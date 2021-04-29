@@ -6153,7 +6153,7 @@ class RiderAPIController extends Controller
             $attachments->save();
             $response['status'] = 0;
             $response['link'] = $link;
-            $message = 'Attachment Has Been Submitted';
+            $message = 'Attachment Has Been Uploaded';
             $response['message'] = $message;
         }
         return response()->json($response);
@@ -6534,6 +6534,167 @@ class RiderAPIController extends Controller
             }
 
         }
+    }
+
+    public function rider_attachments_delete(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
+            'attachment_type' => ['required'],
+            'attachment_path' => ['required'],
+
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $employee_id = $request->employee_id;
+            $attachment_path = $request->attachment_path;
+            $attachment_type = $request->attachment_type;
+
+            $attachments = EmployeeAttachment::where('employee_id', $employee_id);
+            if ($attachments->exists()) {
+                $attachments = $attachments->first();
+
+                if ($attachment_type == 'cv') {
+                    if ($attachments->cv != NULL) {
+                        $cvs = explode(',', $attachments->cv);
+                        if (($key = array_search($attachment_path, $cvs)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($cvs[$key]);
+                        }
+                        $attachments->cv = implode(',', $cvs);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'cnic') {
+                    if ($attachments->cnic != NULL) {
+                        $cnics = explode(',', $attachments->cnic);
+                        if (($key = array_search($attachment_path, $cnics)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($cnics[$key]);
+                        }
+                        $attachments->cnic = implode(',', $cnics);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'photo') {
+                    if ($attachments->photo != NULL) {
+                        $photos = explode(',', $attachments->photo);
+                        if (($key = array_search($attachment_path, $photos)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($photos[$key]);
+                        }
+                        $attachments->photo = implode(',', $photos);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'academic') {
+                    if ($attachments->academic != NULL) {
+                        $academics = explode(',', $attachments->academic);
+                        if (($key = array_search($attachment_path, $academics)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($academics[$key]);
+                        }
+                        $attachments->academic = implode(',', $academics);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'experience_certificate') {
+                    if ($attachments->experience != NULL) {
+                        $experience_certificates = explode(',', $attachments->experience);
+                        if (($key = array_search($attachment_path, $experience_certificates)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($experience_certificates[$key]);
+                        }
+                        $attachments->experience = implode(',', $experience_certificates);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'last_pay_slip') {
+                    if ($attachments->last_pay_slip != NULL) {
+                        $last_pay_slips = explode(',', $attachments->last_pay_slip);
+                        if (($key = array_search($attachment_path, $last_pay_slips)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($last_pay_slips[$key]);
+                        }
+                        $attachments->last_pay_slip = implode(',', $last_pay_slips);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'nikkah_nama') {
+                    if ($attachments->nikkah_nama != NULL) {
+                        $nikkah_namas = explode(',', $attachments->nikkah_nama);
+                        if (($key = array_search($attachment_path, $nikkah_namas)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($nikkah_namas[$key]);
+                        }
+                        $attachments->nikkah_nama = implode(',', $nikkah_namas);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'cnic_spouse') {
+                    if ($attachments->cnic_spouse != NULL) {
+                        $cnic_spouses = explode(',', $attachments->cnic_spouse);
+                        if (($key = array_search($attachment_path, $cnic_spouses)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($cnic_spouses[$key]);
+                        }
+                        $attachments->cnic_spouse = implode(',', $cnic_spouses);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'child_b_form') {
+                    if ($attachments->child_b_form != NULL) {
+                        $child_b_forms = explode(',', $attachments->child_b_form);
+                        if (($key = array_search($attachment_path, $child_b_forms)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($child_b_forms[$key]);
+                        }
+                        $attachments->child_b_form = implode(',', $child_b_forms);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'cnic_nominee') {
+                    if ($attachments->cnic_nominee != NULL) {
+                        $cnic_nominies = explode(',', $attachments->cnic_nominee);
+                        if (($key = array_search($attachment_path, $cnic_nominies)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($cnic_nominies[$key]);
+                        }
+                        $attachments->cnic_nominee = implode(',', $cnic_nominies);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'utility_bill') {
+                    if ($attachments->utility_bill != NULL) {
+                        $utility_bills = explode(',', $attachments->utility_bill);
+                        if (($key = array_search($attachment_path, $utility_bills)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($utility_bills[$key]);
+                        }
+                        $attachments->utility_bill = implode(',', $utility_bills);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'affidavit') {
+                    if ($attachments->affidavit != NULL) {
+                        $affidavits = explode(',', $attachments->affidavit);
+                        if (($key = array_search($attachment_path, $affidavits)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($affidavits[$key]);
+                        }
+                        $attachments->affidavit = implode(',', $affidavits);
+                        $attachments->save();
+                    }
+                } elseif ($attachment_type == 'cheque') {
+                    if ($attachments->cheque != NULL) {
+                        $cheques = explode(',', $attachments->cheque);
+                        if (($key = array_search($attachment_path, $cheques)) !== false) {
+                            Storage::disk('public')->delete($attachment_path);
+                            unset($cheques[$key]);
+                        }
+                        $attachments->cheque = implode(',', $cheques);
+                        $attachments->save();
+                    }
+                }
+            }
+
+        }
+        return response()->json(['status' => 0, 'message' => 'Attachment Has Been Deleted']);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

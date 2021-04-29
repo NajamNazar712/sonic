@@ -93,6 +93,7 @@ Route::name('api.')->group(function () {
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
             Route::post('attachment_store_v2', 'Rider\RiderAPIController@rider_attachments_store_v2')->name('attachment_store_v2');
             Route::post('attachment_view', 'Rider\RiderAPIController@rider_attachments_view')->name('attachment_view');
+            Route::post('attachment_delete', 'Rider\RiderAPIController@rider_attachments_delete')->name('attachment_delete');
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
