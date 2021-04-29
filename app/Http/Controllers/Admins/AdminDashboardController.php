@@ -7921,13 +7921,12 @@ class AdminDashboardController extends Controller
 
 
         $flag = true;
-        $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
-        if($user){
-            if($user_id == $user->id) {
-                $flag = true;
-            }
-            else{
-                $flag = false;
+        $users = User::where('email', $request->email)->orWhere('phone', $request->phone)->get();
+        if($users){
+            foreach($users as $user){
+                if($user_id != $user->id) {
+                    $flag = false;
+                }
             }
         }
 
