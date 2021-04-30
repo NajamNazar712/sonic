@@ -279,10 +279,23 @@ class APIController extends Controller
     public function pickup_address_add(Request $request) {
       $user_id = $request->user_id;
 
+      Validator::extend('phone_number', function($attribute, $value, $parameters) {
+        if ($value) {
+          $value = $this->phone_number($value);
+
+          if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+            return TRUE;
+          }
+          else {
+            return FALSE;
+          }
+        }
+      });
+
       $rules = [
         'person_of_contact' => ['required', 'between:1,190'],
         'vendor' => ['nullable', 'filled', 'between:0,190'],
-        'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        'phone_number' => ['required', 'phone_number'],
         'email_address' => ['required', 'email'],
         'address' => ['required', 'between:1,190'],
         'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
@@ -312,7 +325,7 @@ class APIController extends Controller
 
         $person_of_contact = $request->input('person_of_contact');
         $vendor = $request->input('vendor');
-        $phone_number = substr_replace($request->input('phone_number'), '-', 4, 0);
+        $phone_number = $this->phone_number($request->phone_number);
         $email_address = $request->input('email_address');
         $address = $request->input('address');
         $city_id = $request->input('city_id');
@@ -465,18 +478,20 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
+
+            if($user_type['corporate_rate_type_id'] == 3){
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
+            else{
+                $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
         }
-         if($user_type['corporate_rate_type_id'] == 3){
-             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                 $query->where('user_id', $user_id)->where('status', 1);
-             })];
-         }
-         else{
-             $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
-             $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                 $query->where('user_id', $user_id)->where('status', 1);
-             })];
-         }
+
 
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
