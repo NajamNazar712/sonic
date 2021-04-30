@@ -10253,7 +10253,7 @@ class AdminCorporateAccountsController extends Controller
                 $rate_type_history->admin_id = Auth::id();
                 $rate_type_history->save();
 
-                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now()]);
+                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
 
 
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -19676,7 +19676,7 @@ class AdminCorporateAccountsController extends Controller
                 $rate_type_history->admin_id = Auth::id();
                 $rate_type_history->save();
 
-                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now()]);
+                User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
 
 
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
@@ -27289,7 +27289,7 @@ class AdminCorporateAccountsController extends Controller
                $rate_type_history->admin_id = Auth::id();
                $rate_type_history->save();
 
-               User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now()]);
+               User::where('id', $id)->update(['corporate_rate_type_id' => $user->new_rate_type_id,'new_rate_type_id'=> null,'rate_type_id_status' => null,'rate_type_id_changed_by' => Auth::id(),'rate_type_id_changed_at' => Carbon::now(),'rate_status' => 0]);
 
 
                if($request->has('rate_remarks') && $request->rate_remarks != null){

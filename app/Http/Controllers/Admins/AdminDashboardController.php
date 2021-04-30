@@ -1539,6 +1539,9 @@ class AdminDashboardController extends Controller
         if($user->status != 3){
             $user->status = 5;
         }
+        if($user->rate_type_id_status == 1){
+            $user->rate_type_id_status = 2;
+        }
         $user->rejected_reason = $reject_reason;
         $user->rate_status = 2;
         $user->rates_rejected_by = Auth::id();
