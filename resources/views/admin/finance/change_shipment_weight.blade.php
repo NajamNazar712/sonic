@@ -70,7 +70,7 @@
 											<input type="hidden" name="shipment_id" class="shipment_id">
 
 											<div class="form-group">
-												<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,10000000]" data-msg-range="Weight needs to be from 0.01 to 10000000">
+												<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000">
 											</div>
 											<div class="row justify-content-center" id="calculate_div">
 												<div class="form-group col">
@@ -90,10 +90,10 @@
 												<div id="replacement_weight_div" class="d-none">
 
 														<div class="form-group">
-														<input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-range="[0.01,10000000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000000">
+														<input type="text" name="shipment_weight" class="form-control weight" placeholder="Shipment Weight (kg)*" data-rule-range="[0.01,100000]" data-msg-range="Shipment Weight needs to be from 0.01 to 100000">
 													</div>
 														<div class="form-group">
-														<input type="text" name="replacement weight" class="form-control weight" placeholder="Replacement Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Replacement Weight is required" data-rule-range="[0.01,10000000]" data-msg-range="Shipment Weight needs to be from 0.01 to 10000000">
+														<input type="text" name="replacement weight" class="form-control weight" placeholder="Replacement Shipment Weight (kg)*" data-rule-required="true" data-msg-required="Replacement Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Shipment Weight needs to be from 0.01 to 100000">
 													</div>
 												</div>
 
