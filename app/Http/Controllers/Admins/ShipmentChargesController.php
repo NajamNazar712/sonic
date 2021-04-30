@@ -247,7 +247,7 @@ class ShipmentChargesController extends Controller
                     }
                 }
 
-                if ($weight_charge->weight_addition == 0 || $account_type_id == 2) {
+                if ($weight_charge->weight_addition == 0 || ($account_type_id == 2 && $rate_type_id != 3)) {
                     if ($type_of_charges == 0) {
                         if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $charges = $weight_charge->local_or_6hr;
