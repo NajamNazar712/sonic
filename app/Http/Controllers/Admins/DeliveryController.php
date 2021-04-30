@@ -2379,10 +2379,10 @@ class DeliveryController extends Controller
             ->addColumn('status', function ($deliveries) {
                 $flag = true;
                 $not_rcp = false;
-                if(ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count() < 2)
-                {
-                    $not_rcp = true;
-                }
+//                if(ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count() < 2)
+//                {
+//                    $not_rcp = true;
+//                }
                 $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $deliveries->shipper_id)->where('status', 1);
                 if($restrict_parcels_attempt->exists()){
                     $restrict_parcels_attempt = $restrict_parcels_attempt->first();
