@@ -59,6 +59,8 @@
                         <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Confirmation Required</th>
+                        <th class="border-primary border-darken-1">Confirmation On</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
                         <th class="border-primary border-darken-1">Assigned Agent</th>
                         <th class="border-primary border-darken-1">Assigned At</th>
@@ -413,6 +415,8 @@
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Confirmation Required');
+                            head.push('Confirmation On');
                             head.push('Re-Attempt Count');
                             head.push('Assigned Agent');
                             head.push('Assigned At');
@@ -444,6 +448,8 @@
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.confirmation_req);
+                                row.push(values.confirmation_on);
                                 row.push(values.reattempts);
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
@@ -782,6 +788,8 @@
                     {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req'},
+                    {data: 'confirmation_on', name: '', class: 'align-middle confirmation_on', orderable: false, searchable: false},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
                     {data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
