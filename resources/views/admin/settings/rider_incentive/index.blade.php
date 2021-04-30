@@ -103,41 +103,58 @@
 
 
 
-    <div class="modal fade text-left" id="EditTierModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditTierModal"
+    <div class="modal fade text-left" id="EditIncentiveModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditIncentiveModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Edit Tier</h4>
+                    <h4 class="modal-title white">Edit Setting</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="edit_commission_form" action="{{route('admin.settings.commission.edit')}}" method="post">
+                    <form id="edit_incentive_form" action="{{route('admin.settings.hr.rider_incentive.update')}}" method="post">
                         @method('POST')
                         @csrf
                         <div class="container">
 
+
                             <div class="row justify-content-center">
-                                <div class="col-6" id="TierNameDiv">
-                                    <input type="hidden" id="sales_tier_id" name="id">
-                                    <input  class="form-control" id="edit_tier_name" name="tier_name" type="text" placeholder="Enter Tier Name"
-                                            data-rule-required="true" data-msg-required="" />
-                                </div>
-                            </div>
-                            <br>
-                            <div class="row justify-content-center">
-                                <div class="col-6" id="TierCommissionDiv">
-                                    <input  class="form-control" id="edit_tier_commission" name="tier_commission" type="text"
-                                            data-rule-required="true" data-msg-required="" placeholder="Enter Overall Commission" />
-                                </div>
+
+                                <fieldset class="col-12 form-group">
+                                    <select name="edit_rider_category_select" id="edit_rider_category_select" class="form-control select2" data-rule-required="true" data-msg-required="Category is required">
+                                        @foreach($rider_categories as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+
+                                <fieldset class="col-12 form-group">
+                                    <select name="edit_delivery_payment_select" id="edit_delivery_payment_select" class="form-control select2" data-rule-required="true" data-msg-required="Type is required">
+                                        @foreach($payment_types as $type)
+                                            <option value="{{$type->id}}">{{$type->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+
+
+                                <fieldset class="col-12 form-group">
+                                    <select name="edit_weight_range_select" id="edit_weight_range_select" class="form-control select2" data-rule-required="true" data-msg-required="Range is required">
+                                        @foreach($weight_ranges as $range)
+                                            <option value="{{$range->id}}">{{$range->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+
+                                <fieldset class="col-12 form-group">
+                                    <input type="text" class="form-control incentive_value" name="edit_incentive_value" data-rule-required="true" data-msg-required="Incentive/Shipment is required" placeholder="Incentive/Shipment">
+                                </fieldset>
                             </div>
 
-                            <br><br>
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <button id="AddnewTier" type="submit" class="btn btn-primary btn-block">Edit Tier</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Update</button>
                                 </div>
                             </div>
 
@@ -210,7 +227,7 @@
                 'allowPlus': false
             });
 
-            $( "#edit_commission_form" ).validate({
+            $( "#edit_incentive_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -230,44 +247,49 @@
                     form.submit();
                 }
             });
+            $('#edit_rider_category_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Category*',
+                dropdownParent:$('#edit_incentive_form')
+            });
 
+            $('#edit_delivery_payment_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Payment Type*',
+                dropdownParent:$('#edit_incentive_form')
+            });
+
+            $('#edit_weight_range_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Weight Range*',
+                dropdownParent:$('#edit_incentive_form')
+            });
 
             $('body').on('click','button.edit',function () {
                 var id = $(this).parents('tr').attr('id');
-                var type = table.row($(this).parents('tr')).data().type_id;
-                var status = table.row($(this).parents('tr')).data().sales_status;
-
-                $.ajax({
-                    url: '{!! route('admin.settings.commission.details') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        $('#sales_tier_id').val(data.salesTiers.id);
-                        $('#edit_tier_name').val(data.salesTiers.tier_name);
-                        $('#edit_tier_commission').val(data.salesTiers.commission);
-
-                        if (status == 1)
-                        {
-                            $('#edit_sales_person_checkbox').trigger('click');
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.settings.hr.rider_incentive.details') !!}',
+                        data: {
+                            'id': id,
                         }
-                        $("#edit_tier_type").select2({
-                            width:'100%',
-                            class:'form-control',
-                            dropdownParent:$('#edit_commission_form')
-                        });
+                    }).done(function (data) {
+                        if (data.status === 1) {
 
-                        $('#edit_tier_type').val(type).trigger('change');
+                            // $('#edit_rider_category_select').val(type).trigger('change');
 
-                        $('#EditTierModal').modal('show');
+                            $('#EditIncentiveModal').modal('show');
 
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                });
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+
+                    });
+                }
 
             });
 
@@ -405,7 +427,7 @@
                 }
 
             });
-            $('#EditTierModal').on('hidden.bs.modal', function() {
+            $('#EditIncentiveModal').on('hidden.bs.modal', function() {
                 $('#sales_tier_id').val('');
                 $('#edit_tier_name').val('');
                 $('#edit_tier_commission').val('');

@@ -3895,6 +3895,10 @@ class GlobalSettingsController extends Controller
 
     }
 
+    public function rider_incentive_details(Request $request){
+        return $request;
+    }
+
     public function rider_incentive_update(Request $request){
         return $request;
     }

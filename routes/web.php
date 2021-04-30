@@ -2519,6 +2519,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\GlobalSettingsController@rider_incentive_index')->name('index');
                 Route::get('list', 'Admins\GlobalSettingsController@rider_incentive_list')->name('list');
                 Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_store')->name('store');
+                Route::get('details', 'Admins\GlobalSettingsController@rider_incentive_details')->name('details');
                 Route::post('update', 'Admins\GlobalSettingsController@rider_incentive_update')->name('update');
 
             });
