@@ -293,6 +293,10 @@ class RetailAdminAccounts extends Controller
                             <td colspan="2" class="color primary border"><strong>Destination</strong></td>
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
                           </tr>
+                           <tr>
+                            <td colspan="3" class="color primary"><strong>Order ID</strong></td>
+                            <td colspan="8">'.$shipment->order_id.'</td>
+                           </tr>
                           <tr>
                             <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
                             <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
