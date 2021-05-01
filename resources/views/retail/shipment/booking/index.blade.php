@@ -90,8 +90,14 @@
                                 <div id="consignee_shipper_info" class="ml-1 col-6 border">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
 
-                                    <div class="form-group col-6">
-                                        <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                    <div class="row ml-0">
+                                        <div class="form-group col-6">
+                                            <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                        </div>
+
+                                        <div class="form-group col-6">
+                                            <input type="text" name="order_id" id="order_id" class="form-control" placeholder="Order ID">
+                                        </div>
                                     </div>
                                     <div class="form-group col-6">
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
@@ -660,6 +666,7 @@
                                $('#print_div').removeClass('d-none');
                            }
                        });
+                        $("#order_id").val('');
                         $('#length').val('');
                         $('#breadth').val('');
                         $('#height').val('');
