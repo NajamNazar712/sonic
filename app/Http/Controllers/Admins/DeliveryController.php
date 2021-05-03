@@ -293,8 +293,13 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-       $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]]);
-       if($delivery_note->exists())
+       $status =  DeliveryNote::leftjoin('delivery_note_station_deposit_notes as dnsdn','dnsdn.delivery_note_id','=','delivery_notes.id')
+           ->leftjoin('station_deposit_notes as sdn','sdn.id','=','dnsdn.station_deposit_note_id')
+           ->select('sdn.status as status')
+           ->where('delivery_notes.rider_id',$request->rider_id)
+           ->where('sdn.status','!=',2);
+
+       if($status->exists())
        {
            return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
        }

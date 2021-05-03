@@ -190,7 +190,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
                     if (strpos($body, '[service_type]') !== FALSE) {
@@ -503,7 +503,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
                     self::sms($body, $to);
@@ -591,7 +591,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
                     self::sms($body, $to);
@@ -781,7 +781,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
                     self::sms($body, $to);
@@ -960,7 +960,7 @@ class NotificationsController extends Controller
                             }
 
                             if (strpos($body, '[company_name]') !== FALSE) {
-                                $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                                $body = str_replace('[company_name]', $shipper->name, $body);
                             }
 
                             if (strpos($body, '[status]') !== FALSE) {
@@ -1142,7 +1142,7 @@ class NotificationsController extends Controller
                             }
 
                             if (strpos($body, '[company_name]') !== FALSE) {
-                                $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                                $body = str_replace('[company_name]', $shipper->name, $body);
                             }
 
                             if (strpos($body, '[status]') !== FALSE) {
@@ -1177,7 +1177,7 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($body, '[company_name]') !== FALSE) {
-                            $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                            $body = str_replace('[company_name]', $shipper->name, $body);
                         }
 
                         if (strpos($body, '[status]') !== FALSE) {
@@ -1266,7 +1266,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
                     if (strpos($body, '[service_type]') !== FALSE) {
@@ -3914,7 +3914,7 @@ class NotificationsController extends Controller
                     $not_done = "Not Done";
                     //$pickup_note = PickupNote::find($reference_1_id);
                     $pickup_request = V2PickupRequest::find($reference_2_id);
-                    $shipper_name = $pickup_request->shipper->brand_name ?? $pickup_request->shipper->name;
+                    $shipper_name = $pickup_request->shipper->name;
                     $vendor = $pickup_request->pickup_address->vendor;
                     $contact_person = $pickup_request->pickup_address->poc;
                     if ($pickup_request->status == 2 || $pickup_request->status == 0) {
@@ -4370,7 +4370,7 @@ class NotificationsController extends Controller
                     $shipper = User::find($reference_1_id);
                     if ($shipper) {
                         if (strpos($body, '[shipper_name]') !== FALSE) {
-                            $body = str_replace('[shipper_name]', $shipper->brand_name ?? $shipper->name, $body);
+                            $body = str_replace('[shipper_name]', $shipper->name, $body);
                         }
                         $to = $shipper->phone;
                         self::sms($body, $to);
@@ -6280,7 +6280,7 @@ class NotificationsController extends Controller
                     $city_name = $pickup_request->pickup_address->city->name;
                     //end
 
-                    $shipper_name = $pickup_request->shipper->brand_name ?? $pickup_request->shipper->name;
+                    $shipper_name = $pickup_request->shipper->name;
                     $shipper_id = $pickup_request->shipper->id;
                     $reason = V2PickupRequestNotPickReason::find($reason_id);
                     $sale_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();

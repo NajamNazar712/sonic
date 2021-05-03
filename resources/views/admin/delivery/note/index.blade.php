@@ -477,7 +477,6 @@
                 var route = $(this).find(":selected").data("id");
                 var rider_id = $(this).val();
                 if(rider_id != null){
-                    console.log(rider_id);
                     $.ajax({
                         url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
                         method: 'POST',
@@ -486,7 +485,6 @@
                             'rider_id': rider_id,
                         }
                     }).done(function(data){
-
                         if (data.status == 1) {
                             $('#route').val(route).trigger('change');
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
