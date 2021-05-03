@@ -295,10 +295,13 @@ class DeliveryController extends Controller
     {
        $status =  DeliveryNote::leftjoin('delivery_note_station_deposit_notes as dnsdn','dnsdn.delivery_note_id','=','delivery_notes.id')
            ->leftjoin('station_deposit_notes as sdn','sdn.id','=','dnsdn.station_deposit_note_id')
-           ->select('sdn.status as status')
+           ->select('sdn.status as status','delivery_notes.id as id')
            ->where('delivery_notes.rider_id',$request->rider_id)
-           ->where('sdn.status','!=',2);
-
+           ->where(function ($query){
+               $query->whereNull('sdn.status')
+                   ->orwhere('sdn.status','!=',2);
+           });
+       
        if($status->exists())
        {
            return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
