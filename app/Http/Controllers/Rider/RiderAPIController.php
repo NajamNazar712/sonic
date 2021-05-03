@@ -7204,8 +7204,7 @@ class RiderAPIController extends Controller
                                 $item_ids = explode(',', $request->trybuy_id_list);
                                 $total_cod = 0;
                                 foreach ($item_ids as $item_id) {
-                                    $item_id = (integer)$item_id;
-                                    $shipment_item = ShipmentItem::find($item_id);
+                                    $shipment_item = ShipmentItem::find((int)$item_id);
                                     $total_cod += $shipment_item->price;
                                     $shipment_item->bought = 1;
                                     $shipment_item->save();
