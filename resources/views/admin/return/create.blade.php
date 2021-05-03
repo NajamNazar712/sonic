@@ -35,10 +35,18 @@
 
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="rider_name" id="rider_name" class="form-control select2" required >
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}" data-id="{{$rider->route_id}}">{{$rider->name}}</option>
+                            <select name="hub_name" id="hub_name" class="form-control select2" required >
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
                                 @endforeach
+                            </select>
+                            <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="rider_name" id="rider_name" class="form-control select2" required >
+
                             </select>
                             <div class="danger" id="rider_error" style="display:none;">This field is required</div>
                         </fieldset>
@@ -285,13 +293,35 @@
                 }
             });
 
-
+            $('#hub_name').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub*',
+            });
             $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider*',
             });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Route*',
             });
+            $("#hub_name").on('change',function () {
+                var hub_id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.return.create.riders.hub') !!}',
+                    method: 'GET',
+                    data: {
+                        'hub_id': hub_id,
+                    }
+                }).done(function(data) {
+                    console.log(data);
+                    html = "";
+                    $.each(data,function (i,v) {
+                       html +=  `<option value="${v.id}" data-id="${v.route_id}">${v.name}</option>`
+                    });
+                    $('#rider_name').html(html);
+                    $('#rider_name').val(null).trigger('change');
+
+                });
+            });
+
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
                 $('#route').val(route).trigger('change');

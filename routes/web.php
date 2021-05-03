@@ -1153,6 +1153,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
+            Route::get('riders/by_hub', 'Admins\ReturnController@get_riders_by_hub')->name('riders.hub');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
             Route::post('shipment/piece_details', 'Admins\ReturnController@get_piece_details')->name('shipment.piece_details');
 
