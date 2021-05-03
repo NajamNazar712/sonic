@@ -112,7 +112,7 @@
 
 
                         <div class="col-3">
-                            <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
+                            <button type="submit" id="deliveryNoteSubmitBtn" class="btn btn-primary btn-block ">Submit &amp; Print</button>
 
                         </div>
 
@@ -489,12 +489,14 @@
 
                         if (data.status == 1) {
                             $('#route').val(route).trigger('change');
+                            $("#deliveryNoteSubmitBtn").attr('disabled',false);
                         }
                         else {
                             toastr.error(data.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
+                            $("#deliveryNoteSubmitBtn").attr('disabled',true);
                         }
                     });
                 }
