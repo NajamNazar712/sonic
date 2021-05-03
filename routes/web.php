@@ -932,6 +932,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
+            Route::post('check/rider/dncc_status','Admins\DeliveryController@check_rider_dncc_status')->name('rider_dncc_status');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('shipment/piece_details', 'Admins\DeliveryController@get_piece_details')->name('shipment.piece_details');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
