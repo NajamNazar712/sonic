@@ -7212,7 +7212,7 @@ class RiderAPIController extends Controller
                                 $shipment = Shipment::find($shipment->id);
                                 $total_cod += $shipment->try_and_buy_fees;
                                 $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
-                                $delivered_parcels = sizeof($item_ids);
+                                $delivered_parcels = count($item_ids);
                                 if ($total_parcels == $delivered_parcels) {
                                     Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
