@@ -2086,6 +2086,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         });
 
+        Route::prefix('retail_sales')->name('retail_sales.')->group(function (){
+            Route::get('', 'Admins\AdminRetailReportController@sales_index')->name('index');
+            Route::post('list', 'Admins\AdminRetailReportController@sales_list')->name('list');
+
+        });
     });
 
     //Reports end
