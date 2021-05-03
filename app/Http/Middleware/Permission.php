@@ -791,6 +791,8 @@ class Permission
             'settings.international_rates.index' => 438,
             'settings.international_rates.upload.index' => 477,
 
+            'settings.hr.rider_incentive.index' => 491,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -914,6 +916,9 @@ class Permission
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,
             'human_resource.department.list' => 484,
+
+            'human_resource.rider_incentive.index' => 492,
+            'human_resource.rider_incentive.list' => 492,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,

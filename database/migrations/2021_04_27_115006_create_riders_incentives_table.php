@@ -17,10 +17,10 @@ class CreateRidersIncentivesTable extends Migration
             $table->increments('id');
             $table->integer('rider_id')->index();
             $table->timestamp('date')->index();
-            $table->integer('pickup_shipments');
-            $table->decimal('pickup_incentive');
-            $table->integer('delivery_shipments');
-            $table->decimal('delivery_incentive');
+            $table->integer('pickup_shipments')->nullable();
+            $table->decimal('pickup_incentive')->nullable();
+            $table->integer('delivery_shipments')->nullable();
+            $table->decimal('delivery_incentive')->nullable();
             $table->timestamps();
         });
     }

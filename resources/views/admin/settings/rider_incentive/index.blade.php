@@ -151,7 +151,7 @@
                                     <input type="text" class="form-control incentive_value" name="edit_incentive_value" data-rule-required="true" data-msg-required="Incentive/Shipment is required" placeholder="Incentive/Shipment">
                                 </fieldset>
                             </div>
-
+                            <input type="hidden" name="incentive_setting_id" id="incentive_setting_id">
                             <div class="row justify-content-center">
                                 <div class="col-6">
                                     <button type="submit" class="btn btn-primary btn-block">Update</button>
@@ -237,7 +237,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Responsible is being Edited!',
+                        text: 'Setting is being Updated!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -266,7 +266,7 @@
             });
 
             $('body').on('click','button.edit',function () {
-                var id = $(this).parents('tr').attr('id');
+                var id = parseInt($(this).parents('tr').attr('id'));
                 if(id) {
                     $.ajax({
                         url: '{!! route('admin.settings.hr.rider_incentive.details') !!}',
@@ -274,10 +274,12 @@
                             'id': id,
                         }
                     }).done(function (data) {
-                        if (data.status === 1) {
-
-                            // $('#edit_rider_category_select').val(type).trigger('change');
-
+                        if (data.status === 0) {
+                            $('#incentive_setting_id').val(id);
+                            $('#edit_rider_category_select').val(data.details.rider_category_id).trigger('change');
+                            $('#edit_delivery_payment_select').val(data.details.rider_shipment_payment_type_id).trigger('change');
+                            $('#edit_weight_range_select').val(data.details.rider_shipment_weight_range_id).trigger('change');
+                            $('#edit_incentive_form input.incentive_value').val(data.details.value);
                             $('#EditIncentiveModal').modal('show');
 
                         } else {
@@ -293,6 +295,49 @@
 
             });
 
+
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.settings.hr.rider_incentive.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Courier Type');
+                            head.push('COD');
+                            head.push('Shipment Weight');
+                            head.push('Incentive/Shipment');
+                            head.push('Added By');
+                            head.push('Added At');
+                            head.push('Updated By');
+                            head.push('Updated At');
+
+                            $.each(result.data, function (index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.rider_category);
+                                row.push(values.payment_type);
+                                row.push(values.weight_range);
+                                row.push(values.value);
+                                row.push(values.added_by);
+                                row.push(values.added_at);
+                                row.push(values.last_updated_by);
+                                row.push(values.updated_at);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -322,7 +367,7 @@
                 order: [[6, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'rate_category', name: 'rc.name', class: 'align-middle rate_category'},
+                    {data: 'rider_category', name: 'rc.name', class: 'align-middle rider_category'},
                     {data: 'payment_type', name: 'rspt.name', class: 'align-middle payment_type'},
                     {data: 'weight_range', name: 'rswr.name', class: 'align-middle weight_range'},
                     {data: 'value', name: 'riders_incentive_settings.value', class: 'align-middle value'},
@@ -428,12 +473,11 @@
 
             });
             $('#EditIncentiveModal').on('hidden.bs.modal', function() {
-                $('#sales_tier_id').val('');
-                $('#edit_tier_name').val('');
-                $('#edit_tier_commission').val('');
-                if($("#edit_sales_person_checkbox").is(":checked")){
-                    $("#edit_sales_person_checkbox").trigger('click');
-                }
+                $('#incentive_setting_id').val('');
+                $('#edit_rider_category_select').val('').trigger('change');
+                $('#edit_delivery_payment_select').val('').trigger('change');
+                $('#edit_weight_range_select').val('').trigger('change');
+                $('#edit_incentive_form input.incentive_value').val('');
             });
         });
 

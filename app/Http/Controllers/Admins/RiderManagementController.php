@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
@@ -10,11 +11,15 @@ use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\Rider\RidersIncentiveSetting;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
+use App\Http\Models\Shipment;
 use App\Http\Models\SmsHistory;
 use App\Http\Models\SmsHistoryRider;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\V2Pickup\V2PickupRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -755,6 +760,89 @@ class RiderManagementController extends Controller
                 $rider_request->save();
             }
             return redirect()->back()->with('success','Rider added successfully');
+        }
+    }
+
+    static public function riders_incentives_calculation($date){
+
+        $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
+        if(count($riders) > 0){
+            foreach ($riders as $rider){
+
+                $rider_category_id = $rider->rider_category_id;
+                $pickup_shipment_ids = array();
+                $delivery_shipment_ids = array();
+                $pickup_incentive = 0;
+                $delivery_incentive = 0;
+                $pickup_note = V2PickupNote::where('rider_id', $rider->id)->Where('pickups', '>', 0)->whereDate('created_at', $date);
+                if($pickup_note->exists()){
+                    $pickup_note = $pickup_note->latest('created_at')->first();
+                    $pickup_note_requests = $pickup_note->pickup_note_requests_picked;
+                    if(count($pickup_note_requests) > 0){
+                        foreach($pickup_note_requests as $note){
+                            $pickup_request_id = $note->pickup_request_id;
+                            $pickup_request = V2PickupRequest::find($pickup_request_id);
+                            $pickup_request_shipments = $pickup_request->pickup_request_received_shipments;
+                            foreach ($pickup_request_shipments as $all_shipments) {
+                                $pickup_shipment_ids[] = $all_shipments->shipment_id;
+                            }
+                        }
+                    }
+                }
+                $pickup_shipments_count = count($pickup_shipment_ids);
+                if($pickup_shipments_count > 0){
+
+                    /*if($rider_category_id == 1){
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $pickup_shipment_ids)->where('actual_weight' , '=<', 1.50)->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $pickup_shipment_ids)->where('actual_weight' , '>=', 1.51)->count();
+                        $shipment_weight_type_3_count = Shipment::whereIn('id', $pickup_shipment_ids)->where('actual_weight' , '=', 0.10)->count();
+                        $setting = RidersIncentiveSetting::where('rider_category_id', $rider_category_id);
+
+                    }
+                    else{
+
+                    }*/
+
+
+                    foreach ($pickup_shipment_ids as $shipment_id){
+                        $shipment = Shipment::find($shipment_id);
+                        $setting = RidersIncentiveSetting::where('rider_category_id', $rider_category_id);
+                        if($shipment->shipment_type == 1){
+                            $setting = $setting->where('rider_shipment_payment_type_id', 1);
+                            if($rider_category_id == 1){
+                                if($shipment->actual_weight == 0.10){
+                                    $setting = $setting->where('rider_shipment_weight_range_id', 3)->first();
+
+                                }
+                                else if($shipment->actual_weight < 1.5){
+                                    $setting = $setting->where('rider_shipment_weight_range_id', 1)->first();
+
+
+                                }
+                                else{
+                                    $setting = $setting->where('rider_shipment_weight_range_id', 2)->first();
+
+
+                                }
+                            }
+                            else{
+
+                            }
+                        }
+                        else{
+
+                        }
+
+                    }
+                }
+
+                $delivery_note = DeliveryNote::where('rider_id', $rider->id)->whereDate('created_at', $date)->where('status', 1);
+                if($delivery_note->exists()){
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_shipments = $delivery_note->delivery_note_shipments;
+//                    foreach ()
+                }
+            }
         }
     }
 }

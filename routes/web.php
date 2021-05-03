@@ -2861,6 +2861,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
         });
+
+        Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
