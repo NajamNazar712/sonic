@@ -1025,16 +1025,6 @@ class ReturnController extends Controller
     }
 
     public function return_create_index(){
-        $riders = Rider::where('status', 1);
-
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-
-        $riders = $riders->get();
-
         $routes = Route::where('status', 1);
 
         if (session('role_id') != 1) {
@@ -1045,7 +1035,25 @@ class ReturnController extends Controller
 
         $routes = $routes->get();
 
-        return view('admin.return.create')->with(['riders'=>$riders,'routes'=>$routes]);
+        $hubs = City::where([['status',1],['hub',1]]);
+
+        if(session('role_id') != 1)
+        {
+            $hubs = $hubs->WhereIn('id',session('hubs'));
+        }
+
+        $hubs = $hubs->get(['id','name']);
+
+        return view('admin.return.create')->with(['routes'=>$routes,'hubs'=>$hubs]);
+    }
+
+    public function get_riders_by_hub(Request $request)
+    {
+        $hub_id = $request->hub_id;
+        return Rider::where('status', 1)
+            ->whereHas('city', function ($query) use ($hub_id) {
+                $query->where('hub_id', $hub_id);
+        })->get(['id','name','route_id']);
     }
 
     public function get_shipment_details(Request $request){
