@@ -6991,7 +6991,7 @@ class RiderAPIController extends Controller
                             }
                         }
                         $deliveries['try_n_buy_items'] = $product;
-                        $deliveries['try_and_buy_fees'] = $shipment_data->try_and_buy_fees;
+                        $deliveries['try_and_buy_fees'] = (double)$shipment_data->try_and_buy_fees;
                     }
                     if ($shipment_status_count > 1) {
                         $deliveries['rcp'] = 1;
