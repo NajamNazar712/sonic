@@ -7201,18 +7201,32 @@ class RiderAPIController extends Controller
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                 ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                             } else if ($shipment->booking_type_id == 3) {
-                                $item_ids = explode(',', $request->trybuy_id_list);
+
+                                if ($request->has('trybuy_id_list')) {
+                                    $trybuy_ids = json_decode($request->trybuy_id_list, true);
+                                    $total_cod = 0;
+                                    $delivered_parcels = 0;
+                                    foreach ($trybuy_ids as $trybuy_id) {
+                                        $item_id = $trybuy_id['pid'];
+                                        $shipment_item = ShipmentItem::find($item_id);
+                                        $total_cod += $shipment_item->price;
+                                        $shipment_item->bought = 1;
+                                        $shipment_item->save();
+                                        $delivered_parcels++;
+                                    }
+                                }
+                                /*$item_ids = explode(',', $request->trybuy_id_list);
                                 $total_cod = 0;
                                 foreach ($item_ids as $item_id) {
                                     $shipment_item = ShipmentItem::find((int)$item_id);
                                     $total_cod += $shipment_item->price;
                                     $shipment_item->bought = 1;
                                     $shipment_item->save();
-                                }
+                                }*/
                                 $shipment = Shipment::find($shipment->id);
                                 $total_cod += $shipment->try_and_buy_fees;
                                 $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
-                                $delivered_parcels = count($item_ids);
+//                                $delivered_parcels = count($item_ids);
                                 if ($total_parcels == $delivered_parcels) {
                                     Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
