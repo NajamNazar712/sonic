@@ -2287,7 +2287,7 @@ class AdminFinanceController extends Controller
         }
         else{
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
-            if($retail_shipment->shipping_mode == 3){
+            if($retail_shipment->shipping_mode == 3 && $adjustment_type == 2){
                 $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
 
                 if ($pending_payment->exists()) {
