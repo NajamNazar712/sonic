@@ -1952,7 +1952,7 @@ class DeliveryController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'success' => 'Statuses updated successfully!']);
                 }
-            }
+
         } else {
             return response()->json(['status'=>0, 'error' => 'Delivery note not found!']);
         }
