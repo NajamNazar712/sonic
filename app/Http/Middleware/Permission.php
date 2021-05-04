@@ -792,6 +792,7 @@ class Permission
             'settings.international_rates.upload.index' => 477,
 
             'settings.hr.rider_incentive.index' => 491,
+            'settings.hr.rider_incentive.cron.index' => 494,
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,

@@ -20,7 +20,7 @@ class RiderIncentiveCalculate extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Rider Incentive Calculation Daily';
 
     /**
      * Create a new command instance.

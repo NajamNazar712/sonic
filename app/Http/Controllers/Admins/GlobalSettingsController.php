@@ -3970,4 +3970,32 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    public function rider_incentive_cron_index()
+    {
+        $value = NULL;
+        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time')->first();
+        if($settings){
+            $value = $settings->setting_value;
+        }
+        return view('admin.settings.rider_incentive.rider_incentive_cron')->with('value', $value);
+    }
+
+    public function rider_incentive_cron_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
+
+        if($settings->exists()){
+            $settings = $settings->first();
+
+        }
+        else{
+            $settings = new GlobalSettings();
+            $settings->type = 'rider_incentive_cron_time';
+        }
+        $settings->setting_value = $request->rider_incentive_cron_time;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
 }

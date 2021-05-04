@@ -87,6 +87,7 @@ class Kernel extends ConsoleKernel
 
         'App\Console\Commands\MonthAverageIndividual',
         'App\Console\Commands\MonthAverageRM',
+        'App\Console\Commands\RiderIncentiveCalculate',
 
 
     ];

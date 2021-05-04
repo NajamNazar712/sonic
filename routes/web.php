@@ -2522,6 +2522,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('details', 'Admins\GlobalSettingsController@rider_incentive_details')->name('details');
                 Route::post('update', 'Admins\GlobalSettingsController@rider_incentive_update')->name('update');
 
+                Route::prefix('cron')->name('cron.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@rider_incentive_cron_index')->name('index');
+                    Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_cron_store')->name('store');
+
+                });
             });
         });
 

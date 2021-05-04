@@ -12,11 +12,13 @@ use App\Http\Models\City;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\Rider\RidersIncentiveSetting;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\SmsHistory;
 use App\Http\Models\SmsHistoryRider;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -780,159 +782,194 @@ class RiderManagementController extends Controller
                 $delivery_shipment_ids = array();
                 $pickup_incentive = 0;
                 $delivery_incentive = 0;
-                /*$pickup_note = V2PickupNote::where('rider_id', $rider->id)->Where('pickups', '>', 0)->whereDate('created_at', $date);
-                if($pickup_note->exists()){
-                    $pickup_note = $pickup_note->latest('created_at')->first();
-                    $pickup_note_requests = $pickup_note->pickup_note_requests_picked;
-                    if(count($pickup_note_requests) > 0){
-                        foreach($pickup_note_requests as $note){
-                            $pickup_request_id = $note->pickup_request_id;
-                            $pickup_request = V2PickupRequest::find($pickup_request_id);
-                            $pickup_request_shipments = $pickup_request->pickup_request_received_shipments;
-                            foreach ($pickup_request_shipments as $all_shipments) {
-                                $pickup_shipment_ids[] = $all_shipments->shipment_id;
-                            }
-                        }
-                    }
-                }*/
+                $pickup_shipments_count = 0;
+                $delivery_shipments_count = 0;
+                $pickup_shipment_ids = V2PickupReceivedShipment::where('rider_id', $rider->id)->whereBetween('created_at', [$date_from, $date_to]);
 
-                $pickup_shipment_ids = V2PickupReceivedShipment::where('rider_id', $rider->id)->whereBetween('created_at', [$date_from, $date_to])->pluck('shipment_id')->toArray();
-                $pickup_shipments_count = count($pickup_shipment_ids);
-                if($pickup_shipments_count > 0){
-                    $regular_shipments = array();
-                    $retail_shipments = array();
+                if($pickup_shipment_ids->exists()){
+                    $pickup_shipment_ids = $pickup_shipment_ids->pluck('shipment_id')->toArray();
+                    $pickup_shipments_count = count($pickup_shipment_ids);
+                    $cod_shipments = array();
+                    $non_cod_shipments = array();
                     $verified_shipments = array();
-                    $regular_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('shipment_type' , '!=', 2)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
-                    $retail_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('shipment_type' , '!=', 2)->pluck('id')->toArray();
+
+                    $cod_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('amount', '>', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
+                    $non_cod_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('amount', '=', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                     $verified_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->whereIn('user_id', [3324,10104])->pluck('id')->toArray();
 
+                    if(count($cod_shipments) > 0){
 
-                    if($rider_category_id == 1){
-                        if(count($regular_shipments) > 0){
-
-                            $shipment_weight_type_1_count = Shipment::whereIn('id', $regular_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight', '!=', 0.10)->count();
-                            $shipment_weight_type_2_count = Shipment::whereIn('id', $regular_shipments)->where('actual_weight' , '=>', 1.51)->count();
-                            $shipment_weight_type_3_count = Shipment::whereIn('id', $regular_shipments)->where('actual_weight' , '=<', 0.10)->count();
-                            if($shipment_weight_type_1_count > 0){
-                                $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
-                                $incentive_shipment = $setting_cod->setting_value;
-                                $pickup_incentive += $shipment_weight_type_1_count * $incentive_shipment;
-                            }
-                            if($shipment_weight_type_2_count > 0){
-                                $setting_non_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 2)->first();
-                                $incentive_shipment = $setting_non_cod->setting_value;
-                                $pickup_incentive += $shipment_weight_type_2_count * $incentive_shipment;
-                            }
-                            if($shipment_weight_type_3_count > 0){
-                                $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 3)->first();
-                                $incentive_shipment = $setting_cod->setting_value;
-                                $pickup_incentive += $shipment_weight_type_3_count * $incentive_shipment;
-                            }
-
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
+                        $shipment_weight_type_3_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                        if($shipment_weight_type_1_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_1_count * $incentive_shipment;
                         }
-
-                        if(count($retail_shipments) > 0){
-                            $retail_cod_shipments = array();
-                            $retail_non_cod_shipments = array();
-                            $retail_cod_shipments = RetailShipment::whereIn('shipment_id', $retail_shipments)->where('shipping_mode', 3)->pluck('shipment_id')->toArray();
-                            $retail_non_cod_shipments = RetailShipment::whereIn('shipment_id', $retail_shipments)->where('shipping_mode', '!=', 3)->pluck('shipment_id')->toArray();
-
-                            $retail_cod_shipments_count = count($retail_cod_shipments);
-
-                            if($retail_cod_shipments_count > 0){
-
-                                $retail_shipment_weight_type_1_count = Shipment::whereIn('id', $retail_cod_shipments)->where('actual_weight' , '=<', 1.50)->count();
-                                $retail_shipment_weight_type_2_count = Shipment::whereIn('id', $retail_cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
-                                $retail_shipment_weight_type_3_count = Shipment::whereIn('id', $retail_cod_shipments)->where('actual_weight' , '<=', 0.10)->count();
-
-                                if($retail_shipment_weight_type_1_count > 0){
-                                    $setting_retail_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
-                                    $incentive_shipment = $setting_retail_cod->setting_value;
-                                    $pickup_incentive += $retail_shipment_weight_type_1_count * $incentive_shipment;
-
-                                }
-
-                                if($retail_shipment_weight_type_2_count > 0){
-                                    $setting_retail_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 2)->first();
-                                    $incentive_shipment = $setting_retail_cod->setting_value;
-                                    $pickup_incentive += $retail_shipment_weight_type_2_count * $incentive_shipment;
-                                }
-
-                                if($retail_shipment_weight_type_3_count > 0){
-                                    $setting_retail_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 3)->first();
-                                    $incentive_shipment = $setting_retail_cod->setting_value;
-                                    $pickup_incentive += $retail_shipment_weight_type_3_count * $incentive_shipment;
-                                }
-
-                            }
-
-                            $retail_non_cod_shipments_count = count($retail_non_cod_shipments);
-
-                            if($retail_non_cod_shipments_count > 0){
-
-                                $retail_shipment_weight_type_1_count = Shipment::whereIn('id', $retail_non_cod_shipments)->where('actual_weight' , '=<', 1.50)->count();
-                                $retail_shipment_weight_type_2_count = Shipment::whereIn('id', $retail_non_cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
-
-                                if($retail_shipment_weight_type_1_count > 0){
-                                    $setting_retail_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 1)->first();
-                                    $incentive_shipment = $setting_retail_cod->setting_value;
-                                    $pickup_incentive += $retail_shipment_weight_type_1_count * $incentive_shipment;
-
-                                }
-
-                                if($retail_shipment_weight_type_1_count > 0){
-                                    $setting_retail_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 2)->first();
-                                    $incentive_shipment = $setting_retail_cod->setting_value;
-                                    $pickup_incentive += $retail_shipment_weight_type_1_count * $incentive_shipment;
-                                }
-
-                            }
-
+                        if($shipment_weight_type_2_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 2)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_2_count * $incentive_shipment;
                         }
-
-                        if(count($verified_shipments) > 0){
-
+                        if($shipment_weight_type_3_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 3)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_3_count * $incentive_shipment;
                         }
 
                     }
-                    else{
+
+                    if(count($non_cod_shipments) > 0){
+
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight', '>', 0.10)->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
+                        $shipment_weight_type_3_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                        if($shipment_weight_type_1_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 1)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_1_count * $incentive_shipment;
+                        }
+                        if($shipment_weight_type_2_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 2)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_2_count * $incentive_shipment;
+                        }
+                        if($shipment_weight_type_3_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 3)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_3_count * $incentive_shipment;
+                        }
 
                     }
 
-
-                    foreach ($pickup_shipment_ids as $shipment_id){
-                        $shipment = Shipment::find($shipment_id);
-                        $setting = RidersIncentiveSetting::where('rider_category_id', $rider_category_id);
-
-                            $setting = $setting->where('rider_shipment_payment_type_id', 1);
-                            if($rider_category_id == 1){
-                                if($shipment->actual_weight == 0.10){
-                                    $setting = $setting->where('rider_shipment_weight_range_id', 3)->first();
-
-                                }
-                                else if($shipment->actual_weight < 1.5){
-                                    $setting = $setting->where('rider_shipment_weight_range_id', 1)->first();
-
-
-                                }
-                                else{
-                                    $setting = $setting->where('rider_shipment_weight_range_id', 2)->first();
-
-
-                                }
-                            }
-                            else{
-
-                            }
-
+                    if(count($verified_shipments) > 0){
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=>', 1.51)->count();
+                        $shipment_weight_type_3_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                        if($shipment_weight_type_1_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 1)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_1_count * $incentive_shipment;
+                        }
+                        if($shipment_weight_type_2_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 2)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_2_count * $incentive_shipment;
+                        }
+                        if($shipment_weight_type_3_count > 0){
+                            $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 3)->first();
+                            $incentive_shipment = $setting_cod->setting_value;
+                            $pickup_incentive += $shipment_weight_type_3_count * $incentive_shipment;
+                        }
                     }
+
                 }
 
-                $delivery_note = DeliveryNote::where('rider_id', $rider->id)->whereDate('created_at', $date)->where('status', 1);
-                if($delivery_note->exists()){
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_shipments = $delivery_note->delivery_note_shipments;
-//                    foreach ()
+                $delivery_date = $date_to;
+                $delivery_date = Carbon::parse($delivery_date)->toDateString();
+                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->where('status', '!=', 4);
+                if($delivery_notes->exists()){
+                    $delivery_note_ids = array();
+                    $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
+                    $delivery_note_ids_count = count($delivery_note_ids);
+                    if($delivery_note_ids_count > 0){
+                        $delivery_shipment_ids = ShipmentsJourney::whereIn('reference_1_id', $delivery_note_ids)->whereIn('shipper_status_id', [14, 30, 36,37])->where('verification', 1)->pluck('shipment_id')->toArray();
+                        array_unique($delivery_shipment_ids);
+
+                        $delivered_shipment_count = count($delivery_shipment_ids);
+
+                        if($delivered_shipment_count > 0){
+
+                            $cod_shipments = array();
+                            $non_cod_shipments = array();
+                            $verified_shipments = array();
+
+                            $cod_shipments = Shipment::whereIn('id', $delivery_shipment_ids)->where('amount', '>', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
+                            $non_cod_shipments = Shipment::whereIn('id', $delivery_shipment_ids)->where('amount', '=', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
+                            $verified_shipments = Shipment::whereIn('id', $delivery_shipment_ids)->whereIn('user_id', [3324,10104])->pluck('id')->toArray();
+
+                            if(count($cod_shipments) > 0){
+
+                                $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
+                                $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
+                                $shipment_weight_type_3_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                                if($shipment_weight_type_1_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_1_count * $incentive_shipment;
+                                }
+                                if($shipment_weight_type_2_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 2)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_2_count * $incentive_shipment;
+                                }
+                                if($shipment_weight_type_3_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 3)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_3_count * $incentive_shipment;
+                                }
+
+                            }
+
+                            if(count($non_cod_shipments) > 0){
+
+                                $shipment_weight_type_1_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight', '>', 0.10)->count();
+                                $shipment_weight_type_2_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
+                                $shipment_weight_type_3_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                                if($shipment_weight_type_1_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 1)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_1_count * $incentive_shipment;
+                                }
+                                if($shipment_weight_type_2_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 2)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_2_count * $incentive_shipment;
+                                }
+                                if($shipment_weight_type_3_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 3)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_3_count * $incentive_shipment;
+                                }
+
+                            }
+
+                            if(count($verified_shipments) > 0){
+                                $shipment_weight_type_1_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
+                                $shipment_weight_type_2_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=>', 1.51)->count();
+                                $shipment_weight_type_3_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                                if($shipment_weight_type_1_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 1)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_1_count * $incentive_shipment;
+                                }
+                                if($shipment_weight_type_2_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 2)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_2_count * $incentive_shipment;
+                                }
+                                if($shipment_weight_type_3_count > 0){
+                                    $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 3)->first();
+                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $delivery_incentive += $shipment_weight_type_3_count * $incentive_shipment;
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+
+                if($pickup_incentive > 0 || $delivery_incentive > 0){
+                    $riders_incentive = new RidersIncentive();
+                    $riders_incentive->rider_id = $rider->id;
+                    $riders_incentive->date = Carbon::now();
+                    $riders_incentive->pickup_shipments = $pickup_shipments_count;
+                    $riders_incentive->pickup_incentive = $pickup_incentive;
+                    $riders_incentive->delivery_shipments = $delivered_shipment_count;
+                    $riders_incentive->delivery_incentive = $delivery_incentive;
+                    $riders_incentive->save();
                 }
             }
         }
