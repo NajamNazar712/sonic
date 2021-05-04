@@ -2309,6 +2309,7 @@ class AdminFinanceController extends Controller
                     $pending_payment->save();
                 }
 
+                $payable = 0 - $payable;
                 $pending_payment_shipment = new RetailPendingPaymentShipment();
 
                 $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
