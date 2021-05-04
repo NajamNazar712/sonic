@@ -953,6 +953,18 @@ class V2AdminPickupsController extends Controller
                 $pickup_request_received_shipment = new V2PickupReceivedShipment();
                 $pickup_request_received_shipment->pickup_request_id = $pickup_request_id;
                 $pickup_request_received_shipment->shipment_id = $shipment->id;
+
+                $pickup_request = V2PickupRequest::find($pickup_request_id);
+                $current_rider_id = $pickup_request->current_rider_id;
+                if($current_rider_id == null){
+                    $pickup_note_request = $pickup_request->pickup_note_request;
+                    if($pickup_note_request){
+                        $pickup_note_id = $pickup_note_request->pickup_note_id;
+                        $pickup_note = V2PickupNote::find($pickup_note_id);
+                        $current_rider_id = $pickup_note->rider_id;
+                    }
+                }
+                $pickup_request_received_shipment->rider_id = $current_rider_id;
                 $pickup_request_received_shipment->save();
                 $pickup_request = $pickup_request_shipment->pickup_request;
                 ShipmentsPickupJourneyController::add($shipment_id, 2, Auth::id(), $pickup_request->id);
