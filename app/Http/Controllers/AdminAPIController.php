@@ -909,58 +909,58 @@ class AdminAPIController extends Controller
         $rules = [
             //Attachments
             'employee_id' => ['required', 'integer', 'digits_between:1,10', 'exists:employees,id'],
-            'cv_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cv_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cv_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cv_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'academic_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'academic_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'academic_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'academic_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'photo_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'photo_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'photo_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'photo_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'experience_certificate_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'experience_certificate_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'experience_certificate_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'experience_certificate_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'last_pay_slip_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'last_pay_slip_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'last_pay_slip_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'last_pay_slip_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'nikkah_nama_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'nikkah_nama_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'nikkah_nama_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'nikkah_nama_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_spouse_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_spouse_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_spouse_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_spouse_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'child_b_form_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'child_b_form_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'child_b_form_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'child_b_form_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_nominee_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_nominee_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_nominee_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cnic_nominee_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'utility_bill_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'utility_bill_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'utility_bill_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'utility_bill_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'affidavit_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'affidavit_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'affidavit_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'affidavit_4' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cheque_1' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cheque_2' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cheque_3' => 'mimes:pdf,png,jpeg,jpg,docx',
-            'cheque_4' => 'mimes:pdf,png,jpeg,jpg,docx',
+            'cv_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cv_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cv_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cv_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'academic_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'academic_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'academic_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'academic_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'photo_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'photo_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'photo_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'photo_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'experience_certificate_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'experience_certificate_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'experience_certificate_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'experience_certificate_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'last_pay_slip_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'last_pay_slip_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'last_pay_slip_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'last_pay_slip_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'nikkah_nama_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'nikkah_nama_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'nikkah_nama_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'nikkah_nama_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_spouse_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_spouse_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_spouse_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_spouse_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'child_b_form_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'child_b_form_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'child_b_form_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'child_b_form_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_nominee_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_nominee_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_nominee_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cnic_nominee_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'utility_bill_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'utility_bill_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'utility_bill_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'utility_bill_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'affidavit_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'affidavit_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'affidavit_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'affidavit_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cheque_1' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cheque_2' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cheque_3' => 'mimes:pdf,png,jpeg,jpg,docx,doc',
+            'cheque_4' => 'mimes:pdf,png,jpeg,jpg,docx,doc'
         ];
         $response = ['status' => 1];
         $message = 'Unknown';
@@ -2288,6 +2288,88 @@ class AdminAPIController extends Controller
                                 $experience_certificate_array[3]["experience_certificate_4"] = $experience_certificate;
                             }
                         }
+                    }
+                    return response()->json(['status' => 0, 'data' => $experience_certificate_array]);
+                }
+            }
+            else {
+                $attachment_type = $request->attachment_type;
+                if ($attachment_type == 'cv') {
+                    $cv_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cv_array[$x]['cv_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $cv_array]);
+                } elseif ($attachment_type == 'cnic') {
+                    $cnic_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_array[$x]['cnic_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $cnic_array]);
+                } elseif ($attachment_type == 'photo') {
+                    $photo_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $photo_array[$x]['photo_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $photo_array]);
+                } elseif ($attachment_type == 'academic') {
+                    $academic_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $academic_array[$x]['academic_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $academic_array]);
+                } elseif ($attachment_type == 'cheque') {
+                    $cheque_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cheque_array[$x]['cheque_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $cheque_array]);
+                } elseif ($attachment_type == 'affidavit') {
+                    $affidavit_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $affidavit_array[$x]['affidavit_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $affidavit_array]);
+                } elseif ($attachment_type == 'utility_bill') {
+                    $utility_bill_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $utility_bill_array[$x]['utility_bill_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $utility_bill_array]);
+                } elseif ($attachment_type == 'cnic_nominee') {
+                    $cnic_nominee_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_nominee_array[$x]['cnic_nominee_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $cnic_nominee_array]);
+                } elseif ($attachment_type == 'child_b_form') {
+                    $child_b_form_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $child_b_form_array[$x]['child_b_form_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $child_b_form_array]);
+                } elseif ($attachment_type == 'cnic_spouse') {
+                    $cnic_spouse_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $cnic_spouse_array[$x]['cnic_spouse_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $cnic_spouse_array]);
+                } elseif ($attachment_type == 'last_pay_slip') {
+                    $last_pay_slip_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $last_pay_slip_array[$x]['last_pay_slip_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $last_pay_slip_array]);
+                } elseif ($attachment_type == 'nikkah_nama') {
+                    $nikkah_nama_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $nikkah_nama_array[$x]['nikkah_nama_' . ($x + 1)] = "";
+                    }
+                    return response()->json(['status' => 0, 'data' => $nikkah_nama_array]);
+                } elseif ($attachment_type == 'experience_certificate') {
+                    $experience_certificate_array = [];
+                    for ($x = 0; $x <= 3; $x++) {
+                        $experience_certificate_array[$x]['experience_certificate_' . ($x + 1)] = "";
                     }
                     return response()->json(['status' => 0, 'data' => $experience_certificate_array]);
                 }
