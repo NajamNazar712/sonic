@@ -456,6 +456,16 @@
                                 </ul>
                             </li>
                         @endif
+
+                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Debriefing</span></a>
+                                <ul class="menu-content">
+
+                                    <li><a class="menu-item" href="{{route('admin.debriefing.supervisor.index')}}">Supervisor Dashboard</a></li>
+                                    <li><a class="menu-item" href="{{route('admin.debriefing.agents_call_monitoring.index')}}">Agents Call Monitoring</a></li>
+                                    <li><a class="menu-item" href="{{route('admin.debriefing.caller_agent.index')}}">Caller Agent Screen</a></li>
+
+                                </ul>
+                            </li>
                     </ul>
                 </li>
             @endif

@@ -1192,6 +1192,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
     });
+    Route::prefix('debriefing')->name('debriefing.')->group(function (){
+        Route::prefix('supervisor')->name('supervisor.')->group(function (){
+            Route::get('','Admins\LastMileDebriefingController@supervisor_view')->name('index');
+            Route::get('list','Admins\LastMileDebriefingController@supervisor_list')->name('list');
+        });
+        Route::prefix('agents_call_monitoring')->name('agents_call_monitoring.')->group(function (){
+            Route::get('','Admins\LastMileDebriefingController@agents_call_monitoring_view')->name('index');
+            Route::get('list','Admins\LastMileDebriefingController@agents_call_monitoring_list')->name('list');
+        });
+        Route::prefix('caller_agent')->name('caller_agent.')->group(function (){
+            Route::get('','Admins\LastMileDebriefingController@caller_agent_view')->name('index');
+        });
+    });
 
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
