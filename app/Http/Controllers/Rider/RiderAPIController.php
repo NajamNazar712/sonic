@@ -7168,6 +7168,7 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v2(Request $request)
     {
+        return response()->json([$request->trybuy_id_list]);
         $message = '';
 
         $rules = [
