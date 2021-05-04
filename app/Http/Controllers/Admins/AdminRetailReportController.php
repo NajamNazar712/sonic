@@ -75,28 +75,23 @@ class AdminRetailReportController extends Controller
                     ->where('sj.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->leftJoin('pending_payment_shipments as pps', function ($join) {
+            ->leftJoin('retail_pending_payment_shipments as pps', function ($join) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
                     ->where('pps.id','=',
-                        DB::connection('reports')->raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id and pending_payment_shipments.type != 2)'));
+                        DB::connection('reports')->raw('(select max(id) from retail_pending_payment_shipments where retail_pending_payment_shipments.shipment_id = shipments.id and retail_pending_payment_shipments.type != 2)'));
             })
-            ->leftJoin('done_payment_shipments as dps', function ($join) {
+            ->leftJoin('retail_done_payment_shipments as dps', function ($join) {
                 $join->on('dps.shipment_id', '=', 'shipments.id')
                     ->where('dps.id','=',
-                        DB::connection('reports')->raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id and done_payment_shipments.type != 2)'));
+                        DB::connection('reports')->raw('(select max(id) from retail_done_payment_shipments where retail_done_payment_shipments.shipment_id = shipments.id and retail_done_payment_shipments.type != 2)'));
             })
             ->leftJoin('shipments_journey as dr', function ($join) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             })
-            ->leftjoin('shipment_items as si', function ($join) {
-                $join->on('si.shipment_id', '=', 'shipments.id')
-                    ->where('si.id', '=',
-                        DB::connection('reports')->raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id and shipment_items.type = 0)'));
-            })
             ->leftjoin('products as p','p.id','=','rs.product_type_id')
-            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.fuel_surcharge','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable','shipments.chargeable_weight','dr.created_at as delivered_or_returned', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id')
+            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','shipments.insurance_charges','rs.fuel_surcharge','rs.total_charges as total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
@@ -141,20 +136,14 @@ class AdminRetailReportController extends Controller
                 }
             })
 
-            ->editColumn('p_total_charges', function($shipment){
-                return number_format($shipment->p_total_charges, 2);
-            })
-            ->editColumn('d_total_charges', function($shipment){
-                return number_format($shipment->d_total_charges, 2);
+            ->editColumn('total_charges', function($shipment){
+                return number_format($shipment->total_charges, 2);
             })
             ->editColumn('p_net_payable', function($shipment){
                 return number_format($shipment->p_net_payable, 2);
             })
             ->editColumn('d_net_payable', function($shipment){
                 return number_format($shipment->d_net_payable, 2);
-            })
-            ->editColumn('d_gst', function($shipment){
-                return number_format($shipment->d_gst, 2);
             })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -170,36 +159,6 @@ class AdminRetailReportController extends Controller
                 else {
                     return $shipment->franchise;
                 }
-            })
-            /*->addColumn('account_number', function ($shipment) {
-                if ($shipment->category == 2) {
-                    return str_pad($shipment->retail_account_id, 6, '0', STR_PAD_LEFT);
-
-                }
-                else {
-                    return str_pad($shipment->franchise_account_id, 6, '0', STR_PAD_LEFT);
-                }
-            })*/
-
-            ->editColumn('p_collection_amount',function($sale){
-                $amount = '';
-                if($sale->p_collection_amount != null){
-                    $amount = $sale->p_collection_amount;
-                }else if($sale->d_collection_amount != null){
-                    $amount = $sale->d_collection_amount;
-                }else{
-                    $amount = $sale->s_collection_amount;
-                }
-                return number_format($amount);
-            })
-            ->editColumn('p_total_charges',function($sale){
-                $total = '';
-                if($sale->p_total_charges != null){
-                    $total = $sale->p_total_charges;
-                }else if($sale->d_total_charges != null){
-                    $total = $sale->d_total_charges;
-                }
-                return number_format((float)$total, 2);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
