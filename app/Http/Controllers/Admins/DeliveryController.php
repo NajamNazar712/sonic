@@ -1880,6 +1880,7 @@ class DeliveryController extends Controller
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', 0)->count();
             if ($updates_count == 0) {
                 $delivery_note_data->pending_status = 1;
+                $delivery_note_data->pending_for_verification_at = Carbon::now();
             }
 
             $delivered_status = array(14, 30, 36, 37);
@@ -2042,6 +2043,7 @@ class DeliveryController extends Controller
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', 0)->count();
             if ($updates_count == 0) {
                 $delivery_note_data->pending_status = 1;
+                $delivery_note_data->pending_for_verification_at = Carbon::now();
             }
             $delivery_note_data->save();
             $delivered_status = array(14, 30, 36, 37);
