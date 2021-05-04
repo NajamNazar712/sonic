@@ -2697,6 +2697,10 @@ class AdminFinanceController extends Controller
                             if ($type == 0) {
                                 $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
                             }
+                            else{
+                                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                            }
 
                             $pending_payment->save();
                         } else {
@@ -2710,7 +2714,7 @@ class AdminFinanceController extends Controller
                                 $pending_payment->adjusted_shipments = 0;
                             } else {
                                 $pending_payment->delivered_shipments = 0;
-                                $pending_payment->adjusted_shipments = 0;
+                                $pending_payment->adjusted_shipments = 1;
                             }
 
                             $pending_payment->save();
