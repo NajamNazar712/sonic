@@ -932,6 +932,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
+            Route::post('check/rider/dncc_status','Admins\DeliveryController@check_rider_dncc_status')->name('rider_dncc_status');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('shipment/piece_details', 'Admins\DeliveryController@get_piece_details')->name('shipment.piece_details');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
@@ -1153,6 +1154,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
+            Route::get('riders/by_hub', 'Admins\ReturnController@get_riders_by_hub')->name('riders.hub');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
             Route::post('shipment/piece_details', 'Admins\ReturnController@get_piece_details')->name('shipment.piece_details');
 
@@ -2085,6 +2087,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         });
 
+        Route::prefix('retail_sales')->name('retail_sales.')->group(function (){
+            Route::get('', 'Admins\AdminRetailReportController@sales_index')->name('index');
+            Route::post('list', 'Admins\AdminRetailReportController@sales_list')->name('list');
+
+        });
     });
 
     //Reports end
