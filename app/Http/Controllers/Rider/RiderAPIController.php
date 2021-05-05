@@ -7295,15 +7295,13 @@ class RiderAPIController extends Controller
                                 $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
                                 $delivered_parcels = count($item_ids);
                                 if ($total_parcels == $delivered_parcels) {
-//                                    'amount' => $total_cod,
-                                    Shipment::where('id', $shipment->id)->update(['received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 } else {
-//                                    'amount' => $total_cod,
-                                    Shipment::where('id', $shipment->id)->update(['received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                     ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 }
-                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 3, 'update_type' => 1]);
+                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
                             } else if ($shipment->booking_type_id == 4) {
                                 ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
 
