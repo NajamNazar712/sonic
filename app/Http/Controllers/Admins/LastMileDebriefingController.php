@@ -54,7 +54,17 @@ class LastMileDebriefingController extends Controller
             })
             ->addColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_count . '</button></div><h4 class="warning">100%</h4>';
+                    return $count_cell;
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('delivered_shipments_link', function($deliveries) {
+                if ($deliveries->delivered_shipments != 0) {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->delivered_shipments . '</button></div><h4 class="success">'. round(($deliveries->delivered_shipments / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
                 }
                 else {
                     return 0;
@@ -62,7 +72,8 @@ class LastMileDebriefingController extends Controller
             })
             ->addColumn('pending_shipments_link', function($deliveries) {
                 if ($deliveries->shipments_pending_count != 0) {
-                    return $deliveries->shipments_pending_count;
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_pending_count . '</button></div><h4 class="success">'. round(($deliveries->shipments_pending_count / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
                 }
                 else {
                     return 0;
@@ -70,7 +81,8 @@ class LastMileDebriefingController extends Controller
             })
             ->addColumn('undelivered_shipments_link', function($deliveries) {
                 if ($deliveries->shipments_undelivered_count != 0) {
-                    return $deliveries->shipments_undelivered_count;
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_undelivered_count . '</button></div><h4 class="yellow">'. round(($deliveries->shipments_undelivered_count / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
                 }
                 else {
                     return 0;

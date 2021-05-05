@@ -198,7 +198,7 @@
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link'},
-                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link'},
                     { data:'undelivered_shipments_link' ,name: 'undelivered_shipments_link', class: 'align-middle undelivered_shipments_link',orderable: false, searchable: false},
                     { data:'pending_shipments_link' ,name: 'pending_shipments_link', class: 'align-middle pending_shipments_link',orderable: false, searchable: false},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
