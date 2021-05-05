@@ -154,10 +154,10 @@
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
-                                row.push(values.undelivered_shipments);
-                                row.push(values.shipments_unverified_count);
+                                row.push(values.shipments_undelivered_count);
+                                row.push(values.shipments_pending_count);
                                 row.push(values.amount);
-                                row.push(values.pending_amount);
+                                row.push(values.pending_cash_collection);
                                 body.push(row);
                             });
                         },
@@ -197,12 +197,12 @@
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments text-center',orderable: false, searchable: false},
-                    { data:'undelivered_shipments' ,name: 'delivery_notes.undelivered_shipments', class: 'align-middle undelivered_shipments text-center',orderable: false, searchable: false},
-                    { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},
+                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link'},
+                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'undelivered_shipments_link' ,name: 'undelivered_shipments_link', class: 'align-middle undelivered_shipments_link',orderable: false, searchable: false},
+                    { data:'pending_shipments_link' ,name: 'pending_shipments_link', class: 'align-middle pending_shipments_link',orderable: false, searchable: false},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
-                    { data:'pending_amount' ,name: 'pending_amount', class: 'align-middle pending_amount'},
+                    { data:'pending_cash_collection' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle pending_cash_collection'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -223,7 +223,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.shipments_unverified_link')) {
+                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -248,14 +248,14 @@
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
 
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
-                    }
-                })
+                    $.ajax({
+                        url: '{!! route('admin.delivery.receive.shipments') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'delivery_note_id': id
+                        }
+                    })
                     .done(function(data) {
                         if (data) {
                             var html = '';
