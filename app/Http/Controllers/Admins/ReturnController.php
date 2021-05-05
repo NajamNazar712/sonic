@@ -376,7 +376,7 @@ class ReturnController extends Controller
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
-                    if ($parcel->booking_type_id != 4) {
+                    if ($parcel->booking_type_id != 4 && $parcel->shipment_type == 1) {
                         ShipmentChargesController::return($shipment);
 
                         if ($parcel->packaging_material_request != 1) {
@@ -485,7 +485,7 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
 
-                if ($parcel->booking_type_id != 4) {
+                if ($parcel->booking_type_id != 4 && $parcel->shipment_type == 1) {
                     ShipmentChargesController::return($request->shipment_id);
 
                     if ($parcel->packaging_material_request != 1) {
