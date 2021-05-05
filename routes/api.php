@@ -167,7 +167,7 @@ Route::name('api.')->group(function () {
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
             });
 
-            Route::get('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
+            Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
 
 		});
 
