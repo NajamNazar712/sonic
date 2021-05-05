@@ -2287,7 +2287,7 @@ class AdminFinanceController extends Controller
         }
         else{
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
-            if($retail_shipment->shipping_mode == 3){
+            if($retail_shipment->shipping_mode == 3 && $adjustment_type == 2){
                 $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
 
                 if ($pending_payment->exists()) {
@@ -2309,6 +2309,7 @@ class AdminFinanceController extends Controller
                     $pending_payment->save();
                 }
 
+                $payable = 0 - $payable;
                 $pending_payment_shipment = new RetailPendingPaymentShipment();
 
                 $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
@@ -2696,6 +2697,10 @@ class AdminFinanceController extends Controller
                             if ($type == 0) {
                                 $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
                             }
+                            else{
+                                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                            }
 
                             $pending_payment->save();
                         } else {
@@ -2709,7 +2714,7 @@ class AdminFinanceController extends Controller
                                 $pending_payment->adjusted_shipments = 0;
                             } else {
                                 $pending_payment->delivered_shipments = 0;
-                                $pending_payment->adjusted_shipments = 0;
+                                $pending_payment->adjusted_shipments = 1;
                             }
 
                             $pending_payment->save();
