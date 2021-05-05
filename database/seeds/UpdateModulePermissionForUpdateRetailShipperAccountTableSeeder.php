@@ -12,7 +12,7 @@ class UpdateModulePermissionForUpdateRetailShipperAccountTableSeeder extends See
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 486, 'name' => 'Retail Account - Edit', 'module_id' => 26),
+            array('id' => 486, 'name' => 'Retail Account - Edit', 'module_id' => 2),
         ));
     }
 }

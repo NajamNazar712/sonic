@@ -87,6 +87,7 @@ class Kernel extends ConsoleKernel
 
         'App\Console\Commands\MonthAverageIndividual',
         'App\Console\Commands\MonthAverageRM',
+        'App\Console\Commands\RiderIncentiveCalculate',
 
 
     ];
@@ -198,7 +199,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
-        $schedule->command('report:donepayment')->dailyAt('17:00')->runInBackground();
+        $schedule->command('report:donepayment')->dailyAt('16:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -264,6 +265,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
+        }
     }
     /**
      * Register the commands for the application.

@@ -25,6 +25,7 @@ use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\RateStatus;
@@ -1520,6 +1521,20 @@ class AdminFinanceController extends Controller
                         }
         
                         ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                       if($shipment->packaging_material_request == 1) {
+                           $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                           if ($packaging_material_shipment != null) {
+                               $packaging_material_shipment->status_id = 3;
+                               $packaging_material_shipment->save();
+
+                               $packaging_request_history = new PackagingMaterialRequestHistory();
+                               $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                               $packaging_request_history->status = 3;
+                               $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                               $packaging_request_history->save();
+                           }
+                       }
         
                         NotificationsController::send(21, $shipment_id, Auth::id());
                        }
@@ -1671,6 +1686,20 @@ class AdminFinanceController extends Controller
                             }
 
                             ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                            if($shipment->packaging_material_request == 1) {
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                                if ($packaging_material_shipment != null) {
+                                    $packaging_material_shipment->status_id = 3;
+                                    $packaging_material_shipment->save();
+
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 3;
+                                    $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                            }
 
                             NotificationsController::send(21, $request->id, Auth::id());
 
@@ -1904,7 +1933,7 @@ class AdminFinanceController extends Controller
             }
         }
 
-        $fuel_result = ShipmentChargesController::calculate_fuel_surcharge($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->weight_charges);
+        $fuel_result = ShipmentChargesController::calculate_fuel_surcharge($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $weight_result['weight_charges']);
 
         if ($fuel_result && $weight_result) {
             $new_charges = $weight_result['weight_charges'] + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $fuel_result['fuel_surcharge'] + $shipment->replacement_charges + $shipment->try_and_buy_charges + $shipment->packaging_material_charges + $shipment->intercept_charges + $shipment->nsa_osa_charges + $shipment->packaging_charges;

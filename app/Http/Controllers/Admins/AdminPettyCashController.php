@@ -244,32 +244,8 @@ class AdminPettyCashController extends Controller
 
             })
             ->addColumn('hub_name', function ($petty_details) {
-                if ($petty_details->hub_id != null) {
-                    $hubs = City::select('id', 'name')->get();
-                    $drops = '';
-                    $selected = '';
-                    foreach ($hubs as $hub) {
-                        if ($hub->id == $petty_details->hub_id) {
-                            $selected = 'selected';
-                        } else {
-                            $selected = '';
-                        }
-                        $drops .= '<option value="' . $hub->id . '" ' . $selected . '>' . $hub->name . '</option>';
-                    }
-                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
-                    return $select;
-                } else {
-                    $hubs = City::where('hub', 1)->select('id', 'name')->get();
-                    $drops = '';
-
-                    foreach ($hubs as $hub) {
-                        $drops .= '<option value="" selected></option>';
-                        $drops .= '<option value="' . $hub->id . '">' . $hub->name . '</option>';
-                    }
-                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
-                    return $select;
-                }
-
+                $input = '<input type="hidden" value="" class="hub_select_id"  name="hub[' . $petty_details->statement_detail_id . ']"></input><input type="text" readonly value="" class="form-control form-control-sm hub_select" data-rule-required="true" data-msg-required="City is required"></input>';
+                return $input;
             })
             ->editColumn('date', function ($petty_details) {
                 return Carbon::parse($petty_details->date)->toDateString();
@@ -1347,7 +1323,12 @@ class AdminPettyCashController extends Controller
                 $titles_array[$title->id] = $title->account_titles;
             }
 
-            $hubs = City::where('hub', 1)->select('id', 'name')->get();
+            if (session('role_id') == 1) {
+                $hubs = City::where('hub', 1)->select('id', 'name')->get();
+            } else {
+                $hubs = City::where('hub', 1)->whereIn('id', session('hubs'))->select('id', 'name')->get();
+            }
+
             $cities = City::select('id', 'name')->get();
             return view('admin.petty_cash.draft.edit')->with(['heads' => $head, 'hubs' => $hubs, 'titles' => $titles_array, 'cities' => $cities, 'petty_statement_draft' => $draft]);
         } else {
@@ -1381,7 +1362,9 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('account_title', function ($petty_details) {
 
-                $titles = PettyCashAccountTitle::select('id', 'name')->get();
+                $account_head_id = $petty_details->account_head_id;
+                $petty_cash_account_title_ids = PettyCashAccountHeadAccountTitle::where('petty_cash_account_head_id', $account_head_id)->pluck('petty_cash_account_title_id')->toArray();
+                $titles = PettyCashAccountTitle::select('id', 'name')->whereIn('id', $petty_cash_account_title_ids)->get();
                 $drops = '';
                 $selected = '';
                 foreach ($titles as $status) {
@@ -1517,8 +1500,6 @@ class AdminPettyCashController extends Controller
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details_draft/' . $filename);
 
                                 $petty_cash_draft_detail->reference_document = $filename;
-
-
                             }
                         }
 

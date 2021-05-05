@@ -90,8 +90,14 @@
                                 <div id="consignee_shipper_info" class="ml-1 col-6 border">
                                     <h4 id="shipper_header_info" class="form-section mb-2 text-center">Consignee & Shipper Info</h4>
 
-                                    <div class="form-group col-6">
-                                        <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                    <div class="row ml-0">
+                                        <div class="form-group col-6">
+                                            <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                        </div>
+
+                                        <div class="form-group col-6">
+                                            <input type="text" name="order_id" id="order_id" class="form-control" placeholder="Order ID">
+                                        </div>
                                     </div>
                                     <div class="form-group col-6">
                                         <input type="text" name="shipper_name" id="shipper_name" class="form-control shipper_name" placeholder="Shipper Name*" data-rule-required="true" data-msg-required="Shipper Name is required">
@@ -371,6 +377,7 @@
                 width:'100%',
                 placeholder:"Select Product*"
             }).bind('change', function () {
+                $('#shipper_phone_no').val('');
                 var id = parseInt($(this).val());
                 if(id === 1){
                     $('#cod_check').addClass('d-none');
@@ -544,7 +551,7 @@
             var first_shipment = false;
 
             $('#shipper_phone_no').on('change', function () {
-                if(this.value !== '' && this.value != null && ($('#shipper_name').val() == '' || $('#shipper_name').val() == null)){
+                if(this.value !== '' && this.value != null){
                     $.ajax({
                         url: '{!! route('retail.shipment.shipper_info') !!}',
                         method: 'POST',
@@ -578,29 +585,24 @@
                                 $('#account_details').removeClass('d-none');
                             }
                             if(complete_shipper_info == false){
-                                console.log(1);
                                 var mode = $('#shipping_mode').val();
                                 if(first_shipment == true){
-                                    console.log(2);
                                     $('#iban_no').removeClass('required');
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
                                     first_shipment = false;
                                 }
                                 else if(cod == true && ($('#iban_no').val() == null || $('#iban_no').val() == '') && $('#shipping_mode').val() == 3){
-                                    console.log(3);
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
                                     $('#bank').addClass('required');
                                 }
                                 else if($('#shipping_mode').val() != 3){
-                                    console.log(4);
                                     $('#iban_no').removeClass('required');
                                     $('#account_no').removeClass('required');
                                     $('#bank').removeClass('required');
                                 }
                                 else{
-                                    console.log(5);
                                     $('#account_details').removeClass('d-none');
                                     $('#iban_no').addClass('required');
                                     $('#account_no').addClass('required');
@@ -664,6 +666,7 @@
                                $('#print_div').removeClass('d-none');
                            }
                        });
+                        $("#order_id").val('');
                         $('#length').val('');
                         $('#breadth').val('');
                         $('#height').val('');

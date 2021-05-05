@@ -162,7 +162,7 @@ class RetailShipmentBookController extends Controller
         $consignee_phone_number_1 = $request->input('consignee_phone_no');
         $consignee_phone_number_2 = NULL;
         $consignee_email_address = NULL;
-        $order_id = NULL;
+        $order_id = $request->input('order_id');
         $package_type = FALSE;
         $special_instructions = NULL;
 
@@ -587,7 +587,7 @@ class RetailShipmentBookController extends Controller
 
                     $slip .= '
                           <tr>
-                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="4" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                             <td colspan="3" class="color primary"><strong>Shipper Account No.</strong></td>
                             <td colspan="2">' . $shipment->retail->shipper_account_no . '</td>
                             <td colspan="2" class="color primary"><strong>Origin</strong></td>
@@ -600,12 +600,16 @@ class RetailShipmentBookController extends Controller
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
                           </tr>
                           <tr>
+                            <td colspan="3" class="color primary"><strong>Order ID</strong></td>
+                            <td colspan="8">'.$shipment->order_id.'</td>
+</tr>
+                          <tr>
                             <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
                             <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
                             <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
                             <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
                             <td colspan="1" class="color primary border"><strong>Bank</strong></td>
-                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . (($shipment->retail->shipper->bank_id != null) ? $shipment->retail->shipper->bank->name : '') . '</strong></td>
                           </tr>
                 ';
 
@@ -920,7 +924,7 @@ class RetailShipmentBookController extends Controller
                               <tr>
                                 <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                     ';
-                        $amount = $shipment->amount;;
+                        $amount = $shipment->amount;
 
                         if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
                             $table_end .= '
@@ -1387,7 +1391,8 @@ class RetailShipmentBookController extends Controller
     public function tracking_slip_list(Request $request){
         $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
             ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.slip_image')
-        ->orderBy('retail_Shipments.created_at', 'desc');
+            ->where('retail_user_id', Auth::id())
+        ->orderBy('retail_shipments.created_at', 'desc');
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('retail.tracking.index');
@@ -1407,10 +1412,26 @@ class RetailShipmentBookController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                $dropdown .= '<button type="button" class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Upload Slip</div></button>';
+                $dropdown .= '<button type="button" class="dropdown-item upload" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Upload Slip</div></button>';
 
                 return $dropdown;
             });
         return  $datatable->make(true);
+    }
+
+    public function tracking_slip_upload(Request $request){
+        $retail_shipment_id = $request->retail_shipment_id;
+        $retail_shipment = RetailShipment::find($retail_shipment_id);
+        if ($request->hasFile('upload_attachment')) {
+            $filename = 'shipment_'. $retail_shipment->shipment_id.'.jpg';
+
+            $file = $request->file('upload_attachment');
+
+            Storage::disk('public')->putFileAs('retail_slip', $file, $filename);
+
+            $retail_shipment->slip_image = $filename;
+            $retail_shipment->save();
+        }
+        return redirect()->back()->with('success', 'Slip uploaded successfully');
     }
 }

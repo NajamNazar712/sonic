@@ -571,7 +571,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
     Route::prefix('corporate')->name('corporate.')->group(function (){
-        Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
+        Route::get('{id}/add/rates/{rate_type_id?}','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
         Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
         Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_index')->name('edit.rates');
         Route::post('/edit/user_documents','Admins\AdminDashboardController@edit_rates_user_documents')->name('edit.user_documents');
@@ -581,6 +581,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('zone_wise')->name('zone_wise.')->group(function (){
             Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_zone_wise_submit')->name('add.rates');
             Route::put('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_zone_wise_submit')->name('edit.rates');
+        });
+        Route::prefix('default')->name('default.')->group(function (){
+            Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_default_submit')->name('add.rates');
+            Route::get('{id}/edit/rates','Admins\AdminCorporateAccountsController@edit_rates_default')->name('edit.rates');
+            Route::get('{id}/edit/rates/view','Admins\AdminCorporateAccountsController@edit_rates_default')->name('view.rates');
+            Route::put('{id}/edit/rates/update','Admins\AdminCorporateAccountsController@edit_rates_default_submit')->name('edit.rates.submit');
+            Route::post('check/corporate_rate_type','Admins\AdminCorporateAccountsController@check_corporate_rate_type')->name('rate_type');
+            Route::post('{id}/add/rates/submit','Admins\AdminCorporateAccountsController@change_corporate_rate_type')->name('change_rate_type');
+            Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@default_view_rates_index')->name('rates.view');
         });
     });
     //ajax request
@@ -923,6 +932,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
+            Route::post('check/rider/dncc_status','Admins\DeliveryController@check_rider_dncc_status')->name('rider_dncc_status');
             Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('shipment/piece_details', 'Admins\DeliveryController@get_piece_details')->name('shipment.piece_details');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
@@ -1144,6 +1154,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
+            Route::get('riders/by_hub', 'Admins\ReturnController@get_riders_by_hub')->name('riders.hub');
             Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
             Route::post('shipment/piece_details', 'Admins\ReturnController@get_piece_details')->name('shipment.piece_details');
 
@@ -2076,6 +2087,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             
         });
 
+        Route::prefix('retail_sales')->name('retail_sales.')->group(function (){
+            Route::get('', 'Admins\AdminRetailReportController@sales_index')->name('index');
+            Route::post('list', 'Admins\AdminRetailReportController@sales_list')->name('list');
+
+        });
     });
 
     //Reports end
@@ -2505,6 +2521,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('hr')->name('hr.')->group(function () {
+            Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@rider_incentive_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@rider_incentive_list')->name('list');
+                Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_store')->name('store');
+                Route::get('details', 'Admins\GlobalSettingsController@rider_incentive_details')->name('details');
+                Route::post('update', 'Admins\GlobalSettingsController@rider_incentive_update')->name('update');
+
+                Route::prefix('cron')->name('cron.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@rider_incentive_cron_index')->name('index');
+                    Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_cron_store')->name('store');
+
+                });
+            });
+        });
+
 
     });
 
@@ -2851,6 +2883,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
         });
+
+        Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
@@ -2885,8 +2922,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
             Route::get('', 'Retail\RetailShipmentBookController@tracking_slip_index')->name('index');
             Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');
-            Route::post('/shipments', 'Retail\RetailShipmentBookController@shipments')->name('shipments');
-            Route::post('print','Retail\RetailShipmentBookController@print')->name('print');
+            Route::post('/upload', 'Retail\RetailShipmentBookController@tracking_slip_upload')->name('upload');
         });
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {

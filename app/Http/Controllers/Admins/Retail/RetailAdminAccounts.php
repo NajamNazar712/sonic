@@ -293,13 +293,17 @@ class RetailAdminAccounts extends Controller
                             <td colspan="2" class="color primary border"><strong>Destination</strong></td>
                             <td colspan="4" class="border twice-bottom twice-right"><strong>' . $shipment->consignee_city->name . '</strong></td>
                           </tr>
+                           <tr>
+                            <td colspan="3" class="color primary"><strong>Order ID</strong></td>
+                            <td colspan="8">'.$shipment->order_id.'</td>
+                           </tr>
                           <tr>
                             <td colspan="1" class="color primary border"><strong>#IBAN</strong></td>
                             <td colspan="2" class="border twice-bottom"><strong>' . $shipment->retail->shipper->iban . '</strong></td>
                             <td colspan="2" class="color primary border"><strong>Account Number</strong></td>
                             <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->account_number . '</strong></td>
                             <td colspan="1" class="color primary border"><strong>Bank</strong></td>
-                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . $shipment->retail->shipper->bank->name . '</strong></td>
+                            <td colspan="2" class="border twice-bottom twice-right"><strong>' . (($shipment->retail->shipper->bank_id != null) ? $shipment->retail->shipper->bank->name : '') . '</strong></td>
                           </tr>
                 ';
 
@@ -615,14 +619,15 @@ class RetailAdminAccounts extends Controller
                               <tr>
                                 <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                     ';
+                    $amount = $shipment->amount;
 
                     if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
                         $table_end .= '
-                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
                         ';
                     } else {
                         $table_end .= '
-                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
                         ';
                     }
                 }

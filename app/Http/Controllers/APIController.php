@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\DonePayment;
+use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceShipment;
+use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -275,10 +279,23 @@ class APIController extends Controller
     public function pickup_address_add(Request $request) {
       $user_id = $request->user_id;
 
+      Validator::extend('phone_number', function($attribute, $value, $parameters) {
+        if ($value) {
+          $value = $this->phone_number($value);
+
+          if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+            return TRUE;
+          }
+          else {
+            return FALSE;
+          }
+        }
+      });
+
       $rules = [
         'person_of_contact' => ['required', 'between:1,190'],
         'vendor' => ['nullable', 'filled', 'between:0,190'],
-        'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        'phone_number' => ['required', 'phone_number'],
         'email_address' => ['required', 'email'],
         'address' => ['required', 'between:1,190'],
         'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
@@ -308,7 +325,7 @@ class APIController extends Controller
 
         $person_of_contact = $request->input('person_of_contact');
         $vendor = $request->input('vendor');
-        $phone_number = substr_replace($request->input('phone_number'), '-', 4, 0);
+        $phone_number = $this->phone_number($request->phone_number);
         $email_address = $request->input('email_address');
         $address = $request->input('address');
         $city_id = $request->input('city_id');
@@ -415,7 +432,7 @@ class APIController extends Controller
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
                 })],
-                'delivery_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
+
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
                 'consignee_name' => ['required', 'between:1,100'],
@@ -427,16 +444,14 @@ class APIController extends Controller
                 'package_type' => ['nullable', 'boolean'],
                 'special_instructions' => ['nullable', 'filled', 'between:0,190'],
                 'estimated_weight' => ['required', 'numeric', 'between:0.1,100000'],
-                'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
-                    $query->where('user_id', $user_id)->where('status', 1);
-                })],
+
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                     $query->whereNotIn('id', [2, 3]);
                 })],
                 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
-                    $query->whereIn('id', [2, 3]);
+                    $query->whereIn('id', [3]);
                 })],
 
                 'item_product_type_id' => ['required_if:service_type_id,1,2,5', 'integer', 'digits_between:1,10', 'exists:products,id'],
@@ -463,7 +478,21 @@ class APIController extends Controller
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_5' => ['nullable', 'between:0,190']
             ];
+
+            if($user_type['corporate_rate_type_id'] == 3){
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
+            else{
+                $rules['delivery_type_id'] = ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'];
+                $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
+                    $query->where('user_id', $user_id)->where('status', 1);
+                })];
+            }
         }
+
+
 
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
         if($shipment_pre_book->exists()){
@@ -777,6 +806,10 @@ class APIController extends Controller
                 $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
             }
             else {
+
+                if($user_type['corporate_rate_type_id'] == 3){
+                    $delivery_type_id = 1;
+                }
                 $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges);
             }
 
@@ -1672,6 +1705,7 @@ class APIController extends Controller
               $query->where('user_id', $user_id)->where('status', 1);
           })],
           'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
+          'delivery_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:delivery_types,id'],
           'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000']
         ];
 
@@ -1769,9 +1803,20 @@ class APIController extends Controller
           }
         }
 
+        $delivery_type_id = NULL;
+
+        if ($user->account_type_id == 2) {
+          if ($request->has('delivery_type_id')) {
+            $delivery_type_id = $request->input('delivery_type_id');
+          }
+          else {
+            $delivery_type_id = 1;
+          }
+        }
+
         $information['charges'] = array();
 
-        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), NULL, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id, 1, 0);
+        $calculation = ShipmentChargesController::calculate_weight($user->account_type_id, $user->id, $request->input('shipping_mode_id'), $request->input('same_day_timing_id'), $delivery_type_id, $request->input('estimated_weight'), $origin_city->id, $origin_city->zone_id, $destination_city->id, 1, 0);
 
         if ($calculation) {
           $information['charges']['weight'] = $calculation['weight_charges'];
@@ -2675,4 +2720,204 @@ class APIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Status of Shipment(s) - Consignee Phone Number #' . $phone_number, 'details' => $details]);
       }
     }
+
+    public function payments(Request $request) {
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'array', 'min:1'],
+            'tracking_number.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })]
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
+
+            $data = array();
+
+            foreach ($shipments as $shipment){
+
+                $account_type_id = $shipment->user->account_type_id;
+
+                $done_payment_shipments = $shipment->done_payment_shipments;
+
+                if (!$done_payment_shipments->isEmpty()) {
+                    $data[$shipment->tracking_number] = array();
+
+                    foreach ($done_payment_shipments as $done_payment_shipment) {
+                        $details = array();
+
+                        if($done_payment_shipment->done_payment->status == 0){
+                            $details['payment_status'] = 'Processed';
+                        }
+                        else if($done_payment_shipment->done_payment->status == 1){
+                            $details['payment_status'] = 'Paid';
+                        }
+                        else if($done_payment_shipment->done_payment->status == 2){
+                            $details['payment_status'] = 'Reverted';
+                        }
+                        else{
+                            $details['payment_status'] = 'Unknown';
+                        }
+                        $details['billing_method'] = $shipment->user->account_type->name;
+                        $details['payment_date'] = Carbon::parse($done_payment_shipment->done_payment->created_at)->toDateTimeString();
+                        $details['payment_method'] = 'IBFT';
+                        $details['payment_type'] = $done_payment_shipment->type;
+                        if ($done_payment_shipment->type == 0) {
+                            $details['payment_type'] = 'Delivered';
+                        }
+                        else if ($done_payment_shipment->type == 1) {
+                            $details['payment_type'] = 'Returned';
+                        }
+                        else {
+                            $details['payment_type'] = 'Adjusted';
+                        }
+                        $details['payment_id'] = $done_payment_shipment->done_payment->id;
+                        if($account_type_id == 2){
+                            $details['invoice_ids'] = array();
+                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
+                        }
+                        $data[$shipment->tracking_number][] = $details;
+                    }
+                }
+            }
+            return response()->json(['status' => 0, 'payments' => $data]);
+        }
+    }
+
+    public function invoice(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'id' => ['required', 'integer', 'digits_between:1,20'],
+            'type' => ['required','integer', 'between:1,2']
+        ];
+
+        //type = 1 => Invoice, 2 => Payment
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else{
+            $data = array();
+
+            $type = $request->type;
+
+            if($type == 1){
+                $invoice = Invoice::where('id', $request->id)->where('user_id', $user_id);
+                if($invoice->exists()){
+                    $invoice = $invoice->first();
+                    $account_type_id = $invoice->shipper->account_type_id;
+                    $data['billing_method'] = 'Corporate Invoicing Account';
+                    $data['invoice_date'] = Carbon::parse($invoice->invoicing_date)->toDateTimeString();;
+                    $data['shipments'] = array();
+                    $invoice_shipments = $invoice->invoice_shipments;
+
+                    if(!$invoice_shipments->isEmpty()){
+                        foreach ($invoice_shipments as $invoice_shipment){
+                            $shipment = $invoice_shipment->shipment;
+                            $details = array();
+                            if ($invoice_shipment->type == 0) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
+                            }
+                            else if ($invoice_shipment->type == 1) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Returned';
+                            }
+                            else {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
+                            }
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 0 && $invoice_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                            $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->insurance_charges : 0);
+                            $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 1 && $invoice_shipment->charges != 0) ? $shipment->return_charges : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->replacement_charges : 0);
+                            $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
+                            $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->intercept_charges : 0);
+                            $details[$shipment->tracking_number]['osa_charges'] = (($account_type_id == 2 && $invoice_shipment->type != 2 && $invoice_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $details[$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 2 && $invoice_shipment->type == 2) ? $invoice_shipment->invoice_amount : 0);
+                            $details[$shipment->tracking_number]['total_charges'] = $invoice_shipment->charges;
+                            $details[$shipment->tracking_number]['gst'] = $invoice_shipment->gst;
+                            $details[$shipment->tracking_number]['invoice_amount'] = $invoice_shipment->invoice_amount;
+                            $data['shipments'][] = $details;
+
+                        }
+                        return response()->json(['status' => 0, 'payments' => $data]);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
+                }
+
+            }
+            else{
+
+                $done_payment = DonePayment::where('id', $request->id)->where('user_id', $user_id);
+                if($done_payment->exists()){
+                    $done_payment = $done_payment->first();
+                    $account_type_id = $done_payment->shipper->account_type_id;
+                    $data['billing_method'] = $done_payment->shipper->account_type->name;
+                    $data['invoice_date'] = Carbon::parse($done_payment->created_at)->toDateTimeString();;
+                    $data['shipments'] = array();
+                    $done_payment_shipments = $done_payment->done_payment_shipments;
+
+                    if(!$done_payment_shipments->isEmpty()){
+                        foreach ($done_payment_shipments as $done_payment_shipment){
+                            $shipment = $done_payment_shipment->shipment;
+                            $details = array();
+                            if ($done_payment_shipment->type == 0) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Delivered';
+                            }
+                            else if ($done_payment_shipment->type == 1) {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Returned';
+                            }
+                            else {
+                                $details[$shipment->tracking_number]['payment_type'] = 'Adjusted';
+                            }
+                            $details[$shipment->tracking_number]['weight_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->weight_charges : 0);
+                            $details[$shipment->tracking_number]['cash_handling_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                            $details[$shipment->tracking_number]['insurance_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->insurance_charges : 0);
+                            $details[$shipment->tracking_number]['return_charges'] = (($account_type_id == 1 && $done_payment_shipment->type == 1 && $done_payment_shipment->charges != 0) ? $shipment->return_charges : 0);
+                            $details[$shipment->tracking_number]['fuel_surcharge'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->fuel_surcharge : 0);
+                            $details[$shipment->tracking_number]['replacement_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->replacement_charges : 0);
+                            $details[$shipment->tracking_number]['try_and_buy_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->try_and_buy_charges : 0);
+                            $details[$shipment->tracking_number]['intercept_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->intercept_charges : 0);
+                            $details[$shipment->tracking_number]['osa_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                            $details[$shipment->tracking_number]['adjustment_charges'] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $done_payment_shipment->charges : 0);
+                            $details[$shipment->tracking_number]['total_charges'] = $done_payment_shipment->charges;
+                            $details[$shipment->tracking_number]['gst'] = $done_payment_shipment->gst;
+                            $details[$shipment->tracking_number]['invoice_amount'] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+                            $data['shipments'][] = $details;
+
+
+                        }
+                        return response()->json(['status' => 0, 'payments' => $data]);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['Invoice not found!']]);
+                }
+            }
+
+
+            return response()->json(['status' => 0, 'payments' => $data]);
+
+        }
+    }
+
+
 }

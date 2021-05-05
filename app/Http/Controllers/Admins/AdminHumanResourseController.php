@@ -26,6 +26,7 @@ use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeType;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
@@ -2196,4 +2197,21 @@ class AdminHumanResourseController extends Controller
         $department->save();
         return redirect()->back()->with('success', 'Department Updated Successfully!');
     }
+
+    public function rider_incentive_index(){
+        return view('admin.human_resource.rider_incentive');
+    }
+
+    public function rider_incentive_list(){
+        $incentives = RidersIncentive::join('riders', 'riders.id', '=', 'riders_incentives.rider_id')
+            ->join('cities', 'cities.id', '=', 'riders.city_id')
+            ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
+            ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive');
+
+        return Datatables::of($incentives)
+            ->make(true);
+
+    }
+
 }

@@ -100,15 +100,16 @@
                                     </thead>
                                     <tbody>
                                     @php
-                                        foreach ($user_shipping_modes as $user_shipping_mode){
-                                            if($user_shipping_mode == 4){
-                                                $check_sameday = 1;
+                                        $check_sameday = '';
+                                            foreach ($user_shipping_modes as $user_shipping_mode){
+                                                if($user_shipping_mode == 4){
+                                                    $check_sameday = 1;
+                                                    }
+                                                    else{
+                                                        $check_sameday = 0;
+                                                    }
                                                 }
-                                                else{
-                                                    $check_sameday = 0;
-                                                }
-                                            }
-                                        $no=1;
+                                            $no=1;
                                     @endphp
                                     @foreach($data as $ro)
                                         <tr>
@@ -522,6 +523,11 @@
                 width: '100%',
                 placeholder: 'Charges Mode'
             });
+
+            @if(session('rate_type_id') == 3)
+              $('.delivery_type_id').val(1);
+            @endif
+
             var rowCount = $("#tbl td").closest("tr").length;
             if(rowCount == 1){
                 $('.cancel_shipment').addClass('d-none');

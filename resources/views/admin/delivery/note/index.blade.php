@@ -112,7 +112,7 @@
 
 
                         <div class="col-3">
-                            <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
+                            <button type="submit" id="deliveryNoteSubmitBtn" class="btn btn-primary btn-block ">Submit &amp; Print</button>
 
                         </div>
 
@@ -454,12 +454,11 @@
                     }).done(function(data){
 
                         if (data.status == 1) {
-                            $('#rider_name').empty().trigger('change');
+                            var html = "";
                             $.each(data.riders, function(key,value) {
-                                var newOption = new Option(value.name,value.id, false, false);
-                                $('#rider_name').append(newOption).trigger('change');
-
+                                html += `<option value="${value.id}">${value.name}</option>`;
                             });
+                            $('#rider_name').html(html);
                             $('#rider_name').val('').trigger('change');
                         }
                         else {
@@ -476,8 +475,35 @@
             });
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
-                $('#route').val(route).trigger('change');
+                var rider_id = $(this).val();
+                if(rider_id != null){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'rider_id': rider_id,
+                        }
+                    }).done(function(data){
+                        if (data.status == 1) {
+                            $('#route').val(route).trigger('change');
+                            $("#deliveryNoteSubmitBtn").attr('disabled',false);
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $("#deliveryNoteSubmitBtn").attr('disabled',true);
+                        }
+                    });
+                }
+                else{
+                    $('#route').val(route).trigger('change');
+                }
+
             });
+
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });

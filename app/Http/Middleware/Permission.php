@@ -503,6 +503,9 @@ class Permission
             'reports.master_cargo.short_received_shipments.index' =>476,
             'reports.master_cargo.short_received_shipments.list' => 476,
 
+            'reports.retail_sales.index' =>493,
+            'reports.retail_sales.list' => 493,
+
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -791,6 +794,9 @@ class Permission
             'settings.international_rates.index' => 438,
             'settings.international_rates.upload.index' => 477,
 
+            'settings.hr.rider_incentive.index' => 491,
+            'settings.hr.rider_incentive.cron.index' => 494,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -920,6 +926,9 @@ class Permission
             'human_resource.designation.list' => 481,
             'human_resource.department.index' => 484,
             'human_resource.department.list' => 484,
+
+            'human_resource.rider_incentive.index' => 492,
+            'human_resource.rider_incentive.list' => 492,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,

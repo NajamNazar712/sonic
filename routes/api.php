@@ -67,6 +67,11 @@ Route::name('api.')->group(function () {
 
 		Route::get('catalyst_users', 'APIController@catalyst_users')->name('catalyst_users');
 
+		Route::post('payments', 'APIController@payments')->name('payments');
+
+		Route::post('invoice', 'APIController@invoice')->name('invoice');
+
+
 	});
 
 	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
@@ -83,8 +88,12 @@ Route::name('api.')->group(function () {
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
+            Route::post('validate_data', 'Rider\RiderAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
+            Route::post('attachment_store_v2', 'Rider\RiderAPIController@rider_attachments_store_v2')->name('attachment_store_v2');
+            Route::post('attachment_view', 'Rider\RiderAPIController@rider_attachments_view')->name('attachment_view');
+            Route::post('attachment_delete', 'Rider\RiderAPIController@rider_attachments_delete')->name('attachment_delete');
         });
 
 		Route::middleware('RiderAPIToken')->group(function () {
@@ -117,7 +126,10 @@ Route::name('api.')->group(function () {
                 Route::post('undelivered', 'Rider\RiderAPIController@shipment_undelivered')->name('undelivered');
                 Route::get('summary/multiple', 'Rider\RiderAPIController@delivery_summary_multiple')->name('delivery_summary_multiple');
                 Route::get('summary/multiple_v2', 'Rider\RiderAPIController@delivery_summary_multiple_v2')->name('delivery_summary_multiple_v2');
+                Route::get('summary/multiple_v3', 'Rider\RiderAPIController@delivery_summary_multiple_v3')->name('delivery_summary_multiple_v3');
+                Route::get('summary/multiple_v4', 'Rider\RiderAPIController@delivery_summary_multiple_v4')->name('delivery_summary_multiple_v4');
                 Route::post('undelivered_v2', 'Rider\RiderAPIController@shipment_undelivered_v2')->name('undelivered_v2');
+                Route::post('delivered_v2', 'Rider\RiderAPIController@shipment_delivered_v2')->name('delivered_v2');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -155,6 +167,8 @@ Route::name('api.')->group(function () {
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
             });
 
+            Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
+
 		});
 
 	});
@@ -165,8 +179,12 @@ Route::name('api.')->group(function () {
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
+            Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::post('store', 'AdminAPIController@admin_signup')->name('store');
             Route::post('attachment_store', 'AdminAPIController@admin_attachments_store')->name('attachment_store');
+            Route::post('attachment_store_v2', 'AdminAPIController@admin_attachments_store_v2')->name('attachment_store_v2');
+            Route::post('attachment_view', 'AdminAPIController@admin_attachments_view')->name('attachment_view');
+            Route::post('attachment_delete', 'AdminAPIController@admin_attachments_delete')->name('attachment_delete');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {

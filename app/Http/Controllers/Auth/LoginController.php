@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Admins\GlobalSettingsController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\RateStatus;
@@ -179,7 +180,7 @@ class LoginController extends Controller
             else {
                 $substitute_user = SubstituteUser::find($user->id);
                 $permissions = SubstituteUserPermission::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
-                $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->id)->pluck('sister_user_id')->toArray();
+                $sister_users = MergedSisterAccountMapping::where('head_user_id', $user->user_id)->pluck('sister_user_id')->toArray();
                 session(['sister_users' => $sister_users]);
                 session(['permissions' => $permissions]);
                 session(['user_id' => $user->user_id]);
@@ -216,10 +217,21 @@ class LoginController extends Controller
             session(['rate_status' => TRUE]);
         }
         else{
-            $corporate_rate_status = CorporateRateStatus::where('user_id', $shipper_user_id)->where('status', 1);
-            if($corporate_rate_status->exists()){
-                session(['rate_status' => TRUE]);
+            $rate_type_id = User::find($shipper_user_id)->corporate_rate_type_id;
+            if($rate_type_id != 3){
+                $corporate_rate_status = CorporateRateStatus::where('user_id', $shipper_user_id)->where('status', 1);
+                if($corporate_rate_status->exists()){
+                    session(['rate_status' => TRUE]);
+                }
             }
+            else{
+                $corporate_default__rate_status = CorporateDefaultRateStatus::where('user_id', $shipper_user_id)->where('status', 1);
+                if($corporate_default__rate_status->exists()){
+                    session(['rate_status' => TRUE]);
+                }
+            }
+            session(['rate_type_id' => $rate_type_id]);
+
         }
         $international_rate_status = InternationalUsersInformation::where('user_id', $shipper_user_id)->where('status', 1);
         if($international_rate_status->exists()){

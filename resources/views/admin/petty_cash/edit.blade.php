@@ -164,7 +164,30 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        let main_hub = '';
+        let main_hub_id = '';
         $(document).ready(function () {
+            $('#select_statement_hub').on('change',function () {
+                var value = $(this).val();
+                $.ajax({
+                    type: "POST",
+                    url: '{!! route('admin.petty_cash.make.destination') !!}', // script to validate in server side
+                    data: {hub_id: value,'_token': '{!! csrf_token() !!}'},
+                    success: function (response) {
+                        if(response.status == 1)
+                        {
+                            main_hub = response.data.name;
+                            main_hub_id = response.data.id;
+                        }
+                        else{
+                            main_hub = '';
+                            main_hub_id = '';
+                        }
+                        $('.hub_select').val(main_hub);
+                        $('.hub_select_id').val(main_hub_id);
+                    }
+                });
+            });
             $('.reference_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -176,7 +199,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#select_statement_hub').val('{!! $petty_statement->hub_id!!}').trigger('change');
+
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
             var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
 
@@ -230,7 +253,7 @@
                                 }
                             }
                     @endif],
-                @elseif(session('role_id') == 1 || ($petty_statement->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                @elseif(session('role_id') == 1 || ($petty_statement->status <= 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
                         @if($petty_statement->status != 6)
@@ -300,12 +323,12 @@
                         this_table.api().table().columns.adjust();
                     });
 
-                    $(".hub_select").select2({
-                        placeholder: "Select Hub",
-                        width:'100%'
-                    }).bind('change', function() {
-                        this_table.api().table().columns.adjust();
-                    });
+                    // $(".hub_select").select2({
+                    //     placeholder: "Select Hub",
+                    //     width:'100%'
+                    // }).bind('change', function() {
+                    //     this_table.api().table().columns.adjust();
+                    // });
                     // $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
                     //     placeholder: "Select a Status",
                     //     width:'100%'
@@ -350,6 +373,7 @@
                         }
                     });
                     this.api().table().columns.adjust();
+                    $('#select_statement_hub').val('{!! $petty_statement->hub_id!!}').trigger('change');
                 }
             });
 
@@ -573,7 +597,7 @@
                     if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
                         $(row.node()).find('td.account_head select').attr('disabled',false);
                         $(row.node()).find('td.account_title select').attr('disabled',false);
-                        $(row.node()).find('td.hub_name select').attr('disabled',false);
+                        $(row.node()).find('td.hub_name').attr('disabled',false);
                         // if($(row.node()).find('td.account_head select').val() == 1){
                         // }
                         $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);

@@ -879,11 +879,11 @@
                 'max': 100000
             });
 
-            $('.postal_code').inputmask({
-                'alias': 'integer',
+            /*$('.postal_code').inputmask({
+                'alias': 'numeric',
                 'allowMinus': false,
                 'allowPlus': false
-            });
+            });*/
 
             $('.weight').inputmask({
                 'alias': 'decimal',

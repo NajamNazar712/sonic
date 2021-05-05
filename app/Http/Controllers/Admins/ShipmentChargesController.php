@@ -9,6 +9,14 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkinShipmentWeightCharges;
+use App\Http\Models\CorporateDefaultBookingTypeCharge;
+use App\Http\Models\CorporateDefaultCashHandlingCharge;
+use App\Http\Models\CorporateDefaultDiscountCharge;
+use App\Http\Models\CorporateDefaultFuelSurcharge;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateDefaultReturnCharge;
+use App\Http\Models\CorporateDefaultWeightCharge;
 use App\Http\Models\CorporateReturnChargeZoneWise;
 use App\Http\Models\CorporateWeightChargeZoneWise;
 use App\Http\Models\InternationalDhlZone;
@@ -119,7 +127,12 @@ class ShipmentChargesController extends Controller
             $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
         }
         else {
-            $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
+            if($rate_type_id == 1 || $rate_type_id == 2 ){
+                $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
+            }
+            else{
+                $rate_status = CorporateDefaultRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('status', 1);
+            }
         }
 
         if ($rate_status->exists()) {
@@ -127,23 +140,30 @@ class ShipmentChargesController extends Controller
                 $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
             }
             else {
-                $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id);
+                if( $rate_type_id != 3 ){
+                    $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id);
 
-                if ($min_chargeable_weight->exists()) {
-                    $min_chargeable_weight = $min_chargeable_weight->first();
+                    if ($min_chargeable_weight->exists()) {
+                        $min_chargeable_weight = $min_chargeable_weight->first();
 
-                    $min_chargeable_weight = $min_chargeable_weight->min_chargeable_weight;
+                        $min_chargeable_weight = $min_chargeable_weight->min_chargeable_weight;
 
-                    if ($weight < $min_chargeable_weight) {
-                        $weight = $min_chargeable_weight;
+                        if ($weight < $min_chargeable_weight) {
+                            $weight = $min_chargeable_weight;
+                        }
                     }
                 }
+
 
                 if($rate_type_id == 1){
                     $weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
-                else{
+                else if($rate_type_id == 2){
                     $weight_charge = CorporateWeightChargeZoneWise::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                }
+                else{
+                    $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+
                 }
             }
 
@@ -151,7 +171,7 @@ class ShipmentChargesController extends Controller
                 $weight_charge = $weight_charge->first();
 
                 $base = FALSE;
-                if ($account_type_id == 2) {
+                if ($account_type_id == 2 && $rate_type_id != 3) {
                     $base_weight_charge = CorporateWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('delivery_type_id', $walk_in_delivery_type_id)->where('id', '<', $weight_charge->id)->where('base', 1)->orderBy('id', 'DESC');
 
                     if ($base_weight_charge->exists()) {
@@ -167,7 +187,12 @@ class ShipmentChargesController extends Controller
                     $discount_charge = DiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    if($rate_type_id == 3){
+                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
+                    else{
+                        $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
                 }
 
                 if ($discount_charge->exists()) {
@@ -195,7 +220,7 @@ class ShipmentChargesController extends Controller
                     }
                     else {
                         $type_of_charges = 1;
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $zone_class_city = ZoneClassCity::where('zone_id', $origin_city_zone_id)->where('city_id', $destination_city_id);
 
                             if ($shipping_mode_id == 2 || $shipping_mode_id == 3) {
@@ -224,14 +249,14 @@ class ShipmentChargesController extends Controller
 
                 if ($weight_charge->weight_addition == 0 || $account_type_id == 2) {
                     if ($type_of_charges == 0) {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $charges = $weight_charge->local_or_6hr;
                         }
                         else{
                             $charges = $weight_charge->local;
                         }
                     } else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
@@ -273,7 +298,7 @@ class ShipmentChargesController extends Controller
 
                     }
 
-                    if ($account_type_id == 2) {
+                    if ($account_type_id == 2 && $rate_type_id != 3) {
                         if ($base) {
                             $weight_difference = $weight - $base_weight_charge->range_down;
 
@@ -292,7 +317,7 @@ class ShipmentChargesController extends Controller
                                     $charges += $weight_charge->local;
                                 }
                             } else {
-                                if($rate_type_id == null || $rate_type_id == 1){
+                                if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                                     if ($class == 1) {
                                         if (strpos($base_weight_charge->national_charges_class_1, '%') !== FALSE) {
                                             $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_1)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
@@ -407,8 +432,14 @@ class ShipmentChargesController extends Controller
 
                     $previous = TRUE;
 
+
                     while ($previous) {
-                        $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        if($rate_type_id == 3){
+                            $weight_charge = CorporateDefaultWeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        }
+                        else{
+                            $weight_charge = WeightCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');  
+                        }
 
                         if ($weight_charge->exists()) {
                             $weight_charge = $weight_charge->first();
@@ -490,6 +521,8 @@ class ShipmentChargesController extends Controller
                             $previous = FALSE;
                         }
                     }
+
+
 
                     if (strpos($discount, '%') !== FALSE) {
                         $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
@@ -649,11 +682,17 @@ class ShipmentChargesController extends Controller
     }
 
     static public function calculate_cash_handling($account_type_id, $user_id, $shipping_mode_id, $amount) {
+        $rate_type_id = User::find($user_id)->corporate_rate_type_id;
         if ($account_type_id == 1) {
             $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
         }
-        else {
-            $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+        else{
+            if($rate_type_id == 3){
+                $rate_status = CorporateDefaultRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+            }
+            else{
+                $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('cash_handling_charges', 1)->where('status', 1);
+            }
         }
 
         if ($rate_status->exists()) {
@@ -661,7 +700,12 @@ class ShipmentChargesController extends Controller
                 $cash_handling_charge = CashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
             }
             else {
-                $cash_handling_charge = CorporateCashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                if($rate_type_id == 3){
+                    $cash_handling_charge = CorporateDefaultCashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                }
+                else{
+                    $cash_handling_charge = CorporateCashHandlingCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('range_up', '<=', $amount)->where('range_down', '>=', $amount);
+                }
             }
 
             if ($cash_handling_charge->exists()) {
@@ -673,7 +717,12 @@ class ShipmentChargesController extends Controller
                     $discount_charge = DiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    if($rate_type_id == 3){
+                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
+                    else{
+                        $discount_charge = CorporateDiscountCharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
                 }
 
                 if ($discount_charge->exists()) {
@@ -814,6 +863,7 @@ class ShipmentChargesController extends Controller
 
     static public function insurance($id) {
         $shipment = Shipment::find($id);
+        $rate_type_id = $shipment->user->corporate_rate_type_id;
         if ($shipment->amount != 0) {
             if ($shipment->business_category_id == 1) {
                 $account_type_id = $shipment->user->account_type_id;
@@ -821,7 +871,12 @@ class ShipmentChargesController extends Controller
                 if ($account_type_id == 1) {
                     $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
                 } else {
-                    $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
+                    if($rate_type_id == 3){
+                        $rate_status = CorporateDefaultRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
+                    }
+                    else{
+                        $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('insurance_charges', 1)->where('status', 1);
+                    }
                 }
 
                 if ($rate_status->exists()) {
@@ -834,7 +889,12 @@ class ShipmentChargesController extends Controller
                             if ($account_type_id == 1) {
                                 $insurance_charge = InsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
                             } else {
-                                $insurance_charge = CorporateInsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
+                                if($rate_type_id == 3){
+                                    $insurance_charge = CorporateDefaultInsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
+                                }
+                                else{
+                                    $insurance_charge = CorporateInsuranceCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $price)->where('range_down', '>=', $price);
+                                }
                             }
 
                             if ($insurance_charge->exists()) {
@@ -845,7 +905,12 @@ class ShipmentChargesController extends Controller
                                 if ($account_type_id == 1) {
                                     $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                                 } else {
-                                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                                    if($rate_type_id == 3){
+                                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                                    }
+                                    else{
+                                        $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                                    }
                                 }
 
                                 if ($discount_charge->exists()) {
@@ -958,7 +1023,12 @@ class ShipmentChargesController extends Controller
                 $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
             }
             else {
-                $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
+                if($rate_type_id != 3){
+                    $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
+                }
+                else{
+                    $rate_status = CorporateDefaultRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('return_charges', 1)->where('status', 1);
+                }
             }
 
             if ($rate_status->exists()) {
@@ -969,8 +1039,11 @@ class ShipmentChargesController extends Controller
                     if($rate_type_id == null || $rate_type_id == 1){
                         $return_charge = CorporateReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
                     }
-                    else{
+                    else if($rate_type_id == 2){
                         $return_charge = CorporateReturnChargeZoneWise::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+                    }
+                    else{
+                        $return_charge = CorporateDefaultReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
                     }
                 }
 
@@ -980,7 +1053,11 @@ class ShipmentChargesController extends Controller
                     $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    if($rate_type_id == 3){
+                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);}
+                    else{
+                        $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
                 }
 
                 if ($discount_charge->exists()) {
@@ -1012,7 +1089,7 @@ class ShipmentChargesController extends Controller
                         else {
                             $type_of_charges = 1;
 
-                            if($rate_type_id == null || $rate_type_id == 1){
+                            if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                                 $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
 
                                 if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
@@ -1044,7 +1121,7 @@ class ShipmentChargesController extends Controller
                         $charges = $return_charge->local;
                     }
                     else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($return_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = ((floatval(str_replace('%', '', $return_charge->national_charges_class_1)) / 100) * $return_charge->national_charges_class_0) + $return_charge->national_charges_class_0;
@@ -1159,11 +1236,18 @@ class ShipmentChargesController extends Controller
     }
 
     static public function calculate_fuel_surcharge($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
+
+        $rate_type_id = User::find($user_id)->corporate_rate_type_id;
         if ($account_type_id == 1) {
             $rate_status = RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
         }
         else {
-            $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            if($rate_type_id == 3){
+                $rate_status = CorporateDefaultRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            }
+            else{
+                $rate_status = CorporateRateStatus::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id)->where('fuel_charges', 1)->where('status', 1);
+            }
         }
 
         if ($rate_status->exists()) {
@@ -1171,7 +1255,12 @@ class ShipmentChargesController extends Controller
                 $fuel_charge = FuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             }
             else {
-                $fuel_charge = CorporateFuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
+                if($rate_type_id == 3){
+                    $fuel_charge = CorporateDefaultFuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
+                }
+                else{
+                    $fuel_charge = CorporateFuelSurcharge::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
+                }
             }
 
             if ($fuel_charge->exists()) {
@@ -1207,7 +1296,6 @@ class ShipmentChargesController extends Controller
             return false;
         }
         $account_type_id = $shipment->user->account_type_id;
-
         $rate_type_id = $shipment->user->corporate_rate_type_id;
 
 
@@ -1215,7 +1303,12 @@ class ShipmentChargesController extends Controller
             $booking_type_charge = BookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
         }
         else {
-            $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            if($rate_type_id == 3){
+                $booking_type_charge = CorporateDefaultBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
+            else{
+                $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
         }
 
         if ($booking_type_charge->exists()) {
@@ -1285,8 +1378,11 @@ class ShipmentChargesController extends Controller
                 if($rate_type_id == 1){
                     $weight_charge = CorporateWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('delivery_type_id', $shipment->walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
-                else{
+                else if($rate_type_id == 2){
                     $weight_charge = CorporateWeightChargeZoneWise::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('delivery_type_id', $shipment->walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                }
+                else{
+                    $weight_charge = CorporateDefaultWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
                 }
 
             }
@@ -1300,7 +1396,12 @@ class ShipmentChargesController extends Controller
                     $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    if($rate_type_id == 3){
+                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
+                    else{
+                        $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
                 }
 
                 if ($discount_charge->exists()) {
@@ -1329,7 +1430,7 @@ class ShipmentChargesController extends Controller
                     else {
                         $type_of_charges = 1;
 
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
 
                             if ($shipment->shipping_mode_id == 2 || $shipment->shipping_mode_id == 3) {
@@ -1359,7 +1460,7 @@ class ShipmentChargesController extends Controller
 
                 if ($weight_charge->weight_addition == 0 || $account_type_id == 2) {
                     if ($type_of_charges == 0) {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $charges = $weight_charge->local_or_6hr;
                         }
                         else{
@@ -1367,7 +1468,7 @@ class ShipmentChargesController extends Controller
                         }
                     }
                     else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
@@ -1441,7 +1542,7 @@ class ShipmentChargesController extends Controller
                     $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
 
                     if ($type_of_charges == 0) {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             $charges = ($weight_charge->local_or_6hr * $multiplier);
                         }
                         else{
@@ -1449,7 +1550,7 @@ class ShipmentChargesController extends Controller
                         }
                     }
                     else {
-                        if($rate_type_id == null || $rate_type_id == 1){
+                        if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
                             if ($class == 1) {
                                 if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
                                     $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
@@ -1502,7 +1603,12 @@ class ShipmentChargesController extends Controller
                     $previous = TRUE;
 
                     while ($previous) {
-                        $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        if($rate_type_id == 3){
+                            $weight_charge = CorporateDefaultWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        }
+                        else{
+                            $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        }
 
                         if ($weight_charge->exists()) {
                             $weight_charge = $weight_charge->first();
@@ -1613,12 +1719,17 @@ class ShipmentChargesController extends Controller
             return false;
         }
         $account_type_id = $shipment->user->account_type_id;
-
+         $rate_type_id =  $shipment->user->corporate_rate_type_id;
         if ($account_type_id == 1) {
             $booking_type_charge = BookingTypeCharges::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
         }
         else {
-            $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            if($rate_type_id != 3){
+                $booking_type_charge = CorporateBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
+            else{
+                $booking_type_charge = CorporateDefaultBookingTypeCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
+            }
         }
 
         if ($booking_type_charge->exists()) {
@@ -1630,7 +1741,12 @@ class ShipmentChargesController extends Controller
                 $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
             }
             else {
-                $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                if($rate_type_id != 3){
+                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
+                else{
+                    $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                }
             }
 
             if ($discount_charge->exists()) {
@@ -1670,14 +1786,19 @@ class ShipmentChargesController extends Controller
             return false;
         }
         $account_type_id = $shipment->user->account_type_id;
-
+        $rate_type_id =  $shipment->user->corporate_rate_type_id;
         $today = Carbon::today();
 
         if ($account_type_id == 1) {
             $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
         }
         else {
-            $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+            if($rate_type_id != 3){
+                $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+            }
+            else{
+                $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+            }
         }
 
         if ($discount_charge->exists()) {
@@ -1807,12 +1928,17 @@ class ShipmentChargesController extends Controller
             return false;
         }
         $account_type_id = $shipment->user->account_type_id;
-
+        $rate_type_id =  $shipment->user->corporate_rate_type_id;
         if ($account_type_id == 1) {
             $rate_status = RateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
         }
         else {
-            $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+            if($rate_type_id != 3){
+                $rate_status = CorporateRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+            }
+            else{
+                $rate_status = CorporateDefaultRateStatus::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('status', 1);
+            }
         }
 
         if ($rate_status->exists()) {
@@ -1822,7 +1948,14 @@ class ShipmentChargesController extends Controller
                 $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
             }
             else {
-                $weight_charge = CorporateWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('delivery_type_id', $shipment->walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                if($rate_type_id != 3){
+                    $weight_charge = CorporateWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('delivery_type_id', $shipment->walk_in_delivery_type_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                }
+                else{
+                    $weight_charge = CorporateDefaultWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+
+                }
+
             }
 
             if ($weight_charge->exists()) {
@@ -1834,7 +1967,13 @@ class ShipmentChargesController extends Controller
                     $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
                 }
                 else {
-                    $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    if($rate_type_id != 3){
+                        $discount_charge = CorporateDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
+                    else{
+                        $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                    }
+
                 }
 
                 if ($discount_charge->exists()) {
@@ -1975,7 +2114,13 @@ class ShipmentChargesController extends Controller
                     $previous = TRUE;
 
                     while ($previous) {
-                        $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        if($rate_type_id == 3){
+                            $weight_charge = CorporateDefaultWeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        }
+                        else{
+                            $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                        }
+
 
                         if ($weight_charge->exists()) {
                             $weight_charge = $weight_charge->first();
