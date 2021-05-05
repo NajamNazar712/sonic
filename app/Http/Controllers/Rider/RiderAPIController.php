@@ -7381,6 +7381,25 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
     }
 
+    public function rider_incentive(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $date = $request->get('date');
+        $rider_incentives = DB::table('riders_incentives')
+            ->select(DB::raw('sum(pickup_shipments) as pickup_shipments,sum(pickup_incentive) as pickup_incentive,sum(delivery_shipments) as delivery_shipments,sum(delivery_incentive) as delivery_incentive, sum(pickup_shipments) + sum(delivery_shipments) as total_shipments, sum(pickup_incentive) + sum(delivery_incentive) as total_incentives'))
+            ->where('rider_id', $rider_id);
+        if ($date != null) {
+            $rider_incentives = $rider_incentives->whereDate('date', $date);
+        }
+        if ($rider_incentives->exists()) {
+            $rider_incentives = $rider_incentives->get();
+            return response()->json(["status" => 0, "incentives" => $rider_incentives]);
+        } else {
+            return response()->json(["status" => 1, "message" => "Incentives Not Found found!"]);
+        }
+
+    }
+
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
