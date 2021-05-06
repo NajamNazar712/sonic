@@ -800,7 +800,7 @@ class RiderManagementController extends Controller
                     if(count($cod_shipments) > 0){
 
 //                        $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '>', 0.10)->where('actual_weight' , '=<', 1.50)->count();
-                        $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->whereBetween('actual_weight' , [0.10,1.50])->count();
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->whereBetween('actual_weight' , [0.11,1.50])->count();
 
                         $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '>', 1.50)->count();
                         $shipment_weight_type_3_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '<', 0.11)->count();
@@ -829,9 +829,9 @@ class RiderManagementController extends Controller
 
                     if(count($non_cod_shipments) > 0){
 
-                        $shipment_weight_type_1_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight', '>', 0.10)->count();
-                        $shipment_weight_type_2_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
-                        $shipment_weight_type_3_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $non_cod_shipments)->whereBetween('actual_weight' , [0.11,1.50])->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '>', 1.50)->count();
+                        $shipment_weight_type_3_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '<', 0.11)->count();
                         if($shipment_weight_type_1_count > 0){
                             $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 1)->first();
                             $incentive_shipment = $setting_cod->setting_value;
@@ -851,9 +851,9 @@ class RiderManagementController extends Controller
                     }
 
                     if(count($verified_shipments) > 0){
-                        $shipment_weight_type_1_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
-                        $shipment_weight_type_2_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=>', 1.51)->count();
-                        $shipment_weight_type_3_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '=<', 0.10)->count();
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $verified_shipments)->whereBetween('actual_weight' , [0.11,1.50])->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '>', 1.50)->count();
+                        $shipment_weight_type_3_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '<', 0.11)->count();
                         if($shipment_weight_type_1_count > 0){
                             $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 1)->first();
                             $incentive_shipment = $setting_cod->setting_value;
