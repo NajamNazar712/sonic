@@ -133,7 +133,7 @@
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
-                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
+                        <th class="border-primary border-darken-1">Delivered Date</th>
                         <th class="border-primary border-darken-1">Booking Staff ID</th>
                     </tr>
                     </thead>
@@ -325,7 +325,7 @@
                             head.push('Total Charges');
                             head.push('Estimated Charges');
                             head.push('Net Payable');
-                            head.push('Delivered/Returned Date');
+                            head.push('Delivered Date');
                             head.push('Booking Staff ID');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -411,7 +411,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     // { data:'account_number' ,name: 'account_number', class: 'align-middle account_number'},
-                    { data:'shipper_name' ,name: 'rsi.shipper_name', class: 'align-middle shipper_name'},
+                    { data:'shipper_name' ,name: 'rsi.shipper_name', class: 'align-middle shipper_name',orderable: false, searchable: false},
                     { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center'},
                     { data:'booked_by' ,name: 'ru.name', class: 'align-middle booked_by'},
                     // { data:'pickup_address' ,name: 'usi.pickup_address', class: 'align-middle pickup_address'},
