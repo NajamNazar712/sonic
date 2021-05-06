@@ -15,6 +15,11 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\http\Models\WarehouseStock;
+use App\Http\Models\WarehouseStockRequest;
+use App\Http\Models\WarehouseStockRequestHistory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -328,9 +333,9 @@ class LastMileDebriefingController extends Controller
                     }
 
                     if (!$in_new_delivery_note) {
-                        if (!in_array($shipment->shipper_status_id, $return_status_array)) {
+                        if (!in_array($shipment_details->shipper_status_id, $return_status_array)) {
 
-                            if (!in_array($shipment->shipper_status_id, $delivered_status_array)) {
+                            if (!in_array($shipment_details->shipper_status_id, $delivered_status_array)) {
 
                                 $verify = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
 
@@ -341,7 +346,7 @@ class LastMileDebriefingController extends Controller
 
                                     //$shipment = Shipment::where('id', $shipment)->first();
                                     $journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
-                                    if ($shipment->shipper_status_id != $shipper_status_id) {
+                                    if ($shipment_details->shipper_status_id != $shipper_status_id) {
                                         if ($shipper_status_id == 7 || $shipper_status_id == 18) {
                                             ShipmentsJourneyController::add($shipment, $shipper_status_id, NULL, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
 
@@ -450,15 +455,15 @@ class LastMileDebriefingController extends Controller
                                                 }
                                             }
                                         } else {
-                                            if ($shipment->packaging_material_request == 0) {
+                                            if ($shipment_details->packaging_material_request == 0) {
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            } else if ($shipment->packaging_material_charges != '' && $shipment->packaging_material_request == 1) {
+                                            } else if ($shipment_details->packaging_material_charges != '' && $shipment_details->packaging_material_request == 1) {
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            } else if ($shipment->packaging_material_charges == null && $shipment->packaging_material_request == 1) {
+                                            } else if ($shipment_details->packaging_material_charges == null && $shipment_details->packaging_material_request == 1) {
                                                 if ($shipper_status_id != 12) {
                                                     ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                     Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
@@ -469,7 +474,7 @@ class LastMileDebriefingController extends Controller
 
                                         }
                                         $dispute_shipments[] = $shipment;
-                                    } else if (($shipment->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id != $status_reason_id)) {
+                                    } else if (($shipment_details->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id != $status_reason_id)) {
                                         if ($verification == 0) {
 
                                             $journey->status_reason_id = $status_reason_id;
@@ -479,7 +484,7 @@ class LastMileDebriefingController extends Controller
                                             ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                         }
 
-                                    } else if (($shipment->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id == $status_reason_id) && ($shipment_journey_remarks != $journey->remarks)) {
+                                    } else if (($shipment_details->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id == $status_reason_id) && ($shipment_journey_remarks != $journey->remarks)) {
                                         if ($verification == 0) {
                                             $journey->remarks = $shipment_journey_remarks;
                                             $journey->save();
@@ -492,7 +497,7 @@ class LastMileDebriefingController extends Controller
                                     } else {
                                         if ($verification == 1) {
 
-                                            if (in_array($shipment->shipper_status_id, [14, 16, 30, 36, 37])) {
+                                            if (in_array($shipment_details->shipper_status_id, [14, 16, 30, 36, 37])) {
                                                 $parcel = Shipment::find($shipment);
 
                                                 if ($parcel->booking_type_id == 2) {
@@ -536,7 +541,7 @@ class LastMileDebriefingController extends Controller
                                         AdminFinanceController::done_payment($shipment, 0);
                                     }
 
-                                    if (!in_array($shipment->shipper_status_id, $delivered_status_array)) {
+                                    if (!in_array($shipment_details->shipper_status_id, $delivered_status_array)) {
                                         $shipment_journey = ShipmentsJourney::where('shipment_id', $parcel->id)->whereNotIn('shipper_status_id', [21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 44, 45, 46, 47, 48])->where('reference_1_id', $delivery_note_id)->latest()->first();
 
                                         if ($shipment_journey) {
@@ -560,7 +565,7 @@ class LastMileDebriefingController extends Controller
 //
                     } else {
                         if ($request->has('status') && $shipper_status_id != null) {
-                            if ($shipment->shipper_status_id != $shipper_status_id) {
+                            if ($shipment_details->shipper_status_id != $shipper_status_id) {
                                 $dispute_shipments[] = $shipment;
                             }
                         }
