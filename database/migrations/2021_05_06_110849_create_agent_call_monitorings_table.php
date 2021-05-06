@@ -16,11 +16,10 @@ class CreateAgentCallMonitoringsTable extends Migration
         Schema::create('agent_call_monitorings', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('agent_id')->index();
-            $table->integer('assigned_calls')->index();
-            $table->integer('completed_calls')->index();
             $table->integer('shipment_id')->index();
             $table->integer('delivery_note_id')->index();
-            $table->boolean('completed')->index();
+            $table->boolean('completed')->default(0)->index();
+            $table->boolean('skip')->default(0)->index();
             $table->timestamps();
         });
     }
