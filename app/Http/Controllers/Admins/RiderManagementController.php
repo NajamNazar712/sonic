@@ -877,7 +877,7 @@ class RiderManagementController extends Controller
                     $delivery_note_ids_count = count($delivery_note_ids);
                     if($delivery_note_ids_count > 0){
                         $delivery_shipment_ids = ShipmentsJourney::whereIn('reference_1_id', $delivery_note_ids)->whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1)->pluck('shipment_id')->toArray();
-
+                        dd($delivery_shipment_ids);
                         array_unique($delivery_shipment_ids);
 
                         $delivered_shipment_count = count($delivery_shipment_ids);
