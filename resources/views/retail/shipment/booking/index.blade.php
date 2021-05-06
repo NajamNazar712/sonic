@@ -666,6 +666,7 @@
                                $('#print_div').removeClass('d-none');
                            }
                        });
+                        $("#order_id").val('');
                         $('#length').val('');
                         $('#breadth').val('');
                         $('#height').val('');

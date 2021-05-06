@@ -1224,7 +1224,7 @@ class RiderAPIController extends Controller
                         $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
 
                         if ($updated_shipments_count == 0) {
-                            DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+                            DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pendign_for_verification_at' => Carbon::now()]);
                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                             if ($rider_delivery_note_status->exists()) {
                                 $rider_delivery_note_status = $rider_delivery_note_status->first();
@@ -1385,7 +1385,7 @@ class RiderAPIController extends Controller
 
                     $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
                     if ($updated_shipments_count == 0) {
-                        DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+                        DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pendign_for_verification_at' => Carbon::now()]);
                     }
 
                     $message = 'Shipment is marked as Undelivered Successfully';
@@ -3562,7 +3562,7 @@ class RiderAPIController extends Controller
 
                             $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
                             if ($updated_shipments_count == 0) {
-                                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
+                                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pendign_for_verification_at' => Carbon::now()]);
                             }
 
                             $message = 'Shipment is marked as Undelivered Successfully';

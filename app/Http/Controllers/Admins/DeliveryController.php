@@ -291,6 +291,25 @@ class DeliveryController extends Controller
         return view('admin.delivery.note.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
+    public function check_rider_dncc_status(Request $request)
+    {
+       $status =  DeliveryNote::leftjoin('delivery_note_station_deposit_notes as dnsdn','dnsdn.delivery_note_id','=','delivery_notes.id')
+           ->leftjoin('station_deposit_notes as sdn','sdn.id','=','dnsdn.station_deposit_note_id')
+           ->select('sdn.status as status','delivery_notes.id as id')
+           ->where('delivery_notes.rider_id',$request->rider_id)
+           ->where(function ($query){
+               $query->whereNull('sdn.status')
+                   ->orwhere('sdn.status','!=',2);
+           });
+       
+       if($status->exists())
+       {
+           return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+       }
+
+        return response()->json(['status'=> 1]);
+    }
+
 	public function note_consolidation_check(Request $request){
         $missing_shipments = array();
         foreach ($request->consolidation_ids as $id){
@@ -1880,6 +1899,7 @@ class DeliveryController extends Controller
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', 0)->count();
             if ($updates_count == 0) {
                 $delivery_note_data->pending_status = 1;
+                $delivery_note_data->pending_for_verification_at = Carbon::now();
             }
 
             $delivered_status = array(14, 30, 36, 37);
@@ -2042,6 +2062,7 @@ class DeliveryController extends Controller
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', 0)->count();
             if ($updates_count == 0) {
                 $delivery_note_data->pending_status = 1;
+                $delivery_note_data->pending_for_verification_at = Carbon::now();
             }
             $delivery_note_data->save();
             $delivered_status = array(14, 30, 36, 37);
