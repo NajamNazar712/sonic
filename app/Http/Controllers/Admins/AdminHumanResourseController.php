@@ -2199,18 +2199,51 @@ class AdminHumanResourseController extends Controller
     }
 
     public function rider_incentive_index(){
-        return view('admin.human_resource.rider_incentive');
+        $cities = DB::table('cities')->select('id','name')->get();
+        $hubs = DB::table('cities')->where('hub',1)->select('id','name')->get();
+        $zones = DB::table('zones')->where('status',1)->select('id','name')->get();
+
+        return view('admin.human_resource.rider_incentive')->with(['cities' => $cities, 'hubs' => $hubs, 'zones' => $zones]);
     }
 
-    public function rider_incentive_list(){
+    public function rider_incentive_list(Request $request){
         $incentives = RidersIncentive::join('riders', 'riders.id', '=', 'riders_incentives.rider_id')
             ->join('cities', 'cities.id', '=', 'riders.city_id')
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive');
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive');
 
-        return Datatables::of($incentives)
-            ->make(true);
+        $datatable = Datatables::of($incentives);
+
+        if($city = $request->get('search_city')){
+            $datatable->where('cities.id', '=', $city);
+        }
+        if($hub = $request->get('search_hub')){
+            $datatable->where('cities.hub_id', '=', $hub);
+        }
+
+        if($zone = $request->get('search_zone')){
+            $datatable->where('cities.zone_id', '=', $zone);
+        }
+
+        if($employee_id = $request->get('employee_id')){
+            $datatable->where('riders.employee_id', '=', $employee_id);
+        }
+
+        if($employee_name = $request->get('employee_name')){
+            $datatable->where('riders.name', 'like', "%".$employee_name."%");
+        }
+
+        if ($request->get('search_date_from') != null && $request->get('search_date_from') != null) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('riders_incentives.date', [$from,$to]);
+        }
+
+
+        return $datatable->make(true);
+
+
 
     }
 

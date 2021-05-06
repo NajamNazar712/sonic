@@ -2537,6 +2537,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+		Route::prefix('return_confirmation_pending_tat_setting')->name('rcp_tat.')->group(function () {
+            Route::get('','Admins\GlobalSettingsController@rcp_tat_index')->name('index');
+            Route::get('list','Admins\GlobalSettingsController@rcp_tat_list')->name('list');
+            Route::put('update','Admins\GlobalSettingsController@rcp_tat_update')->name('update');
+        });
 
     });
 

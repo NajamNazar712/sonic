@@ -16,7 +16,83 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            <div id="search_form" class="row mb-2 justify-content-center">
 
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_hub" id="search_hub" class="form-control select2">
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_city" id="search_city" class="form-control select2">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_zone" id="search_zone" class="form-control select2">
+                                            @foreach($zones as $zone)
+                                                <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+
+                                <div class="col-4">
+
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                        </div>
+
+                                        <input type="text" name="search_date_from"
+                                               class="form-control pickadate bg-primary border-primary white rounded-right"
+                                               id="search_date_from" placeholder="Date (From)"
+                                               data-value="{{Carbon\Carbon::now()->subDays(3)}}">
+                                    </div>
+                                </div>
+                                <div class="col-4 ">
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                        </div>
+
+                                        <input type="text" name="search_date_to"
+                                               class="form-control pickadate bg-primary border-primary white rounded-right"
+                                               id="search_date_to" placeholder="Date (To)"
+                                               data-value="{{ Carbon\Carbon::today() }}">
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-4 mb-1">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="search_employee_name" id="search_employee_name" placeholder="Search Employee Name">
+                                    </fieldset>
+                                </div>
+                                <div class="col-4 mb-1">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="search_employee_id" id="search_employee_id" placeholder="Search Employee ID">
+                                    </fieldset>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                            </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr role="row" class="bg-primary white">
@@ -31,6 +107,7 @@
                                         <th class="border-primary border-darken-1">Pickup Incentive</th>
                                         <th class="border-primary border-darken-1">Delivery Shipment Count</th>
                                         <th class="border-primary border-darken-1">Delivery Incentive</th>
+                                        <th class="border-primary border-darken-1">Date</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -48,10 +125,15 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -61,10 +143,55 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
+            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search City',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
+                width:'100%',
+                allowClear:true
+            });
+
             $('input.incentive_value').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
+            });
+
+
+            var from_date = $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var to_date = $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
             });
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
@@ -90,6 +217,7 @@
                             head.push('Pickup Incentive');
                             head.push('Delivery Shipment Count');
                             head.push('Delivery Incentive');
+                            head.push('Date');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -104,6 +232,7 @@
                                 row.push(values.pickup_incentive);
                                 row.push(values.delivery_shipments);
                                 row.push(values.delivery_incentive);
+                                row.push(values.date);
                                 body.push(row);
                             });
                         },
@@ -131,7 +260,18 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.human_resource.rider_incentive.list') }}',
+                ajax:{
+                    url: '{{ route('admin.human_resource.rider_incentive.list') }}',
+                    data: function (d) {
+                        d.employee_id = $('#search_employee_id').val();
+                        d.employee_name = $('#search_employee_name').val();
+                        d.search_city = $('#search_city').val();
+                        d.search_zone = $('#search_zone').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
                 rowId: 'rider_id',
                 order: [[6, 'asc']],
                 columns: [
@@ -146,6 +286,7 @@
                     {data: 'pickup_incentive', name: 'riders_incentives.pickup_incentive', class: 'align-middle pickup_incentive'},
                     {data: 'delivery_shipments', name: 'riders_incentives.delivery_shipments', class: 'align-middle delivery_shipments'},
                     {data: 'delivery_incentive', name: 'riders_incentives.delivery_incentive', class: 'align-middle delivery_incentive'},
+                    {data: 'date', name: 'riders_incentives.date', class: 'align-middle date'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -153,48 +294,13 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    /*var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Disable</option>' +
-                        '<option value="1">Enable</option>' +
-                        '</select>';*/
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
-                            $(td).appendTo($(search));
-                        }
-                        /*else if($(header).is('.status')){
-                            $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }*/
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                    /*$("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });*/
                     this.api().table().columns.adjust();
                 }
             });
-
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
 
         });
 
