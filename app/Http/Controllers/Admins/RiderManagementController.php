@@ -869,14 +869,14 @@ class RiderManagementController extends Controller
                 }
 
                 $delivery_date = $date_to;
-                $delivery_date = Carbon::parse($delivery_date)->toDateString();
+//                $delivery_date = Carbon::parse($delivery_date)->toDateString();
                 $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->where('status', '!=', 4);
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
                     $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
                     $delivery_note_ids_count = count($delivery_note_ids);
                     if($delivery_note_ids_count > 0){
-                        $delivery_shipment_ids = ShipmentsJourney::whereIn('reference_1_id', $delivery_note_ids)->whereIn('shipper_status_id', [14, 30, 36,37])->where('verification', 1)->pluck('shipment_id')->toArray();
+                        $delivery_shipment_ids = ShipmentsJourney::whereIn('reference_1_id', $delivery_note_ids)->whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1)->pluck('shipment_id')->toArray();
 
                         array_unique($delivery_shipment_ids);
 
@@ -899,17 +899,17 @@ class RiderManagementController extends Controller
                                 $shipment_weight_type_3_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '<', 0.11)->count();
                                 if($shipment_weight_type_1_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_1_count * $incentive_shipment;
                                 }
                                 if($shipment_weight_type_2_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 2)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_2_count * $incentive_shipment;
                                 }
                                 if($shipment_weight_type_3_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 3)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_3_count * $incentive_shipment;
                                 }
 
@@ -922,17 +922,17 @@ class RiderManagementController extends Controller
                                 $shipment_weight_type_3_count = Shipment::whereIn('id', $non_cod_shipments)->where('actual_weight' , '=<', 0.11)->count();
                                 if($shipment_weight_type_1_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 1)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_1_count * $incentive_shipment;
                                 }
                                 if($shipment_weight_type_2_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 2)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_2_count * $incentive_shipment;
                                 }
                                 if($shipment_weight_type_3_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 2)->where('rider_shipment_weight_range_id', 3)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_3_count * $incentive_shipment;
                                 }
 
@@ -944,17 +944,17 @@ class RiderManagementController extends Controller
                                 $shipment_weight_type_3_count = Shipment::whereIn('id', $verified_shipments)->where('actual_weight' , '<', 0.11)->count();
                                 if($shipment_weight_type_1_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 1)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_1_count * $incentive_shipment;
                                 }
                                 if($shipment_weight_type_2_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 2)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_2_count * $incentive_shipment;
                                 }
                                 if($shipment_weight_type_3_count > 0){
                                     $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 3)->where('rider_shipment_weight_range_id', 3)->first();
-                                    $incentive_shipment = $setting_cod->setting_value;
+                                    $incentive_shipment = $setting_cod->value;
                                     $delivery_incentive += $shipment_weight_type_3_count * $incentive_shipment;
                                 }
                             }
