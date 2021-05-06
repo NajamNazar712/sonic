@@ -874,18 +874,14 @@ class RiderManagementController extends Controller
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
                     $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
-                    if($rider->id == 297){
-                        dd($delivery_note_ids);
-                    }
+
                     $delivery_note_ids_count = count($delivery_note_ids);
                     if($delivery_note_ids_count > 0){
                         $delivery_shipment_ids = ShipmentsJourney::whereIn('reference_1_id', $delivery_note_ids)->whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1)->pluck('shipment_id')->toArray();
                         array_unique($delivery_shipment_ids);
 
                         $delivered_shipment_count = count($delivery_shipment_ids);
-                        if($rider->id == 297){
-                            dd($delivered_shipment_count);
-                        }
+
                         if($delivered_shipment_count > 0){
 
                             $cod_shipments = array();
@@ -895,7 +891,9 @@ class RiderManagementController extends Controller
                             $cod_shipments = Shipment::whereIn('id', $delivery_shipment_ids)->where('amount', '>', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                             $non_cod_shipments = Shipment::whereIn('id', $delivery_shipment_ids)->where('amount', '=', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                             $verified_shipments = Shipment::whereIn('id', $delivery_shipment_ids)->whereIn('user_id', [3324,10104])->pluck('id')->toArray();
-
+                            if($rider->id == 297){
+                                dd([$delivery_shipment_ids,$cod_shipments]);
+                            }
                             if(count($cod_shipments) > 0){
 
                                 $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->whereBetween('actual_weight' , [0.11,1.50])->count();
