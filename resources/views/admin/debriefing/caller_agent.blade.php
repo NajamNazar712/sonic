@@ -275,7 +275,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 }
             });
-            @if($call->skip == 0)
+            @if($data == true && $call->skip == 0)
             $("#skip_btn").on('click',function () {
                 var id = $("#call_id").val();
                 $.ajax({

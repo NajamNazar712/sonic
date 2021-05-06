@@ -658,7 +658,7 @@ class LastMileDebriefingController extends Controller
 
                         $data->completed = 1;
                         $data->update();
-                        
+
                         return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
 
                     }
