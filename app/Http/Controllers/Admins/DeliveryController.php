@@ -1770,7 +1770,8 @@ class DeliveryController extends Controller
                 if($selected_status == 12) {
                     $out_for_delivery_count = ShipmentsJourney::where([['shipment_id', $shipment], ['shipper_status_id', 5]])->count();
                     if ($out_for_delivery_count < 2) {
-                        $not_suitable_for_rcp[] = $shipment;
+                        $tracking_number = Shipment::where('id',$shipment)->first()->tracking_number;
+                        $not_suitable_for_rcp[] = $tracking_number;
                     }
                 }
             }
@@ -2399,6 +2400,11 @@ class DeliveryController extends Controller
             })
             ->addColumn('status', function ($deliveries) {
                 $flag = true;
+                $not_rcp = false;
+//                if(ShipmentsJourney::where(['shipment_id' => $deliveries->shId, 'shipper_status_id' => 5, 'verification' => 1])->count() < 2)
+//                {
+//                    $not_rcp = true;
+//                }
                 $restrict_parcels_attempt = RestrictParcelsAttempt::where('shipper_id', $deliveries->shipper_id)->where('status', 1);
                 if($restrict_parcels_attempt->exists()){
                     $restrict_parcels_attempt = $restrict_parcels_attempt->first();
@@ -2415,12 +2421,26 @@ class DeliveryController extends Controller
                             $where = array(7, 8, 9, 15, 18, 56);
                         }
                         else {
-                            $where = array(7, 8, 9, 12, 15, 18, 56);
+                            if($not_rcp === true)
+                            {
+                                $where = array(7, 8, 9, 15, 18, 56);
+                            }
+                            else
+                            {
+                                $where = array(7, 8, 9, 12, 15, 18, 56);
+                            }
+
                         }
                     }
                 }
                 else{
-                    $where = array(12, 14);
+                    if($not_rcp === true)
+                    {
+                        $where = array(14);
+                    }
+                    else {
+                        $where = array(12, 14);
+                    }
                 }
 
                 $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);

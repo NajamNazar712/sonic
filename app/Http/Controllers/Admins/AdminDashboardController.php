@@ -37,11 +37,13 @@ use App\Http\Models\InvoicingCycle;
 use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\Operataions\OperationForecast;
 use App\Http\Models\PaymentCycle;
+use App\Http\Models\PendingCorporateDefaultRateStatus;
 use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Rates\HistoryCorporateRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
+use App\Http\Models\Rates\PendingCorporateRateStatus;
 use App\Http\Models\Reference;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
@@ -1536,6 +1538,9 @@ class AdminDashboardController extends Controller
         $user = User::find($shipper_id);
         if($user->status != 3){
             $user->status = 5;
+        }
+        if($user->rate_type_id_status == 1){
+            $user->rate_type_id_status = 2;
         }
         $user->rejected_reason = $reject_reason;
         $user->rate_status = 2;
@@ -7206,7 +7211,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
             ->leftjoin('territories as t','t.id','=','users.territory_id')
-			->select(['rrb.name as rates_rejected_by','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
+			->select(['rrb.name as rates_rejected_by','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id','users.new_rate_type_id as new_rate_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -7397,13 +7402,23 @@ class AdminDashboardController extends Controller
 
                     }
                     else{
-                        if($result->corporate_rate_type_id != 3) {
+                        if($result->corporate_rate_type_id != 3 && $result->new_rate_type_id == null) {
                             if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         }
-                        else{
+                        else if ($result->corporate_rate_type_id == 3 && $result->new_rate_type_id == null){
                             if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                            }
+                        }
+                        else if($result->corporate_rate_type_id != null && ($result->new_rate_type_id == 1 || $result->new_rate_type_id == 2)){
+                            if (PendingCorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                            }
+                        }
+                        else{
+                            if (PendingCorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                                 $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.edit.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                             }
                         }
@@ -7423,9 +7438,11 @@ class AdminDashboardController extends Controller
                         }
 
                     }
-                   /* if ($result->account_type_id == 2 && $result->corporate_rate_type_id != null) {
-                        $dropdown .= '<button type="button" class="dropdown-item change_rate_type" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Change Rate Type</div></button>';
-                    }*/
+                    if ((session('role_id') == 1 || in_array(487, session('permissions')))) {
+                        if ($result->account_type_id == 2 && $result->corporate_rate_type_id != null) {
+                            $dropdown .= '<button type="button" class="dropdown-item change_rate_type" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Change Rate Type</div></button>';
+                        }
+                    }
                     
                     if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
@@ -7921,13 +7938,12 @@ class AdminDashboardController extends Controller
 
 
         $flag = true;
-        $user = User::where('email', $request->email)->orWhere('phone', $request->phone)->first();
-        if($user){
-            if($user_id == $user->id) {
-                $flag = true;
-            }
-            else{
-                $flag = false;
+        $users = User::where('email', $request->email)->orWhere('phone', $request->phone)->get();
+        if($users){
+            foreach($users as $user){
+                if($user_id != $user->id) {
+                    $flag = false;
+                }
             }
         }
 

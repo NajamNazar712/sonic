@@ -376,7 +376,7 @@ class ReturnController extends Controller
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
-                    if ($parcel->booking_type_id != 4) {
+                    if ($parcel->booking_type_id != 4 && $parcel->shipment_type == 1) {
                         ShipmentChargesController::return($shipment);
 
                         if ($parcel->packaging_material_request != 1) {
@@ -485,7 +485,7 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
 
-                if ($parcel->booking_type_id != 4) {
+                if ($parcel->booking_type_id != 4 && $parcel->shipment_type == 1) {
                     ShipmentChargesController::return($request->shipment_id);
 
                     if ($parcel->packaging_material_request != 1) {
@@ -2608,8 +2608,9 @@ class ReturnController extends Controller
                         }
 
                         ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
-
-                        AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
+                        if($shipment->shipment_type == 1) {
+                            AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
+                        }
                     }
                 }
                 else{
@@ -2628,8 +2629,9 @@ class ReturnController extends Controller
 
 
                     ShipmentsJourneyController::add($request->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
-
-                    AdminFinanceController::return_confirmed_revert($request->id, 1);
+                    if($shipment->shipment_type == 1){
+                        AdminFinanceController::return_confirmed_revert($request->id, 1);
+                    }
                 }
 
                 return ['status' => 0, 'success' => 'Shipment has been Reverted'];
