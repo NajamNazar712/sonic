@@ -28,7 +28,7 @@ class LastMileDebriefingController extends Controller
     {
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count')])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
             ->where('delivery_notes.status', 0);
 
 
@@ -43,23 +43,46 @@ class LastMileDebriefingController extends Controller
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
+            ->editColumn('pending_cash_collection', function($shipment){
+                return number_format($shipment->pending_cash_collection);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);
             })
-            ->editColumn('shipments_count_link', function($deliveries) {
+            ->addColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_count . '</button></div><h4 class="warning">100%</h4>';
+                    return $count_cell;
                 }
                 else {
                     return 0;
                 }
             })
-            ->editColumn('shipments_unverified_link', function($deliveries) {
-                if ($deliveries->shipments_unverified_count != 0) {
-                    return  $deliveries->shipments_unverified_count ;
+            ->addColumn('delivered_shipments_link', function($deliveries) {
+                if ($deliveries->delivered_shipments != 0) {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->delivered_shipments . '</button></div><h4 class="success">'. round(($deliveries->delivered_shipments / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('pending_shipments_link', function($deliveries) {
+                if ($deliveries->shipments_pending_count != 0) {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_pending_count . '</button></div><h4 class="success">'. round(($deliveries->shipments_pending_count / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('undelivered_shipments_link', function($deliveries) {
+                if ($deliveries->shipments_undelivered_count != 0) {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_undelivered_count . '</button></div><h4 class="yellow">'. round(($deliveries->shipments_undelivered_count / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
                 }
                 else {
                     return 0;
