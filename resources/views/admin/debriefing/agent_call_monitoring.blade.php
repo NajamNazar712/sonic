@@ -159,9 +159,9 @@
                 columns: [
                     { data:'hub' ,name: 'hub.name', class: 'align-middle hub text-center'},
                     { data:'agent_name' ,name: 'agent.name', class: 'align-middle agent_name text-center'},
-                    { data:'assigned_calls' ,name: 'assigned_calls', class: 'align-middle assigned_calls text-center'},
-                    { data:'completed_calls' ,name: 'completed_calls', class: 'align-middle completed_calls text-center'},
-                    { data:'pending_calls' ,name: 'pending_calls', class: 'align-middle pending_calls text-center'},
+                    { data:'assigned_calls' ,name: 'assigned_calls', class: 'align-middle assigned_calls text-center',orderable: false, searchable: false},
+                    { data:'completed_calls' ,name: 'completed_calls', class: 'align-middle completed_calls text-center',orderable: false, searchable: false},
+                    { data:'pending_calls' ,name: 'pending_calls', class: 'align-middle pending_calls text-center',orderable: false, searchable: false},
                 ],
                 drawCallback: function (settings) {
                     var api = new $.fn.dataTable.Api( settings );
@@ -179,12 +179,17 @@
                         var header = column.header();
 
 
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
+                        if($(header).is('.assigned_calls') || $(header).is('.completed_calls') || $(header).is('.pending_calls')) {
+                            $(td).appendTo($(search));
+                        }
+                        else{
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                        if (column.search()) {
-                            current.val(column.search());
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
                         }
 
                     });
