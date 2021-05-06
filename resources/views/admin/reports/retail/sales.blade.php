@@ -116,7 +116,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
-{{--                        <th class="border-primary border-darken-1">SDN Number</th>--}}
+                        <th class="border-primary border-darken-1">PNCC Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -133,7 +133,7 @@
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
-                        <th class="border-primary border-darken-1">Delivered Date</th>
+                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                         <th class="border-primary border-darken-1">Booking Staff ID</th>
                     </tr>
                     </thead>
@@ -307,7 +307,7 @@
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Payment ID');
-                            head.push('SDN Number');
+                            head.push('PNCC Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Origin');
@@ -339,7 +339,7 @@
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
-                                // row.push(values.sdn_id);
+                                row.push(values.pncc_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
@@ -412,13 +412,13 @@
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     // { data:'account_number' ,name: 'account_number', class: 'align-middle account_number'},
                     { data:'shipper_name' ,name: 'rsi.shipper_name', class: 'align-middle shipper_name'},
-                    { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center',orderable: false, searchable: false},
+                    { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center'},
                     { data:'booked_by' ,name: 'ru.name', class: 'align-middle booked_by'},
                     // { data:'pickup_address' ,name: 'usi.pickup_address', class: 'align-middle pickup_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
-                    // { data:'sdn_id' ,name: 'dnsdn.station_deposit_note_id', class: 'align-middle payment_status'},
+                    { data:'pncc_id' ,name: 'pns.retail_pickup_note_id', class: 'align-middle pncc_id'},
                     { data:'service_type' ,name: 'rsm.name', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
@@ -428,7 +428,7 @@
                     { data:'destination_zone' ,name: 'dz.name', class: 'align-middle destination_zone'},
                     { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
                     { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
-                    { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
+                    { data:'collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
