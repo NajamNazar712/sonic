@@ -17,11 +17,12 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
+                            @if($data)
                             <div class="row mb-2 justify-content-center">
 
                                 <div class="col-6">
                                     <fieldset class="position-relative has-icon-left">
-                                        <input type="text" class="form-control" placeholder="Tracking Number" readonly style="text-align: center;">
+                                        <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;">
                                     </fieldset>
                                 </div>
                             </div>
@@ -36,7 +37,7 @@
                                                         <i class="icon-flag text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">20</h3>
+                                                        <h3 class="text-white">{{$total_calls}}</h3>
                                                         <span>Total Call(s)</span>
                                                     </div>
                                                 </div>
@@ -53,7 +54,7 @@
                                                         <i class="icon-check text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">8</h3>
+                                                        <h3 class="text-white">{{$completed_calls}}</h3>
                                                         <span>Completed Call(s)</span>
                                                     </div>
                                                 </div>
@@ -70,7 +71,7 @@
                                                         <i class="icon-close text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white">12</h3>
+                                                        <h3 class="text-white">{{$pending_calls}}</h3>
                                                         <span>Pending Call(s)</span>
                                                     </div>
                                                 </div>
@@ -84,10 +85,10 @@
                                 <div class="align-items-center bg-primary">
                                     <div class="d-flex flex-wrap ml-1 mr-1 font-medium-3 white">
                                         <div>
-                                            Rider Name : <span class="font-medium-2">Dummy Rider</span>
+                                                Rider Name : <span class="font-medium-2">{{$delivery_note->rider->name}}</span>
                                         </div>
                                         <div class="ml-auto mr-0 mr-sm-1">
-                                            Rider Phone Number : <span class="font-medium-2">+92334-0000000</span>
+                                            Rider Phone Number : <span class="font-medium-2">{{$delivery_note->rider->phone}}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -100,19 +101,19 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><strong>Name :</strong></td>
-                                                            <td>Shipper Name</td>
+                                                            <td>{{$shipment->user->brand_name ?? $shipment->user->name}}</td>
                                                             <td><strong>Amount :</strong></td>
-                                                            <td>1000</td>
+                                                            <td>{{$shipment->amount}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td><strong>Address :</strong></td>
-                                                            <td>Shipper Address</td>
+                                                            <td>{{$shipment->user->address}}</td>
                                                             <td><strong>Type :</strong></td>
-                                                            <td>Shipper Type</td>
+                                                            <td>{{$shipment->shipping_mode->mode}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td><strong>Phone :</strong></td>
-                                                            <td>+92334-0000000</td>
+                                                            <td>{{$shipment->user->phone}}</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -125,54 +126,62 @@
                                                     <tbody>
                                                         <tr>
                                                             <td><strong>Name :</strong></td>
-                                                            <td>Consignee Name</td>
+                                                            <td>{{$shipment->consignee_name}}</td>
                                                             <td><strong>Phone :</strong></td>
-                                                            <td>+92334-0000000</td>
+                                                            <td>{{$shipment->consignee_phone_number_1}}</td>
                                                         </tr>
                                                         <tr>
                                                             <td><strong>Address :</strong></td>
-                                                            <td>Consignee Address</td>
-                                                            <td><strong>Description :</strong></td>
-                                                            <td>Some Description About the Consignee</td>
+                                                            <td>{{$shipment->consignee_address}}</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
                                         </div>
                                         <div class="col-12 mb-1">
-                                            <div class="row justify-content-center">
-                                                <div class="col-4">
-                                                    <fieldset class="form-group">
-                                                        <select name="status" id="status" class="form-control select2">
-                                                            @foreach($statuses as $status)
-                                                                <option value="{{$status->id}}">{{$status->name}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </fieldset>
+                                            <form action="{{route('admin.debriefing.caller_agent.next')}}" id="next_form" method="post" novalidate="novalidate">
+                                                @csrf
+                                                <input type="hidden" name="call_id" id="call_id" value="{{$call->id}}">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-4">
+                                                        <fieldset class="form-group">
+                                                            <select name="status" id="status" class="form-control select2" data-rule-required="true" data-msg-required="Status is Required">
+                                                                @foreach($statuses as $status)
+                                                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <fieldset class="form-group">
+                                                            <select name="reason" id="reasons" class="form-control select2">
+                                                                <option value=""></option>
+                                                            </select>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <fieldset class="form-group">
+                                                            <textarea class="form-control" name="remarks" placeholder="Remarks"></textarea>
+                                                        </fieldset>
+                                                    </div>
                                                 </div>
-                                                <div class="col-4">
-                                                    <fieldset class="form-group">
-                                                        <select name="reasons" id="reasons" class="form-control select2">
-                                                            <option value=""></option>
-                                                        </select>
-                                                    </fieldset>
-                                                </div>
-                                                <div class="col-4">
-                                                    <fieldset class="form-group">
-                                                        <textarea class="form-control" placeholder="Remarks"></textarea>
-                                                    </fieldset>
-                                                </div>
-                                            </div>
 
-                                            <div class="row justify-content-end">
-                                                <button type="button" class="mr-1 mb-1 btn btn-danger btn-min-width"> Skip </button>
-                                                <button type="button" class="mr-1 mb-1 btn btn-success btn-min-width"> Next </button>
-                                            </div>
-
+                                                <div class="row justify-content-end">
+                                                    @if($call->skip == 0)
+                                                        <button type="button" id="skip_btn" class="mr-1 mb-1 btn btn-danger btn-min-width"> Skip </button>
+                                                    @endif
+                                                    <button type="submit" value="next" class="mr-1 mb-1 btn btn-success btn-min-width"> Next </button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            @else
+                                <div class="row justify-content-center">
+                                    <h3>No Calls Assigned</h3>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -258,6 +267,34 @@
                     }
                 });
             });
+
+            $('#next_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                }
+            });
+            @if($call->skip == 0)
+            $("#skip_btn").on('click',function () {
+                var id = $("#call_id").val();
+                $.ajax({
+                    url: '{!! route('admin.debriefing.caller_agent.skip') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status == 1)
+                        {
+                            location.reload();
+                        }
+                    });
+            });
+            @endif
+
         });
 
     </script>

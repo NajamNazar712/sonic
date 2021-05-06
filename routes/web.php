@@ -1203,6 +1203,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('caller_agent')->name('caller_agent.')->group(function (){
             Route::get('','Admins\LastMileDebriefingController@caller_agent_view')->name('index');
+            Route::post('next','Admins\LastMileDebriefingController@caller_agent_next')->name('next');
+            Route::post('skip','Admins\LastMileDebriefingController@caller_agent_skip')->name('skip');
         });
     });
 

@@ -462,7 +462,9 @@
 
                                     <li><a class="menu-item" href="{{route('admin.debriefing.supervisor.index')}}">Supervisor Dashboard</a></li>
                                     <li><a class="menu-item" href="{{route('admin.debriefing.agents_call_monitoring.index')}}">Agents Call Monitoring</a></li>
-                                    <li><a class="menu-item" href="{{route('admin.debriefing.caller_agent.index')}}">Caller Agent Screen</a></li>
+                                    @if(session('role_id') == 1 || session('role_id') == 18)
+                                        <li><a class="menu-item" href="{{route('admin.debriefing.caller_agent.index')}}">Caller Agent Screen</a></li>
+                                    @endif
 
                                 </ul>
                             </li>
