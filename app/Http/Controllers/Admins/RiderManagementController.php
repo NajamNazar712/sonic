@@ -917,10 +917,6 @@ class RiderManagementController extends Controller
 
                             }
 
-                            if($rider->id == 297){
-                                dd([$delivery_shipment_ids,$shipment_weight_type_1_count, $delivery_incentive]);
-                            }
-
                             if(count($non_cod_shipments) > 0){
 
                                 $shipment_weight_type_1_count = Shipment::whereIn('id', $non_cod_shipments)->whereBetween('actual_weight' , [0.11,1.50])->count();
