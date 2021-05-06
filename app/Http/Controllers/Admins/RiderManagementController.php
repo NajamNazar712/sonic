@@ -771,7 +771,7 @@ class RiderManagementController extends Controller
     static public function riders_incentives_calculation($date){
 
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 06:00A');
-        $next_day = Carbon::parse($date)->addDay(1);
+        $next_day = Carbon::parse($date)->addDay(4);
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 05:59A');
         $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
         if(count($riders) > 0){
