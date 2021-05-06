@@ -3912,62 +3912,26 @@ class GlobalSettingsController extends Controller
     }
 
     public function rider_incentive_update(Request $request){
-        $names = [
-            'rider_category_select' => 'Rider Category',
-            'delivery_payment_select' => 'Rider Delivery Payment',
-            'weight_range_select' => 'Rider Weight Range',
-            'incentive_value' => 'Rider Incentive/Shipment',
 
-        ];
-
-        $messages = [
-            'required' => ':attribute is Required.',
-            'integer' => ':attribute must be an Integer.',
-            'numeric' => ':attribute must be a Number.',
-            'boolean' => ':attribute must be 0 or 1.',
-            'digits_between' => ':attribute must be between :min and :max Digits.',
-            'exists' => 'Given :attribute is of Invalid ID.',
-
-        ];
-
-        $rules = [
-            'incentive_setting_id' => ['required', 'integer', 'exists:riders_incentive_settings,id'],
-            'edit_rider_category_select' => ['required','integer', 'digits_between:1,10', 'exists:rider_categories,id'],
-            'edit_delivery_payment_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_payment_types,id'],
-            'edit_weight_range_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_weight_ranges,id'],
-            'edit_incentive_value' => ['required','integer', 'digits_between:1,100000'],
-        ];
-
-        $validate = Validator::make($request->all(), $rules, $messages);
-
-        $validate->setAttributeNames($names);
-
-        if ($validate->fails()) {
-            return redirect()->back()->with(['errors' => $validate->errors()]);
+        $incentive_setting_id = $request->incentive_setting_id;
+        $value = $request->edit_incentive_value;
+        if($value == ''){
+            return redirect()->back()->with('error', 'Value not entered!');
         }
-        else {
-            $incentive_setting_id = $request->incentive_setting_id;
-            $rider_category_id = $request->edit_rider_category_select;
-            $delivery_payment_type_id = $request->edit_delivery_payment_select;
-            $weight_range_id = $request->edit_weight_range_select;
-            $value = $request->edit_incentive_value;
 
-            $setting = RidersIncentiveSetting::where('id' , $incentive_setting_id);
-            if(!$setting->exists()){
-                return redirect()->back()->with('error', 'Setting not found!');
-            }
-            else{
-                $rider_setting = $setting->first();
-                $rider_setting->rider_category_id = $rider_category_id;
-                $rider_setting->rider_shipment_payment_type_id = $delivery_payment_type_id;
-                $rider_setting->rider_shipment_weight_range_id = $weight_range_id;
-                $rider_setting->value = $value;
-                $rider_setting->last_updated_by = Auth::id();
-                $rider_setting->save();
-
-                return redirect()->back()->with('success', 'Setting updated successfully!');
-            }
+        $setting = RidersIncentiveSetting::where('id' , $incentive_setting_id);
+        if(!$setting->exists()){
+            return redirect()->back()->with('error', 'Setting not found!');
         }
+        else{
+            $rider_setting = $setting->first();
+            $rider_setting->value = $value;
+            $rider_setting->last_updated_by = Auth::id();
+            $rider_setting->save();
+
+            return redirect()->back()->with('success', 'Setting updated successfully!');
+        }
+
     }
 
     public function rider_incentive_cron_index()
