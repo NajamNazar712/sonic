@@ -11,13 +11,7 @@ class RiderIncentiveTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('riders_shipment_payment_types')->truncate();
 
-        DB::table('riders_shipment_payment_types')->insert(array(
-            array('id' => 1, 'name' => 'COD'),
-            array('id' => 2, 'name' => 'Non-COD'),
-            array('id' => 3, 'name' => 'Verification'),
-        ));
 
         DB::table('riders_shipment_weight_ranges')->truncate();
 
