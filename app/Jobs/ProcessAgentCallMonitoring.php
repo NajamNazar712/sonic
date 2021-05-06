@@ -54,7 +54,6 @@ class ProcessAgentCallMonitoring implements ShouldQueue
             $rec['admin_id'] = $admin_id;
             $rec['count'] = AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
             $recs[] = $rec;
-            $recs = collect($recs);
 
 
             // if((AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count())<$count){
@@ -65,6 +64,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
             //     $agent_id=$admin->id;
             // }
         }
+        $recs = collect($recs);
 
         $min = $recs->where('count', $recs->min('count'))->first();
 
