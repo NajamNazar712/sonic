@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
@@ -106,7 +107,59 @@ class LastMileDebriefingController extends Controller
 
     public function agents_call_monitoring_list ()
     {
+        $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
+            ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
+            ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
+            ->groupBy('agent_id');
 
+        $datatables = Datatables::of($data)
+            ->addColumn('assigned_calls_excel', function($calls) {
+               return AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
+            })
+            ->addColumn('completed_calls_excel', function($calls) {
+                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->count();
+            })
+            ->addColumn('pending_calls_excel', function($calls) {
+                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->count();
+            })
+            ->addColumn('assigned_calls', function($calls) {
+                $count = AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="warning">100%</h4>';
+
+                return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('completed_calls', function($calls) {
+                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
+                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->count();
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="success">'. round(($count / $total_count) * 100, 2) .'%</h4>';
+                return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('pending_calls', function($calls) {
+                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
+                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->count();
+                if($count != 0)
+                {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="danger">'. round(($count / $total_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else{
+                    return 0;
+                }
+            });
+
+         return $datatables->make(true);
     }
 
     public function caller_agent_view()

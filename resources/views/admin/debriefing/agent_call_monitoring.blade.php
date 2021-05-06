@@ -22,7 +22,6 @@
                         <th class="border-primary border-darken-1">Assigned Calls</th>
                         <th class="border-primary border-darken-1">Completed Calls</th>
                         <th class="border-primary border-darken-1">Pending Calls</th>
-                        <th class="border-primary border-darken-1">Shift Starting Time<br>(24 Hour)</th>
                     </tr>
                     </thead>
                 </table>
@@ -97,6 +96,43 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.debriefing.agents_call_monitoring.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+
+                            head.push('Hub');
+                            head.push('Agent Name');
+                            head.push('Assigned Calls');
+                            head.push('Completed Calls');
+                            head.push('Pending Calls');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(values.hub);
+                                row.push(values.agent_name);
+                                row.push(values.assigned_calls_excel);
+                                row.push(values.completed_calls_excel);
+                                row.push(values.pending_calls_excel);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -121,17 +157,12 @@
                 },
                 order: [[1, 'desc']],
                 columns: [
-                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'agent_name' ,name: '', class: 'align-middle agent_name'},
-                    { data:'assigned_calls' ,name: '', class: 'align-middle assigned_calls text-center'},
-                    { data:'completed_calls' ,name: '', class: 'align-middle completed_calls text-center'},
-                    { data:'pending_calls' ,name: '', class: 'align-middle pending_calls text-center'},
-                    { data:'shift' ,name: '', class: 'align-middle shift text-center'},
+                    { data:'hub' ,name: 'hub.name', class: 'align-middle hub text-center'},
+                    { data:'agent_name' ,name: 'agent.name', class: 'align-middle agent_name text-center'},
+                    { data:'assigned_calls' ,name: 'assigned_calls', class: 'align-middle assigned_calls text-center'},
+                    { data:'completed_calls' ,name: 'completed_calls', class: 'align-middle completed_calls text-center'},
+                    { data:'pending_calls' ,name: 'pending_calls', class: 'align-middle pending_calls text-center'},
                 ],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
                 drawCallback: function (settings) {
                     var api = new $.fn.dataTable.Api( settings );
                     var data = api.rows( {page:'current'} ).data();
@@ -147,18 +178,15 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
+                        var current = $(input).appendTo($(search)).on('change', function() {
+                            column.search($(this).val(), false, false, true).draw();
+                        }).wrap(td).after(icon);
+
+                        if (column.search()) {
+                            current.val(column.search());
                         }
+
                     });
 
                     this.api().table().columns.adjust();
