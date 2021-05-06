@@ -66,7 +66,7 @@ class AdminRetailReportController extends Controller
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftjoin('retail_pickup_note_shipments as pns',function($join){
                 $join->on('pns.shipment_id','=','shipments.id')
-                    ->where('pns.delivery_note_id','=',
+                    ->where('pns.retail_pickup_note_id','=',
                         DB::connection('reports')->raw('(select max(retail_pickup_note_id) from retail_pickup_note_shipments where retail_pickup_note_shipments.shipment_id = shipments.id)'));
             })
 //            ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
