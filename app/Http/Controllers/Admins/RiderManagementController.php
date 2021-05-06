@@ -870,11 +870,11 @@ class RiderManagementController extends Controller
 
                 $delivery_date = $date_to;
                 $delivery_date = Carbon::parse($delivery_date)->toDateString();
-                dd($delivery_date);
-                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->where('status', '!=', 4);
+                $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->whereIn('status', [0,1]);
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
                     $delivery_note_ids = $delivery_notes->pluck('id')->toArray();
+                    dd($delivery_note_ids);
                     $delivery_note_ids_count = count($delivery_note_ids);
                     if($delivery_note_ids_count > 0){
                         $delivery_shipment_ids = ShipmentsJourney::whereIn('reference_1_id', $delivery_note_ids)->whereIn('shipper_status_id', [14, 30, 36, 37])->where('verification', 1)->pluck('shipment_id')->toArray();
