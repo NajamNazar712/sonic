@@ -88,6 +88,7 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Jobs\ProcessAgentCallMonitoring;
 use DB;
 
 class RiderAPIController extends Controller
@@ -3564,7 +3565,12 @@ class RiderAPIController extends Controller
                             if ($updated_shipments_count == 0) {
                                 DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1]);
                             }
-
+                           
+                            $arr['shipment_id'] = $request->shipment_id;
+                            $arr['delivery_note_id'] = $request->delivery_note_id;
+                            dispatch(new ProcessAgentCallMonitoring($arr));
+                            
+                            
                             $message = 'Shipment is marked as Undelivered Successfully';
                         } else {
                             $message = 'Shipment is already marked as Undelivered';
