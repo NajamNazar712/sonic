@@ -775,9 +775,9 @@ class RiderManagementController extends Controller
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 05:59A');
         $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
         if(count($riders) > 0){
-                dd($riders);
             foreach ($riders as $rider){
                 $rider_category_id = $rider->rider_category_id;
+                dd($rider_category_id);
                 $pickup_shipment_ids = array();
                 $delivery_shipment_ids = array();
                 $pickup_incentive = 0;
