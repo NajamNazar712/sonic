@@ -123,7 +123,7 @@
                             <div class="row justify-content-center">
 
                                 <fieldset class="col-12 form-group">
-                                    <select name="edit_rider_category_select" id="edit_rider_category_select" class="form-control select2" data-rule-required="true" data-msg-required="Category is required">
+                                    <select name="" id="edit_rider_category_select" class="form-control select2" data-rule-required="true" data-msg-required="Category is required" disabled>
                                         @foreach($rider_categories as $category)
                                             <option value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
@@ -131,7 +131,7 @@
                                 </fieldset>
 
                                 <fieldset class="col-12 form-group">
-                                    <select name="edit_delivery_payment_select" id="edit_delivery_payment_select" class="form-control select2" data-rule-required="true" data-msg-required="Type is required">
+                                    <select name="" id="edit_delivery_payment_select" class="form-control select2" data-rule-required="true" data-msg-required="Type is required" disabled>
                                         @foreach($payment_types as $type)
                                             <option value="{{$type->id}}">{{$type->name}}</option>
                                         @endforeach
@@ -140,7 +140,7 @@
 
 
                                 <fieldset class="col-12 form-group">
-                                    <select name="edit_weight_range_select" id="edit_weight_range_select" class="form-control select2" data-rule-required="true" data-msg-required="Range is required">
+                                    <select name="" id="edit_weight_range_select" class="form-control select2" data-rule-required="true" data-msg-required="Range is required" disabled>
                                         @foreach($weight_ranges as $range)
                                             <option value="{{$range->id}}">{{$range->name}}</option>
                                         @endforeach
