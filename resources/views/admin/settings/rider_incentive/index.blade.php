@@ -342,12 +342,6 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    text: '<i class="la la-cogs"></i> Add',
-                    className: 'btn btn-primary add',
-                    action: function (e, dt, node, config) {
-                        $('#AddIncentiveModal').modal('show');
-                    }
-                }, ,{
                     extend: 'excel',
                     title: 'Rider Incentive Setting',
                     className: 'btn btn-primary',
