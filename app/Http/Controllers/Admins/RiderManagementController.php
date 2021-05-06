@@ -869,7 +869,8 @@ class RiderManagementController extends Controller
                 }
 
                 $delivery_date = $date_to;
-//                $delivery_date = Carbon::parse($delivery_date)->toDateString();
+                $delivery_date = Carbon::parse($delivery_date)->toDateString();
+                dd($delivery_date);
                 $delivery_notes = DeliveryNote::where('rider_id', $rider->id)->whereDate('pending_for_verification_at', $delivery_date)->where('status', '!=', 4);
                 if($delivery_notes->exists()){
                     $delivery_note_ids = array();
