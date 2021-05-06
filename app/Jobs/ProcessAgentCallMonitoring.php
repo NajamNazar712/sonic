@@ -11,6 +11,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Support\Arr;
 
 class ProcessAgentCallMonitoring implements ShouldQueue
 {
@@ -38,14 +39,21 @@ class ProcessAgentCallMonitoring implements ShouldQueue
         $shipment_id = $this->booking['shipment_id'];
         $delivery_note = DeliveryNote::find($this->booking['delivery_note_id']);
         $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->get();
-        $count = 0;
-        foreach ($admin_ids as $admin_id) {
-            $admin = Admin::where('role',18)->where('id',$admin_id)->get()->first();
-            if($admin){
-                if(count(AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->get())>$count){
-                    $agent_id=$admin->id;
-                    $count=count(AgentCallMonitoring::where('agent_id',$admin->id)->get());
-                }
+        $count = 1;
+        $admin_ids = array();
+        $admins = array();
+        $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
+        $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
+        // AgentCallMonitoring::where('completed',0)->groupBy('agent_id')->count();
+        foreach($admins as $admin_id) {
+            $admin = Admin::find($admin_id);
+            if((AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count())<$count){
+                $agent_id=$admin->id;
+                $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
+            }else{
+                $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
+                $agent_id=$admin->id;
+
             }
         }
         $agent_call_monitoring = new AgentCallMonitoring;
