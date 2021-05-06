@@ -70,7 +70,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
 
         $agent_call_monitoring = new AgentCallMonitoring;
-        $agent_call_monitoring->agent_id= $min->admin_id;
+        $agent_call_monitoring->agent_id= $min['admin_id'];
         $agent_call_monitoring->shipment_id= $shipment_id;
         $agent_call_monitoring->delivery_note_id= $delivery_note->id;
         $agent_call_monitoring->save();
