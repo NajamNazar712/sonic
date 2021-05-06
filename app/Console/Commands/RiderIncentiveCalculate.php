@@ -39,7 +39,7 @@ class RiderIncentiveCalculate extends Command
      */
     public function handle()
     {
-        $date = Carbon::today()->subDays(3)->format('Y-m-d');
+        $date = Carbon::yesterday()->format('Y-m-d');
 
         RiderManagementController::riders_incentives_calculation($date. ' 00:00:00');
 

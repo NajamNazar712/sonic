@@ -771,7 +771,7 @@ class RiderManagementController extends Controller
     static public function riders_incentives_calculation($date){
 
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 06:00A');
-        $next_day = Carbon::parse($date)->addDay(4);
+        $next_day = Carbon::parse($date)->addDay(1);
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 05:59A');
         $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
         if(count($riders) > 0){
@@ -792,7 +792,7 @@ class RiderManagementController extends Controller
                     $cod_shipments = array();
                     $non_cod_shipments = array();
                     $verified_shipments = array();
-                    $test = array();
+
                     $cod_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('amount', '>', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                     $non_cod_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('amount', '=', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                     $verified_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->whereIn('user_id', [3324,10104])->pluck('id')->toArray();
