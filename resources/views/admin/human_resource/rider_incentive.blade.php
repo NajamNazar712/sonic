@@ -202,7 +202,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.hr.rider_incentive.list') }}',
+                        url: '{{ route('admin.human_resource.rider_incentive.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
