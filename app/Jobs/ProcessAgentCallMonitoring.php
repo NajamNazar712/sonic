@@ -46,19 +46,31 @@ class ProcessAgentCallMonitoring implements ShouldQueue
         $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
         $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
         // AgentCallMonitoring::where('completed',0)->groupBy('agent_id')->count();
+        $recs = array();
+
         foreach($admins as $admin_id) {
             $admin = Admin::find($admin_id);
-            if((AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count())<$count){
-                $agent_id=$admin->id;
-                $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
-            }else{
-                $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
-                $agent_id=$admin->id;
+            $rec = array();
+            $rec['admin_id'] = $admin_id;
+            $rec['count'] = AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
+            $recs[] = $rec;
+            $recs = collect($recs);
 
-            }
+
+            // if((AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count())<$count){
+            //     $agent_id=$admin->id;
+            //     $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
+            // }else{
+            //     $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
+            //     $agent_id=$admin->id;
+            // }
         }
+
+        $min = $recs->where('count', $recs->min('count'))->first();
+
+
         $agent_call_monitoring = new AgentCallMonitoring;
-        $agent_call_monitoring->agent_id= $agent_id;
+        $agent_call_monitoring->agent_id= $min->admin_id;
         $agent_call_monitoring->shipment_id= $shipment_id;
         $agent_call_monitoring->delivery_note_id= $delivery_note->id;
         $agent_call_monitoring->save();
