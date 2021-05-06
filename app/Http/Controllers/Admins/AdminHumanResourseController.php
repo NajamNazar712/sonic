@@ -2211,7 +2211,7 @@ class AdminHumanResourseController extends Controller
             ->join('cities', 'cities.id', '=', 'riders.city_id')
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
             ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive');
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id');
 
         $datatable = Datatables::of($incentives);
 
@@ -2227,7 +2227,7 @@ class AdminHumanResourseController extends Controller
         }
 
         if($employee_id = $request->get('employee_id')){
-            $datatable->where('riders.employee_id', '=', $employee_id);
+            $datatable->where('riders.trax_id', '=', $employee_id);
         }
 
         if($employee_name = $request->get('employee_name')){

@@ -276,7 +276,7 @@
                 order: [[6, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'employee_id', name: 'riders.employee_id', class: 'align-middle employee_id'},
+                    {data: 'employee_id', name: 'riders.trax_id', class: 'align-middle employee_id'},
                     {data: 'rider_name', name: 'riders.name', class: 'align-middle rider_name'},
                     {data: 'rider_phone', name: 'riders.phone', class: 'align-middle rider_phone'},
                     {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
