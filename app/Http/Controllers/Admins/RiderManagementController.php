@@ -796,12 +796,11 @@ class RiderManagementController extends Controller
                     $cod_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('amount', '>', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                     $non_cod_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->where('amount', '=', 0)->whereNotIn('user_id', [3324,10104])->pluck('id')->toArray();
                     $verified_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->whereIn('user_id', [3324,10104])->pluck('id')->toArray();
-                    if($rider->id == 297){
-                        dd($cod_shipments);
-                    }
+
                     if(count($cod_shipments) > 0){
 
-                        $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
+                        $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '>', 0.10)->where('actual_weight' , '=<', 1.50)->count();
+
                         $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
                         $shipment_weight_type_3_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
                         $test = [$shipment_weight_type_1_count, $shipment_weight_type_2_count, $shipment_weight_type_2_count];
