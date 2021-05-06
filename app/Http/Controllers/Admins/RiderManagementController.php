@@ -803,7 +803,7 @@ class RiderManagementController extends Controller
                         $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->whereBetween('actual_weight' , [0.11,1.50])->count();
 //                        $test = [$cod_shipments, $non_cod_shipments, $verified_shipments];
 
-                        $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=>', '1.51')->count();
+                        $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
                         if($rider->id == 297){
                             dd($shipment_weight_type_2_count);
                         }
