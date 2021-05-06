@@ -415,7 +415,7 @@
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     // { data:'account_number' ,name: 'account_number', class: 'align-middle account_number'},
                     { data:'shipper_name' ,name: 'rsi.shipper_name', class: 'align-middle shipper_name'},
-                    { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center'},
+                    { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center',orderable: false, searchable: false},
                     { data:'booked_by' ,name: 'ru.name', class: 'align-middle booked_by'},
                     // { data:'pickup_address' ,name: 'usi.pickup_address', class: 'align-middle pickup_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},

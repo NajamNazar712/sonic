@@ -67,7 +67,7 @@ class AdminRetailReportController extends Controller
             ->leftjoin('delivery_note_shipments as ds',function($join){
                 $join->on('ds.shipment_id','=','shipments.id')
                     ->where('ds.delivery_note_id','=',
-                        DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)')                        );
+                        DB::connection('reports')->raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id and delivery_note_shipments.status > 3 and  delivery_note_shipments.status != 8)'));
             })
             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'ds.delivery_note_id', '=', 'dnsdn.delivery_note_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
