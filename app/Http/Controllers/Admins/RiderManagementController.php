@@ -806,6 +806,7 @@ class RiderManagementController extends Controller
 
                         if($shipment_weight_type_1_count > 0){
                             $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
+                            dd($setting_cod);
                             $incentive_shipment = $setting_cod->setting_value;
                             $pickup_incentive += $shipment_weight_type_1_count * $incentive_shipment;
                         }
