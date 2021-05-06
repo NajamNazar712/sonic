@@ -782,7 +782,7 @@ class RiderManagementController extends Controller
                 $pickup_incentive = 0;
                 $delivery_incentive = 0;
                 $pickup_shipments_count = 0;
-                $delivery_shipments_count = 0;
+                $delivered_shipments_count = 0;
                 $pickup_shipment_ids = V2PickupReceivedShipment::where('rider_id', $rider->id)->whereBetween('created_at', [$date_from, $date_to]);
 
                 if($pickup_shipment_ids->exists()){
