@@ -788,6 +788,9 @@ class RiderManagementController extends Controller
 
                 if($pickup_shipment_ids->exists()){
                     $pickup_shipment_ids = $pickup_shipment_ids->pluck('shipment_id')->toArray();
+                    if($rider->id == 249){
+                        dd($pickup_shipment_ids);
+                    }
                     $pickup_shipments_count = count($pickup_shipment_ids);
                     $cod_shipments = array();
                     $non_cod_shipments = array();
@@ -960,9 +963,7 @@ class RiderManagementController extends Controller
                     }
 
                 }
-                if($rider->id == 249){
-                    dd($pickup_incentive);
-                }
+
                 if($pickup_incentive > 0 || $delivery_incentive > 0){
                     $riders_incentive = new RidersIncentive();
                     $riders_incentive->rider_id = $rider->id;
