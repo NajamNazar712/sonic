@@ -776,7 +776,7 @@ class RiderManagementController extends Controller
         $riders = Rider::where('status', 1)->select('id', 'rider_category_id')->get();
         if(count($riders) > 0){
             foreach ($riders as $rider){
-                dd($date_to);
+//                dd($date_to);
                 $rider_category_id = $rider->rider_category_id;
                 $pickup_shipment_ids = array();
                 $delivery_shipment_ids = array();
