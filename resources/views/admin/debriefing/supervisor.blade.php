@@ -271,6 +271,93 @@
 
             });
 
+            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                    $.ajax({
+                        url: '{!! route('admin.delivery.receive.receive_shipments_delivered') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'delivery_note_id': id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+            $('#datatable tbody').on('click','tr td.undelivered_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                    $.ajax({
+                        url: '{!! route('admin.delivery.receive.receive_shipments_undelivered') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'delivery_note_id': id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+
+            $('#datatable tbody').on('click','tr td.pending_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                    $.ajax({
+                        url: '{!! route('admin.delivery.receive.receive_shipments_pending') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'delivery_note_id': id
+                        }
+                    })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
+            
+
             $('body').on('click','.printdeliverynote',function () {
                 var deliverynote = $(this).parents('tr').attr('id');
                 print(deliverynote);
