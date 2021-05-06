@@ -799,14 +799,15 @@ class RiderManagementController extends Controller
                     $verified_shipments = Shipment::whereIn('id', $pickup_shipment_ids)->whereIn('user_id', [3324,10104])->pluck('id')->toArray();
 
                     if(count($cod_shipments) > 0){
-                        if($rider->id == 249){
-                            dd($cod_shipments);
-                        }
+
                         $shipment_weight_type_1_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 1.50)->where('actual_weight' , '>', 0.10)->count();
                         $shipment_weight_type_2_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=>', 1.51)->count();
                         $shipment_weight_type_3_count = Shipment::whereIn('id', $cod_shipments)->where('actual_weight' , '=<', 0.10)->count();
                         if($shipment_weight_type_1_count > 0){
                             $setting_cod = RidersIncentiveSetting::where('rider_category_id', $rider_category_id)->where('rider_shipment_payment_type_id', 1)->where('rider_shipment_weight_range_id', 1)->first();
+                            if($rider->id == 249){
+                                dd($setting_cod);
+                            }
                             $incentive_shipment = $setting_cod->setting_value;
                             $pickup_incentive += $shipment_weight_type_1_count * $incentive_shipment;
                         }
