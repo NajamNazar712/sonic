@@ -16,6 +16,7 @@ use Illuminate\Support\Arr;
 class ProcessAgentCallMonitoring implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    protected $booking;
 
     /**
      * Create a new job instance.
