@@ -818,6 +818,7 @@ class RiderManagementController extends Controller
                             $pickup_incentive += $shipment_weight_type_3_count * $incentive_shipment;
                         }
 
+                        dd($pickup_incentive);
                     }
 
                     if(count($non_cod_shipments) > 0){

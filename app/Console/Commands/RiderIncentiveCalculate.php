@@ -41,7 +41,7 @@ class RiderIncentiveCalculate extends Command
     {
         $date = Carbon::today()->subDays(3)->format('Y-m-d');
 
-        $data = RiderManagementController::riders_incentives_calculation($date. ' 00:00:00');
-        dd($data);
+        RiderManagementController::riders_incentives_calculation($date. ' 00:00:00');
+
     }
 }
