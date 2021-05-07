@@ -931,7 +931,16 @@ class Permission
             'retail.trax_center.index' => 432,
             'retail.trax_center.list' => 432,
             'retail.users.index' => 474,
-            'retail.users.list' => 474
+            'retail.users.list' => 474,
+
+
+            'debriefing.supervisor.index' => 495,
+            'debriefing.supervisor.list' => 495,
+            'debriefing.agents_call_monitoring.index' => 496,
+            'debriefing.agents_call_monitoring.list' => 496,
+
+
+
            
         ],
 
