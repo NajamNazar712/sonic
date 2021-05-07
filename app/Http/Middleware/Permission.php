@@ -950,6 +950,9 @@ class Permission
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,
             'debriefing.agents_call_monitoring.list' => 496,
+            'debriefing.caller_agent.index' => 497,
+            'debriefing.caller_agent.next' => 497,
+            'debriefing.caller_agent.skip' => 497,
 
 
 

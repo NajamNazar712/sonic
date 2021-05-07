@@ -594,7 +594,7 @@
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
-                    {data: 'status', name: 'es.name', class: 'align-middle status'},
+                    {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -612,6 +612,8 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
                         '</select>';
+                    var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
+                        '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
@@ -622,6 +624,13 @@
                         else if($(header).is('.employee_type'))
                         {
                             $(employee_type).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.status'))
+                        {
+                            $(employee_status).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -642,6 +651,20 @@
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
                         placeholder: "Select Employee Type",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var status_data = $.map({!! $employee_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#employee_status_search").prepend('<option value="" selected></option>').select2({
+                        data: status_data,
+                        placeholder: "Select Status",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

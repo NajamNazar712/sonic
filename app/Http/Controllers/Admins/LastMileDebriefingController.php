@@ -179,11 +179,6 @@ class LastMileDebriefingController extends Controller
 
     public function caller_agent_view()
     {
-        if(session('role_id') != 1 && session('role_id') != 18)
-        {
-            return back();
-        }
-
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
             ->where('completed',0)->where('skip',0);
         if($calls->exists())

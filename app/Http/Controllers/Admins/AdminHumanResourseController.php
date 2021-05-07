@@ -23,6 +23,7 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeeReference;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
@@ -199,8 +200,9 @@ class AdminHumanResourseController extends Controller
         $rider_categories = RiderCategory::all();
         $route_types = RouteType::all();
         $employee_types = EmployeeType::all();
+        $employee_statuses = EmployeeStatus::all();
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses]);
     }
 
     public function employee_directory_list(Request $request){

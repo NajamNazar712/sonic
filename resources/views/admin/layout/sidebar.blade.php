@@ -337,7 +337,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 44, 47, 48, 49, 126, 262, 441,464], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 44, 47, 48, 49, 126, 262, 441,464,495,496,497], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-motorcycle"></i>Last Mile</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([32, 33, 35, 36, 40, 42, 105, 262, 441,464], session('permissions'))) !== 0)
@@ -456,7 +456,7 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([495, 496], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Debriefing</span></a>
                                 <ul class="menu-content">
@@ -466,7 +466,7 @@
                                     @if(session('role_id') == 1 || in_array(496, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.debriefing.agents_call_monitoring.index')}}">Agents Call Monitoring</a></li>
                                     @endif
-                                    @if(session('role_id') == 1 || session('role_id') == 18)
+                                    @if(session('role_id') == 1 || in_array(497, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.debriefing.caller_agent.index')}}">Caller Agent Screen</a></li>
                                     @endif
 
