@@ -2539,6 +2539,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
 
+        Route::prefix('hr')->name('hr.')->group(function () {
+            Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
+                Route::get('', 'Admins\GlobalSettingsController@rider_incentive_index')->name('index');
+                Route::get('list', 'Admins\GlobalSettingsController@rider_incentive_list')->name('list');
+                Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_store')->name('store');
+                Route::get('details', 'Admins\GlobalSettingsController@rider_incentive_details')->name('details');
+                Route::post('update', 'Admins\GlobalSettingsController@rider_incentive_update')->name('update');
+
+                Route::prefix('cron')->name('cron.')->group(function () {
+                    Route::get('', 'Admins\GlobalSettingsController@rider_incentive_cron_index')->name('index');
+                    Route::post('store', 'Admins\GlobalSettingsController@rider_incentive_cron_store')->name('store');
+
+                });
+            });
+        });
+
+		Route::prefix('return_confirmation_pending_tat_setting')->name('rcp_tat.')->group(function () {
+            Route::get('','Admins\GlobalSettingsController@rcp_tat_index')->name('index');
+            Route::get('list','Admins\GlobalSettingsController@rcp_tat_list')->name('list');
+            Route::put('update','Admins\GlobalSettingsController@rcp_tat_update')->name('update');
+        });
 
     });
 
@@ -2852,6 +2873,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
             Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
+
+            Route::prefix('rider')->name('rider.')->group(function () {
+                Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');
+                Route::post('permanent', 'Admins\AdminHumanResourseController@employee_directory_make_rider_permanent')->name('permanent');
+                Route::post('blacklist', 'Admins\AdminHumanResourseController@employee_directory_make_rider_blacklist')->name('blacklist');
+                Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_rider_activate')->name('activate');
+                Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_rider_deactivate')->name('deactivate');
+                Route::post('update', 'Admins\AdminHumanResourseController@employee_directory_make_rider_update')->name('update');
+            });
+
         });
 
         Route::prefix('reporting_location')->name('reporting_location.')->group(function () {
@@ -2874,6 +2905,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@department_list')->name('list');
             Route::post('add', 'Admins\AdminHumanResourseController@department_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@department_edit')->name('edit');
+        });
+
+        Route::prefix('rider_incentive')->name('rider_incentive.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');
         });
     });
 

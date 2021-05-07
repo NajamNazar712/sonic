@@ -4014,23 +4014,27 @@
                                 <div class="form-group">
                                     <input type="hidden" id="authorize" name="authorize">
                                     <input type="hidden" name="approve" id="approve">
+                                    <input type="hidden" name="approve_change_rate_type" id="approve_change_rate_type">
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
 
                                     @if (($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
 
-                                    @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))))
+                                    @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))) || $shipper->status == 3 && $shipper->rate_type_id_status == 1)
                                         <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
                                     @endif
-                                    @if (($shipper->rate_status ==0 && ($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
+                                    @if (($shipper->rate_status ==0 && ($shipper->status == 1 || $shipper->status == 5) && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))) || $shipper->status == 3 && $shipper->rate_type_id_status == 1)
                                         <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                                     @endif
+                                   {{-- @if ($shipper->new_rate_type_id != null && $shipper->status == 3 && $shipper->rate_type_id_status == 1 && (session('role_id') == 1 || in_array(140, session('permissions'))))
+                                        <button id="accountApproveChangeSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve Change</button>
+                                    @endif
+                                    @if (($shipper->new_rate_type_id != null && ($shipper->status == 3 && $shipper->rate_type_id_status == 1) && (session('role_id') == 1 || in_array(8, session('permissions')))) && (session('role_id') == 1 || in_array(140, session('permissions'))))
+                                    <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Change</button>
+                                    @endif--}}
                                 </div>
                             </div>
-
-                            
-
                         </form>
 
                     </div>
@@ -4600,6 +4604,9 @@
         $('#accountApproveActiveSubmit').on('click',function(){
             $('#approve').val(1);
             // console.log('ddd');
+        });
+        $('#accountApproveChangeSubmit').on('click',function(){
+            $('#approve_change_rate_type').val(1);
         });
 
         $('.decimal').inputmask({

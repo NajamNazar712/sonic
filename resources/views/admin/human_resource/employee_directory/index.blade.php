@@ -25,8 +25,8 @@
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
-                                    <th class="border-primary border-darken-1">Type</th>
-                                    <th class="border-primary border-darken-1">Request Status</th>
+                                    <th class="border-primary border-darken-1">Employee Type</th>
+                                    <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -39,32 +39,179 @@
             </div>
         </div>
     </section>
-    <div class="modal fade text-left" id="approveRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
-         aria-labelledby="approveRiderModal" aria-hidden="true">
+
+    <div class="modal fade text-left" id="editRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="editRiderModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel8">Approve Rider</h4>
+                    <h4 class="modal-title" id="myModalLabel8">Edit Rider</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-{{--                <form action="{{route('admin.human_resource.employee_directory.approve')}}" method="post" class="mt-1"--}}
-{{--                      id="approveRiderForm" novalidate="novalidate">--}}
-{{--                    {{csrf_field()}}--}}
-{{--                    <div class="modal-footer">--}}
-{{--                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Add--}}
-{{--                            Rider--}}
-{{--                        </button>--}}
-{{--                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">--}}
-{{--                            Cancel--}}
-{{--                        </button>--}}
-{{--                    </div>--}}
-{{--                </form>--}}
+                <form action="{{route('admin.human_resource.employee_directory.rider.update')}}" method="post" class="mt-1"
+                      id="editRiderForm" novalidate="novalidate">
+                    {{csrf_field()}}
+                    <div class="modal-body">
+                        <div id="unEditableFields">
+                            <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="rider_type" id="rider_type_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($rider_types as $rider_type)
+                                            <option value="{{$rider_type->id}}">{{$rider_type->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+
+                            <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="city_id" id="city_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+                            <input type="hidden" name="employee_id" id="employee_id">
+                            <div>
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="rider_name" id="rider_name"
+                                               placeholder="Rider Name" required data-rule-required="true"
+                                               data-msg-required="This field is required">
+                                    </fieldset>
+
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="phone" id="rider_phone"
+                                               placeholder="Phone No." required data-rule-required="true"
+                                               data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="cnic" id="rider_cnic"
+                                               placeholder="CNIC" required data-rule-required="true"
+                                               data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="pin" id="rider_pin"
+                                               placeholder="PIN" required data-rule-required="true"
+                                               data-msg-required="This field is required" data-rule-minlength="4"
+                                               data-rule-maxlength="4">
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+
+                            <div class="row mb-2">
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <textarea name="address" class="form-control" placeholder="Address" id="address"
+                                              cols="30" rows="5" required data-rule-required="true"
+                                              data-msg-required="This field is required"></textarea>
+                                </fieldset>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="rider_category" id="category_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($rider_categories as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="category" id="category" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($operation_rider_category as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="route_id" id="route_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($routes as $route)
+                                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}}
+                                                - {{$route->start}})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div id="new_route_div" class="d-none">
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="route_code" placeholder="Route Code" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="start"  id="startSearchTextField" placeholder="Start Point" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="end"  placeholder="End Point" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <select name="route_type_id" id="route_type_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                                            <option value="" selected>Select Route Type</option>
+                                            @foreach($route_types as $route_type)
+                                                <option value="{{$route_type->id}}">{{$route_type->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <textarea name="junction" class="form-control" placeholder="Add Junctions (comma seperated)" id="junction" cols="30" rows="5" required data-rule-required="true" data-msg-required="This field is required"></textarea>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update
+                            Rider
+                        </button>
+                        <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('css')
@@ -86,6 +233,89 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            let route_id;
+            $('#editRiderForm #unEditableFields input,#editRiderForm #unEditableFields textarea,#editRiderForm #unEditableFields select').attr('disabled','disabled');
+            $('#rider_type_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Type',
+                dropdownParent: $('#editRiderModal')
+            });
+            $('#category').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Functional Category',
+                dropdownParent: $('#editRiderModal')
+            });
+
+            $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select City',
+                dropdownParent: $('#editRiderModal')
+            });
+            $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Route',
+                dropdownParent: $('#editRiderModal')
+            });
+            $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Category',
+                dropdownParent: $('#editRiderModal')
+            });
+
+            $('#city_list').on('change',function () {
+                var routelist = $('#route_list');
+                var id = $('#city_list').val();
+                $.ajax({
+                    url:'{!! route('admin.management.rider.category.ajax') !!}',
+                    type:'GET',
+                    dataType:'json',
+                    data: {
+                        'id':id,
+                    },
+                    success:function (data) {
+
+                        routelist.empty();
+                        $.each(data, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
+                            routelist.append(newOption);
+                        });
+                        routelist.append('<option value="other">Other</option>').trigger('change');
+                        routelist.val(route_id).trigger('change');
+                    }
+                });
+            });
+
+            $('#route_list').on('change', function () {
+                var selection = $(this).val();
+                if(selection == 'other'){
+                    $('#new_route_div').removeClass('d-none');
+                }else{
+                    $('#new_route_div').addClass('d-none');
+                }
+            });
+
+            $("#editRiderForm").validate({
+
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    $('#editRiderForm #unEditableFields input,#editRiderForm #unEditableFields textarea,#editRiderForm #unEditableFields select').removeAttr('disabled');
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Rider is being Updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -105,8 +335,8 @@
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
-                            head.push('Type');
-                            head.push('Request Status');
+                            head.push('Employee Type');
+                            head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
 
@@ -380,13 +610,23 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
+                        '</select>';
                     this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
-                        } else {
+                        }
+                        else if($(header).is('.employee_type'))
+                        {
+                            $(employee_type).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
                             var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -395,6 +635,16 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'}];
+
+                    $("#employee_type_search").prepend('<option value="" selected></option>').select2({
+                        data: data,
+                        placeholder: "Select Employee Type",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
 
                     this.api().table().columns.adjust();
@@ -548,26 +798,360 @@
                 });
             });
 
-            $("#approveRiderForm").validate({
-                errorClass: "danger",
-                errorPlacement: function (error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function (form) {
-                    $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').removeAttr('disabled');
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Rider is being added!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
+            $('body').on('click', '.update_rider', function (e) {
+                var id = $(this).data('target-id');
+                var rider_name = table.row($(this).parents('tr')).data().employee_name;
+                var cnic = table.row($(this).parents('tr')).data().cnic;
+                var phone_no = table.row($(this).parents('tr')).data().phone_number;
+                var pin = table.row($(this).parents('tr')).data().pin;
+                var address = table.row($(this).parents('tr')).data().address;
+                var city_id = table.row($(this).parents('tr')).data().city_id;
+                var check_bit = table.row($(this).parents('tr')).data().check_if_rider_present_bit;
+                $('#city_list').val(city_id).trigger('change');
+                if(check_bit != null)
+                {
+                    var rider_type = table.row($(this).parents('tr')).data().active_rider_type_id;
+                    $('#category_list').val(table.row($(this).parents('tr')).data().category_id).trigger('change');
+                    $('#category').val(table.row($(this).parents('tr')).data().operation_id).trigger('change');
+                    route_id = table.row($(this).parents('tr')).data().route_id;
                 }
+                else{
+                    var rider_type = table.row($(this).parents('tr')).data().inactive_rider_type_id;
+                    route_id = null;
+                }
+                $('#employee_id').val(id);
+                $('#rider_name').val(rider_name);
+                $('#rider_cnic').val(cnic);
+                $('#rider_phone').val(phone_no);
+                $('#rider_pin').val(pin);
+                $('#address').val(address);
+                $('#rider_type_list').val(rider_type).trigger('change');
+                $('#editRiderModal').modal('show');
+
             });
+
+            $('body').on('hidden.bs.modal', '#editRiderModal', function () {
+                $('#employee_id').val('');
+                $('#rider_name').val('');
+                $('#rider_cnic').val('');
+                $('#rider_phone').val('');
+                $('#rider_pin').val('');
+                $('#address').val('');
+                $('#city_list').val(null).trigger('change');
+                $('#rider_type_list').val(null).trigger('change');
+                $('#route_list').val(null).trigger('change');
+                $('#category_list').val(null).trigger('change');
+                $('#category').val(null).trigger('change');
+
+
+            });
+
+            $('body').on('click', '.incentive', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Rider Incentive!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Rider Incentive',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.rider.incentive') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
+            $('body').on('click', '.permanent', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Rider Permanent!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Rider Permanent',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.rider.permanent') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
+            $('body').on('click', '.blacklist', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Rider Blacklist!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Rider Blaclist',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.rider.blacklist') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
+            $('body').on('click', '.deactivate', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Rider Inactive!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Rider Inactive',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.rider.deactivate') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
+            $('body').on('click', '.activate', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Rider Active!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Rider Active',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.rider.activate') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
+
         });
     </script>
 

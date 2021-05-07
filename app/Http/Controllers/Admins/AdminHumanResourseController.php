@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
@@ -22,10 +23,13 @@ use App\Http\Models\HR\EmployeeNationality;
 use App\Http\Models\HR\EmployeeReference;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
+use App\Http\Models\HR\EmployeeType;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
+use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
+use App\Http\Models\RouteType;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -34,6 +38,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Rider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use Auth;
@@ -191,7 +197,10 @@ class AdminHumanResourseController extends Controller
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
         $rider_categories = RiderCategory::all();
-        return view('admin.human_resource.employee_directory.index')->with(['rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category]);
+        $route_types = RouteType::all();
+        $employee_types = EmployeeType::all();
+        $city = City::where('business_category_id', 1)->get();
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types]);
     }
 
     public function employee_directory_list(Request $request){
@@ -201,10 +210,19 @@ class AdminHumanResourseController extends Controller
         }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
+            ->leftjoin('admins as staff','staff.trax_id','=','employees.trax_id')
+            ->leftjoin('riders as r','r.trax_id','=','employees.trax_id')
+            ->leftjoin('rider_requests as rr','rr.id','=','employees.rider_request_id')
+            ->leftjoin('rider_types as rr_rt','rr_rt.id','=','rr.rider_type_id')
+            ->leftjoin('rider_types as r_rt','r_rt.id','=','r.rider_type_id')
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['employees.id as employee_id', 'employees.name as employee_name', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at']);
+            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address'])
+            ->where(function ($q){
+                $q ->where('r.blacklist','=',0)
+                    ->orWhere('r.blacklist','=',null);
+            });
 
         if (session('role_id') != 1) {
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
@@ -217,8 +235,57 @@ class AdminHumanResourseController extends Controller
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
             })
+            ->filterColumn('et.name', function ($query, $keyword) {
+                if($keyword == 1)
+                {
+                    return $query->where('employees.employee_type_id','=',1);
+                }
+                elseif ($keyword == 2)
+                {
+                    return $query->where('et.name','=','Rider')
+                        ->where(function ($q){
+                           $q->where([['employees.status_id','!=',2],['r_rt.id',1]])
+                            ->orwhere([['employees.status_id','=',2],['rr_rt.id',1]]);
+                        });
+
+                }
+                elseif ($keyword == 3)
+                {
+                    return $query->where('et.name','=','Rider')
+                        ->where(function ($q){
+                            $q->where([['employees.status_id','!=',2],['r_rt.id',2]])
+                                ->orwhere([['employees.status_id','=',2],['rr_rt.id',2]]);
+                        });
+                }
+
+                return null;
+            })
+            ->editColumn('employee_type',function ($user){
+                if($user->employee_type_id == 1)
+                {
+                    return $user->employee_type;
+                }
+                else{
+
+                    $type = $user->employee_type;
+                    if ($user->status_id != 2) {
+                        if(isset($user->active_rider_type))
+                        {
+                            $type .=' - ' . $user->active_rider_type;
+                        }
+                        return $type;
+                    } else {
+                        if(isset($user->inactive_rider_type))
+                        {
+                            $type .=' - ' . $user->inactive_rider_type;
+                        }
+                        return $type;
+                    }
+
+                }
+            })
             ->addColumn("action", function ($result) {
-                if(session('role_id') == 1 || (in_array(468, session('permissions')) || (in_array(469, session('permissions')) && ($result->request_status_id == 1 || $result->request_status_id == 2)))){
+                if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(469, session('permissions'))  || in_array(98, session('permissions')) || in_array(381, session('permissions'))){
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -226,7 +293,7 @@ class AdminHumanResourseController extends Controller
             ';
                     if (session('role_id') == 1 || in_array(468, session('permissions'))) {
                         $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                        $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-edit"></i> Update Details</a>';
+                        $dropdown .= '<a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                     }
                     if($result->request_status_id == 1 || $result->request_status_id == 2){
                         if (session('role_id') == 1 || in_array(469, session('permissions'))) {
@@ -237,6 +304,47 @@ class AdminHumanResourseController extends Controller
 
                         }
                     }
+
+                    if($result->request_status_id == 3 && $result->employee_type_id == 2)
+                    {
+                        if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
+                        }
+
+                        if($result->status_id != 2)
+                        {
+                            if (session('role_id') == 1 || in_array(381, session('permissions'))) {
+                                if($result->active_rider_type_id == 1)
+                                {
+                                    $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
+                                }
+                                else{
+                                    $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
+                                }
+
+                            }
+
+                            if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+                            }
+
+                            if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                            }
+
+
+                        }
+
+                        if($result->status_id == 2 && $result->check_if_rider_present_bit != null)
+                        {
+                            if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                            }
+                        }
+                    }
+
+
+
                     $dropdown .= '
                 </div>
               </div>
@@ -250,24 +358,271 @@ class AdminHumanResourseController extends Controller
             ->make(true);
     }
 
+    public function employee_directory_make_rider_incentive(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if($employee_id){
+            $employee = Employee::find($employee_id);
+            if($employee){
+                $rider = Rider::where('trax_id',$employee->trax_id);
+                if($rider->exists())
+                {
+                    $rider = $rider->first();
+                    $rider_status = $rider->rider_type_id;
+                    if($rider_status == 1){
+                        $rider->rider_type_id = 2;
+                        $rider->updated_by = Auth::id();
+                        $rider->save();
+                        return response()->json(['status' => 0, 'success' => 'Rider Marked as Incentive Rider!']);
+                    }
+
+                    return response()->json(['status' => 1, 'error' => 'Rider already Marked as Incentive Rider!']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+    }
+    public function employee_directory_make_rider_permanent(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if($employee_id){
+            $employee = Employee::find($employee_id);
+            if($employee){
+                $rider = Rider::where('trax_id',$employee->trax_id);
+                if($rider->exists())
+                {
+                    $rider = $rider->first();
+                    $rider_status = $rider->rider_type_id;
+                    if($rider_status == 2){
+                        $rider->rider_type_id = 1;
+                        $rider->updated_by = Auth::id();
+                        $rider->save();
+                        return response()->json(['status' => 0, 'success' => 'Rider Marked as Permanent Rider!']);
+                    }
+
+                    return response()->json(['status' => 1, 'error' => 'Rider already Marked as Permanent Rider!']);
+                }
+                return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+    }
+    public function employee_directory_make_rider_blacklist(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $rider = Rider::where('trax_id',$employee->trax_id);
+        if($rider->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+
+        $rider = $rider->first();
+
+        $rider->blacklist = 1;
+        $rider->status = 0;
+        $rider->updated_by = Auth::id();
+        $rider->save();
+        return response()->json(['status' => 0, 'success' => 'Rider is blacklisted!']);
+
+    }
+    public function employee_directory_make_rider_activate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $rider = Rider::where('trax_id',$employee->trax_id);
+        if($rider->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $rider = $rider->first();
+
+        $rider->status = 1;
+        $rider->updated_by = Auth::id();
+        $rider->save();
+
+        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Rider is Activated!']);
+
+    }
+    public function employee_directory_make_rider_deactivate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $rider = Rider::where('trax_id',$employee->trax_id);
+        if($rider->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Rider not found!']);
+        }
+        $rider = $rider->first();
+
+        $rider->status = 0;
+        $rider->route_id = null;
+        $rider->updated_by = Auth::id();
+        $rider->save();
+
+        $employee->status_id = 2;
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
+    }
+
+    public function employee_directory_make_rider_update(Request $request)
+    {
+        $validations = [
+            'city_id'=>'required|numeric',
+            'rider_name'=>'required|max:255',
+            'phone'=>'required|max:255',
+            'cnic'=>'required|max:255',
+            'address'=>'required|max:255',
+            'route_id'=>'required',
+            'rider_category'=>'required|numeric',
+            'pin' => 'required|integer|digits:4',
+            'rider_type' => "required|numeric",
+            'category' => "required|numeric"
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+        $employee = Employee::where('id',$request->employee_id);
+        if($employee->doesntExist())
+        {
+            return redirect()->back()->with('error','Rider Not Found');
+        }
+
+        $employee = $employee->first();
+        $trax_id = $employee->trax_id;
+        $rider = Rider::where('trax_id',$trax_id);
+        if($rider->doesntExist()) {
+            $rider = new Rider();
+            $rider->city_id = $request->city_id;
+            $rider->name = $request->rider_name;
+            $rider->phone = $request->phone;
+            $rider->cnic = $request->cnic;
+            $rider->address = $request->address;
+            $rider->status =1;
+            $rider->pin = bcrypt($request->pin);
+            $rider->created_by = Auth::id();
+            $rider->trax_id = $trax_id;
+            $rider->rider_type_id  = $request->rider_type;
+            $rider->save();
+
+            $employee->status_id = self::GetStatusOfEmployee($employee->id);
+            $employee->save();
+        }
+        else{
+            $rider = $rider->first();
+        }
+        if($request->route_id == 'other'){
+            $route = new Route();
+            $route->city_id = $request->city_id;
+            $route->code = $request->route_code;
+            $route->start = $request->start;
+            $route->end = $request->end;
+            $route->junction = $request->junction;
+            $route->route_type_id = $request->route_type_id;
+            $route->status = 1;
+            $route->save();
+            $route_id = $route->id;
+        }else{
+            Rider::where('route_id', $request->route_id)->where('id', '<>', $rider->id)->update(['route_id' => NULL]);
+            $route_id = $request->route_id;
+        }
+
+        $rider->route_id = $route_id;
+        $rider->operation_rider_id = $request->category;
+        $rider->rider_category_id = $request->rider_category;
+        $rider->update();
+
+        if($rider){
+            NotificationsController::send(61, $rider->id, $request->pin);
+            $rider_request = RiderRequest::find($employee->rider_request_id);
+            if($rider_request){
+                $rider_request->status = 1;
+                $rider_request->save();
+            }
+            return redirect()->back()->with('success','Rider Updated successfully');
+        }
+    }
+
+    public static function GetStatusOfEmployee($employee_id)
+    {
+        $employee_fields = ['guardian_name','phone_number','address','city_id','department_id','zone_id','pin','official_phone_number'];
+        $employee_attachments_fields = ['cheque','photo'];
+        $employee = Employee::find($employee_id);
+        foreach ($employee_fields as $field)
+        {
+            if($employee[$field] == null)
+            {
+                return 3;
+            }
+        }
+
+        $bankInfo = EmployeeBankInformation::where('employee_id',$employee_id);
+        if($bankInfo->doesntExist())
+        {
+            return 3;
+        }
+
+        $attachments = EmployeeAttachment::where('employee_id',$employee_id);
+        if($attachments->doesntExist())
+        {
+            return 3;
+        }
+
+        $attachments = $attachments->first();
+        foreach ($employee_attachments_fields as $employee_attachments_field) {
+            if($attachments[$employee_attachments_field] == null)
+            {
+                return 3;
+            }
+        }
+
+        return 1;
+    }
+
     public function employee_directory_approve(Request $request){
         if(is_array($request->employee_ids)){
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
                 if(in_array($employee->request_status_id, [1, 2])) {
-                    $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                    if($employee->trax_id == null) {
+                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                    if ($global_setting->exists()) {
-                        $global_setting = $global_setting->first();
-                        $trax_id = $global_setting->setting_value + 1;
-                        $global_setting->setting_value = $trax_id;
-                        $global_setting->save();
-                        $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                    } else {
-                        $trax_id = null;
+                        if ($global_setting->exists()) {
+                            $global_setting = $global_setting->first();
+                            $trax_id = $global_setting->setting_value + 1;
+                            $global_setting->setting_value = $trax_id;
+                            $global_setting->save();
+                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                        } else {
+                            $trax_id = null;
+                        }
+
+                        $employee->trax_id = $trax_id;
                     }
-
-                    $employee->trax_id = $trax_id;
                     $employee->request_status_id = 3;
                     $employee->save();
                 }
@@ -287,9 +642,9 @@ class AdminHumanResourseController extends Controller
                     $employee->request_status_id = 4;
                     $employee->save();
 
-                    if ($employee->employee_type_id == 2) {
-                        RiderRequest::where('id', $employee->rider_request_id)->delete();
-                    }
+//                    if ($employee->employee_type_id == 2) {
+//                        RiderRequest::where('id', $employee->rider_request_id)->update(['status'=>2]);
+//                    }
                 }
             }
             return response()->json(['status' => 0, 'success' => 'Employee(s) Rejected Successfully!']);
@@ -326,7 +681,13 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update (Employee $employee, Request $request)
     {
+        $request->validate([
+            'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id)],
+        ]);
+
         $employee->request_status_id = 2;
+        $employee->name = $request->employee_name;
+        $employee->phone_number = $request->personal_number;
         $employee->guardian_name = $request->name;
         $employee->religion_id = $request->religion;
         $employee->nationality_id = $request->nationality;
@@ -349,6 +710,7 @@ class AdminHumanResourseController extends Controller
         $employee->place_of_birth = $request->place_of_birth;
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->reporting_location_id = $request->reporting_location;
+        $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
         return back()->with(['success'=>'Employee Profile Updated Successfully']);
@@ -375,6 +737,7 @@ class AdminHumanResourseController extends Controller
         if(count($request->name) > 0)
         {
             $employee->request_status_id = 2;
+            $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
 
@@ -401,6 +764,7 @@ class AdminHumanResourseController extends Controller
         if(count($request->name) > 0)
         {
             $employee->request_status_id = 2;
+            $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
         return back()->with(['success'=>'Employee Educational Information Updated Successfully']);
@@ -427,6 +791,7 @@ class AdminHumanResourseController extends Controller
         if(count($request->name) > 0)
         {
             $employee->request_status_id = 2;
+            $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
             $employee->update();
         }
         return back()->with(['success'=>'Employee Employment History Updated Successfully']);
@@ -452,6 +817,7 @@ class AdminHumanResourseController extends Controller
         $bank_info->save();
 
         $employee->request_status_id = 2;
+        $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
 
@@ -478,6 +844,7 @@ class AdminHumanResourseController extends Controller
         $reference->save();
 
         $employee->request_status_id = 2;
+        $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
 
         return back()->with(['success'=>'Employee Reference Updated Successfully']);
@@ -486,23 +853,118 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_attachments_update(Employee $employee, Request $request)
     {
         $request->validate([
-            'cv'=>'mimes:pdf,png,jpeg,jpg',
-            'academic_credentials'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic'=>'mimes:pdf,png,jpeg,jpg',
-            'photo'=>'mimes:pdf,png,jpeg,jpg',
-            'experience_certificates'=>'mimes:pdf,png,jpeg,jpg',
-            'pay_slip'=>'mimes:pdf,png,jpeg,jpg',
-            'nikkah_nama'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_spouse'=>'mimes:pdf,png,jpeg,jpg',
-            'bform'=>'mimes:pdf,png,jpeg,jpg',
-            'cnic_nominee'=>'mimes:pdf,png,jpeg,jpg',
-            'utility_bill'=>'mimes:pdf,png,jpeg,jpg',
-            'affidavit'=>'mimes:pdf,png,jpeg,jpg',
-            'cheque'=>'mimes:pdf,png,jpeg,jpg',
-        ]);
+            'cv_1'=>'mimes:pdf,png,jpeg,jpg',
+            'cv_2'=>'mimes:pdf,png,jpeg,jpg',
+            'cv_3'=>'mimes:pdf,png,jpeg,jpg',
+            'cv_4'=>'mimes:pdf,png,jpeg,jpg',
+            'academic_1'=>'mimes:pdf,png,jpeg,jpg',
+            'academic_2'=>'mimes:pdf,png,jpeg,jpg',
+            'academic_3'=>'mimes:pdf,png,jpeg,jpg',
+            'academic_4'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_1'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_1'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_2'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_3'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_4'=>'mimes:pdf,png,jpeg,jpg',
+            'photo_1'=>'mimes:pdf,png,jpeg,jpg',
+            'photo_2'=>'mimes:pdf,png,jpeg,jpg',
+            'photo_3'=>'mimes:pdf,png,jpeg,jpg',
+            'photo_4'=>'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_1'=>'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_2'=>'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_3'=>'mimes:pdf,png,jpeg,jpg',
+            'experience_certificate_4'=>'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_1'=>'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_2'=>'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_3'=>'mimes:pdf,png,jpeg,jpg',
+            'last_pay_slip_4'=>'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_1'=>'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_2'=>'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_3'=>'mimes:pdf,png,jpeg,jpg',
+            'nikkah_nama_4'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_1'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_2'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_3'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_spouse_4'=>'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_1'=>'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_2'=>'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_3'=>'mimes:pdf,png,jpeg,jpg',
+            'child_b_form_4'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_1'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_2'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_3'=>'mimes:pdf,png,jpeg,jpg',
+            'cnic_nominee_4'=>'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_1'=>'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_2'=>'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_3'=>'mimes:pdf,png,jpeg,jpg',
+            'utility_bill_4'=>'mimes:pdf,png,jpeg,jpg',
+            'affidavit_1'=>'mimes:pdf,png,jpeg,jpg',
+            'affidavit_2'=>'mimes:pdf,png,jpeg,jpg',
+            'affidavit_3'=>'mimes:pdf,png,jpeg,jpg',
+            'affidavit_4'=>'mimes:pdf,png,jpeg,jpg',
+            'cheque_1'=>'mimes:pdf,png,jpeg,jpg',
+            'cheque_2'=>'mimes:pdf,png,jpeg,jpg',
+            'cheque_3'=>'mimes:pdf,png,jpeg,jpg',
+            'cheque_4'=>'mimes:pdf,png,jpeg,jpg',
+        ],
+            [
+                'cv_1.mimes' => 'CV must be a file of type: pdf,png,jpeg,jpg',
+                'cv_2.mimes' => 'CV must be a file of type: pdf,png,jpeg,jpg',
+                'cv_3.mimes' => 'CV must be a file of type: pdf,png,jpeg,jpg',
+                'cv_4.mimes' => 'CV must be a file of type: pdf,png,jpeg,jpg',
+                'academic_1.mimes' => 'Academic Certificates must be a file of type: pdf,png,jpeg,jpg',
+                'academic_2.mimes' => 'Academic Certificates must be a file of type: pdf,png,jpeg,jpg',
+                'academic_3.mimes' => 'Academic Certificates must be a file of type: pdf,png,jpeg,jpg',
+                'academic_4.mimes' => 'Academic Certificates must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_1.mimes' => 'CNIC must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_2.mimes' => 'CNIC must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_3.mimes' => 'CNIC must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_4.mimes' => 'CNIC must be a file of type: pdf,png,jpeg,jpg',
+                'photo_1.mimes' => 'Passport Size Photo must be a file of type: pdf,png,jpeg,jpg',
+                'photo_2.mimes' => 'Passport Size Photo must be a file of type: pdf,png,jpeg,jpg',
+                'photo_3.mimes' => 'Passport Size Photo must be a file of type: pdf,png,jpeg,jpg',
+                'photo_4.mimes' => 'Passport Size Photo must be a file of type: pdf,png,jpeg,jpg',
+                'experience_certificate_1.mimes' => 'Experience Certificate must be a file of type: pdf,png,jpeg,jpg',
+                'experience_certificate_2.mimes' => 'Experience Certificate must be a file of type: pdf,png,jpeg,jpg',
+                'experience_certificate_3.mimes' => 'Experience Certificate must be a file of type: pdf,png,jpeg,jpg',
+                'experience_certificate_4.mimes' => 'Experience Certificate must be a file of type: pdf,png,jpeg,jpg',
+                'last_pay_slip_1.mimes' => 'Last Pay Slip must be a file of type: pdf,png,jpeg,jpg',
+                'last_pay_slip_2.mimes' => 'Last Pay Slip must be a file of type: pdf,png,jpeg,jpg',
+                'last_pay_slip_3.mimes' => 'Last Pay Slip must be a file of type: pdf,png,jpeg,jpg',
+                'last_pay_slip_4.mimes' => 'Last Pay Slip must be a file of type: pdf,png,jpeg,jpg',
+                'nikkah_nama_1.mimes' => 'Nikkah Nama must be a file of type: pdf,png,jpeg,jpg',
+                'nikkah_nama_2.mimes' => 'Nikkah Nama must be a file of type: pdf,png,jpeg,jpg',
+                'nikkah_nama_3.mimes' => 'Nikkah Nama must be a file of type: pdf,png,jpeg,jpg',
+                'nikkah_nama_4.mimes' => 'Nikkah Nama must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_spouse_1.mimes' => 'CNIC Spouse must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_spouse_2.mimes' => 'CNIC Spouse must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_spouse_3.mimes' => 'CNIC Spouse must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_spouse_4.mimes' => 'CNIC Spouse must be a file of type: pdf,png,jpeg,jpg',
+                'child_b_form_1.mimes' => 'Child B Form must be a file of type: pdf,png,jpeg,jpg',
+                'child_b_form_2.mimes' => 'Child B Form must be a file of type: pdf,png,jpeg,jpg',
+                'child_b_form_3.mimes' => 'Child B Form must be a file of type: pdf,png,jpeg,jpg',
+                'child_b_form_4.mimes' => 'Child B Form must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_nominee_1.mimes' => 'CNIC Nominee must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_nominee_2.mimes' => 'CNIC Nominee must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_nominee_3.mimes' => 'CNIC Nominee must be a file of type: pdf,png,jpeg,jpg',
+                'cnic_nominee_4.mimes' => 'CNIC Nominee must be a file of type: pdf,png,jpeg,jpg',
+                'utility_bill_1.mimes' => 'Utility Bill must be a file of type: pdf,png,jpeg,jpg',
+                'utility_bill_2.mimes' => 'Utility Bill must be a file of type: pdf,png,jpeg,jpg',
+                'utility_bill_3.mimes' => 'Utility Bill must be a file of type: pdf,png,jpeg,jpg',
+                'utility_bill_4.mimes' => 'Utility Bill must be a file of type: pdf,png,jpeg,jpg',
+                'affidavit_1.mimes' => 'Affidavit must be a file of type: pdf,png,jpeg,jpg',
+                'affidavit_2.mimes' => 'Affidavit must be a file of type: pdf,png,jpeg,jpg',
+                'affidavit_3.mimes' => 'Affidavit must be a file of type: pdf,png,jpeg,jpg',
+                'affidavit_4.mimes' => 'Affidavit must be a file of type: pdf,png,jpeg,jpg',
+                'cheque_1.mimes' => 'Cheque must be a file of type: pdf,png,jpeg,jpg',
+                'cheque_2.mimes' => 'Cheque must be a file of type: pdf,png,jpeg,jpg',
+                'cheque_3.mimes' => 'Cheque must be a file of type: pdf,png,jpeg,jpg',
+                'cheque_4.mimes' => 'Cheque must be a file of type: pdf,png,jpeg,jpg',
+            ]);
+
         if($employee->attachments()->exists())
         {
-            $attachments = $employee->attachments->first();
+            $attachments = $employee->attachments;
         }
         else{
             $attachments = new EmployeeAttachment();
@@ -511,166 +973,1005 @@ class AdminHumanResourseController extends Controller
 
         $date = Carbon::now()->format('Y_m_d');
 
-        if ($request->hasFile('cv')) {
+        if ($request->hasFile('cv_1') || $request->hasFile('cv_2') || $request->hasFile('cv_3') || $request->hasFile('cv_4'))       {
+            $cv_array = [];
             if($attachments->cv != NULL) {
-                Storage::disk('public')->delete($attachments->cv);
+                $cvs = explode(',', $attachments->cv);
+                foreach ($cvs as $cv)
+                {
+                    $pos = strpos($cv, "cv_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cv_1')) {
+                            Storage::disk('public')->delete($cv);
+                        }
+                        $cv_array[0] = $cv;
+                    }
+                    $pos = strpos($cv, "cv_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cv_2')) {
+                            Storage::disk('public')->delete($cv);
+                        }
+                        $cv_array[1] = $cv;
+                    }
+                    $pos = strpos($cv, "cv_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cv_3')) {
+                            Storage::disk('public')->delete($cv);
+                        }
+                        $cv_array[2] = $cv;
+                    }
+                    $pos = strpos($cv, "cv_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cv_4')) {
+                            Storage::disk('public')->delete($cv);
+                        }
+                        $cv_array[3] = $cv;
+                    }
+                }
+            }
+            if($request->hasFile('cv_1'))
+            {
+                $file = $request->file('cv_1');
+                $filename = 'cv_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cv_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cv_2'))
+            {
+                $file = $request->file('cv_2');
+                $filename = 'cv_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cv_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cv_3'))
+            {
+                $file = $request->file('cv_3');
+                $filename = 'cv_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cv_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cv_4'))
+            {
+                $file = $request->file('cv_4');
+                $filename = 'cv_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cv_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('cv');
-            $filename = 'cv_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->cv = $directory.'/'.$filename;
+            $attachments->cv = implode(',',$cv_array);
         }
 
-        if ($request->hasFile('cnic')) {
+        if ($request->hasFile('cnic_1') || $request->hasFile('cnic_2')|| $request->hasFile('cnic_3') || $request->hasFile('cnic_4'))
+        {
+            $cnic_array = [];
             if($attachments->cnic != NULL) {
-                Storage::disk('public')->delete($attachments->cnic);
+                $cnics = explode(',',$attachments->cnic);
+                foreach ($cnics as $cnic)
+                {
+                    $pos = strpos($cnic, "cnic_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_1')) {
+                            Storage::disk('public')->delete($cnic);
+                        }
+                        $cnic_array[0] = $cnic;
+                    }
+                    $pos = strpos($cnic, "cnic_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_2')) {
+                            Storage::disk('public')->delete($cnic);
+                        }
+                        $cnic_array[1] = $cnic;
+                    }
+                    $pos = strpos($cnic, "cnic_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_3')) {
+                            Storage::disk('public')->delete($cnic);
+                        }
+                        $cnic_array[2] = $cnic;
+                    }
+                    $pos = strpos($cnic, "cnic_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_4')) {
+                            Storage::disk('public')->delete($cnic);
+                        }
+                        $cnic_array[3] = $cnic;
+                    }
+                }
             }
 
-            $file = $request->file('cnic');
-            $filename = 'cnic_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->cnic = $directory.'/'.$filename;
+            if($request->hasFile('cnic_1'))
+            {
+                $file = $request->file('cnic_1');
+                $filename = 'cnic_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_2'))
+            {
+                $file = $request->file('cnic_2');
+                $filename = 'cnic_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_3'))
+            {
+                $file = $request->file('cnic_3');
+                $filename = 'cnic_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_4'))
+            {
+                $file = $request->file('cnic_4');
+                $filename = 'cnic_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_array[3] = $directory.'/'.$filename;
+            }
+
+            $attachments->cnic = implode(',',$cnic_array);
+
         }
 
-        if ($request->hasFile('photo')) {
+        if ($request->hasFile('photo_1') || $request->hasFile('photo_2') || $request->hasFile('photo_3') || $request->hasFile('photo_4'))       {
+            $photo_array = [];
             if($attachments->photo != NULL) {
-                Storage::disk('public')->delete($attachments->cnic);
+                $photos = explode(',', $attachments->photo);
+                foreach ($photos as $photo)
+                {
+                    $pos = strpos($photo, "photo_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('photo_1')) {
+                            Storage::disk('public')->delete($photo);
+                        }
+                        $photo_array[0] = $photo;
+                    }
+                    $pos = strpos($photo, "photo_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('photo_2')) {
+                            Storage::disk('public')->delete($photo);
+                        }
+                        $photo_array[1] = $photo;
+                    }
+                    $pos = strpos($photo, "photo_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('photo_3')) {
+                            Storage::disk('public')->delete($photo);
+                        }
+                        $photo_array[2] = $photo;
+                    }
+                    $pos = strpos($photo, "photo_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('photo_4')) {
+                            Storage::disk('public')->delete($photo);
+                        }
+                        $photo_array[3] = $photo;
+                    }
+                }
+            }
+            if($request->hasFile('photo_1'))
+            {
+                $file = $request->file('photo_1');
+                $filename = 'photo_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $photo_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('photo_2'))
+            {
+                $file = $request->file('photo_2');
+                $filename = 'photo_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $photo_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('photo_3'))
+            {
+                $file = $request->file('photo_3');
+                $filename = 'photo_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $photo_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('photo_4'))
+            {
+                $file = $request->file('photo_4');
+                $filename = 'photo_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $photo_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('photo');
-            $filename = 'photo_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->photo = $directory.'/'.$filename;
+            $attachments->photo = implode(',',$photo_array);
         }
 
-        if ($request->hasFile('academic_credentials')) {
+
+        if ($request->hasFile('academic_1') || $request->hasFile('academic_2') || $request->hasFile('academic_3') || $request->hasFile('academic_4'))       {
+            $academic_array = [];
             if($attachments->academic != NULL) {
-                Storage::disk('public')->delete($attachments->academic);
+                $academics = explode(',', $attachments->academic);
+                foreach ($academics as $academic)
+                {
+                    $pos = strpos($academic, "academic_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('academic_1')) {
+                            Storage::disk('public')->delete($academic);
+                        }
+                        $academic_array[0] = $academic;
+                    }
+                    $pos = strpos($academic, "academic_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('academic_2')) {
+                            Storage::disk('public')->delete($academic);
+                        }
+                        $academic_array[1] = $academic;
+                    }
+                    $pos = strpos($academic, "academic_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('academic_3')) {
+                            Storage::disk('public')->delete($academic);
+                        }
+                        $academic_array[2] = $academic;
+                    }
+                    $pos = strpos($academic, "academic_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('academic_4')) {
+                            Storage::disk('public')->delete($academic);
+                        }
+                        $academic_array[3] = $academic;
+                    }
+                }
+            }
+            if($request->hasFile('academic_1'))
+            {
+                $file = $request->file('academic_1');
+                $filename = 'academic_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $academic_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('academic_2'))
+            {
+                $file = $request->file('academic_2');
+                $filename = 'academic_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $academic_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('academic_3'))
+            {
+                $file = $request->file('academic_3');
+                $filename = 'academic_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $academic_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('academic_4'))
+            {
+                $file = $request->file('academic_4');
+                $filename = 'academic_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $academic_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('academic_credentials');
-            $filename = 'academic_credentials_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->academic = $directory.'/'.$filename;
+            $attachments->academic = implode(',',$academic_array);
         }
 
-        if ($request->hasFile('experience_certificates')) {
+        if ($request->hasFile('experience_certificate_1') || $request->hasFile('experience_certificate_2') || $request->hasFile('experience_certificate_3') || $request->hasFile('experience_certificate_4'))       {
+            $experience_certificate_array = [];
             if($attachments->experience != NULL) {
-                Storage::disk('public')->delete($attachments->experience);
+                $experience_certificates = explode(',', $attachments->experience);
+                foreach ($experience_certificates as $experience_certificate)
+                {
+                    $pos = strpos($experience_certificate, "experience_certificate_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('experience_certificate_1')) {
+                            Storage::disk('public')->delete($experience_certificate);
+                        }
+                        $experience_certificate_array[0] = $experience_certificate;
+                    }
+                    $pos = strpos($experience_certificate, "experience_certificate_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('experience_certificate_2')) {
+                            Storage::disk('public')->delete($experience_certificate);
+                        }
+                        $experience_certificate_array[1] = $experience_certificate;
+                    }
+                    $pos = strpos($experience_certificate, "experience_certificate_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('experience_certificate_3')) {
+                            Storage::disk('public')->delete($experience_certificate);
+                        }
+                        $experience_certificate_array[2] = $experience_certificate;
+                    }
+                    $pos = strpos($experience_certificate, "experience_certificate_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('experience_certificate_4')) {
+                            Storage::disk('public')->delete($experience_certificate);
+                        }
+                        $experience_certificate_array[3] = $experience_certificate;
+                    }
+                }
+            }
+            if($request->hasFile('experience_certificate_1'))
+            {
+                $file = $request->file('experience_certificate_1');
+                $filename = 'experience_certificate_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $experience_certificate_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('experience_certificate_2'))
+            {
+                $file = $request->file('experience_certificate_2');
+                $filename = 'experience_certificate_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $experience_certificate_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('experience_certificate_3'))
+            {
+                $file = $request->file('experience_certificate_3');
+                $filename = 'experience_certificate_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $experience_certificate_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('experience_certificate_4'))
+            {
+                $file = $request->file('experience_certificate_4');
+                $filename = 'experience_certificate_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $experience_certificate_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('experience_certificates');
-            $filename = 'experience_certificates_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->experience = $directory.'/'.$filename;
+            $attachments->experience = implode(',',$experience_certificate_array);
         }
 
-        if ($request->hasFile('pay_slip')) {
+        if ($request->hasFile('last_pay_slip_1') || $request->hasFile('last_pay_slip_2') || $request->hasFile('last_pay_slip_3') || $request->hasFile('last_pay_slip_4'))       {
+            $last_pay_slip_array = [];
             if($attachments->last_pay_slip != NULL) {
-                Storage::disk('public')->delete($attachments->last_pay_slip);
+                $last_pay_slips = explode(',', $attachments->last_pay_slip);
+                foreach ($last_pay_slips as $last_pay_slip)
+                {
+                    $pos = strpos($last_pay_slip, "last_pay_slip_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('last_pay_slip_1')) {
+                            Storage::disk('public')->delete($last_pay_slip);
+                        }
+                        $last_pay_slip_array[0] = $last_pay_slip;
+                    }
+                    $pos = strpos($last_pay_slip, "last_pay_slip_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('last_pay_slip_2')) {
+                            Storage::disk('public')->delete($last_pay_slip);
+                        }
+                        $last_pay_slip_array[1] = $last_pay_slip;
+                    }
+                    $pos = strpos($last_pay_slip, "last_pay_slip_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('last_pay_slip_3')) {
+                            Storage::disk('public')->delete($last_pay_slip);
+                        }
+                        $last_pay_slip_array[2] = $last_pay_slip;
+                    }
+                    $pos = strpos($last_pay_slip, "last_pay_slip_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('last_pay_slip_4')) {
+                            Storage::disk('public')->delete($last_pay_slip);
+                        }
+                        $last_pay_slip_array[3] = $last_pay_slip;
+                    }
+                }
+            }
+            if($request->hasFile('last_pay_slip_1'))
+            {
+                $file = $request->file('last_pay_slip_1');
+                $filename = 'last_pay_slip_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $last_pay_slip_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('last_pay_slip_2'))
+            {
+                $file = $request->file('last_pay_slip_2');
+                $filename = 'last_pay_slip_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $last_pay_slip_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('last_pay_slip_3'))
+            {
+                $file = $request->file('last_pay_slip_3');
+                $filename = 'last_pay_slip_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $last_pay_slip_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('last_pay_slip_4'))
+            {
+                $file = $request->file('last_pay_slip_4');
+                $filename = 'last_pay_slip_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $last_pay_slip_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('pay_slip');
-            $filename = 'pay_slip_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->last_pay_slip = $directory.'/'.$filename;
+            $attachments->last_pay_slip = implode(',',$last_pay_slip_array);
         }
 
-        if ($request->hasFile('nikkah_nama')) {
+        if ($request->hasFile('nikkah_nama_1') || $request->hasFile('nikkah_nama_2') || $request->hasFile('nikkah_nama_3') || $request->hasFile('nikkah_nama_4'))       {
+            $nikkah_nama_array = [];
             if($attachments->nikkah_nama != NULL) {
-                Storage::disk('public')->delete($attachments->nikkah_nama);
+                $nikkah_namas = explode(',', $attachments->nikkah_nama);
+                foreach ($nikkah_namas as $nikkah_nama)
+                {
+                    $pos = strpos($nikkah_nama, "nikkah_nama_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('nikkah_nama_1')) {
+                            Storage::disk('public')->delete($nikkah_nama);
+                        }
+                        $nikkah_nama_array[0] = $nikkah_nama;
+                    }
+                    $pos = strpos($nikkah_nama, "nikkah_nama_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('nikkah_nama_2')) {
+                            Storage::disk('public')->delete($nikkah_nama);
+                        }
+                        $nikkah_nama_array[1] = $nikkah_nama;
+                    }
+                    $pos = strpos($nikkah_nama, "nikkah_nama_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('nikkah_nama_3')) {
+                            Storage::disk('public')->delete($nikkah_nama);
+                        }
+                        $nikkah_nama_array[2] = $nikkah_nama;
+                    }
+                    $pos = strpos($nikkah_nama, "nikkah_nama_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('nikkah_nama_4')) {
+                            Storage::disk('public')->delete($nikkah_nama);
+                        }
+                        $nikkah_nama_array[3] = $nikkah_nama;
+                    }
+                }
+            }
+            if($request->hasFile('nikkah_nama_1'))
+            {
+                $file = $request->file('nikkah_nama_1');
+                $filename = 'nikkah_nama_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $nikkah_nama_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('nikkah_nama_2'))
+            {
+                $file = $request->file('nikkah_nama_2');
+                $filename = 'nikkah_nama_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $nikkah_nama_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('nikkah_nama_3'))
+            {
+                $file = $request->file('nikkah_nama_3');
+                $filename = 'nikkah_nama_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $nikkah_nama_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('nikkah_nama_4'))
+            {
+                $file = $request->file('nikkah_nama_4');
+                $filename = 'nikkah_nama_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $nikkah_nama_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('nikkah_nama');
-            $filename = 'nikkah_nama_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->nikkah_nama = $directory.'/'.$filename;
+            $attachments->nikkah_nama = implode(',',$nikkah_nama_array);
         }
 
-        if ($request->hasFile('cnic_spouse')) {
+        if ($request->hasFile('cnic_spouse_1') || $request->hasFile('cnic_spouse_2') || $request->hasFile('cnic_spouse_3') || $request->hasFile('cnic_spouse_4'))       {
+            $cnic_spouse_array = [];
             if($attachments->cnic_spouse != NULL) {
-                Storage::disk('public')->delete($attachments->cnic_spouse);
+                $cnic_spouses = explode(',', $attachments->cnic_spouse);
+                foreach ($cnic_spouses as $cnic_spouse)
+                {
+                    $pos = strpos($cnic_spouse, "cnic_spouse_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_spouse_1')) {
+                            Storage::disk('public')->delete($cnic_spouse);
+                        }
+                        $cnic_spouse_array[0] = $cnic_spouse;
+                    }
+                    $pos = strpos($cnic_spouse, "cnic_spouse_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_spouse_2')) {
+                            Storage::disk('public')->delete($cnic_spouse);
+                        }
+                        $cnic_spouse_array[1] = $cnic_spouse;
+                    }
+                    $pos = strpos($cnic_spouse, "cnic_spouse_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_spouse_3')) {
+                            Storage::disk('public')->delete($cnic_spouse);
+                        }
+                        $cnic_spouse_array[2] = $cnic_spouse;
+                    }
+                    $pos = strpos($cnic_spouse, "cnic_spouse_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_spouse_4')) {
+                            Storage::disk('public')->delete($cnic_spouse);
+                        }
+                        $cnic_spouse_array[3] = $cnic_spouse;
+                    }
+                }
+            }
+            if($request->hasFile('cnic_spouse_1'))
+            {
+                $file = $request->file('cnic_spouse_1');
+                $filename = 'cnic_spouse_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_spouse_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_spouse_2'))
+            {
+                $file = $request->file('cnic_spouse_2');
+                $filename = 'cnic_spouse_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_spouse_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_spouse_3'))
+            {
+                $file = $request->file('cnic_spouse_3');
+                $filename = 'cnic_spouse_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_spouse_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_spouse_4'))
+            {
+                $file = $request->file('cnic_spouse_4');
+                $filename = 'cnic_spouse_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_spouse_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('cnic_spouse');
-            $filename = 'cnic_spouse_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->cnic_spouse = $directory.'/'.$filename;
+            $attachments->cnic_spouse = implode(',',$cnic_spouse_array);
         }
 
-        if ($request->hasFile('bform')) {
+        if ($request->hasFile('child_b_form_1') || $request->hasFile('child_b_form_2') || $request->hasFile('child_b_form_3') || $request->hasFile('child_b_form_4'))       {
+            $child_b_form_array = [];
             if($attachments->child_b_form != NULL) {
-                Storage::disk('public')->delete($attachments->child_b_form);
+                $child_b_forms = explode(',', $attachments->child_b_form);
+                foreach ($child_b_forms as $child_b_form)
+                {
+                    $pos = strpos($child_b_form, "child_b_form_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('child_b_form_1')) {
+                            Storage::disk('public')->delete($child_b_form);
+                        }
+                        $child_b_form_array[0] = $child_b_form;
+                    }
+                    $pos = strpos($child_b_form, "child_b_form_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('child_b_form_2')) {
+                            Storage::disk('public')->delete($child_b_form);
+                        }
+                        $child_b_form_array[1] = $child_b_form;
+                    }
+                    $pos = strpos($child_b_form, "child_b_form_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('child_b_form_3')) {
+                            Storage::disk('public')->delete($child_b_form);
+                        }
+                        $child_b_form_array[2] = $child_b_form;
+                    }
+                    $pos = strpos($child_b_form, "child_b_form_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('child_b_form_4')) {
+                            Storage::disk('public')->delete($child_b_form);
+                        }
+                        $child_b_form_array[3] = $child_b_form;
+                    }
+                }
+            }
+            if($request->hasFile('child_b_form_1'))
+            {
+                $file = $request->file('child_b_form_1');
+                $filename = 'child_b_form_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $child_b_form_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('child_b_form_2'))
+            {
+                $file = $request->file('child_b_form_2');
+                $filename = 'child_b_form_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $child_b_form_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('child_b_form_3'))
+            {
+                $file = $request->file('child_b_form_3');
+                $filename = 'child_b_form_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $child_b_form_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('child_b_form_4'))
+            {
+                $file = $request->file('child_b_form_4');
+                $filename = 'child_b_form_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $child_b_form_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('bform');
-            $filename = 'child_b_form_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->child_b_form = $directory.'/'.$filename;
+            $attachments->child_b_form = implode(',',$child_b_form_array);
         }
 
-        if ($request->hasFile('cnic_nominee')) {
+        if ($request->hasFile('cnic_nominee_1') || $request->hasFile('cnic_nominee_2') || $request->hasFile('cnic_nominee_3') || $request->hasFile('cnic_nominee_4'))       {
+            $cnic_nominee_array = [];
             if($attachments->cnic_nominee != NULL) {
-                Storage::disk('public')->delete($attachments->cnic_nominee);
+                $cnic_nominees = explode(',', $attachments->cnic_nominee);
+                foreach ($cnic_nominees as $cnic_nominee)
+                {
+                    $pos = strpos($cnic_nominee, "cnic_nominee_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_nominee_1')) {
+                            Storage::disk('public')->delete($cnic_nominee);
+                        }
+                        $cnic_nominee_array[0] = $cnic_nominee;
+                    }
+                    $pos = strpos($cnic_nominee, "cnic_nominee_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_nominee_2')) {
+                            Storage::disk('public')->delete($cnic_nominee);
+                        }
+                        $cnic_nominee_array[1] = $cnic_nominee;
+                    }
+                    $pos = strpos($cnic_nominee, "cnic_nominee_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_nominee_3')) {
+                            Storage::disk('public')->delete($cnic_nominee);
+                        }
+                        $cnic_nominee_array[2] = $cnic_nominee;
+                    }
+                    $pos = strpos($cnic_nominee, "cnic_nominee_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cnic_nominee_4')) {
+                            Storage::disk('public')->delete($cnic_nominee);
+                        }
+                        $cnic_nominee_array[3] = $cnic_nominee;
+                    }
+                }
+            }
+            if($request->hasFile('cnic_nominee_1'))
+            {
+                $file = $request->file('cnic_nominee_1');
+                $filename = 'cnic_nominee_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_nominee_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_nominee_2'))
+            {
+                $file = $request->file('cnic_nominee_2');
+                $filename = 'cnic_nominee_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_nominee_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_nominee_3'))
+            {
+                $file = $request->file('cnic_nominee_3');
+                $filename = 'cnic_nominee_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_nominee_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cnic_nominee_4'))
+            {
+                $file = $request->file('cnic_nominee_4');
+                $filename = 'cnic_nominee_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cnic_nominee_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('cnic_nominee');
-            $filename = 'cnic_nominee_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->cnic_nominee = $directory.'/'.$filename;
+            $attachments->cnic_nominee = implode(',',$cnic_nominee_array);
         }
 
-        if ($request->hasFile('utility_bill')) {
+        if ($request->hasFile('utility_bill_1') || $request->hasFile('utility_bill_2') || $request->hasFile('utility_bill_3') || $request->hasFile('utility_bill_4'))       {
+            $utility_bill_array = [];
             if($attachments->utility_bill != NULL) {
-                Storage::disk('public')->delete($attachments->utility_bill);
+                $utility_bills = explode(',', $attachments->utility_bill);
+                foreach ($utility_bills as $utility_bill)
+                {
+                    $pos = strpos($utility_bill, "utility_bill_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('utility_bill_1')) {
+                            Storage::disk('public')->delete($utility_bill);
+                        }
+                        $utility_bill_array[0] = $utility_bill;
+                    }
+                    $pos = strpos($utility_bill, "utility_bill_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('utility_bill_2')) {
+                            Storage::disk('public')->delete($utility_bill);
+                        }
+                        $utility_bill_array[1] = $utility_bill;
+                    }
+                    $pos = strpos($utility_bill, "utility_bill_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('utility_bill_3')) {
+                            Storage::disk('public')->delete($utility_bill);
+                        }
+                        $utility_bill_array[2] = $utility_bill;
+                    }
+                    $pos = strpos($utility_bill, "utility_bill_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('utility_bill_4')) {
+                            Storage::disk('public')->delete($utility_bill);
+                        }
+                        $utility_bill_array[3] = $utility_bill;
+                    }
+                }
+            }
+            if($request->hasFile('utility_bill_1'))
+            {
+                $file = $request->file('utility_bill_1');
+                $filename = 'utility_bill_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $utility_bill_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('utility_bill_2'))
+            {
+                $file = $request->file('utility_bill_2');
+                $filename = 'utility_bill_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $utility_bill_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('utility_bill_3'))
+            {
+                $file = $request->file('utility_bill_3');
+                $filename = 'utility_bill_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $utility_bill_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('utility_bill_4'))
+            {
+                $file = $request->file('utility_bill_4');
+                $filename = 'utility_bill_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $utility_bill_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('utility_bill');
-            $filename = 'utility_bill_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->utility_bill = $directory.'/'.$filename;
+            $attachments->utility_bill = implode(',',$utility_bill_array);
         }
 
-        if ($request->hasFile('affidavit')) {
+        if ($request->hasFile('affidavit_1') || $request->hasFile('affidavit_2') || $request->hasFile('affidavit_3') || $request->hasFile('affidavit_4'))       {
+            $affidavit_array = [];
             if($attachments->affidavit != NULL) {
-                Storage::disk('public')->delete($attachments->affidavit);
+                $affidavits = explode(',', $attachments->affidavit);
+                foreach ($affidavits as $affidavit)
+                {
+                    $pos = strpos($affidavit, "affidavit_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('affidavit_1')) {
+                            Storage::disk('public')->delete($affidavit);
+                        }
+                        $affidavit_array[0] = $affidavit;
+                    }
+                    $pos = strpos($affidavit, "affidavit_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('affidavit_2')) {
+                            Storage::disk('public')->delete($affidavit);
+                        }
+                        $affidavit_array[1] = $affidavit;
+                    }
+                    $pos = strpos($affidavit, "affidavit_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('affidavit_3')) {
+                            Storage::disk('public')->delete($affidavit);
+                        }
+                        $affidavit_array[2] = $affidavit;
+                    }
+                    $pos = strpos($affidavit, "affidavit_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('affidavit_4')) {
+                            Storage::disk('public')->delete($affidavit);
+                        }
+                        $affidavit_array[3] = $affidavit;
+                    }
+                }
+            }
+            if($request->hasFile('affidavit_1'))
+            {
+                $file = $request->file('affidavit_1');
+                $filename = 'affidavit_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $affidavit_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('affidavit_2'))
+            {
+                $file = $request->file('affidavit_2');
+                $filename = 'affidavit_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $affidavit_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('affidavit_3'))
+            {
+                $file = $request->file('affidavit_3');
+                $filename = 'affidavit_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $affidavit_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('affidavit_4'))
+            {
+                $file = $request->file('affidavit_4');
+                $filename = 'affidavit_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $affidavit_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('affidavit');
-            $filename = 'affidavit_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->affidavit = $directory.'/'.$filename;
+            $attachments->affidavit = implode(',',$affidavit_array);
         }
 
-        if ($request->hasFile('cheque')) {
+        if ($request->hasFile('cheque_1') || $request->hasFile('cheque_2') || $request->hasFile('cheque_3') || $request->hasFile('cheque_4'))       {
+            $cheque_array = [];
             if($attachments->cheque != NULL) {
-                Storage::disk('public')->delete($attachments->cheque);
+                $cheques = explode(',', $attachments->cheque);
+                foreach ($cheques as $cheque)
+                {
+                    $pos = strpos($cheque, "cheque_1_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cheque_1')) {
+                            Storage::disk('public')->delete($cheque);
+                        }
+                        $cheque_array[0] = $cheque;
+                    }
+                    $pos = strpos($cheque, "cheque_2_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cheque_2')) {
+                            Storage::disk('public')->delete($cheque);
+                        }
+                        $cheque_array[1] = $cheque;
+                    }
+                    $pos = strpos($cheque, "cheque_3_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cheque_3')) {
+                            Storage::disk('public')->delete($cheque);
+                        }
+                        $cheque_array[2] = $cheque;
+                    }
+                    $pos = strpos($cheque, "cheque_4_");
+                    if($pos !== false)
+                    {
+                        if($request->hasFile('cheque_4')) {
+                            Storage::disk('public')->delete($cheque);
+                        }
+                        $cheque_array[3] = $cheque;
+                    }
+                }
+            }
+            if($request->hasFile('cheque_1'))
+            {
+                $file = $request->file('cheque_1');
+                $filename = 'cheque_1_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cheque_array[0] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cheque_2'))
+            {
+                $file = $request->file('cheque_2');
+                $filename = 'cheque_2_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cheque_array[1] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cheque_3'))
+            {
+                $file = $request->file('cheque_3');
+                $filename = 'cheque_3_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cheque_array[2] = $directory.'/'.$filename;
+            }
+            if($request->hasFile('cheque_4'))
+            {
+                $file = $request->file('cheque_4');
+                $filename = 'cheque_4_'. $date . '.' . $file->extension();
+                $directory = 'employee_directory/employee_' . $employee->id . '';
+                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                $cheque_array[3] = $directory.'/'.$filename;
             }
 
-            $file = $request->file('cheque');
-            $filename = 'cheque_' . $date . '.'.$file->extension();
-            $directory = 'employee_directory/employee_'. $employee->id .'';
-            Storage::disk('public')->putFileAs($directory, $file, $filename);
-            $attachments->cheque = $directory.'/'.$filename;
+            $attachments->cheque = implode(',',$cheque_array);
         }
+
+
+        $attachments->save();
 
         $employee->request_status_id = 2;
+        $employee->status_id =  ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
-        
-        $attachments->save();
+
 
         return back()->with(['success'=>'Employee Attachments Updated Successfully']);
     }
@@ -896,4 +2197,54 @@ class AdminHumanResourseController extends Controller
         $department->save();
         return redirect()->back()->with('success', 'Department Updated Successfully!');
     }
+
+    public function rider_incentive_index(){
+        $cities = DB::table('cities')->select('id','name')->get();
+        $hubs = DB::table('cities')->where('hub',1)->select('id','name')->get();
+        $zones = DB::table('zones')->where('status',1)->select('id','name')->get();
+
+        return view('admin.human_resource.rider_incentive')->with(['cities' => $cities, 'hubs' => $hubs, 'zones' => $zones]);
+    }
+
+    public function rider_incentive_list(Request $request){
+        $incentives = RidersIncentive::join('riders', 'riders.id', '=', 'riders_incentives.rider_id')
+            ->join('cities', 'cities.id', '=', 'riders.city_id')
+            ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')
+            ->join('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
+            ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as rider_phone', 'riders.cnic', 'riders.employee_id', 'rt.name as rider_type','cities.name as rider_city', 'riders_incentives.date', 'riders_incentives.pickup_shipments', 'riders_incentives.pickup_incentive', 'riders_incentives.delivery_shipments', 'riders_incentives.delivery_incentive', 'riders.trax_id as employee_id');
+
+        $datatable = Datatables::of($incentives);
+
+        if($city = $request->get('search_city')){
+            $datatable->where('cities.id', '=', $city);
+        }
+        if($hub = $request->get('search_hub')){
+            $datatable->where('cities.hub_id', '=', $hub);
+        }
+
+        if($zone = $request->get('search_zone')){
+            $datatable->where('cities.zone_id', '=', $zone);
+        }
+
+        if($employee_id = $request->get('employee_id')){
+            $datatable->where('riders.trax_id', '=', $employee_id);
+        }
+
+        if($employee_name = $request->get('employee_name')){
+            $datatable->where('riders.name', 'like', "%".$employee_name."%");
+        }
+
+        if ($request->get('search_date_from') != null && $request->get('search_date_from') != null) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('riders_incentives.date', [$from,$to]);
+        }
+
+
+        return $datatable->make(true);
+
+
+
+    }
+
 }

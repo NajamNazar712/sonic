@@ -18,6 +18,7 @@ use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
+use App\Http\Models\Admin\RcpTatOption;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
@@ -43,7 +44,11 @@ use App\Http\Models\InternationalStandardDhlRate;
 use App\http\Models\RestrictedCityIntercept;
 use App\http\Models\RestrictParcelsAttempt;
 use App\Http\Models\Rider;
+use App\Http\Models\Rider\RidersIncentiveSetting;
+use App\Http\Models\Rider\RidersShipmentPaymentType;
+use App\Http\Models\Rider\RidersShipmentWeightRange;
 use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\RiderCategory;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetailTime;
 use App\http\Models\RunnerJunction;
@@ -3799,5 +3804,204 @@ class GlobalSettingsController extends Controller
             }
 
         }
+    }
+
+    public function rider_incentive_index(){
+        $rider_categories = RiderCategory::whereIn('id', [1,2])->select('id', 'name')->get();
+        $shipment_payment_types = RidersShipmentPaymentType::select('id', 'name')->get();
+        $weight_ranges = RidersShipmentWeightRange::select('id', 'name')->get();
+        return view('admin.settings.rider_incentive.index')->with(['rider_categories' => $rider_categories, 'payment_types' => $shipment_payment_types, 'weight_ranges' => $weight_ranges]);
+    }
+
+    public function rider_incentive_list(Request $request)
+    {
+        $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'riders_incentive_settings.rider_category_id')
+            ->join('riders_shipment_payment_types as rspt', 'rspt.id', '=', 'riders_incentive_settings.rider_shipment_payment_type_id')
+            ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
+            ->join('admins as ab','ab.id', '=', 'riders_incentive_settings.added_by')
+            ->leftjoin('admins as ub', 'ub.id', '=', 'riders_incentive_settings.last_updated_by')
+            ->select('riders_incentive_settings.id as row_id','riders_incentive_settings.value','rc.name as rider_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at', 'riders_incentive_settings.updated_at');
+        return Datatables::of($types)
+            ->addColumn('action', function ($types) {
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+
+    public function rider_incentive_store(Request $request){
+
+        $names = [
+            'rider_category_select' => 'Rider Category',
+            'delivery_payment_select' => 'Rider Delivery Payment',
+            'weight_range_select' => 'Rider Weight Range',
+            'incentive_value' => 'Rider Incentive/Shipment',
+
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+
+        ];
+
+        $rules = [
+            'rider_category_select' => ['required','integer', 'digits_between:1,10', 'exists:rider_categories,id'],
+            'delivery_payment_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_payment_types,id'],
+            'weight_range_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_weight_ranges,id'],
+            'incentive_value' => ['required','integer', 'digits_between:1,100000'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+        $validate->setAttributeNames($names);
+
+        if ($validate->fails()) {
+            return redirect()->back()->with(['errors' => $validate->errors()]);
+        }
+        else {
+            $rider_category_id = $request->rider_category_select;
+            $delivery_payment_type_id = $request->delivery_payment_select;
+            $weight_range_id = $request->weight_range_select;
+            $value = $request->incentive_value;
+
+            $setting = RidersIncentiveSetting::where(['rider_category_id' => $rider_category_id, 'rider_shipment_payment_type_id' => $delivery_payment_type_id, 'rider_shipment_weight_range_id' => $weight_range_id]);
+            if($setting->exists()){
+                return redirect()->back()->with('error', 'Setting already exists!');
+            }
+            else{
+                $rider_setting = new RidersIncentiveSetting();
+                $rider_setting->rider_category_id = $rider_category_id;
+                $rider_setting->rider_shipment_payment_type_id = $delivery_payment_type_id;
+                $rider_setting->rider_shipment_weight_range_id = $weight_range_id;
+                $rider_setting->value = $value;
+                $rider_setting->added_by = Auth::id();
+                $rider_setting->save();
+
+                return redirect()->back()->with('success', 'Setting updated successfully!');
+            }
+        }
+
+    }
+
+    public function rider_incentive_details(Request $request){
+        $id = $request->id;
+        if($id){
+            $rider_incentive = RidersIncentiveSetting::find($id);
+            if($rider_incentive){
+                return response()->json(['status' => 0, 'details' => $rider_incentive]);
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'Setting not found!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Request error!']);
+        }
+    }
+
+    public function rider_incentive_update(Request $request){
+
+        $incentive_setting_id = $request->incentive_setting_id;
+        $value = $request->edit_incentive_value;
+        if($value == ''){
+            return redirect()->back()->with('error', 'Value not entered!');
+        }
+
+        $setting = RidersIncentiveSetting::where('id' , $incentive_setting_id);
+        if(!$setting->exists()){
+            return redirect()->back()->with('error', 'Setting not found!');
+        }
+        else{
+            $rider_setting = $setting->first();
+            $rider_setting->value = $value;
+            $rider_setting->last_updated_by = Auth::id();
+            $rider_setting->save();
+
+            return redirect()->back()->with('success', 'Setting updated successfully!');
+        }
+
+    }
+
+    public function rider_incentive_cron_index()
+    {
+        $value = NULL;
+        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time')->first();
+        if($settings){
+            $value = $settings->setting_value;
+        }
+        return view('admin.settings.rider_incentive.rider_incentive_cron')->with('value', $value);
+    }
+
+    public function rider_incentive_cron_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
+
+        if($settings->exists()){
+            $settings = $settings->first();
+
+        }
+        else{
+            $settings = new GlobalSettings();
+            $settings->type = 'rider_incentive_cron_time';
+        }
+        $settings->setting_value = $request->rider_incentive_cron_time;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+	public function rcp_tat_index()
+    {
+        $tat_options = RcpTatOption::all();
+        return view('admin.settings.rcp_tat_view')->with(['tat_options'=>$tat_options]);
+    }
+
+    public function rcp_tat_list(Request $request)
+    {
+        $shippers = User::join('rcp_tat_options as tat_option','users.rcp_tat_option_id','=','tat_option.id')
+            ->leftJoin('admins as a','a.id','=','users.rcp_tat_updated_by')
+            ->select(['users.id as id','users.name as shipper','users.rcp_tat_updated_at as updated_at','a.name as updated_by','tat_option.name as tat','users.rcp_tat_option_id as tat_id'])
+            ->where([['users.status',3],['users.blacklist',0]]);
+
+        return Datatables::of($shippers)
+            ->addColumn('action', function ($shippers) {
+                $dropdown = '';
+                if (session('role_id') == 1 || count(array_intersect([489], session('permissions'))) !== 0) {
+                    $dropdown = '
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+
+                    $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function rcp_tat_update(Request $request)
+    {
+        $shipper_ids = explode(',',$request->shipper_id);
+        User::whereIn('id',$shipper_ids)->update([
+           'rcp_tat_option_id' => $request->tat_option,
+           'rcp_tat_updated_by' => Auth::id(),
+           'rcp_tat_updated_at' => now(),
+        ]);
+
+        return back()->with(['success'=>'Shipper TAT Updated Successfully']);
     }
 }

@@ -25,6 +25,7 @@ use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
 use App\Http\Models\PickupAddressIbanMapping;
 use App\Http\Models\RateStatus;
@@ -1520,6 +1521,20 @@ class AdminFinanceController extends Controller
                         }
         
                         ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                       if($shipment->packaging_material_request == 1) {
+                           $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                           if ($packaging_material_shipment != null) {
+                               $packaging_material_shipment->status_id = 3;
+                               $packaging_material_shipment->save();
+
+                               $packaging_request_history = new PackagingMaterialRequestHistory();
+                               $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                               $packaging_request_history->status = 3;
+                               $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                               $packaging_request_history->save();
+                           }
+                       }
         
                         NotificationsController::send(21, $shipment_id, Auth::id());
                        }
@@ -1671,6 +1686,20 @@ class AdminFinanceController extends Controller
                             }
 
                             ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                            if($shipment->packaging_material_request == 1) {
+                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                                if ($packaging_material_shipment != null) {
+                                    $packaging_material_shipment->status_id = 3;
+                                    $packaging_material_shipment->save();
+
+                                    $packaging_request_history = new PackagingMaterialRequestHistory();
+                                    $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                    $packaging_request_history->status = 3;
+                                    $packaging_request_history->updated_by = \Illuminate\Support\Facades\Auth::id();
+                                    $packaging_request_history->save();
+                                }
+                            }
 
                             NotificationsController::send(21, $request->id, Auth::id());
 
@@ -2258,7 +2287,7 @@ class AdminFinanceController extends Controller
         }
         else{
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
-            if($retail_shipment->shipping_mode == 3){
+            if($retail_shipment->shipping_mode == 3 && $adjustment_type == 2){
                 $pending_payment = RetailPendingPayment::where('user_id', $retail_shipment->shipper_account_no);
 
                 if ($pending_payment->exists()) {
@@ -2280,6 +2309,7 @@ class AdminFinanceController extends Controller
                     $pending_payment->save();
                 }
 
+                $payable = 0 - $payable;
                 $pending_payment_shipment = new RetailPendingPaymentShipment();
 
                 $pending_payment_shipment->retail_pending_payment_id = $pending_payment->id;
@@ -2667,6 +2697,10 @@ class AdminFinanceController extends Controller
                             if ($type == 0) {
                                 $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
                             }
+                            else{
+                                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                            }
 
                             $pending_payment->save();
                         } else {
@@ -2680,7 +2714,7 @@ class AdminFinanceController extends Controller
                                 $pending_payment->adjusted_shipments = 0;
                             } else {
                                 $pending_payment->delivered_shipments = 0;
-                                $pending_payment->adjusted_shipments = 0;
+                                $pending_payment->adjusted_shipments = 1;
                             }
 
                             $pending_payment->save();

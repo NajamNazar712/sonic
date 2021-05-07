@@ -59,6 +59,8 @@
                         <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Confirmation Required</th>
+                        <th class="border-primary border-darken-1">Confirmation On</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
                         <th class="border-primary border-darken-1">Assigned Agent</th>
                         <th class="border-primary border-darken-1">Assigned At</th>
@@ -354,6 +356,10 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+        var selected_rows = [];
+        var restricted_rows = [];
+        @php $permission = (in_array(490, session('permissions'))); if($permission){ $permission = 1; }else{ $permission = 0; } @endphp
         $(document).ready(function () {
             $('#label_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -413,6 +419,8 @@
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Confirmation Required');
+                            head.push('Confirmation On');
                             head.push('Re-Attempt Count');
                             head.push('Assigned Agent');
                             head.push('Assigned At');
@@ -444,6 +452,8 @@
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.confirmation_req);
+                                row.push(values.confirmation_on);
                                 row.push(values.reattempts);
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
@@ -461,7 +471,6 @@
             } );
 
             var return_confirm_reasons = @json($return_confirm_reasons);
-            var selected_rows = [];
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -524,6 +533,7 @@
                                                             });
                                                         }
                                                         selected_rows = [];
+                                                        restricted_rows = [];
 
                                                         table.rows().deselect();
 
@@ -558,7 +568,7 @@
                         className: 'btn btn-primary confirm',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            if(selected_rows !== ''){
+                            if(selected_rows !== '' && restricted_rows.length == 0){
                                 $('#ReturnConfirmReasonModal').modal('show');
 
                             }else{
@@ -575,7 +585,7 @@
                         className: 'btn btn-primary re-attempt',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
+                            if(selected_rows != '' && restricted_rows.length == 0){
                                 swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to change shipment status to Re-Attempt!',
@@ -622,6 +632,7 @@
                                         }).done(function (data) {
                                             UnblockPagePermanently();
                                             selected_rows = [];
+                                            restricted_rows = [];
                                             shipment_remarks = {};
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
@@ -656,6 +667,9 @@
                                 if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                     id = parseInt(row.id());
 
+                                    var assigned_agent_id = row.data().assigned_agent_id;
+                                    var tat = row.data().confirmation_on;
+
                                     hub_id = $(row.node()).data('hub');
 
                                     var allow = false;
@@ -678,9 +692,22 @@
                                             selected_rows.push(id);
                                         }
 
-                                        table.button('.confirm').enable();
+
+                                        if({{session('role_id')}} != 1 && {{$permission}} == 0 && assigned_agent_id != {{auth()->id()}} && tat > 0)
+                                        {
+                                            restricted_index = $.inArray(id, restricted_rows);
+
+                                            if (restricted_index === -1) {
+                                                restricted_rows.push(id);
+                                            }
+                                        }
+
+                                        if(restricted_rows.length == 0)
+                                        {
+                                            table.button('.confirm').enable();
+                                            table.button('.re-attempt').enable();
+                                        }
                                         table.button('.assign').enable();
-                                        table.button('.re-attempt').enable();
                                     }
                                 }
                             });
@@ -704,6 +731,13 @@
 
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
+                                    }
+
+                                    var restricted_index = $.inArray(id,restricted_rows);
+
+                                    if(restricted_index !== -1)
+                                    {
+                                        restricted_rows.splice(restricted_index,1);
                                     }
 
                                     if (selected_rows.length == 0) {
@@ -782,6 +816,8 @@
                     {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req'},
+                    {data: 'confirmation_on', name: '', class: 'align-middle confirmation_on', orderable: false, searchable: false},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
                     {data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
@@ -896,6 +932,9 @@
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
+                var assigned_agent_id  = table.row($(this).parents('tr')).data().assigned_agent_id;
+                var tat  = table.row($(this).parents('tr')).data().confirmation_on;
+
                 if(con_id){
                     if(hub_ids.length == 0){
                         hub_ids.push(hub_id);
@@ -948,10 +987,28 @@
                             selected_rows.splice(index, 1);
                         }
 
+                        if({{session('role_id')}} != 1 && {{$permission}} == 0 && assigned_agent_id != {{auth()->id()}} && tat > 0)
+                        {
+                            var restricted_index = $.inArray(id, restricted_rows);
+
+                            if (restricted_index === -1) {
+                                restricted_rows.push(id);
+                            } else {
+                                restricted_rows.splice(restricted_index, 1);
+                            }
+                        }
+
                         if (selected_rows.length > 0) {
-                            table.button('.confirm').enable();
+                            if(restricted_rows.length == 0)
+                            {
+                                table.button('.re-attempt').enable();
+                                table.button('.confirm').enable();
+                            }
+                            else{
+                                table.button('.re-attempt').disable();
+                                table.button('.confirm').disable();
+                            }
                             table.button('.assign').enable();
-                            table.button('.re-attempt').enable();
                         }
                         else {
                             table.button('.confirm').disable();
@@ -969,10 +1026,29 @@
                                 selected_rows.splice(index, 1);
                             }
 
+                            if({{session('role_id')}} != 1 && {{$permission}} == 0 && assigned_agent_id != {{auth()->id()}} && tat > 0)
+                            {
+                                var restricted_index = $.inArray(id, restricted_rows);
+
+                                if (restricted_index === -1) {
+                                    restricted_rows.push(id);
+                                } else {
+                                    restricted_rows.splice(restricted_index, 1);
+                                }
+                            }
+
+
                             if (selected_rows.length > 0) {
-                                table.button('.confirm').enable();
+                                if(restricted_rows.length == 0)
+                                {
+                                    table.button('.re-attempt').enable();
+                                    table.button('.confirm').enable();
+                                }
+                                else{
+                                    table.button('.re-attempt').disable();
+                                    table.button('.confirm').disable();
+                                }
                                 table.button('.assign').enable();
-                                table.button('.re-attempt').enable();
                             }
                             else {
                                 table.button('.confirm').disable();
