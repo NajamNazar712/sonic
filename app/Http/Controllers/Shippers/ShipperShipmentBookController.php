@@ -1282,13 +1282,18 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color secondary"><strong>Name</strong></td>
                     ';
                     }
-
-                    if($shipment->user->brand_name != NULL){
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
                         $company_name = $shipment->user->brand_name;
+
+                    }else{
+                        if($shipment->user->brand_name != NULL){
+                            $company_name = $shipment->user->brand_name;
+                        }
+                        else{
+                            $company_name = $shipment->user->name;
+                        }
                     }
-                    else{
-                        $company_name = $shipment->user->name;
-                    }
+                    
 
                     if ($shipment->booking_type_id != 4) {
                         $table_start .= '
@@ -3017,12 +3022,18 @@ class ShipperShipmentBookController extends Controller
                             <td class="color secondary"><strong>Name</strong></td>
                 ';
 
-            if($shipment->user->brand_name != NULL){
-                $company_name = $shipment->user->brand_name;
-            }
-            else{
-                $company_name = $shipment->user->name;
-            }
+                if($shipment->pickup_address->pickup_brand_name != NULL){
+                    $company_name = $shipment->user->brand_name;
+
+                }else{
+                    if($shipment->user->brand_name != NULL){
+                        $company_name = $shipment->user->brand_name;
+                    }
+                    else{
+                        $company_name = $shipment->user->name;
+                    }
+                }
+            
 
             if ($shipment->booking_type_id != 4) {
                 $table_start .= '
