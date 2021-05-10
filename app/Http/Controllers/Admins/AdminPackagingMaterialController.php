@@ -52,6 +52,7 @@ use App\Http\Models\WMS\WmsShipmentProduct;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\ShipperPackagingMaterailType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
@@ -1189,12 +1190,33 @@ class AdminPackagingMaterialController extends Controller
             ->make(true);
     }
 
+    public function all_shippers(){
+        $field = ' <div class="form-group">
+        <label>Select Shippers</label>
+
+        <fieldset class="form-group">
+            <select name="shippers_ids[]" multiple="multiple" id="shippers_ids" class="form-control select2" placeholder="Select Shippers*" required data-rule-required="true" data-msg-required="This field is required">
+            ';
+        
+        
+        $shippers = User::all();
+       
+            foreach ($shippers as $shipper) {
+                $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
+            }
+
+
+        $field .= '  </select></fieldset></div>';
+        return $field;
+    }
     public function type_add(Request $request){
         $packaging_type = 3;
         if($request->has('packaging_type') && $request->packaging_type == 'external'){
             $packaging_type = 2;
         }else if($request->has('packaging_type') && $request->packaging_type == 'internal'){
             $packaging_type = 1;
+        }else if($request->has('packaging_type') && $request->packaging_type == 'only_shipper'){
+            $packaging_type = 4;
         }
 
         $type = new PackagingMaterialTypes();
@@ -1220,6 +1242,16 @@ class AdminPackagingMaterialController extends Controller
         $type_history->status = 1;
         $type_history->created_by = Auth::id();
         $type_history->save();
+        if($packaging_type == 4){
+            foreach($request->shippers_ids as $index => $shippers_id){
+
+                $shipper_packaging_materail = new ShipperPackagingMaterailType;
+                $shipper_packaging_materail->shipper_id = $shippers_id;
+                $shipper_packaging_materail->type_id = $type->id;
+    
+                $shipper_packaging_materail->save();
+            }
+        }
 
         foreach($request->size as $index => $type_size){
             $packaging_material_type_size = new PackagingMaterialTypeSizes();

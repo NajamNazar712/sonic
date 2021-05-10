@@ -75,8 +75,15 @@
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
                                                     <input type="radio" class="custom-control-input bg-danger add_both" value="both" name="packaging_type" id="colorRadio3" checked>
                                                     <label class="custom-control-label" for="colorRadio3">Both</label>
+                                                </div> 
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-danger add_both" value="only_shipper" name="packaging_type" id="colorRadio7">
+                                                    <label class="custom-control-label" for="colorRadio7">Selected Shipper</label>
                                                 </div>
                                             </fieldset>
+                                        </div>
+                                        <div class="card-body" id="shippers_select">
+                                           
                                         </div>
                                     </div>
                                 </div>
@@ -256,6 +263,31 @@
     <script type="text/javascript">
         var index_count = 0;
         $(document).ready(function () {
+
+
+            $('input[name="packaging_type"]').change(function(e) { // Select the radio input group
+
+                // This returns the value of the checked radio button
+                // which triggered the event.
+                if($(this).val() =="only_shipper"){
+                    $.ajax({
+                        url: '{{route('admin.packaging.types.all_shippers')}}',
+                        success: function (result) {
+                            $("#shippers_select").html(result);
+                            $('#shippers_ids').select2({
+                                width:'100%',
+                                placeholder:"Select Shippers",
+                                allowClear:true,
+                                dropdownParent:$('#add_material_form')
+                             })
+                        }
+                    });
+
+
+
+                } 
+            });
+            
             $('.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
