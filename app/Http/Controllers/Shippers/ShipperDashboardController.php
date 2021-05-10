@@ -1236,4 +1236,87 @@ class ShipperDashboardController extends Controller
             return 'true';
         }
     }
+
+    public function quick_search_index() {
+        return view('client.quick_search');
+    }
+
+    public function quick_search_list(Request $request) {
+        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758])) {
+            $connection = 'reports';
+        }
+        else {
+            $connection = 'mysql';
+        }
+
+        $date = Carbon::now()->subMonths(3)->toDateString();
+
+        $starting_id = DB::connection($connection)->table('shipments')->whereDate('created_at', '>=', $date)->first()->id;
+
+        $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+            })
+            ->leftJoin('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->select(['u.name as user_name','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','ssr.name as reason'])
+            ->whereDate('shipments.id', '>', $starting_id);
+
+        $shipments = $shipments->where(function ($query) {
+            $query->where('shipments.user_id', session('user_id'))
+                ->orwhereIn('shipments.user_id', session('sister_users'));
+            });
+
+        if (session('user_type') == 2) {
+            if (session('restriction') == 1) {
+                $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('phone', function ($shipments){
+                $phone = $shipments->phone1;
+
+                if ($shipments->phone2) {
+                    $phone .= . ' / ' . $shipments->phone2;
+                }
+
+                return $phone;
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            });
+
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatable->where('shipments.tracking_number', $tracking_number);
+        }
+
+        if ($phone_number = $request->get('phone_number')) {
+            $phone_number = str_replace('-', '', $phone_number);
+
+            $phone_number = '%' . $phone_number . '%';
+
+            $datatable->where(function ($sub_query) use ($phone_number) {
+                $sub_query->whereRaw('REPLACE(`shipments`.`consignee_phone_number_1`, "-", "") LIKE ?', [$phone_number])
+                ->orWhereRaw('REPLACE(`shipments`.`consignee_phone_number_2`, "-", "") LIKE ?', [$phone_number]);
+            });
+        }
+
+        return $datatable->make(true);
+    }
 }
