@@ -1052,9 +1052,18 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
+                    var count = 0;
+                    reconcile_delivery_notes_table.rows().nodes().each(function(index) {
+                        count++;
+                            var row = reconcile_delivery_notes_table.row(index);
+
+                            
+                        });
                     var pressed_button = $(this.submitButton);
-                    console.log(selected_rows.length);
-                    if(selected_rows.length==0){
+                    // console.log(selected_rows.length);
+                    // console.log('total rows');
+                    // console.log(count);
+                    if(selected_rows.length!=count){
 
                         toastr.error('Please Select all delivery notes or sheets', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }else{
