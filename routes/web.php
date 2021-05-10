@@ -395,6 +395,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('', 'Shippers\ShipperTelenorController@data_conversion_store')->name('store');
         });
     });
+
+    Route::prefix('quick_search')->name('quick_search.')->group(function(){
+        Route::get('','Shippers\ShipperDashboardController@quick_search_index')->name('index');
+        Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
+    });
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
