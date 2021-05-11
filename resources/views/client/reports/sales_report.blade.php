@@ -149,6 +149,7 @@
                         <th class="border-primary border-darken-1">Shipper Reference 3</th>
                         <th class="border-primary border-darken-1">Shipper Reference 4</th>
                         <th class="border-primary border-darken-1">Shipper Reference 5</th>
+                        <th class="border-primary border-darken-1">Reason</th>
                     </tr>
                     </thead>
                 </table>
@@ -410,6 +411,7 @@
                             head.push('Shipper Reference 3');
                             head.push('Shipper Reference 4');
                             head.push('Shipper Reference 5');
+                            head.push('Reason');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -445,6 +447,7 @@
                                 row.push(values.reference_3);
                                 row.push(values.reference_4);
                                 row.push(values.reference_5);
+                                row.push(values.reason_name);
 
                                 body.push(row);
                             });
@@ -520,7 +523,9 @@
                     { data: 'reference_2' ,name: 'ssr.reference_2', class: 'align-middle reference_2'},
                     { data: 'reference_3' ,name: 'ssr.reference_3', class: 'align-middle reference_3'},
                     { data: 'reference_4' ,name: 'ssr.reference_4', class: 'align-middle reference_4'},
-                    { data: 'reference_5' ,name: 'ssr.reference_5', class: 'align-middle reference_5'}
+                    { data: 'reference_5' ,name: 'ssr.reference_5', class: 'align-middle reference_5'},
+                    { data: 'reason_name' ,name: 'ssreason.reason_name', class: 'align-middle reason_name'}
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
