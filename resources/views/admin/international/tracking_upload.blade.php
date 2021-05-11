@@ -75,6 +75,11 @@
                             <label class="label" for="tracking_number">International Tracking Number</label>
                             <input type="text"  class="form-control" name="international_tracking_number" id="edit_international_tracking_number" data-rule-required="true" data-msg-required="Internatioanl Tracking No. is required">
                         </div>
+                        <div class="form-group">
+                            <label class="label" for="actual_weight">Actual Weight</label>
+                            <input type="number" class="form-control" name="actual_weight" id="edit_actual_weight">
+                        </div>
+                        
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -251,6 +256,7 @@
                         }).done(function(data) {
                             if(data.status == 0){
                                 $('#edit_tracking_number').val(data.details.tracking_number);
+                                $('#edit_actual_weight').val(data.details.actual_weight);
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
