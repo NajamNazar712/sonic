@@ -2459,8 +2459,21 @@ class NotificationsController extends Controller
 
                     $cc = array();
 
-                    $general_admins = Admin::where('role_id', 2)->where('status', 1);
 
+                    $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
+                    $sales_person_admin = Admin::find($sales_person->admin_id);
+                    
+                    if ($sales_person) {
+                        $cc[] = Admin::find($sales_person->admin_id)->email;
+                    }
+
+                    $regional_manager = Admin::whereIn('role_id', [44, 27])->where('default_hub_id', $sales_person_admin->default_hub1)->get()->first();
+                    // $general_admins = Admin::where('role_id', 2)->where('status', 1);
+                    if ($regional_manager) {
+                        $cc[] = $regional_manager->email;
+                    }
+                    $general_admins = Admin::whereIn('role_id', [2, 5])->where('status', 1);
+                    
                     if ($general_admins->exists()) {
                         $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
                     }
