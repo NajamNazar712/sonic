@@ -77,7 +77,7 @@
                         </div>
                         <div class="form-group">
                             <label class="label" for="actual_weight">Actual Weight</label>
-                            <input type="number" class="form-control" name="actual_weight" id="edit_actual_weight">
+                            <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight">
                         </div>
                         
                     </div>
