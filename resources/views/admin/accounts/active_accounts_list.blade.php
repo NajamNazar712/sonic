@@ -476,6 +476,7 @@
                         head.push('Rates Rejected At');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
+                        head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
                         head.push('Documents Uploaded At');
                         head.push('Documents Approved By');
@@ -516,6 +517,7 @@
                             row.push(values.rates_rejected_at);
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
+                            row.push(values.disable_at);
                             row.push(values.disable_remarks);
                             row.push(values.documents_uploaded_at);
                             row.push(values.documents_approved_by);
