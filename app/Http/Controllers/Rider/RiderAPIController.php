@@ -10,11 +10,16 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailPaymentMode;
+use App\http\Models\Admin\Retail\RetailShippingMode;
+use App\http\Models\Admin\Retail\RetailTraxBox;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\CityDelivery;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\CRM\CrmComments;
@@ -37,6 +42,7 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
 use App\Http\Models\RiderDelivery;
@@ -4854,6 +4860,9 @@ class RiderAPIController extends Controller
                         $information = array();
 
                         $information['name'] = $rider->name;
+                        $information['phone'] = $rider->phone;
+                        $information['cnic'] = $rider->cnic;
+                        $information['address'] = $rider->address;
                         $information['role'] = 'rider';
 
                         $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
@@ -7403,6 +7412,18 @@ class RiderAPIController extends Controller
             return response()->json(["status" => 1, "message" => "Incentives Not Found found!"]);
         }
 
+    }
+
+    public function retail_index(){
+        $products = Product::all();
+        $business_categories = BusinessCategory::where('id', '!=', 2)->get();
+        $shipping_modes = RetailShippingMode::all();
+        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
+        $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
+        $trax_boxes = RetailTraxBox::all();
+        $banks = BanksList::all();
+        return response()->json(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
     }
 
 

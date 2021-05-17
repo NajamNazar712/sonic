@@ -88,6 +88,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $user = Admin::where('email', $request->input('email_address'));
+            $employee = Employee::where('trax_id', $user->trax_id);
             if ($user->exists()) {
                 $user = $user->first();
                 if($user->status == 0){
@@ -98,6 +99,13 @@ class AdminAPIController extends Controller
 
                     $information['id'] = $user->id;
                     $information['name'] = $user->name;
+                    $information['phone'] = $user->phone_number;
+                    $information['cnic'] = $user->cnic;
+                    if ($employee->exists()) {
+                        $information['address'] = $employee->address;
+                    } else {
+                        $information['address'] = '';
+                    }
                     $information['role'] = 'staff';
 
                     if ($user->api_token) {

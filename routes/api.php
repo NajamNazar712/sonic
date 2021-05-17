@@ -169,6 +169,10 @@ Route::name('api.')->group(function () {
 
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
 
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
+            });
+
 		});
 
 	});
@@ -196,6 +200,10 @@ Route::name('api.')->group(function () {
                 Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
+            });
+
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
             });
 
         });
