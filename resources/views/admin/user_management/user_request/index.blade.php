@@ -73,7 +73,7 @@
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <label for="tarx_id" class="font-weight-bold">Trax Id</label>
+                                        <label for="tarx_id" class="font-weight-bold">Employee Id</label>
                                         <div class="form-group">
                                             <input type="text" name="trax_id" id="trax_id" class="form-control" readonly>
                                         </div>
@@ -122,7 +122,7 @@
                                 <tr role="row" class="bg-primary white">
 
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Trax ID</th>
+                                    <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Email</th>
                                     <th class="border-primary border-darken-1">Outlook Email Required (Yes/No)</th>
@@ -198,7 +198,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Trax Id');
+                            head.push('Employee Id');
                             head.push('Name');
                             head.push('Email');
                             head.push('OutLook Email Required (Yes/No)');
