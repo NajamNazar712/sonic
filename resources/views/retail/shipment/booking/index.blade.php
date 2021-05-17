@@ -54,6 +54,13 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="form-group d-none" id="international_destination_div">
+                                        <select name="international_destination" id="international_destination" class="select2 form-control destination" data-rule-required="true" data-msg-required="Destination is required">
+                                            @foreach($international_cities as $international_city)
+                                                <option value="{{$international_city->id}}">{{$international_city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="form-group text-center">
                                         <label class="mr-1">Volumetric Weight</label>
                                         <input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
@@ -379,15 +386,34 @@
             }).bind('change', function () {
                 $('#shipper_phone_no').val('');
                 var id = parseInt($(this).val());
+                var business_category = parseInt($("#business_category").val());
                 if(id === 1){
                     $('#cod_check').addClass('d-none');
-                    $('#domestic_overland_destination_div').removeClass('d-none');
-                    $('#domestic_destination_div').addClass('d-none');
+                    if(business_category == 1)
+                    {
+                        $('#domestic_overland_destination_div').removeClass('d-none');
+                        $('#domestic_destination_div').addClass('d-none');
+                        $('#international_destination_div').addClass('d-none');
+                    }
+                    else {
+
+                        $('#domestic_overland_destination_div').addClass('d-none');
+                        $('#domestic_destination_div').addClass('d-none');
+                        $('#international_destination_div').removeClass('d-none');
+                    }
                     overland = true;
                 }
                 else{
-                    $('#domestic_destination_div').removeClass('d-none');
-                    $('#domestic_overland_destination_div').addClass('d-none');
+                    if(business_category == 1) {
+                        $('#domestic_destination_div').removeClass('d-none');
+                        $('#domestic_overland_destination_div').addClass('d-none');
+                        $('#international_destination_div').addClass('d-none');
+                    }
+                    else{
+                        $('#domestic_destination_div').addClass('d-none');
+                        $('#domestic_overland_destination_div').addClass('d-none');
+                        $('#international_destination_div').removeClass('d-none');
+                    }
                     if(id == 5){
                         $('#trax_box_div').removeClass('d-none');
                     }

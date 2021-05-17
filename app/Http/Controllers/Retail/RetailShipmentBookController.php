@@ -140,14 +140,15 @@ class RetailShipmentBookController extends Controller
 
     public function index(){
         $products = Product::all();
-        $business_categories = BusinessCategory::where('id', '!=', 2)->get();
+        $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
     }
 
     public function store(Request $request){
@@ -169,15 +170,31 @@ class RetailShipmentBookController extends Controller
 
         $shipping_mode_check = $request->input('shipping_mode');
         if ($shipping_mode_check == 1) {
-            $consignee_city_id = $request->input('domestic_overland_destination');
+            if($request->input('business_category') == 1)
+            {
+                $consignee_city_id = $request->input('domestic_overland_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
             $shipping_mode_id = 2;
         }
         elseif ($shipping_mode_check == 4){
-            $consignee_city_id = $request->input('domestic_destination');
+            if($request->input('business_category') == 1) {
+                $consignee_city_id = $request->input('domestic_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
             $shipping_mode_id = 3;
         }
         else{
-            $consignee_city_id = $request->input('domestic_destination');
+            if($request->input('business_category') == 1) {
+                $consignee_city_id = $request->input('domestic_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
             $shipping_mode_id = 1;
         }
         $same_day_timing_id = NULL;
@@ -246,10 +263,20 @@ class RetailShipmentBookController extends Controller
         }
 
         if($request->shipping_mode == 1){
-            $destination = $request->domestic_overland_destination;
+            if($request->input('business_category') == 1) {
+                $destination = $request->domestic_overland_destination;
+            }
+            else{
+                $destination = $request->input('international_destination');
+            }
         }
         else{
-            $destination = $request->domestic_destination;
+            if($request->input('business_category') == 1) {
+                $destination = $request->domestic_destination;
+            }
+            else{
+            $destination = $request->input('international_destination');
+            }
         }
 
         $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
