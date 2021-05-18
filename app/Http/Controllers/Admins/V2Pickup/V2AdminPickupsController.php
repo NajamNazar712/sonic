@@ -402,12 +402,12 @@ class V2AdminPickupsController extends Controller
                         $rider_device_token = $rider_device_token->first();
                         $device_token = $rider_device_token->device_token;
                         $title = "Pickup Request Reassigned";
-                        $message = "Dear Rider Pickup of : " . $pickup_request->shipper->name . " has been reassigned to";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Reassigned To ".$pickup_request->rider->name;
                         NotificationsController::bolt_app_notification($previous_rider_id, 2,$device_token, $title, $message);
                     }
                 }
 
-                if ($rider_id != null) {
+                if ($rider_id != null && $previous_rider_id == null) {
                     $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
                         ->where('employee_type_id', 2)
                         ->select('device_token');
@@ -415,7 +415,20 @@ class V2AdminPickupsController extends Controller
                         $rider_device_token = $rider_device_token->first();
                         $device_token = $rider_device_token->device_token;
                         $title = "Pickup Request Assigned";
-                        $message = "Dear Rider Pickup Request : " . $pickup_request->shipper->name . " Assigned To You";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Assigned To You";
+                        NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
+                    }
+                }
+                elseif ($rider_id != null && $previous_rider_id != null){
+                    $previous_rider = Rider::where('id', $previous_rider_id)->select('name');
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Pickup Request Ressigned";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Ressigned To You From ". $previous_rider->name;
                         NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
                     }
                 }
