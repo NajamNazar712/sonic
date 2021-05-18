@@ -170,6 +170,7 @@ class AdminInternationalShipmentsController extends Controller
                             $international_shipment = $international_shipment->first();
                             $international_shipment->international_tracking_number = $international_tracking_number;
                             $international_shipment->actual_weight = $international_shipment_weight;
+                            $international_shipment->sync = 1;
                             $international_shipment->save();
 
                             if($international_shipment_weight != NULL){

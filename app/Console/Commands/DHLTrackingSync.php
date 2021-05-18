@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\DHLInternationalShipmentSyncController;
 use Illuminate\Console\Command;
 
 class DHLTrackingSync extends Command
@@ -37,6 +38,6 @@ class DHLTrackingSync extends Command
      */
     public function handle()
     {
-        //
+        DHLInternationalShipmentSyncController::dhl_tracking();
     }
 }
