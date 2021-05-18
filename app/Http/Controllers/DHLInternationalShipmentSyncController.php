@@ -26,7 +26,7 @@ class DHLInternationalShipmentSyncController extends Controller
         $response = '{
   "shipments": [
     {
-      "id": "7837177526",
+      "id": "7837361350",
       "service": "express",
       "origin": {
         "address": {
@@ -35,377 +35,42 @@ class DHLInternationalShipmentSyncController extends Controller
       },
       "destination": {
         "address": {
-          "addressLocality": "SOUTHERN ALBERTA, AB - CALGARY - CANADA"
+          "addressLocality": "KARACHI - OSWEGO - PAKISTAN"
         }
       },
       "status": {
-        "timestamp": "2021-05-05T15:42:00",
+        "timestamp": "2021-05-04T17:47:00",
         "location": {
           "address": {
-            "addressLocality": "CALGARY"
+            "addressLocality": "KARACHI - PAKISTAN"
           }
         },
-        "statusCode": "delivered",
-        "status": "delivered",
-        "description": "Delivered"
+        "statusCode": "failure",
+        "status": "exception",
+        "description": "Returned to shipper"
       },
       "details": {
         "proofOfDelivery": {
-          "timestamp": "2021-05-05T15:42:00",
-          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=OBvVocSjllvofDoLcGeeNg%3D%3D&pudate=v0a0iIfJ4nzlFxyuFR%2BYLw%3D%3D&appuid=u6Nea0eLLDV14sbJMpOHuw%3D%3D&language=en&country=G0",
-          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=OBvVocSjllvofDoLcGeeNg%3D%3D&pudate=v0a0iIfJ4nzlFxyuFR%2BYLw%3D%3D&appuid=u6Nea0eLLDV14sbJMpOHuw%3D%3D&language=en&country=G0",
-          "signed": {
-            "@type": "Person",
-            "name": "Delivered"
-          }
+          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=HIyI5ZQw9ML%2BPB%2FgRhc6ZA%3D%3D&pudate=H%2FLXM5bvdh9v4JvRMeM7Gw%3D%3D&appuid=XGULCnoKLyskTnvIFkscaQ%3D%3D&language=en&country=G0",
+          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=HIyI5ZQw9ML%2BPB%2FgRhc6ZA%3D%3D&pudate=H%2FLXM5bvdh9v4JvRMeM7Gw%3D%3D&appuid=XGULCnoKLyskTnvIFkscaQ%3D%3D&language=en&country=G0"
         },
         "totalNumberOfPieces": 1,
         "pieceIds": [
-          "JD014600008665770753"
+          "JD014600008665793657"
         ]
       },
       "events": [
         {
-          "timestamp": "2021-05-05T15:42:00",
-          "location": {
-            "address": {
-              "addressLocality": "CALGARY"
-            }
-          },
-          "description": "Delivered"
-        },
-        {
-          "timestamp": "2021-05-05T13:08:00",
-          "location": {
-            "address": {
-              "addressLocality": "SOUTHERN ALBERTA, AB - CANADA"
-            }
-          },
-          "description": "With delivery courier"
-        },
-        {
-          "timestamp": "2021-05-05T10:19:00",
-          "location": {
-            "address": {
-              "addressLocality": "SOUTHERN ALBERTA, AB - CANADA"
-            }
-          },
-          "description": "Clearance processing complete at SOUTHERN ALBERTA - CANADA"
-        },
-        {
-          "timestamp": "2021-05-05T09:45:00",
-          "location": {
-            "address": {
-              "addressLocality": "SOUTHERN ALBERTA, AB - CANADA"
-            }
-          },
-          "description": "Arrived at Sort Facility SOUTHERN ALBERTA - CANADA"
-        },
-        {
-          "timestamp": "2021-05-05T08:36:00",
-          "location": {
-            "address": {
-              "addressLocality": "SOUTHERN ALBERTA, AB - CANADA"
-            }
-          },
-          "description": "Customs status updated"
-        },
-        {
-          "timestamp": "2021-05-05T06:55:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Departed Facility in CINCINNATI HUB - USA"
-        },
-        {
-          "timestamp": "2021-05-04T23:13:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Processed at CINCINNATI HUB - USA"
-        },
-        {
-          "timestamp": "2021-05-04T21:59:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Arrived at Sort Facility CINCINNATI HUB - USA"
-        },
-        {
-          "timestamp": "2021-05-04T10:01:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Shipment on hold"
-        },
-        {
-          "timestamp": "2021-05-03T08:08:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Shipment on hold"
-        },
-        {
-          "timestamp": "2021-05-01T12:44:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Customs status updated"
-        },
-        {
-          "timestamp": "2021-05-01T10:01:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Shipment on hold"
-        },
-        {
-          "timestamp": "2021-04-30T21:25:00",
-          "location": {
-            "address": {
-              "addressLocality": "BRUSSELS - BELGIUM"
-            }
-          },
-          "description": "Departed Facility in BRUSSELS - BELGIUM"
-        },
-        {
-          "timestamp": "2021-04-30T19:05:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Customs status updated"
-        },
-        {
-          "timestamp": "2021-04-29T23:03:00",
-          "location": {
-            "address": {
-              "addressLocality": "BRUSSELS - BELGIUM"
-            }
-          },
-          "description": "Processed at BRUSSELS - BELGIUM"
-        },
-        {
-          "timestamp": "2021-04-29T15:36:00",
-          "location": {
-            "address": {
-              "addressLocality": "BRUSSELS - BELGIUM"
-            }
-          },
-          "description": "Arrived at Sort Facility BRUSSELS - BELGIUM"
-        },
-        {
-          "timestamp": "2021-04-29T06:21:00",
+          "timestamp": "2021-05-04T17:47:00",
           "location": {
             "address": {
               "addressLocality": "KARACHI - PAKISTAN"
             }
           },
-          "description": "Departed Facility in KARACHI - PAKISTAN"
+          "description": "Returned to shipper"
         },
         {
-          "timestamp": "2021-04-28T22:09:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Processed at KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-04-28T16:55:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment picked up"
-        },
-        {
-          "timestamp": "2021-04-28T16:55:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment Accepted"
-        },
-        {
-          "timestamp": "2020-05-03T08:08:00",
-          "location": {
-            "address": {
-              "addressLocality": "CINCINNATI HUB, OH - USA"
-            }
-          },
-          "description": "Shipment on hold"
-        }
-      ]
-    },
-    {
-      "id": "9750874965",
-      "service": "express",
-      "origin": {
-        "address": {
-          "addressLocality": "KARACHI - KARACHI - PAKISTAN"
-        }
-      },
-      "destination": {
-        "address": {
-          "addressLocality": "SHARJAH - SHARJAH - UNITED ARAB EMIRATES"
-        }
-      },
-      "status": {
-        "timestamp": "2021-05-10T13:22:00",
-        "location": {
-          "address": {
-            "addressLocality": "SHARJAH"
-          }
-        },
-        "statusCode": "delivered",
-        "status": "delivered",
-        "description": "Delivered - Signed for by: MOHAMED. HUZEF"
-      },
-      "details": {
-        "proofOfDelivery": {
-          "timestamp": "2021-05-10T13:22:00",
-          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=h0ThTPQUqTynzkN7k9bQBA%3D%3D&pudate=daN%2FePkbEue%2By9vInUFPnA%3D%3D&appuid=7gywRO%2Fa19CkfG2jckECFw%3D%3D&language=en&country=G0",
-          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=h0ThTPQUqTynzkN7k9bQBA%3D%3D&pudate=daN%2FePkbEue%2By9vInUFPnA%3D%3D&appuid=7gywRO%2Fa19CkfG2jckECFw%3D%3D&language=en&country=G0",
-          "signed": {
-            "@type": "Person",
-            "name": "MOHAMED. HUZEF"
-          }
-        },
-        "totalNumberOfPieces": 1,
-        "pieceIds": [
-          "JD014600008687507677"
-        ]
-      },
-      "events": [
-        {
-          "timestamp": "2021-05-10T13:22:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH"
-            }
-          },
-          "description": "Delivered - Signed for by: MOHAMED. HUZEF"
-        },
-        {
-          "timestamp": "2021-05-10T13:22:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Payment is received and recorded for shipment related fees"
-        },
-        {
-          "timestamp": "2021-05-10T08:30:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "With delivery courier"
-        },
-        {
-          "timestamp": "2021-05-08T15:41:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Delivery attempted; recipient not home"
-        },
-        {
-          "timestamp": "2021-05-08T08:58:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "With delivery courier"
-        },
-        {
-          "timestamp": "2021-05-06T14:44:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Delivery attempted; recipient not home"
-        },
-        {
-          "timestamp": "2021-05-06T13:34:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "With delivery courier"
-        },
-        {
-          "timestamp": "2021-05-06T13:09:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Shipment on hold"
-        },
-        {
-          "timestamp": "2021-05-06T13:05:00",
-          "location": {
-            "address": {
-              "addressLocality": "SHARJAH - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Arrived at Delivery Facility in SHARJAH - UNITED ARAB EMIRATES"
-        },
-        {
-          "timestamp": "2021-05-06T12:15:00",
-          "location": {
-            "address": {
-              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Departed Facility in DUBAI - UNITED ARAB EMIRATES"
-        },
-        {
-          "timestamp": "2021-05-06T11:14:00",
-          "location": {
-            "address": {
-              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Processed at DUBAI - UNITED ARAB EMIRATES"
-        },
-        {
-          "timestamp": "2021-05-06T10:49:00",
-          "location": {
-            "address": {
-              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Clearance processing complete at DUBAI - UNITED ARAB EMIRATES"
-        },
-        {
-          "timestamp": "2021-05-06T10:03:00",
+          "timestamp": "2021-05-04T15:53:00",
           "location": {
             "address": {
               "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
@@ -414,7 +79,7 @@ class DHLInternationalShipmentSyncController extends Controller
           "description": "Arrived at Sort Facility DUBAI - UNITED ARAB EMIRATES"
         },
         {
-          "timestamp": "2021-05-06T05:05:00",
+          "timestamp": "2021-05-04T09:49:00",
           "location": {
             "address": {
               "addressLocality": "KARACHI - PAKISTAN"
@@ -423,16 +88,7 @@ class DHLInternationalShipmentSyncController extends Controller
           "description": "Departed Facility in KARACHI - PAKISTAN"
         },
         {
-          "timestamp": "2021-05-06T04:54:00",
-          "location": {
-            "address": {
-              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Customs status updated"
-        },
-        {
-          "timestamp": "2021-05-05T22:12:00",
+          "timestamp": "2021-05-04T00:51:00",
           "location": {
             "address": {
               "addressLocality": "KARACHI - PAKISTAN"
@@ -441,7 +97,7 @@ class DHLInternationalShipmentSyncController extends Controller
           "description": "Processed at KARACHI - PAKISTAN"
         },
         {
-          "timestamp": "2021-05-05T19:29:00",
+          "timestamp": "2021-05-03T22:01:00",
           "location": {
             "address": {
               "addressLocality": "KARACHI - PAKISTAN"
@@ -450,13 +106,281 @@ class DHLInternationalShipmentSyncController extends Controller
           "description": "Shipment Accepted"
         },
         {
-          "timestamp": "2021-05-05T19:29:00",
+          "timestamp": "2021-05-03T22:01:00",
           "location": {
             "address": {
               "addressLocality": "KARACHI - PAKISTAN"
             }
           },
           "description": "Shipment picked up"
+        }
+      ]
+    },
+    {
+      "id": "1600370450",
+      "service": "express",
+      "origin": {
+        "address": {
+          "addressLocality": "KARACHI - KARACHI - PAKISTAN"
+        }
+      },
+      "destination": {
+        "address": {
+          "addressLocality": "KARACHI - HIALEAH - PAKISTAN"
+        }
+      },
+      "status": {
+        "timestamp": "2021-05-04T17:48:00",
+        "location": {
+          "address": {
+            "addressLocality": "KARACHI - PAKISTAN"
+          }
+        },
+        "statusCode": "failure",
+        "status": "exception",
+        "description": "Returned to shipper"
+      },
+      "details": {
+        "proofOfDelivery": {
+          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=bYFqpz3ou%2Bpvz7tW8SZ%2BUA%3D%3D&pudate=HafB9vPKf700yKYzuH%2FG4g%3D%3D&appuid=l%2Bq%2FHtc6RizTu%2FvQ4fKztQ%3D%3D&language=en&country=G0",
+          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=bYFqpz3ou%2Bpvz7tW8SZ%2BUA%3D%3D&pudate=HafB9vPKf700yKYzuH%2FG4g%3D%3D&appuid=l%2Bq%2FHtc6RizTu%2FvQ4fKztQ%3D%3D&language=en&country=G0"
+        },
+        "totalNumberOfPieces": 1,
+        "pieceIds": [
+          "JD014600008668192770"
+        ]
+      },
+      "events": [
+        {
+          "timestamp": "2021-05-04T17:48:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Returned to shipper"
+        },
+        {
+          "timestamp": "2021-05-04T15:53:00",
+          "location": {
+            "address": {
+              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
+            }
+          },
+          "description": "Arrived at Sort Facility DUBAI - UNITED ARAB EMIRATES"
+        },
+        {
+          "timestamp": "2021-05-04T09:49:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Departed Facility in KARACHI - PAKISTAN"
+        },
+        {
+          "timestamp": "2021-05-04T01:43:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Processed at KARACHI - PAKISTAN"
+        },
+        {
+          "timestamp": "2021-05-03T16:20:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Shipment picked up"
+        },
+        {
+          "timestamp": "2021-05-03T16:20:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Shipment Accepted"
+        }
+      ]
+    },
+    {
+      "id": "1297318621",
+      "service": "express",
+      "origin": {
+        "address": {
+          "addressLocality": "KARACHI - KARACHI - PAKISTAN"
+        }
+      },
+      "destination": {
+        "address": {
+          "addressLocality": "NEW YORK, NY - EAST ELMHURST - USA"
+        }
+      },
+      "status": {
+        "timestamp": "2021-04-26T11:42:00",
+        "location": {
+          "address": {
+            "addressLocality": "EAST ELMHURST"
+          }
+        },
+        "statusCode": "delivered",
+        "status": "delivered",
+        "description": "Delivered"
+      },
+      "details": {
+        "proofOfDelivery": {
+          "timestamp": "2021-04-26T11:42:00",
+          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=a%2FWPGBbwKAuAhUodE78X3Q%3D%3D&pudate=tXMCnmf%2BbnPg9tzxoYCXdQ%3D%3D&appuid=4L5D0s%2BN1GZjoQHER9S9XA%3D%3D&language=en&country=G0",
+          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=a%2FWPGBbwKAuAhUodE78X3Q%3D%3D&pudate=tXMCnmf%2BbnPg9tzxoYCXdQ%3D%3D&appuid=4L5D0s%2BN1GZjoQHER9S9XA%3D%3D&language=en&country=G0",
+          "signed": {
+            "@type": "Person",
+            "name": "Delivered"
+          }
+        },
+        "totalNumberOfPieces": 1,
+        "pieceIds": [
+          "JD014600008650258972"
+        ]
+      },
+      "events": [
+        {
+          "timestamp": "2021-04-26T11:42:00",
+          "location": {
+            "address": {
+              "addressLocality": "EAST ELMHURST"
+            }
+          },
+          "description": "Delivered"
+        },
+        {
+          "timestamp": "2021-04-26T10:10:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK, NY - USA"
+            }
+          },
+          "description": "With delivery courier"
+        },
+        {
+          "timestamp": "2021-04-26T06:57:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK, NY - USA"
+            }
+          },
+          "description": "Arrived at Delivery Facility in NEW YORK - USA"
+        },
+        {
+          "timestamp": "2021-04-26T04:03:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
+            }
+          },
+          "description": "Departed Facility in NEW YORK CITY GATEWAY - USA"
+        },
+        {
+          "timestamp": "2021-04-25T18:21:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
+            }
+          },
+          "description": "Processed at NEW YORK CITY GATEWAY - USA"
+        },
+        {
+          "timestamp": "2021-04-25T18:21:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
+            }
+          },
+          "description": "Clearance processing complete at NEW YORK CITY GATEWAY - USA"
+        },
+        {
+          "timestamp": "2021-04-25T15:00:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
+            }
+          },
+          "description": "Arrived at Sort Facility NEW YORK CITY GATEWAY - USA"
+        },
+        {
+          "timestamp": "2021-04-25T11:08:00",
+          "location": {
+            "address": {
+              "addressLocality": "BRUSSELS - BELGIUM"
+            }
+          },
+          "description": "Departed Facility in BRUSSELS - BELGIUM"
+        },
+        {
+          "timestamp": "2021-04-25T09:07:00",
+          "location": {
+            "address": {
+              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
+            }
+          },
+          "description": "Customs status updated"
+        },
+        {
+          "timestamp": "2021-04-23T18:53:00",
+          "location": {
+            "address": {
+              "addressLocality": "BRUSSELS - BELGIUM"
+            }
+          },
+          "description": "Processed at BRUSSELS - BELGIUM"
+        },
+        {
+          "timestamp": "2021-04-23T17:51:00",
+          "location": {
+            "address": {
+              "addressLocality": "BRUSSELS - BELGIUM"
+            }
+          },
+          "description": "Arrived at Sort Facility BRUSSELS - BELGIUM"
+        },
+        {
+          "timestamp": "2021-04-23T02:54:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Departed Facility in KARACHI - PAKISTAN"
+        },
+        {
+          "timestamp": "2021-04-22T21:26:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Processed at KARACHI - PAKISTAN"
+        },
+        {
+          "timestamp": "2021-04-22T16:41:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Shipment picked up"
+        },
+        {
+          "timestamp": "2021-04-22T16:41:00",
+          "location": {
+            "address": {
+              "addressLocality": "KARACHI - PAKISTAN"
+            }
+          },
+          "description": "Shipment Accepted"
         }
       ]
     }
@@ -469,49 +393,55 @@ class DHLInternationalShipmentSyncController extends Controller
 
         if(count($international_tracking_numbers) > 0){
 
-            $international_tracking_numbers = implode(',',$international_tracking_numbers);
+            print_r($international_tracking_numbers);
 
-            dd($international_tracking_numbers);
-            $current_search_trackings = array();
-            $already_searched_trackings = array();
-            foreach ($international_tracking_numbers as $international_tracking_number) {
-                if(!in_array($already_searched_trackings, $international_tracking_number)){
-//                    $current_search_trackings =
-                }
-            }
-                $client = new Client(['base_uri' => $dhl_url, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-                try{
-                    $response = $client->get('shipments', [
-                        'headers' => [
-                            'DHL-API-Key' => $dhl_api_key,
-                        ],
-                        'query' => [
-                            'trackingNumber' => $international_tracking_numbers
-                        ]
-                    ]);
-                    $status_code = $response->getStatusCode();
+            print("Hello \n");
 
-                    if($status_code == 200){
-                        $response = $response->getBody()->getContents();
-                        Log::info($response);
-                        dd(123);
+            $chunk_international_shipments = array();
+
+//            $chunk_international_shipments = array_chunk($international_tracking_numbers, 2);
+
+//            foreach ($chunk_international_shipments as $chunk_international_shipment){
+//                $international_tracking_numbers = implode(',',$chunk_international_shipment);
+
+//                $client = new Client(['base_uri' => $dhl_url, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
+//                try{
+//                    $response = $client->get('shipments', [
+//                        'headers' => [
+//                            'DHL-API-Key' => $dhl_api_key,
+//                        ],
+//                        'query' => [
+//                            'trackingNumber' => $international_tracking_numbers
+//                        ]
+//                    ]);
+//                    $status_code = $response->getStatusCode();
+
+//                    if($status_code == 200){
+//                        $response = $response->getBody()->getContents();
                         $response = json_decode($response);
                         $international_shipments = $response->shipments;
                         if(count($international_shipments) > 0){
                             foreach ($international_shipments as $international_shipment){
                                 $intl_shipment = InternationalShipment::where('international_tracking_number', $international_shipment->id)->where('sync', 1)->first();
-                                dd($intl_shipment);
                                 if($intl_shipment){
                                     $shipment = $intl_shipment->shipment;
-                                    dd($shipment);
+                                    $origin_city_id = $shipment->pickup_address->city_id;
+                                    $destination_city_id = $shipment->consignee_city_id;
+                                    $shipment_id = $shipment->id;
                                 }
                             }
                         }
-                    }
+//                    }
 
-                }catch (RequestException $exception){
-                    Log::info($exception);
-                }
+//                }catch (RequestException $exception){
+//                    Log::info($exception);
+//                }
+
+//            }
+
+
+
+
 //            }
         }
     }
