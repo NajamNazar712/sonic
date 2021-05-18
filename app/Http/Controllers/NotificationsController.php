@@ -2461,18 +2461,21 @@ class NotificationsController extends Controller
 
 
                     $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
-                    $sales_person_admin = Admin::find($sales_person->admin_id);
+                    // $sales_person_admin = Admin::find($sales_person->admin_id);
                     
                     if ($sales_person) {
                         $cc[] = Admin::find($sales_person->admin_id)->email;
                     }
+                    $regional_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('role_id', 60)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $shipper->city->zone_id);
 
-                    $regional_manager = Admin::whereIn('role_id', [44, 27])->where('default_hub_id', $sales_person_admin->default_hub1)->get()->first();
+                    // $regional_manager = Admin::whereIn('role_id', [44, 27])->where('default_hub_id', $sales_person_admin->default_hub1)->get()->first();
                     // $general_admins = Admin::where('role_id', 2)->where('status', 1);
-                    if ($regional_manager) {
-                        $cc[] = $regional_manager->email;
+                    if ($regional_managers->exists()) {
+                        $cc = array_merge($cc, $regional_managers->pluck('admins.email')->toArray());
+                        // $cc[] = $regional_manager->email;
                     }
-                    $general_admins = Admin::whereIn('role_id', [2, 5])->where('status', 1);
+
+                    $general_admins = Admin::where('role_id',4)->where('status', 1);
                     
                     if ($general_admins->exists()) {
                         $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
