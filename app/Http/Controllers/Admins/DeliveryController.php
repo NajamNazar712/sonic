@@ -5927,41 +5927,50 @@ class DeliveryController extends Controller
             $shipment = $shipment->first();
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC')->first();
             if ($shipment->shipper_status_id == 30) {
-                if ($shipment_journey->verification == 1){
-                    $details = array();
-                    $shipper = $shipment->user;
-                    $details['id'] = $shipment->id;
+                    $delivery_note_id = $shipment_journey->reference_1_id;
+                    if($delivery_note_id){
+                        $delivery_note = DeliveryNote::find($delivery_note_id);
+                        if ($delivery_note->status == 1){
 
-                    $details['tracking_number'] = $shipment->tracking_number;
-                    $details['status'] = $shipment->status_shipper->name;
+                            $details = array();
+                            $shipper = $shipment->user;
+                            $details['id'] = $shipment->id;
 
-                    $details['service_type'] = $shipment->booking_type->booking_type;
-                    $details['shipping_mode'] = $shipment->shipping_mode->mode;
-                    $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['status'] = $shipment->status_shipper->name;
 
-                    $details['payment_mode'] = $shipment->payment_mode->mode;
-                    $details['amount'] = number_format($shipment->amount);
+                            $details['service_type'] = $shipment->booking_type->booking_type;
+                            $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                            $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
-                    $details['shipper']['name'] = $shipper->name;
-                    $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                    $details['shipper']['phone_number_1'] = $shipper->phone;
-                    $details['shipper']['phone_number_2'] = $shipper->phone2;
-                    $details['shipper']['origin'] = $shipper->city->name;
-                    $details['shipper']['address'] = $shipper->address;
+                            $details['payment_mode'] = $shipment->payment_mode->mode;
+                            $details['amount'] = number_format($shipment->amount);
 
-                    $details['consignee']['name'] = $shipment->consignee_name;
-                    $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-                    $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-                    $details['consignee']['destination'] = $shipment->consignee_city->name;
-                    $details['consignee']['address'] = $shipment->consignee_address;
+                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                            $details['shipper']['phone_number_1'] = $shipper->phone;
+                            $details['shipper']['phone_number_2'] = $shipper->phone2;
+                            $details['shipper']['origin'] = $shipper->city->name;
+                            $details['shipper']['address'] = $shipper->address;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null,null);
+                            $details['consignee']['name'] = $shipment->consignee_name;
+                            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                            $details['consignee']['destination'] = $shipment->consignee_city->name;
+                            $details['consignee']['address'] = $shipment->consignee_address;
 
-                    return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
-                }
-                else {
-                    return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
-                }
+                            ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null,null);
+
+                            return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
+                        }
+                        else {
+                            return ['status' => 1, 'error' => 'Shipment Delivery note is Not Verified yet'];
+                        }
+                    }
+                    else{
+                        return ['status' => 1, 'error' => 'Delivery Note not found!'];
+                    }
+
             }
             else {
                 return ['status' => 1, 'error' => 'Shipment Status is Not Replacement - Collected'];
