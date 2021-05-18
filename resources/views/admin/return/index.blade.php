@@ -816,7 +816,7 @@
                     {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req'},
+                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req', orderable: false, searchable: false},
                     {data: 'confirmation_on', name: '', class: 'align-middle confirmation_on', orderable: false, searchable: false},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
