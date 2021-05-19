@@ -61,7 +61,7 @@ class ShipperReportsController extends Controller
                         ->where('sjreason.id', '=',
                             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
                 })
-                ->leftJoin('shipment_status_reason as ssreason', 'ssreason.id', '=', 'sjreason.status_reason_id')
+                ->leftJoin('shipment_status_reason as ssreason', 'ssreason.id', '=', 'cj.status_reason_id')
 
                 ->leftJoin('shipment_status as ss','ss.id','=','cj.shipper_status_id')
                 ->leftJoin('pending_payment_shipments as pps', function ($join) use($connection) {
