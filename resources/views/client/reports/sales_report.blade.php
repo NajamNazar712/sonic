@@ -524,7 +524,7 @@
                     { data: 'reference_3' ,name: 'ssr.reference_3', class: 'align-middle reference_3'},
                     { data: 'reference_4' ,name: 'ssr.reference_4', class: 'align-middle reference_4'},
                     { data: 'reference_5' ,name: 'ssr.reference_5', class: 'align-middle reference_5'},
-                    { data: 'reason_name' ,name: 'ssreason.reason_name', class: 'align-middle reason_name'}
+                    { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'}
                     
                 ],
                 rowCallback: function(row, data, index) {
