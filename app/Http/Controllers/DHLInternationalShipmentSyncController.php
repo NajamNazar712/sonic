@@ -2,10 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\MasterCargoBagJourneyController;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
+use App\Http\Models\City;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\Shipment;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class DHLInternationalShipmentSyncController extends Controller
@@ -428,6 +439,8 @@ class DHLInternationalShipmentSyncController extends Controller
                                     $origin_city_id = $shipment->pickup_address->city_id;
                                     $destination_city_id = $shipment->consignee_city_id;
                                     $shipment_id = $shipment->id;
+                                    $shipper_status_id = $shipment->shipper_status_id;
+
                                 }
                             }
                         }
@@ -450,12 +463,167 @@ class DHLInternationalShipmentSyncController extends Controller
 
     }
     public function shipment_intransit($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        if($shipment->shipper_status_id == 2){
+            $origin_hub_id = $shipment->pickup_address->city->hub_id;
+            $destination_hub_id = $shipment->consignee_city->hub_id;
+            if($origin_hub_id != $destination_hub_id){
+                $destination = $shipment->consignee_city;
 
+                $shipments = 1;
+                $quantity = 1;
+                $shipments_weight = $shipment->actual_weight;
+                $bag = new Bag();
+
+                $bag->origin_hub_id = $origin_hub_id;
+                $bag->destination_hub_id = $destination_hub_id;
+                $bag->junction_hub_1_id = $origin_hub_id;
+                $bag->junction_hub_2_id = NULL;
+                $bag->seal_number = 123213123;
+                $bag->shipping_mode_id = 1;
+                $bag->transport_mode_id = 2;
+                $bag->transport_mode_vendor_id = 9;
+                $bag->shipments = $shipments;
+                $bag->quantity = $quantity;
+                $bag->shipments_weight = $shipments_weight;
+                $bag->actual_weight = $shipments_weight;
+                $bag->created_by = 50;
+                $bag->type = 1;
+
+                $bag->status_id = 9;
+
+                $bag->save();
+
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, 1, 50, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, 2, 50, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, 9, 50, NULL, NULL);
+
+                $id = $bag->id;
+
+                $bag_shipment = new BagShipment();
+
+                $bag_shipment->bag_id = $id;
+                $bag_shipment->shipment_id = $shipment_id;
+
+                $bag_shipment->save();
+
+                $shipment->shipper_status_id = 4;
+                $shipment->consignee_status_id = 4;
+
+                ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, 50, $bag->id, $bag->builty_number);
+
+
+                $bags = 0;
+                $shipments = 0;
+                $quantity = 0;
+                $bags_weight = 0;
+
+                $master_cargo = new MasterCargo();
+
+                $master_cargo->origin_hub_id = $origin_hub_id;
+                $master_cargo->destination_hub_id = $destination_hub_id;
+                $master_cargo->junction_hub_1_id = $origin_hub_id;
+                $master_cargo->junction_hub_2_id = NULL;
+                $master_cargo->shipping_mode_id = 1;
+                $master_cargo->transport_mode_id = 2;
+                $master_cargo->driver_name = 'International Driver';
+                $master_cargo->vehicle = 'DHL Plane';
+                $master_cargo->phone_number = $request->input('phone_number');
+            }
+        }
     }
     public function shipment_delivered($shipment_id){
 
+        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+        $rider_id = $settings->setting_value;
+
+        $shipment = Shipment::find($shipment_id);
+
+        $hub_id = City::find($shipment->consignee_city_id)->hub_id;
+        $note = DeliveryNote::create([
+            'hub_id' => $hub_id,
+            'rider_id' => $rider_id,
+            'route_id' => 2,
+            'shipments_count' => 1,
+            'admin_id' => 50,
+            'total_cod_amount' => $shipment->amount,
+            'password' => NULL,
+            'last_updated_at' => Carbon::now(),
+            'special_rider' => 0,
+            'order' => FALSE
+        ]);
+
+        if($note){
+            DeliveryNoteShipment::create([
+                'delivery_note_id' => $note->id,
+                'shipment_id' => $shipment_id,
+                'notification' => 0,
+                'rider_information' => 0,
+                'ordering' => 1
+            ]);
+
+            $shipment->shipper_status_id = 14;
+            $shipment->consignee_status_id = 14;
+            $shipment->save();
+
+            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 1);
+            DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_id])->update(['status' => 6]);
+            $date = Carbon::now();
+            DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 1, 'verified_by' => 50, 'received_cod_amount' => $shipment->amount, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
+
+            $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
+            if($international_shipment){
+                $international_shipment->sync = 0;
+                $international_shipment->save();
+            }
+        }
+
+
     }
     public function shipment_return($shipment_id){
+
+        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+        $rider_id = $settings->setting_value;
+
+        $shipment = Shipment::find($shipment_id);
+        $hub_id = City::find($shipment->consignee_city_id)->hub_id;
+        $note = DeliveryNote::create([
+            'hub_id' => $hub_id,
+            'rider_id' => $rider_id,
+            'route_id' => 2,
+            'shipments_count' => 1,
+            'admin_id' => 50,
+            'total_cod_amount' => $shipment->amount,
+            'password' => NULL,
+            'last_updated_at' => Carbon::now(),
+            'special_rider' => 0,
+            'order' => FALSE
+        ]);
+
+        if($note){
+            DeliveryNoteShipment::create([
+                'delivery_note_id' => $note->id,
+                'shipment_id' => $shipment_id,
+                'notification' => 0,
+                'rider_information' => 0,
+                'ordering' => 1
+            ]);
+
+            $shipment->shipper_status_id = 20;
+            $shipment->consignee_status_id = 20;
+            $shipment->save();
+
+
+            ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+            ShipmentsJourneyController::add($shipment_id, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0);
+            ShipmentsJourneyController::add($shipment_id, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
+
+            DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
+
+            $date = Carbon::now();
+            DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
+        }
 
     }
 }
