@@ -260,6 +260,10 @@
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
+                                console.log(data.details.shipment_status);
+                                if(data.details.shipment_status == 1){
+                                    $("#edit_actual_weight").prop("readonly", true);
+                                }
                                 $('#EditTrackingModal').modal('show');
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

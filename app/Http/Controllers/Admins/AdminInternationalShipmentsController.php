@@ -220,6 +220,7 @@ class AdminInternationalShipmentsController extends Controller
                 $details = array();
                 $details['id'] = $international_shipment->id;
                 $details['tracking_number'] = $shipment->tracking_number;
+                $details['shipment_status'] = $shipment->shipper_status_id;
                 $details['actual_weight'] = $international_shipment->actual_weight;
                 $details['international_tracking_number'] = $international_shipment->international_tracking_number;
                 return response()->json(['status' => 0, 'details' => $details]);
