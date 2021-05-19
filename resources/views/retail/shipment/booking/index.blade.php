@@ -378,6 +378,28 @@
             $('#business_category').select2({
                 width:'100%',
                 placeholder:"Select Shipment Category*"
+            }).bind('change',function(){
+                var id = parseInt($(this).val());
+                var shipping_mode = parseInt($("#shipping_mode").val());
+                if(id == 2)
+                {
+                    $('#domestic_overland_destination_div').addClass('d-none');
+                    $('#domestic_destination_div').addClass('d-none');
+                    $('#international_destination_div').removeClass('d-none');
+                }
+                else{
+                    if(shipping_mode == 1)
+                    {
+                        $('#domestic_overland_destination_div').removeClass('d-none');
+                        $('#domestic_destination_div').addClass('d-none');
+                        $('#international_destination_div').addClass('d-none');
+                    }
+                    else{
+                        $('#domestic_destination_div').removeClass('d-none');
+                        $('#domestic_overland_destination_div').addClass('d-none');
+                        $('#international_destination_div').addClass('d-none');
+                    }
+                }
             });
             var overland = false;
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
