@@ -118,11 +118,11 @@
             });
 
             $('#edit_actual_weight').inputmask({
-                'alias': 'integer',
+                'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
                 'min': 1,
-                'max':10000,
+                'max':100000,
             });
             $('body').on('change','#edit_international_tracking_number',function() {
                 $(this).val($(this).val().trim());
