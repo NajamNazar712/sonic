@@ -8,6 +8,8 @@ use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
 use App\http\Models\Admin\Retail\RetailTraxCenter;
@@ -2567,6 +2569,17 @@ class AdminAPIController extends Controller
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
         return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers]);
+    }
+
+    public function retail_bank_info(Request $request){
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no)
+            ->select('iban', 'account_number', 'cheque_image', 'bank_id');
+        $shipment_count = RetailShipment::where('shipper_phone_no', $request->shipper_phone_no)->count();
+        if($shipper_info->exists()){
+            $shipper_info = $shipper_info->get();
+            return response()->json(["status" => 0, "shipper_bank_info" => $shipper_info, "shipment_count" => $shipment_count]);
+        }
+        return response()->json(["status" => 0, "shipper_bank_info" => "", "shipment_count" => ""]);
     }
 
 }

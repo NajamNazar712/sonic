@@ -204,6 +204,7 @@ Route::name('api.')->group(function () {
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'AdminAPIController@retail_index')->name('retail_data');
+                Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
             });
 
         });
