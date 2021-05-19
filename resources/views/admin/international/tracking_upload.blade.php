@@ -116,6 +116,14 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
+            $('#edit_actual_weight').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'min': 1,
+                'max':10000,
+            });
             $('body').on('change','#edit_international_tracking_number',function() {
                 $(this).val($(this).val().trim());
             });
