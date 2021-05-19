@@ -203,7 +203,7 @@ Route::name('api.')->group(function () {
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {
-                Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
+                Route::get('retail_data', 'AdminAPIController@retail_index')->name('retail_data');
             });
 
         });
