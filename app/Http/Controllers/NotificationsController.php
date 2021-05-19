@@ -2408,9 +2408,11 @@ class NotificationsController extends Controller
                     $shipper = $invoice->shipper;
 
                     $to[] = $shipper->email;
-                    if($shipper->bank->billing_person_email !== null){
 
-                        $to[] = $shipper->bank->billing_person_email;
+                    if(isset($shipper->bank->billing_person_email)){
+                        if(isset($shipper->bank->billing_person_email) !== null){
+                            $to[] = $shipper->bank->billing_person_email;
+                        }
                     }
 
                     foreach ($shipper_fields as $key => $field) {
