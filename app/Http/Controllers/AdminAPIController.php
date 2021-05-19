@@ -110,6 +110,7 @@ class AdminAPIController extends Controller
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
                     if ($employee->exists()) {
+                        $employee = $employee->first();
                         $information['address'] = $employee->address;
                     } else {
                         $information['address'] = '';
