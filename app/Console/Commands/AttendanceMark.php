@@ -48,35 +48,43 @@ class AttendanceMark extends Command
         $rider_attendance = EmployeeAttendance::whereDate('attendance_date', $today)->where('employee_type', 2);
         if ($admin_attendance->exists()) {
             $admin_ids = $admin_attendance->pluck('employee_id')->toArray();
-            $admins = Admin::whereNotIn('id',$admin_ids)->where('status','!=',0);
-            if($admins->exists())
+            $admins = Admin::whereNotIn('id', $admin_ids)->where('status', '!=', 0);
+        }
+        else {
+            $admins = Admin::where('status', '!=', 0);
+        }
+
+        if($admins->exists())
+        {
+            $admins = $admins->get();
+            foreach ($admins as $admin)
             {
-                $admins = $admins->get();
-                foreach ($admins as $admin)
-                {
-                    $attendance = new EmployeeAttendance();
-                    $attendance->employee_id = $admin->id;
-                    $attendance->employee_type = 1;
-                    $attendance->attendance_date = $today;
-                    $attendance->save();
-                }
+                $attendance = new EmployeeAttendance();
+                $attendance->employee_id = $admin->id;
+                $attendance->employee_type = 1;
+                $attendance->attendance_date = $today;
+                $attendance->save();
             }
         }
 
         if ($rider_attendance->exists()) {
             $rider_ids = $rider_attendance->pluck('employee_id')->toArray();
-            $riders = Rider::whereNotIn('id',$rider_ids)->where('status',1);
-            if($riders->exists())
+            $riders = Rider::whereNotIn('id', $rider_ids)->where('status', 1);
+        }
+        else {
+            $riders = Rider::where('status', 1);
+        }
+        
+        if($riders->exists())
+        {
+            $riders = $riders->get();
+            foreach ($riders as $rider)
             {
-                $riders = $riders->get();
-                foreach ($riders as $rider)
-                {
-                    $attendance = new EmployeeAttendance();
-                    $attendance->employee_id = $rider->id;
-                    $attendance->employee_type = 2;
-                    $attendance->attendance_date = $today;
-                    $attendance->save();
-                }
+                $attendance = new EmployeeAttendance();
+                $attendance->employee_id = $rider->id;
+                $attendance->employee_type = 2;
+                $attendance->attendance_date = $today;
+                $attendance->save();
             }
         }
         
