@@ -6270,7 +6270,7 @@ class AdminReportsController extends Controller
                     $datatable->whereIn('shipments.shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
                     break;
                 case 'returned':
-                    $datatable->whereIn('shipments.shipper_status_id',[20,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50]);
+                    $datatable->whereIn('shipments.shipper_status_id',[25]);
                     break;
                 case 'returned_intransit':
                     $datatable->where('shipments.shipper_status_id',21);
