@@ -111,7 +111,7 @@ class AdminAPIController extends Controller
                     $information['cnic'] = $user->cnic;
                     if ($employee->exists()) {
                         $employee = $employee->first();
-                        $information['address'] = $employee->address;
+                        $information['address'] = ($employee->address) ? $employee->address : "" ;
                     } else {
                         $information['address'] = '';
                     }
