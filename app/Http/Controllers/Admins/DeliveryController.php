@@ -293,13 +293,13 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-        $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-        $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]])
-            ->whereDate('created_at','>',$datetime);
-        if($delivery_note->exists())
-        {
-           return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
-        }
+        // $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+        // $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]])
+        //     ->whereDate('created_at','>',$datetime);
+        // if($delivery_note->exists())
+        // {
+        //    return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+        // }
 
         return response()->json(['status'=> 1]);
     }
