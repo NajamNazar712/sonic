@@ -1384,12 +1384,12 @@ class AdminPackagingMaterialController extends Controller
         $type_history->updated_by = Auth::id();
         $type_history->save();
         if($packaging_type_edit == 4){
-            foreach($request->shippers_ids_edit as $index => $shippers_id){
 
+            ShipperPackagingMaterailType::where('type_id',$type->id)->delete();
+            foreach($request->shippers_ids_edit as $index => $shippers_id){
                 $shipper_packaging_materail = new ShipperPackagingMaterailType;
                 $shipper_packaging_materail->shipper_id = $shippers_id;
                 $shipper_packaging_materail->type_id = $type->id;
-    
                 $shipper_packaging_materail->save();
             }
         }
