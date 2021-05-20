@@ -2640,7 +2640,7 @@ class AdminAPIController extends Controller
 
         $charges_mode_id = 1;
 
-        if ($request->volumetric_weight == 0) {
+        if ($request->volumetric_weight == 1) {
             $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
             $length = $request->length;
             $breadth = $request->breadth;
