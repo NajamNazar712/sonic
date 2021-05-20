@@ -1283,7 +1283,9 @@ class ShipperShipmentBookController extends Controller
                     ';
                     }
                     if($shipment->pickup_address->pickup_brand_name != NULL){
-                        $company_name = $shipment->user->brand_name;
+                        // $company_name = $shipment->user->brand_name;
+                        $company_name = $shipment->pickup_address->pickup_brand_name;
+                        
 
                     }else{
                         if($shipment->user->brand_name != NULL){
@@ -3023,7 +3025,8 @@ class ShipperShipmentBookController extends Controller
                 ';
 
                 if($shipment->pickup_address->pickup_brand_name != NULL){
-                    $company_name = $shipment->user->brand_name;
+                    // $company_name = $shipment->user->brand_name;
+                    $company_name = $shipment->pickup_address->pickup_brand_name;
 
                 }else{
                     if($shipment->user->brand_name != NULL){
