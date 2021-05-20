@@ -1123,7 +1123,18 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function types_index(){
-        return view('admin.materials.types.index');
+        $existing_shipper_packing_types = ShipperPackagingMaterailType::all();
+        $arr_shipper_packing_types = array();
+        if (count($existing_shipper_packing_types)>0) {
+            // $settings = $settings->first();
+            foreach ($existing_shipper_packing_types as $existing_shipper_packing_type) {
+                array_push($arr_shipper_packing_types, $existing_shipper_packing_type->shipper_id);
+                // $arr_shipper_packing_types = array_map('intval', explode(',', $settings->text));
+            }
+            // $rider_id = $settings->setting_value;
+        }
+        // dd($arr_shipper_packing_types);
+        return view('admin.materials.types.index')->with(['arr_shipper_packing_types' => $arr_shipper_packing_types]);
     }
 
     public function types_list(Request $request){
@@ -1326,8 +1337,18 @@ class AdminPackagingMaterialController extends Controller
     public function type_details(Request $request){
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $sizes = PackagingMaterialTypeSizes::where('type_id',$request->id)->get();
+        $existing_shipper_packing_types = ShipperPackagingMaterailType::where('type_id',$type->id)->get();
 
-        return response()->json(['status' => 1, 'type' => $type, 'sizes' => $sizes]);
+        $arr_shipper_packing_types = array();
+        if (count($existing_shipper_packing_types)>0) {
+            // $settings = $settings->first();
+            foreach ($existing_shipper_packing_types as $existing_shipper_packing_type) {
+                array_push($arr_shipper_packing_types, $existing_shipper_packing_type->shipper_id);
+                // $arr_shipper_packing_types = array_map('intval', explode(',', $settings->text));
+            }
+            // $rider_id = $settings->setting_value;
+        }
+        return response()->json(['status' => 1, 'type' => $type, 'sizes' => $sizes, 'arr_shipper_packing_types' => $arr_shipper_packing_types]);
     }
 
     public function type_edit(Request $request){

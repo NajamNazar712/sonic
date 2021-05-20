@@ -140,6 +140,9 @@
                                 <div class="col-8 form-group" id="type_div">
 
                                 </div>
+                                <div class="col-8 form-group" id="type_existing">
+
+                                </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-12 form-group" id="description_div">
@@ -167,7 +170,7 @@
                                                     <label class="custom-control-label" for="colorRadio6">Both</label>
                                                 </div>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
-                                                    <input type="radio" class="custom-control-input bg-danger edit_both" value="only_shipper" name="packaging_type_edit" id="colorRadio8">
+                                                    <input type="radio" class="custom-control-input bg-danger edit_only_shipper" value="only_shipper" name="packaging_type_edit" id="colorRadio8">
                                                     <label class="custom-control-label" for="colorRadio8">Selected Shipper</label>
                                                 </div>
                                             </fieldset>
@@ -288,14 +291,6 @@
                                 dropdownParent:$('#add_material_form')
                              });
 
-                             $("#shippers_select_edit").html(result);
-                            $('#shippers_ids').select2({
-                                width:'100%',
-                                placeholder:"Select Shippers",
-                                allowClear:true,
-                                dropdownParent:$('#edit_material_form')
-                             })
-
                         }
                     });
 
@@ -303,9 +298,6 @@
 
                 }else{
                     $("#shippers_select").html('');
-                    $("#shippers_select_edit").html('');
-
-
                 } 
             });
             
@@ -319,13 +311,28 @@
                     $.ajax({
                         url: '{{route('admin.packaging.types.all_shippers_edit')}}',
                         success: function (result) {
+
                             $("#shippers_select_edit").html(result);
                             $('#shippers_ids_edit').select2({
                                 width:'100%',
                                 placeholder:"Select Shippers",
                                 allowClear:true,
                                 dropdownParent:$('#edit_material_form')
-                             })
+                             });
+
+                             var temp = document.getElementById('existing_type').value.split(',');
+                             for (a in temp ) {
+                                    temp[a] = parseInt(temp[a], 10); // Explicitly include base as per Álvaro's comment
+                                }
+                                if(temp.length>0){
+                                $('#shippers_ids_edit').val(temp).trigger('change');
+
+                                }
+
+
+                             @if(count($arr_shipper_packing_types) > 0)
+                                var ids = @json($arr_shipper_packing_types);
+                            @endif
                         }
                     });
                 }else{
@@ -535,7 +542,6 @@
 
             $('body').on('click','button.edit',function () {
                 var id = $(this).parents('tr').attr('id');
-                console.log(id);
                 $.ajax({
                     url: '{!! route('admin.packaging.types.details') !!}',
                     method: 'POST',
@@ -545,6 +551,8 @@
                     }
                 }).done(function (data) {
                     if(data.status === 1){
+                var html_type_existing = '<input type="hidden" name="existing_type" id="existing_type" value="' + data.arr_shipper_packing_types + '">';
+
                         var html_type = '<input type="hidden" name="id" value="' + data.type.id + '"><input type="text" name="edit_type" id="edit_type" class="form-control type" value="' + data.type.type + '" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">';
                         var html_description = '<textarea name="edit_description" id="edit_description" class="form-control" placeholder="Description *" data-rule-required="true" data-msg-required="Description is required">' + data.type.description + '</textarea>';
                         var html_picture = '<label for="packaging_picture">Picture</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture" id="edit_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
@@ -564,11 +572,42 @@
                             $('input.edit_internal').attr('checked', true);
                         }else if(data.type.packaging_type === 2){
                             $('input.edit_external').attr('checked', true);
+                        }else if(data.type.packaging_type === 4){
+                            $('input.edit_only_shipper').attr('checked', true);
+                            $.ajax({
+                        url: '{{route('admin.packaging.types.all_shippers_edit')}}',
+                        success: function (result) {
+
+                            $("#shippers_select_edit").html(result);
+                            $('#shippers_ids_edit').select2({
+                                width:'100%',
+                                placeholder:"Select Shippers",
+                                allowClear:true,
+                                dropdownParent:$('#edit_material_form')
+                             });
+
+                             var temp = document.getElementById('existing_type').value.split(',');
+                             for (a in temp ) {
+                                    temp[a] = parseInt(temp[a], 10); // Explicitly include base as per Álvaro's comment
+                                }
+                                if(temp.length>0){
+                                $('#shippers_ids_edit').val(temp).trigger('change');
+
+                                }
+
+
+                             @if(count($arr_shipper_packing_types) > 0)
+                                var ids = @json($arr_shipper_packing_types);
+                            @endif
                         }
-                        // else{
-                        //     $('input.edit_both').attr('checked', true);
-                        // }
+                    });
+                        }
+                        else{
+                            $('input.edit_both').attr('checked', true);
+                        }
                         $('#EditMaterialModal #type_div').html(html_type);
+                        $('#EditMaterialModal #type_existing').html(html_type_existing);
+
                         $('#EditMaterialModal #description_div').html(html_description);
                         $('#EditMaterialModal #picture_div').html(html_picture);
                         $('#EditMaterialModal #edit_size_charges_wrapper').html(html_sizes);
