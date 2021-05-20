@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\http\Models\Admin\Retail\RetailCashDeposit;
 use App\http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
 use App\http\Models\Admin\Retail\RetailShipment;
