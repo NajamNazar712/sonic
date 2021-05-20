@@ -52,7 +52,9 @@
                                     <hr>
                                 @endforeach
                                 @foreach($shipper_packaging_types as $index => $shipper_packaging_type)
-
+                                
+                                    @if ($shipper_packaging_type->packaging_material->status != 0)
+                                        
                                 <div class="col">
                                     <h1 class="mb-1">
                                         {{$shipper_packaging_type->packaging_material->type}}
@@ -89,6 +91,8 @@
                                     </div>
                                 </div>
                                 <hr>
+                                @endif
+
                             @endforeach
                             </div>
                         </div>
