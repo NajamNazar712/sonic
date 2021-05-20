@@ -570,8 +570,12 @@
 
                         if(data.type.packaging_type === 1){
                             $('input.edit_internal').attr('checked', true);
+                            $("#shippers_select_edit").html('');
+
                         }else if(data.type.packaging_type === 2){
                             $('input.edit_external').attr('checked', true);
+                            $("#shippers_select_edit").html('');
+
                         }else if(data.type.packaging_type === 4){
                             $('input.edit_only_shipper').attr('checked', true);
                             $.ajax({
@@ -604,6 +608,8 @@
                         }
                         else{
                             $('input.edit_both').attr('checked', true);
+                            $("#shippers_select_edit").html('');
+
                         }
                         $('#EditMaterialModal #type_div').html(html_type);
                         $('#EditMaterialModal #type_existing').html(html_type_existing);
