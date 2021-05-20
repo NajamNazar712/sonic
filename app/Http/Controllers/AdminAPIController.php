@@ -2590,8 +2590,8 @@ class AdminAPIController extends Controller
 
     public function retail_shipment_store(Request $request)
     {
-        $file = file_get_contents($request->cheque);
-        return response()->json([$request->cheque]);
+        /*$file = file_get_contents($request->cheque);
+        return response()->json([$request->cheque]);*/
         $user_id = $request->admin_id;
         $pickup_address_id = $request->pickup_address_id;
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
@@ -2719,7 +2719,7 @@ class AdminAPIController extends Controller
                 if ($request->has('cheque')) {
                     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
                     $file = file_get_contents($request->cheque);
-                    Storage::disk('public')->put('retail_shipper_cheque', $file, $filename);
+                    Storage::disk('public')->put('retail_shipper_cheque/'.$filename, $file);
                     $shipper_info->cheque_image = $filename;
                     $shipper_info->completed_status = 1;
                 }
