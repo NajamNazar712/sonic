@@ -56,6 +56,7 @@ use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
 
 use Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Session;
 
@@ -1050,6 +1051,13 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
+            $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
+            $barcode_series = '';
+            if(count($package_barcode)>0){
+              $first_barcode = $package_barcode->first();
+              $last_barcode = $package_barcode->last();
+              $barcode_series = $first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number;
+            }
             ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
@@ -1501,7 +1509,7 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series .'</td>
                               </tr>
                     ';
 
@@ -1524,7 +1532,7 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                               </tr>
                     ';
 
@@ -1541,7 +1549,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
                     ';
 
@@ -2955,6 +2963,15 @@ class ShipperShipmentBookController extends Controller
         $shipment_details = '';
 
         $shipment = Shipment::where('id',$request->ids)->first();
+
+        $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
+            $barcode_series = '';
+            if(count($package_barcode)>0){
+              $first_barcode = $package_barcode->first();
+              $last_barcode = $package_barcode->last();
+              $barcode_series = $first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number;
+            }
+
         if ($request->has('admin') || session('user_id') == $shipment->user_id) {
             $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -3165,7 +3182,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
             ';
 
@@ -3189,7 +3206,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
             ';
 
@@ -3206,7 +3223,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
             ';
 
@@ -3228,7 +3245,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
               ';
                 }
