@@ -2695,7 +2695,8 @@ class AdminAPIController extends Controller
                 $shipper_info->account_number = $request->account_no;
                 if ($request->has('cheque')) {
                     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-                    Storage::disk('public')->put('retail_shipper_cheque', $filename, file_get_contents($request->cheque));
+                    $file = file_get_contents($request->cheque);
+                    Storage::disk('public')->put('retail_shipper_cheque', $file, $filename);
                     $shipper_info->cheque_image = $filename;
                     $shipper_info->completed_status = 1;
                 }
@@ -2715,7 +2716,8 @@ class AdminAPIController extends Controller
                 $shipper_info->account_number = $request->account_no;
                 if ($request->has('cheque')) {
                     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-                    Storage::disk('public')->put('retail_shipper_cheque', $filename, file_get_contents($request->cheque));
+                    $file = file_get_contents($request->cheque);
+                    Storage::disk('public')->put('retail_shipper_cheque', $file, $filename);
                     $shipper_info->cheque_image = $filename;
                     $shipper_info->completed_status = 1;
                 }
