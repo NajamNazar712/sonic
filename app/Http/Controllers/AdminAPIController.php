@@ -2590,8 +2590,6 @@ class AdminAPIController extends Controller
 
     public function retail_shipment_store(Request $request)
     {
-        /*$file = file_get_contents($request->cheque);
-        return response()->json([$request->cheque]);*/
         $user_id = $request->admin_id;
         $pickup_address_id = $request->pickup_address_id;
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
@@ -2695,10 +2693,10 @@ class AdminAPIController extends Controller
                 $shipper_info->bank_id = $request->bank_id;
                 $shipper_info->iban = $request->iban_no;
                 $shipper_info->account_number = $request->account_no;
-                if ($request->has('cheque')) {
+                if ($request->hasFile('cheque')) {
                     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-                    $file = file_get_contents($request->cheque);
-                    Storage::disk('public')->put('retail_shipper_cheque', $file, $filename);
+                    $file = $request->file('cheque');
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
                     $shipper_info->cheque_image = $filename;
                     $shipper_info->completed_status = 1;
                 }
@@ -2712,14 +2710,14 @@ class AdminAPIController extends Controller
             $shipper_info->shipper_address = $request->shipper_address;
             $shipper_info->city_id = $pickup_city_id;
             $shipper_info->save();
-            if ($request->has('cheque') && $request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+            if ($request->hasFile('cheque') && $request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
                 $shipper_info->bank_id = $request->bank_id;
                 $shipper_info->iban = $request->iban_no;
                 $shipper_info->account_number = $request->account_no;
-                if ($request->has('cheque')) {
+                if ($request->hasFile('cheque')) {
                     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-                    $file = file_get_contents($request->cheque);
-                    Storage::disk('public')->put('retail_shipper_cheque/'.$filename, $file);
+                    $file = $request->file('cheque');
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
                     $shipper_info->cheque_image = $filename;
                     $shipper_info->completed_status = 1;
                 }
