@@ -67,6 +67,7 @@ class AdminPickupsController extends Controller
 
     static public function generate($shipment_id) {
               $shipment = Shipment::find($shipment_id);
+              dd($shipment);
               if(in_array($shipment->shipper_status_id, [1, 17])){
 
                   if($shipment->shipper_status_id == 17){
