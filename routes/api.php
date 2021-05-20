@@ -169,10 +169,6 @@ Route::name('api.')->group(function () {
 
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
 
-            Route::prefix('retail')->name('retail.')->group(function () {
-                Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
-            });
-
 		});
 
 	});
@@ -205,6 +201,7 @@ Route::name('api.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'AdminAPIController@retail_index')->name('retail_data');
                 Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
         });
