@@ -2590,6 +2590,8 @@ class AdminAPIController extends Controller
 
     public function retail_shipment_store(Request $request)
     {
+        $file = file_get_contents($request->cheque);
+        return response()->json([$file]);
         $user_id = $request->admin_id;
         $pickup_address_id = $request->pickup_address_id;
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
