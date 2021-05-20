@@ -86,7 +86,6 @@ class RetailShipmentBookController extends Controller
         $shipment->shipment_type = 2;
 
         $shipment->save();
-        dd($shipment);
 
         $shipment_id = $shipment->id;
 
