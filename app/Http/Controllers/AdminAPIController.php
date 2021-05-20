@@ -2738,7 +2738,7 @@ class AdminAPIController extends Controller
         $retail_shipment->shipper_name = $request->shipper_name;
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
         $retail_shipment->shipper_address = $request->shipper_address;
-        $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : "";
+        $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
         $retail_shipment->total_charges_without_gst = $total_charges_without_gst;
         $retail_shipment->gst = $gst;
         $retail_shipment->total_charges = $total_charges;
