@@ -2693,12 +2693,9 @@ class AdminAPIController extends Controller
                 $shipper_info->bank_id = $request->bank_id;
                 $shipper_info->iban = $request->iban_no;
                 $shipper_info->account_number = $request->account_no;
-                if ($request->hasFile('cheque')) {
+                if ($request->has('cheque')) {
                     $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
-
-                    $file = $request->file('cheque');
-
-                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $filename, file_get_contents($request->cheque));
                     $shipper_info->cheque_image = $filename;
                     $shipper_info->completed_status = 1;
                 }
