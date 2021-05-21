@@ -67,6 +67,7 @@ class RetailAPIController extends Controller
         } else {
             $user = RetailUser::where('name', $request->input('user_name'));
             if ($user->exists()) {
+                $user = $user->first();
 
                 if($user->category == 2){
                     $trax_center = RetailTraxCenter::find($user->category_id);
@@ -74,7 +75,6 @@ class RetailAPIController extends Controller
                     $trax_center = RetailFranchise::find($user->category_id);
                 }
 
-                $user = $user->first();
                 if($user->status == 0){
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
