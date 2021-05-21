@@ -558,6 +558,8 @@
 
 			$('#send_custom_notification').on('hide.bs.modal', function (e) {
 				$('.notification_receiver').val('').trigger('change');
+				$('.riders').val('').trigger('change');
+				$('.employees').val('').trigger('change');
 				$('#riders_div').addClass('d-none');
 				$('#employees_div').addClass('d-none');
 				$('.notification_title').val('');
