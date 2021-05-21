@@ -1,5 +1,6 @@
 @extends('admin.layout.master')
 @section('title','Return Confirmation Pending Shipments')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('content')
     <h1 class="mb-1">
@@ -786,6 +787,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.return.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
