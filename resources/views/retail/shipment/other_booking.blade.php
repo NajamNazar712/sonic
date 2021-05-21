@@ -102,10 +102,9 @@
                 serverSide: true,
                 ajax:{
                     url: '{{ route('retail.shipment.other_booking.list') }}',
-                    // data: function (d) {
-                    //     d.search_from = $('input[name="from_date_formatted"]').val();
-                    //     d.search_to = $('input[name="to_date_formatted"]').val();
-                    // }
+                    data: function (d) {
+                        d.search_date = $('input[name="search_date_formatted"]').val();
+                    }
                 },
                 rowId: 'id',
                 order: [[0, 'desc']],
