@@ -7424,7 +7424,7 @@ class AdminReportsController extends Controller
                     $station_recovery->adjustment_amount = $request->adjustment_amount[$key];
                     $station_recovery->reason = $request->reason[$key];
                     $station_recovery->save();
-                    $station_recovery->fresh();
+                    $station_recovery->refresh();
                     $difference = $station_recovery->total_amount - $station_recovery->deposit_amount - $station_recovery->adjustment_amount;
                     $station_recovery->difference_amount = $difference;
                     if($station_recovery->total_amount > 0){
