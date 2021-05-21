@@ -1392,6 +1392,9 @@ class AdminPackagingMaterialController extends Controller
                 $shipper_packaging_materail->type_id = $type->id;
                 $shipper_packaging_materail->save();
             }
+        }else{
+            ShipperPackagingMaterailType::where('type_id',$type->id)->delete();
+
         }
         $product_check = false;
         $setting = GlobalSettings::where('type', 'packaging_material');
