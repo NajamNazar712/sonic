@@ -417,6 +417,7 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
+                    'pickup_brand_name' => $data['pickup_brand_name'][$index],
                     'default_address' => TRUE
                 ]);
 
@@ -430,6 +431,8 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
+                    'pickup_brand_name' => $data['pickup_brand_name'][$index],
+                    
                 ]);
             }
         }
