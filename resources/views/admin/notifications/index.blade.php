@@ -83,6 +83,65 @@
 								</div>
 							@endif
 
+							@if (session('role_id') == 1 || in_array(103, session('permissions')))
+								<div class="modal fade" id="send_custom_notification" role="dialog" aria-labelledby="send_custom_notification_title" aria-hidden="true">
+									<div class="modal-dialog modal-lg" role="document">
+										<div class="modal-content">
+											<form class="form-horizontal" id = "send_custom_notification_form" method="POST" action="{{ route('admin.notifications.send_custom_notification') }}" novalidate="novalidate">
+												{{ csrf_field() }}
+
+												<div class="modal-header">
+													<h4 class="modal-title" id="send_custom_notification_title">Send Custom Notification</h4>
+
+													<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+														<span aria-hidden="true">×</span>
+													</button>
+												</div>
+												<div class="modal-body">
+													<div class="form-group">
+														<select name="notification_receiver" class="select2 notification_receiver" data-rule-required="true" data-msg-required="Receiver is required">
+															<option value="" selected="selected"></option>
+															<option value="1">Employees</option>
+															<option value="2">Riders</option>
+														</select>
+													</div>
+
+													<div class="form-group d-none" id="riders_div">
+														<select name="riders[]" class="select2 riders" multiple data-rule-required="true" data-msg-required="Rider is required">
+															@foreach($riders as $rider)
+																<option value="{{$rider->id}}">{{$rider->name}}</option>
+															@endforeach
+														</select>
+													</div>
+
+													<div class="form-group d-none" id="employees_div">
+														<select name="employees[]" class="select2 employees" multiple data-rule-required="true" data-msg-required="Employee is required">
+															@foreach($employees as $employee)
+																<option value="{{$employee->id}}">{{$employee->name}}</option>
+															@endforeach
+														</select>
+													</div>
+
+													<div class="form-group">
+														<label>Notification Title</label>
+														<input type="text" name="notification_title" class="form-control notification_title" placeholder="Title*" data-rule-required="true" data-msg-required="Title is required">
+													</div>
+
+													<div class="form-group">
+														<label>Notification Body</label>
+														<textarea type="text" name="notification_body" class="form-control notification_body" placeholder="Notification Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
+													</div>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+													<button type="submit" name="send" class="btn btn-primary">Send</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							@endif
+
 							@if (session('role_id') == 1 || in_array(101, session('permissions')))
 								<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
@@ -165,7 +224,32 @@
 						$('#shipper_div').addClass('d-none');
 					}
 				});
-				autosize($('#send_custom_email .body')[0]);
+
+			$('#send_custom_notification .notification_receiver').select2({
+				width: '100%',
+				placeholder: 'Receiver*'
+			}).bind('change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+				if(this.value == 2){
+					$('#riders_div').removeClass('d-none');
+					$('#employees_div').addClass('d-none');
+				}
+				else{
+					$('#employees_div').removeClass('d-none');
+					$('#riders_div').addClass('d-none');
+				}
+			});
+			$('#send_custom_notification .riders').select2({
+				width: '100%',
+				placeholder: 'Select Rider*'
+			});
+			$('#send_custom_notification .employees').select2({
+				width: '100%',
+				placeholder: 'Select Employee*'
+			});
+			autosize($('#send_custom_email .body')[0]);
 			@endif
 
 				var reciever = $('#send_custom_email .receiver').val();
@@ -181,12 +265,19 @@
 				@if (session('role_id') == 1 || in_array(103, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
-						text: 'Send Custom Email',
+						text: 'Send Custom Email - Sonic',
 						className: 'btn btn-primary send_custom_email',
 						action: function (e, dt, node, config) {
 							$('#send_custom_email').modal('show');
 						}
-					},'reset'],
+					},{
+						text: 'Send Custom Notification - Bolt',
+						className: 'btn btn-primary send_custom_notification',
+						action: function (e, dt, node, config) {
+							$('#send_custom_notification').modal('show');
+						}
+					},'reset'
+					],
 				@else
                 	dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 	buttons: ['reset'],
@@ -445,6 +536,14 @@
 						});
 					}
 				});
+
+			$('#send_custom_notification_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+			});
 			@endif
 
 			$('#send_custom_email').on('hide.bs.modal', function (e) {
