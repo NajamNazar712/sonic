@@ -56,6 +56,7 @@ use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
 
 use Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Session;
 
@@ -1050,6 +1051,13 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
+            $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
+            $barcode_series = '';
+            if(count($package_barcode)>0){
+              $first_barcode = $package_barcode->first();
+              $last_barcode = $package_barcode->last();
+              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
+            }
             ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
@@ -1178,19 +1186,31 @@ class ShipperShipmentBookController extends Controller
                                 <td rowspan="4" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
-                                </td>
+                                </td>';
 
-                                <td class="color primary border twice-left"><strong>Service</strong></td>
-                    ';
+                                if($shipment->business_category->id==2){
+                                    $table_start .= '<td class="color primary border twice-left"><strong>Service Type</strong></td>
+                                    ';
+                                }else{
+                                    $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>
+                                    ';
+                                }
                     } else {
                         $table_start .= '
                                 <td rowspan="4" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
-                                </td>
+                                </td>';
 
-                                <td class="color primary border twice-left"><strong>Service</strong></td>
-                    ';
+                                if($shipment->business_category->id==2){
+                                    $table_start .= '<td class="color primary border twice-left"><strong>Service Type</strong></td>
+                                    ';
+                                }else{
+                                    $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>
+                                    ';
+                                }
+                      
+
                     }
 
                     if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
@@ -1223,11 +1243,15 @@ class ShipperShipmentBookController extends Controller
                         $table_start .= '
                                 <td class="color primary"><strong>Datetime</strong></td>
                                 <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
-                              </tr>
-                              <tr>
-                                <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                                <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
-                    ';
+                              </tr>';
+                              
+                                if($shipment->business_category->id==1){
+                                    $table_start.='<tr>
+                                    <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                                    <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+                                ';
+                                }
+                      
 
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
@@ -1282,13 +1306,20 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color secondary"><strong>Name</strong></td>
                     ';
                     }
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        // $company_name = $shipment->user->brand_name;
+                        $company_name = $shipment->pickup_address->pickup_brand_name;
+                        
 
-                    if($shipment->user->brand_name != NULL){
-                        $company_name = $shipment->user->brand_name;
+                    }else{
+                        if($shipment->user->brand_name != NULL){
+                            $company_name = $shipment->user->brand_name;
+                        }
+                        else{
+                            $company_name = $shipment->user->name;
+                        }
                     }
-                    else{
-                        $company_name = $shipment->user->name;
-                    }
+                    
 
                     if ($shipment->booking_type_id != 4) {
                         $table_start .= '
@@ -1501,7 +1532,7 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series .'</td>
                               </tr>
                     ';
 
@@ -1524,7 +1555,7 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                               </tr>
                     ';
 
@@ -1541,7 +1572,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
                     ';
 
@@ -2955,6 +2986,15 @@ class ShipperShipmentBookController extends Controller
         $shipment_details = '';
 
         $shipment = Shipment::where('id',$request->ids)->first();
+
+        $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
+            $barcode_series = '';
+            if(count($package_barcode)>0){
+              $first_barcode = $package_barcode->first();
+              $last_barcode = $package_barcode->last();
+              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
+            }
+
         if ($request->has('admin') || session('user_id') == $shipment->user_id) {
             $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -3017,12 +3057,19 @@ class ShipperShipmentBookController extends Controller
                             <td class="color secondary"><strong>Name</strong></td>
                 ';
 
-            if($shipment->user->brand_name != NULL){
-                $company_name = $shipment->user->brand_name;
-            }
-            else{
-                $company_name = $shipment->user->name;
-            }
+                if($shipment->pickup_address->pickup_brand_name != NULL){
+                    // $company_name = $shipment->user->brand_name;
+                    $company_name = $shipment->pickup_address->pickup_brand_name;
+
+                }else{
+                    if($shipment->user->brand_name != NULL){
+                        $company_name = $shipment->user->brand_name;
+                    }
+                    else{
+                        $company_name = $shipment->user->name;
+                    }
+                }
+            
 
             if ($shipment->booking_type_id != 4) {
                 $table_start .= '
@@ -3165,7 +3212,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
             ';
 
@@ -3189,7 +3236,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
             ';
 
@@ -3206,7 +3253,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
             ';
 
@@ -3228,7 +3275,7 @@ class ShipperShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
               ';
                 }
