@@ -1043,6 +1043,39 @@
 
                 }
             });
+
+
+            $('#reconcile_delivery_notes_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var count = 0;
+                    reconcile_delivery_notes_table.rows().nodes().each(function(index) {
+                        count++;
+                            var row = reconcile_delivery_notes_table.row(index);
+
+                            
+                        });
+                    var pressed_button = $(this.submitButton);
+                    // console.log(selected_rows.length);
+                    // console.log('total rows');
+                    // console.log(count);
+                    if(selected_rows.length!=count){
+
+                        toastr.error('Please Select all delivery notes or sheets', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }else{
+                            form.submit();
+
+                    }
+
+                   
+                }
+            });
+
+
             $('body').on('click', '#edit_deposit_slip_table td a.remove_row',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, new_selected_deposit_ids);
