@@ -25,6 +25,7 @@ class RetailUserAPIToken
 
                 if ($retail_user->status) {
                     $request->request->add(['retail_user_id' => $retail_user->id]);
+                    $request->request->add(['category' => $retail_user->category]);
 
                     return $next($request);
                 }

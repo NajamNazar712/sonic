@@ -135,10 +135,11 @@ class RetailAPIController extends Controller
 
     public function retail_shipment_store(Request $request)
     {
-        $admin_id = $request->admin_id;
+        $retail_user_id = $request->retail_user_id;
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $user_id = $setting->setting_value;
         $pickup_address_id = $request->pickup_address_id;
+        $category = $request->category;
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
@@ -293,12 +294,12 @@ class RetailAPIController extends Controller
         $retail_shipment->length = $length;
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
-        $retail_shipment->admin_id = $admin_id;
+        $retail_shipment->retail_user_id = $retail_user_id;
         $retail_shipment->save();
 
 
         $date = Carbon::today()->toDateString();
-        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 3)->where('admin_id', $admin_id);
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', $category)->where('retail_user_id', $retail_user_id);;
         if($cash_deposit->exists()){
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;
@@ -309,8 +310,8 @@ class RetailAPIController extends Controller
         }
         else{
             $cash_deposit = new RetailCashDeposit();
-            $cash_deposit->category = 3;
-            $cash_deposit->admin_id = $admin_id;
+            $cash_deposit->category = $category;
+            $cash_deposit->retail_user_id = $retail_user_id;
             $cash_deposit->total_cn = 1;
             $cash_deposit->total_cash = $total_charges;
             $cash_deposit->save();

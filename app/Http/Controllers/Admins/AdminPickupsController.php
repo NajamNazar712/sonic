@@ -207,7 +207,9 @@ class AdminPickupsController extends Controller
                         $retail_pickup_note_create = new RetailPickupNote();
                         $retail_pickup_note_create->pickup_address_id = $shipment->pickup_address_id;
                         $retail_pickup_note_create->hub_id = $shipment->pickup_address->city->hub_id;
-                        $retail_pickup_note_create->retail_user_id = ($retail_shipment->retail_user_id) ? $retail_shipment->retail_user_id : $retail_shipment->admin_id;
+                        $retail_pickup_note_create->retail_user_id = ($retail_shipment->retail_user_id) ? $retail_shipment->retail_user_id : null;
+                        $retail_pickup_note_create->rider_booking_id = ($retail_shipment->rider_id) ? $retail_shipment->rider_booking_id : null;
+                        $retail_pickup_note_create->admin_id = ($retail_shipment->admin_id) ? $retail_shipment->admin_id : null;
                         $retail_pickup_note_create->pickup_request_id = $pickup_request_id;
                         $retail_pickup_note_create->shipments = 1;
                         $retail_pickup_note_create->amount = $retail_shipment->total_charges;
