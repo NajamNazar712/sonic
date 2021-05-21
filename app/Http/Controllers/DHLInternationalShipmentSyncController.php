@@ -7,6 +7,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\MasterCargoBagJourneyController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
@@ -17,6 +18,7 @@ use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
 use App\Http\Models\City;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\ReceivingSheetReceived;
+use App\Http\Models\Rider;
 use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -34,6 +36,8 @@ use Illuminate\Support\Facades\Log;
 
 class DHLInternationalShipmentSyncController extends Controller
 {
+    protected $rider_id = 3003;
+    protected $admin_id = 184;
     public function __construct() {
         $this->middleware('auth:admin');
 
@@ -47,374 +51,12 @@ class DHLInternationalShipmentSyncController extends Controller
         $dhl_api_key = 'EXYgAAqX3c5TYz3GqVLCS6e1fS57AAYO';
         $dhl_url = 'https://api-eu.dhl.com/track/';
 
-        $response = '{
-  "shipments": [
-    {
-      "id": "7837361350",
-      "service": "express",
-      "origin": {
-        "address": {
-          "addressLocality": "KARACHI - KARACHI - PAKISTAN"
-        }
-      },
-      "destination": {
-        "address": {
-          "addressLocality": "KARACHI - OSWEGO - PAKISTAN"
-        }
-      },
-      "status": {
-        "timestamp": "2021-05-04T17:47:00",
-        "location": {
-          "address": {
-            "addressLocality": "KARACHI - PAKISTAN"
-          }
-        },
-        "statusCode": "failure",
-        "status": "exception",
-        "description": "Returned to shipper"
-      },
-      "details": {
-        "proofOfDelivery": {
-          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=HIyI5ZQw9ML%2BPB%2FgRhc6ZA%3D%3D&pudate=H%2FLXM5bvdh9v4JvRMeM7Gw%3D%3D&appuid=XGULCnoKLyskTnvIFkscaQ%3D%3D&language=en&country=G0",
-          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=HIyI5ZQw9ML%2BPB%2FgRhc6ZA%3D%3D&pudate=H%2FLXM5bvdh9v4JvRMeM7Gw%3D%3D&appuid=XGULCnoKLyskTnvIFkscaQ%3D%3D&language=en&country=G0"
-        },
-        "totalNumberOfPieces": 1,
-        "pieceIds": [
-          "JD014600008665793657"
-        ]
-      },
-      "events": [
-        {
-          "timestamp": "2021-05-04T17:47:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Returned to shipper"
-        },
-        {
-          "timestamp": "2021-05-04T15:53:00",
-          "location": {
-            "address": {
-              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Arrived at Sort Facility DUBAI - UNITED ARAB EMIRATES"
-        },
-        {
-          "timestamp": "2021-05-04T09:49:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Departed Facility in KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-05-04T00:51:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Processed at KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-05-03T22:01:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment Accepted"
-        },
-        {
-          "timestamp": "2021-05-03T22:01:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment picked up"
-        }
-      ]
-    },
-    {
-      "id": "1600370450",
-      "service": "express",
-      "origin": {
-        "address": {
-          "addressLocality": "KARACHI - KARACHI - PAKISTAN"
-        }
-      },
-      "destination": {
-        "address": {
-          "addressLocality": "KARACHI - HIALEAH - PAKISTAN"
-        }
-      },
-      "status": {
-        "timestamp": "2021-05-04T17:48:00",
-        "location": {
-          "address": {
-            "addressLocality": "KARACHI - PAKISTAN"
-          }
-        },
-        "statusCode": "failure",
-        "status": "exception",
-        "description": "Returned to shipper"
-      },
-      "details": {
-        "proofOfDelivery": {
-          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=bYFqpz3ou%2Bpvz7tW8SZ%2BUA%3D%3D&pudate=HafB9vPKf700yKYzuH%2FG4g%3D%3D&appuid=l%2Bq%2FHtc6RizTu%2FvQ4fKztQ%3D%3D&language=en&country=G0",
-          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=bYFqpz3ou%2Bpvz7tW8SZ%2BUA%3D%3D&pudate=HafB9vPKf700yKYzuH%2FG4g%3D%3D&appuid=l%2Bq%2FHtc6RizTu%2FvQ4fKztQ%3D%3D&language=en&country=G0"
-        },
-        "totalNumberOfPieces": 1,
-        "pieceIds": [
-          "JD014600008668192770"
-        ]
-      },
-      "events": [
-        {
-          "timestamp": "2021-05-04T17:48:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Returned to shipper"
-        },
-        {
-          "timestamp": "2021-05-04T15:53:00",
-          "location": {
-            "address": {
-              "addressLocality": "DUBAI - UNITED ARAB EMIRATES"
-            }
-          },
-          "description": "Arrived at Sort Facility DUBAI - UNITED ARAB EMIRATES"
-        },
-        {
-          "timestamp": "2021-05-04T09:49:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Departed Facility in KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-05-04T01:43:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Processed at KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-05-03T16:20:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment picked up"
-        },
-        {
-          "timestamp": "2021-05-03T16:20:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment Accepted"
-        }
-      ]
-    },
-    {
-      "id": "1297318621",
-      "service": "express",
-      "origin": {
-        "address": {
-          "addressLocality": "KARACHI - KARACHI - PAKISTAN"
-        }
-      },
-      "destination": {
-        "address": {
-          "addressLocality": "NEW YORK, NY - EAST ELMHURST - USA"
-        }
-      },
-      "status": {
-        "timestamp": "2021-04-26T11:42:00",
-        "location": {
-          "address": {
-            "addressLocality": "EAST ELMHURST"
-          }
-        },
-        "statusCode": "delivered",
-        "status": "delivered",
-        "description": "Delivered"
-      },
-      "details": {
-        "proofOfDelivery": {
-          "timestamp": "2021-04-26T11:42:00",
-          "signatureUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=a%2FWPGBbwKAuAhUodE78X3Q%3D%3D&pudate=tXMCnmf%2BbnPg9tzxoYCXdQ%3D%3D&appuid=4L5D0s%2BN1GZjoQHER9S9XA%3D%3D&language=en&country=G0",
-          "documentUrl": "https://webpod.dhl.com/webPOD/DHLePODRequest?hwb=a%2FWPGBbwKAuAhUodE78X3Q%3D%3D&pudate=tXMCnmf%2BbnPg9tzxoYCXdQ%3D%3D&appuid=4L5D0s%2BN1GZjoQHER9S9XA%3D%3D&language=en&country=G0",
-          "signed": {
-            "@type": "Person",
-            "name": "Delivered"
-          }
-        },
-        "totalNumberOfPieces": 1,
-        "pieceIds": [
-          "JD014600008650258972"
-        ]
-      },
-      "events": [
-        {
-          "timestamp": "2021-04-26T11:42:00",
-          "location": {
-            "address": {
-              "addressLocality": "EAST ELMHURST"
-            }
-          },
-          "description": "Delivered"
-        },
-        {
-          "timestamp": "2021-04-26T10:10:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK, NY - USA"
-            }
-          },
-          "description": "With delivery courier"
-        },
-        {
-          "timestamp": "2021-04-26T06:57:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK, NY - USA"
-            }
-          },
-          "description": "Arrived at Delivery Facility in NEW YORK - USA"
-        },
-        {
-          "timestamp": "2021-04-26T04:03:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
-            }
-          },
-          "description": "Departed Facility in NEW YORK CITY GATEWAY - USA"
-        },
-        {
-          "timestamp": "2021-04-25T18:21:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
-            }
-          },
-          "description": "Processed at NEW YORK CITY GATEWAY - USA"
-        },
-        {
-          "timestamp": "2021-04-25T18:21:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
-            }
-          },
-          "description": "Clearance processing complete at NEW YORK CITY GATEWAY - USA"
-        },
-        {
-          "timestamp": "2021-04-25T15:00:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
-            }
-          },
-          "description": "Arrived at Sort Facility NEW YORK CITY GATEWAY - USA"
-        },
-        {
-          "timestamp": "2021-04-25T11:08:00",
-          "location": {
-            "address": {
-              "addressLocality": "BRUSSELS - BELGIUM"
-            }
-          },
-          "description": "Departed Facility in BRUSSELS - BELGIUM"
-        },
-        {
-          "timestamp": "2021-04-25T09:07:00",
-          "location": {
-            "address": {
-              "addressLocality": "NEW YORK CITY GATEWAY, NY - USA"
-            }
-          },
-          "description": "Customs status updated"
-        },
-        {
-          "timestamp": "2021-04-23T18:53:00",
-          "location": {
-            "address": {
-              "addressLocality": "BRUSSELS - BELGIUM"
-            }
-          },
-          "description": "Processed at BRUSSELS - BELGIUM"
-        },
-        {
-          "timestamp": "2021-04-23T17:51:00",
-          "location": {
-            "address": {
-              "addressLocality": "BRUSSELS - BELGIUM"
-            }
-          },
-          "description": "Arrived at Sort Facility BRUSSELS - BELGIUM"
-        },
-        {
-          "timestamp": "2021-04-23T02:54:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Departed Facility in KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-04-22T21:26:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Processed at KARACHI - PAKISTAN"
-        },
-        {
-          "timestamp": "2021-04-22T16:41:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment picked up"
-        },
-        {
-          "timestamp": "2021-04-22T16:41:00",
-          "location": {
-            "address": {
-              "addressLocality": "KARACHI - PAKISTAN"
-            }
-          },
-          "description": "Shipment Accepted"
-        }
-      ]
-    }
-  ]
-}';
 
-        $arrival_status = ['pre-transit'];
-        $intransit_status = ['transit'];
+        $arrival_status = ['Shipment picked up', 'Shipment Accepted'];
+        $transit_status = ['pre-transit','transit'];
         $delivered_status = ['delivered'];
-        $returned_status = ['failure', 'unknown'];
+        $undelivered_status = ['Shipment on hold', 'Delivery attempted; recipient not home', 'Recipient refused delivery'];
+        $returned_status = ['exception','failure', 'unknown'];
 
         $international_tracking_numbers = InternationalShipment::whereNotNull('international_tracking_number')->where('sync', 1)->pluck('international_tracking_number')->toArray();
 
@@ -453,13 +95,14 @@ class DHLInternationalShipmentSyncController extends Controller
 //                                    $destination_city_id = $shipment->consignee_city_id;
                                     $shipment_id = $shipment->id;
                                     $shipper_status_id = $shipment->shipper_status_id;
-                                    $international_shipment_status = $intl_shipment->status->status;
-                                    if(in_array($international_shipment_status, $arrival_status)){
+                                    $international_shipment_status = $intl_shipment->status->statusCode;
+                                    $international_shipment_description = $intl_shipment->status->description;
+                                    if(in_array($international_shipment_description, $arrival_status)){
                                         if($shipper_status_id == 1){
                                             (new self)->shipment_arrived($shipment->id);
                                         }
                                     }
-                                    else if(in_array($international_shipment_status, $intransit_status)){
+                                    else if(in_array($international_shipment_status, $transit_status)){
                                         if($shipper_status_id == 1){
                                             (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
@@ -472,28 +115,54 @@ class DHLInternationalShipmentSyncController extends Controller
                                         if($shipper_status_id == 1){
                                             (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         else if($shipper_status_id == 2){
                                             (new self)->shipment_intransit($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         else if($shipper_status_id == 4){
+                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
+                                        }
+                                        else if(in_array($shipper_status_id, [9])){
+                                            (new self)->shipment_delivered($shipment->id);
+                                        }
+                                    }
+                                    else if(in_array($international_shipment_description, $undelivered_status)){
+                                        if($shipper_status_id == 1){
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_intransit($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_undelivered($shipment->id, 9);
+                                        }
+                                        else if($shipper_status_id == 2){
+                                            (new self)->shipment_intransit($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_undelivered($shipment->id,9);
+                                        }
+                                        else if($shipper_status_id == 4){
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_undelivered($shipment->id,9);
                                         }
                                     }
                                     else if(in_array($international_shipment_status, $returned_status)){
                                         if($shipper_status_id == 1){
                                             (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
-                                            (new self)->shipment_return($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_returned($shipment->id);
                                         }
                                         else if($shipper_status_id == 2){
                                             (new self)->shipment_intransit($shipment->id);
-                                            (new self)->shipment_return($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_returned($shipment->id);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_return($shipment->id);
+                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_returned($shipment->id);
                                         }
 
                                     }
@@ -511,19 +180,42 @@ class DHLInternationalShipmentSyncController extends Controller
 
         }
     }
-
+    //184 admin
+    //3003 rider
+    public function shipment_picked($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, $this->admin_id);
+    }
+    public function shipment_intransit($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 3, 3, NULL, NULL, NULL, $this->admin_id);
+    }
     public function shipment_arrived($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, $this->admin_id);
+    }
+    public function shipment_delivered($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 14, 14, NULL, NULL, NULL, $this->admin_id);
+    }
+    public function shipment_undelivered($shipment_id, $shipment_status){
+        ShipmentsJourneyController::add($shipment_id, $shipment_status, $shipment_status, NULL, NULL, NULL, $this->admin_id);
+    }
+    public function shipment_returned($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, $this->admin_id);
+    }
+
+
+    public function shipment_arrived_old($shipment_id){
+        $rider = Rider::find(3003);
         $pickup_request_id = NULL;
         $shipment = Shipment::find($shipment_id);
         if($shipment->shipper_status_id == 1){
 
-            $settings = GlobalSettings::where('type', 'global_rider_id')->first();
+            $global_rider_id = 3003;
+            /*$settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
             if ($settings) {
                 $global_rider_id = $settings->setting_value;
             } else {
                 $global_rider_id = 0;
-            }
+            }*/
             $reference_1_id = NULL;
             $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('status', 0);
             if(!$pickup_request_shipment->exists()){
@@ -601,7 +293,7 @@ class DHLInternationalShipmentSyncController extends Controller
 
             if(($shipment->charges_mode_id == 2 || $shipment->charges_mode_id == 1) && $shipment->booking_type_id == 4){
                 $shipment_ids = array($shipment->id);
-                NotificationsController::send(85, $shipment_ids , 50);
+                NotificationsController::send(85, $shipment_ids , 184);
             }
 
             $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->where('pickup_request_id', $pickup_request_id);
@@ -636,14 +328,15 @@ class DHLInternationalShipmentSyncController extends Controller
                     }
                 }
 
-                ShipmentsPickupJourneyController::add($shipment_id, 2, 50, $pickup_request->id);
+                ShipmentsPickupJourneyController::add($shipment_id, 2, 184, $pickup_request->id);
 
             }
         }
     }
-    public function shipment_intransit($shipment_id){
+    public function shipment_intransit_old($shipment_id){
         $shipment = Shipment::find($shipment_id);
         if($shipment->shipper_status_id == 2){
+            $admin = Admin::find(184);
             $origin_hub_id = $shipment->pickup_address->city->hub_id;
             $destination_hub_id = $shipment->consignee_city->hub_id;
             if($origin_hub_id != $destination_hub_id){
@@ -657,7 +350,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $bag->destination_hub_id = $destination_hub_id;
                 $bag->junction_hub_1_id = $origin_hub_id;
                 $bag->junction_hub_2_id = NULL;
-                $bag->seal_number = 123213123;
+                $bag->seal_number = $shipment->tracking_number;
                 $bag->shipping_mode_id = 1;
                 $bag->transport_mode_id = 2;
                 $bag->transport_mode_vendor_id = 9;
@@ -665,7 +358,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $bag->quantity = $quantity;
                 $bag->shipments_weight = $shipments_weight;
                 $bag->actual_weight = $shipments_weight;
-                $bag->created_by = 50;
+                $bag->created_by = $admin->id;
                 $bag->type = 1;
 
                 $bag->status_id = 9;
@@ -674,9 +367,9 @@ class DHLInternationalShipmentSyncController extends Controller
 
                 $bag_id = $bag->id;
 
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 1, 50, NULL, NULL);
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 2, 50, NULL, NULL);
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 9, 50, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 1, $admin->id, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 2, $admin->id, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 9, $admin->id, NULL, NULL);
 
 
                 $bag_shipment = new BagShipment();
@@ -688,31 +381,14 @@ class DHLInternationalShipmentSyncController extends Controller
 
                 $shipper_status_id = NULL;
                 $consignee_status_id = NULL;
-                if ($shipment->shipper_status_id != 20) {
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
-                        $shipper_status_id = 21;
-                        $consignee_status_id = 21;
-                    }
-                    else if ($shipment->booking_type_id == 2) {
-                        $shipper_status_id = 26;
-                        $consignee_status_id = 26;
-                    }
-                    else if ($shipment->booking_type_id == 3) {
-                        $shipper_status_id = 32;
-                        $consignee_status_id = 32;
-                    }
-                    else {
-                        $shipper_status_id = 21;
-                        $consignee_status_id = 21;
-                    }
-                }
+
                 $shipment->shipper_status_id = $shipper_status_id;
                 $shipment->consignee_status_id = $consignee_status_id;
 
                 $shipment->save();
 
-                ShipmentsJourneyController::add($shipment_id, 3, 3, NULL, NULL, NULL, 50, $bag->id, $bag->builty_number);
-                ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, 50, $bag->id, $bag->builty_number);
+                ShipmentsJourneyController::add($shipment_id, 3, 3, NULL, NULL, NULL, 184, $bag->id, $bag->builty_number);
+
 
 
                 $bags = 1;
@@ -729,7 +405,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $master_cargo->junction_hub_2_id = NULL;
                 $master_cargo->shipping_mode_id = 1;
                 $master_cargo->transport_mode_id = 2;
-                $master_cargo->driver_name = 'International Driver';
+                $master_cargo->driver_name = $admin->name;
                 $master_cargo->vehicle = 'DHL Plane';
                 $master_cargo->phone_number = '0000-0000000';
                 $master_cargo->bags = $bags;
@@ -737,7 +413,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $master_cargo->quantity = $quantity;
                 $master_cargo->bags_weight = $bags_weight;
                 $master_cargo->actual_weight = $shipments_weight;
-                $master_cargo->created_by = 50;
+                $master_cargo->created_by = 184;
                 $master_cargo->status_id = $master_cargo_status_id;
                 $master_cargo->save();
 
@@ -749,15 +425,15 @@ class DHLInternationalShipmentSyncController extends Controller
 
                 $mater_cargo_bags->save();
 
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, $bag->status_id, 50, $master_cargo_id, $master_cargo_status_id);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, $bag->status_id, 184, $master_cargo_id, $master_cargo_status_id);
 
             }
         }
     }
-    public function shipment_delivered($shipment_id){
-
-        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-        $rider_id = $settings->setting_value;
+    public function shipment_delivered_old($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, 184);
+//        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+        $rider_id = 3003;
 
         $shipment = Shipment::find($shipment_id);
 
@@ -767,7 +443,7 @@ class DHLInternationalShipmentSyncController extends Controller
             'rider_id' => $rider_id,
             'route_id' => 2,
             'shipments_count' => 1,
-            'admin_id' => 50,
+            'admin_id' => 184,
             'total_cod_amount' => $shipment->amount,
             'password' => NULL,
             'last_updated_at' => Carbon::now(),
@@ -789,11 +465,11 @@ class DHLInternationalShipmentSyncController extends Controller
             $shipment->save();
 
             AdminFinanceController::done_payment($shipment_id, 0);
-            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 1);
+            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 184, $note->id, $rider_id);
+            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 184, $note->id, NULL, 1);
             DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_id])->update(['status' => 6]);
             $date = Carbon::now();
-            DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 1, 'verified_by' => 50, 'received_cod_amount' => $shipment->amount, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
+            DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 1, 'verified_by' => 184, 'received_cod_amount' => $shipment->amount, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
 
             $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
             if($international_shipment){
@@ -802,12 +478,57 @@ class DHLInternationalShipmentSyncController extends Controller
             }
         }
 
+    }
+
+    public function shipment_undelivered_old($shipment_id){
+        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, 184);
+
+//        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+        $rider_id = 3003;
+
+        $shipment = Shipment::find($shipment_id);
+
+        $hub_id = City::find($shipment->consignee_city_id)->hub_id;
+        $note = DeliveryNote::create([
+            'hub_id' => $hub_id,
+            'rider_id' => $rider_id,
+            'route_id' => 2,
+            'shipments_count' => 1,
+            'admin_id' => 184,
+            'total_cod_amount' => $shipment->amount,
+            'password' => NULL,
+            'last_updated_at' => Carbon::now(),
+            'special_rider' => 0,
+            'order' => FALSE
+        ]);
+
+        if($note){
+            DeliveryNoteShipment::create([
+                'delivery_note_id' => $note->id,
+                'shipment_id' => $shipment_id,
+                'notification' => 0,
+                'rider_information' => 0,
+                'ordering' => 1
+            ]);
+
+            $shipment->shipper_status_id = 9;
+            $shipment->consignee_status_id = 9;
+            $shipment->save();
+
+            AdminFinanceController::done_payment($shipment_id, 0);
+            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 184, $note->id, $rider_id);
+            ShipmentsJourneyController::add($shipment, 9, 9, NULL, NULL, NULL, 184, $note->id, NULL, 1);
+            DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_id])->update(['status' => 6]);
+            $date = Carbon::now();
+            DeliveryNote::where('id', $note->id)->update(['verified_by' => 184, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
+
+        }
 
     }
-    public function shipment_return($shipment_id){
+    public function shipment_return_old($shipment_id){
 
-        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-        $rider_id = $settings->setting_value;
+//        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+        $rider_id = 3003;
 
         $shipment = Shipment::find($shipment_id);
         $hub_id = City::find($shipment->consignee_city_id)->hub_id;
@@ -816,7 +537,7 @@ class DHLInternationalShipmentSyncController extends Controller
             'rider_id' => $rider_id,
             'route_id' => 2,
             'shipments_count' => 1,
-            'admin_id' => 50,
+            'admin_id' => 184,
             'total_cod_amount' => $shipment->amount,
             'password' => NULL,
             'last_updated_at' => Carbon::now(),
@@ -838,14 +559,14 @@ class DHLInternationalShipmentSyncController extends Controller
             $shipment->save();
 
 
-            ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-            ShipmentsJourneyController::add($shipment_id, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0);
-            ShipmentsJourneyController::add($shipment_id, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1);
+            ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, 184, $note->id, $rider_id);
+            ShipmentsJourneyController::add($shipment_id, 12, 12, 34, NULL, NULL, 184, $note->id, NULL, 0);
+            ShipmentsJourneyController::add($shipment_id, 20, 20, 34, NULL, NULL, 184, $note->id, NULL, 1);
 
             DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
 
             $date = Carbon::now();
-            DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
+            DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 184, 'status' => 1, 'last_updated_at' => $date, 'status_verified_at' => $date, 'pending_for_verification_at' => $date]);
 
             $shipment->refresh();
 
@@ -863,7 +584,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $bag->destination_hub_id = $destination_hub_id;
                 $bag->junction_hub_1_id = $origin_hub_id;
                 $bag->junction_hub_2_id = NULL;
-                $bag->seal_number = 123213123;
+                $bag->seal_number = $shipment->tracking_number;
                 $bag->shipping_mode_id = 1;
                 $bag->transport_mode_id = 2;
                 $bag->transport_mode_vendor_id = 9;
@@ -871,7 +592,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $bag->quantity = $quantity;
                 $bag->shipments_weight = $shipments_weight;
                 $bag->actual_weight = $shipments_weight;
-                $bag->created_by = 50;
+                $bag->created_by = 184;
                 $bag->type = 2;
 
                 $bag->status_id = 9;
@@ -880,9 +601,9 @@ class DHLInternationalShipmentSyncController extends Controller
 
                 $bag_id = $bag->id;
 
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 1, 50, NULL, NULL);
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 2, 50, NULL, NULL);
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 9, 50, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 1, 184, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 2, 184, NULL, NULL);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, 9, 184, NULL, NULL);
 
 
                 $bag_shipment = new BagShipment();
@@ -895,8 +616,8 @@ class DHLInternationalShipmentSyncController extends Controller
                 $shipment->shipper_status_id = 22;
                 $shipment->consignee_status_id = 22;
 
-                ShipmentsJourneyController::add($shipment_id, 21, 21, NULL, NULL, NULL, 50, $bag->id, $bag->builty_number);
-                ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, 50, $bag->id, $bag->builty_number);
+                ShipmentsJourneyController::add($shipment_id, 21, 21, NULL, NULL, NULL, 184, $bag->id, $bag->builty_number);
+                ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, 184, $bag->id, $bag->builty_number);
 
 
                 $bags = 1;
@@ -921,7 +642,7 @@ class DHLInternationalShipmentSyncController extends Controller
                 $master_cargo->quantity = $quantity;
                 $master_cargo->bags_weight = $bags_weight;
                 $master_cargo->actual_weight = $shipments_weight;
-                $master_cargo->created_by = 50;
+                $master_cargo->created_by = 184;
                 $master_cargo->status_id = $master_cargo_status_id;
                 $master_cargo->save();
 
@@ -933,7 +654,7 @@ class DHLInternationalShipmentSyncController extends Controller
 
                 $mater_cargo_bags->save();
 
-                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, $bag->status_id, 50, $master_cargo_id, $master_cargo_status_id);
+                MasterCargoBagJourneyController::add($bag_id, $bag->seal_number, $bag->status_id, 184, $master_cargo_id, $master_cargo_status_id);
 
             }
 
@@ -947,13 +668,13 @@ class DHLInternationalShipmentSyncController extends Controller
         $pickup_request_attempt->pickup_request_id = $pickup_request_id;
         $pickup_request_attempt->rider_id = $rider_id;
         $pickup_request_attempt->attempt_date = Carbon::now();
-        $pickup_request_attempt->assigned_by = 50;
+        $pickup_request_attempt->assigned_by = 184;
         $pickup_request_attempt->save();
 
         $pickup_request->rider_status = 2;
         $pickup_request->attempts = $pickup_request->attempts + 1;
         $pickup_request->current_rider_id = $rider_id;
-        $pickup_request->last_updated_by = 50;
+        $pickup_request->last_updated_by = 184;
         $pickup_request->save();
 
         $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
