@@ -604,14 +604,7 @@ class RetailShipmentBookController extends Controller
         $page_items = 1;
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
-            
-            $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
-            $barcode_series = '';
-            if(count($package_barcode)>0){
-              $first_barcode = $package_barcode->first();
-              $last_barcode = $package_barcode->last();
-              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
-            }
+
 //            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
@@ -788,7 +781,7 @@ class RetailShipmentBookController extends Controller
                         $table_start .= '
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description . $barcode_series . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description  . '</td>
                                 <td class="color secondary border twice-bottom"><strong>Price</strong></td>
                                 <td class="border twice-bottom">Rs ' . number_format($shipment_item->price) . '</td>';
 
@@ -1027,7 +1020,7 @@ class RetailShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
                               </tr>
                     ';
 
@@ -1050,7 +1043,7 @@ class RetailShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description  . '</td>
                               </tr>
                     ';
 
@@ -1067,7 +1060,7 @@ class RetailShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description  . '</td>
                         </tr>
                     ';
 
