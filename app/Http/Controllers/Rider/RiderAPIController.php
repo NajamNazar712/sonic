@@ -7441,7 +7441,7 @@ class RiderAPIController extends Controller
     {
         $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no)
             ->select('iban', 'account_number', 'cheque_image', 'bank_id');
-        $shipment_count = RetailShipment::where('shipper_phone_no', $request->shipper_phone_no)->count();
+        $shipment_count = RetailShipment::where('shipper_phone_no', $request->shipper_phone_no)->where('shipping_mode', 3)->count();
         if ($shipper_info->exists()) {
             $shipper_info = $shipper_info->get();
             return response()->json(["status" => 0, "shipper_bank_info" => $shipper_info, "shipment_count" => $shipment_count]);
