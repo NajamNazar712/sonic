@@ -84,7 +84,7 @@ class DHLInternationalShipmentSyncController extends Controller
 
                     if($status_code == 200){
                         $response = $response->getBody()->getContents();
-                        $response = json_decode($response);
+                        $response = json_decode($response, true);
                         $international_shipments = $response->shipments;
                         if(count($international_shipments) > 0){
                             foreach ($international_shipments as $international_shipment){
