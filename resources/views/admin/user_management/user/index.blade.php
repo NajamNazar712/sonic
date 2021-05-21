@@ -74,7 +74,7 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
-										<th class="border-primary border-darken-1">Trax Id</th>
+										<th class="border-primary border-darken-1">Employee Id</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Phone Number</th>
 										<th class="border-primary border-darken-1">Email</th>
@@ -134,7 +134,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Trax Id');
+                            head.push('Employee Id');
                             head.push('Name');
                             head.push('Phone Number');
                             head.push('Email');

@@ -229,8 +229,19 @@ class NotificationsController extends Controller
                         }
                     }
 
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipper->brand_name != NULL){
+                            $brand_name = $shipper->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipper->name;
+                        }
+                    }
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $brand_name, $body);
                     }
 
                     if (strpos($body, '[service_type]') !== FALSE) {
@@ -833,8 +844,19 @@ class NotificationsController extends Controller
                         }
                     }
 
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipper->brand_name != NULL){
+                            $brand_name = $shipper->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipper->name;
+                        }
+                    }
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $shipper->brand_name ?? $shipper->name ), 0, 25), $body);
+                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name ), 0, 25), $body);
                     }
 
                     if (strpos($body, '[payment_mode]') !== FALSE) {
@@ -2798,8 +2820,19 @@ class NotificationsController extends Controller
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
                     }
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipment->user->brand_name != NULL){
+                            $brand_name = $shipment->user->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipment->user->name;
+                        }
+                    }
                     if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->brand_name ?? $shipment->user->name, $body);
+                        $body = str_replace('[shipper_name]', $brand_name, $body);
                     }
                     if (strpos($body, '[receiver_name]') !== FALSE) {
                         $body = str_replace('[receiver_name]', $shipment_journey->received_or_refused_by, $body);

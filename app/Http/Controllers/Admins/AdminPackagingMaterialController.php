@@ -52,6 +52,7 @@ use App\Http\Models\WMS\WmsShipmentProduct;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\ShipperPackagingMaterailType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
@@ -1122,7 +1123,18 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function types_index(){
-        return view('admin.materials.types.index');
+        $existing_shipper_packing_types = ShipperPackagingMaterailType::all();
+        $arr_shipper_packing_types = array();
+        if (count($existing_shipper_packing_types)>0) {
+            // $settings = $settings->first();
+            foreach ($existing_shipper_packing_types as $existing_shipper_packing_type) {
+                array_push($arr_shipper_packing_types, $existing_shipper_packing_type->shipper_id);
+                // $arr_shipper_packing_types = array_map('intval', explode(',', $settings->text));
+            }
+            // $rider_id = $settings->setting_value;
+        }
+        // dd($arr_shipper_packing_types);
+        return view('admin.materials.types.index')->with(['arr_shipper_packing_types' => $arr_shipper_packing_types]);
     }
 
     public function types_list(Request $request){
@@ -1189,12 +1201,55 @@ class AdminPackagingMaterialController extends Controller
             ->make(true);
     }
 
+    public function all_shippers(){
+        $field = ' <div class="form-group">
+        <label>Select Shippers</label>
+
+        <fieldset class="form-group">
+            <select name="shippers_ids[]" multiple="multiple" id="shippers_ids" class="form-control select2" placeholder="Select Shippers*" required data-rule-required="true" data-msg-required="This field is required">
+            ';
+        
+        
+        $shippers = User::all();
+       
+            foreach ($shippers as $shipper) {
+                $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
+            }
+
+
+        $field .= '  </select></fieldset></div>';
+        return $field;
+    }
+
+    public function all_shippers_edit(){
+        $field = ' <div class="form-group">
+        <label>Select Shippers</label>
+
+        <fieldset class="form-group">
+            <select name="shippers_ids_edit[]" multiple="multiple" id="shippers_ids_edit" class="form-control select2" placeholder="Select Shippers*" required data-rule-required="true" data-msg-required="This field is required">
+            ';
+        
+        
+        $shippers = User::all();
+       
+            foreach ($shippers as $shipper) {
+                $field .= '<option value="' . $shipper->id . '">' . $shipper->name . '</option> ';
+            }
+
+
+        $field .= '  </select></fieldset></div>';
+        return $field;
+    }
+
+    
     public function type_add(Request $request){
         $packaging_type = 3;
         if($request->has('packaging_type') && $request->packaging_type == 'external'){
             $packaging_type = 2;
         }else if($request->has('packaging_type') && $request->packaging_type == 'internal'){
             $packaging_type = 1;
+        }else if($request->has('packaging_type') && $request->packaging_type == 'only_shipper'){
+            $packaging_type = 4;
         }
 
         $type = new PackagingMaterialTypes();
@@ -1220,6 +1275,16 @@ class AdminPackagingMaterialController extends Controller
         $type_history->status = 1;
         $type_history->created_by = Auth::id();
         $type_history->save();
+        if($packaging_type == 4){
+            foreach($request->shippers_ids as $index => $shippers_id){
+
+                $shipper_packaging_materail = new ShipperPackagingMaterailType;
+                $shipper_packaging_materail->shipper_id = $shippers_id;
+                $shipper_packaging_materail->type_id = $type->id;
+    
+                $shipper_packaging_materail->save();
+            }
+        }
 
         foreach($request->size as $index => $type_size){
             $packaging_material_type_size = new PackagingMaterialTypeSizes();
@@ -1272,22 +1337,35 @@ class AdminPackagingMaterialController extends Controller
     public function type_details(Request $request){
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $sizes = PackagingMaterialTypeSizes::where('type_id',$request->id)->get();
+        $existing_shipper_packing_types = ShipperPackagingMaterailType::where('type_id',$type->id)->get();
 
-        return response()->json(['status' => 1, 'type' => $type, 'sizes' => $sizes]);
+        $arr_shipper_packing_types = array();
+        if (count($existing_shipper_packing_types)>0) {
+            // $settings = $settings->first();
+            foreach ($existing_shipper_packing_types as $existing_shipper_packing_type) {
+                array_push($arr_shipper_packing_types, $existing_shipper_packing_type->shipper_id);
+                // $arr_shipper_packing_types = array_map('intval', explode(',', $settings->text));
+            }
+            // $rider_id = $settings->setting_value;
+        }
+        return response()->json(['status' => 1, 'type' => $type, 'sizes' => $sizes, 'arr_shipper_packing_types' => $arr_shipper_packing_types]);
     }
 
     public function type_edit(Request $request){
-        $packaging_type = 3;
-        if($request->has('packaging_type') && $request->packaging_type == 'external'){
-            $packaging_type = 2;
-        }else if($request->has('packaging_type') && $request->packaging_type == 'internal'){
-            $packaging_type = 1;
+        $packaging_type_edit = 3;
+        if($request->has('packaging_type_edit') && $request->packaging_type_edit == 'external'){
+            $packaging_type_edit = 2;
+        }else if($request->has('packaging_type_edit') && $request->packaging_type_edit == 'internal'){
+            $packaging_type_edit = 1;
+        }else if($request->has('packaging_type_edit') && $request->packaging_type_edit == 'only_shipper'){
+            $packaging_type_edit = 4;
         }
+        
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->type = $request->edit_type;
         $type->description = $request->edit_description;
         $type->updated_by = Auth::id();
-        $type->packaging_type = $packaging_type;
+        $type->packaging_type = $packaging_type_edit;
 
         if ($request->hasFile('edit_packaging_picture')) {
             $filename = 'packaging_picture_' . $type->id . '.png';
@@ -1305,7 +1383,19 @@ class AdminPackagingMaterialController extends Controller
         $type_history->created_by = $type->created_by;
         $type_history->updated_by = Auth::id();
         $type_history->save();
+        if($packaging_type_edit == 4){
 
+            ShipperPackagingMaterailType::where('type_id',$type->id)->delete();
+            foreach($request->shippers_ids_edit as $index => $shippers_id){
+                $shipper_packaging_materail = new ShipperPackagingMaterailType;
+                $shipper_packaging_materail->shipper_id = $shippers_id;
+                $shipper_packaging_materail->type_id = $type->id;
+                $shipper_packaging_materail->save();
+            }
+        }else{
+            ShipperPackagingMaterailType::where('type_id',$type->id)->delete();
+
+        }
         $product_check = false;
         $setting = GlobalSettings::where('type', 'packaging_material');
         if($setting->exists()) {
