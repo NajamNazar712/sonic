@@ -6322,25 +6322,15 @@ class DeliveryController extends Controller
                     $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
                     $serial = $serial->ordering;
                 }
-                if($serial != null){
-                    $serial++;
-                }
-                else{
-                    $serial = null;
-                }
+                $serial++;
+
                 $delivery_note_shipment = new DeliveryNoteShipment();
                 $delivery_note_shipment->delivery_note_id = $delivery_note_id;
                 $delivery_note_shipment->shipment_id = $shipment->id;
                 $delivery_note_shipment->ordering = $serial;
                 $delivery_note_shipment->save();
 
-                $journey = new ShipmentsJourney;
-                $journey->shipment_id = $shipment_id;
-                $journey->verification = 1;
-                $journey->shipper_status_id = 5;
-                $journey->consignee_status_id = 5;
-                $journey->admin_id = Auth::id();
-                $journey->save();
+            ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
 //                NotificationsController::send(10,$delivery_note_id, $shipment_id);
                 return response()->json(['status' => 0, 'success' => 'Shipments Added']);
         }
