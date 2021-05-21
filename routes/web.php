@@ -1785,6 +1785,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@types_list')->name('list');
             Route::post('add','Admins\AdminPackagingMaterialController@type_add')->name('add');
+            Route::get('all_shippers','Admins\AdminPackagingMaterialController@all_shippers')->name('all_shippers');
+            Route::get('all_shippers_edit','Admins\AdminPackagingMaterialController@all_shippers_edit')->name('all_shippers_edit');
+            
             Route::post('details','Admins\AdminPackagingMaterialController@type_details')->name('details');
             Route::post('edit','Admins\AdminPackagingMaterialController@type_edit')->name('edit');
             Route::post('enable_disable','Admins\AdminPackagingMaterialController@type_enable_disable')->name('enable_disable');
