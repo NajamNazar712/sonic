@@ -13,6 +13,7 @@ use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -30,6 +31,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
@@ -140,14 +142,15 @@ class RetailShipmentBookController extends Controller
 
     public function index(){
         $products = Product::all();
-        $business_categories = BusinessCategory::where('id', '!=', 2)->get();
+        $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
     }
 
     public function store(Request $request){
@@ -169,15 +172,31 @@ class RetailShipmentBookController extends Controller
 
         $shipping_mode_check = $request->input('shipping_mode');
         if ($shipping_mode_check == 1) {
-            $consignee_city_id = $request->input('domestic_overland_destination');
+            if($request->input('business_category') == 1)
+            {
+                $consignee_city_id = $request->input('domestic_overland_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
             $shipping_mode_id = 2;
         }
         elseif ($shipping_mode_check == 4){
-            $consignee_city_id = $request->input('domestic_destination');
+            if($request->input('business_category') == 1) {
+                $consignee_city_id = $request->input('domestic_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
             $shipping_mode_id = 3;
         }
         else{
-            $consignee_city_id = $request->input('domestic_destination');
+            if($request->input('business_category') == 1) {
+                $consignee_city_id = $request->input('domestic_destination');
+            }
+            else{
+                $consignee_city_id = $request->input('international_destination');
+            }
             $shipping_mode_id = 1;
         }
         $same_day_timing_id = NULL;
@@ -246,10 +265,20 @@ class RetailShipmentBookController extends Controller
         }
 
         if($request->shipping_mode == 1){
-            $destination = $request->domestic_overland_destination;
+            if($request->input('business_category') == 1) {
+                $destination = $request->domestic_overland_destination;
+            }
+            else{
+                $destination = $request->input('international_destination');
+            }
         }
         else{
-            $destination = $request->domestic_destination;
+            if($request->input('business_category') == 1) {
+                $destination = $request->domestic_destination;
+            }
+            else{
+            $destination = $request->input('international_destination');
+            }
         }
 
         $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no);
@@ -575,6 +604,14 @@ class RetailShipmentBookController extends Controller
         $page_items = 1;
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
+            
+            $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
+            $barcode_series = '';
+            if(count($package_barcode)>0){
+              $first_barcode = $package_barcode->first();
+              $last_barcode = $package_barcode->last();
+              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
+            }
 //            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
@@ -751,7 +788,7 @@ class RetailShipmentBookController extends Controller
                         $table_start .= '
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description . $barcode_series . '</td>
                                 <td class="color secondary border twice-bottom"><strong>Price</strong></td>
                                 <td class="border twice-bottom">Rs ' . number_format($shipment_item->price) . '</td>';
 
@@ -787,10 +824,16 @@ class RetailShipmentBookController extends Controller
                             <td rowspan="4" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
-                            </td>
+                            </td>';
 
-                            <td class="color primary border twice-left"><strong>Service</strong></td>
-                ';
+                            if($shipment->business_category->id==2){
+                              $table_start .='<td class="color primary border twice-left"><strong>Service Type</strong></td>
+                              ';
+                          }else{
+                            $table_start .='<td class="color primary border twice-left"><strong>Service</strong></td>
+                            ';
+                          }
+                            
 
                     if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
                         $table_start .= '
@@ -815,10 +858,13 @@ class RetailShipmentBookController extends Controller
                             <td class="color primary"><strong>Datetime</strong></td>
                             <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
-                          <tr>
-                            <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                          <tr>';
+                          if($shipment->business_category->id==1){
+                            $table_start .='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
                 ';
+                        }
+                           
 
                     $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
@@ -981,7 +1027,7 @@ class RetailShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                               </tr>
                     ';
 
@@ -1004,7 +1050,7 @@ class RetailShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                               </tr>
                     ';
 
@@ -1021,7 +1067,7 @@ class RetailShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . '</td>
+                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
                         </tr>
                     ';
 
@@ -1433,5 +1479,32 @@ class RetailShipmentBookController extends Controller
             $retail_shipment->save();
         }
         return redirect()->back()->with('success', 'Slip uploaded successfully');
+    }
+
+    public function other_booking_index(){
+        return view('retail.shipment.other_booking');
+    }
+
+    public function other_booking_list(Request $request){
+        $retail_user_id = Auth::id();
+        $retail_user = RetailUser::find($retail_user_id);
+        $retail_trax_center = RetailTraxCenter::find($retail_user->category_id);
+        $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
+            ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.created_at as created_at')
+            ->where('s.pickup_address_id', $retail_trax_center->pickup_address_id)
+            ->wherenull('retail_shipments.retail_user_id')
+            ->orderBy('retail_shipments.created_at', 'desc');
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('retail.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+
+        if ($request->get('search_date')) {
+            $date = $request->get('search_date');
+            $datatable->whereDate('retail_shipments.created_at', $date);
+        }
+
+        return  $datatable->make(true);
     }
 }

@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
         'APIThrottle' => \App\Http\Middleware\APIThrottle::class,
 
         'RiderAPIToken' => \App\Http\Middleware\RiderAPIToken::class,
-        'AdminAPIToken' => \App\Http\Middleware\AdminAPIToken::class
+        'AdminAPIToken' => \App\Http\Middleware\AdminAPIToken::class,
+        'RetailUserAPIToken' => \App\Http\Middleware\RetailUserAPIToken::class
     ];
 }

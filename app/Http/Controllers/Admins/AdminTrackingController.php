@@ -755,18 +755,38 @@ class AdminTrackingController extends Controller
                         $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                         if($retail_shipment){
                             $retail_user_id = $retail_shipment->retail_user_id;
-                            $retail_user = RetailUser::find($retail_user_id);
-                            if($retail_user->category == 1){
-                                $franchise = RetailFranchise::find($retail_user->category_id);
-                                $details['retail_user']['name'] = $franchise->name;
-                                $details['retail_user']['code'] = 'Franchise';
-                                $details['shipper']['city'] = $franchise->pickup_address->city->name;
+                            $retail_admin_id = $retail_shipment->admin_id;
+                            $retail_rider_id = $retail_shipment->rider_id;
+                            if($retail_user_id){
+                                $retail_user = RetailUser::find($retail_user_id);
+                                if($retail_user->category == 1){
+                                    $franchise = RetailFranchise::find($retail_user->category_id);
+                                    $details['retail_user']['name'] = $franchise->name;
+                                    $details['retail_user']['code'] = 'Franchise';
+                                    $details['shipper']['city'] = $franchise->pickup_address->city->name;
+                                }
+                                else{
+                                    $trax_center  = RetailTraxCenter::find($retail_user->category_id);
+                                    $details['retail_user']['name'] = $trax_center->name;
+                                    $details['retail_user']['code'] = 'Trax Center';
+                                    $details['shipper']['city'] = $trax_center->pickup_address->city->name;
+                                }
                             }
-                            else{
-                                $trax_center  = RetailTraxCenter::find($retail_user->category_id);
-                                $details['retail_user']['name'] = $trax_center->name;
+                            elseif($retail_admin_id){
+                                $admin_id = $retail_shipment->admin_id;
+                                $admin_info = Admin::find($admin_id);
+                                $details['retail_user']['name'] = $admin_info->name;
                                 $details['retail_user']['code'] = 'Trax Center';
-                                $details['shipper']['city'] = $trax_center->pickup_address->city->name;
+                                $details['shipper']['city'] = $shipment->pickup_address->city->name;
+
+                            }
+                            elseif($retail_rider_id){
+                                $rider_id = $retail_shipment->rider_id;
+                                $rider_info = Rider::find($rider_id);
+                                $details['retail_user']['name'] = $rider_info->name;
+                                $details['retail_user']['code'] = 'Trax Center';
+                                $details['shipper']['city'] = $shipment->pickup_address->city->name;
+
                             }
 
                             $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);

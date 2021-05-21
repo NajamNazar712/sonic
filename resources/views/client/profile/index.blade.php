@@ -170,6 +170,7 @@
                                                 <th class="border-primary border-darken-1">Phone Number</th>
                                                 <th class="border-primary border-darken-1">City</th>
                                                 <th class="border-primary border-darken-1">Email Address</th>
+                                                <th class="border-primary border-darken-1">Brand Name</th>
                                                 <th class="border-primary border-darken-1">Status</th>
                                                 <th class="border-primary border-darken-1"></th>
                                             </tr>
@@ -391,8 +392,12 @@
                                     <textarea type="text" name="pickup_address" id="pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required></textarea>
                                 </div>
                                 <div class="col-6 form-group">
+                                    <input type="text" name="pickup_brand_name" id="pickup_brand_name" class="form-control numeric flyer"  placeholder="Brand Name" >
+                                </div>
+                                <div class="col-6 form-group">
                                     <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>
                                 </div>
+                                
                                 <div class="col-6 form-group">
                                     <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
                                 </div>
@@ -835,6 +840,7 @@
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},
+                    {data: 'pickup_brand_name', name: 'pickup_brand_name'},
                     {data: 'status',orderable: false, name: 'status',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'}
                 ],

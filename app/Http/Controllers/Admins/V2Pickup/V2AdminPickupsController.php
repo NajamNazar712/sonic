@@ -887,7 +887,7 @@ class V2AdminPickupsController extends Controller
                             NotificationsController::send(126,$shipment_id);
                         }
                     }
-                    $shipment->fresh();
+                    $shipment->refresh();
                     if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
@@ -1616,7 +1616,7 @@ class V2AdminPickupsController extends Controller
                             NotificationsController::send(126,$shipment_id);
                         }
                     }
-                    $shipment->fresh();
+                    $shipment->refresh();
                     if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;

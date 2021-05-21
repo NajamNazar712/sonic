@@ -273,7 +273,7 @@
                     }
                 },
                 rowId: 'rider_id',
-                order: [[6, 'asc']],
+                order: [[11, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'employee_id', name: 'riders.trax_id', class: 'align-middle employee_id'},

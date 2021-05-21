@@ -1804,7 +1804,7 @@ class DailyPickupSalesReportController extends Controller
                 $data[$mode->id]['avg_rev_chargeable_weight'] = ($chargeable_weight != 0) ? $revenue_wo_gst / $chargeable_weight:0;
                 $data[$mode->id]['collection_amount'] = $cod_collection;
                 $data[$mode->id]['avg_amount_collection'] = ($received != 0) ? $cod_collection / $received : 0;
-                $data[$mode->id]['revenue_amount_collection'] = ($received != 0) ? $revenue_wo_gst / $cod_collection : 0;
+                $data[$mode->id]['revenue_amount_collection'] = ($cod_collection != 0) ? $revenue_wo_gst / $cod_collection : 0;
                 $data[$mode->id]['revenue_amount_collection'] = $data[$mode->id]['revenue_amount_collection'] * 100;
                 $serial++;
             }

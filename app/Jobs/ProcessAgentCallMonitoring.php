@@ -65,10 +65,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
             // }
         }
         $recs = collect($recs);
-
         $min = $recs->where('count', $recs->min('count'))->first();
-
-
         $agent_call_monitoring = new AgentCallMonitoring;
         $agent_call_monitoring->agent_id= $min['admin_id'];
         $agent_call_monitoring->shipment_id= $shipment_id;
