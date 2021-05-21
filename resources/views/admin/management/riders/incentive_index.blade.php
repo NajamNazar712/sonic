@@ -19,7 +19,7 @@
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
-                                    <th class="border-primary border-darken-1">Trax ID.</th>
+                                    <th class="border-primary border-darken-1">Employee ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
                                 <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Hub</th>
@@ -130,7 +130,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Trax ID');
+                            head.push('Employee ID');
                             head.push('City Name');
                             head.push('Zone');
                             head.push('Hub Name');
