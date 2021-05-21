@@ -1447,6 +1447,7 @@ class RetailShipmentBookController extends Controller
         $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
             ->select('retail_shipments.id', 's.tracking_number as tracking_number')
             ->where('s.pickup_address_id', $retail_trax_center->pickup_address_id)
+            ->wherenotnull('retail_shipments.admin_id')
             ->orderBy('retail_shipments.created_at', 'desc');
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
