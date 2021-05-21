@@ -396,6 +396,10 @@
                     params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.return.list') }}',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
