@@ -2409,9 +2409,11 @@ class NotificationsController extends Controller
 
                     $to[] = $shipper->email;
 
-                    if(isset($shipper->bank->billing_person_email)){
-                        if(isset($shipper->bank->billing_person_email) !== null){
-                            $to[] = $shipper->bank->billing_person_email;
+
+                    if(isset($shipper->bank)){
+                        foreach($shipper->bank as $bank)
+                        {
+                            $to[] = $bank->billing_person_email;
                         }
                     }
 
