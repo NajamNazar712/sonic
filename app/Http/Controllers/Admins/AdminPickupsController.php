@@ -10,6 +10,7 @@ use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\ShipmentItem;
@@ -3131,6 +3132,17 @@ class AdminPickupsController extends Controller
                     $pickup_note_request->pickup_request_id = $pickup_request_id;
 
                     $pickup_note_request->save();
+
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Pickup Request Assigned";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Auto Assigned To You";
+                        NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
+                    }
 //                        $pickup_request = V2PickupRequest::find($pickup_request_id);
 //                        $assigned_shipments = $pickup_request->pickup_request_shipments;
 //                        NotificationsController::send(42, $rider_id, $pickup_request->shipper_id);
