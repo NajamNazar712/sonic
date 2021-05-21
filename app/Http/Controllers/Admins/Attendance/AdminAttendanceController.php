@@ -49,7 +49,7 @@ class AdminAttendanceController extends Controller
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status');
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status');
 
         if (session('role_id') != 1) {
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
@@ -135,20 +135,31 @@ class AdminAttendanceController extends Controller
             });
 
         if ($search_admin = $request->get('search_admin')) {
-            $datatable->where('a.id', $search_admin);
+            $datatable->where('a.id', $search_admin)->where('employee_type',1);
         }
         if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider);
+            $datatable->where('r.id', $search_rider)->where('employee_type',2);
         }
         if ($search_city = $request->get('search_city')) {
-            $datatable->where('c.id', $search_city)->orWhere('rc.id', $search_city);
+            $datatable->where(function($q) use ($search_city){
+                $q->where([['c.id', $search_city],['employee_type',1]])
+                    ->orWhere([['rc.id', $search_city],['employee_type',2]]);
+            });
         }
         if ($search_department = $request->get('search_department')) {
-            $datatable->where('ad.id', $search_department);
+            if($search_department != 6) {
+                $datatable->where('department_id', $search_department)->where('employee_type',1);
+            }
+            else{
+                $datatable->where('employee_type',2);
+            }
         }
+
         if ($search_trax_id = $request->get('search_trax_id')) {
-            $datatable->where('a.trax_id', $search_trax_id)
-                ->orWhere('r.trax_id', $search_trax_id);
+            $datatable->where(function($q) use ($search_trax_id){
+                $q->where([['a.trax_id', $search_trax_id],['employee_type',1]])
+                    ->orWhere([['r.trax_id', $search_trax_id],['employee_type',2]]);
+            });
         }
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
