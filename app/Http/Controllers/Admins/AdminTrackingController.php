@@ -754,7 +754,7 @@ class AdminTrackingController extends Controller
                     else{
                         $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                         if($retail_shipment){
-                            $retail_user_id = $retail_shipment->retail_user_id;
+                            $retail_user_id = ($retail_shipment->retail_user_id) ? $retail_shipment->retail_user_id : $retail_shipment->admin_id;
                             $retail_user = RetailUser::find($retail_user_id);
                             if($retail_user->category == 1){
                                 $franchise = RetailFranchise::find($retail_user->category_id);
