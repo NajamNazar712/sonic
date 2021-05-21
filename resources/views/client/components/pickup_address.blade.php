@@ -19,6 +19,13 @@
                         <input type="text" class="form-control required" value="{{ old('pickup_address[]') }}" name="temp_pickupaddress">
                     </div>
                     <div class="form-group">
+                        <label for="shipping_phone">
+                            Phone Number:
+                            <span class="danger">*</span>
+                        </label>
+                        <input type="tel" class="form-control required" placeholder="0345-9999999" value="{{ old('shipping_phone[]') }}" name="temp_shipping_phone">
+                    </div>
+                    <div class="form-group">
                         <label for="shipping_poc">
                             Person of Contact:
                             <span class="danger">*</span>
@@ -43,10 +50,9 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="shipping_phone">
-                            Phone Number:
-                            <span class="danger">*</span>
+                            Brand Name:
                         </label>
-                        <input type="tel" class="form-control required" placeholder="0345-9999999" value="{{ old('shipping_phone[]') }}" name="temp_shipping_phone">
+                        <input type="text" class="form-control" placeholder="Brand Name" value="{{ old('pickup_brand_name[]') }}" name="temp_pickup_brand_name">
                     </div>
                     <div class="form-group">
                         <label for="shipping_email">Email Address:<span class="danger">*</span></label>
