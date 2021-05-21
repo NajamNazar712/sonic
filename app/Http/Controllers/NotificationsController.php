@@ -229,8 +229,19 @@ class NotificationsController extends Controller
                         }
                     }
 
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipper->brand_name != NULL){
+                            $brand_name = $shipper->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipper->name;
+                        }
+                    }
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $brand_name, $body);
                     }
 
                     if (strpos($body, '[service_type]') !== FALSE) {
@@ -833,8 +844,19 @@ class NotificationsController extends Controller
                         }
                     }
 
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipper->brand_name != NULL){
+                            $brand_name = $shipper->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipper->name;
+                        }
+                    }
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $shipper->brand_name ?? $shipper->name ), 0, 25), $body);
+                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name ), 0, 25), $body);
                     }
 
                     if (strpos($body, '[payment_mode]') !== FALSE) {
@@ -2409,7 +2431,13 @@ class NotificationsController extends Controller
 
                     $to[] = $shipper->email;
 
-                    $to[] = $shipper->bank->billing_person_email;
+
+                    if(isset($shipper->bank)){
+                        foreach($shipper->bank as $bank)
+                        {
+                            $to[] = $bank->billing_person_email;
+                        }
+                    }
 
                     foreach ($shipper_fields as $key => $field) {
                         if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -2459,8 +2487,24 @@ class NotificationsController extends Controller
 
                     $cc = array();
 
-                    $general_admins = Admin::where('role_id', 2)->where('status', 1);
 
+                    $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
+                    // $sales_person_admin = Admin::find($sales_person->admin_id);
+                    
+                    if ($sales_person) {
+                        $cc[] = Admin::find($sales_person->admin_id)->email;
+                    }
+                    $regional_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('role_id', 60)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $shipper->city->zone_id);
+
+                    // $regional_manager = Admin::whereIn('role_id', [44, 27])->where('default_hub_id', $sales_person_admin->default_hub1)->get()->first();
+                    // $general_admins = Admin::where('role_id', 2)->where('status', 1);
+                    if ($regional_managers->exists()) {
+                        $cc = array_merge($cc, $regional_managers->pluck('admins.email')->toArray());
+                        // $cc[] = $regional_manager->email;
+                    }
+
+                    $general_admins = Admin::whereIn('role_id',[4,31])->where('status', 1);
+                    
                     if ($general_admins->exists()) {
                         $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
                     }
@@ -2798,8 +2842,19 @@ class NotificationsController extends Controller
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
                     }
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipment->user->brand_name != NULL){
+                            $brand_name = $shipment->user->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipment->user->name;
+                        }
+                    }
                     if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->brand_name ?? $shipment->user->name, $body);
+                        $body = str_replace('[shipper_name]', $brand_name, $body);
                     }
                     if (strpos($body, '[receiver_name]') !== FALSE) {
                         $body = str_replace('[receiver_name]', $shipment_journey->received_or_refused_by, $body);

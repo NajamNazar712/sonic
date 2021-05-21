@@ -482,10 +482,15 @@ class RetailAdminAccounts extends Controller
                             <td rowspan="4" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
-                            </td>
-
-                            <td class="color primary border twice-left"><strong>Service</strong></td>
+                            </td>';
+                            if($shipment->business_category->id==2){
+                              $table_start .='<td class="color primary border twice-left"><strong>Service Type</strong></td>
                 ';
+                          }else{
+                            $table_start .='<td class="color primary border twice-left"><strong>Service</strong></td>
+                            ';
+                          }
+                           
 
                 if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
                     $table_start .= '
@@ -510,10 +515,14 @@ class RetailAdminAccounts extends Controller
                             <td class="color primary"><strong>Datetime</strong></td>
                             <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
-                          <tr>
-                            <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                          <tr>';
+                          if($shipment->business_category->id==1){
+                            $table_start.='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
                             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
                 ';
+                        }
+
+                          
 
                 $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>

@@ -325,6 +325,13 @@
                                                         <input type="text" id="pickup_address" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]" placeholder="Pickup Address">
                                                     </div>
                                                     <div class="form-group">
+                                                        <label for="shipping_phone">
+                                                            Phone Number:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" id="pickup_phone" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
+                                                    </div>
+                                                    <div class="form-group">
                                                         <label for="shipping_poc">
                                                             Person of Contact:
                                                             <span class="danger">*</span>
@@ -348,10 +355,9 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
-                                                            Phone Number:
-                                                            <span class="danger">*</span>
+                                                            Brand Name:
                                                         </label>
-                                                        <input type="text" id="pickup_phone" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
+                                                        <input type="text" id="pickup_brand_name" class="form-control" placeholder="Brand Name" name="pickup_brand_name[]" value="{{ old('pickup_brand_name.0') }}">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
@@ -1084,6 +1090,8 @@
                 temp_product_type.attr('name','product_type['+innerdivcount+']');
                 var temp_shipping_phone = $('#shipping_'+count+' input[name="temp_shipping_phone"]');
                 temp_shipping_phone.attr('name','shipping_phone['+innerdivcount+']');
+                var temp_pickup_brand_name = $('#shipping_'+count+' input[name="temp_pickup_brand_name"]');
+                temp_pickup_brand_name.attr('name','pickup_brand_name['+innerdivcount+']');
                 var temp_shipping_email = $('#shipping_'+count+' input[name="temp_shipping_email"]');
                 temp_shipping_email.attr('name','shipping_email['+innerdivcount+']');
                 var temp_shipping_city = $('#shipping_'+count+' select[name="temp_shipping_city"]');
