@@ -582,7 +582,7 @@ class RetailShipmentBookController extends Controller
             if(count($package_barcode)>0){
               $first_barcode = $package_barcode->first();
               $last_barcode = $package_barcode->last();
-              $barcode_series = $first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number;
+              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
             }
 //            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
 //            if(!file_exists($url)){
