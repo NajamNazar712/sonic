@@ -75,6 +75,11 @@
                             <label class="label" for="tracking_number">International Tracking Number</label>
                             <input type="text"  class="form-control" name="international_tracking_number" id="edit_international_tracking_number" data-rule-required="true" data-msg-required="Internatioanl Tracking No. is required">
                         </div>
+                        <div class="form-group">
+                            <label class="label" for="actual_weight">Actual Weight</label>
+                            <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight">
+                        </div>
+                        
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -110,6 +115,14 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
+            });
+
+            $('#edit_actual_weight').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'min': 1,
+                'max':100000,
             });
             $('body').on('change','#edit_international_tracking_number',function() {
                 $(this).val($(this).val().trim());
@@ -251,9 +264,14 @@
                         }).done(function(data) {
                             if(data.status == 0){
                                 $('#edit_tracking_number').val(data.details.tracking_number);
+                                $('#edit_actual_weight').val(data.details.actual_weight);
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
+                                console.log(data.details.shipment_status);
+                                if(data.details.shipment_status == 1){
+                                    $("#edit_actual_weight").prop("readonly", true);
+                                }
                                 $('#EditTrackingModal').modal('show');
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

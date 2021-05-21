@@ -172,7 +172,7 @@ class V2AdminArrivalServiceController extends Controller
                     $reference_2_id = NULL;
                     ShipmentsJourneyController::add($shipment_id, 61, 61, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
-                    $shipment->fresh();
+                    $shipment->refresh();
                 }
             }else {
                 unset($shipment_ids[$key]);

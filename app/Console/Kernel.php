@@ -88,6 +88,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\MonthAverageIndividual',
         'App\Console\Commands\MonthAverageRM',
         'App\Console\Commands\RiderIncentiveCalculate',
+        'App\Console\Commands\DHLTrackingSync',
 
 
     ];
@@ -100,6 +101,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
+
         $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
         $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
         $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
@@ -272,6 +275,7 @@ class Kernel extends ConsoleKernel
             $cut_off_time = $settings->setting_value . ':00';
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
+        $schedule->command('dhl:shipmentstatussync')->dailyAt( '04:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
