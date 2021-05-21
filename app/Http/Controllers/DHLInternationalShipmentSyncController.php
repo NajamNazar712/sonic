@@ -129,20 +129,36 @@ class DHLInternationalShipmentSyncController extends Controller
                                         }
                                     }
                                     else if(in_array($international_shipment_description, $undelivered_status)){
+                                        $shipment_status = NULL;
+                                        $shipment_reason = NULL;
+                                        foreach ($undelivered_status as $index => $status){
+                                            if($index == 1){
+                                                $shipment_status = 9;
+                                            }
+                                            else if($index == 2){
+                                                $shipment_status = 8;
+                                                $shipment_reason = 8;
+
+                                            }
+                                            else{
+                                                $shipment_status = 8;
+                                                $shipment_reason = 1;
+                                            }
+                                        }
                                         if($shipper_status_id == 1){
                                             (new self)->shipment_picked($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
                                             (new self)->shipment_arrived($shipment->id);
-                                            (new self)->shipment_undelivered($shipment->id, 9);
+                                            (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                         else if($shipper_status_id == 2){
                                             (new self)->shipment_intransit($shipment->id);
                                             (new self)->shipment_arrived($shipment->id);
-                                            (new self)->shipment_undelivered($shipment->id,9);
+                                            (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                         else if($shipper_status_id == 4){
                                             (new self)->shipment_arrived($shipment->id);
-                                            (new self)->shipment_undelivered($shipment->id,9);
+                                            (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                     }
                                     else if(in_array($international_shipment_status, $returned_status)){
@@ -208,20 +224,25 @@ class DHLInternationalShipmentSyncController extends Controller
         $shipment->shipper_status_id = 14;
         $shipment->consignee_status_id = 14;
         $shipment->save();
+        ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 14, 14, NULL, NULL, NULL, $this->admin_id);
     }
-    public function shipment_undelivered($shipment_id, $shipment_status){
+    public function shipment_undelivered($shipment_id, $shipment_status, $shipment_reason){
         $shipment = Shipment::find($shipment_id);
         $shipment->shipper_status_id = $shipment_status;
         $shipment->consignee_status_id = $shipment_status;
         $shipment->save();
-        ShipmentsJourneyController::add($shipment_id, $shipment_status, $shipment_status, NULL, NULL, NULL, $this->admin_id);
+        ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
+        ShipmentsJourneyController::add($shipment_id, $shipment_status, $shipment_reason, NULL, NULL, NULL, $this->admin_id);
     }
     public function shipment_returned($shipment_id){
         $shipment = Shipment::find($shipment_id);
         $shipment->shipper_status_id = 22;
         $shipment->consignee_status_id = 22;
         $shipment->save();
+        ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
+        ShipmentsJourneyController::add($shipment_id, 12, 12, NULL, NULL, NULL, $this->admin_id);
+        ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, $this->admin_id);
     }
 
