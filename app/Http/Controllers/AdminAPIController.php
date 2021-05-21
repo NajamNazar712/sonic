@@ -25,6 +25,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -2801,6 +2802,23 @@ class AdminAPIController extends Controller
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
 
+    }
+
+    public function notification_history(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
+        $to_date = Carbon::now()->format('Y-m-d 23:59:59');
+
+        $notifiction_history = EmployeeNotificationHistory::where('employee_id', $admin_id)
+            ->where('employee_type_id', 1)
+            ->whereBetween('created_at', [$from_date, $to_date])
+            ->orderBy('created_at', 'desc');
+        if ($notifiction_history->exists()) {
+            $notifiction_history = $notifiction_history->get();
+            return response()->json(['status' => 0, 'data' => $notifiction_history]);
+        }
+        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 
 }
