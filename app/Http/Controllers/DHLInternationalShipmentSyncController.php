@@ -96,12 +96,12 @@ class DHLInternationalShipmentSyncController extends Controller
                                     $international_shipment_description = $international_shipment->status->description;
                                     if(in_array($international_shipment_description, $arrival_status)){
                                         if($shipper_status_id == 1){
-                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_picked($shipment->id);
                                         }
                                     }
                                     else if(in_array($international_shipment_status, $transit_status)){
                                         if($shipper_status_id == 1){
-                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_picked($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
                                         }
                                         else if($shipper_status_id == 2){
@@ -110,7 +110,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                     }
                                     else if(in_array($international_shipment_status, $delivered_status)){
                                         if($shipper_status_id == 1){
-                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_picked($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
                                             (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
@@ -130,7 +130,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                     }
                                     else if(in_array($international_shipment_description, $undelivered_status)){
                                         if($shipper_status_id == 1){
-                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_picked($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
                                             (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_undelivered($shipment->id, 9);
@@ -147,7 +147,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                     }
                                     else if(in_array($international_shipment_status, $returned_status)){
                                         if($shipper_status_id == 1){
-                                            (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_picked($shipment->id);
                                             (new self)->shipment_intransit($shipment->id);
                                             (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_returned($shipment->id);
