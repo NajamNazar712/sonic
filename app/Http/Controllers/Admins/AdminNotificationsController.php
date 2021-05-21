@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\NotificationType;
+use App\Http\Models\Rider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -27,7 +29,9 @@ class AdminNotificationsController extends Controller
 
     public function index() {
         $notifications = NotificationType::all();
-      return view('admin.notifications.index')->with(['notifications'=>$notifications]);
+        $riders = Rider::where('status', 1)->get();
+        $employees = Admin::where('status', 1)->get();
+      return view('admin.notifications.index')->with(['notifications'=>$notifications, 'riders' => $riders, 'employees' => $employees]);
     }
 
     public function list(Request $request) {
@@ -434,5 +438,26 @@ class AdminNotificationsController extends Controller
         else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];
         }
+    }
+
+    public function send_custom_notification(Request $request) {
+        $title = $request->get('notification_title');
+        $message = $request->get('notification_body');
+        if ($request->get('notification_receiver') == 2) {
+            $rider_ids = $request->get('riders');
+            $device_tokens = EmployeeDeviceToken::whereIn('employee_id', $rider_ids)->where('employee_type_id', 2)->select('employee_id', 'device_token', 'employee_type_id');
+        }
+        elseif ($request->get('notification_receiver') == 1) {
+            $employees_ids = $request->get('employees');
+            $device_tokens = EmployeeDeviceToken::whereIn('employee_id', $employees_ids)->where('employee_type_id', 1)->select('employee_id', 'device_token', 'employee_type_id');
+        }
+        if($device_tokens->exists()){
+            foreach($device_tokens as $device_token){
+                NotificationsController::bolt_app_notification($device_token->employee_id, $device_token->employee_type_id,$device_token->device_token, $title, $message);
+            }
+
+            return redirect()->back()->with('success', 'Custom Notification Sent');
+        }
+        return back()->withErrors('No Receiver to send notification to!');
     }
 }

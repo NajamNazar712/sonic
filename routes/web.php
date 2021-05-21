@@ -1831,6 +1831,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('details', 'Admins\AdminNotificationsController@details')->name('details');
         Route::post('status', 'Admins\AdminNotificationsController@status')->name('status');
         Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+        Route::post('send_custom_notification', 'Admins\AdminNotificationsController@send_custom_notification')->name('send_custom_notification');
     });
 
     //Reports start

@@ -24,6 +24,7 @@ use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -94,7 +95,8 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'email_address' => ['required', 'email'],
-            'password' => ['required', 'min:6']
+            'password' => ['required', 'min:6'],
+            'device_token' => ['nullable']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -125,6 +127,20 @@ class AdminAPIController extends Controller
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
+
+                    if($request->has('device_token')){
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
+                            ->where('employee_type_id', 1);
+                        if ($employee_device_token->exists()) {
+                            $employee_device_token = $employee_device_token->first();
+                        } else {
+                            $employee_device_token = new EmployeeDeviceToken();
+                            $employee_device_token->employee_id = $user->id;
+                            $employee_device_token->employee_type_id = 1;
+                        }
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+                    }
 
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
