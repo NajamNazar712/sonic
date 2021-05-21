@@ -703,8 +703,17 @@ class DeliveryController extends Controller
                     'last_updated_at' => Carbon::now(),
                     'ordering' => $order
                 ]);
+                $rider_device_token = EmployeeDeviceToken::where('employee_id',$request->selected_rider_id)
+                    ->where('employee_type_id', 2)
+                    ->select('device_token');
+                if ($rider_device_token->exists()) {
+                    $rider_device_token = $rider_device_token->first();
+                    $device_token = $rider_device_token->device_token;
+                    $title = "Delivery Note Assigned";
+                    $message = "Dear Rider Delivery Note # " . $note->id . " Has Been Assigned To You";
+                    NotificationsController::bolt_app_notification($request->selected_rider_id, 2,$device_token, $title, $message);
+                }
             }
-
             if ($note) {
                 if (!$order) {  //Default
                     sort($valid_shipments); //sort_valid_shipments;

@@ -452,7 +452,7 @@ class AdminNotificationsController extends Controller
             $device_tokens = EmployeeDeviceToken::whereIn('employee_id', $employees_ids)->where('employee_type_id', 1)->select('employee_id', 'device_token', 'employee_type_id');
         }
         if($device_tokens->exists()){
-            foreach($device_tokens as $device_token){
+            foreach($device_tokens->get() as $device_token){
                 NotificationsController::bolt_app_notification($device_token->employee_id, $device_token->employee_type_id,$device_token->device_token, $title, $message);
             }
 
