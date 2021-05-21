@@ -88,6 +88,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\MonthAverageIndividual',
         'App\Console\Commands\MonthAverageRM',
         'App\Console\Commands\RiderIncentiveCalculate',
+        'App\Console\Commands\DHLTrackingSync',
 
 
     ];
@@ -274,6 +275,7 @@ class Kernel extends ConsoleKernel
             $cut_off_time = $settings->setting_value . ':00';
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
+        $schedule->command('dhl:shipmentstatussync')->dailyAt( '04:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

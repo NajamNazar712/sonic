@@ -91,9 +91,6 @@ class DHLInternationalShipmentSyncController extends Controller
                                 $intl_shipment = InternationalShipment::where('international_tracking_number', $international_shipment->id)->where('sync', 1)->first();
                                 if($intl_shipment){
                                     $shipment = $intl_shipment->shipment;
-//                                    $origin_city_id = $shipment->pickup_address->city_id;
-//                                    $destination_city_id = $shipment->consignee_city_id;
-                                    $shipment_id = $shipment->id;
                                     $shipper_status_id = $shipment->shipper_status_id;
                                     $international_shipment_status = $intl_shipment->status->statusCode;
                                     $international_shipment_description = $intl_shipment->status->description;
@@ -162,6 +159,9 @@ class DHLInternationalShipmentSyncController extends Controller
                                         }
                                         else if($shipper_status_id == 4){
                                             (new self)->shipment_arrived($shipment->id);
+                                            (new self)->shipment_returned($shipment->id);
+                                        }
+                                        else if(in_array($shipper_status_id, [9])){
                                             (new self)->shipment_returned($shipment->id);
                                         }
 

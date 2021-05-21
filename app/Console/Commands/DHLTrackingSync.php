@@ -19,7 +19,7 @@ class DHLTrackingSync extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'DHL Shipment Tracking Cron';
 
     /**
      * Create a new command instance.
