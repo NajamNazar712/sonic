@@ -1445,7 +1445,7 @@ class RetailShipmentBookController extends Controller
         $retail_user = RetailUser::find($retail_user_id);
         $retail_trax_center = RetailTraxCenter::find($retail_user->category_id);
         $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
-            ->select('retail_shipments.id', 's.tracking_number as tracking_number')
+            ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.created_at as created_at')
             ->where('s.pickup_address_id', $retail_trax_center->pickup_address_id)
             ->wherenull('retail_shipments.retail_user_id')
             ->orderBy('retail_shipments.created_at', 'desc');
@@ -1454,6 +1454,12 @@ class RetailShipmentBookController extends Controller
                 $route = route('retail.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             });
+
+        if ($request->get('search_date')) {
+            $date = $request->get('search_date');
+            $datatable->whereDate('retail_shipments.created_at', $date);
+        }
+
         return  $datatable->make(true);
     }
 }

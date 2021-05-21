@@ -14,11 +14,39 @@
                 <div class="card-content" aria-expanded="true">
                     <div class="card-body">
                         @include('retail.inc.messages')
+                        <div class="row mb-2 justify-content-center">
+                            <div class="col-12 ">
+                                <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="col-5 mt-1">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                            </div>
+                                            <input type="text" name="search_date"
+                                                   class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                   id="search_date" placeholder="Select Shipment Date" data-value="{{ Carbon\Carbon::today() }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-2 mt-1">
+                                        <div class="form-group">
+                                            <button type="button" id="search_filter_btn"
+                                                    class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                         <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                             <thead>
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Tracking Number</th>
+                                <th class="border-primary border-darken-1">Created At</th>
                             </tr>
                             </thead>
                         </table>
@@ -84,6 +112,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle text-center shipments_button'},
+                    {data: 'created_at', name: 'retail_shipments.created_at', class: 'align-middle text-center created_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -100,7 +129,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.slip_image') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.slip_image') || $(header).is('.action') || $(header).is('.created_at')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -116,6 +145,20 @@
                     this.api().table().columns.adjust();
                 }
             });
+        });
+    </script>
+    <script type="text/javascript">
+        var search_date = $('#search_form #search_date').pickadate({
+            firstDay: 1,
+            clear: '',
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd',
+            hiddenSuffix: '_formatted',
+        });
+
+        $('#search_filter_btn').on('click',function () {
+            table.draw(true);
         });
     </script>
 @endsection
