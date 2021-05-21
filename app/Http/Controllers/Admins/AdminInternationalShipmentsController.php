@@ -235,6 +235,7 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->shipment_id = $shipment_id;
                         $international_shipment->international_tracking_number = $international_tracking_number;
                         $international_shipment->actual_weight = $actual_weight;
+                        $international_shipment->sync = 1;
                         $international_shipment->save();
                         Shipment::where('id',$shipment_id)->update(['actual_weight'=>$actual_weight]);
                         return redirect()->back()->with('success', 'Shipment successfully updated!');
