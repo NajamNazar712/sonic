@@ -20,6 +20,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;

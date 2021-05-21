@@ -23,6 +23,7 @@ use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
