@@ -151,7 +151,7 @@ class AdminAttendanceController extends Controller
                 $datatable->where('department_id', $search_department)->where('employee_type',1);
             }
             else{
-//                $datatable->where('ad.name',6)->where('employee_type',2);
+                $datatable->where('employee_type',2);
             }
         }
 
