@@ -84,6 +84,7 @@
                                         <th class="border-primary border-darken-1">Rates Rejected At</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
+                                        <th class="border-primary border-darken-1">Account Disable Date</th>
                                         <th class="border-primary border-darken-1">Account Disable Remarks</th>
                                         <th class="border-primary border-darken-1">Document Uploaded At</th>
                                         <th class="border-primary border-darken-1">Documents Approved By</th>
@@ -475,6 +476,7 @@
                         head.push('Rates Rejected At');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
+                        head.push('Account Disable Date');
                         head.push('Account Disable Remarks');
                         head.push('Documents Uploaded At');
                         head.push('Documents Approved By');
@@ -515,6 +517,7 @@
                             row.push(values.rates_rejected_at);
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
+                            row.push(values.disable_at);
                             row.push(values.disable_remarks);
                             row.push(values.documents_uploaded_at);
                             row.push(values.documents_approved_by);
@@ -1046,6 +1049,7 @@
                 {data: 'rates_rejected_at', name: 'users.rates_rejected_at', class: 'align-middle rates_rejected_at'},
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
+                {data: 'disable_at', name: 'users.disable_at', class: 'align-middle disable_at'},
                 {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
                 {data: 'documents_uploaded_at', name: 'uda.uploaded_at', class: 'align-middle documents_uploaded_at', searchable: false},
                 {data: 'documents_approved_by', name: 'dab.name', class: 'align-middle documents_approved_by', searchable: false},

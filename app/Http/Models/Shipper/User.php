@@ -55,4 +55,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\Http\Models\Segment', 'segment_id', 'id');
     }
+    public function packaging_materails()
+    {
+        return $this->hasMany('App\Http\Models\ShipperPackagingMaterailType','shipper_id','id');
+    }
+    
 }
