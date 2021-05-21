@@ -107,7 +107,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[0, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle text-center shipments_button'},
@@ -144,6 +144,10 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
+            });
         });
     </script>
     <script type="text/javascript">
@@ -154,10 +158,6 @@
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
-        });
-
-        $('#search_filter_btn').on('click',function () {
-            table.draw(true);
         });
     </script>
 @endsection
