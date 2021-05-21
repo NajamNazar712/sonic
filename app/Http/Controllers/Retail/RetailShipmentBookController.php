@@ -13,6 +13,7 @@ use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -1433,5 +1434,25 @@ class RetailShipmentBookController extends Controller
             $retail_shipment->save();
         }
         return redirect()->back()->with('success', 'Slip uploaded successfully');
+    }
+
+    public function other_booking_index(){
+        return view('retail.shipment.other_booking');
+    }
+
+    public function other_booking_list(Request $request){
+        $retail_user_id = Auth::id();
+        $retail_user = RetailUser::find($retail_user_id);
+        $retail_trax_center = RetailTraxCenter::find($retail_user->category_id);
+        $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
+            ->select('retail_shipments.id', 's.tracking_number as tracking_number')
+            ->where('s.pickup_address_id', $retail_trax_center->pickup_address_id)
+            ->orderBy('retail_shipments.created_at', 'desc');
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('retail.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+        return  $datatable->make(true);
     }
 }

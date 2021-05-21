@@ -2947,6 +2947,10 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');
             Route::post('/upload', 'Retail\RetailShipmentBookController@tracking_slip_upload')->name('upload');
         });
+        Route::prefix('other_booking')->name('other_booking.')->group(function () {
+            Route::get('', 'Retail\RetailShipmentBookController@other_booking_index')->name('index');
+            Route::get('/list', 'Retail\RetailShipmentBookController@other_booking_list')->name('list');
+        });
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
         Route::get('', 'Retail\RetailCashDepositController@index')->name('index');
