@@ -2481,7 +2481,7 @@ class NotificationsController extends Controller
                         // $cc[] = $regional_manager->email;
                     }
 
-                    $general_admins = Admin::where('role_id',4)->where('status', 1);
+                    $general_admins = Admin::whereIn('role_id',[4,31])->where('status', 1);
                     
                     if ($general_admins->exists()) {
                         $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
