@@ -7449,7 +7449,7 @@ class RiderAPIController extends Controller
         return response()->json(["status" => 0, "shipper_bank_info" => "", "shipment_count" => ""]);
     }
 
-    /*public function retail_shipment_store(Request $request)
+    public function retail_shipment_store(Request $request)
     {
         $rider_id = $request->rider_id;
         $setting = GlobalSettings::where('type', 'retail_store')->first();
@@ -7609,12 +7609,12 @@ class RiderAPIController extends Controller
         $retail_shipment->length = $length;
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
-        $retail_shipment->admin_id = $admin_id;
+        $retail_shipment->rider_id = $rider_id;
         $retail_shipment->save();
 
 
         $date = Carbon::today()->toDateString();
-        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 3)->where('admin_id', $admin_id);
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 4)->where('admin_id', $rider_id);
         if ($cash_deposit->exists()) {
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;
@@ -7624,8 +7624,8 @@ class RiderAPIController extends Controller
             $cash_deposit->save();
         } else {
             $cash_deposit = new RetailCashDeposit();
-            $cash_deposit->category = 3;
-            $cash_deposit->admin_id = $admin_id;
+            $cash_deposit->category = 4;
+            $cash_deposit->rider_id = $rider_id;
             $cash_deposit->total_cn = 1;
             $cash_deposit->total_cash = $total_charges;
             $cash_deposit->save();
@@ -7644,7 +7644,7 @@ class RiderAPIController extends Controller
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
 
-    }*/
+    }
 
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();

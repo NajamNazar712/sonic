@@ -172,7 +172,7 @@ Route::name('api.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
                 Route::post('retail_bank_info', 'Rider\RiderAPIController@retail_bank_info')->name('retail_bank_info');
-//                Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
+                Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
 		});
