@@ -183,21 +183,45 @@ class DHLInternationalShipmentSyncController extends Controller
     //184 admin
     //3003 rider
     public function shipment_picked($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        $shipment->shipper_status_id = 2;
+        $shipment->consignee_status_id = 2;
+        $shipment->save();
         ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, $this->admin_id);
     }
     public function shipment_intransit($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        $shipment->shipper_status_id = 3;
+        $shipment->consignee_status_id = 3;
+        $shipment->save();
         ShipmentsJourneyController::add($shipment_id, 3, 3, NULL, NULL, NULL, $this->admin_id);
     }
     public function shipment_arrived($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        $shipment->shipper_status_id = 4;
+        $shipment->consignee_status_id = 4;
+        $shipment->save();
         ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, NULL, NULL, $this->admin_id);
     }
     public function shipment_delivered($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        $shipment->shipper_status_id = 14;
+        $shipment->consignee_status_id = 14;
+        $shipment->save();
         ShipmentsJourneyController::add($shipment_id, 14, 14, NULL, NULL, NULL, $this->admin_id);
     }
     public function shipment_undelivered($shipment_id, $shipment_status){
+        $shipment = Shipment::find($shipment_id);
+        $shipment->shipper_status_id = $shipment_status;
+        $shipment->consignee_status_id = $shipment_status;
+        $shipment->save();
         ShipmentsJourneyController::add($shipment_id, $shipment_status, $shipment_status, NULL, NULL, NULL, $this->admin_id);
     }
     public function shipment_returned($shipment_id){
+        $shipment = Shipment::find($shipment_id);
+        $shipment->shipper_status_id = 22;
+        $shipment->consignee_status_id = 22;
+        $shipment->save();
         ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, $this->admin_id);
     }
 
