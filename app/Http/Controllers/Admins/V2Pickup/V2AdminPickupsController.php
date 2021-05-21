@@ -420,7 +420,7 @@ class V2AdminPickupsController extends Controller
                     }
                 }
                 elseif ($rider_id != null && $previous_rider_id != null){
-                    $previous_rider = Rider::where('id', $previous_rider_id)->select('name');
+                    $previous_rider = Rider::where('id', $previous_rider_id)->select('name')->first();
                     $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
                         ->where('employee_type_id', 2)
                         ->select('device_token');
