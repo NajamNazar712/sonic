@@ -16,9 +16,11 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Route Code</th>
+                        <th class="border-primary border-darken-1">Route Title</th>
                         <th class="border-primary border-darken-1">Starting Point</th>
                         <th class="border-primary border-darken-1">End Point</th>
                         <th class="border-primary border-darken-1">Junctions</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
@@ -27,39 +29,66 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AddRunnerModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRunnerModal"
+    <div class="modal fade text-left" id="AddRouteManagementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRouteManagementModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Runner</h4>
+                    <h4 class="modal-title white">Add Route</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="runner_add_form" class="form-horizontal" action="{{ route('admin.settings.runner.add') }}" method="POST" novalidate="novalidate">
+                <form id="route_management_add_form" class="form-horizontal" action="{{ route('admin.settings.route_management.store') }}" method="POST" novalidate="novalidate">
                     @csrf
                     <div class="modal-body">
                         <div class="row justify-content-center">
                             <div class="col-6 form-group">
-                                <input type="text" name="runner_name" id="runner_name" class="form-control runner_name" placeholder="Runner Name*" data-rule-required="true" data-msg-required="Runner Name is required" data-rule-remote="{{ route('admin.settings.runner.unique') }}" data-msg-remote="Runner Name must be unique">
+                                <label for="route_code">Route Code</label>
+                                <input type="text" name="route_code" id="route_code" class="form-control route_code" placeholder="Route Code*" data-rule-required="true" data-msg-required="Route Code is required" data-rule-remote="{{ route('admin.settings.route_management.unique') }}" data-msg-remote="Route Code must be unique">
                             </div>
                         </div>
                         <div class="row justify-content-center">
-                            <div class="col form-group">
-                                <select class="form-control origin" name="origin" id="origin" data-rule-required="true" data-msg-required="Origin is required">
+                            <div class="col-6 form-group">
+                                <label for="route_title">Route Title</label>
+                                <input type="text" name="route_title" id="route_title" class="form-control route_title" placeholder="Route Title*" data-rule-required="true" data-msg-required="Route Title is required" >
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-6 form-group">
+                                <label for="starting_point_id">Starting Point</label>
+
+                                <select class="form-control starting_point_id" name="starting_point_id" id="starting_point_id" data-rule-required="true" data-msg-required="Starting Point is required">
                                     @foreach($cities as $city)
                                         <option value="{{$city->id}}">{{$city->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col form-group">
-                                <select class="form-control destination" name="destination" id="destination" data-rule-required="true" data-msg-required="Destination is required">
+                        </div>
+                        <div class="row justify-content-center">
+
+                            <div class="col-6 form-group">
+                                <label for="end_point_id">End Point</label>
+
+                                <select class="form-control end_point_id" name="end_point_id" id="end_point_id" data-rule-required="true" data-msg-required="End Point_id is required">
                                     @foreach($cities as $city)
                                         <option value="{{$city->id}}">{{$city->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
+                            
+                        </div>
+                        <div class="row justify-content-center">
+
+                            <div class="col-6 form-group">
+                                    <label for="end_point_id">Junctions</label>
+                                    <select class="form-control" name="junction[1]" id="junction_1" data-rule-required="true" data-msg-required="Junction 1 is required">
+                                        @foreach($cities as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                            </div>
+                            
                         </div>
                         <div id="junctions">
 
@@ -148,20 +177,25 @@
     <script type="text/javascript">
         var index_count = 0;
         $(document).ready(function () {
-            $("#origin").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Origin",
+            $("#starting_point_id").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Starting Point",
                 width:'100%',
-                dropdownParent:$('#AddRunnerModal')
+                dropdownParent:$('#AddRouteManagementModal')
             });
-            $("#destination").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Destination",
+            $("#end_point_id").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select End Point",
                 width:'100%',
-                dropdownParent:$('#AddRunnerModal')
+                dropdownParent:$('#AddRouteManagementModal')
             });
-            var row = 1;
-            $('#AddRunnerModal #runner_add_form #add_junction').on('click', function(){
+            $("#junction_1").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Junction 1",
+                    width:'100%',
+                    dropdownParent:$('#AddRouteManagementModal')
+                });
+            var row = 2;
+            $('#AddRouteManagementModal #route_management_add_form #add_junction').on('click', function(){
                var html = '<div class="row justify-content-center">\n' +
-                   '                            <div class="col-5 form-group">\n' +
+                   '                            <div class="col-6 form-group">\n' +
                    '                                <select class="form-control" name="junction[' + row + ']" id="junction_' + row + '" data-rule-required="true" data-msg-required="Junction ' + row + ' is required">\n' +
                    '                                    @foreach($cities as $city)\n' +
                    '                                        <option value="{{$city->id}}">{{$city->name}}</option>\n' +
@@ -174,11 +208,11 @@
                 $("#junction_" + row).prepend('<option value="" selected></option>').select2({
                     placeholder: "Select Junction " + row,
                     width:'100%',
-                    dropdownParent:$('#AddRunnerModal')
+                    dropdownParent:$('#AddRouteManagementModal')
                 });
                 row++;
             });
-            $('#runner_add_form').validate({
+            $('#route_management_add_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -200,56 +234,56 @@
                 }
             });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.runner.list') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
-                            head.push('S.No');
-                            head.push('Runner');
-                            head.push('Created At');
-                            head.push('Created By');
-                            head.push('Status');
+            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            //     if ( this.context.length ) {
+            //         body = [];
+            //         var params = table.ajax.params();
+            //         params.start = 0;
+            //         params.length = -1;
+            //         var jsonResult = $.ajax({
+            //             url: '{{ route('admin.settings.route_management.list') }}',
+            //             data: params,
+            //             success: function (result) {
+            //                 head = [];
+            //                 head.push('S.No');
+            //                 head.push('Runner');
+            //                 head.push('Created At');
+            //                 head.push('Created By');
+            //                 head.push('Status');
 
-                            $.each(result.data, function(index, values) {
-                                row = [];
+            //                 $.each(result.data, function(index, values) {
+            //                     row = [];
 
 
-                                row.push(index + 1);
-                                row.push(values.runner);
-                                row.push(values.created_at);
-                                row.push(values.created_by);
-                                row.push(values.status);
+            //                     row.push(index + 1);
+            //                     row.push(values.runner);
+            //                     row.push(values.created_at);
+            //                     row.push(values.created_by);
+            //                     row.push(values.status);
 
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
+            //                     body.push(row);
+            //                 });
+            //             },
+            //             async: false
+            //         });
 
-                    return {body: body, header: head};
-                }
-            } );
+            //         return {body: body, header: head};
+            //     }
+            // } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
-                        text: '<i class="la la-plus"></i> Add Runner',
-                        className: 'btn btn-primary add_warehouse',
+                        text: '<i class="la la-plus"></i> Add Route',
+                        className: 'btn btn-primary add_route_management',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            $('#AddRunnerModal').modal('show');
+                            $('#AddRouteManagementModal').modal('show');
                         }
                     },{
                         extend: 'excel',
-                        title: 'Runner Report',
+                        title: 'Route Management',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         className: 'btn btn-primary',
                     },
@@ -264,15 +298,17 @@
                 },
                 serverSide: true,
                 autoWidth: false,
-                ajax: '{{ route('admin.settings.runner.list') }}',
+                ajax: '{{ route('admin.settings.route_management.list') }}',
                 rowId: 'id',
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'runner', name: 'runners.name', class: 'align-middle text-center runner'},
-                    {data: 'created_at', name: 'runners.created_at', class: 'align-middle text-center created_at'},
-                    {data: 'created_by', name: 'a.name', class: 'align-middle text-center created_by'},
-                    {data: 'status', name: 'runners.status', class: 'align-middle text-center status'},
+                    {data: 'route_code', name: 'route_managements.route_code', class: 'align-middle text-center route_code'},
+                    {data: 'route_title', name: 'route_managements.route_title', class: 'align-middle text-center route_title'},
+                    {data: 'starting_id', name: 'stp.id', class: 'align-middle text-center starting_point'},
+                    {data: 'end_id', name: 'endp.id', class: 'align-middle text-center end_point'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle text-left junctions'},
+                    {data: 'status', name: 'route_managements.status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -296,7 +332,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number')|| $(header).is('.action')) {
+                        if ($(header).is('.serial_number')|| $(header).is('.action')|| $(header).is('.starting_point')|| $(header).is('.end_point')|| $(header).is('.junctions')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){
@@ -330,7 +366,7 @@
 
                 if ($(this).hasClass('status')) {
                     $.ajax({
-                        url: '{!! route('admin.settings.runner.enable_disable') !!}',
+                        url: '{!! route('admin.settings.route_management.enable_disable') !!}',
                         method: 'POST',
                         data: {
                             'id': id,

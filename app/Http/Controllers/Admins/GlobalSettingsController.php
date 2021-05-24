@@ -25,6 +25,8 @@ use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\Http\Models\Admin\RcpTatOption;
+use App\Http\Models\Admin\RouteManagement;
+use App\Http\Models\Admin\RouteManagementJunction;
 use App\Http\Models\Admin\SalePersonTarget;
 use App\Http\Models\Admin\SalePersonTargetLog;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
@@ -4075,5 +4077,121 @@ class GlobalSettingsController extends Controller
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.route_management_index')->with('cities', $cities);
     
+    }
+
+    public function route_management_list()
+    {
+        // $cargo_consignments = CargoConsignment::join('cities as oh', 'cargo_consignments.origin_hub_id', '=', 'oh.id')
+        // ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
+        // ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
+        // ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
+        // ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
+        // ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
+        // ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
+        // ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
+        // ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
+        // ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND (s.shipper_status_id = 3 OR s.shipper_status_id = 21)) AS short_received_shipments'))
+        // ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7, 9]);
+        $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
+        ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
+        ->select('route_managements.id','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.location_latitude as starting_lat', 'stp.location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.location_latitude as end_lat', 'endp.location_longitude as end_long')
+        ;
+        $datatable = Datatables::of($route_management)
+        ->editColumn('status', function ($route_management) {
+            if ($route_management->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })->editColumn('starting_id', function ($route_management) {
+            // $route_management->starting_id.'-'.
+            return "<a href='https://www.google.com/maps/?q=".$route_management->starting_lat.",".$route_management->starting_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->starting_name;
+        })
+        ->editColumn('end_id', function ($route_management) {
+            return "<a href='https://www.google.com/maps/?q=".$route_management->end_lat.",".$route_management->end_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->end_name;
+            
+            return $route_management->end_id.'-'.$route_management->end_name;
+        })
+            
+            ->addColumn('junctions', function ($route_management) {
+                $junctions = RouteManagementJunction::where('route_management_id',$route_management->id)->get();
+                $junction_data = '';
+
+                
+                    foreach ($junctions as $junction) {
+                        $city = City::find($junction->junction_id);
+                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->location_latitude.",".$route_management->location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
+
+                    }
+                    return $junction_data;
+                    // return $route_management->id;
+            })
+            ->addColumn('action', function ($fleet) {
+                $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+
+                if ($fleet->status == 0) {
+                    $dropdown .= $enable;
+                }
+                if ($fleet->status == 1) {
+                    $dropdown .= $disable;
+                }
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+
+    }
+    public function route_management_unique(Request $request)
+    {
+        if ($request->filled('route_code')) {
+            $fleet = RouteManagement::where('route_code', $request->input('route_code'));
+
+            if (!$fleet->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'true';
+        }
+    }
+
+    public function route_management_store(Request $request)
+    {
+        $route_management = new RouteManagement;
+        $route_management->route_code = $request->route_code;
+        $route_management->route_title = $request->route_title;
+        $route_management->starting_point_id = $request->starting_point_id;
+        $route_management->end_point_id = $request->end_point_id;
+        $route_management->save();
+        foreach ($request->junction as $junction_id) {
+            $route_management_junction = new RouteManagementJunction;
+            $route_management_junction->junction_id = $junction_id;
+            $route_management_junction->route_management_id = $route_management->id;
+            $route_management_junction->save();
+            }
+        return redirect()->back()->with('success', 'Route Added successfully!');
+
+    }
+
+    public function route_management_enable_disable(Request $request){
+        $id = $request->id;
+        $route_management = RouteManagement::find($id);
+        if ($route_management) {
+            if ($route_management->status == 0) {
+                $route_management->status = 1;
+                $route_management->save();
+            } else {
+                $route_management->status = 0;
+                $route_management->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
     }
 }

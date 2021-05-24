@@ -2161,10 +2161,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('route_management')->name('route_management.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@route_management_index')->name('index');
-            Route::get('list', 'Admins\GlobalSettingsController@fleet_list')->name('list');
-            Route::post('store', 'Admins\GlobalSettingsController@fleet_store')->name('store');
-            Route::post('enable_disable', 'Admins\GlobalSettingsController@fleet_enable_disable')->name('enable_disable');
-            Route::get('unique', 'Admins\GlobalSettingsController@fleet_unique')->name('unique');
+            Route::get('list', 'Admins\GlobalSettingsController@route_management_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@route_management_store')->name('store');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@route_management_enable_disable')->name('enable_disable');
+            Route::get('unique', 'Admins\GlobalSettingsController@route_management_unique')->name('unique');
         });
 
 

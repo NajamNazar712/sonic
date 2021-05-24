@@ -80,7 +80,7 @@
                                                         <h4 class="form-section mb-2 text-center">Cargo Information</h4>
                                                     </div>
 
-                                                    <div class="col">
+                                                    <div class="col-3">
                                                         <div class="form-group">
                                                             <input type="hidden" name="origin_hub_id" class="origin_hub_id">
 
@@ -88,15 +88,20 @@
                                                         </div>
                                                     </div>
 
-                                                    <div class="col">
+                                                    <div class="col-3">
                                                         <div class="form-group">
                                                             <input type="hidden" name="destination_hub_id" class="destination_hub_id">
 
                                                             <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination"></p>
                                                         </div>
                                                     </div>
-
-                                                    <div class="col">
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <select name="route_management_id" class="select2 route_management_id">
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    {{-- <div class="col">
                                                         <div class="form-group">
                                                             <select name="junction_1" class="select2 junction_1">
                                                             </select>
@@ -108,7 +113,7 @@
                                                             <select name="junction_2" class="select2 junction_2">
                                                             </select>
                                                         </div>
-                                                    </div>
+                                                    </div> --}}
 
                                                     <div class="w-100"></div>
 
@@ -139,12 +144,17 @@
                                                             <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>
                                                         </div>
                                                     </div>
-                                                    <div class="col">
+                                                    {{-- <div class="col">
                                                         <div class="form-group">
                                                             <input type="text" name="vehicle" class="form-control rounded-right vehicle" placeholder="Vehicle Number*" data-rule-required="true" data-msg-required="Vehicle Number is required">
                                                         </div>
+                                                    </div> --}}
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <select name="fleet_id" class="select2 fleet_id">
+                                                            </select>
+                                                        </div>
                                                     </div>
-
                                                     <div class="w-100"></div>
 
                                                     <div class="col">
@@ -402,43 +412,65 @@
 
                         $('#master_cargo_consignment form .actual_weight').val(data.actual_weight);
 
-                        $.each(data.junctions, function(index, junction) {
-                            $('#master_cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-                            $('#master_cargo_consignment form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+                        // $.each(data.junctions, function(index, junction) {
+                        //     $('#master_cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+                        //     $('#master_cargo_consignment form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+                        // });
+
+
+                        $.each(data.routes, function(index, route) {
+                            $('#master_cargo_consignment form .route_management_id').append('<option value="' + route.id + '">' + route.route_code    + '</option>');
                         });
 
-                        if(data.junction_1) {
-                            $('#master_cargo_consignment form .junction_1').val(data.junction_1);
-                            $('#master_cargo_consignment form .junction_1').select2({
+                        $('#master_cargo_consignment form .route_management_id').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
-                                placeholder: 'Junction 1'
+                                placeholder: 'Select Route'
                             }).bind('change', function() {
                                 $(this).valid();
                             });
-                        }
-                        else{
-                            $('#master_cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
+
+                            $.each(data.fleets, function(index, fleet) {
+                            $('#master_cargo_consignment form .fleet_id').append('<option value="' + fleet.id + '">' + fleet.reg_number    + '</option>');
+                        });
+
+                        $('#master_cargo_consignment form .fleet_id').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
-                                placeholder: 'Junction 1'
+                                placeholder: 'Select Vehicle'
                             }).bind('change', function() {
                                 $(this).valid();
                             });
-                        }
-                        if(data.junction_2) {
-                            $('#master_cargo_consignment form .junction_2').val(data.junction_2);
-                            $('#master_cargo_consignment form .junction_2').select2({
-                                width: '100%',
-                                placeholder: 'Junction 2',
-                                allowClear: true
-                            });
-                        }
-                        else{
-                            $('#master_cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Junction 2',
-                                allowClear: true
-                            })
-                        }
+                        // if(data.junction_1) {
+                        //     $('#master_cargo_consignment form .junction_1').val(data.junction_1);
+                        //     $('#master_cargo_consignment form .junction_1').select2({
+                        //         width: '100%',
+                        //         placeholder: 'Junction 1'
+                        //     }).bind('change', function() {
+                        //         $(this).valid();
+                        //     });
+                        // }
+                        // else{
+                        //     $('#master_cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
+                        //         width: '100%',
+                        //         placeholder: 'Junction 1'
+                        //     }).bind('change', function() {
+                        //         $(this).valid();
+                        //     });
+                        // }
+                        // if(data.junction_2) {
+                        //     $('#master_cargo_consignment form .junction_2').val(data.junction_2);
+                        //     $('#master_cargo_consignment form .junction_2').select2({
+                        //         width: '100%',
+                        //         placeholder: 'Junction 2',
+                        //         allowClear: true
+                        //     });
+                        // }
+                        // else{
+                        //     $('#master_cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
+                        //         width: '100%',
+                        //         placeholder: 'Junction 2',
+                        //         allowClear: true
+                        //     })
+                        // }
 
                         $('#master_cargo_consignment form input.actual_weight').inputmask({
                             'alias': 'decimal',

@@ -14,7 +14,10 @@ class RouteManagement extends Model
         return $this->belongsTo('App\Http\Models\City', 'end_point_id', 'id');
     }
 
-    public function junction() {
-        return $this->belongsTo('App\Http\Models\City', 'junction_id', 'id');
+    public function junctions(){
+        return $this->hasMany('App\Http\Models\RouteManagementJunction');
     }
+    
 }
+
+

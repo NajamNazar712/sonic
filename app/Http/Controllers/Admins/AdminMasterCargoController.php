@@ -34,6 +34,9 @@ use App\Http\Models\WarehouseStockRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Fleet;
+use App\Http\Models\Admin\RouteManagement;
+use App\Http\Models\Admin\RouteManagementJunction;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -1180,6 +1183,8 @@ class AdminMasterCargoController extends Controller
         $origin_details['id'] = $origin->id;
         $origin_details['name'] = $origin->name;
 
+
+        
         $destination = $bag->destination_hub->hub_city;
 
         $destination_details = array();
@@ -1192,6 +1197,9 @@ class AdminMasterCargoController extends Controller
         $details['junctions'] = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
 
         $details['transport_modes'] = TransportMode::all();
+
+        $details['routes'] = RouteManagement::where('starting_point_id',$origin->id)->get();
+        $details['fleets'] = Fleet::all();
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
