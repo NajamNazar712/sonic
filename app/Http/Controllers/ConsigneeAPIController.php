@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
+use Validator;
+use DB;
 
 class ConsigneeAPIController extends Controller
 {
