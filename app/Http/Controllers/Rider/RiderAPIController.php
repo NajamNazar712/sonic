@@ -4883,6 +4883,20 @@ class RiderAPIController extends Controller
                         $employee_device_token->device_token = $request->get('device_token');
                         $employee_device_token->save();
 
+                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                            ->join('riders as r', 'e.id', 'r.employee_id')
+                            ->where('r.id', $rider->id);
+                        if ($reporting_location->exists()) {
+                            $reporting_location = $reporting_location->first();
+                            $information['distance'] = $reporting_location->radius;
+                            $information['lat'] = $reporting_location->lat;
+                            $information['long'] = $reporting_location->long;
+                        }else{
+                            $information['distance'] = 0;
+                            $information['lat'] = 0;
+                            $information['long'] = 0;
+                        }
+
                         if ($rider->api_token) {
                             $information['api_token'] = $rider->api_token;
                         } else {
