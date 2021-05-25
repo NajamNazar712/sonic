@@ -3004,6 +3004,69 @@ class APIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Pending for approval']);
                     }
                 }
+                elseif ($employee->employee_type_id == 2) {
+                    $rider = Rider::where('employee_id', $employee->id);
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->status == 0) {
+                            return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                        }
+                        if ($request->input('pin') == $employee->pin) {
+                            $information['name'] = $employee->name;
+                            $information['phone'] = $employee->phone_number;
+                            $information['cnic'] = $employee->cnic;
+                            $information['address'] = $employee->address;
+                            $information['role'] = 'rider';
+
+                            //Reporting Location
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
+                            if ($reporting_location->exists()) {
+                                $reporting_location = $reporting_location->first();
+                                $information['distance'] = $reporting_location->radius;
+                                $information['lat'] = $reporting_location->lat;
+                                $information['long'] = $reporting_location->long;
+                            } else {
+                                $information['distance'] = 0;
+                                $information['lat'] = 0;
+                                $information['long'] = 0;
+                            }
+
+                            //Device Token
+                            if ($request->has('device_token')) {
+                                $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
+                                    ->where('employee_type_id', 2);
+                                if ($employee_device_token->exists()) {
+                                    $employee_device_token = $employee_device_token->first();
+                                } else {
+                                    $employee_device_token = new EmployeeDeviceToken();
+                                    $employee_device_token->employee_id = $rider->id;
+                                    $employee_device_token->employee_type_id = 2;
+                                }
+                                $employee_device_token->device_token = $request->get('device_token');
+                                $employee_device_token->save();
+                            }
+
+                            //API_TOKEN
+                            if ($rider->api_token) {
+                                $information['api_token'] = $rider->api_token;
+                            } else {
+                                $api_token = uniqid(base64_encode(str_random(60)));
+
+                                $rider->api_token = $api_token;
+
+                                $rider->save();
+
+                                $information['api_token'] = $api_token;
+                            }
+                            return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                    }
+                }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
             }
