@@ -43,7 +43,7 @@ class RetailCompletedDeliveries extends Controller
             ->leftJoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
             ->leftJoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
             ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
-            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at'])
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
             ->where('retail_pickup_notes.status', 4)
             ->where('retail_pickup_notes.pncc_status', '=', 0);
 
