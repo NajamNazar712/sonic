@@ -845,6 +845,7 @@ class ShipperDashboardController extends Controller
             $user_shipping_info = UserShippingInfo::find($id);
             if($user_shipping_info){
                 $user_shipping_info->pickup_address = $pickup_address;
+                $user_shipping_info->pickup_brand_name = $request->pickup_brand_name;
                 $user_shipping_info->poc = $poc;
                 $user_shipping_info->email = $email;
                 $user_shipping_info->city_id = $city_id;

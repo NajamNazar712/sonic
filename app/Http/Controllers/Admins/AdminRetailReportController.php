@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Rider;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -45,8 +46,8 @@ class AdminRetailReportController extends Controller
         $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
-            ->join('retail_users as ru','ru.id','=','rs.retail_user_id')
-            ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
+            ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
             ->leftJoin('retail_franchises as rf', function ($join) {
                 $join->on('rf.id', '=', 'ru.category_id')
                     ->where('ru.category','=', DB::raw(1));
@@ -58,6 +59,7 @@ class AdminRetailReportController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->join('retail_shipping_modes as rsm','rsm.id','=','rs.shipping_mode')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'shipments.pickup_address_id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as oz', 'oz.id', '=', 'oc.zone_id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -91,7 +93,7 @@ class AdminRetailReportController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             })
             ->leftjoin('products as p','p.id','=','rs.product_type_id')
-            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id')
+            ->select('p.product_name as category','shipments.id as shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link', 'ru.name as booked_by', 'ru.category as retail_category','ru.id as booked_by_id', 'rsi.shipper_name', 'rf.id as franchise_account_id','rf.name as franchise', 'rc.id as retail_account_id','rc.name as retail_center','ss.name as current_status','rsm.name as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub', 'oz.name as origin_zone', 'dz.name as destination_zone','shipments.amount as collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','rs.weight_charges','rs.cash_handling_charges','rs.fuel_surcharge','rs.total_charges as total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.payable as d_net_payable','dr.created_at as delivered_or_returned', 'dps.retail_done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status' , 'dr.shipper_status_id as dr_status_id', 'pns.retail_pickup_note_id as pncc_id','rtc.name as retail_trax_center_name')
             ->whereNotIn('shipments.shipper_status_id',[1,17])
             ->whereBetween('sj.created_at', [$from,$to])
             ->where('shipments.shipment_type', 2);
@@ -116,7 +118,8 @@ class AdminRetailReportController extends Controller
                 $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipment_id',$shipment->shipment_id)->where('shipper_status_id',5)->count();
                 return $out_for_delivery;
             })
-            ->editColumn('booked_by_id', function($shipment){
+
+            ->editColumn('booked_by_id', function ($shipment) {
                 return str_pad($shipment->booked_by_id, 6, '0', STR_PAD_LEFT);
             })
 
@@ -137,11 +140,17 @@ class AdminRetailReportController extends Controller
                 return number_format($shipment->collection_amount);
             })
             ->addColumn('franchise_center', function ($shipment) {
-                if ($shipment->retail_category == 2) {
-                    return $shipment->retail_center;
+                if($shipment->retail_category){
+
+                    if ($shipment->retail_category == 2) {
+                        return $shipment->retail_center;
+                    }
+                    else {
+                        return $shipment->franchise;
+                    }
                 }
-                else {
-                    return $shipment->franchise;
+                else{
+                    return $shipment->retail_trax_center_name;
                 }
             })
             ->addColumn('estimated_charges',function($sale){

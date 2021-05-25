@@ -321,9 +321,9 @@
                     {data: 'retail_pickup_note_id',name:'retail_pickup_notes.id', class: 'text-center align-middle retail_pickup_note_id'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'r.name', class: 'align-middle rider'},
-                    { data:'store' ,name: 'store', class: 'align-middle store text-center'},
+                    { data:'store' ,name: 'store', class: 'align-middle store text-center', orderable: false, searchable: false},
                     { data:'count' ,name: 'retail_pickup_notes.shipments', class: 'align-middle count text-center'},
-                    { data:'code' ,name: 'code', class: 'align-middle code text-center'},
+                    { data:'code' ,name: 'code', class: 'align-middle code text-center', orderable: false, searchable: false},
                     { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
                     { data:'time' ,name: 'retail_pickup_notes.assigned_at', class: 'align-middle time text-center'},
                     { data:'amount' ,name: 'retail_pickup_notes.amount', class: 'align-middle amount'},
@@ -348,7 +348,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.store') || $(header).is('.code')) {
                             $(td).appendTo($(search));
                         }
                         else {
