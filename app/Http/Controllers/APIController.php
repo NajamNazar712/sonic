@@ -2958,6 +2958,9 @@ class APIController extends Controller
                             $information['address'] = $employee->address;
                             $information['role'] = 'staff';
 
+                            if($employee->forget_pin_status == 1){
+                                $information['forget_pin_status'] = $employee->forget_pin_status;
+                            }
                             //Reporting Location
                             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
                             if ($reporting_location->exists()) {
@@ -3020,6 +3023,10 @@ class APIController extends Controller
                             $information['cnic'] = $employee->cnic;
                             $information['address'] = $employee->address;
                             $information['role'] = 'rider';
+
+                            if($employee->forget_pin_status == 1){
+                                $information['forget_pin_status'] = $employee->forget_pin_status;
+                            }
 
                             //Reporting Location
                             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
@@ -3090,6 +3097,10 @@ class APIController extends Controller
                             $information['address'] = $employee->address;
                             $information['pickup_address_id'] = $trax_center->pickup_address_id;
                             $information['role'] = 'retail_user';
+
+                            if($employee->forget_pin_status == 1){
+                                $information['forget_pin_status'] = $employee->forget_pin_status;
+                            }
 
                             //Reporting Location
                             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
@@ -3165,9 +3176,10 @@ class APIController extends Controller
                 $employee = $employee->first();
                 $pin = rand(1000,9999);
                 $employee->pin = $pin;
+                $employee->forget_pin_status = 1;
                 $employee->save();
                 NotificationsController::bolt_forget_pin($employee->phone_number, $pin, $employee->name);
-                return response()->json(['status' => 0, 'message' => 'Pin has been sended to your registered number']);
+                return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number']);
             }else{
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
             }
