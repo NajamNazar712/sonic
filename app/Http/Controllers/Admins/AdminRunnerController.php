@@ -15,6 +15,10 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Fleet;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
+use App\Http\Models\Admin\RouteManagement;
+use Illuminate\Support\Facades\DB;
 
 class AdminRunnerController extends Controller
 {
@@ -366,5 +370,43 @@ class AdminRunnerController extends Controller
             }
             return response()->json(['runner_detail_times' => $details]);
         }
+    }
+
+    public function vehicle_in_transit(){
+
+        // $route_managements = RouteManagement::where('status',1)->get();
+        $route_managements = DB::table('route_managements')->where('status',1)->get();
+        // $fleets = Fleet::where('status',1)->get();
+        $fleets = DB::table('fleets')->where('status',1)->get();
+        return view('admin.runner.in_transit')->with(['route_managements'=>$route_managements,'fleets'=>$fleets]);
+    }
+
+    public function vehicle_in_transit_list(Request $request){
+        $master_cargo = MasterCargo::leftjoin('cities as or', 'master_cargoes.origin_hub_id', '=', 'or.id')
+        ->leftjoin('cities as des','master_cargoes.destination_hub_id','=','des.id')
+        ->leftjoin('route_managements as rm','master_cargoes.route_management_id','=','rm.id')
+        ->leftjoin('fleets as f', 'master_cargoes.fleet_id','=','f.id')
+        ->leftjoin('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
+        ->select('or.name as origin','des.name as destination','master_cargoes.id','master_cargoes.driver_name', 'master_cargoes.bags','tmv.name as vendor','rm.route_title as route_title','f.reg_number as vehicle');
+        
+         $datatables = Datatables::of($master_cargo)
+            ->addColumn('bags',function ($master_cargo){
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->bags . '</button>';
+          
+
+            });
+
+            if($route_managemnt = $request->get('search_route_managemnt')){
+                $datatables->where('rm.id', '=', $route_managemnt);
+            }
+    
+            if($fleet = $request->get('search_fleet')){
+                $datatables->where('f.id', '=', $fleet);
+            }
+
+            $datatables->where('f.id', '<>', 0)->where('rm.id','<>',0);
+
+        return $datatables->make(true);
+            
     }
 }

@@ -2758,6 +2758,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
         Route::post('/view_details', 'Admins\AdminRunnerController@runner_details_view')->name('view_details');
+        Route::get('in_transit', 'Admins\AdminRunnerController@vehicle_in_transit')->name('intransit');
+        Route::get('in_transit/list', 'Admins\AdminRunnerController@vehicle_in_transit_list')->name('intransit.list');
     });
 
     Route::prefix('open_parcel_history')->name('open_parcel_history.')->group(function () {
