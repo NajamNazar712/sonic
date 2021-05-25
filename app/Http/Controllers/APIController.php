@@ -3179,7 +3179,34 @@ class APIController extends Controller
                 $employee->forget_pin_status = 1;
                 $employee->save();
                 NotificationsController::bolt_forget_pin($employee->phone_number, $pin, $employee->name);
-                return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number']);
+                return response()->json(['status' => 0, 'forget_pin_message' => 'Pin has been sent to your registered number']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function bolt_reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }else{
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if($employee->exists()){
+                $employee = $employee->first();
+                $employee->pin = $request->pin;
+                $employee->forget_pin_status = 0;
+                $employee->save();
+                return response()->json(['status' => 0, 'reset_pin_message' => 'Pin has been reset successfully']);
             }else{
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
             }

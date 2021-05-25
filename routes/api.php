@@ -17,6 +17,7 @@ Route::name('api.')->group(function () {
 	Route::post('login', 'APIController@login')->name('login');
 	Route::post('user_login', 'APIController@bolt_login')->name('user_login');
 	Route::post('forget_pin', 'APIController@bolt_forget_pin')->name('forget_pin');
+	Route::post('reset_pin', 'APIController@bolt_reset_pin')->name('reset_pin');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');
