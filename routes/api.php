@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 
 Route::name('api.')->group(function () {
 	Route::post('login', 'APIController@login')->name('login');
+	Route::post('user_login', 'APIController@bolt_login')->name('user_login');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');

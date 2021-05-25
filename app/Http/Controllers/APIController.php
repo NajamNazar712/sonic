@@ -2923,14 +2923,13 @@ class APIController extends Controller
         }
     }
 
-    public function bolt_login(Request $request){
+    public function bolt_login(Request $request)
+    {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'pin' => ['required', 'integer', 'digits:4'],
             'device_token' => ['nullable']
         ];
-
-        //type = 1 => Invoice, 2 => Payment
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -2938,16 +2937,15 @@ class APIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else{
+        } else {
             $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($employee->exists()) {
                 $employee = $employee->first();
-                if($employee->employee_type_id == 1){
+                if ($employee->employee_type_id == 1) {
                     $admin = Admin::where('employee_id', $employee->id);
-                    if($admin->exists()){
+                    if ($admin->exists()) {
                         $admin = $admin->first();
-                        if($admin->status == 0){
+                        if ($admin->status == 0) {
                             return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                         }
                         if (Hash::check($request->input('pin'), $employee->pin)) {
@@ -2964,14 +2962,14 @@ class APIController extends Controller
                                 $information['distance'] = $reporting_location->radius;
                                 $information['lat'] = $reporting_location->lat;
                                 $information['long'] = $reporting_location->long;
-                            }else{
+                            } else {
                                 $information['distance'] = 0;
                                 $information['lat'] = 0;
                                 $information['long'] = 0;
                             }
 
                             //Device Token
-                            if($request->has('device_token')){
+                            if ($request->has('device_token')) {
                                 $employee_device_token = EmployeeDeviceToken::where('employee_id', $admin->id)
                                     ->where('employee_type_id', 1);
                                 if ($employee_device_token->exists()) {
@@ -2998,12 +2996,15 @@ class APIController extends Controller
                                 $information['api_token'] = $api_token;
                             }
 
-                        }else{
-                            return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                         }
                     }
-                        }
-            }else{
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                    }
+                }
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
             }
 
