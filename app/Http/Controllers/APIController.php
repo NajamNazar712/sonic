@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\http\Models\Admin\Retail\RetailFranchise;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\DonePayment;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\HR\Employee;
@@ -3055,6 +3058,76 @@ class APIController extends Controller
                                 $rider->api_token = $api_token;
 
                                 $rider->save();
+
+                                $information['api_token'] = $api_token;
+                            }
+                            return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                    }
+                }
+                elseif ($employee->employee_type_id == 3) {
+                    $retail_user = RetailUser::where('trax_id', $employee->trax_id);
+                    if ($retail_user->exists()) {
+                        $retail_user = $retail_user->first();
+
+                        if($retail_user->category == 2){
+                            $trax_center = RetailTraxCenter::find($retail_user->category_id);
+                        }elseif ($retail_user->category == 1){
+                            $trax_center = RetailFranchise::find($retail_user->category_id);
+                        }
+                        if ($retail_user->status == 0) {
+                            return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                        }
+                        if ($request->input('pin') == $employee->pin) {
+                            $information['name'] = $employee->name;
+                            $information['phone'] = $employee->phone_number;
+                            $information['cnic'] = $employee->cnic;
+                            $information['address'] = $employee->address;
+                            $information['pickup_address_id'] = $trax_center->pickup_address_id;
+                            $information['role'] = 'retail_user';
+
+                            //Reporting Location
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
+                            if ($reporting_location->exists()) {
+                                $reporting_location = $reporting_location->first();
+                                $information['distance'] = $reporting_location->radius;
+                                $information['lat'] = $reporting_location->lat;
+                                $information['long'] = $reporting_location->long;
+                            } else {
+                                $information['distance'] = 0;
+                                $information['lat'] = 0;
+                                $information['long'] = 0;
+                            }
+
+                            //Device Token
+                            if ($request->has('device_token')) {
+                                $employee_device_token = EmployeeDeviceToken::where('employee_id', $retail_user->id)
+                                    ->where('employee_type_id', 3);
+                                if ($employee_device_token->exists()) {
+                                    $employee_device_token = $employee_device_token->first();
+                                } else {
+                                    $employee_device_token = new EmployeeDeviceToken();
+                                    $employee_device_token->employee_id = $retail_user->id;
+                                    $employee_device_token->employee_type_id = 3;
+                                }
+                                $employee_device_token->device_token = $request->get('device_token');
+                                $employee_device_token->save();
+                            }
+
+                            //API_TOKEN
+                            if ($retail_user->api_token) {
+                                $information['api_token'] = $retail_user->api_token;
+                            } else {
+                                $api_token = uniqid(base64_encode(str_random(60)));
+
+                                $retail_user->api_token = $api_token;
+
+                                $retail_user->save();
 
                                 $information['api_token'] = $api_token;
                             }
