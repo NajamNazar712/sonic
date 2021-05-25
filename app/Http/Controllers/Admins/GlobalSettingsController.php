@@ -2,30 +2,39 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\http\Models\Admin\BookingSmsForShippers;
 use App\Http\Models\Admin\BusinessProjectionReason;
 use App\Http\Models\Admin\BusinessProjectionShipment;
+use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
 use App\Http\Models\Admin\PettyCashAccountTitle;
 use App\Http\Models\Admin\PettyCashConsignee;
 use App\Http\Models\Admin\PettyCashConsigneeHub;
 use App\Http\Models\Admin\RcpTatOption;
+use App\Http\Models\Admin\RouteManagement;
+use App\Http\Models\Admin\RouteManagementJunction;
+use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\SalePersonTargetLog;
 use App\http\Models\Admin\ShortReceiveReportTimeHubWise;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Admin\VehicleType;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
-use App\Http\Models\Admin\SalePersonTarget;
-use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Blacklist\BlacklistCondition;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
@@ -38,56 +47,44 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
-use App\Http\Models\Holiday;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\InternationalStandardDhlRate;
-use App\http\Models\RestrictedCityIntercept;
-use App\http\Models\RestrictParcelsAttempt;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RidersIncentiveSetting;
-use App\Http\Models\Rider\RidersShipmentPaymentType;
-use App\Http\Models\Rider\RidersShipmentWeightRange;
-use App\Http\Models\Rider\RiderTickerImage;
-use App\Http\Models\RiderCategory;
-use App\http\Models\Runner;
-use App\http\Models\RunnerDetailTime;
-use App\http\Models\RunnerJunction;
-use App\Http\Models\Shipment;
-use App\http\Models\UserDocumentAttachment;
-use App\Mail\Notifications;
-use App\Http\Models\Zone;
-use App\Http\Models\ZoneClassCity;
-use http\Env\Response;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Models\CorporateFuelSurcharge;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\CRM\CrmTatHolidays;
-use App\http\Models\DefaultWeight;
 use App\Http\Models\DeliveryCallVerificationRatio;
-use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\Holiday;
+use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\MultipleSaleTagging;
 use App\Http\Models\OvernightOverlandReportOriginHubs;
+use App\Http\Models\RateStatus;
 use App\Http\Models\Rates\HistoryCorporateFuelSurcharge;
 use App\Http\Models\Rates\HistoryCorporateWeightCharge;
 use App\Http\Models\Rates\HistoryFuelSurcharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
-use App\Http\Models\RateStatus;
+use App\http\Models\RestrictedCityIntercept;
+use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
+use App\Http\Models\Rider\RidersIncentiveSetting;
+use App\Http\Models\Rider\RidersShipmentPaymentType;
+use App\Http\Models\Rider\RidersShipmentWeightRange;
+use App\Http\Models\Rider\RiderTickerImage;
+use App\http\Models\Runner;
+use App\http\Models\RunnerJunction;
+use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
-use App\Http\Models\Admin\CompletedAgingReport;
-use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use Carbon\Carbon;
+use http\Env\Response;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -95,7 +92,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
-use App\Http\Controllers\Admins\ActivityTrailController;
 
 class GlobalSettingsController extends Controller
 {
@@ -118,7 +114,7 @@ class GlobalSettingsController extends Controller
         if ($request->isMethod('post')) {
             $result = GlobalSettings::create([
                 'setting_value' => $request->pickup_weight,
-                'type' => 'pickup_weight'
+                'type' => 'pickup_weight',
             ]);
             if ($result) {
                 return redirect()->back()->with('success', 'Pickup request weight updated');
@@ -127,7 +123,7 @@ class GlobalSettingsController extends Controller
             $record = GlobalSettings::where('type', 'pickup_weight')->get();
             $result = GlobalSettings::where('id', $record[0]->id)->update([
                 'setting_value' => $request->pickup_weight,
-                'type' => 'pickup_weight'
+                'type' => 'pickup_weight',
             ]);
             if ($result) {
                 return redirect()->back()->with('success', 'Pickup request weight updated');
@@ -141,7 +137,6 @@ class GlobalSettingsController extends Controller
 
         return view('admin.settings.shipment_cancellation_cut_off_days')->with('settings', $settings);
     }
-
 
     public function shipment_cancellation_cut_off_days_store(Request $request)
     {
@@ -227,11 +222,10 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-
     public function ticker_index()
     {
-        $admin_ticker = NULL;
-        $shipper_ticker = NULL;
+        $admin_ticker = null;
+        $shipper_ticker = null;
 
         $settings = GlobalSettings::where('type', 'admin_ticker');
 
@@ -555,29 +549,31 @@ class GlobalSettingsController extends Controller
         }
     }
 
-    public function petty_cash_consignee_index(){
-        $consignees = User::where([['status',3],['blacklist',0]])->get(['id','name']);
-        $hubs = City::where('hub',1)->get(['id','name']);
-        return view('admin.settings.petty_cash.consignee_settings')->with(['consignees'=>$consignees,'hubs'=>$hubs]);
+    public function petty_cash_consignee_index()
+    {
+        $consignees = User::where([['status', 3], ['blacklist', 0]])->get(['id', 'name']);
+        $hubs = City::where('hub', 1)->get(['id', 'name']);
+        return view('admin.settings.petty_cash.consignee_settings')->with(['consignees' => $consignees, 'hubs' => $hubs]);
     }
 
-    public function petty_cash_consignee_list(){
+    public function petty_cash_consignee_list()
+    {
 
-        $data = PettyCashConsignee::join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
-            ->select('petty_cash_consignees.hub_id as hub_id', 'petty_cash_consignees.id as id','hubs.name as hub_name','petty_cash_consignees.consignee_name as consignee_name');
+        $data = PettyCashConsignee::join('cities as hubs', 'hubs.id', '=', 'petty_cash_consignees.hub_id')
+            ->select('petty_cash_consignees.hub_id as hub_id', 'petty_cash_consignees.id as id', 'hubs.name as hub_name', 'petty_cash_consignees.consignee_name as consignee_name');
         return Datatables::of($data)
             ->addColumn('action', function ($data) {
-                    $update_city_url = route('admin.settings.petty_cash.consignee.city.index',$data->id);
-                    $dropdown = '
+                $update_city_url = route('admin.settings.petty_cash.consignee.city.index', $data->id);
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                        $dropdown .= '<a href="'.$update_city_url.'"><button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Update Cities</div></button></a>';
+                $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $dropdown .= '<a href="' . $update_city_url . '"><button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Update Cities</div></button></a>';
 
-                    return $dropdown;
+                return $dropdown;
 
             })
             ->make(true);
@@ -586,14 +582,12 @@ class GlobalSettingsController extends Controller
     public function petty_cash_consignee_store(Request $request)
     {
         $hub_error = "";
-        $hub_error_status = PettyCashConsignee::where('hub_id',$request->hub)->exists();
-        if($hub_error_status)
-        {
+        $hub_error_status = PettyCashConsignee::where('hub_id', $request->hub)->exists();
+        if ($hub_error_status) {
             $hub_error = "Please Select a Unique Hub";
         }
-        if($hub_error_status)
-        {
-            return response()->json(['status' => 0,'hub_error'=>$hub_error]);
+        if ($hub_error_status) {
+            return response()->json(['status' => 0, 'hub_error' => $hub_error]);
         }
 
         $table = new PettyCashConsignee();
@@ -607,19 +601,16 @@ class GlobalSettingsController extends Controller
     public function petty_cash_consignee_edit(Request $request)
     {
         $hub_error = "";
-        $hub_error_status = PettyCashConsignee::where([['hub_id',$request->hub],['id','!=',$request->id]])->exists();
-        if($hub_error_status)
-        {
+        $hub_error_status = PettyCashConsignee::where([['hub_id', $request->hub], ['id', '!=', $request->id]])->exists();
+        if ($hub_error_status) {
             $hub_error = "Please Select a Unique Hub";
         }
-        if($hub_error_status)
-        {
-            return response()->json(['status' => 0, 'hub_error'=>$hub_error]);
+        if ($hub_error_status) {
+            return response()->json(['status' => 0, 'hub_error' => $hub_error]);
         }
 
         $table = PettyCashConsignee::find($request->id);
-        if(!$table->exists())
-        {
+        if (!$table->exists()) {
             return response()->json(['status' => 0, 'error' => "Petty Cash Consignee Information Not Found, Please Try again!"]);
         }
 
@@ -632,13 +623,13 @@ class GlobalSettingsController extends Controller
 
     public function petty_cash_consignee_city_index($id)
     {
-        $cities = City::all(['id','name']);
-        $consignee = PettyCashConsignee::where('petty_cash_consignees.id',$id)
-            ->join('cities as hubs','hubs.id','=','petty_cash_consignees.hub_id')
-            ->select('hubs.name as hub_name','petty_cash_consignees.consignee_name as consignee_name','petty_cash_consignees.id as id')
+        $cities = City::all(['id', 'name']);
+        $consignee = PettyCashConsignee::where('petty_cash_consignees.id', $id)
+            ->join('cities as hubs', 'hubs.id', '=', 'petty_cash_consignees.hub_id')
+            ->select('hubs.name as hub_name', 'petty_cash_consignees.consignee_name as consignee_name', 'petty_cash_consignees.id as id')
             ->first();
-        $petty_cash_cities = PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->pluck('city_id')->toArray();
-        return view('admin.settings.petty_cash.consignee_city_update')->with(['cities'=>$cities,'petty_cash_cities'=>$petty_cash_cities,'consignee'=>$consignee]);
+        $petty_cash_cities = PettyCashConsigneeHub::where('petty_cash_consignee_id', $id)->pluck('city_id')->toArray();
+        return view('admin.settings.petty_cash.consignee_city_update')->with(['cities' => $cities, 'petty_cash_cities' => $petty_cash_cities, 'consignee' => $consignee]);
     }
 
     public function petty_cash_consignee_city_check($id, Request $request)
@@ -647,18 +638,15 @@ class GlobalSettingsController extends Controller
             if (count($request->cities) > 0) {
                 $cities = $request->cities;
                 foreach ($cities as $city_id) {
-                    if(PettyCashConsigneeHub::where([['city_id',$city_id],['petty_cash_consignee_id','!=',$id]])->exists())
-                    {
-                        return response()->json(['error'=>'Select Unique Cities, '.City::find($city_id)->name.' is already assigned to consignee']);
+                    if (PettyCashConsigneeHub::where([['city_id', $city_id], ['petty_cash_consignee_id', '!=', $id]])->exists()) {
+                        return response()->json(['error' => 'Select Unique Cities, ' . City::find($city_id)->name . ' is already assigned to consignee']);
                     }
                 }
+            } else {
+                return response()->json(['error' => 'Cities are required']);
             }
-            else{
-                return response()->json(['error'=>'Cities are required']);
-            }
-        }
-        else{
-            return response()->json(['error'=>'Cities are required']);
+        } else {
+            return response()->json(['error' => 'Cities are required']);
         }
 
         return 0;
@@ -666,7 +654,7 @@ class GlobalSettingsController extends Controller
 
     public function petty_cash_consignee_city_update($id, Request $request)
     {
-        PettyCashConsigneeHub::where('petty_cash_consignee_id',$id)->delete();
+        PettyCashConsigneeHub::where('petty_cash_consignee_id', $id)->delete();
         if ($request->has('cities')) {
             if (count($request->cities) > 0) {
                 $cities = $request->cities;
@@ -706,7 +694,7 @@ class GlobalSettingsController extends Controller
             'national_charges_class_0' => $request->walk_in_door_on_return_class_0_charges,
             'national_charges_class_1' => $request->walk_in_door_on_return_class_1_charges,
             'national_charges_class_2' => $request->walk_in_door_on_return_class_2_charges,
-            'national_charges_class_3' => $request->walk_in_door_on_return_class_3_charges
+            'national_charges_class_3' => $request->walk_in_door_on_return_class_3_charges,
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
@@ -720,7 +708,7 @@ class GlobalSettingsController extends Controller
             'national_charges_class_0' => $request->walk_in_hub_on_return_class_0_charges,
             'national_charges_class_1' => $request->walk_in_hub_on_return_class_1_charges,
             'national_charges_class_2' => $request->walk_in_hub_on_return_class_2_charges,
-            'national_charges_class_3' => $request->walk_in_hub_on_return_class_3_charges
+            'national_charges_class_3' => $request->walk_in_hub_on_return_class_3_charges,
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
@@ -734,7 +722,7 @@ class GlobalSettingsController extends Controller
             'national_charges_class_0' => $request->walk_in_door_ol_return_class_0_charges,
             'national_charges_class_1' => $request->walk_in_door_ol_return_class_1_charges,
             'national_charges_class_2' => $request->walk_in_door_ol_return_class_2_charges,
-            'national_charges_class_3' => $request->walk_in_door_ol_return_class_3_charges
+            'national_charges_class_3' => $request->walk_in_door_ol_return_class_3_charges,
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
@@ -748,7 +736,7 @@ class GlobalSettingsController extends Controller
             'national_charges_class_0' => $request->walk_in_hub_ol_return_class_0_charges,
             'national_charges_class_1' => $request->walk_in_hub_ol_return_class_1_charges,
             'national_charges_class_2' => $request->walk_in_hub_ol_return_class_2_charges,
-            'national_charges_class_3' => $request->walk_in_hub_ol_return_class_3_charges
+            'national_charges_class_3' => $request->walk_in_hub_ol_return_class_3_charges,
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
@@ -762,7 +750,7 @@ class GlobalSettingsController extends Controller
             'national_charges_class_0' => $request->walk_in_door_dn_return_class_0_charges,
             'national_charges_class_1' => $request->walk_in_door_dn_return_class_1_charges,
             'national_charges_class_2' => $request->walk_in_door_dn_return_class_2_charges,
-            'national_charges_class_3' => $request->walk_in_door_dn_return_class_3_charges
+            'national_charges_class_3' => $request->walk_in_door_dn_return_class_3_charges,
         ]);
 
         WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
@@ -776,12 +764,11 @@ class GlobalSettingsController extends Controller
             'national_charges_class_0' => $request->walk_in_hub_dn_return_class_0_charges,
             'national_charges_class_1' => $request->walk_in_hub_dn_return_class_1_charges,
             'national_charges_class_2' => $request->walk_in_hub_dn_return_class_2_charges,
-            'national_charges_class_3' => $request->walk_in_hub_dn_return_class_3_charges
+            'national_charges_class_3' => $request->walk_in_hub_dn_return_class_3_charges,
         ]);
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-
 
     public function debriefing_report_cut_off_time_index()
     {
@@ -1097,16 +1084,16 @@ class GlobalSettingsController extends Controller
     {
         if ($request->class_a != null && $request->class_b != null && $request->class_c != null && $request->class_d != null) {
             GlobalSettings::where('type', 'cod_cap_for_zone_class_0')->update([
-                'setting_value' => $request->class_a
+                'setting_value' => $request->class_a,
             ]);
             GlobalSettings::where('type', 'cod_cap_for_zone_class_1')->update([
-                'setting_value' => $request->class_b
+                'setting_value' => $request->class_b,
             ]);
             GlobalSettings::where('type', 'cod_cap_for_zone_class_2')->update([
-                'setting_value' => $request->class_c
+                'setting_value' => $request->class_c,
             ]);
             GlobalSettings::where('type', 'cod_cap_for_zone_class_3')->update([
-                'setting_value' => $request->class_d
+                'setting_value' => $request->class_d,
             ]);
             return redirect()->back()->with('success', 'Settings Updated!');
         } else {
@@ -1177,7 +1164,7 @@ class GlobalSettingsController extends Controller
                     $global_settings->type = 'weight_charges_factor';
                     $global_settings->save();
                 }
-                $this->weight_factor_account_charges_update($weight_factor, NULL);
+                $this->weight_factor_account_charges_update($weight_factor, null);
 
                 return redirect()->back()->with('success', 'Weight Charges Factor is Updated!');
             } else {
@@ -1203,10 +1190,10 @@ class GlobalSettingsController extends Controller
 
     }
 
-    public function weight_factor_account_charges_update($weight_factor, $shippers = NULL)
+    public function weight_factor_account_charges_update($weight_factor, $shippers = null)
     {
         $shipping_modes = ShippingMode::all();
-        if ($shippers == NULL) {
+        if ($shippers == null) {
             $users = User::where('status', 3)->select('id', 'account_type_id')->get();
             if (!$users->isEmpty()) {
                 foreach ($users as $user) {
@@ -1231,19 +1218,19 @@ class GlobalSettingsController extends Controller
                                     $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
                                     $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
 
-                                    if (strpos($charge->national_charges_class_1, '%') == FALSE) {
+                                    if (strpos($charge->national_charges_class_1, '%') == false) {
                                         $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
                                     } else {
                                         $national_charges_class_1 = $charge->national_charges_class_1;
                                     }
 
-                                    if (strpos($charge->national_charges_class_2, '%') == FALSE) {
+                                    if (strpos($charge->national_charges_class_2, '%') == false) {
                                         $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
                                     } else {
                                         $national_charges_class_2 = $charge->national_charges_class_2;
                                     }
 
-                                    if (strpos($charge->national_charges_class_3, '%') == FALSE) {
+                                    if (strpos($charge->national_charges_class_3, '%') == false) {
                                         $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
                                     } else {
                                         $national_charges_class_3 = $charge->national_charges_class_3;
@@ -1309,7 +1296,6 @@ class GlobalSettingsController extends Controller
                         }
                         if ($rate_status->exists()) {
 
-
                             if ($user->account_type_id == 1) {
                                 $weight_charge = WeightCharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                             } else {
@@ -1322,19 +1308,19 @@ class GlobalSettingsController extends Controller
                                     $local_or_6hr = self::calculate_weight_charges_factor($charge->local_or_6hr);
                                     $national_charges_class_0 = self::calculate_weight_charges_factor($charge->national_charges_class_0);
 
-                                    if (strpos($charge->national_charges_class_1, '%') == FALSE) {
+                                    if (strpos($charge->national_charges_class_1, '%') == false) {
                                         $national_charges_class_1 = self::calculate_weight_charges_factor($charge->national_charges_class_1);
                                     } else {
                                         $national_charges_class_1 = $charge->national_charges_class_1;
                                     }
 
-                                    if (strpos($charge->national_charges_class_2, '%') == FALSE) {
+                                    if (strpos($charge->national_charges_class_2, '%') == false) {
                                         $national_charges_class_2 = self::calculate_weight_charges_factor($charge->national_charges_class_2);
                                     } else {
                                         $national_charges_class_2 = $charge->national_charges_class_2;
                                     }
 
-                                    if (strpos($charge->national_charges_class_3, '%') == FALSE) {
+                                    if (strpos($charge->national_charges_class_3, '%') == false) {
                                         $national_charges_class_3 = self::calculate_weight_charges_factor($charge->national_charges_class_3);
                                     } else {
                                         $national_charges_class_3 = $charge->national_charges_class_3;
@@ -1518,7 +1504,6 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-
     public function crm_case_nature_types_index()
     {
         $case_nature = CrmRequestCaseNature::whereNotIn('id', [3])->select(['id', 'name'])->get();
@@ -1681,8 +1666,8 @@ class GlobalSettingsController extends Controller
             ->select('a.id as id', 'a.name as name')
             ->get();
 //        if($tagged_admins){
-//            $admins->whereNotIn('a.id', $tagged_admins);
-//        }
+        //            $admins->whereNotIn('a.id', $tagged_admins);
+        //        }
         if ($admins) {
             return response()->json(['status' => 1, 'admins' => $admins]);
         } else {
@@ -1803,7 +1788,7 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),50);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 50);
         $sales = DB::table('admins')->whereExists(function ($query) {
             $query->from('admin_roles')
                 ->where('admins.role_id', '=', DB::raw('`admin_roles`.`id`'))
@@ -1845,7 +1830,6 @@ class GlobalSettingsController extends Controller
                     $sales_target->average_revenue = $request->average_revenue;
                     $sales_target->save();
 
-
                 } else {
                     $sale_person_target = new SalePersonTarget();
                     $sale_person_target->start_date = $start_date;
@@ -1864,9 +1848,8 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_list(Request $request)
     {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),110);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
         $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
             ->select('sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days/sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month/sale_person_targets.average_revenue) as per_month_revenue_target'))->where('a.status', 1);
@@ -1877,15 +1860,14 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_history()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),51);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 51);
         return view('admin.settings.sales_person.history');
     }
 
     public function sales_person_targets_history_list(Request $request)
     {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),111);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 111);
         }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
             ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
@@ -1921,14 +1903,13 @@ class GlobalSettingsController extends Controller
     public function overnight_overland_cargo_report_rad_tat_submit(Request $request)
     {
         GlobalSettings::where('type', 'rad_tat_overnight')->update([
-            'setting_value' => $request->overnight
+            'setting_value' => $request->overnight,
         ]);
         GlobalSettings::where('type', 'rad_tat_overland')->update([
-            'setting_value' => $request->overland
+            'setting_value' => $request->overland,
         ]);
         return redirect()->back()->with('success', 'Rad Tat Updated Successfully!');
     }
-
 
     public function overnight_overland_cargo_report_edit_index($id)
     {
@@ -1976,7 +1957,6 @@ class GlobalSettingsController extends Controller
             }
         }
 
-
         return redirect()->route('admin.settings.overnight_overland_cargo_report.index')->with('success', 'Setting Updated Successfully');
     }
 
@@ -2011,7 +1991,6 @@ class GlobalSettingsController extends Controller
     {
         return view('admin.settings.sales.reasons');
     }
-
 
     public function projection_reason_list(Request $request)
     {
@@ -2380,7 +2359,7 @@ class GlobalSettingsController extends Controller
             $data['consignee']['city'] = $consignee_information->consignee_city->name;
             $consignee_information_id = $consignee_information->id;
             $manual_blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
-            $color = NULL;
+            $color = null;
             if ($manual_blacklist->exists()) {
                 $manual_blacklist = $manual_blacklist->first();
                 $color = BlacklistSetting::find($manual_blacklist->blacklist_setting_id)->color;
@@ -2394,7 +2373,7 @@ class GlobalSettingsController extends Controller
                 $data['blacklist']['undelivered_ratio'] = $consignee_information->blacklisted_consignee->undelivered_ratio;
                 $data['blacklist']['return'] = $consignee_information->blacklisted_consignee->return;
                 $data['blacklist']['return_ratio'] = $consignee_information->blacklisted_consignee->return_ratio;
-                if ($color == NULL) {
+                if ($color == null) {
                     $data['blacklist']['color'] = $consignee_information->blacklisted_consignee->blacklist->color;
                 } else {
                     $data['blacklist']['color'] = $color;
@@ -2420,7 +2399,6 @@ class GlobalSettingsController extends Controller
             $blacklist->consignee_information_id = $consignee_information_id;
             $blacklist->excluded_by = Auth::id();
             $blacklist->save();
-
 
         } else if ($action == 'label') {
             $blacklist = BlacklistedConsigneeManuallyBlacklisted::where('consignee_information_id', $consignee_information_id);
@@ -2612,7 +2590,7 @@ class GlobalSettingsController extends Controller
 
             $rider_assignment->type = 'rider_assignment_cut_off_time';
         }
-        if ($request->rider_assignment_off_time != NULL) {
+        if ($request->rider_assignment_off_time != null) {
             $rider_assignment->setting_value = $request->rider_assignment_off_time;
         } else {
             $rider_assignment->setting_value = 0;
@@ -2900,7 +2878,6 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.over_payment_limit')->with('over_payment_limit', $over_payment_limit);
     }
 
-
     public function over_payment_limit_store(Request $request)
     {
         $settings = GlobalSettings::where('type', 'over_payment_limit');
@@ -2919,7 +2896,6 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-
 
     public function nsa_account_index()
     {
@@ -3079,7 +3055,7 @@ class GlobalSettingsController extends Controller
         if ($request->has('shipper_id') && $request->has('attempt_days')) {
             $shipper_id = $request->shipper_id;
             $attempt_days = $request->attempt_days;
-            if ($shipper_id != NULL && $attempt_days != NULL) {
+            if ($shipper_id != null && $attempt_days != null) {
                 $restrict_shipper = new RestrictParcelsAttempt();
                 $restrict_shipper->shipper_id = $shipper_id;
                 $restrict_shipper->attempt_days = $attempt_days;
@@ -3100,7 +3076,7 @@ class GlobalSettingsController extends Controller
         if ($request->has('id') && $request->has('attempt_days')) {
             $id = $request->id;
             $attempt_days = $request->attempt_days;
-            if ($id != NULL && $attempt_days != NULL) {
+            if ($id != null && $attempt_days != null) {
                 $restrict_shipper = RestrictParcelsAttempt::find($id);
                 $restrict_shipper->attempt_days = $attempt_days;
                 $restrict_shipper->status = 1;
@@ -3121,7 +3097,7 @@ class GlobalSettingsController extends Controller
         if ($request->has('id') && $request->has('status')) {
             $id = $request->id;
             $status = $request->status;
-            if ($id != NULL && $status != NULL) {
+            if ($id != null && $status != null) {
                 $restrict_shipper = RestrictParcelsAttempt::find($id);
                 $restrict_shipper->status = $status;
                 $restrict_shipper->updated_by = Auth::id();
@@ -3248,7 +3224,7 @@ class GlobalSettingsController extends Controller
     {
         $shippers = $request->shippers;
         BookingSmsForShippers::truncate();
-        if ($shippers != NULL) {
+        if ($shippers != null) {
             if (count($shippers) > 0) {
                 foreach ($shippers as $shipper) {
                     ;
@@ -3315,29 +3291,31 @@ class GlobalSettingsController extends Controller
         }
     }
 
-	public function international_walk_in_index(){
+    public function international_walk_in_index()
+    {
         $walk_in_standard_charges = WalkInInternationalStandardWeightCharge::all();
 
         $cities = City::where('hub', 1)->where('business_category_id', 2)->select('id', 'name')->get();
         return view('admin.settings.international_walk_in')->with(['cities' => $cities, 'walk_in_standard_charges' => $walk_in_standard_charges]);
     }
-    public function international_walk_in_store(Request $request){
+    public function international_walk_in_store(Request $request)
+    {
         WalkInInternationalStandardWeightCharge::truncate();
         WalkInInternationalStandardWeightChargeHub::truncate();
 
-        foreach($request->standard_charges as $index => $charge_id){
+        foreach ($request->standard_charges as $index => $charge_id) {
             $standard_weight_charge = new WalkInInternationalStandardWeightCharge();
             $standard_weight_charge->id = $charge_id;
             $standard_weight_charge->shipping_mode_id = 2;
             $standard_weight_charge->hub_actual_weight = $request->hub_actual_weight[$charge_id];
-            $standard_weight_charge->hub_chargeable_weight = $request->hub_chargeable_weight[$charge_id];;
-            $standard_weight_charge->hub_return_charges = $request->hub_return_charges[$charge_id];;
-            $standard_weight_charge->door_actual_weight = $request->door_actual_weight[$charge_id];;
-            $standard_weight_charge->door_chargeable_weight = $request->door_chargeable_weight[$charge_id];;
-            $standard_weight_charge->door_return_charges = $request->door_return_charges[$charge_id];;
+            $standard_weight_charge->hub_chargeable_weight = $request->hub_chargeable_weight[$charge_id];
+            $standard_weight_charge->hub_return_charges = $request->hub_return_charges[$charge_id];
+            $standard_weight_charge->door_actual_weight = $request->door_actual_weight[$charge_id];
+            $standard_weight_charge->door_chargeable_weight = $request->door_chargeable_weight[$charge_id];
+            $standard_weight_charge->door_return_charges = $request->door_return_charges[$charge_id];
             $standard_weight_charge->save();
 
-            foreach($request->hubs[$charge_id] as $hub_id){
+            foreach ($request->hubs[$charge_id] as $hub_id) {
                 $standard_weight_charge_hub = new WalkInInternationalStandardWeightChargeHub();
                 $standard_weight_charge_hub->international_charges_id = $charge_id;
                 $standard_weight_charge_hub->hub_id = $hub_id;
@@ -3358,7 +3336,7 @@ class GlobalSettingsController extends Controller
         $types = MonthClosingType::select('id', 'name');
         return Datatables::of($types)
             ->addColumn('action', function ($types) {
-                    $dropdown = '
+                $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
@@ -3366,7 +3344,7 @@ class GlobalSettingsController extends Controller
 
                 $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
-                    return $dropdown;
+                return $dropdown;
             })
             ->make(true);
     }
@@ -3398,7 +3376,6 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 0, 'error' => 'Month Closing Type is empty!']);
         }
     }
-
 
     public function month_closing_status_index()
     {
@@ -3451,35 +3428,35 @@ class GlobalSettingsController extends Controller
         }
     }
 
-    public function international_rates_index(){
+    public function international_rates_index()
+    {
         $fuel_charges = '';
         $fuel_surcharge = GlobalSettings::where('type', 'international_fuel_surcharge');
-        if($fuel_surcharge->exists()){
+        if ($fuel_surcharge->exists()) {
             $fuel_surcharge = $fuel_surcharge->first();
-            $fuel_charges = (float)$fuel_surcharge->text;
+            $fuel_charges = (float) $fuel_surcharge->text;
         }
         $exchange_rate_charges = '';
         $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
-        if($exchange_rate->exists()){
+        if ($exchange_rate->exists()) {
             $exchange_rate = $exchange_rate->first();
-            $exchange_rate_charges = (float)$exchange_rate->text;
+            $exchange_rate_charges = (float) $exchange_rate->text;
         }
         $gst = '';
         $gst_charges = GlobalSettings::where('type', 'international_gst_rate');
-        if($gst_charges->exists()){
+        if ($gst_charges->exists()) {
             $gst_charges = $gst_charges->first();
-            $gst = (float)$gst_charges->text;
+            $gst = (float) $gst_charges->text;
         }
-       return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges, 'gst' => $gst]);
+        return view('admin.settings.international.index')->with(['fuel_surcharge' => $fuel_charges, 'exchange_rate' => $exchange_rate_charges, 'gst' => $gst]);
     }
 
     public function international_rates_update(Request $request)
     {
         $fuel_surcharge_rate = GlobalSettings::where('type', 'international_fuel_surcharge');
-        if($fuel_surcharge_rate->exists()){
+        if ($fuel_surcharge_rate->exists()) {
             $fuel_surcharge_rate = $fuel_surcharge_rate->first();
-        }
-        else{
+        } else {
             $fuel_surcharge_rate = new GlobalSettings();
             $fuel_surcharge_rate->type = 'international_fuel_surcharge';
         }
@@ -3487,10 +3464,9 @@ class GlobalSettingsController extends Controller
         $fuel_surcharge_rate->text = $request->fuel_surcharge;
         $fuel_surcharge_rate->save();
         $exchange_rate_value = GlobalSettings::where('type', 'international_exchange_rate');
-        if($exchange_rate_value->exists()){
+        if ($exchange_rate_value->exists()) {
             $exchange_rate_value = $exchange_rate_value->first();
-        }
-        else{
+        } else {
             $exchange_rate_value = new GlobalSettings();
             $exchange_rate_value->type = 'international_exchange_rate';
         }
@@ -3499,10 +3475,9 @@ class GlobalSettingsController extends Controller
         $exchange_rate_value->save();
 
         $gst = GlobalSettings::where('type', 'international_gst_rate');
-        if($gst->exists()){
+        if ($gst->exists()) {
             $gst = $gst->first();
-        }
-        else{
+        } else {
             $gst = new GlobalSettings();
             $gst->type = 'international_gst_rate';
         }
@@ -3617,16 +3592,19 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with(['success' => 'Images Uploaded!']);
     }
 
-    public function international_rates_upload_index(){
+    public function international_rates_upload_index()
+    {
         return view('admin.settings.international.excel_upload');
     }
 
-    public function international_standard_dhl_rates_list(Request $request){
-        $rates_list = InternationalStandardDhlRate::select('id','range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
+    public function international_standard_dhl_rates_list(Request $request)
+    {
+        $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
 
         return Datatables::of($rates_list)->make(true);
     }
-    public function international_rates_upload_excel(Request $request){
+    public function international_rates_upload_excel(Request $request)
+    {
 
         $names = [
             'range_up' => 'Range Up',
@@ -3665,9 +3643,9 @@ class GlobalSettingsController extends Controller
             'zone_11' => ['required', 'numeric', 'between:0,1000000'],
         ];
 
-        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 =>  'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11'];
+        $fields = [0 => 'range_up', 1 => 'range_down', 2 => 'zone_1', 3 => 'zone_2', 4 => 'zone_3', 5 => 'zone_4', 6 => 'zone_5', 7 => 'zone_6', 8 => 'zone_7', 9 => 'zone_8', 10 => 'zone_9', 11 => 'zone_10', 12 => 'zone_11'];
 
-        if($file = $request->file('rates')) {
+        if ($file = $request->file('rates')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
@@ -3675,21 +3653,19 @@ class GlobalSettingsController extends Controller
             $header = ['Range Up', 'Range Down', 'Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6', 'Zone 7', 'Zone 8', 'Zone 9', 'Zone 10', 'Zone 11'];
 
             if (isset($spreadsheet)) {
-                $header_correct = TRUE;
+                $header_correct = true;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
-                    if($index == 12){
-                    }
-                    elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                        $header_correct = FALSE;
+                    if ($index == 12) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = false;
                         break;
                     }
                 }
 
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-                }
-                else {
+                } else {
                     unset($spreadsheet[0]);
                 }
             }
@@ -3726,12 +3702,10 @@ class GlobalSettingsController extends Controller
                             if (empty($rate_range_ids)) {
                                 $rate_range_ids[] = $row['range_up'];
                                 $rate_range_id_row[$row['range_up']] = $row_id;
-                            }
-                            else {
+                            } else {
                                 if (in_array($row['range_up'], $rate_range_ids)) {
                                     $errors['Row #' . $row_id][] = 'Same Range as of Row #' . $rate_range_id_row[$row['range_up']];
-                                }
-                                else {
+                                } else {
                                     $rate_range_ids[] = $row['range_up'];
                                     $rate_range_id_row[$row['range_up']] = $row_id;
                                 }
@@ -3742,7 +3716,7 @@ class GlobalSettingsController extends Controller
                         }
                     }
                 }
-                if(empty($errors)){
+                if (empty($errors)) {
                     $updated = 0;
                     $not_updated = 0;
                     foreach ($rows as $key => $row) {
@@ -3762,7 +3736,7 @@ class GlobalSettingsController extends Controller
                         $zone_11 = trim($row['zone_11']);
 
                         $standard_rate = InternationalStandardDhlRate::where('range_up', $range_up)->where('range_down', $range_down);
-                        if($standard_rate->exists()){
+                        if ($standard_rate->exists()) {
                             $standard_rate = $standard_rate->first();
                             $standard_rate->zone_1 = ($zone_1 != null) ? $zone_1 : 0;
                             $standard_rate->zone_2 = ($zone_2 != null) ? $zone_2 : 0;
@@ -3777,20 +3751,18 @@ class GlobalSettingsController extends Controller
                             $standard_rate->zone_11 = ($zone_11 != null) ? $zone_11 : 0;
                             $standard_rate->save();
                             $updated++;
-                        }
-                        else{
+                        } else {
                             $not_updated++;
                         }
 
                     }
                     $error_msg = '';
-                    if($not_updated > 1){
+                    if ($not_updated > 1) {
                         $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
                     }
 
                     return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
-                }
-                else{
+                } else {
                     $errors = array_map(function ($row, $errors) {
                         return $row . ':' . PHP_EOL . implode(' | ', $errors);
                     }, array_keys($errors), $errors);
@@ -3798,16 +3770,16 @@ class GlobalSettingsController extends Controller
                     return redirect()->back()->withErrors($errors);
                 }
 
-            }
-            else {
+            } else {
                 return redirect()->back()->with('error', 'No Rates in File');
             }
 
         }
     }
 
-    public function rider_incentive_index(){
-        $rider_categories = RiderCategory::whereIn('id', [1,2])->select('id', 'name')->get();
+    public function rider_incentive_index()
+    {
+        $rider_categories = RiderCategory::whereIn('id', [1, 2])->select('id', 'name')->get();
         $shipment_payment_types = RidersShipmentPaymentType::select('id', 'name')->get();
         $weight_ranges = RidersShipmentWeightRange::select('id', 'name')->get();
         return view('admin.settings.rider_incentive.index')->with(['rider_categories' => $rider_categories, 'payment_types' => $shipment_payment_types, 'weight_ranges' => $weight_ranges]);
@@ -3818,9 +3790,9 @@ class GlobalSettingsController extends Controller
         $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'riders_incentive_settings.rider_category_id')
             ->join('riders_shipment_payment_types as rspt', 'rspt.id', '=', 'riders_incentive_settings.rider_shipment_payment_type_id')
             ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
-            ->join('admins as ab','ab.id', '=', 'riders_incentive_settings.added_by')
+            ->join('admins as ab', 'ab.id', '=', 'riders_incentive_settings.added_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders_incentive_settings.last_updated_by')
-            ->select('riders_incentive_settings.id as row_id','riders_incentive_settings.value','rc.name as rider_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at', 'riders_incentive_settings.updated_at');
+            ->select('riders_incentive_settings.id as row_id', 'riders_incentive_settings.value', 'rc.name as rider_category', 'rspt.name as payment_type', 'rswr.name as weight_range', 'ab.name as added_by', 'ub.name as last_updated_by', 'riders_incentive_settings.created_at as added_at', 'riders_incentive_settings.updated_at');
         return Datatables::of($types)
             ->addColumn('action', function ($types) {
                 $dropdown = '
@@ -3836,8 +3808,8 @@ class GlobalSettingsController extends Controller
             ->make(true);
     }
 
-
-    public function rider_incentive_store(Request $request){
+    public function rider_incentive_store(Request $request)
+    {
 
         $names = [
             'rider_category_select' => 'Rider Category',
@@ -3858,10 +3830,10 @@ class GlobalSettingsController extends Controller
         ];
 
         $rules = [
-            'rider_category_select' => ['required','integer', 'digits_between:1,10', 'exists:rider_categories,id'],
-            'delivery_payment_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_payment_types,id'],
-            'weight_range_select' => ['required','integer', 'digits_between:1,10', 'exists:riders_shipment_weight_ranges,id'],
-            'incentive_value' => ['required','integer', 'digits_between:1,100000'],
+            'rider_category_select' => ['required', 'integer', 'digits_between:1,10', 'exists:rider_categories,id'],
+            'delivery_payment_select' => ['required', 'integer', 'digits_between:1,10', 'exists:riders_shipment_payment_types,id'],
+            'weight_range_select' => ['required', 'integer', 'digits_between:1,10', 'exists:riders_shipment_weight_ranges,id'],
+            'incentive_value' => ['required', 'integer', 'digits_between:1,100000'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $messages);
@@ -3870,18 +3842,16 @@ class GlobalSettingsController extends Controller
 
         if ($validate->fails()) {
             return redirect()->back()->with(['errors' => $validate->errors()]);
-        }
-        else {
+        } else {
             $rider_category_id = $request->rider_category_select;
             $delivery_payment_type_id = $request->delivery_payment_select;
             $weight_range_id = $request->weight_range_select;
             $value = $request->incentive_value;
 
             $setting = RidersIncentiveSetting::where(['rider_category_id' => $rider_category_id, 'rider_shipment_payment_type_id' => $delivery_payment_type_id, 'rider_shipment_weight_range_id' => $weight_range_id]);
-            if($setting->exists()){
+            if ($setting->exists()) {
                 return redirect()->back()->with('error', 'Setting already exists!');
-            }
-            else{
+            } else {
                 $rider_setting = new RidersIncentiveSetting();
                 $rider_setting->rider_category_id = $rider_category_id;
                 $rider_setting->rider_shipment_payment_type_id = $delivery_payment_type_id;
@@ -3896,35 +3866,34 @@ class GlobalSettingsController extends Controller
 
     }
 
-    public function rider_incentive_details(Request $request){
+    public function rider_incentive_details(Request $request)
+    {
         $id = $request->id;
-        if($id){
+        if ($id) {
             $rider_incentive = RidersIncentiveSetting::find($id);
-            if($rider_incentive){
+            if ($rider_incentive) {
                 return response()->json(['status' => 0, 'details' => $rider_incentive]);
-            }
-            else{
+            } else {
                 return response()->json(['status' => 1, 'error' => 'Setting not found!']);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'error' => 'Request error!']);
         }
     }
 
-    public function rider_incentive_update(Request $request){
+    public function rider_incentive_update(Request $request)
+    {
 
         $incentive_setting_id = $request->incentive_setting_id;
         $value = $request->edit_incentive_value;
-        if($value == ''){
+        if ($value == '') {
             return redirect()->back()->with('error', 'Value not entered!');
         }
 
-        $setting = RidersIncentiveSetting::where('id' , $incentive_setting_id);
-        if(!$setting->exists()){
+        $setting = RidersIncentiveSetting::where('id', $incentive_setting_id);
+        if (!$setting->exists()) {
             return redirect()->back()->with('error', 'Setting not found!');
-        }
-        else{
+        } else {
             $rider_setting = $setting->first();
             $rider_setting->value = $value;
             $rider_setting->last_updated_by = Auth::id();
@@ -3937,9 +3906,9 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_cron_index()
     {
-        $value = NULL;
+        $value = null;
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time')->first();
-        if($settings){
+        if ($settings) {
             $value = $settings->setting_value;
         }
         return view('admin.settings.rider_incentive.rider_incentive_cron')->with('value', $value);
@@ -3949,11 +3918,10 @@ class GlobalSettingsController extends Controller
     {
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
 
-        if($settings->exists()){
+        if ($settings->exists()) {
             $settings = $settings->first();
 
-        }
-        else{
+        } else {
             $settings = new GlobalSettings();
             $settings->type = 'rider_incentive_cron_time';
         }
@@ -3963,18 +3931,18 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-	public function rcp_tat_index()
+    public function rcp_tat_index()
     {
         $tat_options = RcpTatOption::all();
-        return view('admin.settings.rcp_tat_view')->with(['tat_options'=>$tat_options]);
+        return view('admin.settings.rcp_tat_view')->with(['tat_options' => $tat_options]);
     }
 
     public function rcp_tat_list(Request $request)
     {
-        $shippers = User::join('rcp_tat_options as tat_option','users.rcp_tat_option_id','=','tat_option.id')
-            ->leftJoin('admins as a','a.id','=','users.rcp_tat_updated_by')
-            ->select(['users.id as id','users.name as shipper','users.rcp_tat_updated_at as updated_at','a.name as updated_by','tat_option.name as tat','users.rcp_tat_option_id as tat_id'])
-            ->where([['users.status',3],['users.blacklist',0]]);
+        $shippers = User::join('rcp_tat_options as tat_option', 'users.rcp_tat_option_id', '=', 'tat_option.id')
+            ->leftJoin('admins as a', 'a.id', '=', 'users.rcp_tat_updated_by')
+            ->select(['users.id as id', 'users.name as shipper', 'users.rcp_tat_updated_at as updated_at', 'a.name as updated_by', 'tat_option.name as tat', 'users.rcp_tat_option_id as tat_id'])
+            ->where([['users.status', 3], ['users.blacklist', 0]]);
 
         return Datatables::of($shippers)
             ->addColumn('action', function ($shippers) {
@@ -3995,13 +3963,235 @@ class GlobalSettingsController extends Controller
 
     public function rcp_tat_update(Request $request)
     {
-        $shipper_ids = explode(',',$request->shipper_id);
-        User::whereIn('id',$shipper_ids)->update([
-           'rcp_tat_option_id' => $request->tat_option,
-           'rcp_tat_updated_by' => Auth::id(),
-           'rcp_tat_updated_at' => now(),
+        $shipper_ids = explode(',', $request->shipper_id);
+        User::whereIn('id', $shipper_ids)->update([
+            'rcp_tat_option_id' => $request->tat_option,
+            'rcp_tat_updated_by' => Auth::id(),
+            'rcp_tat_updated_at' => now(),
         ]);
 
-        return back()->with(['success'=>'Shipper TAT Updated Successfully']);
+        return back()->with(['success' => 'Shipper TAT Updated Successfully']);
+    }
+
+    public function fleet_index()
+    {
+        $vehicles = VehicleType::all();
+        return view('admin.settings.fleet_index')->with('vehicles', $vehicles);
+    }
+
+    public function fleet_list()
+    {
+        $fleet = Fleet::all();
+        $datatable = Datatables::of($fleet)
+            ->editColumn('status', function ($fleet) {
+                if ($fleet->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })
+            ->editColumn('vehicle_type_id', function ($fleet) {
+                
+                    return $fleet->vehicle_type->name;
+            })
+            ->addColumn('action', function ($fleet) {
+                $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+
+                if ($fleet->status == 0) {
+                    $dropdown .= $enable;
+                }
+                if ($fleet->status == 1) {
+                    $dropdown .= $disable;
+                }
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+    }
+
+    public function fleet_store(Request $request)
+    {
+
+        $vehicle_select = $request->vehicle_select;
+        if ($vehicle_select == 'other') {
+            $vehicle_type = new VehicleType;
+            $vehicle_type->name = $request->vehicle_type_name;
+            $vehicle_type->save();
+
+            $fleet = new Fleet;
+            $fleet->reg_number = $request->reg_number;
+            $fleet->vehicle_type_id = $vehicle_type->id;
+            $fleet->save();
+            return redirect()->back()->with('success', 'Fleet Added successfully!');
+
+        } else {
+
+
+            $fleet = new Fleet;
+            $fleet->reg_number = $request->reg_number;
+            $fleet->vehicle_type_id = $request->vehicle_select;
+            $fleet->save();
+            return redirect()->back()->with('success', 'Fleet Added successfully!');
+
+        }
+    }
+    
+
+    public function fleet_enable_disable(Request $request){
+        $id = $request->id;
+        $fleet = Fleet::find($id);
+        if ($fleet) {
+            if ($fleet->status == 0) {
+                $fleet->status = 1;
+                $fleet->save();
+            } else {
+                $fleet->status = 0;
+                $fleet->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
+    }
+
+    public function fleet_unique(Request $request)
+    {
+        if ($request->filled('reg_number')) {
+            $fleet = Fleet::where('reg_number', $request->input('reg_number'));
+
+            if (!$fleet->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'true';
+        }
+    }
+
+    public function route_management_index(){
+        $cities = City::where('status', 1)->where('hub', 1)->get();
+        return view('admin.settings.route_management_index')->with('cities', $cities);
+    
+    }
+
+    public function route_management_list()
+    {
+        // $cargo_consignments = CargoConsignment::join('cities as oh', 'cargo_consignments.origin_hub_id', '=', 'oh.id')
+        // ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
+        // ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
+        // ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
+        // ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
+        // ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
+        // ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
+        // ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
+        // ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
+        // ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND (s.shipper_status_id = 3 OR s.shipper_status_id = 21)) AS short_received_shipments'))
+        // ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7, 9]);
+        $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
+        ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
+        ->select('route_managements.id','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.location_latitude as starting_lat', 'stp.location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.location_latitude as end_lat', 'endp.location_longitude as end_long')
+        ;
+        $datatable = Datatables::of($route_management)
+        ->editColumn('status', function ($route_management) {
+            if ($route_management->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })->editColumn('starting_id', function ($route_management) {
+            // $route_management->starting_id.'-'.
+            return "<a href='https://www.google.com/maps/?q=".$route_management->starting_lat.",".$route_management->starting_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->starting_name;
+        })
+        ->editColumn('end_id', function ($route_management) {
+            return "<a href='https://www.google.com/maps/?q=".$route_management->end_lat.",".$route_management->end_long."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$route_management->end_name;
+            
+            return $route_management->end_id.'-'.$route_management->end_name;
+        })
+            
+            ->addColumn('junctions', function ($route_management) {
+                $junctions = RouteManagementJunction::where('route_management_id',$route_management->id)->get();
+                $junction_data = '';
+
+                
+                    foreach ($junctions as $junction) {
+                        $city = City::find($junction->junction_id);
+                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->location_latitude.",".$route_management->location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
+
+                    }
+                    return $junction_data;
+                    // return $route_management->id;
+            })
+            ->addColumn('action', function ($fleet) {
+                $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+
+                if ($fleet->status == 0) {
+                    $dropdown .= $enable;
+                }
+                if ($fleet->status == 1) {
+                    $dropdown .= $disable;
+                }
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+
+    }
+    public function route_management_unique(Request $request)
+    {
+        if ($request->filled('route_code')) {
+            $fleet = RouteManagement::where('route_code', $request->input('route_code'));
+
+            if (!$fleet->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'true';
+        }
+    }
+
+    public function route_management_store(Request $request)
+    {
+        $route_management = new RouteManagement;
+        $route_management->route_code = $request->route_code;
+        $route_management->route_title = $request->route_title;
+        $route_management->starting_point_id = $request->starting_point_id;
+        $route_management->end_point_id = $request->end_point_id;
+        $route_management->save();
+        foreach ($request->junction as $junction_id) {
+            $route_management_junction = new RouteManagementJunction;
+            $route_management_junction->junction_id = $junction_id;
+            $route_management_junction->route_management_id = $route_management->id;
+            $route_management_junction->save();
+            }
+        return redirect()->back()->with('success', 'Route Added successfully!');
+
+    }
+
+    public function route_management_enable_disable(Request $request){
+        $id = $request->id;
+        $route_management = RouteManagement::find($id);
+        if ($route_management) {
+            if ($route_management->status == 0) {
+                $route_management->status = 1;
+                $route_management->save();
+            } else {
+                $route_management->status = 0;
+                $route_management->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
+        }
     }
 }
