@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\DonePayment;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceShipment;
+use App\http\Models\ReportingLocation;
+use App\Http\Models\Rider;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\CorporateDeliveryTypeStatus;
@@ -2915,6 +2919,93 @@ class APIController extends Controller
 
 
             return response()->json(['status' => 0, 'payments' => $data]);
+
+        }
+    }
+
+    public function bolt_login(Request $request){
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['nullable']
+        ];
+
+        //type = 1 => Invoice, 2 => Payment
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else{
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                if($employee->employee_type_id == 1){
+                    $admin = Admin::where('employee_id', $employee->id);
+                    if($admin->exists()){
+                        $admin = $admin->first();
+                        if($admin->status == 0){
+                            return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                        }
+                        if (Hash::check($request->input('pin'), $employee->pin)) {
+                            $information['name'] = $employee->name;
+                            $information['phone'] = $employee->phone_number;
+                            $information['cnic'] = $employee->cnic;
+                            $information['address'] = $employee->address;
+                            $information['role'] = 'staff';
+
+                            //Reporting Location
+                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
+                            if ($reporting_location->exists()) {
+                                $reporting_location = $reporting_location->first();
+                                $information['distance'] = $reporting_location->radius;
+                                $information['lat'] = $reporting_location->lat;
+                                $information['long'] = $reporting_location->long;
+                            }else{
+                                $information['distance'] = 0;
+                                $information['lat'] = 0;
+                                $information['long'] = 0;
+                            }
+
+                            //Device Token
+                            if($request->has('device_token')){
+                                $employee_device_token = EmployeeDeviceToken::where('employee_id', $admin->id)
+                                    ->where('employee_type_id', 1);
+                                if ($employee_device_token->exists()) {
+                                    $employee_device_token = $employee_device_token->first();
+                                } else {
+                                    $employee_device_token = new EmployeeDeviceToken();
+                                    $employee_device_token->employee_id = $admin->id;
+                                    $employee_device_token->employee_type_id = 1;
+                                }
+                                $employee_device_token->device_token = $request->get('device_token');
+                                $employee_device_token->save();
+                            }
+
+                            //API_TOKEN
+                            if ($admin->api_token) {
+                                $information['api_token'] = $admin->api_token;
+                            } else {
+                                $api_token = uniqid(base64_encode(str_random(60)));
+
+                                $admin->api_token = $api_token;
+
+                                $admin->save();
+
+                                $information['api_token'] = $api_token;
+                            }
+
+                        }else{
+                            return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                        }
+                    }
+                        }
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }
 
         }
     }
