@@ -287,6 +287,16 @@ class LastMileDebriefingController extends Controller
                             $verify = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment)->first();
 
                             $verify->call_verification = 1;
+
+                            if ($request->has('fake_status')) {
+                                $verify->fake_status = 1;
+                                $verify->fake_status_updated_at = Carbon::now();
+                            } else {
+                                $verify->fake_status = 0;
+                                $verify->fake_status_updated_at = Carbon::now();
+                            }
+
+
                             $verify->save();
 
                             if ($shipper_status_id != null) {

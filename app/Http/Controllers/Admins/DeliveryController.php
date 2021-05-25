@@ -23,6 +23,7 @@ use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
@@ -293,19 +294,13 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-       $status =  DeliveryNote::leftjoin('delivery_note_station_deposit_notes as dnsdn','dnsdn.delivery_note_id','=','delivery_notes.id')
-           ->leftjoin('station_deposit_notes as sdn','sdn.id','=','dnsdn.station_deposit_note_id')
-           ->select('sdn.status as status','delivery_notes.id as id')
-           ->where('delivery_notes.rider_id',$request->rider_id)
-           ->where(function ($query){
-               $query->whereNull('sdn.status')
-                   ->orwhere('sdn.status','!=',2);
-           });
-       
-       if($status->exists())
-       {
-           return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
-       }
+        // $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+        // $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]])
+        //     ->whereDate('created_at','>',$datetime);
+        // if($delivery_note->exists())
+        // {
+        //    return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+        // }
 
         return response()->json(['status'=> 1]);
     }
@@ -709,8 +704,17 @@ class DeliveryController extends Controller
                     'last_updated_at' => Carbon::now(),
                     'ordering' => $order
                 ]);
+                $rider_device_token = EmployeeDeviceToken::where('employee_id',$request->selected_rider_id)
+                    ->where('employee_type_id', 2)
+                    ->select('device_token');
+                if ($rider_device_token->exists()) {
+                    $rider_device_token = $rider_device_token->first();
+                    $device_token = $rider_device_token->device_token;
+                    $title = "Delivery Note Assigned";
+                    $message = "Dear Rider Delivery Note # " . $note->id . " Has Been Assigned To You";
+                    NotificationsController::bolt_app_notification($request->selected_rider_id, 2,$device_token, $title, $message);
+                }
             }
-
             if ($note) {
                 if (!$order) {  //Default
                     sort($valid_shipments); //sort_valid_shipments;
@@ -5933,41 +5937,50 @@ class DeliveryController extends Controller
             $shipment = $shipment->first();
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC')->first();
             if ($shipment->shipper_status_id == 30) {
-                if ($shipment_journey->verification == 1){
-                    $details = array();
-                    $shipper = $shipment->user;
-                    $details['id'] = $shipment->id;
+                    $delivery_note_id = $shipment_journey->reference_1_id;
+                    if($delivery_note_id){
+                        $delivery_note = DeliveryNote::find($delivery_note_id);
+                        if ($delivery_note->status == 1){
 
-                    $details['tracking_number'] = $shipment->tracking_number;
-                    $details['status'] = $shipment->status_shipper->name;
+                            $details = array();
+                            $shipper = $shipment->user;
+                            $details['id'] = $shipment->id;
 
-                    $details['service_type'] = $shipment->booking_type->booking_type;
-                    $details['shipping_mode'] = $shipment->shipping_mode->mode;
-                    $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                            $details['tracking_number'] = $shipment->tracking_number;
+                            $details['status'] = $shipment->status_shipper->name;
 
-                    $details['payment_mode'] = $shipment->payment_mode->mode;
-                    $details['amount'] = number_format($shipment->amount);
+                            $details['service_type'] = $shipment->booking_type->booking_type;
+                            $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                            $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
-                    $details['shipper']['name'] = $shipper->name;
-                    $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                    $details['shipper']['phone_number_1'] = $shipper->phone;
-                    $details['shipper']['phone_number_2'] = $shipper->phone2;
-                    $details['shipper']['origin'] = $shipper->city->name;
-                    $details['shipper']['address'] = $shipper->address;
+                            $details['payment_mode'] = $shipment->payment_mode->mode;
+                            $details['amount'] = number_format($shipment->amount);
 
-                    $details['consignee']['name'] = $shipment->consignee_name;
-                    $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-                    $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-                    $details['consignee']['destination'] = $shipment->consignee_city->name;
-                    $details['consignee']['address'] = $shipment->consignee_address;
+                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                            $details['shipper']['phone_number_1'] = $shipper->phone;
+                            $details['shipper']['phone_number_2'] = $shipper->phone2;
+                            $details['shipper']['origin'] = $shipper->city->name;
+                            $details['shipper']['address'] = $shipper->address;
 
-                    ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null,null);
+                            $details['consignee']['name'] = $shipment->consignee_name;
+                            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                            $details['consignee']['destination'] = $shipment->consignee_city->name;
+                            $details['consignee']['address'] = $shipment->consignee_address;
 
-                    return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
-                }
-                else {
-                    return ['status' => 1, 'error' => 'Shipment Status is Not Verified yet'];
-                }
+                            ShipmentScanningJourneyController::add($shipment->id, 12, 1, Auth::id(), null,null);
+
+                            return ['status' => 0, 'success' => 'Shipment\'s service type can be changed', 'details' => $details];
+                        }
+                        else {
+                            return ['status' => 1, 'error' => 'Shipment Delivery note is Not Verified yet'];
+                        }
+                    }
+                    else{
+                        return ['status' => 1, 'error' => 'Delivery Note not found!'];
+                    }
+
             }
             else {
                 return ['status' => 1, 'error' => 'Shipment Status is Not Replacement - Collected'];
@@ -6306,88 +6319,38 @@ class DeliveryController extends Controller
         $serial = '';
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
+                if($delivery_note){
 
-                $total_shipments = $delivery_note->shipments_count;
-                $total_shipments++;
-                $cod_amount = $delivery_note->total_cod_amount;
-                $total_cod_amount = $cod_amount + $shipment->amount;
-                $delivery_note->shipments_count = $total_shipments;
-                $delivery_note->total_cod_amount = $total_cod_amount;
-                $delivery_note->save();
+                    $total_shipments = $delivery_note->shipments_count;
+                    $total_shipments++;
+                    $cod_amount = $delivery_note->total_cod_amount;
+                    $total_cod_amount = $cod_amount + $shipment->amount;
+                    $delivery_note->shipments_count = $total_shipments;
+                    $delivery_note->total_cod_amount = $total_cod_amount;
+                    $delivery_note->save();
 
-                if($delivery_note->ordering == 1){
-                    $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
-                    $serial = $serial->ordering;
-                }
-                if($serial != null){
+                    if($delivery_note->ordering == 1){
+                        $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('ordering','desc')->first();
+                        $serial = $serial->ordering;
+                    }
                     $serial++;
-                }
-                else{
-                    $serial = null;
-                }
-                $delivery_note_shipment = new DeliveryNoteShipment();
-                $delivery_note_shipment->delivery_note_id = $delivery_note_id;
-                $delivery_note_shipment->shipment_id = $shipment->id;
-                $delivery_note_shipment->ordering = $serial;
-                $delivery_note_shipment->save();
 
-                $journey = new ShipmentsJourney;
-                $journey->shipment_id = $shipment_id;
-                $journey->verification = 1;
-                $journey->shipper_status_id = 5;
-                $journey->consignee_status_id = 5;
-                $journey->admin_id = Auth::id();
-                $journey->save();
-//                NotificationsController::send(10,$delivery_note_id, $shipment_id);
-                return response()->json(['status' => 0, 'success' => 'Shipments Added']);
+                    $delivery_note_shipment = new DeliveryNoteShipment();
+                    $delivery_note_shipment->delivery_note_id = $delivery_note_id;
+                    $delivery_note_shipment->shipment_id = $shipment->id;
+                    $delivery_note_shipment->ordering = $serial;
+                    $delivery_note_shipment->save();
+
+                    $shipment->shipper_status_id = 5;
+                    $shipment->consignee_status_id = 5;
+                    $shipment->save();
+                    ShipmentsJourneyController::add($shipment->id, 5, 5, NULL, NULL, NULL, Auth::id(), $delivery_note_id, $delivery_note->rider_id);
+                    return response()->json(['status' => 0, 'success' => 'Shipments Added']);
+                }
         }
         else{
             return response()->json(['status' => 1, 'error' => 'Shipments Not Found']);
         }
-
-//        if($shipment->exists()){
-//            $shipment = $shipment->first();
-//            if($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 4){
-//                $deliver_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id)->where('delivery_note_id',$delivery_note_id);
-//                if($deliver_note_shipment->exists()){
-//                    return response()->json(['status' => 1, 'error' => 'Shipments Already Exists']);
-//                }
-//                else{
-//                    $delivery_note = DeliveryNote::find($delivery_note_id);
-//                    if($delivery_note->hub_id == $shipment->consignee_city->hub_id){
-//                        $total_shipments = $delivery_note->shipments_count;
-//                        $total_shipments++;
-//                        $cod_amount = $delivery_note->total_cod_amount;
-//                        $cod_amount = $cod_amount + $shipment->amount;
-//                        $delivery_note->shipments_count = $total_shipments;
-//                        $delivery_note->total_cod_amount = $cod_amount;
-//                        $delivery_note->save();
-//
-//                        $serial = DeliveryNoteShipment::select('ordering')->where('delivery_note_id', $delivery_note_id)->orderBy('delivery_note_id','desc')->first();
-//                        if($serial != null){
-//                            $serial++;
-//                        }
-//                        else{
-//                            $serial = null;
-//                        }
-//                        $delivery_note_shipment = new DeliveryNoteShipment();
-//                        $delivery_note_shipment->delivery_note_id = $delivery_note_id;
-//                        $delivery_note_shipment->shipment_id = $shipment->id;
-//                        $delivery_note_shipment->ordering = $serial;
-//                        $delivery_note_shipment->save();
-//
-//                    }
-//                    else{
-//                        //return ['status' => 1, 'error' => 'Hubs are not the same'];
-//                        return response()->json(['status' => 1, 'error' => 'Hubs are not the same']);
-//                    }
-//                }
-//            }
-//            else{
-//                //return ['status' => 1, 'error' => 'Shipments Status Id is invalid'];
-//                return response()->json(['status' => 1, 'error' => 'Shipments Status Id is invalid']);
-//            }
-//        }
 
     }
 

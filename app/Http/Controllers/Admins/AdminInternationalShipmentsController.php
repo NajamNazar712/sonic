@@ -73,7 +73,7 @@ class AdminInternationalShipmentsController extends Controller
             'international_tracking_number' => ['required'],
             'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
         ];
-        $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight'];
+
 
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -83,23 +83,13 @@ class AdminInternationalShipmentsController extends Controller
             $header = ['Tracking Number', 'International Tracking Number', 'Actual Weight'];
 
             if (isset($spreadsheet)) {
-                $header_correct = TRUE;
-
-                foreach ($spreadsheet[0] as $index => $header_value) {
-                    if($index == 2){
-                    }
-                    elseif (!isset($header[$index]) || $header_value != $header[$index]) {
-                        $header_correct = FALSE;
-                        break;
-                    }
+                if (count($spreadsheet[0]) == 3){
+                    $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight'];
                 }
-
-                if (!$header_correct) {
+                else{
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 }
-                else {
-                    unset($spreadsheet[0]);
-                }
+                unset($spreadsheet[0]);
             }
 
             if (!empty($spreadsheet) || !isset($spreadsheet)) {
@@ -245,6 +235,7 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->shipment_id = $shipment_id;
                         $international_shipment->international_tracking_number = $international_tracking_number;
                         $international_shipment->actual_weight = $actual_weight;
+                        $international_shipment->sync = 1;
                         $international_shipment->save();
                         Shipment::where('id',$shipment_id)->update(['actual_weight'=>$actual_weight]);
                         return redirect()->back()->with('success', 'Shipment successfully updated!');

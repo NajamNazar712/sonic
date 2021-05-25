@@ -20,6 +20,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
@@ -431,23 +432,25 @@ class ReturnController extends Controller
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
-                    if ($parcel->booking_type_id != 4 && $parcel->shipment_type == 1) {
-                        ShipmentChargesController::return($shipment);
+                    if ($parcel->shipment_type == 1) {
+                        if ($parcel->booking_type_id != 4) {
+                            ShipmentChargesController::return($shipment);
 
-                        if ($parcel->packaging_material_request != 1) {
+                            if ($parcel->packaging_material_request != 1) {
 
-                            AdminFinanceController::add_payment($shipment, 1);
+                                AdminFinanceController::add_payment($shipment, 1);
 
+                            }
                         }
-                    }
-                    else {
-                        ShipmentChargesController::walk_in_return($shipment);
+                        else {
+                            ShipmentChargesController::walk_in_return($shipment);
 
-                        $parcel->walk_in_status = 2;
+                            $parcel->walk_in_status = 2;
 
-                        $parcel->save();
+                            $parcel->save();
 
-                        AdminFinanceController::done_payment($shipment, 1);
+                            AdminFinanceController::done_payment($shipment, 1);
+                        }
                     }
 //                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
 //                    if($return_assign_shipment->exists()){
@@ -540,21 +543,23 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
 
-                if ($parcel->booking_type_id != 4 && $parcel->shipment_type == 1) {
-                    ShipmentChargesController::return($request->shipment_id);
+                if ($parcel->shipment_type == 1) {
+                    if ($parcel->booking_type_id != 4) {
+                        ShipmentChargesController::return($request->shipment_id);
 
-                    if ($parcel->packaging_material_request != 1) {
-                        AdminFinanceController::add_payment($request->shipment_id, 1);
+                        if ($parcel->packaging_material_request != 1) {
+                            AdminFinanceController::add_payment($request->shipment_id, 1);
+                        }
                     }
-                }
-                else {
-                    ShipmentChargesController::walk_in_return($request->shipment_id);
+                    else {
+                        ShipmentChargesController::walk_in_return($request->shipment_id);
 
-                    $parcel->walk_in_status = 2;
+                        $parcel->walk_in_status = 2;
 
-                    $parcel->save();
+                        $parcel->save();
 
-                    AdminFinanceController::done_payment($request->shipment_id, 1);
+                        AdminFinanceController::done_payment($request->shipment_id, 1);
+                    }
                 }
 //                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
 //                if($return_assign_shipment->exists()){
@@ -794,22 +799,23 @@ class ReturnController extends Controller
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
+                        if ($shipment_details->shipment_type == 1) {
+                            if ($shipment_details->booking_type_id != 4) {
+                                ShipmentChargesController::return($shipment_details->id);
 
-                        if ($shipment_details->booking_type_id != 4) {
-                            ShipmentChargesController::return($shipment_details->id);
+                                if ($shipment_details->packaging_material_request != 1) {
 
-                            if ($shipment_details->packaging_material_request != 1) {
+                                    AdminFinanceController::add_payment($shipment_details->id, 1);
 
-                                AdminFinanceController::add_payment($shipment_details->id, 1);
-
+                                }
                             }
-                        }
-                        else {
-                            ShipmentChargesController::walk_in_return($shipment_details->id);
+                            else {
+                                ShipmentChargesController::walk_in_return($shipment_details->id);
 
-                            $shipment_details->walk_in_status = 2;
+                                $shipment_details->walk_in_status = 2;
 
-                            AdminFinanceController::done_payment($shipment_details->id, 1);
+                                AdminFinanceController::done_payment($shipment_details->id, 1);
+                            }
                         }
 
                     }
@@ -1496,6 +1502,18 @@ class ReturnController extends Controller
             if ($shipments_count != 0) {
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
+
+                $rider_device_token = EmployeeDeviceToken::where('employee_id',$rider)
+                    ->where('employee_type_id', 2)
+                    ->select('device_token');
+                if ($rider_device_token->exists()) {
+                    $rider_device_token = $rider_device_token->first();
+                    $device_token = $rider_device_token->device_token;
+                    $title = "Return Note Assigned";
+                    $message = "Dear Rider Return Note # " . $note->id . " Has Been Assigned To You";
+                    NotificationsController::bolt_app_notification($rider, 2,$device_token, $title, $message);
+                }
+
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
                         $shipment = Shipment::where('id', $shipment_id);
@@ -2663,7 +2681,7 @@ class ReturnController extends Controller
                         }
 
                         ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, $request->remarks, NULL, Auth::id());
-                        if($shipment->shipment_type == 1) {
+                        if($is_shipment->shipment_type == 1) {
                             AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
                         }
                     }

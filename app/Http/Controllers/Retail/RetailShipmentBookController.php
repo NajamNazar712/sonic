@@ -13,6 +13,7 @@ use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailShippingMode;
 use App\http\Models\Admin\Retail\RetailTraxBox;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
@@ -603,14 +604,7 @@ class RetailShipmentBookController extends Controller
         $page_items = 1;
         foreach($request->ids as $id) {
             $shipment = Shipment::find($id);
-            
-            $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
-            $barcode_series = '';
-            if(count($package_barcode)>0){
-              $first_barcode = $package_barcode->first();
-              $last_barcode = $package_barcode->last();
-              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
-            }
+
 //            $url = 'storage/retail/shipment_'. $shipment->id.'.jpg';
 //            if(!file_exists($url)){
 //                $this::save_slip($shipment->id);
@@ -787,7 +781,7 @@ class RetailShipmentBookController extends Controller
                         $table_start .= '
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description . $barcode_series . '</td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description  . '</td>
                                 <td class="color secondary border twice-bottom"><strong>Price</strong></td>
                                 <td class="border twice-bottom">Rs ' . number_format($shipment_item->price) . '</td>';
 
@@ -1026,7 +1020,7 @@ class RetailShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
                               </tr>
                     ';
 
@@ -1049,7 +1043,7 @@ class RetailShipmentBookController extends Controller
                               </tr>
                               <tr>
                                 <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description  . '</td>
                               </tr>
                     ';
 
@@ -1066,7 +1060,7 @@ class RetailShipmentBookController extends Controller
                         </tr>
                         <tr>
                           <td style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class=" border twice-bottom"><strong>Description</strong></td>
-                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                          <td colspan="6" style="color:#ffffff !important; background-color: #000000 !important;border-color:#ffffff !important" class="border twice-bottom">' . $item->description  . '</td>
                         </tr>
                     ';
 
@@ -1478,5 +1472,32 @@ class RetailShipmentBookController extends Controller
             $retail_shipment->save();
         }
         return redirect()->back()->with('success', 'Slip uploaded successfully');
+    }
+
+    public function other_booking_index(){
+        return view('retail.shipment.other_booking');
+    }
+
+    public function other_booking_list(Request $request){
+        $retail_user_id = Auth::id();
+        $retail_user = RetailUser::find($retail_user_id);
+        $retail_trax_center = RetailTraxCenter::find($retail_user->category_id);
+        $shipments = RetailShipment::join('shipments as s', 's.id', '=', 'retail_shipments.shipment_id')
+            ->select('retail_shipments.id', 's.tracking_number as tracking_number', 'retail_shipments.created_at as created_at')
+            ->where('s.pickup_address_id', $retail_trax_center->pickup_address_id)
+            ->wherenull('retail_shipments.retail_user_id')
+            ->orderBy('retail_shipments.created_at', 'desc');
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('retail.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            });
+
+        if ($request->get('search_date')) {
+            $date = $request->get('search_date');
+            $datatable->whereDate('retail_shipments.created_at', $date);
+        }
+
+        return  $datatable->make(true);
     }
 }

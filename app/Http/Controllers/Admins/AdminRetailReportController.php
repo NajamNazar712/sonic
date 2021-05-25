@@ -45,8 +45,8 @@ class AdminRetailReportController extends Controller
         $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
-            ->join('retail_users as ru','ru.id','=','rs.retail_user_id')
-            ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
+            ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
             ->leftJoin('retail_franchises as rf', function ($join) {
                 $join->on('rf.id', '=', 'ru.category_id')
                     ->where('ru.category','=', DB::raw(1));
@@ -137,12 +137,12 @@ class AdminRetailReportController extends Controller
                 return number_format($shipment->collection_amount);
             })
             ->addColumn('franchise_center', function ($shipment) {
-                if ($shipment->retail_category == 2) {
-                    return $shipment->retail_center;
-                }
-                else {
-                    return $shipment->franchise;
-                }
+                    if ($shipment->retail_category == 2) {
+                        return $shipment->retail_center;
+                    }
+                    else {
+                        return $shipment->franchise;
+                    }
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
@@ -164,6 +164,7 @@ class AdminRetailReportController extends Controller
         }
         if($center = $request->get('search_retail_center')){
             $datatable->where('rf.id', '=', $center);
+            $datatable->where('rtc.id', '=', $center);
         }
         if($franchise = $request->get('search_retail_franchise')){
             $datatable->where('rf.id', '=', $franchise);
