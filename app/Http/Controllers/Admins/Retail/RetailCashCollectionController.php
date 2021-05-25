@@ -36,7 +36,7 @@ class RetailCashCollectionController extends Controller
         $deliveries = RetailPickupNote::join('cities AS oc', 'retail_pickup_notes.hub_id', '=', 'oc.id')
             ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->leftjoin('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
-            ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
+            ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
             ->leftjoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
             ->leftjoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
             ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
