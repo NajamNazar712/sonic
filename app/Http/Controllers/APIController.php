@@ -2948,7 +2948,7 @@ class APIController extends Controller
                         if ($admin->status == 0) {
                             return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                         }
-                        if (Hash::check($request->input('pin'), $employee->pin)) {
+                        if ($request->input('pin') == $employee->pin) {
                             $information['name'] = $employee->name;
                             $information['phone'] = $employee->phone_number;
                             $information['cnic'] = $employee->cnic;
