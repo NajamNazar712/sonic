@@ -19,6 +19,7 @@ use App\Http\Models\City;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
@@ -8490,6 +8491,65 @@ class AdminReportsController extends Controller
                 }
             });
         return $datatables->make(true);
+    }
+
+    public function shipper_insurance_index(){
+        $shipper_name = User::select('id','name')->get();
+        return view('admin.reports.shipper_insurance')->with(['shipper_name' => $shipper_name]);
+    }
+
+    public function shipper_insurance_list(Request $request){
+
+        $shipments = Shipment::join('users as u','shipments.user_id','=','u.id')
+            ->join('shipment_items as si','si.shipment_id','=','shipments.id')
+            ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number as tracking_number','u.name','shipments.insurance_charges','shipments.created_at','si.insurance','si.price as price')
+            ->groupBy('tracking_number');
+
+        $datatables = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            }) ->editColumn('insurance',function ($shipments){
+                if($shipments->insurance == 0){
+                    return 'No';
+                }else{
+                    return 'Yes';
+                }
+            })
+            ->addColumn('charges', function ($shipments){
+                return '<div class="text-center"><button type="button" class="btn btn-primary btn-sm charges"><i class="fas fa-dollar-sign"></i> Charges</button></div>';
+            });
+
+        if($shipper_id = $request->get('shipper_name')){
+            $receiving_sheet = $shipments->where('shipments.user_id', '=',$shipper_id);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('shipments.created_at', [$from,$to]);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        return $datatables->make(true);
+    }
+
+    public function shipper_insurance_charges(Request $request){
+        $tracking_number = $request->tracking_number;
+
+        if($tracking_number){
+            $shipment = Shipment::where('tracking_number',$tracking_number)->first();
+            $charges = array();
+
+            foreach($shipment->items as $insurance){
+                $charges[] = $insurance;
+            }
+            $total_insurance = ShipmentItem::where('shipment_id',$shipment->id)->sum('price');
+
+            return response()->json(['status' => 1,'charges'=>$charges,'total_insurance' => $total_insurance]);
+            
+        }
     }
 }
 

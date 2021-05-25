@@ -1009,6 +1009,9 @@
                         @if (session('role_id') == 1 || in_array(493, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.retail_sales.index') }}">Retail Sales</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(502, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.shipper_insurance.index') }}">Shipper Insurance</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
