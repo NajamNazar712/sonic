@@ -37,7 +37,7 @@ class V2PickupCronController extends Controller
         $yesterday->setTime($arrival_cut_off_time,0,1);
 
         $now = Carbon::now();
-
+        V2PickupNote::where('status', 0)->update(['status' => 1]);
         V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->whereBetween('updated_at', [$yesterday,$today])->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
 
         $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereBetween('created_at', [$yesterday,$today]);
@@ -111,7 +111,7 @@ class V2PickupCronController extends Controller
                 }
             }
 
-            V2PickupNote::where('status', 0)->update(['status' => 1]);
+
 
             self::remove_riders($today);
         }
