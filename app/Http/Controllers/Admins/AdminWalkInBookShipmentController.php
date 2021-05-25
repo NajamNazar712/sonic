@@ -681,14 +681,7 @@ class AdminWalkInBookShipmentController extends Controller
 
             $shipment = Shipment::where('id',$request->ids)->first();
 
-            $package_barcode = DB::table('packaging_barcodes')->where('shipment_id',$shipment->id)->get();
-            $barcode_series = '';
-            if(count($package_barcode)>0){
-              $first_barcode = $package_barcode->first();
-              $last_barcode = $package_barcode->last();
-              $barcode_series = ' ( '.$first_barcode->barcode_number. ' - ' . $last_barcode->barcode_number.' )';
-              
-            }
+
             if ($user_id == $shipment->user_id) {
                 $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -799,7 +792,7 @@ class AdminWalkInBookShipmentController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                              <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series . '</td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
                             </tr>
                 ';
 
@@ -914,7 +907,7 @@ class AdminWalkInBookShipmentController extends Controller
                                     </tr>
                                     <tr>
                                       <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description . $barcode_series .'</td>
+                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
                                     </tr>
                                 </tbody>
                             </table>
