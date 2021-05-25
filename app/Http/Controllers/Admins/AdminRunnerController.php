@@ -374,10 +374,10 @@ class AdminRunnerController extends Controller
 
     public function vehicle_in_transit(){
 
-        // $route_managements = RouteManagement::where('status',1)->get();
-        $route_managements = DB::table('route_managements')->where('status',1)->get();
-        // $fleets = Fleet::where('status',1)->get();
-        $fleets = DB::table('fleets')->where('status',1)->get();
+        $route_managements = RouteManagement::where('status',1)->get();
+        // $route_managements = DB::table('route_managements')->where('status',1)->get();
+        $fleets = Fleet::where('status',1)->get();
+        // $fleets = DB::table('fleets')->where('status',1)->get();
         return view('admin.runner.in_transit')->with(['route_managements'=>$route_managements,'fleets'=>$fleets]);
     }
 
