@@ -8330,6 +8330,8 @@ class AdminDashboardController extends Controller
                 'status'=>1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_latitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
