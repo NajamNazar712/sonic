@@ -1079,6 +1079,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_create_index(Request $request, $id = NULL) {
+              
         if($id == NULL){
             $id = 0;
         }
