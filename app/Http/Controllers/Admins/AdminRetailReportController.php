@@ -45,8 +45,8 @@ class AdminRetailReportController extends Controller
         $to = Carbon::parse($to)->addDay()->setTimeFromTimeString('06:00:00');
 
         $sales = DB::connection('reports')->table('shipments')->join('retail_shipments as rs', 'rs.shipment_id', '=','shipments.id')
-            ->join('retail_users as ru','ru.id','=','rs.retail_user_id')
-            ->join('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
+            ->leftjoin('retail_users as ru','ru.id','=','rs.retail_user_id')
+            ->leftjoin('retail_shipper_infos as rsi', 'rsi.id', '=', 'rs.shipper_account_no')
             ->leftJoin('retail_franchises as rf', function ($join) {
                 $join->on('rf.id', '=', 'ru.category_id')
                     ->where('ru.category','=', DB::raw(1));
