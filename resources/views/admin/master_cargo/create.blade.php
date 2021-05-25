@@ -365,13 +365,13 @@
             });
             $('#master_cargo_consignment_confirm').bind('click', function() {
 
-                if ($('#master_cargo_consignment form .junction_1').hasClass('select2-hidden-accessible')) {
-                    $('#master_cargo_consignment form .junction_1').html('').select2('destroy');
-                }
+                // if ($('#master_cargo_consignment form .junction_1').hasClass('select2-hidden-accessible')) {
+                //     $('#master_cargo_consignment form .junction_1').html('').select2('destroy');
+                // }
 
-                if ($('#master_cargo_consignment form .junction_2').hasClass('select2-hidden-accessible')) {
-                    $('#master_cargo_consignment form .junction_2').html('').select2('destroy');
-                }
+                // if ($('#master_cargo_consignment form .junction_2').hasClass('select2-hidden-accessible')) {
+                //     $('#master_cargo_consignment form .junction_2').html('').select2('destroy');
+                // }
 
                 if ($('#master_cargo_consignment form .transport_mode').hasClass('select2-hidden-accessible')) {
                     $('#master_cargo_consignment form .transport_mode').html('').select2('destroy');
@@ -537,7 +537,7 @@
                             if (this.value) {
                                 $(this).valid();
                             }
-
+                            console.log(this.value);
                             if (this.value && this.value == 0) {
                                 $('#master_cargo_consignment #new_vendor').removeClass('d-none');
                             }

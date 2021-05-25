@@ -1255,12 +1255,15 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->origin_hub_id = $request->input('origin_hub_id');
             $master_cargo->destination_hub_id = $request->input('destination_hub_id');
-            $master_cargo->junction_hub_1_id = $request->input('junction_1');
-            $master_cargo->junction_hub_2_id = $request->input('junction_2');
+            $master_cargo->route_management_id = $request->input('route_management_id');
+            $master_cargo->fleet_id = $request->input('fleet_id');
+            
+            // $master_cargo->junction_hub_1_id = $request->input('junction_1');
+            // $master_cargo->junction_hub_2_id = $request->input('junction_2');
             $master_cargo->shipping_mode_id = $request->input('shipping_mode_id');
             $master_cargo->transport_mode_id = $request->input('transport_mode');
             $master_cargo->driver_name = $request->input('driver_name');
-            $master_cargo->vehicle = $request->input('vehicle');
+            // $master_cargo->vehicle = $request->input('vehicle');
             $master_cargo->phone_number = $request->input('phone_number');
 //            if($request->has('cnic')){
 //                $master_cargo->cnic = $request->input('cnic');
