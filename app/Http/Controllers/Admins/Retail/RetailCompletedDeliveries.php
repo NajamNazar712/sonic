@@ -71,7 +71,7 @@ class RetailCompletedDeliveries extends Controller
                         return $user->center;
                     }
                 }else{
-                    return $user->retail_trax_center_center;
+                    return $user->retail_trax_center_name;
                 }
             })
             ->editColumn('code', function ($user) {
