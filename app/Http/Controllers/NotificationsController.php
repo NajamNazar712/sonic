@@ -7364,4 +7364,20 @@ class NotificationsController extends Controller
             $notification_history->save();
         }
     }
+
+    static public function bolt_forget_pin($phone_number, $pin, $name)
+    {
+        $notification = Notification::find(61);
+        $body = $notification->body;
+        if (strpos($body, '[rider_name]') !== FALSE) {
+            $body = str_replace('[rider_name]', $name, $body);
+        }
+        if (strpos($body, '[pin]') !== FALSE) {
+            $body = str_replace('[pin]', $pin, $body);
+        }
+
+        $to = $phone_number;
+        self::sms($body, $to);
+    }
+
 }

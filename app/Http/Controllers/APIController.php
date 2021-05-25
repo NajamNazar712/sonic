@@ -3147,5 +3147,32 @@ class APIController extends Controller
         }
     }
 
+    public function bolt_forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }else{
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if($employee->exists()){
+                $employee = $employee->first();
+                $pin = rand(1000,9999);
+                $employee->pin = $pin;
+                $employee->save();
+                NotificationsController::bolt_forget_pin($employee->phone_number, $pin, $employee->name);
+                return response()->json(['status' => 0, 'message' => 'Pin has been sended to your registered number']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
 
 }
