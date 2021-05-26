@@ -1367,31 +1367,18 @@ class AdminMasterCargoController extends Controller
             // ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
-            // ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
+            ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
             // ->leftjoin('route_managements as rm', function($join){
             //     $join->on('rm.id','=','master_cargoes.route_management_id')
             //         ->leftjoin('route_management_junctions as rmj','rm.id','=','rmj.route_management_id');
             // })
-            
-            
             // ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.quantity', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor','master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
             ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.quantity', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor','master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
-            ->whereIn('master_cargoes.status_id', [1, 3, 6]);
+            ->whereIn('master_cargoes.status_id', [1, 3, 6])->groupBy('master_cargoes.id');
 
         if (session('role_id') != 1) {
-            
-            $receive_cargo = $receive_cargo->where(function ($query) {
-                $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhere('a.id', Auth::id());
-            });
-
-            // $receive_cargo->join('route_management_junctions as rmj', function($join){
-            //     $join->on('rmj.route_management_id','=','rm.id')
-            //     ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
-            // });
-
-            // $receive_cargo = $receive_cargo->where(function ($query) {
-            //     $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhere('a.id', Auth::id());
-            // });
+            $receive_cargo->join('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
+                ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
         }
 
         $datatables = Datatables::of($receive_cargo)
@@ -2626,18 +2613,18 @@ class AdminMasterCargoController extends Controller
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
             ->join('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+            ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
             // ->leftjoin('cities as jh1', 'master_cargoes.junction_hub_1_id', '=', 'jh1.id')
             // ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
             ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
             // ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
-            ->where('master_cargoes.status_id', 2);
+            ->where('master_cargoes.status_id', 2)->groupBy('master_cargoes.id');
 
         if (session('role_id') != 1) {
-            $receive_cargo = $receive_cargo->where(function ($query) {
-                $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'));
-            });
+            $receive_cargo->join('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
+                ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
         }
 
         $datatables = Datatables::of($receive_cargo)
@@ -2740,20 +2727,28 @@ class AdminMasterCargoController extends Controller
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
             ->join('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+            ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
+
             // ->leftjoin('cities as jh1', 'master_cargoes.junction_hub_1_id', '=', 'jh1.id')
             // ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id');
+            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
+            ->groupBy('master_cargoes.id');
             // ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id');
 
-        if (session('role_id') != 1) {
-            $receive_cargo = $receive_cargo->where(function ($query) {
-                $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'));
-            });
-        }
+        // if (session('role_id') != 1) {
+        //     $receive_cargo = $receive_cargo->where(function ($query) {
+        //         $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'));
+        //     });
+        // }
+        
 
+        if (session('role_id') != 1) {
+            $receive_cargo->join('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
+                ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
+        }
         $datatables = Datatables::of($receive_cargo)
             ->addColumn('id_padded', function ($master_cargo) {
                 return str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT);
