@@ -237,6 +237,7 @@ Route::name('api.')->group(function () {
         Route::post('get_info', 'ConsigneeAPIController@consignee_info')->name('get_info');
         Route::post('consignee_otp', 'ConsigneeAPIController@consignee_otp')->name('consignee_otp');
         Route::post('otp_verify', 'ConsigneeAPIController@consignee_otp_verification')->name('otp_verify');
+        Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         /*Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 

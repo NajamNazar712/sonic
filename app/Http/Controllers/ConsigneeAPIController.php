@@ -155,4 +155,37 @@ class ConsigneeAPIController extends Controller
             }
         }
     }
+
+    public function consignee_signup(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'name' => ['required'],
+            'address' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_info->exists()) {
+                $consignee_info = $consignee_info->first();
+                if($consignee_info->pin){
+                    return response()->json(['status' => 1, 'message' => 'Account Already Exist']);
+                }else{
+                    $consignee_info->name = $request->name;
+                    $consignee_info->address = $request->address;
+                    $consignee_info->pin = bcrypt($request->pin);
+                    return response()->json(['status' => 1, 'message' => 'Account has been created']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
 }
