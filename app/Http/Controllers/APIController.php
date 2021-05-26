@@ -2946,7 +2946,7 @@ class APIController extends Controller
                 $employee = $employee->first();
                 if ($employee->request_status_id == 3) {
                     if ($employee->employee_type_id == 1) {
-                        $admin = Admin::where('employee_id', $employee->id);
+                        $admin = Admin::where('trax_id', $employee->trax_id);
                         if ($admin->exists()) {
                             $admin = $admin->first();
                             if ($admin->status == 0) {
@@ -3009,8 +3009,9 @@ class APIController extends Controller
                         } else {
                             return response()->json(['status' => 1, 'message' => 'Pending for approval']);
                         }
-                    } elseif ($employee->employee_type_id == 2) {
-                        $rider = Rider::where('employee_id', $employee->id);
+                    }
+                    elseif ($employee->employee_type_id == 2) {
+                        $rider = Rider::where('trax_id', $employee->trax_id);
                         if ($rider->exists()) {
                             $rider = $rider->first();
                             if ($rider->status == 0) {
@@ -3074,7 +3075,8 @@ class APIController extends Controller
                         } else {
                             return response()->json(['status' => 1, 'message' => 'Pending for approval']);
                         }
-                    } elseif ($employee->employee_type_id == 3) {
+                    }
+                    elseif ($employee->employee_type_id == 3) {
                         $retail_user = RetailUser::where('trax_id', $employee->trax_id);
                         if ($retail_user->exists()) {
                             $retail_user = $retail_user->first();
@@ -3189,7 +3191,7 @@ class APIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'regex:/\b\d{4}\b/'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
