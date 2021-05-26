@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\app\Http\Models\ConsigneeOTP;
+use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Validator;
 use DB;
 
@@ -62,7 +65,8 @@ class ConsigneeAPIController extends Controller
         'rider_location_longitude.regex' => ':attribute is Invalid Longitude Coordinates.',
     ];
 
-    public function consignee_info(Request $request){
+    public function consignee_info(Request $request)
+    {
         $rules = [
             'tracking_no' => ['required']
         ];
@@ -76,11 +80,79 @@ class ConsigneeAPIController extends Controller
         } else {
             $shipment_info = Shipment::where('tracking_number', $request->tracking_no)
                 ->select('consignee_name', 'consignee_address', 'consignee_phone_number_1 as phone_number');
-            if ($shipment_info->exists()){
+            if ($shipment_info->exists()) {
                 $shipment_info = $shipment_info->get();
                 return response()->json(['status' => 0, 'consignee_info' => $shipment_info]);
             }
             return response()->json(['status' => 1, 'message' => 'Consignee Information Not Found']);
+        }
+    }
+
+    public function consignee_otp(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_info->exists()) {
+                $consignee_info = $consignee_info->first();
+                $otp_pin = rand(100000, 999999);
+                $consignee_otp = ConsigneeOTP::where('consignee_id', $consignee_info->id);
+                if ($consignee_otp->exists()) {
+                    $consignee_otp = $consignee_otp->first();
+                } else {
+                    $consignee_otp = new ConsigneeOTP();
+                    $consignee_otp->consignee_id = $consignee_info->id;
+                }
+                $consignee_otp->otp = bcrypt($otp_pin);
+                $consignee_otp->save();
+                NotificationsController::bolt_forget_pin($consignee_info->phone_number1, $otp_pin, $consignee_info->name);
+                return response()->json(['status' => 0, 'message' => 'OTP has been sent to your registered number']);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function consignee_otp_verification(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'digits:6']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_info->exists()) {
+                $consignee_info = $consignee_info->first();
+                $consignee_otp = ConsigneeOTP::where('consignee_id', $consignee_info->id);
+                if ($consignee_otp->exists()) {
+                    $consignee_otp = $consignee_otp->first();
+                    if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
+                        return response()->json(['status' => 0, 'message' => 'OTP has been verified']);
+                    } else {
+                        return response()->json(['status' => 0, 'message' => 'Invalid OTP']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
         }
     }
 }
