@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateConsigneeOtpsTable extends Migration
+class CreateConsigneeUsersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,14 @@ class CreateConsigneeOtpsTable extends Migration
      */
     public function up()
     {
-        Schema::create('consignee_otps', function (Blueprint $table) {
+        Schema::create('consignee_users', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('phone_number');
-            $table->string('otp');
+            $table->string('name');
+            $table->string('phone_number_1');
+            $table->string('phone_number_2')->nullable();
+            $table->string('address', 255);
+            $table->string('pin');
+            $table->string('api_token')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +32,6 @@ class CreateConsigneeOtpsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('consignee_otps');
+        Schema::dropIfExists('consignee_users');
     }
 }

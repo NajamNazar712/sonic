@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
+use App\Http\Models\ConsigneeUser;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -91,7 +92,7 @@ class ConsigneeAPIController extends Controller
     public function consignee_otp(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/']
+            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -101,24 +102,18 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
-            if ($consignee_info->exists()) {
-                $consignee_info = $consignee_info->first();
-                $otp_pin = rand(1000, 9999);
-                $consignee_otp = ConsigneeOtp::where('consignee_id', $consignee_info->id);
-                if ($consignee_otp->exists()) {
-                    $consignee_otp = $consignee_otp->first();
-                } else {
-                    $consignee_otp = new ConsigneeOtp();
-                    $consignee_otp->consignee_id = $consignee_info->id;
-                }
-                $consignee_otp->otp = bcrypt($otp_pin);
-                $consignee_otp->save();
-                NotificationsController::bolt_forget_pin($consignee_info->phone_number_1, $otp_pin, $consignee_info->name);
-                return response()->json(['status' => 0, 'otp_message' => 'OTP has been sent to your registered number']);
+            $otp_pin = rand(1000, 9999);
+            $consignee_otp = ConsigneeOtp::where('phone_number', $request->input('phone_number'));
+            if ($consignee_otp->exists()) {
+                $consignee_otp = $consignee_otp->first();
             } else {
-                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                $consignee_otp = new ConsigneeOtp();
+                $consignee_otp->phone_number = $request->input('phone_number');
             }
+            $consignee_otp->otp = bcrypt($otp_pin);
+            $consignee_otp->save();
+            NotificationsController::bolt_forget_pin($request->input('phone_number'), $otp_pin, "Consignee");
+            return response()->json(['status' => 0, 'otp_message' => 'OTP has been sent to your registered number']);
         }
     }
 
@@ -136,22 +131,16 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
-            if ($consignee_info->exists()) {
-                $consignee_info = $consignee_info->first();
-                $consignee_otp = ConsigneeOtp::where('consignee_id', $consignee_info->id);
-                if ($consignee_otp->exists()) {
-                    $consignee_otp = $consignee_otp->first();
-                    if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
-                        return response()->json(['status' => 0, 'message' => 'OTP has been verified']);
-                    } else {
-                        return response()->json(['status' => 0, 'message' => 'Invalid OTP']);
-                    }
+            $consignee_otp = ConsigneeOtp::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_otp->exists()) {
+                $consignee_otp = $consignee_otp->first();
+                if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
+                    return response()->json(['status' => 0, 'message' => 'OTP has been verified']);
                 } else {
-                    return response()->json(['status' => 0, 'message' => 'Invalid OTP']);
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
             }
         }
     }
@@ -159,7 +148,7 @@ class ConsigneeAPIController extends Controller
     public function consignee_signup(Request $request)
     {
         $rules = [
-            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
             'pin' => ['required', 'integer', 'digits:4'],
             'name' => ['required'],
             'address' => ['required'],
@@ -172,19 +161,21 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'));
             if ($consignee_info->exists()) {
-                $consignee_info = $consignee_info->first();
-                if($consignee_info->pin){
-                    return response()->json(['status' => 1, 'message' => 'Account Already Exist']);
-                }else{
-                    $consignee_info->name = $request->name;
-                    $consignee_info->address = $request->address;
-                    $consignee_info->pin = bcrypt($request->pin);
-                    return response()->json(['status' => 1, 'message' => 'Account has been created']);
-                }
+                return response()->json(['status' => 1, 'message' => 'Account Already registered']);
             } else {
-                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                $api_token = uniqid(base64_encode(str_random(60)));
+                $consignee_info = new ConsigneeUser();
+                $consignee_info->name = $request->name;
+                $consignee_info->address = $request->address;
+                $consignee_info->pin = bcrypt($request->pin);
+                $consignee_info->phone_number_1 = $request->phone_number;
+                $consignee_info->api_token = $api_token;
+                $consignee_info->save();
+                $information = ['message' => 'Account has been created', 'api_token' => $consignee_info->api_token, 'name' => $consignee_info->name, 'phone_number' => $consignee_info->phone_number_1];
+                return response()->json(['status' => 0, 'information' => $information]);
+
             }
         }
     }
