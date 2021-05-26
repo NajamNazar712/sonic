@@ -2945,7 +2945,7 @@ class APIController extends Controller
             if ($employee->exists()) {
                 $employee = $employee->first();
                 if ($employee->employee_type_id == 1) {
-                    $admin = Admin::where('employee_id', $employee->id);
+                    $admin = Admin::where('trax_id', $employee->trax_id);
                     if ($admin->exists()) {
                         $admin = $admin->first();
                         if ($admin->status == 0) {
@@ -3011,7 +3011,7 @@ class APIController extends Controller
                     }
                 }
                 elseif ($employee->employee_type_id == 2) {
-                    $rider = Rider::where('employee_id', $employee->id);
+                    $rider = Rider::where('trax_id', $employee->trax_id);
                     if ($rider->exists()) {
                         $rider = $rider->first();
                         if ($rider->status == 0) {
@@ -3190,7 +3190,7 @@ class APIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'regex:/\b\d{4}\b/'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
