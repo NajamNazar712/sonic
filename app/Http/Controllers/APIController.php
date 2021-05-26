@@ -2944,212 +2944,211 @@ class APIController extends Controller
             $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($employee->exists()) {
                 $employee = $employee->first();
-                if ($employee->employee_type_id == 1) {
-                    $admin = Admin::where('trax_id', $employee->trax_id);
-                    if ($admin->exists()) {
-                        $admin = $admin->first();
-                        if ($admin->status == 0) {
-                            return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
-                        }
-                        if ($request->input('pin') == $employee->pin) {
-                            $information['name'] = $employee->name;
-                            $information['phone'] = $employee->phone_number;
-                            $information['cnic'] = $employee->cnic;
-                            $information['address'] = $employee->address;
-                            $information['role'] = 'staff';
-
-                            if($employee->forget_pin_status == 1){
-                                $information['forget_pin_status'] = $employee->forget_pin_status;
+                if ($employee->request_status_id == 3) {
+                    if ($employee->employee_type_id == 1) {
+                        $admin = Admin::where('employee_id', $employee->id);
+                        if ($admin->exists()) {
+                            $admin = $admin->first();
+                            if ($admin->status == 0) {
+                                return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                             }
-                            //Reporting Location
-                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
-                            if ($reporting_location->exists()) {
-                                $reporting_location = $reporting_location->first();
-                                $information['distance'] = $reporting_location->radius;
-                                $information['lat'] = $reporting_location->lat;
-                                $information['long'] = $reporting_location->long;
-                            } else {
-                                $information['distance'] = 0;
-                                $information['lat'] = 0;
-                                $information['long'] = 0;
-                            }
+                            if ($request->input('pin') == $employee->pin) {
+                                $information['name'] = $employee->name;
+                                $information['phone'] = $employee->phone_number;
+                                $information['cnic'] = $employee->cnic;
+                                $information['address'] = $employee->address;
+                                $information['role'] = 'staff';
 
-                            //Device Token
-                            if ($request->has('device_token')) {
-                                $employee_device_token = EmployeeDeviceToken::where('employee_id', $admin->id)
-                                    ->where('employee_type_id', 1);
-                                if ($employee_device_token->exists()) {
-                                    $employee_device_token = $employee_device_token->first();
-                                } else {
-                                    $employee_device_token = new EmployeeDeviceToken();
-                                    $employee_device_token->employee_id = $admin->id;
-                                    $employee_device_token->employee_type_id = 1;
+                                if ($employee->forget_pin_status == 1) {
+                                    $information['forget_pin_status'] = $employee->forget_pin_status;
                                 }
-                                $employee_device_token->device_token = $request->get('device_token');
-                                $employee_device_token->save();
-                            }
-
-                            //API_TOKEN
-                            if ($admin->api_token) {
-                                $information['api_token'] = $admin->api_token;
-                            } else {
-                                $api_token = uniqid(base64_encode(str_random(60)));
-
-                                $admin->api_token = $api_token;
-
-                                $admin->save();
-
-                                $information['api_token'] = $api_token;
-                            }
-                            return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                        }
-                    }
-                    else{
-                        return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                    }
-                }
-                elseif ($employee->employee_type_id == 2) {
-                    $rider = Rider::where('trax_id', $employee->trax_id);
-                    if ($rider->exists()) {
-                        $rider = $rider->first();
-                        if ($rider->status == 0) {
-                            return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
-                        }
-                        if ($request->input('pin') == $employee->pin) {
-                            $information['name'] = $employee->name;
-                            $information['phone'] = $employee->phone_number;
-                            $information['cnic'] = $employee->cnic;
-                            $information['address'] = $employee->address;
-                            $information['role'] = 'rider';
-
-                            if($employee->forget_pin_status == 1){
-                                $information['forget_pin_status'] = $employee->forget_pin_status;
-                            }
-
-                            //Reporting Location
-                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
-                            if ($reporting_location->exists()) {
-                                $reporting_location = $reporting_location->first();
-                                $information['distance'] = $reporting_location->radius;
-                                $information['lat'] = $reporting_location->lat;
-                                $information['long'] = $reporting_location->long;
-                            } else {
-                                $information['distance'] = 0;
-                                $information['lat'] = 0;
-                                $information['long'] = 0;
-                            }
-
-                            //Device Token
-                            if ($request->has('device_token')) {
-                                $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
-                                    ->where('employee_type_id', 2);
-                                if ($employee_device_token->exists()) {
-                                    $employee_device_token = $employee_device_token->first();
+                                //Reporting Location
+                                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
+                                if ($reporting_location->exists()) {
+                                    $reporting_location = $reporting_location->first();
+                                    $information['distance'] = $reporting_location->radius;
+                                    $information['lat'] = $reporting_location->lat;
+                                    $information['long'] = $reporting_location->long;
                                 } else {
-                                    $employee_device_token = new EmployeeDeviceToken();
-                                    $employee_device_token->employee_id = $rider->id;
-                                    $employee_device_token->employee_type_id = 2;
+                                    $information['distance'] = 0;
+                                    $information['lat'] = 0;
+                                    $information['long'] = 0;
                                 }
-                                $employee_device_token->device_token = $request->get('device_token');
-                                $employee_device_token->save();
-                            }
 
-                            //API_TOKEN
-                            if ($rider->api_token) {
-                                $information['api_token'] = $rider->api_token;
-                            } else {
-                                $api_token = uniqid(base64_encode(str_random(60)));
+                                //Device Token
+                                if ($request->has('device_token')) {
+                                    $employee_device_token = EmployeeDeviceToken::where('employee_id', $admin->id)
+                                        ->where('employee_type_id', 1);
+                                    if ($employee_device_token->exists()) {
+                                        $employee_device_token = $employee_device_token->first();
+                                    } else {
+                                        $employee_device_token = new EmployeeDeviceToken();
+                                        $employee_device_token->employee_id = $admin->id;
+                                        $employee_device_token->employee_type_id = 1;
+                                    }
+                                    $employee_device_token->device_token = $request->get('device_token');
+                                    $employee_device_token->save();
+                                }
 
-                                $rider->api_token = $api_token;
-
-                                $rider->save();
-
-                                $information['api_token'] = $api_token;
-                            }
-                            return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                        }
-                    }
-                    else{
-                        return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                    }
-                }
-                elseif ($employee->employee_type_id == 3) {
-                    $retail_user = RetailUser::where('trax_id', $employee->trax_id);
-                    if ($retail_user->exists()) {
-                        $retail_user = $retail_user->first();
-
-                        if($retail_user->category == 2){
-                            $trax_center = RetailTraxCenter::find($retail_user->category_id);
-                        }elseif ($retail_user->category == 1){
-                            $trax_center = RetailFranchise::find($retail_user->category_id);
-                        }
-                        if ($retail_user->status == 0) {
-                            return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
-                        }
-                        if ($request->input('pin') == $employee->pin) {
-                            $information['name'] = $employee->name;
-                            $information['phone'] = $employee->phone_number;
-                            $information['cnic'] = $employee->cnic;
-                            $information['address'] = $employee->address;
-                            $information['pickup_address_id'] = $trax_center->pickup_address_id;
-                            $information['role'] = 'retail_user';
-
-                            if($employee->forget_pin_status == 1){
-                                $information['forget_pin_status'] = $employee->forget_pin_status;
-                            }
-
-                            //Reporting Location
-                            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
-                            if ($reporting_location->exists()) {
-                                $reporting_location = $reporting_location->first();
-                                $information['distance'] = $reporting_location->radius;
-                                $information['lat'] = $reporting_location->lat;
-                                $information['long'] = $reporting_location->long;
-                            } else {
-                                $information['distance'] = 0;
-                                $information['lat'] = 0;
-                                $information['long'] = 0;
-                            }
-
-                            //Device Token
-                            if ($request->has('device_token')) {
-                                $employee_device_token = EmployeeDeviceToken::where('employee_id', $retail_user->id)
-                                    ->where('employee_type_id', 3);
-                                if ($employee_device_token->exists()) {
-                                    $employee_device_token = $employee_device_token->first();
+                                //API_TOKEN
+                                if ($admin->api_token) {
+                                    $information['api_token'] = $admin->api_token;
                                 } else {
-                                    $employee_device_token = new EmployeeDeviceToken();
-                                    $employee_device_token->employee_id = $retail_user->id;
-                                    $employee_device_token->employee_type_id = 3;
+                                    $api_token = uniqid(base64_encode(str_random(60)));
+
+                                    $admin->api_token = $api_token;
+
+                                    $admin->save();
+
+                                    $information['api_token'] = $api_token;
                                 }
-                                $employee_device_token->device_token = $request->get('device_token');
-                                $employee_device_token->save();
-                            }
-
-                            //API_TOKEN
-                            if ($retail_user->api_token) {
-                                $information['api_token'] = $retail_user->api_token;
+                                return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                             } else {
-                                $api_token = uniqid(base64_encode(str_random(60)));
-
-                                $retail_user->api_token = $api_token;
-
-                                $retail_user->save();
-
-                                $information['api_token'] = $api_token;
+                                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                             }
-                            return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                         } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                            return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                        }
+                    } elseif ($employee->employee_type_id == 2) {
+                        $rider = Rider::where('employee_id', $employee->id);
+                        if ($rider->exists()) {
+                            $rider = $rider->first();
+                            if ($rider->status == 0) {
+                                return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                            }
+                            if ($request->input('pin') == $employee->pin) {
+                                $information['name'] = $employee->name;
+                                $information['phone'] = $employee->phone_number;
+                                $information['cnic'] = $employee->cnic;
+                                $information['address'] = $employee->address;
+                                $information['role'] = 'rider';
+
+                                if ($employee->forget_pin_status == 1) {
+                                    $information['forget_pin_status'] = $employee->forget_pin_status;
+                                }
+
+                                //Reporting Location
+                                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
+                                if ($reporting_location->exists()) {
+                                    $reporting_location = $reporting_location->first();
+                                    $information['distance'] = $reporting_location->radius;
+                                    $information['lat'] = $reporting_location->lat;
+                                    $information['long'] = $reporting_location->long;
+                                } else {
+                                    $information['distance'] = 0;
+                                    $information['lat'] = 0;
+                                    $information['long'] = 0;
+                                }
+
+                                //Device Token
+                                if ($request->has('device_token')) {
+                                    $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
+                                        ->where('employee_type_id', 2);
+                                    if ($employee_device_token->exists()) {
+                                        $employee_device_token = $employee_device_token->first();
+                                    } else {
+                                        $employee_device_token = new EmployeeDeviceToken();
+                                        $employee_device_token->employee_id = $rider->id;
+                                        $employee_device_token->employee_type_id = 2;
+                                    }
+                                    $employee_device_token->device_token = $request->get('device_token');
+                                    $employee_device_token->save();
+                                }
+
+                                //API_TOKEN
+                                if ($rider->api_token) {
+                                    $information['api_token'] = $rider->api_token;
+                                } else {
+                                    $api_token = uniqid(base64_encode(str_random(60)));
+
+                                    $rider->api_token = $api_token;
+
+                                    $rider->save();
+
+                                    $information['api_token'] = $api_token;
+                                }
+                                return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                            }
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Pending for approval']);
+                        }
+                    } elseif ($employee->employee_type_id == 3) {
+                        $retail_user = RetailUser::where('trax_id', $employee->trax_id);
+                        if ($retail_user->exists()) {
+                            $retail_user = $retail_user->first();
+
+                            if ($retail_user->category == 2) {
+                                $trax_center = RetailTraxCenter::find($retail_user->category_id);
+                            } elseif ($retail_user->category == 1) {
+                                $trax_center = RetailFranchise::find($retail_user->category_id);
+                            }
+                            if ($retail_user->status == 0) {
+                                return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                            }
+                            if ($request->input('pin') == $employee->pin) {
+                                $information['name'] = $employee->name;
+                                $information['phone'] = $employee->phone_number;
+                                $information['cnic'] = $employee->cnic;
+                                $information['address'] = $employee->address;
+                                $information['pickup_address_id'] = $trax_center->pickup_address_id;
+                                $information['role'] = 'retail_user';
+
+                                if ($employee->forget_pin_status == 1) {
+                                    $information['forget_pin_status'] = $employee->forget_pin_status;
+                                }
+
+                                //Reporting Location
+                                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id');
+                                if ($reporting_location->exists()) {
+                                    $reporting_location = $reporting_location->first();
+                                    $information['distance'] = $reporting_location->radius;
+                                    $information['lat'] = $reporting_location->lat;
+                                    $information['long'] = $reporting_location->long;
+                                } else {
+                                    $information['distance'] = 0;
+                                    $information['lat'] = 0;
+                                    $information['long'] = 0;
+                                }
+
+                                //Device Token
+                                if ($request->has('device_token')) {
+                                    $employee_device_token = EmployeeDeviceToken::where('employee_id', $retail_user->id)
+                                        ->where('employee_type_id', 3);
+                                    if ($employee_device_token->exists()) {
+                                        $employee_device_token = $employee_device_token->first();
+                                    } else {
+                                        $employee_device_token = new EmployeeDeviceToken();
+                                        $employee_device_token->employee_id = $retail_user->id;
+                                        $employee_device_token->employee_type_id = 3;
+                                    }
+                                    $employee_device_token->device_token = $request->get('device_token');
+                                    $employee_device_token->save();
+                                }
+
+                                //API_TOKEN
+                                if ($retail_user->api_token) {
+                                    $information['api_token'] = $retail_user->api_token;
+                                } else {
+                                    $api_token = uniqid(base64_encode(str_random(60)));
+
+                                    $retail_user->api_token = $api_token;
+
+                                    $retail_user->save();
+
+                                    $information['api_token'] = $api_token;
+                                }
+                                return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                            }
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Pending for approval']);
                         }
                     }
-                    else{
-                        return response()->json(['status' => 1, 'message' => 'Pending for approval']);
-                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Pending for approval']);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
@@ -3170,17 +3169,17 @@ class APIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }else{
+        } else {
             $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
-            if($employee->exists()){
+            if ($employee->exists()) {
                 $employee = $employee->first();
-                $pin = rand(1000,9999);
+                $pin = rand(1000, 9999);
                 $employee->pin = $pin;
                 $employee->forget_pin_status = 1;
                 $employee->save();
                 NotificationsController::bolt_forget_pin($employee->phone_number, $pin, $employee->name);
                 return response()->json(['status' => 0, 'forget_pin_message' => 'Pin has been sent to your registered number']);
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
             }
         }
@@ -3190,7 +3189,7 @@ class APIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'regex:/\b\d{4}\b/'],
+            'pin' => ['required', 'integer', 'digits:4'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3199,15 +3198,15 @@ class APIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }else{
+        } else {
             $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
-            if($employee->exists()){
+            if ($employee->exists()) {
                 $employee = $employee->first();
                 $employee->pin = $request->pin;
                 $employee->forget_pin_status = 0;
                 $employee->save();
                 return response()->json(['status' => 0, 'reset_pin_message' => 'Pin has been reset successfully']);
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
             }
         }
