@@ -8211,6 +8211,8 @@ class AdminDashboardController extends Controller
                         'attempt_tat'=>$request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     CityHistory::create([
@@ -8225,6 +8227,8 @@ class AdminDashboardController extends Controller
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     WalkInCities::where('city_id',$id)->delete();
@@ -8264,6 +8268,8 @@ class AdminDashboardController extends Controller
                         'attempt_tat'=>$request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     CityHistory::create([
@@ -8278,6 +8284,8 @@ class AdminDashboardController extends Controller
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     WalkInCities::where('city_id',$id)->delete();
@@ -8314,7 +8322,6 @@ class AdminDashboardController extends Controller
     }
     //update city end
     public function addCityHub(Request $request){
-        // dd($request->city_code);
         if($request->postType == 'city'){
             $zone_id = City::find($request->hubs)->zone_id;
 
@@ -8331,7 +8338,7 @@ class AdminDashboardController extends Controller
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
                 'hub_location_latitude' => $request->hub_latitude,
-                'hub_location_latitude' => $request->hub_longitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8347,6 +8354,8 @@ class AdminDashboardController extends Controller
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8404,6 +8413,8 @@ class AdminDashboardController extends Controller
                 'status'=>1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8418,6 +8429,8 @@ class AdminDashboardController extends Controller
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 

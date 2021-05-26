@@ -84,6 +84,20 @@
                 <input type="text" name="longitude" id="longitude" class="form-control longitude" placeholder="Longitude" value="{{$city->location_longitude}}">
             </fieldset>
         </div>
+    </div><div class="row">
+        <div class="col-2">
+            <h4 class="card-title font-weight-bold">Hub Location</h4>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="hub_latitude" id="latitude" class="form-control latitude" placeholder="Latitude" value="{{$city->hub_location_latitude}}">
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="hub_longitude" id="longitude" class="form-control longitude" placeholder="Longitude" value="{{$city->hub_location_longitude}}">
+            </fieldset>
+        </div>
     </div>
     <div class="row">
         <div class="col-3">
