@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\app\Http\Models\ConsigneeOTP;
+use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
@@ -105,11 +105,11 @@ class ConsigneeAPIController extends Controller
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
                 $otp_pin = rand(100000, 999999);
-                $consignee_otp = ConsigneeOTP::where('consignee_id', $consignee_info->id);
+                $consignee_otp = ConsigneeOtp::where('consignee_id', $consignee_info->id);
                 if ($consignee_otp->exists()) {
                     $consignee_otp = $consignee_otp->first();
                 } else {
-                    $consignee_otp = new ConsigneeOTP();
+                    $consignee_otp = new ConsigneeOtp();
                     $consignee_otp->consignee_id = $consignee_info->id;
                 }
                 $consignee_otp->otp = bcrypt($otp_pin);
@@ -139,7 +139,7 @@ class ConsigneeAPIController extends Controller
             $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
-                $consignee_otp = ConsigneeOTP::where('consignee_id', $consignee_info->id);
+                $consignee_otp = ConsigneeOtp::where('consignee_id', $consignee_info->id);
                 if ($consignee_otp->exists()) {
                     $consignee_otp = $consignee_otp->first();
                     if (Hash::check($request->input('otp'), $consignee_otp->otp)) {
