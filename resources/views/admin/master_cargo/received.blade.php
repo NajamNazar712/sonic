@@ -43,8 +43,7 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Total Weight</th>
-                                    <th class="border-primary border-darken-1">Junction 1</th>
-                                    <th class="border-primary border-darken-1">Junction 2</th>
+                                    <th class="border-primary border-darken-1">Junctions</th>
                                     <th class="border-primary border-darken-1">Transport Mode</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Driver Name</th>
@@ -158,8 +157,7 @@
                             head.push('Destination');
                             head.push('Shipping Mode');
                             head.push('Total Weight');
-                            head.push('Junction 1');
-                            head.push('Junction 2');
+                            head.push('Junctions');
                             head.push('Transport Mode');
                             head.push('Vendor');
                             head.push('Driver Name');
@@ -181,8 +179,7 @@
                                 row.push(values.destination);
                                 row.push(values.shipping_mode);
                                 row.push(values.actual_weight);
-                                row.push(values.junction_1);
-                                row.push(values.junction_2);
+                                row.push(values.excel_junctions);
                                 row.push(values.transport_mode);
                                 row.push(values.vendor);
                                 row.push(values.driver_name);
@@ -237,12 +234,11 @@
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'actual_weight', name: 'master_cargoes.actual_weight', class: 'align-middle actual_weight'},
-                    {data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
-                    {data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle junctions'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
                     {data: 'driver_name', name: 'master_cargoes.driver_name', class: 'align-middle driver_name'},
-                    {data: 'vehicle', name: 'master_cargoes.vehicle', class: 'align-middle vehicle'},
+                    {data: 'vehicle', name: 'f.reg_number', class: 'align-middle vehicle'},
                     {data: 'phone_number', name: 'master_cargoes.phone_number', class: 'align-middle phone_number'},
                     {data: 'transit_at', name: 'master_cargoes.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'}
@@ -266,7 +262,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.shipping_mode')){
                             $(mode_drop_select).appendTo($(search))
@@ -372,6 +368,41 @@
                         }
                     });
             });
+
+            $('#datatable tbody').on('click', 'tr td.junctions button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                $('#info_modal .modal-body').html('');
+                $.ajax({
+                    url: '{!! route('admin.master_cargo.all_junctions') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                }).done(function(data) {
+                        if (data) {
+                            var head = '';
+                            var junctions = '';
+
+                            head = '<h4 class="modal-title" id="info_modal_title">Shipment(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data, function(index, junction) {
+                                junctions += junction+'<br>';
+                            });
+
+                            $('#info_modal .modal-header').html(head);
+                            $('#info_modal .modal-body').html(junctions);
+
+                            $('#info_modal').modal('show');
+                        }
+                    });
+            });
+
+
             $('#datatable tbody').on('click', 'tr td.short_received_bags button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 

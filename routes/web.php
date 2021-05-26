@@ -1370,6 +1370,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bag_cargo_details', 'Admins\AdminMasterCargoController@create_master_cargo_details')->name('cargo_details');
             Route::post('', 'Admins\AdminMasterCargoController@master_cargo_create_store')->name('store');
         });
+        Route::post('all_junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_all_junctions')->name('all_junctions');
 
         Route::prefix('in_transit')->name('in_transit.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_index')->name('index');
@@ -1378,6 +1379,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bags')->name('bags');
             Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
             Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
+            
             Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
             Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
             Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
