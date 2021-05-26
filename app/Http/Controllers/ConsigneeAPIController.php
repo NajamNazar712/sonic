@@ -114,7 +114,7 @@ class ConsigneeAPIController extends Controller
                 }
                 $consignee_otp->otp = bcrypt($otp_pin);
                 $consignee_otp->save();
-                NotificationsController::bolt_forget_pin($consignee_info->phone_number1, $otp_pin, $consignee_info->name);
+                NotificationsController::bolt_forget_pin($consignee_info->phone_number_1, $otp_pin, $consignee_info->name);
                 return response()->json(['status' => 0, 'message' => 'OTP has been sent to your registered number']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
