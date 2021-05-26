@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class MonthAverateReportsController extends Controller
+class MonthAverageReportsController extends Controller
 {
 
 
