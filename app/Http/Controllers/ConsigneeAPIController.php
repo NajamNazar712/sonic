@@ -104,7 +104,7 @@ class ConsigneeAPIController extends Controller
             $consignee_info = ConsigneeInfo::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
-                $otp_pin = rand(100000, 999999);
+                $otp_pin = rand(1000, 9999);
                 $consignee_otp = ConsigneeOtp::where('consignee_id', $consignee_info->id);
                 if ($consignee_otp->exists()) {
                     $consignee_otp = $consignee_otp->first();
@@ -126,7 +126,7 @@ class ConsigneeAPIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'otp' => ['required', 'digits:6']
+            'otp' => ['required', 'digits:4']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
