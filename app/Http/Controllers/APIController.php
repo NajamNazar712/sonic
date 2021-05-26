@@ -2930,7 +2930,7 @@ class APIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'regex:/\b\d{4}\b/'],
+            'pin' => ['required', 'integer', 'digits:4'],
             'device_token' => ['nullable']
         ];
 
@@ -3191,7 +3191,7 @@ class APIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'regex:/\b\d{4}\b/'],
+            'pin' => ['required', 'integer', 'digits:4'],
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
