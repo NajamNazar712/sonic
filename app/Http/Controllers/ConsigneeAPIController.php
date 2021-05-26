@@ -179,4 +179,47 @@ class ConsigneeAPIController extends Controller
             }
         }
     }
+
+    public function login(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($consignee_user->exists()) {
+                $consignee_user = $consignee_user->first();
+                    if (Hash::check($request->input('pin'), $consignee_user->pin)) {
+                        $information = array();
+                        $information['name'] = $consignee_user->name;
+                        $information['phone_number'] = $consignee_user->phone_number_1;
+                        if ($consignee_user->api_token) {
+                            $information['api_token'] = $consignee_user->api_token;
+                        }
+                        else {
+                            $api_token = uniqid(base64_encode(str_random(60)));
+
+                            $consignee_user->api_token = $api_token;
+
+                            $consignee_user->save();
+
+                            $information['api_token'] = $api_token;
+                        }
+                        return response()->json(['status' => 0, 'message' => 'Login Successful', 'information' => $information]);
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+                    }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+            }
+        }
+    }
 }
