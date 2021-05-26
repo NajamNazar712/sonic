@@ -2930,7 +2930,7 @@ class APIController extends Controller
     {
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'pin' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'regex:/\b\d{4}\b/'],
             'device_token' => ['nullable']
         ];
 
