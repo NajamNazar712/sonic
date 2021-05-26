@@ -116,6 +116,7 @@ class RegisterController extends Controller
                 'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
+                'pickup_brand_name.*'=>'required|string|max:255',
                 'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
@@ -153,6 +154,7 @@ class RegisterController extends Controller
                 'product_name' => 'required_if:shipper_product_type, ==, 24',
                 'shipping_city.*'=>'required|string|max:255',
                 'pickup_address.*'=>'required|string|max:255',
+                'pickup_brand_name.*'=>'required|string|max:255',
                 'shipping_poc.*'=>'required|regex:/^[a-zA-Z ]+$/u|max:255',
                 'shipping_phone.*'=>'required|string|max:255',
                 'shipping_email.*'=>'required|string|max:255',
@@ -417,6 +419,7 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
+                    'pickup_brand_name' => $data['pickup_brand_name'][$index],
                     'default_address' => TRUE
                 ]);
 
@@ -430,6 +433,8 @@ class RegisterController extends Controller
                     'phone' => $data['shipping_phone'][$index],
                     'email' => $data['shipping_email'][$index],
                     'city_id' => $data['shipping_city'][$index],
+                    'pickup_brand_name' => $data['pickup_brand_name'][$index],
+                    
                 ]);
             }
         }

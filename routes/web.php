@@ -395,6 +395,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('', 'Shippers\ShipperTelenorController@data_conversion_store')->name('store');
         });
     });
+
+    Route::prefix('quick_search')->name('quick_search.')->group(function(){
+        Route::get('','Shippers\ShipperDashboardController@quick_search_index')->name('index');
+        Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
+    });
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -1138,7 +1143,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
-        Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
+        Route::post('list','Admins\ReturnController@return_marked_list')->name('list');
         Route::post('confirm/status','Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status','Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
@@ -1785,6 +1790,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@types_list')->name('list');
             Route::post('add','Admins\AdminPackagingMaterialController@type_add')->name('add');
+            Route::get('all_shippers','Admins\AdminPackagingMaterialController@all_shippers')->name('all_shippers');
+            Route::get('all_shippers_edit','Admins\AdminPackagingMaterialController@all_shippers_edit')->name('all_shippers_edit');
+            
             Route::post('details','Admins\AdminPackagingMaterialController@type_details')->name('details');
             Route::post('edit','Admins\AdminPackagingMaterialController@type_edit')->name('edit');
             Route::post('enable_disable','Admins\AdminPackagingMaterialController@type_enable_disable')->name('enable_disable');
@@ -1823,6 +1831,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('details', 'Admins\AdminNotificationsController@details')->name('details');
         Route::post('status', 'Admins\AdminNotificationsController@status')->name('status');
         Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+        Route::post('send_custom_notification', 'Admins\AdminNotificationsController@send_custom_notification')->name('send_custom_notification');
     });
 
     //Reports start
@@ -2946,6 +2955,10 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::get('', 'Retail\RetailShipmentBookController@tracking_slip_index')->name('index');
             Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');
             Route::post('/upload', 'Retail\RetailShipmentBookController@tracking_slip_upload')->name('upload');
+        });
+        Route::prefix('other_booking')->name('other_booking.')->group(function () {
+            Route::get('', 'Retail\RetailShipmentBookController@other_booking_index')->name('index');
+            Route::get('/list', 'Retail\RetailShipmentBookController@other_booking_list')->name('list');
         });
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {

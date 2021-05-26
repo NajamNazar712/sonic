@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 
 Route::name('api.')->group(function () {
 	Route::post('login', 'APIController@login')->name('login');
+	Route::post('user_login', 'APIController@bolt_login')->name('user_login');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');
@@ -171,6 +172,8 @@ Route::name('api.')->group(function () {
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
+                Route::post('retail_bank_info', 'Rider\RiderAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
 		});
@@ -203,10 +206,44 @@ Route::name('api.')->group(function () {
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {
-                Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
+                Route::get('retail_data', 'AdminAPIController@retail_index')->name('retail_data');
+                Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
+            });
+            Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
+
+        });
+
+    });
+
+    Route::prefix('retail_user')->name('retail_user.')->group(function() {
+        Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
+        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+
+        Route::middleware('RetailUserAPIToken')->group(function () {
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('retail_data', 'Retail\RetailAPIController@retail_index')->name('retail_data');
+                Route::post('retail_bank_info', 'Retail\RetailAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('retail_shipment_store', 'Retail\RetailAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
         });
+
+    });
+
+    Route::prefix('consignee')->name('consignee.')->group(function() {
+        Route::post('get_info', 'ConsigneeAPIController@consignee_info')->name('get_info');
+        /*Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
+        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+
+        Route::middleware('RetailUserAPIToken')->group(function () {
+            Route::prefix('retail')->name('retail.')->group(function () {
+                Route::get('retail_data', 'Retail\RetailAPIController@retail_index')->name('retail_data');
+                Route::post('retail_bank_info', 'Retail\RetailAPIController@retail_bank_info')->name('retail_bank_info');
+                Route::post('retail_shipment_store', 'Retail\RetailAPIController@retail_shipment_store')->name('retail_shipment_store');
+            });
+
+        });*/
 
     });
 

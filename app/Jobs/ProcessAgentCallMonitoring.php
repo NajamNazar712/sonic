@@ -52,10 +52,10 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                 if(count($admins) > 0){
 
                     foreach($admins as $admin_id) {
-                        $admin = Admin::find($admin_id);
+
                         $rec = array();
                         $rec['admin_id'] = $admin_id;
-                        $rec['count'] = AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
+                        $rec['count'] = AgentCallMonitoring::where('agent_id',$admin_id)->where('completed',0)->count();
                         $recs[] = $rec;
 
 
@@ -67,16 +67,17 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                         //     $agent_id=$admin->id;
                         // }
                     }
-                    $recs = collect($recs);
 
-                    $min = $recs->where('count', $recs->min('count'))->first();
+                    if(count($recs) > 0){
+                        $recs = collect($recs);
+                        $min = $recs->where('count', $recs->min('count'))->first();
+                        $agent_call_monitoring = new AgentCallMonitoring;
+                        $agent_call_monitoring->agent_id= $min['admin_id'];
+                        $agent_call_monitoring->shipment_id= $shipment_id;
+                        $agent_call_monitoring->delivery_note_id= $delivery_note->id;
+                        $agent_call_monitoring->save();
+                    }
 
-
-                    $agent_call_monitoring = new AgentCallMonitoring;
-                    $agent_call_monitoring->agent_id= $min['admin_id'];
-                    $agent_call_monitoring->shipment_id= $shipment_id;
-                    $agent_call_monitoring->delivery_note_id= $delivery_note->id;
-                    $agent_call_monitoring->save();
                 }
             }
         }
