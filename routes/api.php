@@ -239,17 +239,13 @@ Route::name('api.')->group(function () {
         Route::post('otp_verify', 'ConsigneeAPIController@consignee_otp_verification')->name('otp_verify');
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
-        /*Route::post('login_v2', 'Retail\RetailAPIController@login')->name('login_v2');
-        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
-
-        Route::middleware('RetailUserAPIToken')->group(function () {
-            Route::prefix('retail')->name('retail.')->group(function () {
-                Route::get('retail_data', 'Retail\RetailAPIController@retail_index')->name('retail_data');
-                Route::post('retail_bank_info', 'Retail\RetailAPIController@retail_bank_info')->name('retail_bank_info');
-                Route::post('retail_shipment_store', 'Retail\RetailAPIController@retail_shipment_store')->name('retail_shipment_store');
+        Route::middleware('ConsigneeAPIToken')->group(function () {
+            Route::prefix('shipments')->name('shipments.')->group(function () {
+                Route::get('active', 'ConsigneeAPIController@active_shipments')->name('active');
+//                Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
             });
 
-        });*/
+        });
 
     });
 

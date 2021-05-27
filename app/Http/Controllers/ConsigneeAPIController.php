@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\City;
 use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
@@ -221,5 +223,54 @@ class ConsigneeAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
             }
         }
+    }
+
+    public function active_shipments(Request $request)
+    {
+        $consignee_id = $request->consignee_id;
+        $consignee_info = ConsigneeUser::find($consignee_id);
+        $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id','=', 'ss.id')
+            ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
+            ->orwherein('consignee_phone_number_2', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
+            ->select('shipments.id as shipment_id','shipments.tracking_no as tracking_no','shipments.shipper_status_id as status_id','ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route' )
+            ->whereIn('shipments.shipper_status_id', [2,27,33,4,13,3,26,32,5,8,29,35,9,15,7]);
+
+        if ($consignee_shipments->exists()) {
+            $consignee_shipments = $consignee_shipments->get();
+            $data = array();
+            foreach ($consignee_shipments as $consignee_shipment){
+                $pickup_address = $consignee_shipment->pickup_address;
+                $data['shipment_id'] = $consignee_shipment->shipment_id;
+                $data['tracking_no'] = $consignee_shipment->tracking_no;
+                $data['status_id'] = $consignee_shipment->status_id;
+                $data['status'] = $consignee_shipment->status;
+                $data['amount'] = $consignee_shipment->amount;
+                $data['in_route'] = $consignee_shipment->delivery_in_route;
+                $pickup['shipper_name'] = $pickup_address->user->name;
+                $pickup['person_of_contact'] = $pickup_address->poc;
+
+                $data['latitude'] = null;
+                $data['longitude'] = null;
+
+                if ($consignee_shipment->status_id == 5){
+                    $data['latitude'] = $consignee_info->latitude;
+                    $data['longitude'] = $consignee_info->longitude;
+                }
+                else{
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
+                        ->where('shipper_status_id', $consignee_shipment->status_id)
+                        ->orderBy('id', 'DESC');
+                    if ($shipment_journey->exists()){
+                        $shipment_journey = $shipment_journey->first();
+                        $city = City::where('id', $shipment_journey->city_id)->first();
+                        $data['latitude'] = $city->location_latitude;
+                        $data['longitude'] = $city->location_longitude;
+                    }
+                }
+            }
+
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No Active Shipment Found"]);
     }
 }
