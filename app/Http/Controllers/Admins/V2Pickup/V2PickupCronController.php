@@ -41,7 +41,7 @@ class V2PickupCronController extends Controller
         self::remove_riders();
 
 
-        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereBetween('created_at', [$yesterday,$today]);
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->where('created_at', '<=', $today);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {
