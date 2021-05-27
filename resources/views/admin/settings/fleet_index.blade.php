@@ -290,8 +290,7 @@
             $('body').on('click','button.edit_fleet',function () {
             $('#editFleet').modal('show');
                var id = $(this).parents('tr').attr('id');
-            //    $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
-            //     +id+"/editfleet
+           
                 $.get( "/public/admin/settings/fleet/"+id+"/edit/form", function( data ) {
                     $("#editFleetDiv").html(data);
                 });
@@ -326,28 +325,6 @@
             });
 
 
-            // $('#runner_select_form').validate({
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //         $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-            //         swal({
-            //             title: 'Please Wait!',
-            //             text: 'Runner is being selected!',
-            //             icon: 'info',
-            //             buttons: false,
-            //             closeOnClickOutside: false,
-            //             closeOnEsc: false
-            //         });
-
-            //         form.submit();
-            //     }
-            // });
-
             
             $('#fleet_add_form').validate({
                 ignore: ":not(:visible),:disabled",
@@ -373,35 +350,10 @@
 
                     form.submit();
                 }
-                // submitHandler: function(form) {
-                //     Swal.fire({
-                //         title: 'Are You Sure?',
-                //         text: 'Select Yes to Add Fleet!',
-                //         type: 'warning',
-                //         showConfirmButton: true,
-                //         confirmButtonText: 'Yes',
-                //         showCancelButton: true,
-                //         allowOutsideClick: false,
-                //     }).then(function (confirm) {
-                //         // $('input[name="picking_ids"]').val(selected_rows);
-                //         if (confirm.value) {
-                //             Swal.fire({
-                //                 type: 'info',
-                //                 title: 'Please Wait!',
-                //                 text: 'Creating Fleet!',
-                //                 showCancelButton: false,
-                //                 showConfirmButton: false,
-                //                 allowOutsideClick: false,
-                //             });
-                //             form.submit();
-                //         }
-                //     });
-                // }
+                
             });
 
-            // $('#SelectRunnerModal').on('hide.bs.modal', function (e) {
-            //     $('#runner').val('').change();
-            // });
+            
         });
 
     </script>

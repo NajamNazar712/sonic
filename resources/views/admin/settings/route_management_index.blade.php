@@ -175,6 +175,9 @@
 
 
     <script type="text/javascript">
+
+
+    
         var index_count = 0;
         $(document).ready(function () {
             $("#starting_point_id").prepend('<option value="" selected></option>').select2({
@@ -392,7 +395,16 @@
                 }
             });
 
-            /*$('body').on('click','button.disable',function () {*/
+
+            $('body').on('click','button.edit_route_management',function () {
+            $('#editRouteManagement').modal('show');
+               var id = $(this).parents('tr').attr('id');
+           
+                $.get( "/public/admin/settings/route_management/"+id+"/edit/form", function( data ) {
+                    $("#editRouteManagementDiv").html(data);
+                });
+            });
+             /*$('body').on('click','button.disable',function () {*/
             /*$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = $(this).parents('tr').attr('id');
                 $.ajax({

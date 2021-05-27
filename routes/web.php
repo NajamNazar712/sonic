@@ -2160,6 +2160,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@fleet_enable_disable')->name('enable_disable');
             Route::get('unique', 'Admins\GlobalSettingsController@fleet_unique')->name('unique');
             Route::get('{id}/edit/form', 'Admins\GlobalSettingsController@fleet_edit')->name('edit');
+            Route::put('{id}/update', 'Admins\GlobalSettingsController@fleet_update')->name('update');
         });
 
         Route::prefix('route_management')->name('route_management.')->group(function () {
@@ -2168,6 +2169,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@route_management_store')->name('store');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@route_management_enable_disable')->name('enable_disable');
             Route::get('unique', 'Admins\GlobalSettingsController@route_management_unique')->name('unique');
+            Route::get('{id}/edit/form', 'Admins\GlobalSettingsController@route_management_edit')->name('edit');
+            Route::put('{id}/update', 'Admins\GlobalSettingsController@route_management_update')->name('update');
+
+
         });
 
 

@@ -4054,6 +4054,17 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.fleet_edit', compact('fleet','vehicles'));
 
     }
+
+    public function fleet_update(Request $request, $id)
+    {
+        $fleet = Fleet::find($id);
+        $fleet->reg_number = $request->reg_number;
+        $fleet->vehicle_type_id = $request->vehicle_select;
+        $fleet->tracking_id = $request->tracking_id;
+        $fleet->save();
+        return redirect()->back()->with('success', 'Fleet Updated successfully!');
+
+    }
     public function fleet_enable_disable(Request $request){
         $id = $request->id;
         $fleet = Fleet::find($id);
@@ -4090,6 +4101,28 @@ class GlobalSettingsController extends Controller
     
     }
 
+
+    public function route_management_edit($id){
+        $cities = City::where('status', 1)->where('hub', 1)->get();
+        $route_management = RouteManagement::find($id);
+        return view('admin.settings.route_management_edit', compact('cities','route_management'));
+    }
+
+    public function route_management_update(Request $request, $id){
+        $route_management = RouteManagement::find($id);
+        $route_management->route_code = $request->route_code;
+        $route_management->route_title = $request->route_title;
+        $route_management->starting_point_id = $request->starting_point_id;
+        $route_management->end_point_id = $request->end_point_id;
+        $route_management->save();
+        foreach ($request->junction as $key => $junction_id) {
+            $route_management_junction = RouteManagementJunction::find($key);
+            $route_management_junction->junction_id = $junction_id;
+            $route_management_junction->route_management_id = $route_management->id;
+            $route_management_junction->save();
+            }
+        return redirect()->back()->with('success', 'Route Updated successfully!');
+    }
     public function route_management_list()
     {
         
@@ -4148,6 +4181,7 @@ class GlobalSettingsController extends Controller
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
+                $dropdown .= '<button type="button" class="dropdown-item edit_route_management"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 if ($fleet->status == 0) {
                     $dropdown .= $enable;

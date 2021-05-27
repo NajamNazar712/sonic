@@ -1,7 +1,7 @@
-<form action="" method="post" class="mt-2" id="editFleetForm" novalidate="novalidate">
+<form action="{{route('admin.settings.fleet.update',['id'=>$fleet->id])}}" method="post" class="mt-2" id="editFleetForm" novalidate="novalidate">
 
     @csrf
-
+@method('put')
 <div class="row align-items-center justify-content-center">
     <div class="col-md-12">
         <div class="row justify-content-center">
@@ -34,7 +34,7 @@
     
     <div class="col-auto">
         <div class="form-group text-right my-1">
-            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="submit" class="btn btn-primary">Update</button>
         <button type="button" class="btn btn-dark btn-min-width mr-1" data-dismiss="modal">Cancel</button>
 
         </div>
@@ -56,64 +56,25 @@
                 dropdownParent:$('#editFleetForm')
             });
 
+
+                var id = @json($fleet->vehicle_type_id);
+                $('.select2').val(id).trigger('change');
+
+
         var errors = 0;
         
         $( "#editFleetForm" ).validate({
-
-
             errorClass:"danger",
             errorPlacement: function(error, element) {
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
                 // $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
                 if(errors === 1){
                     return false;
                 }else{
-                    
-
-                    swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Add Wife!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                       
-                                        form.submit();
-
-                                    }
-                                });
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    // swal({
-                    //     title: 'Please Wait!',
-                    //     text: 'City is being updated!',
-                    //     icon: 'info',
-                    //     buttons: false,
-                    //     closeOnClickOutside: false,
-                    //     closeOnEsc: false
-                    // });
-
-                    // form.submit();
+                    form.submit();
                 }
-
             }
         });
 
