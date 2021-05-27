@@ -246,8 +246,8 @@ class ConsigneeAPIController extends Controller
                 $data['status'] = $consignee_shipment->status;
                 $data['amount'] = $consignee_shipment->amount;
                 $data['in_route'] = $consignee_shipment->delivery_in_route;
-                $pickup['shipper_name'] = $pickup_address->user->name;
-                $pickup['person_of_contact'] = $pickup_address->poc;
+                /*$data['shipper_name'] = $pickup_address->user->name;
+                $data['person_of_contact'] = $pickup_address->poc;*/
 
                 $data['latitude'] = null;
                 $data['longitude'] = null;
