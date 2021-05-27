@@ -8,6 +8,7 @@ use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
@@ -232,7 +233,6 @@ class ConsigneeAPIController extends Controller
         $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
             ->wherein('shipments.shipper_status_id', [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7])
-            /*->orwherein('consignee_phone_number_2', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])*/
             ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route');
 
         if ($consignee_shipments->exists()) {
@@ -240,15 +240,15 @@ class ConsigneeAPIController extends Controller
             $data = array();
             foreach ($consignee_shipments as $consignee_shipment) {
                 $datum = array();
-                $pickup_address = $consignee_shipment->pickup_address;
+                $pickup_address = UserShippingInfo::find($consignee_shipment->pickup_address_id);
                 $datum['shipment_id'] = $consignee_shipment->shipment_id;
                 $datum['tracking_no'] = $consignee_shipment->tracking_no;
                 $datum['status_id'] = $consignee_shipment->status_id;
                 $datum['status'] = $consignee_shipment->status;
                 $datum['amount'] = $consignee_shipment->amount;
                 $datum['in_route'] = $consignee_shipment->delivery_in_route;
-                /*$data['shipper_name'] = $pickup_address->user->name;
-                $data['person_of_contact'] = $pickup_address->poc;*/
+                $data['shipper_name'] = $pickup_address->user->name;
+                $data['person_of_contact'] = $pickup_address->poc;
 
                 $datum['latitude'] = null;
                 $datum['longitude'] = null;
