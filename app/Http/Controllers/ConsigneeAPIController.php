@@ -239,22 +239,23 @@ class ConsigneeAPIController extends Controller
             $consignee_shipments = $consignee_shipments->get();
             $data = array();
             foreach ($consignee_shipments as $consignee_shipment) {
+                $datum = array();
                 $pickup_address = $consignee_shipment->pickup_address;
-                $data['shipment_id'] = $consignee_shipment->shipment_id;
-                $data['tracking_no'] = $consignee_shipment->tracking_no;
-                $data['status_id'] = $consignee_shipment->status_id;
-                $data['status'] = $consignee_shipment->status;
-                $data['amount'] = $consignee_shipment->amount;
-                $data['in_route'] = $consignee_shipment->delivery_in_route;
+                $datum['shipment_id'] = $consignee_shipment->shipment_id;
+                $datum['tracking_no'] = $consignee_shipment->tracking_no;
+                $datum['status_id'] = $consignee_shipment->status_id;
+                $datum['status'] = $consignee_shipment->status;
+                $datum['amount'] = $consignee_shipment->amount;
+                $datum['in_route'] = $consignee_shipment->delivery_in_route;
                 /*$data['shipper_name'] = $pickup_address->user->name;
                 $data['person_of_contact'] = $pickup_address->poc;*/
 
-                $data['latitude'] = null;
-                $data['longitude'] = null;
+                $datum['latitude'] = null;
+                $datum['longitude'] = null;
 
                 if ($consignee_shipment->status_id == 5) {
-                    $data['latitude'] = $consignee_info->latitude;
-                    $data['longitude'] = $consignee_info->longitude;
+                    $datum['latitude'] = $consignee_info->latitude;
+                    $datum['longitude'] = $consignee_info->longitude;
                 } else {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
                         ->where('shipper_status_id', $consignee_shipment->status_id)
@@ -262,10 +263,11 @@ class ConsigneeAPIController extends Controller
                     if ($shipment_journey->exists()) {
                         $shipment_journey = $shipment_journey->first();
                         $city = City::where('id', $shipment_journey->city_id)->first();
-                        $data['latitude'] = $city->location_latitude;
-                        $data['longitude'] = $city->location_longitude;
+                        $datum['latitude'] = $city->location_latitude;
+                        $datum['longitude'] = $city->location_longitude;
                     }
                 }
+                $data[] = $datum;
             }
 
             return response()->json(['status' => 0, 'data' => $data]);
