@@ -3073,7 +3073,7 @@ class AdminPickupsController extends Controller
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id != $rider_id){
-
+                    $pickup_request->rider_status = 2;
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = $global_admin_id;
                     $pickup_request->save();

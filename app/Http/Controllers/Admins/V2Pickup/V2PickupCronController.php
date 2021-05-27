@@ -36,49 +36,45 @@ class V2PickupCronController extends Controller
         $today->setTime($arrival_cut_off_time,0,0);
         $yesterday->setTime($arrival_cut_off_time,0,1);
 
-        $now = Carbon::now();
-        V2PickupNote::where('status', 0)->where('updated_at', '<', $today)->update(['status' => 1]);
-        V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->whereBetween('updated_at', [$yesterday,$today])->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
+        V2PickupNote::where('status', 0)->update(['status' => 1]);
 
-        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereBetween('created_at', [$yesterday,$today]);
+        self::remove_riders();
 
+
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->where('created_at', '<=', $today);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
-
-            foreach ($pickup_requests as $key => $pickup_request) {
+            foreach ($pickup_requests as $pickup_request) {
                 $pickup_request_shipments = $pickup_request->pickup_request_shipments->pluck('shipment_id')->toArray();
                 $cancelled_shipments_count = Shipment::whereIn('id', $pickup_request_shipments)->where('shipper_status_id', 17)->count();
 
                 if ($cancelled_shipments_count == $pickup_request->booked) {
                     $pickup_request->status_id = 4;
                     $pickup_request->save();
-
-                    unset($pickup_requests[$key]);
-
                     continue;
                 }
-                else if ($pickup_request->status_id != 3) {
+
+                $now = Carbon::now();
+                if($pickup_request->status_id != 3){
                     $pickup_request->status_id = 3;
                     $pickup_request->save();
                 }
-            }
-
-            $pickup_request_with_attempts = array();
-            $pickup_request_without_attempts = array();
-
-            foreach ($pickup_requests as $pickup_request) {
-                $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereBetween('attempt_date', [$yesterday, $today]);
-
-                if($pickup_request_attempt->exists()) {
-                    $pickup_request_with_attempts[] = $pickup_request_attempt->latest('id')->first();
-                }
-                else {
-                    $pickup_request_without_attempts[] = $pickup_request;
-                }
-            }
-
-            if (!empty($pickup_request_without_attempts)) {
-                foreach ($pickup_request_without_attempts as $pickup_request) {
+                $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereBetween('attempt_date', [$yesterday,$today]);
+                if($pickup_request_attempt->exists()){
+                    $pickup_request_attempt = $pickup_request_attempt->latest('id')->first();
+                    if($pickup_request_attempt->reason_id == null){
+                        $pickup_request_attempt->reason_id = 7;
+                        $pickup_request_attempt->save();
+                    }
+                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request->id);
+                    if($pickup_note_request->exists()){
+                        $pickup_note_request = $pickup_note_request->latest('id')->first();
+                        if($pickup_note_request->status == 0){
+                            $pickup_note_request->status = 1;
+                            $pickup_note_request->save();
+                        }
+                    }
+                }else{
                     $pickup_request->attempts = $pickup_request->attempts + 1;
                     $pickup_request->save();
 
@@ -89,36 +85,22 @@ class V2PickupCronController extends Controller
                     $pickup_request_attempt->attempt_date = $now;
                     $pickup_request_attempt->assigned_by = $global_admin_id;
                     $pickup_request_attempt->save();
+                    $auto_generate_pickup_ids[] = $pickup_request->id;
+                }
 
-                    AdminPickupsController::auto_pickup_assign($pickup_request->id);
+            }
+
+            if(count($auto_generate_pickup_ids) > 0){
+                foreach ($auto_generate_pickup_ids as $pickup_request_id){
+                    AdminPickupsController::auto_pickup_assign($pickup_request_id);
                 }
             }
 
-            if (!empty($pickup_request_with_attempts)) {
-                foreach ($pickup_request_with_attempts as $pickup_request_attempt) {
-                    if ($pickup_request_attempt->reason_id == null) {
-                        $pickup_request_attempt->reason_id = 7;
-                        $pickup_request_attempt->save();
-                    }
-                    $pickup_note_request = V2PickupNoteRequest::where('pickup_request_id', $pickup_request_attempt->pickup_request_id);
-                    if ($pickup_note_request->exists()) {
-                        $pickup_note_request = $pickup_note_request->latest('id')->first();
-                        if ($pickup_note_request->status == 0) {
-                            $pickup_note_request->status = 1;
-                            $pickup_note_request->save();
-                        }
-                    }
-                }
-            }
-
-
-
-            self::remove_riders($today);
         }
     }
 
-    static public function remove_riders($today){
-        V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->where('updated_at', '<', $today)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
+    static public function remove_riders(){
+        V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
     }
     static public function cancel_if_not_valid(){
         $pickup_requests = V2PickupRequest::where('status_id', 1);
@@ -198,22 +180,22 @@ class V2PickupCronController extends Controller
 
     static public function pickup_delete_duplicate_shipments(){
         $pickup_requests = V2PickupRequest::whereIn('status_id',[1,3]);
-        if ($pickup_requests->exists()) {
-            $pickup_requests = $pickup_requests->get();
+            if ($pickup_requests->exists()) {
+                $pickup_requests = $pickup_requests->get();
 
-            foreach ($pickup_requests as $pickup_request) {
-                $shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->distinct('shipment_id')->pluck('shipment_id')->toArray();
+                foreach ($pickup_requests as $pickup_request) {
+                    $shipment_ids = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->distinct('shipment_id')->pluck('shipment_id')->toArray();
 
-                if (count($shipment_ids) > 0) {
-                    foreach ($shipment_ids as $shipment_id) {
-                        $id = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->first()->id;
-                        if($id){
-                            V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->where('id', '!=', $id)->delete();
-                        }
+                    if (count($shipment_ids) > 0) {
+                        foreach ($shipment_ids as $shipment_id) {
+                            $id = V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->first()->id;
+                            if($id){
+                                V2PickupRequestShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id)->where('id', '!=', $id)->delete();
+                            }
+                         }
                     }
-                }
-            }
-        }
+               }
+           }
         self::pickup_shipment_reset_count();
     }
     static public function pickup_shipment_reset_count(){
