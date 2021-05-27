@@ -215,6 +215,9 @@
             $('#route_management_add_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
@@ -234,42 +237,46 @@
                 }
             });
 
-            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            //     if ( this.context.length ) {
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.settings.route_management.list') }}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
-            //                 head.push('S.No');
-            //                 head.push('Runner');
-            //                 head.push('Created At');
-            //                 head.push('Created By');
-            //                 head.push('Status');
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.settings.route_management.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Route Code');
+                            head.push('Route Title');
+                            head.push('Starting Point');
+                            head.push('End Point');
+                            head.push('Junctions');
+                            head.push('Status');
 
-            //                 $.each(result.data, function(index, values) {
-            //                     row = [];
+                            $.each(result.data, function(index, values) {
+                                row = [];
 
 
-            //                     row.push(index + 1);
-            //                     row.push(values.runner);
-            //                     row.push(values.created_at);
-            //                     row.push(values.created_by);
-            //                     row.push(values.status);
+                                row.push(index + 1);
+                                row.push(values.route_code);
+                                row.push(values.route_title);
+                                row.push(values.starting_name);
+                                row.push(values.end_name);
+                                row.push(values.excel_junctions);
+                                row.push(values.status);
 
-            //                     body.push(row);
-            //                 });
-            //             },
-            //             async: false
-            //         });
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
 
-            //         return {body: body, header: head};
-            //     }
-            // } );
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',

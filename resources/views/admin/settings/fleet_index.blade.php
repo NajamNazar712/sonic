@@ -17,6 +17,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Registration Number</th>
                         <th class="border-primary border-darken-1">Vehicle Type</th>
+                        <th class="border-primary border-darken-1">Tracking ID</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -56,8 +57,13 @@
                         <div class="form-group col-md">
                             <input type="text" name="vehicle_type_name" id="vehicle_type_name" class="form-control" placeholder="New Vehicle Type" data-rule-required="true" data-msg-required="Vehicle Type is required">
                         </div>
-                    </div>
+                        </div>
                    </div>
+                   <div class="row justify-content-center">
+                        <div class="col-12 form-group">
+                            <input type="text" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
+                        </div>
+                    </div>
                    
                </div>
                <div class="modal-footer">
@@ -169,6 +175,7 @@
                             head.push('S.No');
                             head.push('Registration Number');
                             head.push('Vehicle Type');
+                            head.push('Tracking ID');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -178,6 +185,7 @@
                                 row.push(index + 1);
                                 row.push(values.reg_number);
                                 row.push(values.vehicle_type_id);
+                                row.push(values.tracking_id);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -226,6 +234,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'reg_number', name: 'fleets.reg_number', class: 'align-middle text-center reg_number'},
                     {data: 'vehicle_type_id', name: 'vehicle_type_id', class: 'align-middle text-center vehicle_type_id'},
+                    {data: 'tracking_id', name: 'tracking_id', class: 'align-middle text-center tracking_id'},
                     {data: 'status', name: 'fleets.status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
@@ -278,7 +287,15 @@
                     this.api().table().columns.adjust();
                 }
             });
-            
+            $('body').on('click','button.edit_fleet',function () {
+            $('#editFleet').modal('show');
+               var id = $(this).parents('tr').attr('id');
+            //    $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
+            //     +id+"/editfleet
+                $.get( "/public/admin/settings/fleet/"+id+"/edit/form", function( data ) {
+                    $("#editFleetDiv").html(data);
+                });
+       });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
@@ -338,6 +355,9 @@
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');

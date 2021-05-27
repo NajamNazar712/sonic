@@ -2159,6 +2159,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@fleet_store')->name('store');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@fleet_enable_disable')->name('enable_disable');
             Route::get('unique', 'Admins\GlobalSettingsController@fleet_unique')->name('unique');
+            Route::get('{id}/edit/form', 'Admins\GlobalSettingsController@fleet_edit')->name('edit');
         });
 
         Route::prefix('route_management')->name('route_management.')->group(function () {
