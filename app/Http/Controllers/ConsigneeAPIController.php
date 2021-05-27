@@ -241,7 +241,6 @@ class ConsigneeAPIController extends Controller
             foreach ($consignee_shipments as $consignee_shipment) {
                 $datum = array();
                 $pickup_address = $consignee_shipment->pickup_address;
-                return response()->json([$pickup_address]);
                 $datum['shipment_id'] = $consignee_shipment->shipment_id;
                 $datum['tracking_no'] = $consignee_shipment->tracking_no;
                 $datum['status_id'] = $consignee_shipment->status_id;
