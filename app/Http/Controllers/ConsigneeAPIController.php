@@ -234,7 +234,7 @@ class ConsigneeAPIController extends Controller
         $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
             ->wherein('shipments.shipper_status_id', [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7])
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id');
 
         if ($consignee_shipments->exists()) {
             $consignee_shipments = $consignee_shipments->get();
