@@ -8,6 +8,7 @@ use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeUser;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -241,13 +242,14 @@ class ConsigneeAPIController extends Controller
             foreach ($consignee_shipments as $consignee_shipment) {
                 $datum = array();
                 $pickup_address = UserShippingInfo::find($consignee_shipment->pickup_address_id);
+                $user = User::find($pickup_address->user_id);
                 $datum['shipment_id'] = $consignee_shipment->shipment_id;
                 $datum['tracking_no'] = $consignee_shipment->tracking_no;
                 $datum['status_id'] = $consignee_shipment->status_id;
                 $datum['status'] = $consignee_shipment->status;
                 $datum['amount'] = $consignee_shipment->amount;
                 $datum['in_route'] = $consignee_shipment->delivery_in_route;
-                $data['shipper_name'] = $pickup_address->user->name;
+                $data['shipper_name'] = $user->name;
                 $data['person_of_contact'] = $pickup_address->poc;
 
                 $datum['latitude'] = null;
