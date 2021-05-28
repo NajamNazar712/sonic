@@ -284,14 +284,18 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if (session('role_id') == 1 || in_array(504, session('permissions')))
+                        {
+                            text: '<i class="la la-plus"></i> Add Route',
+                            className: 'btn btn-primary add_route_management',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddRouteManagementModal').modal('show');
+                            }
+                        },
+                    @endif
+                    
                     {
-                        text: '<i class="la la-plus"></i> Add Route',
-                        className: 'btn btn-primary add_route_management',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddRouteManagementModal').modal('show');
-                        }
-                    },{
                         extend: 'excel',
                         title: 'Route Management',
                         text: '<i class="la la-file-excel-o"></i> Excel',

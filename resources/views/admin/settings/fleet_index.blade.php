@@ -203,15 +203,19 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                    {
-                        text: '<i class="la la-plus"></i> Add Fleet',
-                        className: 'btn btn-primary add_fleet',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddFleetModal').modal('show');
+                    @if (session('role_id') == 1 || in_array(503, session('permissions')))
 
-                        }
-                    },{
+                        {
+                            text: '<i class="la la-plus"></i> Add Fleet',
+                            className: 'btn btn-primary add_fleet',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddFleetModal').modal('show');
+
+                            }
+                        },
+                    @endif    
+                    {
                         extend: 'excel',
                         title: 'Fleet Management',
                         text: '<i class="la la-file-excel-o"></i> Excel',
