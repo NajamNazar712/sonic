@@ -321,11 +321,10 @@ class ConsigneeAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else {
+        } else {
             $shipment_info = array();
             $shipment = Shipment::where('id', $request->shipment_id);
-            if($shipment->exists()){
+            if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $shipment_info['tracking_no'] = $shipment->tracking_number;
                 $shipment_info['origin'] = $shipment->consignee_city->name;
@@ -340,14 +339,51 @@ class ConsigneeAPIController extends Controller
                 if ($consignee_shipments_journey->exists()) {
                     $consignee_shipments_journey = $consignee_shipments_journey->get();
                     return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => $consignee_shipments_journey]);
-                }else{
+                } else {
                     return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => ""]);
                 }
 
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => "Shipment History Not Found"]);
             }
 
+        }
+    }
+
+    public function update_profile(Request $request)
+    {
+        $consignee_id = $request->consignee_id;
+        $rules = [
+            'phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'phone_number_updated' => ['required'],
+            'pin' => ['nullable', 'integer', 'digits:4'],
+            'name' => ['nullable'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_info = ConsigneeUser::where('id', $consignee_id);
+            if ($consignee_info->exists()) {
+                $consignee_info = $consignee_info - first();
+                if ($request->has('name')) {
+                    $consignee_info->name = $request->name;
+                }
+                if ($request->has('phone_number') && $request->phone_number_updated == 1) {
+                    $consignee_info->phone_number_2 = $request->phone_number;
+                }
+                if ($request->has('pin')) {
+                    $consignee_info->pin = bcrypt($request->pin);
+                }
+                $consignee_info->save();
+                return response()->json(['status' => 1, 'profile_message' => 'Profile Updated Successfully']);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
+            }
         }
     }
 }

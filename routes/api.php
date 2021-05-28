@@ -241,6 +241,7 @@ Route::name('api.')->group(function () {
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
         Route::post('shipment_history', 'ConsigneeAPIController@shipment_history')->name('shipment_history');
         Route::middleware('ConsigneeAPIToken')->group(function () {
+            Route::get('update_profile', 'ConsigneeAPIController@update_profile')->name('update_profile');
             Route::prefix('shipments')->name('shipments.')->group(function () {
                 Route::get('active', 'ConsigneeAPIController@active_shipments')->name('active');
                 Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
