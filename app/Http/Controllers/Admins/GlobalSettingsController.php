@@ -3981,7 +3981,11 @@ class GlobalSettingsController extends Controller
 
     public function fleet_list()
     {
-        $fleet = Fleet::all();
+        // $fleet = Fleet::all();
+        $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
+            ->select(['fleets.id', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type']);
+                // ->select();
+
         $datatable = Datatables::of($fleet)
             ->editColumn('status', function ($fleet) {
                 if ($fleet->status == 1) {
@@ -3990,10 +3994,10 @@ class GlobalSettingsController extends Controller
                     return 'Disable';
                 }
             })
-            ->editColumn('vehicle_type_id', function ($fleet) {
+            // ->editColumn('vehicle_type_id', function ($fleet) {
                 
-                    return $fleet->vehicle_type->name;
-            })
+            //         return $fleet->vehicle_type->name;
+            // })
             ->addColumn('action', function ($fleet) {
                 $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
@@ -4109,6 +4113,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function route_management_update(Request $request, $id){
+        
         $route_management = RouteManagement::find($id);
         $route_management->route_code = $request->route_code;
         $route_management->route_title = $request->route_title;
@@ -4120,6 +4125,15 @@ class GlobalSettingsController extends Controller
             $route_management_junction->junction_id = $junction_id;
             $route_management_junction->route_management_id = $route_management->id;
             $route_management_junction->save();
+            }
+
+            if(isset($request->new_junction)){
+                foreach ($request->new_junction as $key => $value) {
+                    $route_management_junction = new RouteManagementJunction;
+                    $route_management_junction->junction_id = $value;
+                    $route_management_junction->route_management_id = $route_management->id;
+                    $route_management_junction->save();
+                    }
             }
         return redirect()->back()->with('success', 'Route Updated successfully!');
     }

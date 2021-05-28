@@ -310,14 +310,14 @@
                 autoWidth: false,
                 ajax: '{{ route('admin.settings.route_management.list') }}',
                 rowId: 'id',
-                order: [[2, 'desc']],
+                order: [[0, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'route_code', name: 'route_managements.route_code', class: 'align-middle text-center route_code'},
                     {data: 'route_title', name: 'route_managements.route_title', class: 'align-middle text-center route_title'},
                     {data: 'starting_id', name: 'stp.id', class: 'align-middle text-center starting_point'},
                     {data: 'end_id', name: 'endp.id', class: 'align-middle text-center end_point'},
-                    {data: 'junctions', name: 'junctions', class: 'align-middle text-left junctions'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle text-left junctions', orderable: false},
                     {data: 'status', name: 'route_managements.status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

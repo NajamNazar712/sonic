@@ -65,10 +65,15 @@
             </div>
             
         </div>
-        <div id="junctions">
+        <div id="edit_junctions">
 
         </div>
-
+        <div class="row justify-content-center">
+            <button type="button" class="btn btn-outline-success mr-1" title="Add more junctions" id="edit_add_junction"><i class="la la-plus"></i>Add Junction</button>
+        </div>
+        <div class="row justify-content-center">
+            <p class="danger">Note: please add junctions in sequence!</p>
+        </div>
         
     </div>
     
@@ -105,7 +110,29 @@
                         width:'100%',
                         dropdownParent:$('#editRouteManagementForm')
             });
+            var row = 1;
+            $('#editRouteManagementDiv #editRouteManagementForm #edit_add_junction').on('click', function(){
+
+               var html = '<div class="row justify-content-center">\n' +
+                   '                            <div class="col-6 form-group">\n' +
+                   '                                <select class="form-control edit_junctions" name="new_junction[' + row + ']" id="new_junction_' + row + '" data-rule-required="true" data-msg-required="Junction ' + row + ' is required">\n' +
+                   '                                    @foreach($cities as $city)\n' +
+                   '                                        <option value="{{$city->id}}">{{$city->name}}</option>\n' +
+                   '                                    @endforeach\n' +
+                   '                                </select>\n' +
+                   '                            </div>\n' +
+                   '                        </div>';
+
+                $('#edit_junctions').append(html);
                 
+                $("#new_junction_" + row).prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select Junction " + row,
+                    width:'100%',
+                    dropdownParent:$('#editRouteManagementForm')
+                });
+                console.log(html);
+                row++;
+            });
 
 
                 var starting_point_id = @json($route_management->starting_point_id);

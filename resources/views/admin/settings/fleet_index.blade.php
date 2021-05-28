@@ -145,6 +145,7 @@
             $('#vehicle_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
                 width: '100%',
                 placeholder: 'Select Vehicle Type*',
+                dropdownParent:$('#fleet_add_form')
             }).bind('change', function() {
                 if ($(this).val() === 'other') {
                     $('#other_picker_name_div').removeClass('d-none');
@@ -232,10 +233,10 @@
                 order: [[0, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'reg_number', name: 'fleets.reg_number', class: 'align-middle text-center reg_number'},
-                    {data: 'vehicle_type_id', name: 'vehicle_type_id', class: 'align-middle text-center vehicle_type_id'},
+                    {data: 'reg_number', name: 'reg_number', class: 'align-middle text-center reg_number'},
+                    {data: 'vehicle_type', name: 'vt.name', class: 'align-middle text-center vehicle_type_id'},
                     {data: 'tracking_id', name: 'tracking_id', class: 'align-middle text-center tracking_id'},
-                    {data: 'status', name: 'fleets.status', class: 'align-middle text-center status'},
+                    {data: 'status', name: 'status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
                 ],
