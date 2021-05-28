@@ -242,7 +242,7 @@ Route::name('api.')->group(function () {
         Route::middleware('ConsigneeAPIToken')->group(function () {
             Route::prefix('shipments')->name('shipments.')->group(function () {
                 Route::get('active', 'ConsigneeAPIController@active_shipments')->name('active');
-//                Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
+                Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
             });
 
         });
