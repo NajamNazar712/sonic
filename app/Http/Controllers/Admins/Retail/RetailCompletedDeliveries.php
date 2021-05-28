@@ -39,10 +39,11 @@ class RetailCompletedDeliveries extends Controller
             ->leftjoin('riders as r', 'retail_pickup_notes.rider_id', '=', 'r.id')
             ->join('admins as a', 'a.id', '=', 'retail_pickup_notes.assigned_by')
             ->join('admins as cc', 'cc.id', '=', 'retail_pickup_notes.cash_collected_by')
-            ->join('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
+            ->leftjoin('retail_users as ru', 'ru.id', '=', 'retail_pickup_notes.retail_user_id')
             ->leftJoin('retail_franchises as rf', 'rf.id', '=', 'ru.category_id')
             ->leftJoin('retail_trax_centers as rc', 'rc.id', '=', 'ru.category_id')
-            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at'])
+            ->leftjoin('retail_trax_centers as rtc', 'rtc.pickup_address_id', '=', 'retail_pickup_notes.pickup_address_id')
+            ->select(['retail_pickup_notes.id', 'retail_pickup_notes.id as retail_pickup_note_id', 'oc.id as hub_id', 'oc.name as hub','r.name as rider','a.name as assignee',  'retail_pickup_notes.assigned_at as assigned_at', 'retail_pickup_notes.shipments as shipment_count', 'retail_pickup_notes.amount as amount','rf.name as franchise','rf.code as franchise_code','rc.name as center','rc.code as center_code','ru.category as category','cc.name as collected_by','retail_pickup_notes.cash_collected_at', 'rtc.name as retail_trax_center_name', 'rtc.code as retail_trax_center_code'])
             ->where('retail_pickup_notes.status', 4)
             ->where('retail_pickup_notes.pncc_status', '=', 0);
 
@@ -62,19 +63,27 @@ class RetailCompletedDeliveries extends Controller
                 }
             })
             ->addColumn('store', function ($user) {
-                if($user->category == 1){
-                    return $user->franchise;
-                }
-                else{
-                    return $user->center;
+                if($user->category){
+                    if($user->category == 1){
+                        return $user->franchise;
+                    }
+                    else{
+                        return $user->center;
+                    }
+                }else{
+                    return $user->retail_trax_center_name;
                 }
             })
             ->editColumn('code', function ($user) {
-                if($user->category == 1){
-                    return $user->franchise_code;
-                }
-                else{
-                    return $user->center_code;
+                if($user->category){
+                    if($user->category == 1){
+                        return $user->franchise_code;
+                    }
+                    else{
+                        return $user->center_code;
+                    }
+                }else{
+                    return $user->retail_trax_center_code;
                 }
             });
         if ($tracking_number = $request->get('search_tracking')) {

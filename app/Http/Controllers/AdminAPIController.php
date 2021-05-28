@@ -143,6 +143,21 @@ class AdminAPIController extends Controller
                         $employee_device_token->save();
                     }
 
+                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                        ->join('admins as a', 'e.id', 'a.employee_id')
+                        ->where('a.id', $user->id);
+
+                    if ($reporting_location->exists()) {
+                        $reporting_location = $reporting_location->first();
+                        $information['distance'] = $reporting_location->radius;
+                        $information['lat'] = $reporting_location->lat;
+                        $information['long'] = $reporting_location->long;
+                    }else{
+                        $information['distance'] = 0;
+                        $information['lat'] = 0;
+                        $information['long'] = 0;
+                    }
+
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
                     } else {
@@ -376,6 +391,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->action_date = $attendance_datetime;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
                 $admin_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
@@ -392,6 +408,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->action_date = $attendance_datetime;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
                 $admin_attendance_action->save();
                 return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
             }
@@ -417,7 +434,7 @@ class AdminAPIController extends Controller
             $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                 ->whereDate('action_date', $request->attendance_date)
                 ->where('employee_type', 1)
-                ->select('action_id', 'action_date', 'latitude', 'longitude')
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status')
                 ->orderBy('action_date', 'ASC');
             if ($admin_attendance_action->exists()) {
                 $admin_attendance_action = $admin_attendance_action->get();
