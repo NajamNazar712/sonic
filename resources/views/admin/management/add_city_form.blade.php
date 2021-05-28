@@ -69,7 +69,7 @@
 
     <div class="row">
         <div class="col-2">
-            <h4 class="card-title font-weight-bold">Forwarding Point</h4>
+            <h4 class="card-title font-weight-bold">Location</h4>
         </div>
         <div class="col">
             <fieldset class="form-group">
