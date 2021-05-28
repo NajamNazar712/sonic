@@ -149,8 +149,8 @@ class Kernel extends ConsoleKernel
         }
 
         if ($daily_pickup_sales_cron_time) {
-            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time);
-            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time);
+            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
         }
 
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
@@ -253,7 +253,7 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
             $zero_charges_report_time = $settings->setting_value . ':00';
-            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
+            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time)->runInBackground();
         }
 //        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
 //
@@ -263,9 +263,9 @@ class Kernel extends ConsoleKernel
 //            $station_recovery_cron_time = $settings->setting_value . ':00';
 //            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
-        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
-        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00');
-        $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
+        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($settings->exists()) {
