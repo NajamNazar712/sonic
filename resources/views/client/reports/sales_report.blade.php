@@ -131,6 +131,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Product Category</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -393,6 +394,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Payment Status');
+                            head.push('Payment ID');
                             head.push('Service Type');
                             head.push('Product Category');
                             head.push('Description');
@@ -429,6 +431,7 @@
                                 row.push(values.current_status);
                                 row.push(values.reason_name);
                                 row.push(values.payment_status);
+                                row.push(values.payment_id);
                                 row.push(values.service_type);
                                 row.push(values.product_name);
                                 row.push(values.description);
@@ -491,7 +494,7 @@
                         d.dr_search_date_to = $('input[name="dr_search_date_to_formatted"]').val();
                     }
                 },
-                order: [[16, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -506,6 +509,7 @@
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'},
                     { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
+                    { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     { data:'description', name: 'si.description', class: 'align-middle description'},
