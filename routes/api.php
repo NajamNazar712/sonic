@@ -239,6 +239,7 @@ Route::name('api.')->group(function () {
         Route::post('otp_verify', 'ConsigneeAPIController@consignee_otp_verification')->name('otp_verify');
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
+        Route::post('shipment_history', 'ConsigneeAPIController@shipment_history')->name('shipment_history');
         Route::middleware('ConsigneeAPIToken')->group(function () {
             Route::prefix('shipments')->name('shipments.')->group(function () {
                 Route::get('active', 'ConsigneeAPIController@active_shipments')->name('active');

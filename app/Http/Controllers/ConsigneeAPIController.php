@@ -309,7 +309,7 @@ class ConsigneeAPIController extends Controller
         return response()->json(['status' => 1, 'message' => "No Active Shipment Found"]);
     }
 
-    /*public function shipment_history(Request $request)
+    public function shipment_history(Request $request)
     {
         $rules = [
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id']
@@ -321,32 +321,33 @@ class ConsigneeAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {}
+        }
+        else {
+            $shipment_info = array();
+            $shipment = Shipment::where('id', $request->shipment_id);
+            if($shipment->exists()){
+                $shipment = $shipment->first();
+                $shipment_info['tracking_no'] = $shipment->tracking_number;
+                $shipment_info['origin'] = $shipment->consignee_city->name;
+                $shipment_info['destination'] = $shipment->pickup_address->city->name;
+                $shipment_info['shipper'] = $shipment->pickup_address->user->name;
+                $shipment_info['amount'] = $shipment->amount;
 
-        $consignee_id = $request->consignee_id;
-        $consignee_info = ConsigneeUser::find($consignee_id);
-        $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
-            ->select('shipments_journey.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id');
+                $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
+                    ->where('shipments_journey.shipment_id', $request->shipment_id)
+                    ->select('shipments_journey.shipper_status_id as status_id', 'ss.name as status', 'shipments_journey.created_at as created_at')
+                    ->orderBy('id', 'DESC');
+                if ($consignee_shipments_journey->exists()) {
+                    $consignee_shipments_journey = $consignee_shipments_journey->get();
+                    return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => $consignee_shipments_journey]);
+                }else{
+                    return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => ""]);
+                }
 
-        if ($consignee_shipments->exists()) {
-            $consignee_shipments = $consignee_shipments->get();
-            $data = array();
-            foreach ($consignee_shipments as $consignee_shipment) {
-                $datum = array();
-                $pickup_address = UserShippingInfo::find($consignee_shipment->pickup_address_id);
-                $user = User::find($pickup_address->user_id);
-                $datum['shipment_id'] = $consignee_shipment->shipment_id;
-                $datum['tracking_no'] = $consignee_shipment->tracking_no;
-                $datum['status_id'] = $consignee_shipment->status_id;
-                $datum['status'] = $consignee_shipment->status;
-                $datum['amount'] = $consignee_shipment->amount;
-                $datum['shipper_name'] = $user->name;
-                $datum['person_of_contact'] = $pickup_address->poc;
-                $data[] = $datum;
+            }else{
+                return response()->json(['status' => 1, 'message' => "Shipment History Not Found"]);
             }
 
-            return response()->json(['status' => 0, 'data' => $data]);
         }
-        return response()->json(['status' => 1, 'message' => "No Active Shipment Found"]);
-    }*/
+    }
 }
