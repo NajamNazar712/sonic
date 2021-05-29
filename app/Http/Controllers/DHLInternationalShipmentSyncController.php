@@ -92,8 +92,14 @@ class DHLInternationalShipmentSyncController extends Controller
                                 if($intl_shipment){
                                     $shipment = $intl_shipment->shipment;
                                     $shipper_status_id = $shipment->shipper_status_id;
-                                    $international_shipment_status = $international_shipment->status->statusCode;
-                                    $international_shipment_description = $international_shipment->status->description;
+                                    $international_shipment_status = NULL;
+                                    $international_shipment_description = NULL;
+                                    if(isset($international_shipment->status->statusCode)){
+                                        $international_shipment_status = $international_shipment->status->statusCode;
+                                    }
+                                    if(isset($international_shipment->status->description)){
+                                        $international_shipment_description = $international_shipment->status->description;
+                                    }
                                     if(in_array($international_shipment_description, $arrival_status)){
                                         if($shipper_status_id == 1){
                                             (new self)->shipment_picked($shipment->id);
