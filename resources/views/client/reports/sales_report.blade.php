@@ -377,6 +377,10 @@
                     params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('cod.reports.sales.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -481,6 +485,10 @@
                 serverSide: true,
                 ajax:{
                     url: '{{ route('cod.reports.sales.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
@@ -508,8 +516,8 @@
                     { data:'consignee_phone_number_2' ,name: 'shipments.consignee_phone_number_2', class: 'align-middle consignee_phone_number_2'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'},
-                    { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
-                    { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
+                    { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
+                    { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                     { data:'description', name: 'si.description', class: 'align-middle description'},
