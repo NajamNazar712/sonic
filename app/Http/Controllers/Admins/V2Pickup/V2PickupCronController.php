@@ -19,6 +19,8 @@ class V2PickupCronController extends Controller
         V2PickupNote::where('status', 0)->update(['status' => 1]);
 
         V2PickupRequest::whereIn('status_id', [1, 3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
+
+        V2PickupRequest::whereIn('status_id', [1, 3])->where('rider_status', 1)->where('current_rider_id', '!=', NULL)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL]);
     }
 
     static public function auto_pickup_assign() {
