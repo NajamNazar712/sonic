@@ -44,11 +44,11 @@
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Closed Date</th>
                                     <th class="border-primary border-darken-1">Launched To Closed (TAT)</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -93,6 +93,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.crm.closed.list') }}',
                         data: params,
@@ -110,11 +111,11 @@
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Channel');
-                            head.push('Complaint Re-Open Date');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
+                            head.push('Complaint Re-Open Date');
                             head.push('Closed Date');
                             head.push('Launched To Closed (TAT)');
 
@@ -132,11 +133,11 @@
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
                                 row.push(values.channel);
-                                row.push(values.reopen_date);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.reopen_date);
                                 row.push(values.closed_date);
                                 row.push(values.total_tat);
 
@@ -289,7 +290,7 @@
                 },
                 deferLoading: 0,
                 rowId: 'id',
-                order: [[15, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -303,11 +304,11 @@
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'closed_date', name: 'res.created_at', class: 'align-middle closed_date'},
                     {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
