@@ -369,7 +369,7 @@ class ConsigneeAPIController extends Controller
         } else {
             $consignee_info = ConsigneeUser::where('id', $consignee_id);
             if ($consignee_info->exists()) {
-                $consignee_info = $consignee_info - first();
+                $consignee_info = $consignee_info->first();
                 if ($request->has('name')) {
                     $consignee_info->name = $request->name;
                 }
