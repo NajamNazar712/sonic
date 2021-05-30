@@ -62,11 +62,19 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Insurance</th>
+                        <th class="border-primary border-darken-1">Insured</th>
                         <th class="border-primary border-darken-1">Charges</th>
+                        <th class="border-primary border-darken-1">Insurance</th>
                         <th class="border-primary border-darken-1">Date</th>
                     </tr>
                     </thead>
+                    <tfoot align="right">
+                    <tr>
+                        <th colspan="5"></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </tfoot>
                 </table>
 
             </div>
@@ -78,7 +86,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header text-center">
-                    <h4 class="modal-title w-100 font-weight-bold">View Charges</h4>
+                    <h4 class="modal-title w-100 font-weight-bold">Insurance Charges</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -101,6 +109,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+
     <style>
         table.dataTable {
             font-size: 12px;
@@ -147,6 +157,10 @@
             width: auto !important;
             text-align: left;
         }
+        table tfoot tr th, table.dataTable tfoot tr th {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
     </style>
 @endsection
 
@@ -160,29 +174,36 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.22/api/sum().js" type="text/javascript"></script>
 
-    {{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
         $(document).ready(function () {
 
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
+                    blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.sdn.list') }}',
+                        url: '{{ route('admin.reports.shipper_insurance.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
+                            footer = [];
+
                             head.push('S.No');
                             head.push('Tracking Number');
                             head.push('Shipper');
+                            head.push('Insured');
                             head.push('Insurance');
                             head.push('Date');
+
+                            var insurance_count = 0;
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -191,17 +212,30 @@
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
                                 row.push(values.insurance);
+                                row.push(values.total_insurance);
                                 row.push(values.created_at);
-                              
+
                                 body.push(row);
+                                insurance_count+=values.total_shipments
+
                             });
+
+
+                            footer.push('');
+                            footer.push('Total');
+                            footer.push('-');
+                            footer.push('-');
+                            footer.push(insurance_count);
+                            footer.push('-');
+                           
                         },
                         async: false
                     });
+                    UnblockPagePermanently();
 
-                    return {body: body, header: head};
+                    return {body: body, header: head, footer: footer};
                 }
-            } );
+            });
 
             var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
@@ -230,6 +264,7 @@
                     }
                 }
             });
+
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -260,13 +295,14 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[5, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number_link', class: 'align-middle text-center tracking_number_link'},
-                    { data:'name' ,name: 'name', class: 'align-middle text-center name'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
                     { data:'insurance' ,name: 'insurance', class: 'align-middle text-center insurance'},
-                    {data: 'charges', name: 'si.price', class: 'align-middle charges'},
+                    {data: 'charges', name: 'si.price', class: 'align-middle text-center charges'},
+                    {data: 'total_insurance', name: 'total_insurance', class: 'align-middle text-center total_insurance'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at text-center'},
 
                 ],
@@ -275,11 +311,41 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
+                "footerCallback": function ( row, data, start, end, display ) {
+                    var api = this.api(), data;
+
+                    // converting to interger to find total
+                    var intVal = function ( i ) {
+                        return typeof i === 'string' ?
+                            i.replace(/[\$,]/g, '')*1 :
+                            typeof i === 'number' ?
+                                i : 0;
+                    };
+
+                    var insurance_count = api
+                        .column( 5 )
+                        .data()
+                        .reduce( function (a, b) {
+                            return intVal(a) + intVal(b);
+                        }, 0 );
+
+
+                    // Update footer by showing the total with the reference of the column index
+                    $( api.column( 0 ).footer() ).html('Total');
+                    $( api.column( 1 ).footer() ).html();
+                    $( api.column( 2 ).footer() ).html();
+                    $( api.column( 3 ).footer() ).html();
+                    $( api.column( 4 ).footer() ).html();
+                    $( api.column( 5 ).footer() ).html(insurance_count);
+
+                },
+
                 initComplete: function() {
 
                     this.api().table().columns.adjust();
-                }
+                },
             });
+
 
             $('#track_form #shipper_name').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Shipper Name',
@@ -322,39 +388,6 @@
                 table.draw();
             });
 
-          /*  $('body').on('click','.charges', function (e) {
-
-                var tracking_number = table.row( $(this).parents('tr') ).data().tracking_number;
-                alert("hello");
-                $.ajax({
-                    url: '{!! route('admin.reports.shipper_insurance.charges') !!}',
-                    method: 'POST',
-                    data: {
-                        'tracking_number': tracking_number,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    console.log(data);
-                    if(data.status === 1){
-                        var html = '';
-                        html += '<table class="table table-sm datatable text-center">';
-                        html += '<thead><tr><th>S No.</th><th><strong>Item</strong></th><th><strong>Insurance</strong></th><th><strong>Price</strong></th></tr></thead>';
-                        html += '<tbody>';
-                        $.each(data.charges, function(index, value) {
-                            var ind = index+1;
-                            html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.sku + '</td>';
-                            html += '<td>' + value.sku_id + '</td>';
-                            html += '<td>' + value.quantity + '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-
-                        $('#ViewSKUModal .modal-body').html(html);
-                        $('#ViewSKUModal').modal('show');
-                       
-                    }
-                });
-            });*/
             $('#datatable tbody').on('click', 'tr td.charges button', function() {
                 var tracking_number = table.row($(this).parents('tr')).data().tracking_number;
 
@@ -368,28 +401,38 @@
                 }).done(function (data) {
 
                     if (data.status === 1) {
-                        console.log(1);
+
                         var html = '';
                         html += '<table class="table table-sm datatable text-center">';
-                        html += '<thead><tr><th>S No.</th><th><strong>Item</strong></th><th><strong>Insurance</strong></th><th><strong>Price</strong></th></tr></thead>';
+                        html += '<thead><tr><th>S No.</th><th><strong>Shipping Mode</strong></th><th><strong>Range Up</strong></th><th><strong>Range Down</strong></th><th><strong>Charges</strong></th></tr></thead>';
                         html += '<tbody>';
-                        $.each(data.charges, function (index, value) {
+                        $.each(data.insurance_charges, function (index, value) {
                             var ind = index + 1;
                             html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.id + '</td>';
-                            if(value.insurance === 1){
-                                html += '<td>Yes</td>';
+                            if(value.shipping_mode_id === 1){
+                                html += '<td>Overnight</td>';
+                            }
+                            else if(value.shipping_mode_id === 2){
+                                html += '<td>Overland</td>';
+                            }
+                            else if(value.shipping_mode_id === 3){
+                                html += '<td>Detain</td>';
                             }
                             else{
-                                html += '<td>No</td>';
+                                html += '<td>Same-day</td>';
                             }
-                            html += '<td>' + value.price + '</td></tr>';
+                            html += '<td>' + value.range_up + '</td>';
+                            html += '<td>' + value.range_down + '</td>';
+                            html += '<td>' + value.charges + '</td></tr>';
                         });
                         html += '</tbody></table>';
 
                         $('#ViewSKUModal .modal-body').html(html);
                         $('#ViewSKUModal').modal('show');
 
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });
             });

@@ -16,7 +16,10 @@ use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\Excel_reports\Debriefing;
+use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentItem;
@@ -8502,7 +8505,7 @@ class AdminReportsController extends Controller
 
         $shipments = Shipment::join('users as u','shipments.user_id','=','u.id')
             ->join('shipment_items as si','si.shipment_id','=','shipments.id')
-            ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number as tracking_number','u.name','shipments.insurance_charges','shipments.created_at','si.insurance','si.price as price')
+            ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number as tracking_number','u.name as shipper','shipments.insurance_charges','shipments.created_at','si.insurance','si.price as price',DB::raw('sum(si.price) as total_insurance'))
             ->groupBy('tracking_number');
 
         $datatables = Datatables::of($shipments)
@@ -8515,9 +8518,11 @@ class AdminReportsController extends Controller
                 }else{
                     return 'Yes';
                 }
-            })
+            }) 
             ->addColumn('charges', function ($shipments){
-                return '<div class="text-center"><button type="button" class="btn btn-primary btn-sm charges"><i class="fas fa-dollar-sign"></i> Charges</button></div>';
+                return '<div class="text-center">
+                                <button type="button" class="btn btn-primary btn-sm"><a class="white" ><i class="la la-dollar align-middle"></i></a></button>
+                        </div>';
             });
 
         if($shipper_id = $request->get('shipper_name')){
@@ -8540,15 +8545,26 @@ class AdminReportsController extends Controller
 
         if($tracking_number){
             $shipment = Shipment::where('tracking_number',$tracking_number)->first();
-            $charges = array();
-
-            foreach($shipment->items as $insurance){
-                $charges[] = $insurance;
-            }
-            $total_insurance = ShipmentItem::where('shipment_id',$shipment->id)->sum('price');
-
-            return response()->json(['status' => 1,'charges'=>$charges,'total_insurance' => $total_insurance]);
+            $user = User::find($shipment->user_id);
             
+            if($user->account_type->id == 1){
+                $insurance_charges = InsuranceCharge::where('user_id',$user->id);
+
+            }
+            else if($user->account_type->id == 2){
+                $insurance_charges = CorporateInsuranceCharge::where('user_id',$user->id);
+            }
+            else{
+                $insurance_charges = CorporateDefaultInsuranceCharge::where('user_id',$user->id);
+            }
+            if($insurance_charges->exists()){
+                $insurance_charges = $insurance_charges->get();
+                return response()->json(['status' => 1,'insurance_charges' => $insurance_charges]);
+            }
+            else{
+                return response()->json(['status' => 0,'error' => 'No Charges Found!']);
+            }
+
         }
     }
 }
