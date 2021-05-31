@@ -7383,7 +7383,7 @@ class NotificationsController extends Controller
     static public function trax_otp_verification($phone_number, $pin)
     {
         $body = "Dear Consignee,
-                 Your OTP for Trax is: [pin]";
+ Your OTP for Trax is: [pin]";
         if (strpos($body, '[pin]') !== FALSE) {
             $body = str_replace('[pin]', $pin, $body);
         }

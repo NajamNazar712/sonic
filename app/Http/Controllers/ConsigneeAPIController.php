@@ -383,7 +383,7 @@ class ConsigneeAPIController extends Controller
                     $consignee_info->pin = bcrypt($request->pin);
                 }
                 $consignee_info->save();
-                return response()->json(['status' => 1, 'profile_message' => 'Profile Updated Successfully']);
+                return response()->json(['status' => 0, 'profile_message' => 'Profile Updated Successfully']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }
