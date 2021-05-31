@@ -116,6 +116,8 @@ Route::name('api.')->group(function () {
 
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
+
+                Route::post('pickup_in_route', 'Rider\RiderAPIController@pickup_in_route')->name('pickup_in_route');
 	        });
 
             Route::prefix('location')->name('location.')->group(function(){
@@ -133,6 +135,7 @@ Route::name('api.')->group(function () {
                 Route::get('summary/multiple_v4', 'Rider\RiderAPIController@delivery_summary_multiple_v4')->name('delivery_summary_multiple_v4');
                 Route::post('undelivered_v2', 'Rider\RiderAPIController@shipment_undelivered_v2')->name('undelivered_v2');
                 Route::post('delivered_v2', 'Rider\RiderAPIController@shipment_delivered_v2')->name('delivered_v2');
+                Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');

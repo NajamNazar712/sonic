@@ -1518,6 +1518,8 @@ class RiderAPIController extends Controller
             if (!V2RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 1)->where('added_at', $added_at)->exists()) {
                 if (V2PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                     $pickup_request = V2PickupRequest::find($request->pickup_request_id);
+                    $pickup_request->pickup_in_route = 0;
+                    $pickup_request->save();
                     $pickup_address = $pickup_request->pickup_address;
 
                     $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
@@ -3550,6 +3552,7 @@ class RiderAPIController extends Controller
                                 $shipment->shipper_status_id = $request->shipper_status_id;
                                 $shipment->consignee_status_id = $request->status_reason_id;
                                 $shipment->open_box = $request->open_box;
+                                $shipment->delivery_in_route = 0;
                                 $shipment->save();
 
                                 $remarks = NULL;
@@ -3633,6 +3636,7 @@ class RiderAPIController extends Controller
                     $pickup_address = $pickup_request->pickup_address;
 
                     $pickup_request->status_id = 3;
+                    $pickup_request->pickup_in_route = 0;
                     $pickup_request->save();
                     $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
                     $pickup_request_attempt->reason_id = $request->reason_id;
@@ -7365,6 +7369,7 @@ class RiderAPIController extends Controller
                                     self::delivery_packaging_material_update($shipment->tracking_number);
                                 }*/
                             }
+                            $shipment->delivery_in_route = 0;
                             $shipment->save();
                         }
                         $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
@@ -7659,6 +7664,54 @@ class RiderAPIController extends Controller
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
+
+    }
+
+    public function delivery_in_route(Request $request){
+        $rules = [
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment = Shipment::where('id', $request->shipment_id);
+            if($shipment->exists()){
+                $shipment = $shipment->first();
+                $shipment->delivery_in_route = 1;
+                $shipment->save();
+                return response()->json(['status' => 0, 'message' => 'Delivery In-Route Successfully']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Delivery In-Route Failed']);
+        }
+
+    }
+
+    public function pickup_in_route(Request $request){
+        $rules = [
+            'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_requests,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $pickup_request = V2PickupRequest::where('id', $request->pickup_request_id);
+            if($pickup_request->exists()){
+                $pickup_request = $pickup_request->first();
+                $pickup_request->pickup_in_route = 1;
+                $pickup_request->save();
+                return response()->json(['status' => 0, 'message' => 'Pickup In-Route Successfully']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Pickup In-Route Failed']);
+        }
 
     }
 
