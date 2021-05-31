@@ -557,7 +557,7 @@ class ShipperPackagingMaterialController extends Controller
             }
         }
         if(count($shipper->packaging_materails) > 0){
-            foreach ($shipper->packaging_materails as  $value) {
+            foreach ($shipper->packaging_materails as $value) {
                 if($value->packaging_material->picture != NULL){
                     $pictures[$value->packaging_material->id] = Storage::url('packaging_pictures/' . $value->packaging_material->picture);
                 }
