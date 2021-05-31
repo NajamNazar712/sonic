@@ -362,6 +362,7 @@ class V2AdminPickupsController extends Controller
                     $riders['old_rider_id'] = $pickup_request->current_rider_id;
                     $riders['new_rider_id'] = $rider_id;
 
+                    $pickup_request->rider_status = 2;
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
