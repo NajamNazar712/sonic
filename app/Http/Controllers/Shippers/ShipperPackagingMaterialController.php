@@ -561,13 +561,14 @@ class ShipperPackagingMaterialController extends Controller
                 $pictures[$packaging_type->id] = 'img/trax_logo.png';
             }
         }
-
-        foreach ($shipper->packaging_materails as  $value) {
-            if($value->packaging_material->picture != NULL){
-                $pictures[$value->packaging_material->id] = Storage::url('packaging_pictures/' . $value->packaging_material->picture);
-            }
-            else{
-                $pictures[$value->packaging_material->id] = 'img/trax_logo.png';
+        if($shipper){
+            foreach ($shipper->packaging_materails as  $value) {
+                if($value->packaging_material->picture != NULL){
+                    $pictures[$value->packaging_material->id] = Storage::url('packaging_pictures/' . $value->packaging_material->picture);
+                }
+                else{
+                    $pictures[$value->packaging_material->id] = 'img/trax_logo.png';
+                }
             }
         }
 
