@@ -950,10 +950,10 @@ class Permission
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,
             'debriefing.agents_call_monitoring.list' => 496,
-            'fleet.index' => 498,
-            'fleet.list' => 503,
-            'route_management.index' => 499,
-            'route_management.list' => 504,
+            'settings.fleet.index' => 498,
+            'settings.fleet.list' => 503,
+            'settings.route_management.index' => 499,
+            'settings.route_management.list' => 504,
 
 
 
