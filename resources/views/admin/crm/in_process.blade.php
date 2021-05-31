@@ -52,7 +52,7 @@
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
-                                    <th class="border-primary border-darken-1">Special Request</th>
+                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
                                     <th class="border-primary border-darken-1">Tagged At</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
@@ -184,6 +184,25 @@
                         <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
                         <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="modal fade" id="ViewRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Special Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+
+                </div>
+                <div class="modal-footer d-flex justify-content-end">
+                    <button class="btn btn-grey" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -602,7 +621,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
-                    {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},
+                  /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
@@ -1151,7 +1170,7 @@
                 }).done(function (data) {
 
                     if (data.status === 1) {
-
+                        console.log(data);
                         var html = '';
                         html += '<table class="table table-sm datatable text-center">';
                         html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th></tr></thead>';
@@ -1159,14 +1178,13 @@
                         $.each(data.admin, function (index, value) {
                             var ind = index + 1;
                             html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.admin + '</td>';
+                            html += '<td>' + value + '</td>';
 
                         });
                         html += '</tbody></table>';
 
-                        $('#ViewSKUModal .modal-body').html(html);
-                        $('#ViewSKUModal').modal('show');
-
+                        $('#ViewRequestModal .modal-body').html(html);
+                        $('#ViewRequestModal').modal('show');
                     }
                     else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
