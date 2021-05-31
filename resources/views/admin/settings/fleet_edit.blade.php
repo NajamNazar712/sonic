@@ -11,7 +11,7 @@
         </div>
         <div class="row justify-content-center">
             <div class="col-12 form-group">
-             <select class="form-control select2" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
+             <select class="form-control" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
                  @foreach($vehicles as $vehicle)
                             <option value="{{$vehicle->id}}">{{$vehicle->name}}</option>
                  @endforeach
@@ -50,7 +50,7 @@
     $(document).ready(function () {
 
 
-        $('.select2').prepend('<option value="" selected="selected"></option>').select2({
+        $('#vehicle_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Vehicle*',
                 dropdownParent:$('#editFleetForm')
@@ -58,7 +58,7 @@
 
 
                 var id = @json($fleet->vehicle_type_id);
-                $('.select2').val(id).trigger('change');
+                $('#vehicle_select').val(id).trigger('change');
 
 
         var errors = 0;
@@ -68,6 +68,9 @@
             errorPlacement: function(error, element) {
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
+            normalizer: function(value) {
+                    return $.trim(value);
+                },
             submitHandler: function(form) {
                 // $(form).find('button[type=submit]').attr('disabled', 'disabled');
                 if(errors === 1){

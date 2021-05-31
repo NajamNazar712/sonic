@@ -336,7 +336,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    var status_select = '<select name="status_select" id="status_select" class="form-control">' +
                         '<option value="1">Enabled</option>' +
                         '<option value="0">Disabled</option>' +
                         '</select>';

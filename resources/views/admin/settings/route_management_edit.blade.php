@@ -48,7 +48,7 @@
             @endphp
                 @foreach ($route_management->junctions as $item)
 
-                    <select class="form-control junctions" name="junction[{{$item->id}}]" id="junction_{{$item->id}}" data-rule-required="true" data-msg-required="Junction 1 is required">
+                    <select class="form-control junctions_select" name="junction[{{$item->id}}]" id="junction_{{$item->id}}" data-rule-required="true" data-msg-required="Junction 1 is required">
                         @foreach($cities as $city)
                             @if ($item->junction_id == $city->id)
                             <option value="{{$city->id}}" selected>{{$city->name}}</option>
@@ -105,7 +105,7 @@
                 dropdownParent:$('#editRouteManagementForm')
             });
             
-            $(".junctions").select2({
+            $(".junctions_select").select2({
                         placeholder: "Select Junction 1",
                         width:'100%',
                         dropdownParent:$('#editRouteManagementForm')
@@ -149,6 +149,9 @@
             errorPlacement: function(error, element) {
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
+            normalizer: function(value) {
+                    return $.trim(value);
+                },
             submitHandler: function(form) {
                 // $(form).find('button[type=submit]').attr('disabled', 'disabled');
                 if(errors === 1){

@@ -46,7 +46,7 @@
                    </div>
                    <div class="row justify-content-center">
                        <div class="col-12 form-group">
-                        <select class="form-control select2" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
+                        <select class="form-control" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
                             @foreach($vehicles as $vehicle)
                                 <option value="{{$vehicle->id}}">{{$vehicle->name}}</option>
                             @endforeach
@@ -254,7 +254,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    var status_select = '<select name="status_select" id="status_select" class="status_select form-control">' +
                         '<option value="1">Enabled</option>' +
                         '<option value="0">Disabled</option>' +
                         '</select>';
@@ -292,21 +292,27 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('body').on('click','button.edit_fleet',function () {
-            $('#editFleet').modal('show');
-               var id = $(this).parents('tr').attr('id');
-           
+
+        $("#editFleet").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+            var id = $(e.relatedTarget).data('target-id');
+            
+
+            if(action == 'edit_fleet'){
                 $.get( "/admin/settings/fleet/"+id+"/edit/form", function( data ) {
                     $("#editFleetDiv").html(data);
                 });
-       });
+            }
+        });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+           
+
+            $('#datatable tbody').on('click', 'tr td.action button.status', function() {
 
                 var id = table.row( $(this).parents('tr') ).data().id;
 
-                console.log(id);
-
+            
                 if ($(this).hasClass('status')) {
                     $.ajax({
                         url: '{!! route('admin.settings.fleet.enable_disable') !!}',
@@ -316,8 +322,8 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function(data) {
-                        console.log(data);
                         if (data.status) {
+
                             table.draw(true);
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
@@ -360,6 +366,9 @@
 
             
         });
+
+   
+        
 
     </script>
 @endsection

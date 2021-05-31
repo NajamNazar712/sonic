@@ -4006,7 +4006,7 @@ class GlobalSettingsController extends Controller
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-                 $dropdown .= '<button type="button" class="dropdown-item edit_fleet"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                 $dropdown .= '<button type="button" class="dropdown-item edit_fleet" data-target-id=' . $fleet->id . ' rel="edit_fleet"  data-toggle="modal" data-target="#editFleet"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 if ($fleet->status == 0) {
                     $dropdown .= $enable;
