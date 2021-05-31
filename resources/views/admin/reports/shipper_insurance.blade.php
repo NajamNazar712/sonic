@@ -68,13 +68,13 @@
                         <th class="border-primary border-darken-1">Date</th>
                     </tr>
                     </thead>
-                    <tfoot align="right">
+                   {{-- <tfoot align="right">
                     <tr>
                         <th colspan="5"></th>
                         <th></th>
                         <th></th>
                     </tr>
-                    </tfoot>
+                    </tfoot>--}}
                 </table>
 
             </div>
@@ -187,7 +187,7 @@
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
-                    params.length = -1;
+                  /*  params.length = -1;*/
                     params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.shipper_insurance.list') }}',
@@ -203,8 +203,7 @@
                             head.push('Insurance');
                             head.push('Date');
 
-                            var insurance_count = 0;
-
+                           
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -216,18 +215,15 @@
                                 row.push(values.created_at);
 
                                 body.push(row);
-                                insurance_count+=values.total_shipments
-
                             });
 
-
-                            footer.push('');
+                            footer.push('-');
+                            footer.push('-');
+                            footer.push('-');
                             footer.push('Total');
-                            footer.push('-');
-                            footer.push('-');
                             footer.push(insurance_count);
                             footer.push('-');
-                           
+
                         },
                         async: false
                     });
@@ -265,7 +261,7 @@
                 }
             });
 
-
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: false, scrollY: '500px',
@@ -275,6 +271,7 @@
                         title: 'Shipper Insurance Report',
                         className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        footer: true
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -311,39 +308,51 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                "footerCallback": function ( row, data, start, end, display ) {
-                    var api = this.api(), data;
-
-                    // converting to interger to find total
-                    var intVal = function ( i ) {
-                        return typeof i === 'string' ?
-                            i.replace(/[\$,]/g, '')*1 :
-                            typeof i === 'number' ?
-                                i : 0;
-                    };
-
-                    var insurance_count = api
-                        .column( 5 )
-                        .data()
-                        .reduce( function (a, b) {
-                            return intVal(a) + intVal(b);
-                        }, 0 );
-
-
-                    // Update footer by showing the total with the reference of the column index
-                    $( api.column( 0 ).footer() ).html('Total');
-                    $( api.column( 1 ).footer() ).html();
-                    $( api.column( 2 ).footer() ).html();
-                    $( api.column( 3 ).footer() ).html();
-                    $( api.column( 4 ).footer() ).html();
-                    $( api.column( 5 ).footer() ).html(insurance_count);
-
-                },
-
                 initComplete: function() {
 
                     this.api().table().columns.adjust();
                 },
+                footerCallback: function(row, data, start, end, display) {
+                    var api = this.api();
+                    api.columns('.serial_number', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html();
+                    }); api.columns('.tracking_number_link', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html();
+                    }); api.columns('.shipper', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html();
+                    }); api.columns('.insurance', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html();
+                    }); api.columns('.charges', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html('Total');
+                    });
+                    api.columns('.total_insurance', {
+                        page: 'current'
+                    }).every(function() {
+                        insurance_count = this
+                            .data()
+                            .reduce(function(a, b) {
+                                var x = parseFloat(a) || 0;
+                                var y = parseFloat(b) || 0;
+                                return x + y;
+                            }, 0);
+                        $(this.footer()).html(insurance_count);
+                    });
+                    api.columns('.created_at', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html();
+                    });
+                }
             });
 
 
