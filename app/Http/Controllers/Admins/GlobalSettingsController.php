@@ -4180,7 +4180,7 @@ class GlobalSettingsController extends Controller
 
                 
                     foreach ($junctions as $value) {
-                        $junction_data.= $value->junction->name.'  ';
+                        $junction_data.= $value->junction->name.' , ';
 
                     }
                     return $junction_data;
