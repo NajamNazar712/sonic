@@ -523,12 +523,7 @@ class ShipperPackagingMaterialController extends Controller
     public function packaging_request_cart_index(){
 
         $shipper = User::find(Auth::id());
-        // foreach ($shipper->packaging_materails as  $value) {
-        //     # code...
-        //     dump($value->packaging_material);
-        //     // dump($value->packaging_material->sizes);
-        // }
-        // dd();
+        
         if(session('foc_account') == 1){
             $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
         }
@@ -561,13 +556,14 @@ class ShipperPackagingMaterialController extends Controller
                 $pictures[$packaging_type->id] = 'img/trax_logo.png';
             }
         }
-
-        foreach ($shipper->packaging_materails as  $value) {
-            if($value->packaging_material->picture != NULL){
-                $pictures[$value->packaging_material->id] = Storage::url('packaging_pictures/' . $value->packaging_material->picture);
-            }
-            else{
-                $pictures[$value->packaging_material->id] = 'img/trax_logo.png';
+        if(count($shipper->packaging_materails) > 0){
+            foreach ($shipper->packaging_materails as  $value) {
+                if($value->packaging_material->picture != NULL){
+                    $pictures[$value->packaging_material->id] = Storage::url('packaging_pictures/' . $value->packaging_material->picture);
+                }
+                else{
+                    $pictures[$value->packaging_material->id] = 'img/trax_logo.png';
+                }
             }
         }
 
