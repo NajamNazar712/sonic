@@ -57,7 +57,7 @@ return [
 
     'from' => [
         'address' => 'info@trax.pk',
-        'name' => 'Trax Logistics',
+        'name' => 'TRAX',
     ],
 
     /*

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\MonthAverateReportsController;
+use App\Http\Controllers\Admins\MonthAverageReportsController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -45,7 +45,7 @@ class MonthAverageRM extends Command
         $regional_managers = DB::connection('reports')->table('admins')->whereIn('role_id', [31,44])->where('status', 1)->select('id', 'name')->get();
         if(count($regional_managers) > 0){
             foreach ($regional_managers as $regional_manager){
-                $response = MonthAverateReportsController::month_average_rm($date . ' 00:00:00', $regional_manager->id);
+                $response = MonthAverageReportsController::month_average_rm($date . ' 00:00:00', $regional_manager->id);
                 NotificationsController::send(125, $regional_manager->id, $response);
             }
         }
