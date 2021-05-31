@@ -45,11 +45,11 @@
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
                                     <th class="border-primary border-darken-1">Resolved Date</th>
                                     <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
@@ -137,11 +137,11 @@
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Channel');
-                            head.push('Complaint Re-Open Date');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
+                            head.push('Complaint Re-Open Date');
                             head.push('Resolved By');
                             head.push('Resolved Date');
                             head.push('In-Process To Resolved (TAT)');
@@ -163,11 +163,11 @@
                                 row.push(values.case_nature_type);
                                 row.push(values.descr);
                                 row.push(values.channel);
-                                row.push(values.reopen_date);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.reopen_date);
                                 row.push(values.resolved_by);
                                 row.push(values.resolved_date);
                                 row.push(values.in_process_resolved_tat);
@@ -413,7 +413,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -427,11 +427,11 @@
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
                     {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
                     {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},

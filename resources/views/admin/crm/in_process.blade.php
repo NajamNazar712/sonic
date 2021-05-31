@@ -47,7 +47,6 @@
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
-                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
@@ -55,6 +54,7 @@
                                     <th class="border-primary border-darken-1">Tagged To</th>
                                     <th class="border-primary border-darken-1">Tagged At</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
                                     <th class="border-primary border-darken-1">Valid Date</th>
@@ -238,13 +238,13 @@
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Channel');
-                            head.push('Complain Re-OPen Date');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
                             head.push('Launched Date');
+                            head.push('Complaint Re-Open Date');
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
                             head.push('Valid Date');
@@ -270,13 +270,13 @@
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
                                 row.push(values.channel);
-                                row.push(values.reopen_date);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
+                                row.push(values.reopen_date);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
                                 row.push(values.valid_date);
@@ -579,7 +579,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[20, 'desc']],
+                order: [[21, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -596,7 +596,6 @@
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
-                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
@@ -604,6 +603,7 @@
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},

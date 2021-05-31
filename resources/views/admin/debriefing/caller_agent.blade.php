@@ -143,7 +143,13 @@
                                                 @csrf
                                                 <input type="hidden" name="call_id" id="call_id" value="{{$call->id}}">
                                                 <div class="row justify-content-center">
-                                                    <div class="col-4">
+                                                    <div class="col-2">
+                                                        <fieldset class="form-group">
+                                                            <input type="checkbox" name="fake_status" id="fake_status">
+                                                            <label for="fake_status">Fake Status</label>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-3">
                                                         <fieldset class="form-group">
                                                             <select name="status" id="status" class="form-control select2" data-rule-required="true" data-msg-required="Status is Required">
                                                                 @foreach($statuses as $status)
@@ -152,14 +158,14 @@
                                                             </select>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col-4">
+                                                    <div class="col-3">
                                                         <fieldset class="form-group">
                                                             <select name="reason" id="reasons" class="form-control select2">
                                                                 <option value=""></option>
                                                             </select>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col-4">
+                                                    <div class="col-3">
                                                         <fieldset class="form-group">
                                                             <textarea class="form-control" name="remarks" placeholder="Remarks"></textarea>
                                                         </fieldset>

@@ -509,9 +509,9 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                        var tracking = $("#add_shipment_form #tracking_number").val();
+                        var tracking = $.trim($("#add_shipment_form #tracking_number").val());
 
-                        if (confirm) {
+                        if (tracking) {
                             $.ajax({
 
                                 url:'{!! route('admin.delivery.note.shipment.info') !!}',

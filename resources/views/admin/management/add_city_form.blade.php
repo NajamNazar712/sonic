@@ -82,6 +82,21 @@
             </fieldset>
         </div>
     </div>
+    <div class="row">
+        <div class="col-2">
+            <h4 class="card-title font-weight-bold">Hub Location</h4>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="hub_latitude" id="latitude" class="form-control latitude" placeholder="Latitude">
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="hub_longitude" id="longitude" class="form-control longitude" placeholder="Longitude">
+            </fieldset>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-3">

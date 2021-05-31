@@ -4294,6 +4294,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
                 $rider_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
@@ -4310,6 +4311,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
                 $rider_attendance_action->save();
                 return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $rider_attendance_action]);
             }
@@ -4335,7 +4337,7 @@ class RiderAPIController extends Controller
             $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
                 ->whereDate('action_date', $request->attendance_date)
                 ->where('employee_type', 2)
-                ->select('action_id', 'action_date', 'latitude', 'longitude')
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status')
                 ->orderBy('action_date', 'ASC');
             if ($rider_attendance_action->exists()) {
                 $rider_attendance_action = $rider_attendance_action->get();
@@ -4882,6 +4884,20 @@ class RiderAPIController extends Controller
                         }
                         $employee_device_token->device_token = $request->get('device_token');
                         $employee_device_token->save();
+
+                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                            ->join('riders as r', 'e.id', 'r.employee_id')
+                            ->where('r.id', $rider->id);
+                        if ($reporting_location->exists()) {
+                            $reporting_location = $reporting_location->first();
+                            $information['distance'] = $reporting_location->radius;
+                            $information['lat'] = $reporting_location->lat;
+                            $information['long'] = $reporting_location->long;
+                        }else{
+                            $information['distance'] = 0;
+                            $information['lat'] = 0;
+                            $information['long'] = 0;
+                        }
 
                         if ($rider->api_token) {
                             $information['api_token'] = $rider->api_token;

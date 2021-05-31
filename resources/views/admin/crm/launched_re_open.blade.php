@@ -271,7 +271,7 @@
                             head.push('Description');
                             head.push('Channel');
                             head.push('Request Status');
-                            head.push('Request Re-Open Date');
+                            head.push('Complaint Re-Open Date');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
@@ -623,7 +623,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[19, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
