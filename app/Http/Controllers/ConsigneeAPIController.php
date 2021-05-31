@@ -265,9 +265,12 @@ class ConsigneeAPIController extends Controller
                         ->orderBy('id', 'DESC');
                     if ($shipment_journey->exists()) {
                         $shipment_journey = $shipment_journey->first();
-                        $city = City::where('id', $shipment_journey->city_id)->first();
-                        $datum['latitude'] = $city->location_latitude;
-                        $datum['longitude'] = $city->location_longitude;
+                        $city = City::where('id', $shipment_journey->city_id);
+                        if($city->exists()){
+                            $city = $city->first();
+                            $datum['latitude'] = $city->location_latitude;
+                            $datum['longitude'] = $city->location_longitude;
+                        }
                     }
                 }
                 $data[] = $datum;
