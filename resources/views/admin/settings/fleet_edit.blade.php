@@ -26,7 +26,7 @@
         </div>
         <div class="row justify-content-center">
              <div class="col-12 form-group">
-                 <input type="text" value="{{$vehicle->tracking_id}}" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
+                 <input type="text" value="{{$fleet->tracking_id}}" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
              </div>
          </div>
         

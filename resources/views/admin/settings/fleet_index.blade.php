@@ -185,7 +185,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.reg_number);
-                                row.push(values.vehicle_type_id);
+                                row.push(values.vehicle_type);
                                 row.push(values.tracking_id);
                                 row.push(values.status);
 
@@ -238,7 +238,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'reg_number', name: 'reg_number', class: 'align-middle text-center reg_number'},
-                    {data: 'vehicle_type', name: 'vt.name', class: 'align-middle text-center vehicle_type_id'},
+                    {data: 'vehicle_type', name: 'vt.name', class: 'align-middle text-center vehicle_type'},
                     {data: 'tracking_id', name: 'tracking_id', class: 'align-middle text-center tracking_id'},
                     {data: 'status', name: 'status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
@@ -296,7 +296,7 @@
             $('#editFleet').modal('show');
                var id = $(this).parents('tr').attr('id');
            
-                $.get( "/public/admin/settings/fleet/"+id+"/edit/form", function( data ) {
+                $.get( "/admin/settings/fleet/"+id+"/edit/form", function( data ) {
                     $("#editFleetDiv").html(data);
                 });
        });

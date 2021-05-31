@@ -404,7 +404,7 @@
             $('#editRouteManagement').modal('show');
                var id = $(this).parents('tr').attr('id');
            
-                $.get( "/public/admin/settings/route_management/"+id+"/edit/form", function( data ) {
+                $.get( "/admin/settings/route_management/"+id+"/edit/form", function( data ) {
                     $("#editRouteManagementDiv").html(data);
                 });
             });
