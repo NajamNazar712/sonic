@@ -622,6 +622,13 @@ class V2AdminPickupsController extends Controller
                 }
 
             }
+
+            if($shipment->warehouse == 1){
+                if($shipment->warehouse_order_status != 5){
+                    return ['status' => 1, 'error' => 'Shipment is not dispatched yet!'];
+                }
+            }
+
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     $details = array();
@@ -1224,6 +1231,12 @@ class V2AdminPickupsController extends Controller
             if(session('role_id') != 1){
                 if(!in_array($shipment_origin, session('hubs'))){
                     return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];
+                }
+            }
+
+            if($shipment->warehouse == 1){
+                if($shipment->warehouse_order_status != 5){
+                    return ['status' => 1, 'error' => 'Shipment is not dispatched yet!'];
                 }
             }
 
