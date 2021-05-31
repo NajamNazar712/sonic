@@ -254,6 +254,9 @@
                                                     </form>
                                                 </div>
                                             @endif
+
+                                            <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
+
                                         </div>
                                     </div>
                                     <div class="col-7">
@@ -940,6 +943,35 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="special_request_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="special_request_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Special Request</h4>
+                </div>
+                <div class="modal-body  text-center">
+                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
+
+                        <input type="checkbox" name="admin[]" value="32"> Waqar Ahmed Dar <br/>
+                        <input type="checkbox" name="admin[]" value="372"> Mursaleen Rafiq<br/>
+                        <input type="checkbox" name="admin[]" value="661"> Waqas Sheikh <br/>
+                        <input type="checkbox" name="admin[]" value="169"> Sohaib Jawaid <br/>
+
+                        <div class="row justify-content-center mt-2">
+                            <div class="col-4">
+                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
@@ -2144,6 +2176,10 @@
                 selected_rows = [];
                 rows_count = 0;
                 $('#crm_image_view_table tbody').html('');
+            });
+
+            $('#special_request').on('click',function () {
+              $('#special_request_modal').modal('show');
             });
 
         });

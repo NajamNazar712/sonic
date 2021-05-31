@@ -2623,6 +2623,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('image_submit','Admins\AdminCRMController@crm_image_submit')->name('image_submit');
             Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
+            Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
