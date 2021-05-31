@@ -278,7 +278,7 @@ class ConsigneeAPIController extends Controller
 
             return response()->json(['status' => 0, 'data' => $data]);
         }
-        return response()->json(['status' => 1, 'message' => "No Active Shipment Found"]);
+        return response()->json(['status' => 1, 'message' => "No Current Shipment Found"]);
     }
 
     public function previous_shipments(Request $request)
@@ -309,7 +309,7 @@ class ConsigneeAPIController extends Controller
 
             return response()->json(['status' => 0, 'data' => $data]);
         }
-        return response()->json(['status' => 1, 'message' => "No Active Shipment Found"]);
+        return response()->json(['status' => 1, 'message' => "No Previous Shipment Found"]);
     }
 
     public function shipment_history(Request $request)
