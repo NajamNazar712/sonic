@@ -52,6 +52,7 @@
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
+                                    <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Tagged At</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
@@ -601,6 +602,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
@@ -1134,6 +1136,42 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
+            });
+
+            $('#datatable tbody').on('click', 'tr td.special_request button', function() {
+                var crm_request_id = table.row($(this).parents('tr')).data().id;
+
+                $.ajax({
+                    url: '{!! route('admin.crm.in_process.special_request_tag') !!}',
+                    method: 'POST',
+                    data: {
+                        'crm_request_id': crm_request_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+
+                    if (data.status === 1) {
+
+                        var html = '';
+                        html += '<table class="table table-sm datatable text-center">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.admin, function (index, value) {
+                            var ind = index + 1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.admin + '</td>';
+
+                        });
+                        html += '</tbody></table>';
+
+                        $('#ViewSKUModal .modal-body').html(html);
+                        $('#ViewSKUModal').modal('show');
+
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
             });
         });
     </script>
