@@ -249,7 +249,7 @@ Route::name('api.')->group(function () {
                 Route::get('active', 'ConsigneeAPIController@active_shipments')->name('active');
                 Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
             });
-
+            Route::post('update_address', 'ConsigneeAPIController@address_change_request')->name('update_address');
         });
 
     });

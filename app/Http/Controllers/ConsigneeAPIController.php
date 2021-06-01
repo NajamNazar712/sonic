@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\City;
 use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
@@ -429,5 +430,12 @@ class ConsigneeAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
             }
         }
+    }
+
+    public function address_change_request(Request $request){
+        $consignee_id = $request->consignee_id;
+        $description = "Address Change Request From Consignee";
+        $crm_request_id = CRMController::add(2, 11, 1, 1, $consignee_id , 3, $request->shipment_id,NULL, NULL, $description);
+        dd($crm_request_id);
     }
 }
