@@ -89,7 +89,7 @@ class ConsigneeAPIController extends Controller
                 $shipment_info = $shipment_info->get();
                 return response()->json(['status' => 0, 'consignee_info' => $shipment_info]);
             }
-            return response()->json(['status' => 1, 'message' => 'Consignee Information Not Found']);
+            return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
         }
     }
 
@@ -234,7 +234,8 @@ class ConsigneeAPIController extends Controller
         $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
             ->wherein('shipments.shipper_status_id', [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7])
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id', 'shipments.consignee_address as consignee_address');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id', 'shipments.consignee_address as consignee_address')
+            ->orderBy('shipments.id', 'DESC');
 
         if ($consignee_shipments->exists()) {
             $consignee_shipments = $consignee_shipments->get();
@@ -288,7 +289,8 @@ class ConsigneeAPIController extends Controller
         $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
             ->wherein('shipments.shipper_status_id', [14, 16, 30, 36, 37, 20, 12])
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id');
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id')
+            ->orderBy('shipments.id', 'DESC');
 
         if ($consignee_shipments->exists()) {
             $consignee_shipments = $consignee_shipments->get();
