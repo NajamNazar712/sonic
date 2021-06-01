@@ -6,6 +6,7 @@ use App\Http\Models\City;
 use App\Http\Models\ConsigneeOtp;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeUser;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -254,13 +255,51 @@ class ConsigneeAPIController extends Controller
                 $datum['shipper_name'] = $user->name;
                 $datum['person_of_contact'] = $pickup_address->poc;
 
+                $consignee_crm = CrmRequest::where('launched_by_id', $consignee_id)
+                    ->where('launched_by', 3)
+                    ->where('shipment_id', $consignee_shipment->shipment_id)
+                    ->orderBy('id', 'DESC');
+                if($consignee_crm->exists()){
+                    $consignee_crm = $consignee_crm->first();
+                    $request_status = $consignee_crm->status_id;
+                    if(in_array($request_status, [1,2,5])){
+                        $datum['request_status'] = 0;
+                    }else{
+                        $datum['request_status'] = 1;
+                        $datum['request_latitude'] = $consignee_shipment->consignee_latitude;
+                        $datum['request_longitude'] = $consignee_shipment->consignee_longitude;
+                    }
+                }else{
+                    $datum['request_status'] = 1;
+                    $datum['request_latitude'] = $consignee_shipment->consignee_latitude;
+                    $datum['request_longitude'] = $consignee_shipment->consignee_longitude;
+                }
+
                 $datum['latitude'] = null;
                 $datum['longitude'] = null;
 
                 if ($consignee_shipment->status_id == 5) {
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
-                } else {
+                }
+                elseif ($consignee_shipment->shipper_status_id == 3){
+                    $datum['runner_id'] = null;
+                    $datum['origin'] = null;
+                    $datum['destination'] = null;
+
+                    $origin_city = City::where('id', $pickup_address->id);
+                    if($origin_city->exists()){
+                        $origin_city = $origin_city->first();
+                        $datum['origin'] = $origin_city->name;
+                    }
+
+                    $destination_city = City::where('id', $consignee_shipment->consignee_city_id);
+                    if($destination_city->exists()){
+                        $destination_city = $destination_city->first();
+                        $datum['destination'] = $destination_city->name;
+                    }
+                }
+                else {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
                         ->where('shipper_status_id', $consignee_shipment->status_id)
                         ->orderBy('id', 'DESC');
