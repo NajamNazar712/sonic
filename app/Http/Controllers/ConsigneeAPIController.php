@@ -234,7 +234,7 @@ class ConsigneeAPIController extends Controller
         $consignee_shipments = Shipment::join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
             ->wherein('consignee_phone_number_1', [$consignee_info->phone_number_1, $consignee_info->phone_number_2])
             ->wherein('shipments.shipper_status_id', [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7])
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id', 'shipments.consignee_address as consignee_address')
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number as tracking_no', 'shipments.shipper_status_id as status_id', 'ss.name as status', 'shipments.amount as amount', 'shipments.delivery_in_route as delivery_in_route', 'shipments.pickup_address_id as pickup_address_id', 'shipments.consignee_address as consignee_address', 'shipments.consignee_latitude as consignee_latitude', 'shipments.consignee_longitude as consignee_longitude')
             ->orderBy('shipments.id', 'DESC');
 
         if ($consignee_shipments->exists()) {
@@ -258,8 +258,8 @@ class ConsigneeAPIController extends Controller
                 $datum['longitude'] = null;
 
                 if ($consignee_shipment->status_id == 5) {
-                    $datum['latitude'] = $consignee_info->latitude;
-                    $datum['longitude'] = $consignee_info->longitude;
+                    $datum['latitude'] = $consignee_shipment->consignee_latitude;
+                    $datum['longitude'] = $consignee_shipment->consignee_longitude;
                 } else {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
                         ->where('shipper_status_id', $consignee_shipment->status_id)
