@@ -16,7 +16,7 @@ use Auth;
 
 class ShipmentsJourneyController extends Controller
 {
-    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL, $rider_id = NULL) {
+    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1, $received_or_refused_by = NULL, $rider_id = NULL,$cancel_reason = NULL) {
       $shipment_journey = new ShipmentsJourney();
 
       $shipment_journey->shipment_id = $shipment_id;
@@ -31,6 +31,8 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->reference_1_id = $reference_1_id;
       $shipment_journey->reference_2_id = $reference_2_id;
       $shipment_journey->received_or_refused_by = $received_or_refused_by;
+      $shipment_journey->received_or_refused_by = $received_or_refused_by;
+      $shipment_journey->cancel_reason = $cancel_reason;
 
       if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50, 61])) {
         $shipment = Shipment::find($shipment_id);
