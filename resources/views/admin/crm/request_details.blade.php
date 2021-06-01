@@ -176,6 +176,14 @@
                                                         <h5 class="mb-0">{{$insurance}}</h5>
                                                 </td>
                                             </tr>
+                                           {{-- <tr>
+                                                <th scope="row">Special Request </th>
+                                                <td class="name">
+                                                    @foreach($approvers as $admin)
+                                                        <h5 class="mb-0">{{$admin['name']}}</h5>
+                                                    @endforeach
+                                                </td>
+                                            </tr>--}}
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
@@ -959,12 +967,50 @@
                         @csrf
                         <input type="hidden" name="request_id" value="{{$crm_details->id}}">
 
-                        <input type="checkbox" name="admin[]" value="32"> Waqar Ahmed Dar <br/>
-                        <input type="checkbox" name="admin[]" value="372"> Mursaleen Rafiq<br/>
-                        <input type="checkbox" name="admin[]" value="661"> Waqas Sheikh <br/>
-                        <input type="checkbox" name="admin[]" value="169"> Sohaib Jawaid <br/>
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Admin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Waqas Ahmed Dar</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Mursaleen Rafiq</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="661" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Waqas Sheikh</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Sohaib Jawaid</td>
+                            </tr>
+                            </tbody>
+                        </table>
 
-                        <div class="row justify-content-center mt-2">
+                        <div class="row justify-content-center mt-2 ml-2">
                             <div class="col-4">
                                 <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Submit</button>
                             </div>
