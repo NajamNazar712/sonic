@@ -305,7 +305,7 @@ class RetailTrackingController extends Controller
                                         $journey_details['status'] = $journey->status->name;
                                     }
                                     else{
-                                        $journey_details['status'] = $journey->status->name;
+                                        $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
                                     }
                                     $journey_details['user'] = $journey->admin->name;
                                     $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';

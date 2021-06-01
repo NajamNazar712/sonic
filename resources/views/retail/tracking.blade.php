@@ -1035,7 +1035,7 @@
             id = $(this).attr('data-id');
             console.log(id);
             $.ajax({
-                url: '{!! route('admin.finance.retail.done_payments.details_print') !!}',
+                url: '{!! route('retail.finance.done_payments.print') !!}',
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
@@ -1060,7 +1060,6 @@
                         tab.focus();
                     }
                 });
-        });
         });
 
 

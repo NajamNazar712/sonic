@@ -3000,5 +3000,13 @@ Route::prefix('retail')->name('retail.')->group(function () {
         });
 
     });
+
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::prefix('done_payments')->name('done_payments.')->group(function () {
+            Route::post('details_print', 'Retail\RetailFinanceController@retail_done_payments_details_print')->name('print');
+            Route::post('details', 'Retail\RetailFinanceController@retail_done_payments_details')->name('details');
+        });
+    });
+
 });
 
