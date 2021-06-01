@@ -3983,7 +3983,8 @@ class GlobalSettingsController extends Controller
     {
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
-            ->select(['fleets.id', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type']);
+            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
+            ->orderBy('fleets.created_at');
                 // ->select();
 
         $datatable = Datatables::of($fleet)
@@ -4061,13 +4062,29 @@ class GlobalSettingsController extends Controller
 
     public function fleet_update(Request $request, $id)
     {
-        $fleet = Fleet::find($id);
-        $fleet->reg_number = $request->reg_number;
-        $fleet->vehicle_type_id = $request->vehicle_select;
-        $fleet->tracking_id = $request->tracking_id;
-        $fleet->save();
-        return redirect()->back()->with('success', 'Fleet Updated successfully!');
+        $vehicle_select = $request->vehicle_select;
+        if ($vehicle_select == 'other') {
+            $vehicle_type = new VehicleType;
+            $vehicle_type->name = $request->vehicle_type_name;
+            $vehicle_type->save();
 
+            $fleet = Fleet::find($id);
+            $fleet->reg_number = $request->reg_number;
+            $fleet->vehicle_type_id = $vehicle_type->id;
+            $fleet->tracking_id = $request->tracking_id;
+            $fleet->save();
+            return redirect()->back()->with('success', 'Fleet Updated successfully!');
+
+        }else{
+            $fleet = Fleet::find($id);
+            $fleet->reg_number = $request->reg_number;
+            $fleet->vehicle_type_id = $request->vehicle_select;
+            $fleet->tracking_id = $request->tracking_id;
+            $fleet->save();
+            return redirect()->back()->with('success', 'Fleet Updated successfully!');
+    
+        }
+        
     }
     public function fleet_enable_disable(Request $request){
         $id = $request->id;

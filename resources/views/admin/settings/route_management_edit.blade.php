@@ -20,7 +20,7 @@
             <div class="col-6 form-group">
                 <label for="starting_point_id">Starting Point</label>
 
-                <select class="form-control starting_point_id" name="starting_point_id" id="starting_point_id" data-rule-required="true" data-msg-required="Starting Point is required">
+                <select class="form-control starting_point_id_edit" name="starting_point_id" id="starting_point_id_edit" data-rule-required="true" data-msg-required="Starting Point is required">
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -32,7 +32,7 @@
             <div class="col-6 form-group">
                 <label for="end_point_id">End Point</label>
 
-                <select class="form-control end_point_id" name="end_point_id" id="end_point_id" data-rule-required="true" data-msg-required="End Point_id is required">
+                <select class="form-control end_point_id_edit" name="end_point_id" id="end_point_id_edit" data-rule-required="true" data-msg-required="End Point_id is required">
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -94,12 +94,12 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        $(".starting_point_id").prepend('<option value="" selected></option>').select2({
+        $(".starting_point_id_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Starting Point",
                 width:'100%',
                 dropdownParent:$('#editRouteManagementForm')
             });
-            $(".end_point_id").prepend('<option value="" selected></option>').select2({
+            $(".end_point_id_edit").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select End Point",
                 width:'100%',
                 dropdownParent:$('#editRouteManagementForm')
@@ -136,10 +136,10 @@
 
 
                 var starting_point_id = @json($route_management->starting_point_id);
-                $('.starting_point_id').val(starting_point_id).trigger('change');
+                $('.starting_point_id_edit').val(starting_point_id).trigger('change');
 
                 var end_point_id = @json($route_management->end_point_id);
-                $('.end_point_id').val(end_point_id).trigger('change');
+                $('.end_point_id_edit').val(end_point_id).trigger('change');
 
 
         var errors = 0;

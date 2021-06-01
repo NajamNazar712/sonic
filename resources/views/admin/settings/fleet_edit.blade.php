@@ -6,19 +6,19 @@
     <div class="col-md-12">
         <div class="row justify-content-center">
             <div class="col-12 form-group">
-                <input type="text" name="reg_number" value={{$fleet->reg_number}} id="reg_number" class="form-control reg_number" placeholder="Registration Number*" data-rule-required="true" data-msg-required="Registration Number is required" >
+                <input type="text" name="reg_number" value="{{$fleet->reg_number}}" id="reg_number" class="form-control reg_number" placeholder="Registration Number*" data-rule-required="true" data-msg-required="Registration Number is required" >
             </div>
         </div>
         <div class="row justify-content-center">
             <div class="col-12 form-group">
-             <select class="form-control" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
+             <select class="form-control vehicle_select" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
                  @foreach($vehicles as $vehicle)
                             <option value="{{$vehicle->id}}">{{$vehicle->name}}</option>
                  @endforeach
              </select>
             </div>
 
-            <div class="col-12 form-group d-none" id="other_picker_name_div">
+            <div class="col-12 form-group d-none" id="other_picker_name_div_edit">
              <div class="form-group col-md">
                  <input type="text" name="vehicle_type_name" id="vehicle_type_name" class="form-control" placeholder="New Vehicle Type" data-rule-required="true" data-msg-required="Vehicle Type is required">
              </div>
@@ -50,15 +50,22 @@
     $(document).ready(function () {
 
 
-        $('#vehicle_select').prepend('<option value="" selected="selected"></option>').select2({
+        $('.vehicle_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
                 width: '100%',
                 placeholder: 'Select Vehicle*',
                 dropdownParent:$('#editFleetForm')
+            }).bind('change', function() {
+                if ($(this).val() === 'other') {
+                    $('#other_picker_name_div_edit').removeClass('d-none');
+                }
+                else{
+                    $('#other_picker_name_div_edit').addClass('d-none');
+                }
             });
 
 
                 var id = @json($fleet->vehicle_type_id);
-                $('#vehicle_select').val(id).trigger('change');
+                $('.vehicle_select').val(id).trigger('change');
 
 
         var errors = 0;
