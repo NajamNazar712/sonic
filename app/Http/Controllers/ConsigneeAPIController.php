@@ -452,8 +452,8 @@ class ConsigneeAPIController extends Controller
             $crm_request_id = CRMController::add(2, 11, 1, 1, $consignee_id , 3, $request->shipment_id,NULL, NULL, $description);
             $crm_request = CrmRequest::find($crm_request_id);
             $crm_request->address = $request->address;
-            $crm_request->address = $request->location_latitude;
-            $crm_request->address = $request->location_longitude;
+            $crm_request->address_latitude = $request->location_latitude;
+            $crm_request->address_longitude = $request->location_longitude;
             $crm_request->save();
             return response()->json(['status' => 0, 'message' => 'Request For Address Change Has Been Submitted']);
         }
