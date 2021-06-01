@@ -433,9 +433,30 @@ class ConsigneeAPIController extends Controller
     }
 
     public function address_change_request(Request $request){
-        $consignee_id = $request->consignee_id;
-        $description = "Address Change Request From Consignee";
-        $crm_request_id = CRMController::add(2, 11, 1, 1, $consignee_id , 3, $request->shipment_id,NULL, NULL, $description);
-        dd($crm_request_id);
+        $rules = [
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
+            'address' => ['required', 'string', 'max:255'],
+            'location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_id = $request->consignee_id;
+            $description = "Address Change Request From Consignee";
+            $crm_request_id = CRMController::add(2, 11, 1, 1, $consignee_id , 3, $request->shipment_id,NULL, NULL, $description);
+            $crm_request = CrmRequest::find($crm_request_id);
+            $crm_request->address = $request->address;
+            $crm_request->address = $request->location_latitude;
+            $crm_request->address = $request->location_longitude;
+            $crm_request->save();
+            return response()->json(['status' => 0, 'message' => 'Request For Address Change Has Been Submitted']);
+        }
+        return response()->json(['status' => 0, 'message' => 'Failed To Submit']);
     }
 }
