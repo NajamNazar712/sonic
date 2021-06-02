@@ -5409,6 +5409,13 @@ class AdminFinanceController extends Controller
 
                         $invoice->save();
 
+                        if( $invoice->total_invoice_amount < 50000){
+                            $users = User::find($user_id);
+                            $users->blacklist = 1;
+                            $users->blacklist_reason = "Invoice Amount was less than 50000";
+                            $users->save();
+                        }
+
                         NotificationsController::send(27, $invoice_id);
                     }
                 }
