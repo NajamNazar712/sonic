@@ -2119,6 +2119,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminRetailReportController@sales_list')->name('list');
 
         });
+
+        Route::prefix('shipper_insurance')->name('shipper_insurance.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@shipper_insurance_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@shipper_insurance_list')->name('list');
+            Route::post('charges', 'Admins\AdminReportsController@shipper_insurance_charges')->name('charges');
+
+        });
     });
 
     //Reports end
@@ -2995,5 +3002,13 @@ Route::prefix('retail')->name('retail.')->group(function () {
         });
 
     });
+
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::prefix('done_payments')->name('done_payments.')->group(function () {
+            Route::post('details_print', 'Retail\RetailFinanceController@retail_done_payments_details_print')->name('print');
+            Route::post('details', 'Retail\RetailFinanceController@retail_done_payments_details')->name('details');
+        });
+    });
+
 });
 

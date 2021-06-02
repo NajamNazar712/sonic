@@ -8206,6 +8206,7 @@ class AdminDashboardController extends Controller
     }
 
     public function updateCity(Request $request,$id){
+       
         $city_id = City::where('id',$id)->first();
         if($city_id){
             if($request->has('updatedelivery') && count($request->updatedelivery) > 0){
@@ -8332,6 +8333,7 @@ class AdminDashboardController extends Controller
     }
     //update city end
     public function addCityHub(Request $request){
+      
         if($request->postType == 'city'){
             $zone_id = City::find($request->hubs)->zone_id;
 
