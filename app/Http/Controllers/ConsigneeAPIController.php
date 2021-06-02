@@ -447,14 +447,29 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $shipment = Shipment::find($request->shipment_id);
+            $shipper_id = $shipment->pickup_address->user_id;
             $consignee_id = $request->consignee_id;
             $description = "Address Change Request From Consignee";
-            $crm_request_id = CRMController::add(2, 11, 7, 1, $consignee_id , 3, $request->shipment_id,NULL, NULL, $description);
-            $crm_request = CrmRequest::find($crm_request_id);
-            $crm_request->address = $request->address;
-            $crm_request->address_latitude = $request->location_latitude;
-            $crm_request->address_longitude = $request->location_longitude;
-            $crm_request->save();
+            $consignee_crm = CrmRequest::where('launched_by_id', $consignee_id)
+                ->where('launched_by', 3)
+                ->where('shipment_id', $request->shipment_id);
+            if($consignee_crm->exists()) {
+                $consignee_crm = $consignee_crm->first();
+                $consignee_crm->address = $request->address;
+                $consignee_crm->address_latitude = $request->location_latitude;
+                $consignee_crm->address_longitude = $request->location_longitude;
+                $consignee_crm->status_id = 5;
+                $consignee_crm->save();
+            }
+            else{
+                $crm_request_id = CRMController::add(2, 11, 7, 1, $consignee_id , 3, $request->shipment_id,$shipper_id, NULL, $description);
+                $crm_request = CrmRequest::find($crm_request_id);
+                $crm_request->address = $request->address;
+                $crm_request->address_latitude = $request->location_latitude;
+                $crm_request->address_longitude = $request->location_longitude;
+                $crm_request->save();
+            }
             return response()->json(['status' => 0, 'message' => 'Request For Address Change Has Been Submitted']);
         }
         return response()->json(['status' => 0, 'message' => 'Failed To Submit']);
