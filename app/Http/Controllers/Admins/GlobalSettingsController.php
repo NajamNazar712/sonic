@@ -4159,7 +4159,7 @@ class GlobalSettingsController extends Controller
         
         $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
         ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
-        ->select('route_managements.id','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.location_latitude as starting_lat', 'stp.location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.location_latitude as end_lat', 'endp.location_longitude as end_long')
+        ->select('route_managements.id','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
         ;
         $datatable = Datatables::of($route_management)
         ->editColumn('status', function ($route_management) {
@@ -4185,7 +4185,7 @@ class GlobalSettingsController extends Controller
                 
                     foreach ($junctions as $junction) {
                         $city = City::find($junction->junction_id);
-                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->location_latitude.",".$route_management->location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
+                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->hub_location_latitude.",".$city->hub_location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
 
                     }
                     return $junction_data;
