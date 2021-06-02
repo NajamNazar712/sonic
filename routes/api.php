@@ -248,5 +248,4 @@ Route::name('api.')->group(function () {
     });
 
 
-
 });
