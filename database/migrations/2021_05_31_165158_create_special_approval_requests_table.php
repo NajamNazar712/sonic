@@ -17,6 +17,7 @@ class CreateSpecialApprovalRequestsTable extends Migration
             $table->increments('id');
             $table->integer('crm_request_id')->index();
             $table->integer('admin_id')->index();
+            $table->integer('status')->default(0)->index();
             $table->timestamps();
         });
     }

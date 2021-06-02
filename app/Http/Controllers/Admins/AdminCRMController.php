@@ -501,20 +501,15 @@ class AdminCRMController extends Controller
             }
 
             $crm_images_count = $crm_request->images->count();
-           /* $special_admins  = SpecialApprovalRequest::where('crm_request_id',$id)->select('admin_id')->latest();
-            if($special_admins->exists()){
-                $special_admins = $special_admins->get();
-                $approvers = array();
-                foreach($special_admins as $admin_id){
-                    $approvers[] = Admin::find($admin_id);
-                }
+
+            $approvers = array();
+            $special_request = SpecialApprovalRequest::join('admins as a','a.id','=','special_approval_requests.admin_id')
+               ->where('special_approval_requests.crm_request_id',$id)->where('special_approval_requests.status',1)->select('a.name as admin')->get();
+            foreach($special_request as $admin_request){
+                $approvers[] = $admin_request->admin;
             }
-            else{
-                $approvers = '-';
-            }*/
-
-
-            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,/*'approvers' => $approvers*/]);
+            
+            return view('admin.crm.request_details')->with(['crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -4222,16 +4217,19 @@ class AdminCRMController extends Controller
      $admin_ids = $request->admin;
 
      if($admin_ids){
+         $approval = SpecialApprovalRequest::where('crm_request_id',$request_id)->update(['status' => 0]);
          foreach($admin_ids as $admin){
+
              NotificationsController::send(131,$request_id,$admin);
 
              $approval_request =  new SpecialApprovalRequest();
              $approval_request->crm_request_id = $request_id;
              $approval_request->admin_id = $admin;
+             $approval_request->status = 1;
              $approval_request->save();
 
          }
-         return redirect()->route('admin.crm.in_process.index')->with(['success'=> "Request Submitted"]);
+         return redirect()->back()->with(['success'=> "Request Submitted"]);
      }
      else{
          return redirect()->back()->with(['error'=> "Select One Admin At-least"]);

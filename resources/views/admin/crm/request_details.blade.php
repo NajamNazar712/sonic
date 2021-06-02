@@ -176,14 +176,14 @@
                                                         <h5 class="mb-0">{{$insurance}}</h5>
                                                 </td>
                                             </tr>
-                                           {{-- <tr>
+                                           <tr>
                                                 <th scope="row">Special Request </th>
                                                 <td class="name">
                                                     @foreach($approvers as $admin)
-                                                        <h5 class="mb-0">{{$admin['name']}}</h5>
+                                                        <h5 class="mb-0">{{$admin}}</h5>
                                                     @endforeach
                                                 </td>
-                                            </tr>--}}
+                                            </tr>
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
