@@ -274,9 +274,9 @@ class NotificationsController extends Controller
 
                     self::sms($body, $to);
                 } else if ($id == 4) {
-                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity'];
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
 
-                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity'];
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
 
                     $present_fields = array();
 
@@ -325,6 +325,7 @@ class NotificationsController extends Controller
                         $details['order_id'] = $shipment->order_id;
                         $details['weight'] = $shipment->actual_weight;
                         $details['tracking_number'] = $shipment->tracking_number;
+                        $details['amount'] = $shipment->amount;
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
