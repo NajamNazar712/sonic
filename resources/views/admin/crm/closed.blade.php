@@ -45,6 +45,9 @@
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Agent</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
@@ -110,6 +113,9 @@
                             head.push('Description');
                             head.push('Channel');
                             head.push('Agent');
+                            head.push('Address');
+                            head.push('Address Latitude');
+                            head.push('Address Longitude');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
@@ -131,6 +137,9 @@
                                 row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.agent);
+                                row.push(values.address);
+                                row.push(values.address_latitude);
+                                row.push(values.address_longitude);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
@@ -301,6 +310,9 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
+                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
@@ -333,6 +345,7 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
+                        '<option value="3">Consignee</option>' +
                         '</select>';
 
                     this.api().columns().every(function(column_id) {

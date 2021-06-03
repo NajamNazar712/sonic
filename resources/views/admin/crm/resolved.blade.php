@@ -51,6 +51,9 @@
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
                                     <th class="border-primary border-darken-1">Resolved Date</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th>
                                     <th class="border-primary border-darken-1">In-Process To Resolved (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
@@ -142,6 +145,9 @@
                             head.push('Launched Date');
                             head.push('Resolved By');
                             head.push('Resolved Date');
+                            head.push('Address');
+                            head.push('Address Latitude');
+                            head.push('Address Longitude');
                             head.push('In-Process To Resolved (TAT)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
@@ -167,6 +173,9 @@
                                 row.push(values.created_at);
                                 row.push(values.resolved_by);
                                 row.push(values.resolved_date);
+                                row.push(values.address);
+                                row.push(values.address_latitude);
+                                row.push(values.address_longitude);
                                 row.push(values.in_process_resolved_tat);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br\\s*[\\/]?>/gi, '\n'));
@@ -430,6 +439,9 @@
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
                     {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
+                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'in_process_resolved_tat', name: 'in_process_resolved_tat', class: 'align-middle in_process_resolved_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
@@ -462,6 +474,7 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
+                        '<option value="3">Consignee</option>' +
                         '</select>';
 
                     this.api().columns().every(function(column_id) {
