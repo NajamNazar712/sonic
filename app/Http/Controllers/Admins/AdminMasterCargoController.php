@@ -1079,7 +1079,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_create_index(Request $request, $id = NULL) {
-              
+       
         if($id == NULL){
             $id = 0;
         }
@@ -1200,7 +1200,14 @@ class AdminMasterCargoController extends Controller
         $details['transport_modes'] = TransportMode::all();
 
         $details['routes'] = RouteManagement::where('starting_point_id',$origin->id)->get();
-        $details['fleets'] = Fleet::all();
+        $details['fleets'] = Fleet::leftjoin('master_cargoes as mc','mc.fleet_id','<>','fleets.id')
+                            ->where('fleets.status',1)
+                            ->where('mc.fleet_id','<>','fleets.id')
+                            ->whereIn('mc.status_id',[2,3,4,5])
+                            ->groupBy('fleets.id')
+                            ->get();
+        // $details['fleets'] = Fleet::all();
+        
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 

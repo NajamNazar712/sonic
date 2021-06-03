@@ -223,12 +223,12 @@ function remove_junction(params) {
                    '                            </div>\n' +
                    '                        ' +
                    '         <div class="col-2" style="position: absolute;left: 580px;">\n'+
-                   '  <a class="btn btn-danger" onclick="remove_junction(this)">X</a>\n'+
+                   '  <a href="javascript:void(0);" class="btn btn-icon btn-danger" onclick="remove_junction(this)"><i class="la la-close"></i></a>\n'+
                    '                        </div>\n'+
                    '                        </div>\n';
                    
                   
-
+                   
 
                 $('#junctions').append(html);
                 $("#junction_" + row).prepend('<option value="" selected></option>').select2({

@@ -430,6 +430,7 @@
                             });
 
                             $.each(data.fleets, function(index, fleet) {
+                                console.log(fleet)
                             $('#master_cargo_consignment form .fleet_id').append('<option value="' + fleet.id + '">' + fleet.reg_number    + '</option>');
                         });
 

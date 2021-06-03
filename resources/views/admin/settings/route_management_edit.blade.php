@@ -66,7 +66,7 @@
                 </div>
                 @if ($i!=1)
                 <div class="col-2" style="position: absolute;left: 580px;">
-                    <a class="btn btn-danger" onclick="edit_remove_junction(this)">X</a>
+                    <a href="javascript:void(0);" class="btn btn-icon btn-danger" onclick="edit_remove_junction(this)"><i class="la la-close"></i></a>
                 </div>
                 @endif
                 
@@ -141,10 +141,9 @@ function edit_remove_junction(params) {
                    '                                </select>\n' +
                    '                            </div>\n' +
                    '         <div class="col-2" style="position: absolute;left: 580px;">\n'+
-                   '  <a class="btn btn-danger" onclick="edit_remove_junction(this)">X</a>\n'+
+                   '  <a href="javascript:void(0);" class="btn btn-icon btn-danger" onclick="edit_remove_junction(this)"><i class="la la-close"></i></a>\n'+
                    '                        </div>\n'+
                    '                        </div>';
-
                 $('#edit_junctions').append(html);
                 
                 $("#new_junction_" + row).prepend('<option value="" selected></option>').select2({
