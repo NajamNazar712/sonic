@@ -3981,7 +3981,12 @@ class GlobalSettingsController extends Controller
 
     public function fleet_list()
     {
-        $fleet = Fleet::all();
+        // $fleet = Fleet::all();
+        $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
+            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
+            ->orderBy('fleets.created_at','desc');
+                // ->select();
+
         $datatable = Datatables::of($fleet)
             ->editColumn('status', function ($fleet) {
                 if ($fleet->status == 1) {
@@ -3990,10 +3995,10 @@ class GlobalSettingsController extends Controller
                     return 'Disable';
                 }
             })
-            ->editColumn('vehicle_type_id', function ($fleet) {
+            // ->editColumn('vehicle_type_id', function ($fleet) {
                 
-                    return $fleet->vehicle_type->name;
-            })
+            //         return $fleet->vehicle_type->name;
+            // })
             ->addColumn('action', function ($fleet) {
                 $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
@@ -4002,6 +4007,7 @@ class GlobalSettingsController extends Controller
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
+                 $dropdown .= '<button type="button" class="dropdown-item edit_fleet" data-target-id=' . $fleet->id . ' rel="edit_fleet"  data-toggle="modal" data-target="#editFleet"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 if ($fleet->status == 0) {
                     $dropdown .= $enable;
@@ -4027,6 +4033,9 @@ class GlobalSettingsController extends Controller
             $fleet = new Fleet;
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $vehicle_type->id;
+            $fleet->tracking_id = $request->tracking_id;
+            $fleet->status = 1;
+            
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Added successfully!');
 
@@ -4036,13 +4045,47 @@ class GlobalSettingsController extends Controller
             $fleet = new Fleet;
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $request->vehicle_select;
+            $fleet->tracking_id = $request->tracking_id;
+            $fleet->status = 1;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Added successfully!');
 
         }
     }
     
+    public function fleet_edit($id){
+        $vehicles = VehicleType::all();
+        $fleet = Fleet::find($id);
+        return view('admin.settings.fleet_edit', compact('fleet','vehicles'));
 
+    }
+
+    public function fleet_update(Request $request, $id)
+    {
+        $vehicle_select = $request->vehicle_select;
+        if ($vehicle_select == 'other') {
+            $vehicle_type = new VehicleType;
+            $vehicle_type->name = $request->vehicle_type_name;
+            $vehicle_type->save();
+
+            $fleet = Fleet::find($id);
+            $fleet->reg_number = $request->reg_number;
+            $fleet->vehicle_type_id = $vehicle_type->id;
+            $fleet->tracking_id = $request->tracking_id;
+            $fleet->save();
+            return redirect()->back()->with('success', 'Fleet Updated successfully!');
+
+        }else{
+            $fleet = Fleet::find($id);
+            $fleet->reg_number = $request->reg_number;
+            $fleet->vehicle_type_id = $request->vehicle_select;
+            $fleet->tracking_id = $request->tracking_id;
+            $fleet->save();
+            return redirect()->back()->with('success', 'Fleet Updated successfully!');
+    
+        }
+        
+    }
     public function fleet_enable_disable(Request $request){
         $id = $request->id;
         $fleet = Fleet::find($id);
@@ -4079,23 +4122,40 @@ class GlobalSettingsController extends Controller
     
     }
 
+
+    public function route_management_edit($id){
+        $cities = City::where('status', 1)->where('hub', 1)->get();
+        $route_management = RouteManagement::find($id);
+        return view('admin.settings.route_management_edit', compact('cities','route_management'));
+    }
+
+    public function route_management_update(Request $request, $id){
+       
+        $route_management = RouteManagement::find($id);
+        $route_management->route_code = $request->route_code;
+        $route_management->route_title = $request->route_title;
+        $route_management->starting_point_id = $request->starting_point_id;
+        $route_management->end_point_id = $request->end_point_id;
+        $route_management->save();
+        foreach ($route_management->junctions as $value) {
+            $route_management_junction = RouteManagementJunction::find($value->id);
+            $route_management_junction->delete();
+        }
+        foreach ($request->edit_junction as $value) {
+            $route_management_junction = new RouteManagementJunction;
+            $route_management_junction->junction_id = $value;
+            $route_management_junction->route_management_id = $route_management->id;
+            $route_management_junction->save();
+        }
+        return redirect()->back()->with('success', 'Route Updated successfully!');
+    }
     public function route_management_list()
     {
-        // $cargo_consignments = CargoConsignment::join('cities as oh', 'cargo_consignments.origin_hub_id', '=', 'oh.id')
-        // ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
-        // ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
-        // ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
-        // ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
-        // ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
-        // ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
-        // ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
-        // ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-        // ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_consignments.type as cargo_type','cargo_consignments.seal_number', DB::raw('(SELECT COUNT(s.id) FROM shipments AS s INNER JOIN cargo_consignment_shipments AS css ON s.id = css.shipment_id WHERE css.cargo_consignment_id = cargo_consignments.id AND (s.shipper_status_id = 3 OR s.shipper_status_id = 21)) AS short_received_shipments'))
-        // ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7, 9]);
+        
         $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
         ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
-        ->select('route_managements.id','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.location_latitude as starting_lat', 'stp.location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.location_latitude as end_lat', 'endp.location_longitude as end_long')
-        ;
+        ->select('route_managements.id','route_managements.created_at','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
+        ->orderBy('route_managements.created_at','desc');
         $datatable = Datatables::of($route_management)
         ->editColumn('status', function ($route_management) {
             if ($route_management->status == 1) {
@@ -4120,12 +4180,25 @@ class GlobalSettingsController extends Controller
                 
                     foreach ($junctions as $junction) {
                         $city = City::find($junction->junction_id);
-                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->location_latitude.",".$route_management->location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
+                        $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->hub_location_latitude.",".$city->hub_location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
 
                     }
                     return $junction_data;
                     // return $route_management->id;
             })
+            ->addColumn('excel_junctions', function ($route_management) {
+                $junctions = RouteManagementJunction::where('route_management_id',$route_management->id)->get();
+                $junction_data = '';
+
+                
+                    foreach ($junctions as $value) {
+                        $junction_data.= $value->junction->name.' , ';
+
+                    }
+                    return $junction_data;
+                    // return $route_management->id;
+            })
+            
             ->addColumn('action', function ($fleet) {
                 $enable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable = '<button type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Disable</div></button>';
@@ -4134,6 +4207,7 @@ class GlobalSettingsController extends Controller
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
+                $dropdown .= '<button type="button" class="dropdown-item edit_route_management"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
 
                 if ($fleet->status == 0) {
                     $dropdown .= $enable;
@@ -4169,7 +4243,9 @@ class GlobalSettingsController extends Controller
         $route_management->route_title = $request->route_title;
         $route_management->starting_point_id = $request->starting_point_id;
         $route_management->end_point_id = $request->end_point_id;
+        $route_management->status = 1;
         $route_management->save();
+        
         foreach ($request->junction as $junction_id) {
             $route_management_junction = new RouteManagementJunction;
             $route_management_junction->junction_id = $junction_id;

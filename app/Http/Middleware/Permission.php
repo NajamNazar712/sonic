@@ -506,6 +506,9 @@ class Permission
             'reports.retail_sales.index' =>493,
             'reports.retail_sales.list' => 493,
 
+            'reports.shipper_insurance.index' => 502,
+            'reports.shipper_insurance.list' => 502,
+
 
             'packaging.index' => 76,
             'packaging.list' => 76,

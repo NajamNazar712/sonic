@@ -7223,6 +7223,8 @@ class NotificationsController extends Controller
                     if ($master_cargo_id) {
 
                         $master_cargo = MasterCargo::find($master_cargo_id);
+
+                        
                         $destination = $master_cargo->destination_hub_id;
                         $html = '<table style="width:100%;">';
                         $html .= '<thead><tr>
@@ -7245,11 +7247,37 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->shipments . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->origin_hub['name'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->destination_hub['name']  . '</td>';
+
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->junction_hub_1['name']  . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->junction_hub_2['name']  . '</td>';
+                        
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->actual_weight . '</td>';
                         $html .= '</tr>';
 
+                        $html .= '</tbody></table> <br>';
+
+
+
+
+//juction table
+
+                    
+                    
+                        $html .= '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Junctions</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        $serial = 1;
+
+                    foreach ($master_cargo->route_management->junctions as $value) {
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->junction['name'] . '</td>';
+                        $html .= '</tr>';
+                        $serial++;
+                    }
                         $html .= '</tbody></table>';
 
                         if (strpos($body, '[preview]') !== FALSE) {
@@ -7258,21 +7286,32 @@ class NotificationsController extends Controller
 
                         $admins = Admin::where('role_id',10)->where('status',1)->get();
                         foreach($admins as $admin) {
-                            if ($master_cargo->junction_hub_1_id != null) {
-                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_1_id);
-                                if ($assign_hubs->exists()) {
-                                    $to = $admin->email;
-                                    self::email($subject, $body, $to);
-                                }
-                            }
 
-                            if ($master_cargo->junction_hub_2_id != null) {
-                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_2_id);
+                            foreach ($master_cargo->route_management->junctions as $value) {
+                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $value->junction['id']);
                                 if ($assign_hubs->exists()) {
                                     $to = $admin->email;
-                                    self::email($subject, $body, $to);
+                                    
                                 }
                             }
+                            if($to != null){
+                                self::email($subject, $body, $to); 
+                            }
+                            // if ($master_cargo->junction_hub_1_id != null) {
+                            //     $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_1_id);
+                            //     if ($assign_hubs->exists()) {
+                            //         $to = $admin->email;
+                            //         self::email($subject, $body, $to);
+                            //     }
+                            // }
+
+                            // if ($master_cargo->junction_hub_2_id != null) {
+                            //     $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_2_id);
+                            //     if ($assign_hubs->exists()) {
+                            //         $to = $admin->email;
+                            //         self::email($subject, $body, $to);
+                            //     }
+                            // }
 
                             if ($master_cargo->destination_hub_id) {
                                 $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->destination_hub_id);
@@ -7316,6 +7355,19 @@ class NotificationsController extends Controller
                     }
 
                     $to = ['fawad.ahmed@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk'];
+
+                    self::email($subject, $body, $to);
+                }
+				else if($id == 131) {
+                  
+                    $request_no = $reference_1_id;
+                    $admin_id = $reference_2_id;
+
+                    if (strpos($body, '[request_no]') !== FALSE) {
+                        $body = str_replace('[request_no]', $request_no, $body);
+                    }
+                    $admin = Admin::find($admin_id);
+                    $to = $admin->email;
 
                     self::email($subject, $body, $to);
                 }

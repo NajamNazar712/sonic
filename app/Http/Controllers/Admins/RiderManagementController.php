@@ -721,9 +721,9 @@ class RiderManagementController extends Controller
         if($employee->exists()){
             $employee = $employee->first();
             $employee->status_id = 1;
-            $employee->save();
             $trax_id = $employee->trax_id;
             $employee_id = $employee->id;
+            $employee->save();
         }
         else{
             $global_setting = GlobalSettings::where('type', 'latest_employee_id');

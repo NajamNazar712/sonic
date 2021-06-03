@@ -82,6 +82,21 @@
             </fieldset>
         </div>
     </div>
+    <div class="row">
+        <div class="col-2">
+            <h4 class="card-title font-weight-bold">Hub Location</h4>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="hub_latitude" id="hub_latitude" class="form-control hub_latitude" placeholder="Latitude">
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
+                <input type="text" name="hub_longitude" id="hub_longitude" class="form-control hub_longitude" placeholder="Longitude">
+            </fieldset>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-3">
@@ -178,6 +193,20 @@
             'digits': 6,
         });
         $('#longitude').inputmask({
+            'alias': 'decimal',
+            'allowMinus': true,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 6,
+        });
+        $('#hub_latitude').inputmask({
+            'alias': 'decimal',
+            'allowMinus': true,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 6,
+        });
+        $('#hub_longitude').inputmask({
             'alias': 'decimal',
             'allowMinus': true,
             'allowPlus': false,

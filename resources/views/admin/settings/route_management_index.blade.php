@@ -175,6 +175,13 @@
 
 
     <script type="text/javascript">
+
+function remove_junction(params) {
+                console.log(params.parentElement.parentElement);
+                var elem = params.parentElement.parentElement;
+                elem.parentNode.removeChild(elem);
+            }
+    
         var index_count = 0;
         $(document).ready(function () {
             $("#starting_point_id").prepend('<option value="" selected></option>').select2({
@@ -192,8 +199,20 @@
                     width:'100%',
                     dropdownParent:$('#AddRouteManagementModal')
                 });
-            var row = 2;
+                
+            // var row = document.getElementById('junctions').children.length;
+            // $('.remove_junction').on('click', function(param){
+            //     console.log('asdsad');
+            // });
+
+             
             $('#AddRouteManagementModal #route_management_add_form #add_junction').on('click', function(){
+                if(document.getElementById('junctions').children.length==0){
+                 var row = 2   
+                }else{
+                    var row = document.getElementById('junctions').children.length+2 
+
+                }
                var html = '<div class="row justify-content-center">\n' +
                    '                            <div class="col-6 form-group">\n' +
                    '                                <select class="form-control" name="junction[' + row + ']" id="junction_' + row + '" data-rule-required="true" data-msg-required="Junction ' + row + ' is required">\n' +
@@ -202,7 +221,14 @@
                    '                                    @endforeach\n' +
                    '                                </select>\n' +
                    '                            </div>\n' +
-                   '                        </div>';
+                   '                        ' +
+                   '         <div class="col-2" style="position: absolute;left: 580px;">\n'+
+                   '  <a href="javascript:void(0);" class="btn btn-icon btn-danger" onclick="remove_junction(this)"><i class="la la-close"></i></a>\n'+
+                   '                        </div>\n'+
+                   '                        </div>\n';
+                   
+                  
+                   
 
                 $('#junctions').append(html);
                 $("#junction_" + row).prepend('<option value="" selected></option>').select2({
@@ -210,11 +236,14 @@
                     width:'100%',
                     dropdownParent:$('#AddRouteManagementModal')
                 });
-                row++;
+                // row++;
             });
             $('#route_management_add_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
@@ -234,54 +263,62 @@
                 }
             });
 
-            // jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            //     if ( this.context.length ) {
-            //         body = [];
-            //         var params = table.ajax.params();
-            //         params.start = 0;
-            //         params.length = -1;
-            //         var jsonResult = $.ajax({
-            //             url: '{{ route('admin.settings.route_management.list') }}',
-            //             data: params,
-            //             success: function (result) {
-            //                 head = [];
-            //                 head.push('S.No');
-            //                 head.push('Runner');
-            //                 head.push('Created At');
-            //                 head.push('Created By');
-            //                 head.push('Status');
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.settings.route_management.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Route Code');
+                            head.push('Route Title');
+                            head.push('Starting Point');
+                            head.push('End Point');
+                            head.push('Junctions');
+                            head.push('Status');
 
-            //                 $.each(result.data, function(index, values) {
-            //                     row = [];
+                            $.each(result.data, function(index, values) {
+                                row = [];
 
 
-            //                     row.push(index + 1);
-            //                     row.push(values.runner);
-            //                     row.push(values.created_at);
-            //                     row.push(values.created_by);
-            //                     row.push(values.status);
+                                row.push(index + 1);
+                                row.push(values.route_code);
+                                row.push(values.route_title);
+                                row.push(values.starting_name);
+                                row.push(values.end_name);
+                                row.push(values.excel_junctions);
+                                row.push(values.status);
 
-            //                     body.push(row);
-            //                 });
-            //             },
-            //             async: false
-            //         });
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
 
-            //         return {body: body, header: head};
-            //     }
-            // } );
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if (session('role_id') == 1 || in_array(504, session('permissions')))
+                        {
+                            text: '<i class="la la-plus"></i> Add Route',
+                            className: 'btn btn-primary add_route_management',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddRouteManagementModal').modal('show');
+                            }
+                        },
+                    @endif
+                    
                     {
-                        text: '<i class="la la-plus"></i> Add Route',
-                        className: 'btn btn-primary add_route_management',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddRouteManagementModal').modal('show');
-                        }
-                    },{
                         extend: 'excel',
                         title: 'Route Management',
                         text: '<i class="la la-file-excel-o"></i> Excel',
@@ -300,14 +337,14 @@
                 autoWidth: false,
                 ajax: '{{ route('admin.settings.route_management.list') }}',
                 rowId: 'id',
-                order: [[2, 'desc']],
+                order: [[0, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'route_code', name: 'route_managements.route_code', class: 'align-middle text-center route_code'},
                     {data: 'route_title', name: 'route_managements.route_title', class: 'align-middle text-center route_title'},
                     {data: 'starting_id', name: 'stp.id', class: 'align-middle text-center starting_point'},
                     {data: 'end_id', name: 'endp.id', class: 'align-middle text-center end_point'},
-                    {data: 'junctions', name: 'junctions', class: 'align-middle text-left junctions'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle text-left junctions', orderable: false},
                     {data: 'status', name: 'route_managements.status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -322,7 +359,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    var status_select = '<select name="status_select" id="status_select" class="form-control">' +
                         '<option value="1">Enabled</option>' +
                         '<option value="0">Disabled</option>' +
                         '</select>';
@@ -385,7 +422,16 @@
                 }
             });
 
-            /*$('body').on('click','button.disable',function () {*/
+
+            $('body').on('click','button.edit_route_management',function () {
+            $('#editRouteManagement').modal('show');
+               var id = $(this).parents('tr').attr('id');
+           
+                $.get( "/admin/settings/route_management/"+id+"/edit/form", function( data ) {
+                    $("#editRouteManagementDiv").html(data);
+                });
+            });
+             /*$('body').on('click','button.disable',function () {*/
             /*$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = $(this).parents('tr').attr('id');
                 $.ajax({

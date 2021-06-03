@@ -17,6 +17,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Registration Number</th>
                         <th class="border-primary border-darken-1">Vehicle Type</th>
+                        <th class="border-primary border-darken-1">Tracking ID</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -45,7 +46,7 @@
                    </div>
                    <div class="row justify-content-center">
                        <div class="col-12 form-group">
-                        <select class="form-control select2" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
+                        <select class="form-control" id="vehicle_select" name="vehicle_select" data-rule-required="true" data-msg-required="Vehicle Type is required">
                             @foreach($vehicles as $vehicle)
                                 <option value="{{$vehicle->id}}">{{$vehicle->name}}</option>
                             @endforeach
@@ -56,8 +57,13 @@
                         <div class="form-group col-md">
                             <input type="text" name="vehicle_type_name" id="vehicle_type_name" class="form-control" placeholder="New Vehicle Type" data-rule-required="true" data-msg-required="Vehicle Type is required">
                         </div>
-                    </div>
+                        </div>
                    </div>
+                   <div class="row justify-content-center">
+                        <div class="col-12 form-group">
+                            <input type="text" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
+                        </div>
+                    </div>
                    
                </div>
                <div class="modal-footer">
@@ -139,6 +145,7 @@
             $('#vehicle_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
                 width: '100%',
                 placeholder: 'Select Vehicle Type*',
+                dropdownParent:$('#fleet_add_form')
             }).bind('change', function() {
                 if ($(this).val() === 'other') {
                     $('#other_picker_name_div').removeClass('d-none');
@@ -169,6 +176,7 @@
                             head.push('S.No');
                             head.push('Registration Number');
                             head.push('Vehicle Type');
+                            head.push('Tracking ID');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -177,7 +185,8 @@
 
                                 row.push(index + 1);
                                 row.push(values.reg_number);
-                                row.push(values.vehicle_type_id);
+                                row.push(values.vehicle_type);
+                                row.push(values.tracking_id);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -194,15 +203,19 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
-                    {
-                        text: '<i class="la la-plus"></i> Add Fleet',
-                        className: 'btn btn-primary add_fleet',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddFleetModal').modal('show');
+                    @if (session('role_id') == 1 || in_array(503, session('permissions')))
 
-                        }
-                    },{
+                        {
+                            text: '<i class="la la-plus"></i> Add Fleet',
+                            className: 'btn btn-primary add_fleet',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddFleetModal').modal('show');
+
+                            }
+                        },
+                    @endif    
+                    {
                         extend: 'excel',
                         title: 'Fleet Management',
                         text: '<i class="la la-file-excel-o"></i> Excel',
@@ -224,9 +237,10 @@
                 order: [[0, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'reg_number', name: 'fleets.reg_number', class: 'align-middle text-center reg_number'},
-                    {data: 'vehicle_type_id', name: 'vehicle_type_id', class: 'align-middle text-center vehicle_type_id'},
-                    {data: 'status', name: 'fleets.status', class: 'align-middle text-center status'},
+                    {data: 'reg_number', name: 'reg_number', class: 'align-middle text-center reg_number'},
+                    {data: 'vehicle_type', name: 'vt.name', class: 'align-middle text-center vehicle_type'},
+                    {data: 'tracking_id', name: 'tracking_id', class: 'align-middle text-center tracking_id'},
+                    {data: 'status', name: 'status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
                 ],
@@ -240,7 +254,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    var status_select = '<select name="status_select" id="status_select" class="status_select form-control">' +
                         '<option value="1">Enabled</option>' +
                         '<option value="0">Disabled</option>' +
                         '</select>';
@@ -278,14 +292,27 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+        $("#editFleet").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+            var id = $(e.relatedTarget).data('target-id');
             
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            if(action == 'edit_fleet'){
+                $.get( "/admin/settings/fleet/"+id+"/edit/form", function( data ) {
+                    $("#editFleetDiv").html(data);
+                });
+            }
+        });
+
+           
+
+            $('#datatable tbody').on('click', 'tr td.action button.status', function() {
 
                 var id = table.row( $(this).parents('tr') ).data().id;
 
-                console.log(id);
-
+            
                 if ($(this).hasClass('status')) {
                     $.ajax({
                         url: '{!! route('admin.settings.fleet.enable_disable') !!}',
@@ -295,8 +322,8 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function(data) {
-                        console.log(data);
                         if (data.status) {
+
                             table.draw(true);
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
@@ -309,28 +336,6 @@
             });
 
 
-            // $('#runner_select_form').validate({
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('.form-group'));
-            //     },
-            //     submitHandler: function(form) {
-            //         $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-            //         swal({
-            //             title: 'Please Wait!',
-            //             text: 'Runner is being selected!',
-            //             icon: 'info',
-            //             buttons: false,
-            //             closeOnClickOutside: false,
-            //             closeOnEsc: false
-            //         });
-
-            //         form.submit();
-            //     }
-            // });
-
             
             $('#fleet_add_form').validate({
                 ignore: ":not(:visible),:disabled",
@@ -338,6 +343,9 @@
                 successClass: 'success',
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
                 },
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
@@ -353,36 +361,14 @@
 
                     form.submit();
                 }
-                // submitHandler: function(form) {
-                //     Swal.fire({
-                //         title: 'Are You Sure?',
-                //         text: 'Select Yes to Add Fleet!',
-                //         type: 'warning',
-                //         showConfirmButton: true,
-                //         confirmButtonText: 'Yes',
-                //         showCancelButton: true,
-                //         allowOutsideClick: false,
-                //     }).then(function (confirm) {
-                //         // $('input[name="picking_ids"]').val(selected_rows);
-                //         if (confirm.value) {
-                //             Swal.fire({
-                //                 type: 'info',
-                //                 title: 'Please Wait!',
-                //                 text: 'Creating Fleet!',
-                //                 showCancelButton: false,
-                //                 showConfirmButton: false,
-                //                 allowOutsideClick: false,
-                //             });
-                //             form.submit();
-                //         }
-                //     });
-                // }
+                
             });
 
-            // $('#SelectRunnerModal').on('hide.bs.modal', function (e) {
-            //     $('#runner').val('').change();
-            // });
+            
         });
+
+   
+        
 
     </script>
 @endsection

@@ -8090,7 +8090,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.city_code as city_code','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
+            ->select(['cities.id as city_id','cities.city_code as city_code','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category','cities.hub_location_latitude','cities.hub_location_longitude']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -8112,6 +8112,16 @@ class AdminDashboardController extends Controller
                 $location = '<div class="text-center">';
                 if($result->location_latitude != null && $result->location_longitude != null) {
                     $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('hub_location', function ($result){
+                $location = '<div class="text-center">';
+                if($result->hub_location_latitude != null && $result->hub_location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->hub_location_latitude . ',' . $result->hub_location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
                     $location .= '</div>';
                     return $location;
                 }else{
@@ -8196,6 +8206,7 @@ class AdminDashboardController extends Controller
     }
 
     public function updateCity(Request $request,$id){
+       
         $city_id = City::where('id',$id)->first();
         if($city_id){
             if($request->has('updatedelivery') && count($request->updatedelivery) > 0){
@@ -8211,6 +8222,8 @@ class AdminDashboardController extends Controller
                         'attempt_tat'=>$request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     CityHistory::create([
@@ -8225,6 +8238,8 @@ class AdminDashboardController extends Controller
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     WalkInCities::where('city_id',$id)->delete();
@@ -8264,6 +8279,8 @@ class AdminDashboardController extends Controller
                         'attempt_tat'=>$request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     CityHistory::create([
@@ -8278,6 +8295,8 @@ class AdminDashboardController extends Controller
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     WalkInCities::where('city_id',$id)->delete();
@@ -8314,7 +8333,7 @@ class AdminDashboardController extends Controller
     }
     //update city end
     public function addCityHub(Request $request){
-        // dd($request->city_code);
+      
         if($request->postType == 'city'){
             $zone_id = City::find($request->hubs)->zone_id;
 
@@ -8330,6 +8349,8 @@ class AdminDashboardController extends Controller
                 'status'=>1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8345,6 +8366,8 @@ class AdminDashboardController extends Controller
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8402,6 +8425,8 @@ class AdminDashboardController extends Controller
                 'status'=>1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8416,6 +8441,8 @@ class AdminDashboardController extends Controller
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 

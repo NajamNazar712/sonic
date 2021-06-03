@@ -1,5 +1,6 @@
 @extends('admin.layout.master')
 @section('title','Return Confirmation Pending Shipments')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('content')
     <h1 class="mb-1">
@@ -395,6 +396,10 @@
                     params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.return.list') }}',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -786,6 +791,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.return.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
@@ -816,7 +825,7 @@
                     {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req'},
+                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req', orderable: false, searchable: false},
                     {data: 'confirmation_on', name: '', class: 'align-middle confirmation_on', orderable: false, searchable: false},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},

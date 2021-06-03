@@ -15,7 +15,7 @@ class RouteManagement extends Model
     }
 
     public function junctions(){
-        return $this->hasMany('App\Http\Models\RouteManagementJunction');
+        return $this->hasMany('App\Http\Models\Admin\RouteManagementJunction');
     }
     
 }
