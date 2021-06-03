@@ -2658,7 +2658,7 @@ class AdminMasterCargoController extends Controller
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
                     foreach ($master_cargo->route_management->junctions as $value) {
-                        $junctions .=  $value->junction->name.'  ';
+                        $junctions .=  $value->junction->name.' , ';
                     }
 
                     return $junctions;

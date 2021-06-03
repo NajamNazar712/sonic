@@ -97,7 +97,7 @@
                                                     </div>
                                                     <div class="col-6">
                                                         <div class="form-group">
-                                                            <select name="route_management_id" class="select2 route_management_id">
+                                                            <select name="route_management_id" class="select2 route_management_id" data-rule-required="true" data-msg-required="Route is required">
                                                             </select>
                                                         </div>
                                                     </div>
@@ -151,7 +151,7 @@
                                                     </div> --}}
                                                     <div class="col">
                                                         <div class="form-group">
-                                                            <select name="fleet_id" class="select2 fleet_id">
+                                                            <select name="fleet_id" class="select2 fleet_id"  data-rule-required="true" data-msg-required="Route is required">
                                                             </select>
                                                         </div>
                                                     </div>
@@ -435,7 +435,7 @@
 
                         $('#master_cargo_consignment form .fleet_id').prepend('<option value="" selected="selected"></option>').select2({
                                 width: '100%',
-                                placeholder: 'Select Vehicle'
+                                placeholder: 'Select Fleet'
                             }).bind('change', function() {
                                 $(this).valid();
                             });

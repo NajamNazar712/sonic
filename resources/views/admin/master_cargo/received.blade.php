@@ -234,7 +234,7 @@
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'actual_weight', name: 'master_cargoes.actual_weight', class: 'align-middle actual_weight'},
-                    {data: 'junctions', name: 'junctions', class: 'align-middle junctions'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle junctions', orderable: false, searchable: false},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
                     {data: 'driver_name', name: 'master_cargoes.driver_name', class: 'align-middle driver_name'},
