@@ -54,7 +54,7 @@
             @foreach ($route_management->junctions as $item)
             <div class="row justify-content-center">
                 <div class="col-6 form-group">
-                    <select class="form-control junctions_select" name="junction[{{$item->id}}]" id="junction_{{$item->id}}" data-rule-required="true" data-msg-required="Junction 1 is required">
+                    <select class="form-control junctions_select" name="edit_junction[{{$i}}]" id="junction_{{$item->id}}" data-rule-required="true" data-msg-required="Junction 1 is required">
                         @foreach($cities as $city)
                             @if ($item->junction_id == $city->id)
                             <option value="{{$city->id}}" selected>{{$city->name}}</option>
@@ -64,6 +64,12 @@
                         @endforeach
                     </select>
                 </div>
+                @if ($i!=1)
+                <div class="col-2" style="position: absolute;left: 580px;">
+                    <a class="btn btn-danger" onclick="edit_remove_junction(this)">X</a>
+                </div>
+                @endif
+                
                
             </div>
            
@@ -99,6 +105,12 @@
 </form>
 
 <script type="text/javascript">
+
+function edit_remove_junction(params) {
+                console.log(params.parentElement.parentElement);
+                var elem = params.parentElement.parentElement;
+                elem.parentNode.removeChild(elem);
+            }
     $(document).ready(function () {
 
         $(".starting_point_id_edit").prepend('<option value="" selected></option>').select2({
@@ -119,15 +131,18 @@
             });
             var row = 1;
             $('#editRouteManagementDiv #editRouteManagementForm #edit_add_junction').on('click', function(){
-
+                    var row = document.getElementById('edit_junctions').children.length+1;
                var html = '<div class="row justify-content-center">\n' +
                    '                            <div class="col-6 form-group">\n' +
-                   '                                <select class="form-control edit_junctions" name="new_junction[' + row + ']" id="new_junction_' + row + '" data-rule-required="true" data-msg-required="Junction ' + row + ' is required">\n' +
+                   '                                <select class="form-control edit_junctions" name="edit_junction[' + row + ']" id="new_junction_' + row + '" data-rule-required="true" data-msg-required="Junction ' + row + ' is required">\n' +
                    '                                    @foreach($cities as $city)\n' +
                    '                                        <option value="{{$city->id}}">{{$city->name}}</option>\n' +
                    '                                    @endforeach\n' +
                    '                                </select>\n' +
                    '                            </div>\n' +
+                   '         <div class="col-2" style="position: absolute;left: 580px;">\n'+
+                   '  <a class="btn btn-danger" onclick="edit_remove_junction(this)">X</a>\n'+
+                   '                        </div>\n'+
                    '                        </div>';
 
                 $('#edit_junctions').append(html);

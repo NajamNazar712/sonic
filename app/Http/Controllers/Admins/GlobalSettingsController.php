@@ -4130,28 +4130,23 @@ class GlobalSettingsController extends Controller
     }
 
     public function route_management_update(Request $request, $id){
-        
+       
         $route_management = RouteManagement::find($id);
         $route_management->route_code = $request->route_code;
         $route_management->route_title = $request->route_title;
         $route_management->starting_point_id = $request->starting_point_id;
         $route_management->end_point_id = $request->end_point_id;
         $route_management->save();
-        foreach ($request->junction as $key => $junction_id) {
-            $route_management_junction = RouteManagementJunction::find($key);
-            $route_management_junction->junction_id = $junction_id;
+        foreach ($route_management->junctions as $value) {
+            $route_management_junction = RouteManagementJunction::find($value->id);
+            $route_management_junction->delete();
+        }
+        foreach ($request->edit_junction as $value) {
+            $route_management_junction = new RouteManagementJunction;
+            $route_management_junction->junction_id = $value;
             $route_management_junction->route_management_id = $route_management->id;
             $route_management_junction->save();
-            }
-
-            if(isset($request->new_junction)){
-                foreach ($request->new_junction as $key => $value) {
-                    $route_management_junction = new RouteManagementJunction;
-                    $route_management_junction->junction_id = $value;
-                    $route_management_junction->route_management_id = $route_management->id;
-                    $route_management_junction->save();
-                    }
-            }
+        }
         return redirect()->back()->with('success', 'Route Updated successfully!');
     }
     public function route_management_list()
