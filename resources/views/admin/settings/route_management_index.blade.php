@@ -176,7 +176,11 @@
 
     <script type="text/javascript">
 
-
+function remove_junction(params) {
+                console.log(params.parentElement.parentElement);
+                var elem = params.parentElement.parentElement;
+                elem.parentNode.removeChild(elem);
+            }
     
         var index_count = 0;
         $(document).ready(function () {
@@ -195,8 +199,20 @@
                     width:'100%',
                     dropdownParent:$('#AddRouteManagementModal')
                 });
-            var row = 2;
+                
+            // var row = document.getElementById('junctions').children.length;
+            // $('.remove_junction').on('click', function(param){
+            //     console.log('asdsad');
+            // });
+
+             
             $('#AddRouteManagementModal #route_management_add_form #add_junction').on('click', function(){
+                if(document.getElementById('junctions').children.length==0){
+                 var row = 2   
+                }else{
+                    var row = document.getElementById('junctions').children.length+2 
+
+                }
                var html = '<div class="row justify-content-center">\n' +
                    '                            <div class="col-6 form-group">\n' +
                    '                                <select class="form-control" name="junction[' + row + ']" id="junction_' + row + '" data-rule-required="true" data-msg-required="Junction ' + row + ' is required">\n' +
@@ -205,7 +221,14 @@
                    '                                    @endforeach\n' +
                    '                                </select>\n' +
                    '                            </div>\n' +
-                   '                        </div>';
+                   '                        ' +
+                   '         <div class="col-2" style="position: absolute;left: 580px;">\n'+
+                   '  <a class="btn btn-danger" onclick="remove_junction(this)">X</a>\n'+
+                   '                        </div>\n'+
+                   '                        </div>\n';
+                   
+                  
+
 
                 $('#junctions').append(html);
                 $("#junction_" + row).prepend('<option value="" selected></option>').select2({
@@ -213,7 +236,7 @@
                     width:'100%',
                     dropdownParent:$('#AddRouteManagementModal')
                 });
-                row++;
+                // row++;
             });
             $('#route_management_add_form').validate({
                 errorClass: 'danger',

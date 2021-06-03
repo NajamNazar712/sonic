@@ -43,11 +43,17 @@
         <div class="row justify-content-center">
             <div class="col-6 form-group">
                 <label for="end_point_id">Junctions</label>
+           
+            </div>
+            
+        </div>
+        <div id="edit_junctions">
             @php
-                $i=1;
+            $i=1;
             @endphp
-                @foreach ($route_management->junctions as $item)
-
+            @foreach ($route_management->junctions as $item)
+            <div class="row justify-content-center">
+                <div class="col-6 form-group">
                     <select class="form-control junctions_select" name="junction[{{$item->id}}]" id="junction_{{$item->id}}" data-rule-required="true" data-msg-required="Junction 1 is required">
                         @foreach($cities as $city)
                             @if ($item->junction_id == $city->id)
@@ -57,16 +63,17 @@
                             @endif
                         @endforeach
                     </select>
-                    @php
-                        $i++
-                    @endphp
-                @endforeach
-                    
+                </div>
+               
             </div>
-            
-        </div>
-        <div id="edit_junctions">
+           
 
+              
+                @php
+                    $i++
+                @endphp
+            @endforeach
+                
         </div>
         <div class="row justify-content-center">
             <button type="button" class="btn btn-outline-success mr-1" title="Add more junctions" id="edit_add_junction"><i class="la la-plus"></i>Add Junction</button>
