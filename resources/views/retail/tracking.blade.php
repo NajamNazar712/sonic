@@ -1031,6 +1031,36 @@
 
         });
 
+        $('#tracking').on('click', '.payment_print', function () {
+            id = $(this).attr('data-id');
+            console.log(id);
+            $.ajax({
+                url: '{!! route('retail.finance.done_payments.print') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'id': id
+                }
+            })
+                .done(function (data) {
+                    var tab = window.open('', '_blank');
+
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        });
 
 
         var max_char = 245;

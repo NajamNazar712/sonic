@@ -254,7 +254,7 @@
                                     </div>
                                     <div class="col-8 d-none" id="receiving_sheet_div">
                                         <fieldset class="form-group">
-{{--                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">--}}
+                                            {{--                                            <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">--}}
                                             <select name="receiving_sheet_id"  id="request_id" class="form-control select2">
 
                                             </select>
@@ -287,11 +287,11 @@
                                             <label for="actual_product_picture"><b>Actual Product Picture:</b></label>
                                             <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
                                         </fieldset>
-{{--                                        <div class="col-8" id="damage_claim_product_cost_div">--}}
+                                        {{--                                        <div class="col-8" id="damage_claim_product_cost_div">--}}
                                         <fieldset class="form-group">
                                             <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Price">
                                         </fieldset>
-{{--                                        </div>--}}
+                                        {{--                                        </div>--}}
                                     </div>
 
                                     <div class="col-8 text-left d-none" id="claim_content_short_div">
@@ -386,21 +386,46 @@
                         <input type="hidden" id="consolidate_shipment_ids" name="shipment_ids">
 
 
-                            <div id="consolidate_shipment_table" class="row justify-content-center">
-                                <div class="col-lg-12 consolidate_shipment_table">
-
-                                </div>
+                        <div id="consolidate_shipment_table" class="row justify-content-center">
+                            <div class="col-lg-12 consolidate_shipment_table">
 
                             </div>
 
+                        </div>
 
-                            <div class="row justify-content-center">
-                                <div class="col-3 mt-1">
-                                    <button id="AddConsolidateShipments" type="submit" class="btn btn-primary btn-block">Consolidate</button>
-                                </div>
+
+                        <div class="row justify-content-center">
+                            <div class="col-3 mt-1">
+                                <button id="AddConsolidateShipments" type="submit" class="btn btn-primary btn-block">Consolidate</button>
                             </div>
+                        </div>
 
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="CancelReasonModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CancelReasonModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Cancel Reason</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <textarea type="text" rows="5" cols="50" id="cancel_reason" name="cancel_reason" placeholder="Enter Reason"></textarea>
+
+
+                    <div class="row justify-content-center">
+                        <div class="col-3 mt-1">
+                            <button id="CancelReasonSubmit" type="submit" class="btn btn-primary btn-block">Submit</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -530,7 +555,7 @@
                         'ids[]': selected_rows,
                         '_token': '{{ csrf_token() }}'
                     }
-                    })
+                })
                     .done(function (data) {
                         if(data.status === 1) {
                             if (data.sticker) {
@@ -546,13 +571,13 @@
                                         '_token': '{{ csrf_token() }}'
                                     }
                                 })
-                                .done(function(data) {
-                                    var blob = new Blob([data]);
-                                    var link = document.createElement('a');
-                                    link.href = window.URL.createObjectURL(blob);
-                                    link.download = 'air_waybills.pdf';
-                                    link.click();
-                                });
+                                    .done(function(data) {
+                                        var blob = new Blob([data]);
+                                        var link = document.createElement('a');
+                                        link.href = window.URL.createObjectURL(blob);
+                                        link.download = 'air_waybills.pdf';
+                                        link.click();
+                                    });
                             }
                             else {
                                 $.ajax({
@@ -564,29 +589,32 @@
                                         '_token': '{{ csrf_token() }}'
                                     }
                                 })
-                                .done(function (data) {
-                                    var tab = window.open('', '_blank');
+                                    .done(function (data) {
+                                        var tab = window.open('', '_blank');
 
-                                    if (!tab) {
-                                        swal({
-                                            title: 'Popup Blocker Enabled!',
-                                            text: 'Please add this site to your exception list.',
-                                            icon: 'error',
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-                                    } else {
-                                        tab.document.write(data);
-                                        tab.document.close();
-                                        tab.focus();
-                                    }
-                                });
+                                        if (!tab) {
+                                            swal({
+                                                title: 'Popup Blocker Enabled!',
+                                                text: 'Please add this site to your exception list.',
+                                                icon: 'error',
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false
+                                            });
+                                        } else {
+                                            tab.document.write(data);
+                                            tab.document.close();
+                                            tab.focus();
+                                        }
+                                    });
                             }
                         }
                     });
             }
 
             function cancel(selected_rows) {
+                $('#CancelReasonModal').modal('show');
+                $('#CancelReasonSubmit').on('click',function () {
+                    var reason = $('#cancel_reason').val();
                     swal({
                         text: 'Are you sure, you want to cancel these Shipment(s)?',
                         icon: 'warning',
@@ -614,11 +642,14 @@
                                 method: 'POST',
                                 data: {
                                     'ids[]': selected_rows,
+                                    'reason' : reason,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             })
                                 .done(function (data) {
                                     if(data.status === 1){
+
+                                        $('#CancelReasonModal').modal('hide');
                                         table.draw('false');
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }else{
@@ -627,6 +658,8 @@
                                 });
                         }
                     });
+                })
+
             }
 
             var selected_rows = [];
@@ -635,123 +668,123 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
 
-                    {{--{--}}
-                    {{--    text: '<i class="la la-plus"></i> Consolidate',--}}
-                    {{--    className: 'btn btn-primary consolidate',--}}
-                    {{--    enabled: false,--}}
-                    {{--    action: function (e, dt, node, config) {--}}
-                    {{--        if (selected_rows.length > 1) {--}}
-                    {{--            $.ajax({--}}
-                    {{--                url: '{!! route('cod.orders.consolidate.shipment_info') !!}',--}}
-                    {{--                method: 'POST',--}}
-                    {{--                data: {--}}
-                    {{--                    'shipment_ids': selected_rows,--}}
-                    {{--                    '_token': '{{ csrf_token() }}'--}}
-                    {{--                }--}}
-                    {{--            }).done(function (data) {--}}
-                    {{--                if (data.status === 1) {--}}
-                    {{--                    $('#consolidate_shipment_ids').val(selected_rows);--}}
-                    {{--                    var route = '{!! route('cod.tracking.index') !!}';--}}
-                    {{--                    var html = '';--}}
-                    {{--                    html += '<table class="table datatable text-center">';--}}
-                    {{--                    html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Origin</strong></th><th><strong>Destination</strong><th><strong>Consignee Name & Phone</strong></th><th><strong>Consignee Address</strong></th><th><strong>COD Amount</strong></th><th><strong>Product Type</strong></th><th><strong>Booking Date</strong></th><th><strong>Action</strong></th></tr></thead>';--}}
-                    {{--                    html += '<tbody>';--}}
-                    {{--                    $.each(data.shipment_info, function(index, value) {--}}
-                    {{--                        var ind = index+1;--}}
-                    {{--                        html += '<tr class=""><td>' + ind + '</td>';--}}
-                    {{--                        html += '<td><u><a href='+route+'?tracking_number='+value.tracking_number+' target="_blank">'+value.tracking_number+'</a></u></td>';--}}
-                    {{--                        // if(value.order_id != null){--}}
-                    {{--                        //     html += '<td>' + value.order_id + '</td>';--}}
-                    {{--                        // } else{--}}
-                    {{--                        //     html += '<td>-</td>';--}}
-                    {{--                        // }--}}
-                    {{--                        html += '<td>' + value.origin + '</td>';--}}
-                    {{--                        html += '<td>' + value.destination + '</td>';--}}
-                    {{--                        html += '<td>' + value.consignee_name + ' | ' + value.consignee_phone_number_1 + '</td>';--}}
-                    {{--                        // html += '<td>' + value.consignee_phone_number_1 + '</td>';--}}
-                    {{--                        html += '<td>' + value.consignee_address + '</td>';--}}
-                    {{--                        html += '<td>' + value.amount + '</td>';--}}
-                    {{--                        html += '<td>' + value.product_type + '</td>';--}}
-                    {{--                        html += '<td>' + value.created_at + '</td>';--}}
-                    {{--                        if(index == 0){--}}
-                    {{--                            html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '" checked="checked"><label for="default-radio">Make Default</label></td></tr>';--}}
-                    {{--                        }--}}
-                    {{--                        else{--}}
-                    {{--                            html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '"><label for="default-radio">Make Default</label></td></tr>';--}}
-                    {{--                        }--}}
-                    {{--                    });--}}
-                    {{--                    html += '</tbody></table>';--}}
+                        {{--{--}}
+                        {{--    text: '<i class="la la-plus"></i> Consolidate',--}}
+                        {{--    className: 'btn btn-primary consolidate',--}}
+                        {{--    enabled: false,--}}
+                        {{--    action: function (e, dt, node, config) {--}}
+                        {{--        if (selected_rows.length > 1) {--}}
+                        {{--            $.ajax({--}}
+                        {{--                url: '{!! route('cod.orders.consolidate.shipment_info') !!}',--}}
+                        {{--                method: 'POST',--}}
+                        {{--                data: {--}}
+                        {{--                    'shipment_ids': selected_rows,--}}
+                        {{--                    '_token': '{{ csrf_token() }}'--}}
+                        {{--                }--}}
+                        {{--            }).done(function (data) {--}}
+                        {{--                if (data.status === 1) {--}}
+                        {{--                    $('#consolidate_shipment_ids').val(selected_rows);--}}
+                        {{--                    var route = '{!! route('cod.tracking.index') !!}';--}}
+                        {{--                    var html = '';--}}
+                        {{--                    html += '<table class="table datatable text-center">';--}}
+                        {{--                    html += '<thead><tr><th>S No.</th><th><strong>Tracking No</strong></th><th><strong>Origin</strong></th><th><strong>Destination</strong><th><strong>Consignee Name & Phone</strong></th><th><strong>Consignee Address</strong></th><th><strong>COD Amount</strong></th><th><strong>Product Type</strong></th><th><strong>Booking Date</strong></th><th><strong>Action</strong></th></tr></thead>';--}}
+                        {{--                    html += '<tbody>';--}}
+                        {{--                    $.each(data.shipment_info, function(index, value) {--}}
+                        {{--                        var ind = index+1;--}}
+                        {{--                        html += '<tr class=""><td>' + ind + '</td>';--}}
+                        {{--                        html += '<td><u><a href='+route+'?tracking_number='+value.tracking_number+' target="_blank">'+value.tracking_number+'</a></u></td>';--}}
+                        {{--                        // if(value.order_id != null){--}}
+                        {{--                        //     html += '<td>' + value.order_id + '</td>';--}}
+                        {{--                        // } else{--}}
+                        {{--                        //     html += '<td>-</td>';--}}
+                        {{--                        // }--}}
+                        {{--                        html += '<td>' + value.origin + '</td>';--}}
+                        {{--                        html += '<td>' + value.destination + '</td>';--}}
+                        {{--                        html += '<td>' + value.consignee_name + ' | ' + value.consignee_phone_number_1 + '</td>';--}}
+                        {{--                        // html += '<td>' + value.consignee_phone_number_1 + '</td>';--}}
+                        {{--                        html += '<td>' + value.consignee_address + '</td>';--}}
+                        {{--                        html += '<td>' + value.amount + '</td>';--}}
+                        {{--                        html += '<td>' + value.product_type + '</td>';--}}
+                        {{--                        html += '<td>' + value.created_at + '</td>';--}}
+                        {{--                        if(index == 0){--}}
+                        {{--                            html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '" checked="checked"><label for="default-radio">Make Default</label></td></tr>';--}}
+                        {{--                        }--}}
+                        {{--                        else{--}}
+                        {{--                            html += '<td><input type="radio" name="default-radio" class="icheck dradio" id="default-radio" value="' + value.id + '"><label for="default-radio">Make Default</label></td></tr>';--}}
+                        {{--                        }--}}
+                        {{--                    });--}}
+                        {{--                    html += '</tbody></table>';--}}
 
-                    {{--                    $('#ConsolidateModal .modal-body .row .consolidate_shipment_table').html(html);--}}
-                    {{--                    $('#ConsolidateModal').modal('show');--}}
-                    {{--                } else if(data.status === 2){--}}
-                    {{--                        var consolidated_html = '';--}}
+                        {{--                    $('#ConsolidateModal .modal-body .row .consolidate_shipment_table').html(html);--}}
+                        {{--                    $('#ConsolidateModal').modal('show');--}}
+                        {{--                } else if(data.status === 2){--}}
+                        {{--                        var consolidated_html = '';--}}
 
-                    {{--                        $.each(data.consolidated_Shipments, function(index, tracking_number) {--}}
-                    {{--                            consolidated_html += tracking_number + '<br/>';--}}
-                    {{--                        });--}}
+                        {{--                        $.each(data.consolidated_Shipments, function(index, tracking_number) {--}}
+                        {{--                            consolidated_html += tracking_number + '<br/>';--}}
+                        {{--                        });--}}
 
-                    {{--                        consolidated_html += '<br/>Above Shipment(s) are already Consolidated!';--}}
+                        {{--                        consolidated_html += '<br/>Above Shipment(s) are already Consolidated!';--}}
 
-                    {{--                        content = document.createElement('div');--}}
-                    {{--                        content.innerHTML = consolidated_html;--}}
+                        {{--                        content = document.createElement('div');--}}
+                        {{--                        content.innerHTML = consolidated_html;--}}
 
-                    {{--                        swal({--}}
-                    {{--                            title: 'Already Consolidated',--}}
-                    {{--                            content: content,--}}
-                    {{--                            icon: 'warning',--}}
-                    {{--                            buttons: {--}}
-                    {{--                                cancel: {--}}
-                    {{--                                    text: 'Close',--}}
-                    {{--                                    value: null,--}}
-                    {{--                                    visible: true,--}}
-                    {{--                                    closeModal: true,--}}
-                    {{--                                },--}}
-                    {{--                            },--}}
-                    {{--                            closeOnClickOutside: false,--}}
-                    {{--                            closeOnEsc: false,--}}
-                    {{--                            dangerMode: true--}}
-                    {{--                        });--}}
-                    {{--                } else{--}}
-                    {{--                    toastr.error(data.error, 'Error!', {--}}
-                    {{--                        positionClass: 'toast-top-center',--}}
-                    {{--                        containerId: 'toast-top-center'--}}
-                    {{--                    });--}}
-                    {{--                }--}}
-                    {{--            });--}}
-                    {{--        }--}}
-                    {{--        else{--}}
-                    {{--            var error = 'Select at least two shipments to Consolidate';--}}
-                    {{--            toastr.error(error, 'Error!', {--}}
-                    {{--                positionClass: 'toast-top-center',--}}
-                    {{--                containerId: 'toast-top-center'--}}
-                    {{--            });--}}
-                    {{--        }--}}
-                    {{--    }--}}
-                    {{--},--}}
+                        {{--                        swal({--}}
+                        {{--                            title: 'Already Consolidated',--}}
+                        {{--                            content: content,--}}
+                        {{--                            icon: 'warning',--}}
+                        {{--                            buttons: {--}}
+                        {{--                                cancel: {--}}
+                        {{--                                    text: 'Close',--}}
+                        {{--                                    value: null,--}}
+                        {{--                                    visible: true,--}}
+                        {{--                                    closeModal: true,--}}
+                        {{--                                },--}}
+                        {{--                            },--}}
+                        {{--                            closeOnClickOutside: false,--}}
+                        {{--                            closeOnEsc: false,--}}
+                        {{--                            dangerMode: true--}}
+                        {{--                        });--}}
+                        {{--                } else{--}}
+                        {{--                    toastr.error(data.error, 'Error!', {--}}
+                        {{--                        positionClass: 'toast-top-center',--}}
+                        {{--                        containerId: 'toast-top-center'--}}
+                        {{--                    });--}}
+                        {{--                }--}}
+                        {{--            });--}}
+                        {{--        }--}}
+                        {{--        else{--}}
+                        {{--            var error = 'Select at least two shipments to Consolidate';--}}
+                        {{--            toastr.error(error, 'Error!', {--}}
+                        {{--                positionClass: 'toast-top-center',--}}
+                        {{--                containerId: 'toast-top-center'--}}
+                        {{--            });--}}
+                        {{--        }--}}
+                        {{--    }--}}
+                        {{--},--}}
                     {
-                    text: '<i class="la la-print"></i> Print',
-                    className: 'btn btn-primary print',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        table.button(0).disable();
-                        table.button(1).disable();
-                        print(selected_rows);
-                        table.rows().deselect();
-                        selected_rows = [];
-                    }
-                }, {
-                    text: '<i class="la la-cancel"></i> Cancel',
-                    className: 'btn btn-danger cancel',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        table.button(0).disable();
-                        table.button(1).disable();
-                        cancel(selected_rows);
-                        table.rows().deselect();
-                        selected_rows = [];
-                    }
-                },
+                        text: '<i class="la la-print"></i> Print',
+                        className: 'btn btn-primary print',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            table.button(0).disable();
+                            table.button(1).disable();
+                            print(selected_rows);
+                            table.rows().deselect();
+                            selected_rows = [];
+                        }
+                    }, {
+                        text: '<i class="la la-cancel"></i> Cancel',
+                        className: 'btn btn-danger cancel',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            table.button(0).disable();
+                            table.button(1).disable();
+                            cancel(selected_rows);
+                            table.rows().deselect();
+                            selected_rows = [];
+                        }
+                    },
                     {
                         text: '<i class="la la-plus"></i> Add Request',
                         className: 'btn btn-primary request_add',
@@ -1618,11 +1651,11 @@
                                             });
 
                                             if (!data.cannot_change) {
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
-                                        }
-                                        else {
-                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
-                                        }
+                                                html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                            }
+                                            else {
+                                                html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            }
 
                                             content = document.createElement('div');
                                             content.innerHTML = html;
@@ -1681,51 +1714,51 @@
                             $('#AddNewRequest').attr('disabled', false);
                         }
                         else{
-                        var nature_flag = true;
-                        var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
-                        // var damage_product_cost = $('#claim_product_cost').val();
-                        var check_product_picture = $('#product_picture').val();
-                        var check_invoice_picture = $('#invoice_picture').val();
-                        $('#shipment_ids').val(selected_rows);
-                        $('#case_nature_id').val(case_nature_id);
-                        $('#complaint_id').val(case_nature_claim_id);
-                        var formData = new FormData($('#add_request_form')[0]);
-                        if(case_nature_claim_id === 23){
-                            if($('#request_id').val() == "" || $('#request_id').val() == null){
+                            var nature_flag = true;
+                            var case_nature_claim_id = $('#case_nature_claim').val();
+                            var product_cost = $('#claim_product_cost').val();
+                            // var damage_product_cost = $('#claim_product_cost').val();
+                            var check_product_picture = $('#product_picture').val();
+                            var check_invoice_picture = $('#invoice_picture').val();
+                            $('#shipment_ids').val(selected_rows);
+                            $('#case_nature_id').val(case_nature_id);
+                            $('#complaint_id').val(case_nature_claim_id);
+                            var formData = new FormData($('#add_request_form')[0]);
+                            if(case_nature_claim_id === 23){
+                                if($('#request_id').val() == "" || $('#request_id').val() == null){
+                                    nature_flag = false;
+                                    var error = "Please select receiving sheet!";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                            }
+                            if (!case_nature_claim_id) {
                                 nature_flag = false;
-                                var error = "Please select receiving sheet!";
+                                var error = "Please select Claim type!";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
                             }
-                        }
-                        if (!case_nature_claim_id) {
-                            nature_flag = false;
-                            var error = "Please select Claim type!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        if (case_nature_claim_id !== "26") {
-                            if (!check_product_picture) {
-                                nature_flag = false;
-                                var error = "Please attach Product Picture!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            if (!product_cost) {
-                                nature_flag = false;
-                                var error = "Please enter Product Cost!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
+                            if (case_nature_claim_id !== "26") {
+                                if (!check_product_picture) {
+                                    nature_flag = false;
+                                    var error = "Please attach Product Picture!";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                if (!product_cost) {
+                                    nature_flag = false;
+                                    var error = "Please enter Product Cost!";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
                                 // if (!damage_product_cost) {
                                 //     nature_flag = false;
                                 //     var error = "Please enter Damage Product Cost!";
@@ -1734,89 +1767,89 @@
                                 //         containerId: 'toast-top-center'
                                 //     });
                                 // }
-                            if (!check_invoice_picture) {
-                                nature_flag = false;
-                                var error = "Please attach Invoice Picture!";
-                                toastr.error(error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
+                                if (!check_invoice_picture) {
+                                    nature_flag = false;
+                                    var error = "Please attach Invoice Picture!";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                            }
+                            if (nature_flag) {
+                                $('#AddNewRequest').attr('disabled', true);
+                                $.ajax({
+                                    url: '{!! route('cod.crm.request.add') !!}',
+                                    method: 'POST',
+                                    enctype: 'multipart/form-data',
+                                    data: formData,
+                                    dataType: 'json',
+                                    processData: false,
+                                    contentType: false,
+                                })
+                                    .done(function (data) {
+                                        if (data.status) {
+                                            if (data.flag) {
+                                                var html = '';
+
+                                                $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                    html += tracking_number + '<br/>';
+                                                });
+
+                                                if (!data.cannot_change) {
+                                                    html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                                }
+                                                else {
+                                                    html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                                }
+
+                                                content = document.createElement('div');
+                                                content.innerHTML = html;
+
+                                                swal({
+                                                    title: 'Request / Complaint Cannot Be Lodged!',
+                                                    content: content,
+                                                    icon: 'warning',
+                                                    buttons: {
+                                                        cancel: {
+                                                            text: 'Close',
+                                                            value: null,
+                                                            visible: true,
+                                                            closeModal: true,
+                                                        },
+                                                    },
+                                                    closeOnClickOutside: false,
+                                                    closeOnEsc: false,
+                                                    dangerMode: true
+                                                });
+                                            } else {
+                                                toastr.success(data.success, 'Success!', {
+                                                    positionClass: 'toast-bottom-center',
+                                                    containerId: 'toast-bottom-center'
+                                                });
+                                            }
+                                        } else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+
+                                        table.button('.print').disable();
+                                        table.button('.cancel').disable();
+
+                                        selected_rows = [];
+
+                                        table.rows().deselect();
+
+                                        table.draw('false');
+
+                                        $('#AddRequestModal').modal('hide');
+                                        $('#AddNewRequest').attr('disabled', false);
+                                    });
                             }
                         }
-                        if (nature_flag) {
-                            $('#AddNewRequest').attr('disabled', true);
-                            $.ajax({
-                                url: '{!! route('cod.crm.request.add') !!}',
-                                method: 'POST',
-                                enctype: 'multipart/form-data',
-                                data: formData,
-                                dataType: 'json',
-                                processData: false,
-                                contentType: false,
-                            })
-                                .done(function (data) {
-                                    if (data.status) {
-                                        if (data.flag) {
-                                            var html = '';
-
-                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
-                                                html += tracking_number + '<br/>';
-                                            });
-
-                                            if (!data.cannot_change) {
-                                            html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
-                                        }
-                                        else {
-                                            html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
-                                        }
-
-                                            content = document.createElement('div');
-                                            content.innerHTML = html;
-
-                                            swal({
-                                                title: 'Request / Complaint Cannot Be Lodged!',
-                                                content: content,
-                                                icon: 'warning',
-                                                buttons: {
-                                                    cancel: {
-                                                        text: 'Close',
-                                                        value: null,
-                                                        visible: true,
-                                                        closeModal: true,
-                                                    },
-                                                },
-                                                closeOnClickOutside: false,
-                                                closeOnEsc: false,
-                                                dangerMode: true
-                                            });
-                                        } else {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        }
-                                    } else {
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-
-                                    table.button('.print').disable();
-                                    table.button('.cancel').disable();
-
-                                    selected_rows = [];
-
-                                    table.rows().deselect();
-
-                                    table.draw('false');
-
-                                    $('#AddRequestModal').modal('hide');
-                                    $('#AddNewRequest').attr('disabled', false);
-                                });
-                        }
                     }
-                }
                     else {
                         $('#AddNewRequest').attr('disabled',true);
                         $.ajax({
@@ -1956,6 +1989,9 @@
             $('#AddFeedbackModal').on('hide.bs.modal', function (e) {
                 $('#feedback_channel').val('').trigger('change');
                 $('#feedback_description').val('');
+            });
+            $('#CancelReasonModal').on('hide.bs.modal', function (e) {
+                $('#cancel_reason').val('').trigger('change');
             });
         });
     </script>

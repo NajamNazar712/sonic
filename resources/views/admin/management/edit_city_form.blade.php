@@ -90,12 +90,12 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="hub_latitude" id="latitude" class="form-control latitude" placeholder="Latitude" value="{{$city->hub_location_latitude}}">
+                <input type="text" name="hub_latitude" id="hub_latitude" class="form-control hub_latitude" placeholder="Latitude" value="{{$city->hub_location_latitude}}">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="hub_longitude" id="longitude" class="form-control longitude" placeholder="Longitude" value="{{$city->hub_location_longitude}}">
+                <input type="text" name="hub_longitude" id="hub_longitude" class="form-control hub_longitude" placeholder="Longitude" value="{{$city->hub_location_longitude}}">
             </fieldset>
         </div>
     </div>
@@ -207,6 +207,20 @@
             'digits': 6,
         });
         $('#longitude').inputmask({
+            'alias': 'decimal',
+            'allowMinus': true,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 6,
+        });
+        $('#hub_latitude').inputmask({
+            'alias': 'decimal',
+            'allowMinus': true,
+            'allowPlus': false,
+            'rightAlign': false,
+            'digits': 6,
+        });
+        $('#hub_longitude').inputmask({
             'alias': 'decimal',
             'allowMinus': true,
             'allowPlus': false,

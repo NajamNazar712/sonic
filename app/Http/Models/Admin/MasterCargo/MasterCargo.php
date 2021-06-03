@@ -51,4 +51,12 @@ class MasterCargo extends Model
     public function receiver() {
         return $this->belongsTo('App\Http\Models\Admin\Admin', 'received_by', 'id');
     }
+
+    public function route_management() {
+        return $this->belongsTo('App\Http\Models\Admin\RouteManagement');
+    }
+
+    public function fleet() {
+        return $this->belongsTo('App\Http\Models\Admin\Fleet');
+    }
 }
