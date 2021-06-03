@@ -8498,7 +8498,9 @@ class AdminReportsController extends Controller
 
     public function shipper_insurance_index(){
         $shipper_name = User::select('id','name')->get();
-        return view('admin.reports.shipper_insurance')->with(['shipper_name' => $shipper_name]);
+        $today = Carbon::now()->endOfDay();
+        $threedays = Carbon::now()->subDays(3)->startOfDay();
+        return view('admin.reports.shipper_insurance')->with(['shipper_name' => $shipper_name,'today' => $today,'threedays' => $threedays]);
     }
 
     public function shipper_insurance_list(Request $request){
@@ -8507,6 +8509,12 @@ class AdminReportsController extends Controller
             ->join('shipment_items as si','si.shipment_id','=','shipments.id')
             ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number as tracking_number','u.name as shipper','shipments.insurance_charges','shipments.created_at','si.insurance','si.price as price',DB::raw('sum(si.price) as total_insurance'))
             ->groupBy('tracking_number');
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from,$to]);
+        }
 
         $datatables = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -8529,11 +8537,13 @@ class AdminReportsController extends Controller
             $receiving_sheet = $shipments->where('shipments.user_id', '=',$shipper_id);
         }
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+
+        /*if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatables->whereBetween('shipments.created_at', [$from,$to]);
-        }
+        }*/
+
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $shipments->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
