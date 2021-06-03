@@ -27,25 +27,24 @@
                                 <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                             </div>
                         </div>
-
                         <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                    </span>
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
                                 </div>
-                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Date From">
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$threedays}}">
                             </div>
                         </div>
                         <div class="col-3">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o small-calender-icon"></span>
-                                    </span>
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
                                 </div>
-                                <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Date To">
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{$today}}">
                             </div>
                         </div>
                     </div>
@@ -226,7 +225,7 @@
                 }
             });
 
-            var search_date_from = $('#track_form #search_date_from').pickadate({
+          /*  var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -251,6 +250,47 @@
                     if (context.select) {
                         $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
                     }
+                }
+            });*/
+            var threedays = '{{ $threedays }}';
+            var today = '{{ $today }}';
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                // min: new Date(thirtydays),
+                max : new Date(today),
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
+                onSet: function(context) {
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(3, 'days');
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
+                }
+            });
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                max : new Date(today),
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
+                onSet: function(context) {
+                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
 
@@ -280,8 +320,10 @@
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.shipper_name = $('select[name="shipper_name"]').val();
-                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                       /* d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();*/
+                        d.search_date_from = $('input[name="from_date_formatted"]').val();
+                        d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 rowId: 'shId',
