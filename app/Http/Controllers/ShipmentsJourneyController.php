@@ -106,8 +106,9 @@ class ShipmentsJourneyController extends Controller
 
       $shipment_journey->save();
       if($verification){
-
-          ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
+          if($shipper_status_id != 1){
+              ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
+          }
       }
     }
 }

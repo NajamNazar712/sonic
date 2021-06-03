@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\ConsigneeInformationController;
+use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -225,6 +226,8 @@ class ShipperShipmentBookController extends Controller
         $shipment->tracking_number = $tracking_number;
 
         $shipment->save();
+
+        ShipmentStatusWebhookController::webhook_subscription($shipment_id, 1);
 
         return $tracking_number;
     }
