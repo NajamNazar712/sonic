@@ -204,8 +204,9 @@ class ShipperGlobalSettingsController extends Controller
                     $sub_user->status = 1;
                 }
                 $sub_user->save();
-
+                return redirect()->back()->with('success', 'Setting Updated Successfully!');
             }
+            return redirect()->back()->with('error', 'Not a valid url!');
         }
         else {
             $sub_user = ShipmentStatusSubscription::where('user_id', $user_id)->first();
