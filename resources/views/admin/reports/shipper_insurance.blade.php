@@ -68,13 +68,6 @@
                         <th class="border-primary border-darken-1">Date</th>
                     </tr>
                     </thead>
-                   {{-- <tfoot align="right">
-                    <tr>
-                        <th colspan="5"></th>
-                        <th></th>
-                        <th></th>
-                    </tr>
-                    </tfoot>--}}
                 </table>
 
             </div>
@@ -295,7 +288,7 @@
                 order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number_link' ,name: 'shipments.tracking_number_link', class: 'align-middle text-center tracking_number_link'},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
                     { data:'insurance' ,name: 'insurance', class: 'align-middle text-center insurance'},
                     {data: 'charges', name: 'si.price', class: 'align-middle text-center charges'},

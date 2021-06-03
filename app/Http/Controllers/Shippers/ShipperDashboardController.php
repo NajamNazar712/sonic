@@ -501,7 +501,7 @@ class ShipperDashboardController extends Controller
                     //Consolidated Shipments
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
-                    ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Cancelled by Shipper' .','. $reason, session('user_id'), NULL);
+                    ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Cancelled by Shipper ' .'- '. $reason, session('user_id'), NULL);
                     $packaging_material = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
                     if($packaging_material){
                         $packaging_material->status_id = 6;
