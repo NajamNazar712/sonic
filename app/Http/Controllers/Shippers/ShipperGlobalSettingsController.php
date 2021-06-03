@@ -158,10 +158,18 @@ class ShipperGlobalSettingsController extends Controller
     }
 
     public function subscription_index(){
-        $user_id = session('user_id');
-        $user_subscription = ShipmentStatusSubscription::where('user_id', $user_id)->first();
+        $user_type = session('user_type');
+        if($user_type == 1){
+            $user_id = session('user_id');
 
-        return view('client.settings.shipment_status_subscription')->with(['user_subscription' => $user_subscription]);
+            $user_subscription = ShipmentStatusSubscription::where('user_id', $user_id)->first();
+
+            return view('client.settings.shipment_status_subscription')->with(['user_subscription' => $user_subscription]);
+        }
+        else{
+            return redirect()->back()->with('error', 'Access Denied!');
+        }
+
     }
     public function subscription_submit(Request $request){
         $user_id = session('user_id');

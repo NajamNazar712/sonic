@@ -135,6 +135,9 @@
                         @if(session('pickup_wise_account'))
                         <li><a class="menu-item" href="{{route('cod.settings.shipping_information.index')}}">IBAN</a></li>
                         @endif
+                        @if(session('user_type') == 1)
+                        <li><a class="menu-item" href="{{route('cod.settings.subscription.index')}}">Shipment Status Subscription</a></li>
+                        @endif
                     </ul>
 
                 </li>
