@@ -357,6 +357,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add_iban', 'Shippers\ShipperGlobalSettingsController@shipping_information_add_iban')->name('add_iban');
             Route::get('bank_info','Shippers\ShipperGlobalSettingsController@shipping_information_bank_info')->name('bank_info');
         });
+        Route::prefix('subscription')->name('subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@subscription_submit')->name('store');
+        });
+
 
     });
 	Route::prefix('consolidation')->name('consolidation.')->group(function () {

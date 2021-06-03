@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -105,5 +106,10 @@ class ShipmentsJourneyController extends Controller
       }
 
       $shipment_journey->save();
+      if($verification){
+          if($shipper_status_id != 1){
+              ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
+          }
+      }
     }
 }
