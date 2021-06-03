@@ -14,7 +14,7 @@ class UpdateEmployeeDeviceTokenForNullableDeviceToken extends Migration
     public function up()
     {
         Schema::table('employee_device_tokens', function (Blueprint $table) {
-            $table->string('device_token', 500)->nullabe()->change();
+            $table->string('device_token', 500)->nullable()->change();
         });
     }
 
