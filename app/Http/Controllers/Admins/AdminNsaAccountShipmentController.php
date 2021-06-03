@@ -265,7 +265,13 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
-                                    $nsa_shipment->actual_weight = 0.10;
+
+                                    if ($nsa_shipment->user_id == 7762) {
+                                        $nsa_shipment->actual_weight = $nsa_shipment->estimated_weight;
+                                    }
+                                    else {
+                                        $nsa_shipment->actual_weight = 0.10;
+                                    }
 
                                     $nsa_shipment->save();
 
