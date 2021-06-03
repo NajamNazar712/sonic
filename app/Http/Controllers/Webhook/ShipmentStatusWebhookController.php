@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhook;
 
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Jobs\ProcessShipmentStatusWebhook;
 use GuzzleHttp\Client;
@@ -25,7 +26,7 @@ class ShipmentStatusWebhookController extends Controller
 
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
-            $data['status'] = $shipment->status_shipper->name;
+            $data['status'] = ShipmentStatus::find($shipper_status_id)->name;
             $data['url'] = $subscriber->url;
             dispatch(new ProcessShipmentStatusWebhook($data));
 

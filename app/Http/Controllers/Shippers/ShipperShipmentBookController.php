@@ -215,6 +215,8 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->save();
 
+        ShipmentStatusWebhookController::webhook_subscription($shipment_id, 1);
+
         return $tracking_number;
     }
 
