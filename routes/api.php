@@ -247,5 +247,5 @@ Route::name('api.')->group(function () {
 
     });
 
-
+    Route::post('test', 'APIController@test')->name('test');
 });
