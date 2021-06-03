@@ -522,7 +522,7 @@ class ShipperPackagingMaterialController extends Controller
 
     public function packaging_request_cart_index(){
 
-        $shipper = User::find(Auth::id());
+        $shipper = User::find(session('user_id'));
         
         if(session('foc_account') == 1){
             $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
