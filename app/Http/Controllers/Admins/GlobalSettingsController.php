@@ -3984,7 +3984,7 @@ class GlobalSettingsController extends Controller
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
             ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
-            ->orderBy('fleets.created_at');
+            ->orderBy('fleets.created_at','desc');
                 // ->select();
 
         $datatable = Datatables::of($fleet)
@@ -4154,8 +4154,8 @@ class GlobalSettingsController extends Controller
         
         $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
         ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
-        ->select('route_managements.id','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
-        ;
+        ->select('route_managements.id','route_managements.created_at','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
+        ->orderBy('route_managements.created_at','desc');
         $datatable = Datatables::of($route_management)
         ->editColumn('status', function ($route_management) {
             if ($route_management->status == 1) {
