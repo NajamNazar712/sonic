@@ -189,6 +189,35 @@
 
 <script type="text/javascript">
         $(document).ready(function () {
+            function print(id) {
+                console.log(id);
+                $.ajax({
+                    url: '{!! route('admin.master_cargo.in_transit.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
             $('#search_form #route_management').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Route',
@@ -277,7 +306,9 @@
                     {orderable: false, searchable: false,name: 'serial_number',class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'vehicle' ,name: 'f.reg_number', class: 'align-middle text-center vehicle'},
                     { data:'route_title' ,name: 'rm.route_title', class: 'align-middle route_title'},
-                    { data:'bags' ,name: 'bags', class: 'align-middle bags'},
+                    // { data:'bags' ,name: 'bags', class: 'align-middle bags'},
+                    {data: 'id_padded_link', name: 'master_cargoes.id', class: 'align-middle master_cargo_number'},
+
                     { data:'origin' ,name: 'or.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'des.name', class: 'align-middle destination'},
                     { data:'driver_name' ,name: 'master_cargoes.driver_name', class: 'align-middle driver_name'},
@@ -329,6 +360,12 @@
                     });
             });
 
+
+            $('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id);
+                print(id);
+            });
         });
 
     </script>
