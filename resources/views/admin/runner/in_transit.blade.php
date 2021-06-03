@@ -253,7 +253,7 @@
                                     row.push(index + 1);
                                     row.push(values.vehicle);
                                     row.push(values.route_title);
-                                    row.push(values.bags);
+                                    row.push(values.id);
                                     row.push(values.origin);
                                     row.push(values.destination);
                                     row.push(values.driver_name);
