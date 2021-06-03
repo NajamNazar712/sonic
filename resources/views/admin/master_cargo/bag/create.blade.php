@@ -602,6 +602,8 @@
                         });
                         $('#cargo_consignment form .transport_mode').val(2).trigger('change');
                         $('#cargo_consignment form .transport_mode').prop("disabled", true);
+                        $('#cargo_consignment form .junction_1').prop("disabled", true);
+                        $('#cargo_consignment form .junction_2').prop("disabled", true);
                         $('#cargo_consignment form .shipping_mode_select').val(1).trigger('change');
                         $('#cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
                         $('#cargo_consignment form .transport_mode_vendor').prop("disabled",true);

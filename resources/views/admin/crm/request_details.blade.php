@@ -961,7 +961,11 @@
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Special Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+
                 <div class="modal-body  text-center">
                     <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
                         @csrf
@@ -2226,6 +2230,10 @@
 
             $('#special_request').on('click',function () {
               $('#special_request_modal').modal('show');
+            });
+
+            $('#special_request_modal').on('hide.bs.modal', function (e) {
+                $('.form-check-input').prop('checked', false);
             });
 
         });
