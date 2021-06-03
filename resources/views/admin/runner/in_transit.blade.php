@@ -201,6 +201,18 @@
                         }
                     });
             }
+
+            $('#search_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('form'));
+				},
+                submitHandler: function(form) {
+				 
+				}
+			});
+
             $('#search_form #route_management').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Route',
