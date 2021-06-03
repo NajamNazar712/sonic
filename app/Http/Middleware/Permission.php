@@ -953,6 +953,8 @@ class Permission
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,
             'debriefing.agents_call_monitoring.list' => 496,
+            'settings.fleet.index' => 498,
+            'settings.route_management.index' => 499,
 
 
 
