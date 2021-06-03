@@ -12,7 +12,7 @@ class UpdateModulePermissionForVehicleInTransit extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 500, 'name' => 'Vehicle In Transit', 'module_id' => 4)
+            array('id' => 501, 'name' => 'Vehicle In Transit', 'module_id' => 4)
         ));
     }
 }

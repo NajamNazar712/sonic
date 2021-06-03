@@ -13,14 +13,14 @@
                 @include('admin.inc.messages')
                 <div class="row mb-1 justify-content-center">
                     <div class="col-8 ">
-                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <form id="search_form"  class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-12">
                                 <div  class="row">   
                                     <div class="col-12">
                                         <div class="form-group pb-1">
-                                            <select name="route_management" class="select2" id="route_management" >
+                                            <select name="route_management" class="" id="route_management" >
                                             @foreach($route_managements as $route_management)
-                                                <option value="{{ $route_management->id }}">{{ $route_management->route_titke }}</option>
+                                                <option value="{{ $route_management->id }}">{{ $route_management->route_title }}</option>
                                             @endforeach
                                             </select>
                                         </div>
@@ -31,7 +31,7 @@
                                 <div  class="row">   
                                     <div class="col-12">
                                         <div class="form-group pb-1">
-                                            <select name="fleet" class="select2" id="fleet" >
+                                            <select name="fleet" class="" id="fleet" >
                                             @foreach($fleets as $fleet)  
                                                 <option value="{{ $fleet->id }}">{{ $fleet->reg_number }}</option>
                                             @endforeach
@@ -44,7 +44,7 @@
 
                                 <div class="col-12">
                                 <!-- <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button> -->
-                                    <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
 
                             </div>
