@@ -953,7 +953,7 @@ class Permission
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,
             'debriefing.agents_call_monitoring.list' => 496,
-            'runner.intransit' => 500,
+            'runner.intransit' => 501,
             'fleet.index' => 498,
             'route_management.index' => 499,
 
