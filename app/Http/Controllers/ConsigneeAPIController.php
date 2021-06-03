@@ -379,6 +379,7 @@ class ConsigneeAPIController extends Controller
 
                 $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
                     ->where('shipments_journey.shipment_id', $request->shipment_id)
+                    ->where('shipments_journey.verification', 1)
                     ->select('shipments_journey.shipper_status_id as status_id', 'ss.name as status', 'shipments_journey.created_at as created_at')
                     ->orderBy('shipments_journey.id', 'DESC');
                 if ($consignee_shipments_journey->exists()) {

@@ -95,6 +95,12 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $shipment->consignee_city_id;
         }
       }
+      else if (in_array($shipper_status_id, [54, 55])) {
+          $shipment = Shipment::find($shipment_id);
+          if ($shipment) {
+              $shipment_journey->city_id = $shipment->consignee_city_id;
+          }
+      }
 
       $whip = new Whip();
       $client_address = $whip->getValidIpAddress();
