@@ -7,6 +7,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -154,5 +155,58 @@ class ShipperGlobalSettingsController extends Controller
             return redirect()->back()->with(['success' => 'IBAN updated successfully!']);
         }
         return redirect()->back()->with(['error' => 'No pickup address selected!']);
+    }
+
+    public function subscription_index(){
+        $user_id = session('user_id');
+        $user_subscription = ShipmentStatusSubscription::where('user_id', $user_id)->first();
+
+        return view('client.settings.shipment_status_subscription')->with(['user_subscription' => $user_subscription]);
+    }
+    public function subscription_submit(Request $request){
+        $user_id = session('user_id');
+        $subscription_status = FALSE;
+
+        if($request->has('subscription_status')){
+            $subscription_status = TRUE;
+        }
+
+        if($subscription_status){
+            $subscription_url = $request->subscription_url;
+
+            if($subscription_url){
+
+                $url = filter_var($subscription_url, FILTER_SANITIZE_URL);
+
+
+                if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+                    return redirect()->back()->with('error', 'Not a valid url!');
+                }
+
+                $sub_user = ShipmentStatusSubscription::where('user_id', $user_id);
+                if($sub_user->exists()){
+                    $sub_user = $sub_user->first();
+                    $sub_user->url = $url;
+                    $sub_user->status = 1;
+                }
+                else{
+                    $sub_user = new ShipmentStatusSubscription();
+                    $sub_user->user_id = $user_id;
+                    $sub_user->url = $url;
+                    $sub_user->status = 1;
+                }
+                $sub_user->save();
+
+            }
+        }
+        else {
+            $sub_user = ShipmentStatusSubscription::where('user_id', $user_id)->first();
+            if($sub_user){
+                $sub_user->status = 0;
+                $sub_user->save();
+            }
+            return redirect()->back()->with('success', 'Setting Updated Successfully!');
+
+        }
     }
 }
