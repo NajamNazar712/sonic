@@ -8831,6 +8831,10 @@ class AdminFinanceController extends Controller
 
         $done_payment = RetailDonePayment::find($request->id);
 
+        if(!$done_payment){
+            return ['status' => 1, 'error' => 'Payment not found'];
+        }
+
         $shipper = $done_payment->shipper;
 
 
