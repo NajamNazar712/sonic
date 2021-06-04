@@ -15,17 +15,26 @@
                     <div class="row">
                         <div class="col-3">
                             <div class="form-group">
-                                <select name="shipper_name" id="shipper_name" class="form-control select2" >
+                                <input type="text" name="tracking_numbers" class="tracking_numbers form-control" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                            </div>
+                        </div>
+                       {{-- <div class="col-3">
+                            <div class="form-group">
+                                <select name="shipper_name" id="shipper_name" class="select2">
                                     @foreach($shipper_name as $shipper)
                                         <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
+                        </div>--}}
                         <div class="col-3">
-                            <div class="form-group">
-                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                            </div>
+                            <fieldset class="form-group pb-1">
+                                <select name="shipper_name" id="shipper_name" class="form-control select2">
+                                    @foreach($shipper_name as $shipper)
+                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
                         </div>
                         <div class="col-3">
                             <div class="form-group input-group">
@@ -63,7 +72,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Insured</th>
                         <th class="border-primary border-darken-1">Charges</th>
-                        <th class="border-primary border-darken-1">Insurance</th>
+                        <th class="border-primary border-darken-1">Declared Product Value</th>
                         <th class="border-primary border-darken-1">Date</th>
                     </tr>
                     </thead>
@@ -172,7 +181,11 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-
+            $('#shipper_name').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipper',
+                width:'100%',
+                allowClear:true
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -192,7 +205,7 @@
                             head.push('Tracking Number');
                             head.push('Shipper');
                             head.push('Insured');
-                            head.push('Insurance');
+                            head.push('Declared Product Value');
                             head.push('Date');
 
                            
@@ -225,33 +238,6 @@
                 }
             });
 
-          /*  var search_date_from = $('#track_form #search_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #search_date_to').pickadate('picker').set('min', $('#track_form #search_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-
-            var search_date_to = $('#track_form #search_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
-                    }
-                }
-            });*/
             var threedays = '{{ $threedays }}';
             var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
@@ -391,10 +377,11 @@
             });
 
 
-            $('#track_form #shipper_name').prepend('<option value="" selected="selected"></option>').select2({
+          /*  $('#track_form #shipper_name').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Shipper Name',
                 allowClear:true
-            });
+            });*/
+
 
 
             var select = $('#track_form .tracking_numbers').selectize({
