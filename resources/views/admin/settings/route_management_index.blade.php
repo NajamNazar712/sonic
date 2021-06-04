@@ -337,7 +337,7 @@ function remove_junction(params) {
                 autoWidth: false,
                 ajax: '{{ route('admin.settings.route_management.list') }}',
                 rowId: 'id',
-                order: [[0, 'desc']],
+                order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'route_code', name: 'route_managements.route_code', class: 'align-middle text-center route_code'},
