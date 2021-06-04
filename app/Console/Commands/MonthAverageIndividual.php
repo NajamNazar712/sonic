@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\MonthAverateReportsController;
+use App\Http\Controllers\Admins\MonthAverageReportsController;
 use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -50,7 +50,7 @@ class MonthAverageIndividual extends Command
         })->where('admins.status', '=', 1)->select('admins.id', 'admins.name')->get();
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
-                $response = MonthAverateReportsController::month_average_individual($date . ' 00:00:00', $sales_person->id);
+                $response = MonthAverageReportsController::month_average_individual($date . ' 00:00:00', $sales_person->id);
                 NotificationsController::send(124, $sales_person->id, $response);
             }
         }

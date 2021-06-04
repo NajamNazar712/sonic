@@ -1368,7 +1368,7 @@
                 id = $(this).attr('data-id');
                 console.log(id);
                 $.ajax({
-                    url: '{!! route('admin.finance.done_payments.details_print') !!}',
+                    url: '{!! route('admin.finance.retail.done_payments.details_print') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',

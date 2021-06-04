@@ -4852,7 +4852,7 @@ class RiderAPIController extends Controller
         $rules = [
             'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'pin' => ['required', 'integer', 'digits:4'],
-            'device_token' => ['required']
+            'device_token' => ['nullable']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4877,17 +4877,19 @@ class RiderAPIController extends Controller
                         $information['address'] = $rider->address;
                         $information['role'] = 'rider';
 
-                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
-                            ->where('employee_type_id', 2);
-                        if ($employee_device_token->exists()) {
-                            $employee_device_token = $employee_device_token->first();
-                        } else {
-                            $employee_device_token = new EmployeeDeviceToken();
-                            $employee_device_token->employee_id = $rider->id;
-                            $employee_device_token->employee_type_id = 2;
+                        if($request->has('device_token')){
+                            $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
+                                ->where('employee_type_id', 2);
+                            if ($employee_device_token->exists()) {
+                                $employee_device_token = $employee_device_token->first();
+                            } else {
+                                $employee_device_token = new EmployeeDeviceToken();
+                                $employee_device_token->employee_id = $rider->id;
+                                $employee_device_token->employee_type_id = 2;
+                            }
+                            $employee_device_token->device_token = $request->get('device_token');
+                            $employee_device_token->save();
                         }
-                        $employee_device_token->device_token = $request->get('device_token');
-                        $employee_device_token->save();
 
                         $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                             ->join('riders as r', 'e.id', 'r.employee_id')

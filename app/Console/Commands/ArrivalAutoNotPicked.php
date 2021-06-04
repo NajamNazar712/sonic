@@ -38,6 +38,8 @@ class ArrivalAutoNotPicked extends Command
      */
     public function handle()
     {
+        V2PickupCronController::ready_pickups();
         V2PickupCronController::arrival_not_picked();
+        V2PickupCronController::auto_pickup_assign();
     }
 }

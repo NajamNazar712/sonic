@@ -101,6 +101,58 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
+        $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
+        $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
+        $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $arrival_cut_off_time = $settings->setting_value . ':00';
+        }
+        else {
+            $arrival_cut_off_time = FALSE;
+        }
+
+        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $daily_pickup_sales_cron_time = $settings->setting_value . ':00';
+        }
+        else {
+            $daily_pickup_sales_cron_time = FALSE;
+        }
+
+        if ($arrival_cut_off_time) {
+            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
+        }
+
+        if ($daily_pickup_sales_cron_time) {
+            $schedule->command('email:dailypickupsalesreport')->dailyAt($daily_pickup_sales_cron_time);
+        }
+
+        if ($arrival_cut_off_time) {
+            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
+        }
+
+        if ($arrival_cut_off_time) {
+            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
+        }
+
+        if ($daily_pickup_sales_cron_time) {
+            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+        }
+
         $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
 
         $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
@@ -110,33 +162,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
         $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
-        $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
         $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
 
-        $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
-        $schedule->command('saleperson:numbersindividual')->dailyAt('07:30')->runInBackground();
         $schedule->command('saleperson:numbersrm')->dailyAt('07:30')->runInBackground();
+        $schedule->command('saleperson:numbersindividual')->dailyAt('07:30')->runInBackground();
 
-
-        $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
-        $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
         $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
-
-
-        $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
-        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $time = $settings->setting_value . ':00';
-
-            $schedule->command('email:dailypickupsalesreport')->dailyAt($time);
-            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($time);
-            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($time);
-
-        }
+        $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
 
@@ -204,18 +237,6 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('report:donepayment')->dailyAt('16:00')->runInBackground();
 
-        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
-
-        if ($settings->exists()) {
-            $settings = $settings->first();
-
-            $arrival_cut_off_time = $settings->setting_value . ':00';
-            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
-            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
-        }
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
 
         if ($settings->exists()) {
@@ -232,7 +253,7 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
             $zero_charges_report_time = $settings->setting_value . ':00';
-            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time);
+            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time)->runInBackground();
         }
 //        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
 //
@@ -242,10 +263,9 @@ class Kernel extends ConsoleKernel
 //            $station_recovery_cron_time = $settings->setting_value . ':00';
 //            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
-        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00');
-        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00');
-        $schedule->command('email:telenorsalesreport')->dailyAt('09:00');
-        $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($settings->exists()) {
@@ -257,7 +277,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
 //        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
-        $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
         $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
