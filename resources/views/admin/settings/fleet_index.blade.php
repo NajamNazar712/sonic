@@ -234,7 +234,7 @@
                 autoWidth: false,
                 ajax: '{{ route('admin.settings.fleet.list') }}',
                 rowId: 'id',
-                order: [[0, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'reg_number', name: 'reg_number', class: 'align-middle text-center reg_number'},
