@@ -506,6 +506,9 @@ class Permission
             'reports.retail_sales.index' =>493,
             'reports.retail_sales.list' => 493,
 
+            'reports.shipper_insurance.index' => 502,
+            'reports.shipper_insurance.list' => 502,
+
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -950,6 +953,9 @@ class Permission
             'debriefing.supervisor.list' => 495,
             'debriefing.agents_call_monitoring.index' => 496,
             'debriefing.agents_call_monitoring.list' => 496,
+            'runner.intransit' => 501,
+            'fleet.index' => 498,
+            'route_management.index' => 499,
 
 
 

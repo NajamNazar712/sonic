@@ -48,6 +48,7 @@
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Request Status</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-open Date</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
@@ -273,6 +274,7 @@
                             head.push('Description');
                             head.push('Channel');
                             head.push('Request Status');
+                            head.push('Complaint Re-Open Date');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
@@ -304,6 +306,7 @@
                                 row.push(values.descr);
                                 row.push(values.channel);
                                 row.push(values.status);
+                                row.push(values.reopen_date);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
@@ -629,7 +632,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[19, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -646,6 +649,7 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'crs.id', class: 'align-middle status'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},

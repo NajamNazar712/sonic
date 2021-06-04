@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\ConsigneeInformationController;
+use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -214,6 +215,8 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->save();
 
+        ShipmentStatusWebhookController::webhook_subscription($shipment_id, 1);
+
         return $tracking_number;
     }
 
@@ -225,6 +228,8 @@ class ShipperShipmentBookController extends Controller
         $shipment->tracking_number = $tracking_number;
 
         $shipment->save();
+
+        ShipmentStatusWebhookController::webhook_subscription($shipment_id, 1);
 
         return $tracking_number;
     }
@@ -881,15 +886,17 @@ class ShipperShipmentBookController extends Controller
                       body {
                         background: none !important;
                         color: #09262e !important;
-                        font-size: 0.9rem !important;
+                        font-size: 0.8rem !important;
                       }
 
                       hr {
                         border-top: 1px dashed #000000;
+                        margin: 1rem 0;
                       }
 
                       table.table-bordered {
                         page-break-inside: avoid;
+                        margin-bottom: 0px;
                       }
 
                       table.table-bordered tbody tr td {
@@ -1073,22 +1080,22 @@ class ShipperShipmentBookController extends Controller
 
                         if ($user_type != 4 && $type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                         } else {
                             if ($type != 'pdf') {
                                 $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                             } else {
                                 $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                             }
                         }
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="4" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
@@ -1102,7 +1109,7 @@ class ShipperShipmentBookController extends Controller
                     ';
                         } else {
                             $table_start .= '
-                                <td rowspan="4" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
                                 </td>
@@ -1162,22 +1169,22 @@ class ShipperShipmentBookController extends Controller
 
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                     ';
                     } else {
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                         } else {
                             $table_start .= '
-                                <td rowspan="4" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
                         ';
                         }
                     }
                     if ($type != 'pdf') {
                         $table_start .= '
-                                <td rowspan="4" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>';
@@ -1191,7 +1198,7 @@ class ShipperShipmentBookController extends Controller
                                 }
                     } else {
                         $table_start .= '
-                                <td rowspan="4" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>';
@@ -1245,6 +1252,12 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
                                 ';
                                 }
+                                else{
+                                    $table_start.='<tr>
+                                    <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                                    <td><strong>International</strong></td>
+                                ';
+                                }
                       
 
                         $table_start .= '
@@ -1258,8 +1271,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>
                               <tr>
-                                <td class="color primary border twice-bottom twice-left"><strong>Business Category</strong></td>
-                                <td colspan="3" class="border twice-bottom twice-right"><strong>' . $shipment->business_category->name . '</strong></td>
+                                
                               </tr>
                               <tr>
                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -1273,10 +1285,16 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary"><strong>Order ID</strong></td>
                                 <td>' . $shipment->order_id . '</td>
                               </tr>
-                              <tr>
-                                <td class="color primary border twice-left"><strong>Shipping</strong></td>
-                                <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
-                    ';
+                              <tr>';
+                                if($shipment->business_category->id==1){
+                                    $table_start .= '<td class="color primary border twice-left"><strong>Shipping</strong></td>
+                                <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>';
+                                }
+                                else{
+                                    $table_start .= '<td class="color primary border twice-left"><strong>Shipping</strong></td>
+                                    <td><strong>International</strong></td>';
+                                }
+
 
                         $table_start .= '
                                 <td class="color primary"><strong>Date</strong></td>
@@ -1287,10 +1305,6 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
-                              </tr>
-                              <tr>
-                                <td class="color primary border twice-bottom twice-left"><strong>Business Category</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->business_category->name . '</strong></td>
                               </tr>
                               <tr>
                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -1504,7 +1518,7 @@ class ShipperShipmentBookController extends Controller
 
                     if ($type != 'pdf') {
                         $table_end .= '
-                      <div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                      <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
                     ';
                     }
@@ -1627,7 +1641,7 @@ class ShipperShipmentBookController extends Controller
 </tr>
                               ';
                             $shipment_pieces .= '</tbody></table>
-                      <div class="col m-1 row justify-content-center"><div class="col"><hr></div>
+                      <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
                       <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
 
                         }

@@ -49,6 +49,7 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
                                     <th class="border-primary border-darken-1">Resolved Date</th>
                                     <th class="border-primary border-darken-1">Address</th>
@@ -143,6 +144,7 @@
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
+                            head.push('Complaint Re-Open Date');
                             head.push('Resolved By');
                             head.push('Resolved Date');
                             head.push('Address');
@@ -171,6 +173,7 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
+                                row.push(values.reopen_date);
                                 row.push(values.resolved_by);
                                 row.push(values.resolved_date);
                                 row.push(values.address);
@@ -419,7 +422,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -437,6 +440,7 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
                     {data: 'resolved_date', name: 'res.created_at', class: 'align-middle resolved_date'},
                     {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
