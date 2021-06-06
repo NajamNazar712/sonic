@@ -295,6 +295,8 @@ class Kernel extends ConsoleKernel
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
         $schedule->command('dhl:shipmentstatussync')->dailyAt( '04:00')->runInBackground();
+        $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
+        $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
