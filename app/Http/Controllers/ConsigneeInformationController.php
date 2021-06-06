@@ -74,12 +74,15 @@ class ConsigneeInformationController extends Controller
                 $consignee_phone = ConsigneeInformation::find($id)->phone;
 
                 $total_shipments = Shipment::where('consignee_phone_number_1', $consignee_phone)->count();
-                $delivered_shipments = Shipment::where('consignee_phone_number_1', $consignee_phone)->whereIn('shipper_status_id', $delivered_statuses)->count();
-                $returned_shipments = Shipment::where('consignee_phone_number_1', $consignee_phone)->whereIn('shipper_status_id', $return_statuses)->count();
-                $undelivered_shipments = $total_shipments - $delivered_shipments;
-                $delivered_shipments_ratio = round(($delivered_shipments / $total_shipments) * 100, 2);
-                $returned_shipments_ratio = round(($returned_shipments / $total_shipments) * 100, 2);
-                $undelivered_shipments_ratio = round(($undelivered_shipments / $total_shipments) * 100,2);
+                if($total_shipments > 0){
+                    $delivered_shipments = Shipment::where('consignee_phone_number_1', $consignee_phone)->whereIn('shipper_status_id', $delivered_statuses)->count();
+                    $returned_shipments = Shipment::where('consignee_phone_number_1', $consignee_phone)->whereIn('shipper_status_id', $return_statuses)->count();
+                    $undelivered_shipments = $total_shipments - $delivered_shipments;
+                    $delivered_shipments_ratio = round(($delivered_shipments / $total_shipments) * 100, 2);
+                    $returned_shipments_ratio = round(($returned_shipments / $total_shipments) * 100, 2);
+                    $undelivered_shipments_ratio = round(($undelivered_shipments / $total_shipments) * 100,2);
+                }
+
 
                 foreach ($blacklist_settings as $setting){
                     $blacklist_conditions = $setting->conditions->groupBy('blacklist_condition_id');
