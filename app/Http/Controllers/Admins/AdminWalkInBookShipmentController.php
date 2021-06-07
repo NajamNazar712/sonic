@@ -68,7 +68,7 @@ class AdminWalkInBookShipmentController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id, $open_shipment) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -104,7 +104,8 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->packaging_charges = $packaging_charges;
         $shipment->business_category_id = $business_category_id;
-
+        $shipment->open_shipment = $open_shipment;
+        
         $self_collection = FALSE;
 
         if($pickup == 1){
@@ -192,6 +193,12 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function walk_in_store(Request $request) {
+        if($request->open_shipment=='on'){
+            $open_shipment=1;
+        }else{
+            $open_shipment=0;
+
+        }
         $test = 0;
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
@@ -320,7 +327,7 @@ class AdminWalkInBookShipmentController extends Controller
 
                     }
                     $business_category_id = 1;
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id);
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id, $open_shipment);
 
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -751,6 +758,7 @@ class AdminWalkInBookShipmentController extends Controller
                                 <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
                               </tr>
+                              
                               <tr>
                                 <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                 ';
@@ -765,10 +773,18 @@ class AdminWalkInBookShipmentController extends Controller
                                 <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
                     ';
                 }
-
+                
                 $table_end .= '
-                              </tr>
-                              <tr>
+                              </tr>';
+                if($shipment->open_shipment==1){
+                    $table_end .= '<tr>
+                    <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
+                    <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
+                    
+                    </tr>';
+                }
+
+                $table_end .= '<tr>
                                 <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
                               </tr>
                             </tbody>
@@ -1117,6 +1133,7 @@ class AdminWalkInBookShipmentController extends Controller
 
     public function international_walk_in_store(Request $request) {
         $test = 0;
+        $open_shipment = 0;
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
         $user_id = $check_id['setting_value'];
@@ -1243,7 +1260,7 @@ class AdminWalkInBookShipmentController extends Controller
             }
             $business_category_id = 2;
 
-            $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id);
+            $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id, $packaging_charges, $pickup, $business_category_id, $open_shipment);
 
             $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 

@@ -3771,7 +3771,8 @@ class AdminCRMController extends Controller
                           </tr>
                           <tr>
                     ';
-                    } elseif ($shipment->booking_type_id == 3) {
+                    } 
+                    elseif ($shipment->booking_type_id == 3) {
                         $table_end .= '
                             <td class="border twice-top twice-bottom twice-left" colspan="2" rowspan="2" style="height: 32px;"></td>
                           </tr>
@@ -3787,6 +3788,13 @@ class AdminCRMController extends Controller
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
                     ';
+                    }
+                    if($shipment->open_shipment==1){
+                        $table_end .= '<tr>
+                        <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
+                        <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
+                        
+                        </tr>';
                     }
                 } else {
                     $table_end = '

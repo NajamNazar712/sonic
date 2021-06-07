@@ -1206,6 +1206,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
                             <td class="color primary"><strong>Special Instructions</strong></td>
+                            <td class="color primary"><strong>Open Shipment</strong></td>
                             <td class="color primary"><strong>Remarks</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Receiver\'s Name</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
@@ -1280,7 +1281,14 @@ class DeliveryController extends Controller
                 else{
                     $shipment_details_row_start .= '<td class="'.$class.' ' . $details_change_class .'">-</td>';
                 }
-
+                if($shipment->open_shipment==1){
+                    $shipment_details_row_start .= '
+                    <td class="'.$class.'"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>';
+                }else{
+                    $shipment_details_row_start .= '
+                    <td class="'.$class.'"><strong> No <span></span></strong></td>';
+              
+                }
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('remarks', '!=', null)->select('remarks');
 
                 if ($shipment_journey->exists()) {

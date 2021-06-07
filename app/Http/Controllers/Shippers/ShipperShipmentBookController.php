@@ -120,7 +120,7 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment) {
 
 
         $shipment = new Shipment();
@@ -142,8 +142,7 @@ class ShipperShipmentBookController extends Controller
         $shipment->package_type = $package_type;
 //        $shipment->pickup_date = $pickup_date;
         $shipment->special_instructions = $special_instructions;
-
-
+        $shipment->open_shipment = $open_shipment;
         $shipment->estimated_weight = $estimated_weight;
         $shipment->shipping_mode_id = $shipping_mode_id;
         $shipment->same_day_timing_id = $same_day_timing_id;
@@ -415,6 +414,12 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
+        if($request->open_shipment=='on'){
+            $open_shipment=1;
+        }else{
+            $open_shipment=0;
+
+        }
         if (BookingType::where('id', '!=', 4)->where('id', $request->input('selected_service_type'))->exists()) {
             if (!empty($request->input('shipping_mode'))) {
                     $user_id = session('user_id');
@@ -585,7 +590,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $business_category_id = 1;
 
-                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment);
 
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
@@ -1453,6 +1458,8 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
                         ';
                         }
+                        
+                        
                     } else {
                         $table_end = '
                               <tr>
@@ -1479,7 +1486,13 @@ class ShipperShipmentBookController extends Controller
                         ';
                         }
                     }
-
+                    if($shipment->open_shipment==1){
+                        $table_end .= '<tr>
+                        <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
+                        <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
+                        
+                        </tr>';
+                    }
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_end .= '
                               </tr>
@@ -2444,7 +2457,7 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges) {
+    static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment) {
 
 
         $shipment = new Shipment();
@@ -2464,7 +2477,8 @@ class ShipperShipmentBookController extends Controller
         $shipment->order_id = $order_id;
         $shipment->package_type = $package_type;
         $shipment->special_instructions = $special_instructions;
-
+        $shipment->open_shipment = $open_shipment;
+        
 
         $shipment->estimated_weight = $estimated_weight;
         $shipment->shipping_mode_id = $shipping_mode_id;
@@ -2566,7 +2580,12 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
+        if($request->open_shipment=='on'){
+            $open_shipment=1;
+        }else{
+            $open_shipment=0;
 
+        }
         if (!empty($request->input('shipping_mode'))) {
                 $user_id = session('user_id');
                 if($request->input('consignee_email_address')){
@@ -2723,7 +2742,7 @@ class ShipperShipmentBookController extends Controller
                     $pieces_quantity = $request->pieces_quantity;
                 }
                 $business_category_id = 1;
-                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges);
+                $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment);
                 if(session('user_type') == 2){
                     $substitute_user_shipment = new SubstituteUserShipment();
                     $substitute_user_shipment->substitute_user_id = Auth::id();
