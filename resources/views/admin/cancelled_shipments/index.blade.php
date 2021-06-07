@@ -135,7 +135,7 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                @if (session('role_id') == 1 || in_array(118, session('permissions')))
+                @if (session('role_id') == 1 || in_array(505, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add',
                         className: 'btn btn-primary add',
