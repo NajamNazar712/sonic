@@ -137,6 +137,16 @@
                 buttons: [
                 @if (session('role_id') == 1 || in_array(118, session('permissions')))
                     {
+                        text: '<i class="la la-plus"></i> Add',
+                        className: 'btn btn-primary add',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            window.location = '{{ route('admin.cancelled_shipments.add.index') }}';
+                        }
+                    },
+                        @endif
+                @if (session('role_id') == 1 || in_array(118, session('permissions')))
+                    {
                         text: 'Revert',
                         className: 'btn btn-primary revert',
                         enabled: false,
