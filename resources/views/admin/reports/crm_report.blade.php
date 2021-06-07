@@ -188,6 +188,9 @@
                         <th class="border-primary border-darken-1">Tagged Hub</th>
                         <th class="border-primary border-darken-1">Tagged At</th>
                         <th class="border-primary border-darken-1">Tagged TAT</th>
+                        <th class="border-primary border-darken-1">Last Comment By</th>
+                        <th class="border-primary border-darken-1">Last Comment</th>
+                        <th class="border-primary border-darken-1">Last Comment Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -539,8 +542,11 @@
                     {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to', orderable: false, searchable: false},
                     {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub'},
                     {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at'},
-                    {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false}
-
+                    {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false},
+                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
+                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

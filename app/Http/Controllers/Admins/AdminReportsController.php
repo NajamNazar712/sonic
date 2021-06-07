@@ -5828,7 +5828,13 @@ class AdminReportsController extends Controller
                  $join->on('change_shipment_weight_logs.shipment_id','=','crm_requests.shipment_id')
                      ->where('change_shipment_weight_logs.created_at','=',DB::raw('(select max(created_at) from change_shipment_weight_logs where change_shipment_weight_logs.shipment_id= crm_requests.shipment_id)'));
              })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges')
+             ->leftjoin('crm_comments as ccs', function($join){
+                $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
+                    ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
+            })
+            ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
+            ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper')
             ->groupBy('crm_requests.id');
 
         $datatable = Datatables::of($crm)
@@ -5996,6 +6002,52 @@ class AdminReportsController extends Controller
             ->editColumn('resolved_date', function($requests){
                 if($requests->current_status_id == 3 || $requests->current_status_id == 4) {
                     return $requests->resolved_date;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('last_comment_name', function($requests){
+                if($requests->last_comment_by == 0){
+                    return $requests->last_comment_admin;
+                }
+                else if($requests->last_comment_by == 1){
+                    return $requests->last_comment_shipper;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('last_comment_date', function($requests){
+                if($requests->last_comment_date != null){
+                    return $requests->last_comment_date;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->filterColumn('last_comment_name', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('ccs.comment_by', '=', 0)
+                            ->where('accs.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('ccs.comment_by', '=', 1)
+                                ->where('uccs.name', 'like', '%' . $keyword . '%');
+                        });
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('last_comment_name', DB::raw('IF (ccs.comment_by = 0, accs.name, IF (ccs.comment_by = 1, uccs.name, ""))') . ' $1')
+
+            ->editColumn('last_comment', function($requests){
+                if($requests->last_comment != null){
+                    return $requests->last_comment;
                 }
                 else{
                     return '-';
