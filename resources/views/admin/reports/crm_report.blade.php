@@ -422,6 +422,9 @@
                             head.push('Tagged Hub');
                             head.push('Tagged At');
                             head.push('Tagged TAT');
+                            head.push('Last Comment By');
+                            head.push('Last Comment');
+                            head.push('Last Comment Date');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -457,6 +460,9 @@
                                 row.push(values.tagged_hub);
                                 row.push(values.tagged_at);
                                 row.push(values.tagged_aging);
+                                row.push(values.last_comment_name);
+                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
+                                row.push(values.last_comment_date);
 
 
                                 body.push(row);
