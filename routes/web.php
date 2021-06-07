@@ -2964,6 +2964,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@rider_incentive_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@rider_incentive_list')->name('list');
         });
+
+        Route::prefix('erf')->name('erf.')->group(function () {
+            Route::get('', 'Admins\AdminERFController@index')->name('index');
+            Route::get('list', 'Admins\AdminERFController@list')->name('list');
+            Route::get('add', 'Admins\AdminERFController@add')->name('add');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
