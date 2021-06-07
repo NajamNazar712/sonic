@@ -1126,15 +1126,20 @@
             $('body').on('click', '.cancel_order', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if (id) {
+                    $('#CancelReasonModal').modal('show');
+                    $('#CancelReasonSubmit').on('click',function () {
+                        var reason = $('#cancel_reason').val();
                     $.ajax({
                         url: '{!! route('cod.orders.cancel') !!}',
                         method: 'POST',
                         data: {
                             'shipment_id': id,
+                            'reason': reason,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
                         if (data.status === 1) {
+                            $('#CancelReasonModal').modal('hide');
                             table.draw('false');
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
@@ -1148,6 +1153,7 @@
                             });
                         }
                     });
+                });
                 }
             });
             $('.datatable tbody').on('click', 'tr td.select-checkbox', function () {
