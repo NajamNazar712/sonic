@@ -2896,7 +2896,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@user_list')->name('list');
             Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@user_enable_disable')->name('status');
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@user_add')->name('add');
+            Route::get('edit/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit')->name('edit');
+            Route::put('update/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_update')->name('update');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
+            Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
         });
 
         Route::prefix('accounts')->name('accounts.')->group(function () {

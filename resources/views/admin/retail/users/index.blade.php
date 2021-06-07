@@ -437,5 +437,17 @@
             });
         });
 
+        $("#editRetailUser").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+            var id = $(e.relatedTarget).data('target-id');
+            
+
+            if(action == 'editretailuser'){
+                $.get( "/admin/retail/users/edit/"+id+"", function( data ) {
+                    $("#editRetailUserDiv").html(data);
+                });
+            }
+        });
     </script>
 @endsection
