@@ -1264,7 +1264,7 @@ class AdminMasterCargoController extends Controller
             $master_cargo->origin_hub_id = $request->input('origin_hub_id');
             $master_cargo->destination_hub_id = $request->input('destination_hub_id');
 //            $master_cargo->route_management_id = $request->input('route_management_id');
-            $master_cargo->fleet_id = $request->input('fleet_id');
+//            $master_cargo->fleet_id = $request->input('fleet_id');
             
             // $master_cargo->junction_hub_1_id = $request->input('junction_1');
             // $master_cargo->junction_hub_2_id = $request->input('junction_2');
@@ -1854,7 +1854,7 @@ class AdminMasterCargoController extends Controller
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $master_cargo->destination_hub->name . '</td>
                               <td class="color secondary"><strong>Vehicle Number</strong></td>
-                              <td>' . $master_cargo->fleet_id ? $master_cargo->fleet->reg_number :  '-' . '</td>
+                              <td>' . (($master_cargo->fleet_id) ? $master_cargo->fleet->reg_number :  '-') . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>

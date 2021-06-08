@@ -150,10 +150,10 @@
                                                         </div>
                                                     </div> --}}
                                                     <div class="col">
-                                                        <div class="form-group">
-                                                            <select name="fleet_id" class="select2 fleet_id"  data-rule-required="true" data-msg-required="Route is required">
-                                                            </select>
-                                                        </div>
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="fleet_id" class="select2 fleet_id"  data-rule-required="true" data-msg-required="Route is required">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
                                                     </div>
                                                     <div class="w-100"></div>
 
