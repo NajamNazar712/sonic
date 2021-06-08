@@ -1206,7 +1206,7 @@ class AdminMasterCargoController extends Controller
         //                     ->whereIn('mc.status_id',[2,3,4,5])
         //                     ->groupBy('fleets.id')
         //                     ->get();
-        $details['fleets'] = Fleet::where('status',1);
+        $details['fleets'] = Fleet::where('status',1)->get();
         
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
