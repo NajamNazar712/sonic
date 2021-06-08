@@ -418,12 +418,38 @@
                 </div>
                 <div class="modal-body text-center">
 
-                    <textarea type="text" rows="5" cols="50" id="cancel_reason" name="cancel_reason" placeholder="Enter Reason"></textarea>
+                    <textarea type="text" rows="5" class="form-control" cols="50" id="cancel_reason" name="cancel_reason" placeholder="Enter Reason"></textarea>
 
 
                     <div class="row justify-content-center">
                         <div class="col-3 mt-1">
-                            <button id="CancelReasonSubmit" type="submit" class="btn btn-primary btn-block">Submit</button>
+                            <button id="CancelReasonSubmit" type="button" class="btn btn-primary btn-block">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade text-left" id="BulkCancelModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkCancelModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Cancel Reason</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                    <textarea type="text" rows="5" class="form-control" cols="50" id="bulk_cancel_reason" name="cancel_reason" placeholder="Enter Reason"></textarea>
+
+
+                    <div class="row justify-content-center">
+                        <div class="col-3 mt-1">
+                            <button id="BulkCancelSubmit" type="button" class="btn btn-primary btn-block">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -611,56 +637,7 @@
                     });
             }
 
-            function cancel(selected_rows) {
-                $('#CancelReasonModal').modal('show');
-                $('#CancelReasonSubmit').on('click',function () {
-                    var reason = $('#cancel_reason').val();
-                    swal({
-                        text: 'Are you sure, you want to cancel these Shipment(s)?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            $.ajax({
-                                url: '{!! route('cod.orders.cancel_all') !!}',
-                                method: 'POST',
-                                data: {
-                                    'ids[]': selected_rows,
-                                    'reason' : reason,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function (data) {
-                                    if(data.status === 1){
 
-                                        $('#CancelReasonModal').modal('hide');
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                });
-                        }
-                    });
-                })
-
-            }
 
             var selected_rows = [];
             var table = $('#datatable').DataTable({
@@ -778,11 +755,7 @@
                         className: 'btn btn-danger cancel',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            table.button(0).disable();
-                            table.button(1).disable();
-                            cancel(selected_rows);
-                            table.rows().deselect();
-                            selected_rows = [];
+                            $('#BulkCancelModal').modal('show');
                         }
                     },
                     {
@@ -1123,38 +1096,94 @@
                 }
             });
 
+            $('#BulkCancelSubmit').click(function () {
+                var reason = $('#bulk_cancel_reason').val();
+                console.log(reason);
+                swal({
+                    text: 'Are you sure, you want to cancel these Shipment(s)?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('cod.orders.cancel_all') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids[]': selected_rows,
+                                'reason' : reason,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if(data.status === 1){
+
+                                    $('#BulkCancelModal').modal('hide');
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                                table.button(0).disable();
+                                table.button(1).disable();
+
+                                table.rows().deselect();
+                                selected_rows = [];
+                            });
+                    }
+                });
+            });
+
             $('body').on('click', '.cancel_order', function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if (id) {
                     $('#CancelReasonModal').modal('show');
-                    $('#CancelReasonSubmit').on('click',function () {
-                        var reason = $('#cancel_reason').val();
-                    $.ajax({
-                        url: '{!! route('cod.orders.cancel') !!}',
-                        method: 'POST',
-                        data: {
-                            'shipment_id': id,
-                            'reason': reason,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if (data.status === 1) {
-                            $('#CancelReasonModal').modal('hide');
-                            table.draw('false');
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
-                });
                 }
+            });
+
+            $('#CancelReasonSubmit').on('click',function () {
+                var reason = $('#cancel_reason').val();
+                var id = parseInt($('.cancel_order').parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('cod.orders.cancel') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': id,
+                        'reason': reason,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if (data.status === 1) {
+                        $('#CancelReasonModal').modal('hide');
+                        table.draw('false');
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+
+                    } else {
+                        $('#CancelReasonModal').modal('hide');
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
             });
             $('.datatable tbody').on('click', 'tr td.select-checkbox', function () {
                 var id = parseInt($(this).parent('tr').attr('id'));
