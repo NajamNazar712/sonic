@@ -7272,13 +7272,16 @@ class NotificationsController extends Controller
 
                         $serial = 1;
 
-                    foreach ($master_cargo->route_management->junctions as $value) {
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->junction['name'] . '</td>';
-                        $html .= '</tr>';
-                        $serial++;
-                    }
+                        if($master_cargo->route_management_id){
+
+                            foreach ($master_cargo->route_management->junctions as $value) {
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->junction['name'] . '</td>';
+                                $html .= '</tr>';
+                                $serial++;
+                            }
+                        }
                         $html .= '</tbody></table>';
 
                         if (strpos($body, '[preview]') !== FALSE) {
@@ -7287,12 +7290,14 @@ class NotificationsController extends Controller
 
                         $admins = Admin::where('role_id',10)->where('status',1)->get();
                         foreach($admins as $admin) {
+                            if($master_cargo->route_management_id){
 
-                            foreach ($master_cargo->route_management->junctions as $value) {
-                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $value->junction['id']);
-                                if ($assign_hubs->exists()) {
-                                    $to = $admin->email;
-                                    
+                                foreach ($master_cargo->route_management->junctions as $value) {
+                                    $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $value->junction['id']);
+                                    if ($assign_hubs->exists()) {
+                                        $to = $admin->email;
+                                        
+                                    }
                                 }
                             }
                             if($to != null){

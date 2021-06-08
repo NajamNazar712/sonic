@@ -795,6 +795,26 @@
                 $('#picture_modal').modal('show');
             });
 
+            $('body').on('click','#app_shipments_datatable tbody tr td.cnic_image button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#picture_modal .modal-body').html(image);
+
+                $('#picture_modal').modal('show');
+            });
+
+            $('body').on('click','#app_shipments_datatable tbody tr td.house_image button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#picture_modal .modal-body').html(image);
+
+                $('#picture_modal').modal('show');
+            });
+
             $('body').on('click','#app_shipments_datatable tbody tr td.audio_path button',function () {
                 var link = $(this).attr('data-link');
 

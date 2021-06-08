@@ -1206,7 +1206,7 @@ class AdminMasterCargoController extends Controller
         //                     ->whereIn('mc.status_id',[2,3,4,5])
         //                     ->groupBy('fleets.id')
         //                     ->get();
-        $details['fleets'] = Fleet::where('status',1);
+        $details['fleets'] = Fleet::where('status',1)->get();
         
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
@@ -1263,8 +1263,8 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->origin_hub_id = $request->input('origin_hub_id');
             $master_cargo->destination_hub_id = $request->input('destination_hub_id');
-            $master_cargo->route_management_id = $request->input('route_management_id');
-            $master_cargo->fleet_id = $request->input('fleet_id');
+//            $master_cargo->route_management_id = $request->input('route_management_id');
+//            $master_cargo->fleet_id = $request->input('fleet_id');
             
             // $master_cargo->junction_hub_1_id = $request->input('junction_1');
             // $master_cargo->junction_hub_2_id = $request->input('junction_2');
@@ -1369,16 +1369,21 @@ class AdminMasterCargoController extends Controller
             ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
-            ->leftjoin('cities as jh1', 'master_cargoes.junction_hub_1_id', '=', 'jh1.id')
-            ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
+            ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+            ->leftjoin('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
-            ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.quantity', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor','master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
+            ->leftjoin('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
+            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.quantity', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor','master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
             ->whereIn('master_cargoes.status_id', [1, 3, 6]);
 
         if (session('role_id') != 1) {
-            $receive_cargo = $receive_cargo->where(function ($query) {
-                $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhere('a.id', Auth::id());
+            $receive_cargo = $receive_cargo->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('oh.hub_id', session('hubs'))
+                        ->orWhereIn('dh.hub_id', session('hubs'))
+                        ->orWhereIn('rmj.junction_id', session('hubs'))
+                        ->orWhere('a.id', Auth::id());
+                });
             });
         }
 
@@ -1424,16 +1429,22 @@ class AdminMasterCargoController extends Controller
             ->addColumn('excel_junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
+                
+                if($master_cargo->route_management_id){
                     foreach ($master_cargo->route_management->junctions as $value) {
                         $junctions .=  $value->junction->name.'  ';
                     }
+                }
+                    
 
                     return $junctions;
                 
             })
             ->addColumn('junctions', function ($receive_cargo) {
                 $master_cargo = MasterCargo::find($receive_cargo->id);
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                if($master_cargo->route_management_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                }
             })
             
             ->filterColumn('master_cargoes.id', function ($query, $keyword) {
@@ -1571,11 +1582,12 @@ class AdminMasterCargoController extends Controller
     public function master_cargo_in_transit_all_junctions(Request $request) {
         $junctions = array();
         $master_cargo = MasterCargo::find($request->id);
-        
-        foreach ($master_cargo->route_management->junctions as $value){
-            
-            $junctions[]  =$value->junction->name;
+        if($master_cargo->route_management_id){
+            foreach ($master_cargo->route_management->junctions as $value){
+                $junctions[]  =$value->junction->name;
+            }
         }
+        
 
         return $junctions;
     }
@@ -1634,8 +1646,10 @@ class AdminMasterCargoController extends Controller
 
 
         $jucntion_names = '';
-        foreach ($master_cargo->route_management->junctions as $value) {
-            $jucntion_names .= ' - '.$value->junction['name'].' - ';
+        if($master_cargo->route_management_id){
+            foreach ($master_cargo->route_management->junctions as $value) {
+                $jucntion_names .= ' - '.$value->junction['name'].' - ';
+            }
         }
         $sender = $master_cargo->sender;
         $receiver = ($master_cargo->received_by) ? $master_cargo->receiver : NULL;
@@ -1840,7 +1854,7 @@ class AdminMasterCargoController extends Controller
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $master_cargo->destination_hub->name . '</td>
                               <td class="color secondary"><strong>Vehicle Number</strong></td>
-                              <td>' . $master_cargo->fleet->reg_number . '</td>
+                              <td>' . (($master_cargo->fleet_id) ? $master_cargo->fleet->reg_number :  '-') . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
@@ -1935,12 +1949,15 @@ class AdminMasterCargoController extends Controller
         $cargo_consignments = MasterCargo::whereIn('id', $request->ids)->get();
 
         foreach ($cargo_consignments as $cargo_consignment) {
-            foreach ($cargo_consignment->route_management->junctions as $value) {
+            if($cargo_consignment->route_management_id){
+                foreach ($cargo_consignment->route_management->junctions as $value) {
                 
-                if($cargo_consignment->origin_hub_id != $value->junction->id && $cargo_consignment->destination_hub_id != $value->junction->id && !in_array($value->junction->id, $city_ids)){
-                    $city_ids[] = $value->junction->id;
+                    if($cargo_consignment->origin_hub_id != $value->junction->id && $cargo_consignment->destination_hub_id != $value->junction->id && !in_array($value->junction->id, $city_ids)){
+                        $city_ids[] = $value->junction->id;
+                    }
                 }
             }
+            
             // if ($cargo_consignment->origin_hub_id != $cargo_consignment->junction_hub_1_id && $cargo_consignment->destination_hub_id != $cargo_consignment->junction_hub_1_id && !in_array($cargo_consignment->junction_hub_1_id, $city_ids)) {
             //     $city_ids[] = $cargo_consignment->junction_hub_1_id;
             // }
@@ -1964,9 +1981,12 @@ class AdminMasterCargoController extends Controller
         if ($cargo_consignment->exists()) {
             $cargo_consignment = $cargo_consignment->first();
             $master_cargo_junctions=array();
-            foreach ($cargo_consignment->route_management->junctions as  $value) {
-                array_push($master_cargo_junctions,$value->junction_id);
+            if($cargo_consignment->route_management_id){
+                foreach ($cargo_consignment->route_management->junctions as  $value) {
+                    array_push($master_cargo_junctions,$value->junction_id);
+                }
             }
+            
             // dd(array_intersect($master_cargo_junctions,session('hubs')));
             if (session('role_id') == 1 || (array_intersect($master_cargo_junctions,session('hubs')) )) {
             // if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
@@ -2081,9 +2101,12 @@ class AdminMasterCargoController extends Controller
 
         $master_bags = $cargo_consignment->master_bags;
         $master_cargo_junctions=array();
-        foreach ($cargo_consignment->route_management->junctions as  $value) {
-            array_push($master_cargo_junctions,$value->junction_id);
+        if($cargo_consignment->route_management_id){
+            foreach ($cargo_consignment->route_management->junctions as  $value) {
+                array_push($master_cargo_junctions,$value->junction_id);
+            }
         }
+        
         // dd(array_intersect($master_cargo_junctions,session('hubs')));
         // if (session('role_id') == 1 || (array_intersect($master_cargo_junctions,session('hubs')) )) {
             if (in_array($request->junction, $master_cargo_junctions)) {
@@ -2338,8 +2361,9 @@ class AdminMasterCargoController extends Controller
 
 //        end dispute short received
 //        dispute start for junction
-//here
-                        foreach ($cargo_consignment->route_management->junctions as $value) {
+//here                  
+                        if($cargo_consignment->route_management_id){
+                            foreach ($cargo_consignment->route_management->junctions as $value) {
 
                                 if($cargo_consignment->origin_hub_id != $value->junction->id && $cargo_consignment->destination_hub_id != $value->junction->id) {
                                     $junction = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$value->junction->id])->exists();
@@ -2347,7 +2371,9 @@ class AdminMasterCargoController extends Controller
                                         DisputeController::add_junction_dispute($cargo_consignment_id,$value->junction->id, 1);
                                     }
                                 }
-                            }        
+                            }  
+                        }
+                              
                             // $junction_hub_1_id = $cargo_consignment->junction_hub_1_id;
                             // $junction_hub_2_id = $cargo_consignment->junction_hub_2_id;
                             // if($junction_hub_1_id != null){
@@ -2612,19 +2638,25 @@ class AdminMasterCargoController extends Controller
             ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
-            ->join('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
-            ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
+            ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+            ->leftjoin('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
             // ->leftjoin('cities as jh1', 'master_cargoes.junction_hub_1_id', '=', 'jh1.id')
             // ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
-            ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
+            ->leftjoin('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
             ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
             // ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
-            ->where('master_cargoes.status_id', 2)->groupBy('master_cargoes.id');
+            ->where('master_cargoes.status_id', 2);
 
         if (session('role_id') != 1) {
-            $receive_cargo->join('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
-                ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
+            $receive_cargo = $receive_cargo->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('oh.hub_id', session('hubs'))
+                        ->orWhereIn('dh.hub_id', session('hubs'))
+                        ->orWhereIn('rmj.junction_id', session('hubs'))
+                        ->orWhere('a.id', Auth::id());
+                });
+            });
         }
 
         $datatables = Datatables::of($receive_cargo)
@@ -2657,17 +2689,22 @@ class AdminMasterCargoController extends Controller
             ->addColumn('excel_junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
+                if($master_cargo->route_management_id){
                     foreach ($master_cargo->route_management->junctions as $value) {
                         $junctions .=  $value->junction->name.' , ';
-                    }
+                    }  
+                }
+                    
 
                     return $junctions;
                 
             })
             ->addColumn('junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
-                
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                if($master_cargo->route_management_id){
+                    
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                }
             
             })
             ->addColumn('shipments', function ($master_cargo) {
@@ -2726,16 +2763,15 @@ class AdminMasterCargoController extends Controller
             ->join('shipping_modes as sm', 'master_cargoes.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
-            ->join('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
-            ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
+            ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+            ->leftjoin('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
 
             // ->leftjoin('cities as jh1', 'master_cargoes.junction_hub_1_id', '=', 'jh1.id')
             // ->leftjoin('cities as jh2', 'master_cargoes.junction_hub_2_id', '=', 'jh2.id')
             
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
-            ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
-            ->groupBy('master_cargoes.id');
+            ->leftjoin('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
+            ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id');
             // ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'master_cargoes.vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id');
 
         // if (session('role_id') != 1) {
@@ -2746,8 +2782,16 @@ class AdminMasterCargoController extends Controller
         
 
         if (session('role_id') != 1) {
-            $receive_cargo->join('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
-                ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
+            if (session('role_id') != 1) {
+                $receive_cargo = $receive_cargo->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')->where(function ($query) {
+                    $query->where(function ($sub_query) {
+                        $sub_query->whereIn('oh.hub_id', session('hubs'))
+                            ->orWhereIn('dh.hub_id', session('hubs'))
+                            ->orWhereIn('rmj.junction_id', session('hubs'))
+                            ->orWhere('a.id', Auth::id());
+                    });
+                });
+            }
         }
         $datatables = Datatables::of($receive_cargo)
             ->addColumn('id_padded', function ($master_cargo) {
@@ -2782,16 +2826,21 @@ class AdminMasterCargoController extends Controller
             ->addColumn('excel_junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
+                if($master_cargo->route_management_id){
                     foreach ($master_cargo->route_management->junctions as $value) {
                         $junctions .=  $value->junction->name.'  ';
-                    }
+                    }  
+                }
+                    
 
                     return $junctions;
                 
             })
             ->addColumn('junctions', function ($receive_cargo) {
                 $master_cargo = MasterCargo::find($receive_cargo->id);
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                if($master_cargo->route_management_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                }
             })
             ->filterColumn('master_cargoes.id', function ($query, $keyword) {
                 return $query->where('master_cargoes.id', '=', $keyword);
