@@ -1370,7 +1370,7 @@ class AdminMasterCargoController extends Controller
             ->join('admins as a', 'master_cargoes.created_by', '=', 'a.id')
             ->join('master_cargo_statuses as mcs', 'master_cargoes.status_id', '=', 'mcs.id')
             ->join('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
-            ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
+            ->leftjoin('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
             ->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
