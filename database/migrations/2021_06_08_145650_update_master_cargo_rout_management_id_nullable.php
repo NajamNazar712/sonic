@@ -15,6 +15,7 @@ class UpdateMasterCargoRoutManagementIdNullable extends Migration
     {
         Schema::table('master_cargoes', function (Blueprint $table) {
             $table->integer('route_management_id')->nullable()->change();
+            $table->integer('fleet_id')->nullable()->change();
         });
     }
 
@@ -27,6 +28,7 @@ class UpdateMasterCargoRoutManagementIdNullable extends Migration
     {
         Schema::table('master_cargoes', function (Blueprint $table) {
             $table->integer('route_management_id')->change();
+            $table->integer('fleet_id')->change();
         });
     }
 }
