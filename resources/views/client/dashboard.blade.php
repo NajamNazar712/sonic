@@ -1098,7 +1098,6 @@
 
             $('#BulkCancelSubmit').click(function () {
                 var reason = $('#bulk_cancel_reason').val();
-                console.log(reason);
                 swal({
                     text: 'Are you sure, you want to cancel these Shipment(s)?',
                     icon: 'warning',
@@ -1133,7 +1132,7 @@
                             .done(function (data) {
                                 if(data.status === 1){
 
-                                    $('#BulkCancelModal').modal('hide');
+
                                     table.draw('false');
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }else{
@@ -1144,6 +1143,8 @@
 
                                 table.rows().deselect();
                                 selected_rows = [];
+                                $('#bulk_cancel_reason').val('');
+                                $('#BulkCancelModal').modal('hide');
                             });
                     }
                 });
