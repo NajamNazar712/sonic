@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateShipmentsTableForOpenShipment extends Migration
+class CreateOpenShipmentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class UpdateShipmentsTableForOpenShipment extends Migration
      */
     public function up()
     {
-        Schema::table('shipments', function (Blueprint $table) {
-            $table->boolean('open_shipment')->default(0);
+        Schema::create('open_shipments', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('shipment_id');
+            $table->integer('is_open')->default(0);
+            $table->timestamps();
         });
     }
 
@@ -25,8 +28,6 @@ class UpdateShipmentsTableForOpenShipment extends Migration
      */
     public function down()
     {
-        Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('open_shipment');
-        });
+        Schema::dropIfExists('open_shipments');
     }
 }

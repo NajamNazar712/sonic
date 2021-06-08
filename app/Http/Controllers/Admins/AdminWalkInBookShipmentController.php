@@ -28,6 +28,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
+use App\Http\Models\OpenShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\PaymentMode;
@@ -104,7 +105,6 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->packaging_charges = $packaging_charges;
         $shipment->business_category_id = $business_category_id;
-        $shipment->open_shipment = $open_shipment;
         
         $self_collection = FALSE;
 
@@ -128,6 +128,10 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
+        $open_shipment_check = new OpenShipment();
+        $open_shipment_check->shipment_id = $shipment_id;
+        $open_shipment_check->is_open = $open_shipment;
+        $open_shipment_check->save();
 
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
         if($pickup == 0){
@@ -776,7 +780,8 @@ class AdminWalkInBookShipmentController extends Controller
                 
                 $table_end .= '
                               </tr>';
-                if($shipment->open_shipment==1){
+                              if($shipment->open_shipment->count()==1){
+
                     $table_end .= '<tr>
                     <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
                     <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
