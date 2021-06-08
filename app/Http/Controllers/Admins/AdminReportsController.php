@@ -8195,7 +8195,7 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.delivered_status','rider_deliveries.audio_path')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.cnic_image as cnic_image', 'rider_deliveries.house_image as house_image', 'rider_deliveries.delivered_status','rider_deliveries.audio_path')
             ->where('delivery_note_shipments.update_type', 1)
             ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
@@ -8232,7 +8232,44 @@ class AdminReportsController extends Controller
                     return '-';
                 }
 
-            }) ->editColumn('audio_path', function ($shipments) {
+            })
+            ->addColumn('cnic_image', function($shipments){
+                $image = '';
+                if($shipments->cnic_image != null){
+                    $exists = Storage::disk('public')->exists($shipments->cnic_image);
+                    if($exists){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    }else{
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->cnic_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->addColumn('house_image', function($shipments){
+                $image = '';
+                if($shipments->house_image != null){
+                    $exists = Storage::disk('public')->exists($shipments->house_image);
+                    if($exists){
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    }else{
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->editColumn('audio_path', function ($shipments) {
                 $audio = '';
                 if($shipments->audio_path != null){
                     $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-file-sound-o"></i> Listen</button></div>';
