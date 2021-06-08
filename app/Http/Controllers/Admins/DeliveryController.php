@@ -782,7 +782,11 @@ class DeliveryController extends Controller
                     NotificationsController::send(11, $note->id, $shipment);
 
                     if($notifications[$index]) {
-                        NotificationsController::send(12, $note->id, $shipment);
+                        if($shipment->amount == 0){
+                            NotificationsController::send(132, $note->id, $shipment);
+                        }else{
+                            NotificationsController::send(12, $note->id, $shipment);
+                        }
                     }
                 }
                 NotificationsController::send(40, $note->id);
