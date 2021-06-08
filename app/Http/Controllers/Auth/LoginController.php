@@ -154,6 +154,10 @@ class LoginController extends Controller
                         session(['pickup_wise_account' => 1]);
                     }
                 }
+
+                $agreement_signed = $user->agreement_signed;
+                session(['agreement_signed' => $agreement_signed]);
+
             }
 
             $shipper_user_id = $user->id;

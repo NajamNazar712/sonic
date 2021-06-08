@@ -1326,4 +1326,12 @@ class ShipperDashboardController extends Controller
 
         return $datatable->make(true);
     }
+
+    public function agreement_status(Request $request){
+        if(session()->has('agreement_signed') && session('agreement_signed') != 1){
+            session(['agreement_signed' => 1]);
+            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
+        }
+        return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
+    }
 }

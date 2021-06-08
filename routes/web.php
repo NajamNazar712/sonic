@@ -38,6 +38,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
     Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
+    Route::post('update/agreement_status','Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');

@@ -3,6 +3,7 @@
 @section('title', 'Welcome')
 
 @section('content')
+
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
