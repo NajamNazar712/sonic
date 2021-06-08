@@ -379,6 +379,7 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
+
                     if($shipment->warehouse == 1){
                         return response()->json(['status' => 0,'error' => 'Warehouse Shipment can not be cancelled from Sonic!']);
                     }
@@ -453,6 +454,7 @@ class ShipperDashboardController extends Controller
                     return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
                 }
                 else {
+                  
                     return response()->json(['status'=>0,'error'=>'Shipment\'s Status has already been changed']);
                 }
             }else{
