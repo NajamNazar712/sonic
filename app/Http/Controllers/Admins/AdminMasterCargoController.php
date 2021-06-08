@@ -1377,11 +1377,14 @@ class AdminMasterCargoController extends Controller
             ->whereIn('master_cargoes.status_id', [1, 3, 6]);
 
         if (session('role_id') != 1) {
-            $receive_cargo = $receive_cargo->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
-      
-            // $receive_cargo = $receive_cargo->where(function ($query) {
-            //     $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhere('a.id', Auth::id());
-            // });
+            $receive_cargo = $receive_cargo->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('oh.hub_id', session('hubs'))
+                        ->orWhereIn('dh.hub_id', session('hubs'))
+                        ->orWhereIn('rmj.junction_id', session('hubs'))
+                        ->orWhere('a.id', Auth::id());
+                });
+            });
         }
 
         $datatables = Datatables::of($receive_cargo)
