@@ -8231,43 +8231,6 @@ class AdminReportsController extends Controller
                 else{
                     return '-';
                 }
-
-            })
-            ->addColumn('cnic_image', function($shipments){
-                $image = '';
-                if($shipments->cnic_image != null){
-                    $exists = Storage::disk('public')->exists($shipments->cnic_image);
-                    if($exists){
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
-                    }else{
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->cnic_image, now()->addMinutes(5));
-                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                    }
-
-                    return $image;
-                }
-                else{
-                    return '-';
-                }
-
-            })
-            ->addColumn('house_image', function($shipments){
-                $image = '';
-                if($shipments->house_image != null){
-                    $exists = Storage::disk('public')->exists($shipments->house_image);
-                    if($exists){
-                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
-                    }else{
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
-                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                    }
-
-                    return $image;
-                }
-                else{
-                    return '-';
-                }
-
             })
             ->editColumn('audio_path', function ($shipments) {
                 $audio = '';
