@@ -466,8 +466,8 @@ class ShipperDashboardController extends Controller
     {
         $correct = FALSE;
         $reason = $request->reason;
+        
         foreach ($request->ids as $id) {
-
             $shipment = Shipment::where('id', $id)->where('user_id', session('user_id'));
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
