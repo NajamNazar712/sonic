@@ -1263,7 +1263,7 @@ class AdminMasterCargoController extends Controller
 
             $master_cargo->origin_hub_id = $request->input('origin_hub_id');
             $master_cargo->destination_hub_id = $request->input('destination_hub_id');
-            $master_cargo->route_management_id = $request->input('route_management_id');
+//            $master_cargo->route_management_id = $request->input('route_management_id');
             $master_cargo->fleet_id = $request->input('fleet_id');
             
             // $master_cargo->junction_hub_1_id = $request->input('junction_1');

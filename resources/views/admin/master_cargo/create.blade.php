@@ -96,10 +96,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
-                                                        <div class="form-group">
-                                                            <select name="route_management_id" class="select2 route_management_id" data-rule-required="true" data-msg-required="Route is required">
-                                                            </select>
-                                                        </div>
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="route_management_id" class="select2 route_management_id" data-rule-required="true" data-msg-required="Route is required">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
                                                     </div>
                                                     {{-- <div class="col">
                                                         <div class="form-group">
