@@ -1373,12 +1373,12 @@ class AdminMasterCargoController extends Controller
             ->join('route_managements as rm', 'master_cargoes.route_management_id', '=', 'rm.id')
             ->leftjoin('transport_modes as tm', 'master_cargoes.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'master_cargoes.transport_mode_vendor_id', '=', 'tmv.id')
+            ->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
             ->select('master_cargoes.id', 'master_cargoes.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'master_cargoes.shipments', 'master_cargoes.quantity', 'master_cargoes.bags', 'master_cargoes.short_received_bags', 'master_cargoes.driver_name', 'f.reg_number as vehicle', 'master_cargoes.phone_number', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'tmv.name as vendor','master_cargoes.bags_weight', 'master_cargoes.actual_weight', 'master_cargoes.created_at as transit_at', 'a.name as transitted_by', 'mcs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
             ->whereIn('master_cargoes.status_id', [1, 3, 6]);
 
         if (session('role_id') != 1) {
-            $receive_cargo->join('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')
-                ->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
+            $receive_cargo = $receive_cargo->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('rmj.junction_id', session('hubs'))->orWhere('a.id', Auth::id());
       
             // $receive_cargo = $receive_cargo->where(function ($query) {
             //     $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhereIn('master_cargoes.junction_hub_1_id', session('hubs'))->orWhere('a.id', Auth::id());
