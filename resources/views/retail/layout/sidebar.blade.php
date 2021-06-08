@@ -4,7 +4,13 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
 {{--            <li class=" nav-item"><a href="{{route('admin.dashboard.index')}}"><i class="la la-area-chart"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a>--}}
 {{--            </li>--}}
-            <li><a class="menu-item" href="{{route('retail.shipment.book.index')}}"><i class="la la-cart-plus"></i>Booking</a></li>
+
+            <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{ route('retail.shipment.book.index') }}">Order Form</a></li>
+                    <li><a class="menu-item" href="{{ route('retail.shipment.book.excel') }}">Excel Sheet</a></li>
+                </ul>
+            </li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.index')}}"><i class="la la-dropbox"></i>Parcel Receiving</a></li>
             <li><a class="menu-item" href="{{route('retail.cash_deposit.index')}}"><i class="la la-money"></i>Cash Deposit</a></li>
             <li><a class="menu-item" href="{{route('retail.shipment.tracking_slip.index')}}"><i class="la la-image"></i>Tracking Slip</a></li>

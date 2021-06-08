@@ -1500,4 +1500,11 @@ class RetailShipmentBookController extends Controller
 
         return  $datatable->make(true);
     }
+
+    public function excel_index() {
+        return view('retail.shipment.booking.excel')->with([]);
+    }
+    public function excel_store(Request $request) {
+        dd($request);
+    }
 }

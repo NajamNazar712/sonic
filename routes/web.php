@@ -2993,6 +2993,8 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/slip', 'Retail\RetailShipmentBookController@slip')->name('slip');
             Route::post('/calculate_rates', 'Retail\RetailShipmentBookController@calculate_rates')->name('calculate_rates');
             Route::post('print_air_waybill', 'Retail\RetailShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::get('/excel', 'Retail\RetailShipmentBookController@excel_index')->name('excel');
+            Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
