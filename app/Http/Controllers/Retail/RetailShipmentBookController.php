@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 
 class RetailShipmentBookController extends Controller
@@ -1502,9 +1503,84 @@ class RetailShipmentBookController extends Controller
     }
 
     public function excel_index() {
-        return view('retail.shipment.booking.excel')->with([]);
+        $products = Product::all();
+        $business_categories = BusinessCategory::where('id', 1)->get();
+        $shipping_modes = RetailShippingMode::all();
+        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
+        $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
+        $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
+        $trax_boxes = RetailTraxBox::all();
+        $banks = BanksList::all();
+        return view('retail.shipment.booking.excel')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'international_cities' => $international_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
     }
     public function excel_store(Request $request) {
+
+        $pickup_address_id = session('pickup_address_id');
+        $category = session('category');
+        $category_id = session('category_id');
+
+        $names = [
+            'product_id' => 'Shipment ID',
+            'business_category_id' => 'Business Category ID',
+            'shipping_mode_id' => 'Product ID',
+            'weight' => 'Weight (kg)',
+            'length' => 'Length (cm)',
+            'breadth' => 'Breadth (cm)',
+            'height' => 'Height (cm)',
+            'pieces' => 'Pieces',
+            'payment_mode_id' => 'Payment Mode ID',
+            'shipper_cell_number' => 'Shipper Cell Number',
+            'shipper_name' => 'Shipper Name',
+            'shipper_cnic' => 'Shipper CNIC',
+            'shipper_address' => 'Shipper Address',
+            'consignee_cell_number' => 'Consignee Cell Number',
+            'consignee_name' => 'Consignee Name',
+            'consignee_cnic' => 'Consignee CNIC',
+            'consignee_address' => 'Consignee Address',
+            'order_id' => 'Order ID',
+            'insurance_offered' => 'Insurance Offered',
+            'weight_charges' => 'Weight Charges',
+            'fuel_surcharge' => 'Fuel Surcharge',
+            'iban_number' => 'IBAN Number',
+            'account_number' => 'Account Number',
+            'bank_id' => 'Bank ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+
+            'consignee_city_name.exists' => 'Given :attribute is of Invalid Name.',
+
+            'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+        ];
+
+        $rules = [
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'consignee_name' => ['required', 'between:1,100'],
+            'consignee_address' => ['required', 'between:1,255'],
+            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
+            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'weight' => ['required', 'numeric', 'between:0.1,100000'],
+            'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+                $query->whereNotIn('id', [2, 3]);
+            })],
+            'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
+
+        ];
         dd($request);
     }
 }
