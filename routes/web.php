@@ -2674,7 +2674,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('in_process')->name('in_process.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@in_process_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@in_process_list')->name('list');
             Route::post('tag', 'Admins\AdminCRMController@bulk_admin_tag')->name('tag');
             Route::post('un_tag', 'Admins\AdminCRMController@admin_un_tag')->name('un_tag');
             Route::post('special_request_tag', 'Admins\AdminCRMController@special_request_tag')->name('special_request_tag');
