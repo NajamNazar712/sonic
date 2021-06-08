@@ -1843,7 +1843,7 @@ class AdminMasterCargoController extends Controller
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $master_cargo->destination_hub->name . '</td>
                               <td class="color secondary"><strong>Vehicle Number</strong></td>
-                              <td>' . $master_cargo->fleet->reg_number . '</td>
+                              <td>' . $master_cargo->fleet_id ? $master_cargo->fleet->reg_number :  '-' . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
