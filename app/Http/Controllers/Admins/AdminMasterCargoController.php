@@ -1427,16 +1427,22 @@ class AdminMasterCargoController extends Controller
             ->addColumn('excel_junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
+                
+                if($master_cargo->route_management_id){
                     foreach ($master_cargo->route_management->junctions as $value) {
                         $junctions .=  $value->junction->name.'  ';
                     }
+                }
+                    
 
                     return $junctions;
                 
             })
             ->addColumn('junctions', function ($receive_cargo) {
                 $master_cargo = MasterCargo::find($receive_cargo->id);
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                if($master_cargo->route_management_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                }
             })
             
             ->filterColumn('master_cargoes.id', function ($query, $keyword) {
@@ -1574,11 +1580,12 @@ class AdminMasterCargoController extends Controller
     public function master_cargo_in_transit_all_junctions(Request $request) {
         $junctions = array();
         $master_cargo = MasterCargo::find($request->id);
-        
-        foreach ($master_cargo->route_management->junctions as $value){
-            
-            $junctions[]  =$value->junction->name;
+        if($master_cargo->route_management_id){
+            foreach ($master_cargo->route_management->junctions as $value){
+                $junctions[]  =$value->junction->name;
+            }
         }
+        
 
         return $junctions;
     }
@@ -1637,8 +1644,10 @@ class AdminMasterCargoController extends Controller
 
 
         $jucntion_names = '';
-        foreach ($master_cargo->route_management->junctions as $value) {
-            $jucntion_names .= ' - '.$value->junction['name'].' - ';
+        if($master_cargo->route_management_id){
+            foreach ($master_cargo->route_management->junctions as $value) {
+                $jucntion_names .= ' - '.$value->junction['name'].' - ';
+            }
         }
         $sender = $master_cargo->sender;
         $receiver = ($master_cargo->received_by) ? $master_cargo->receiver : NULL;
@@ -1938,12 +1947,15 @@ class AdminMasterCargoController extends Controller
         $cargo_consignments = MasterCargo::whereIn('id', $request->ids)->get();
 
         foreach ($cargo_consignments as $cargo_consignment) {
-            foreach ($cargo_consignment->route_management->junctions as $value) {
+            if($cargo_consignment->route_management_id){
+                foreach ($cargo_consignment->route_management->junctions as $value) {
                 
-                if($cargo_consignment->origin_hub_id != $value->junction->id && $cargo_consignment->destination_hub_id != $value->junction->id && !in_array($value->junction->id, $city_ids)){
-                    $city_ids[] = $value->junction->id;
+                    if($cargo_consignment->origin_hub_id != $value->junction->id && $cargo_consignment->destination_hub_id != $value->junction->id && !in_array($value->junction->id, $city_ids)){
+                        $city_ids[] = $value->junction->id;
+                    }
                 }
             }
+            
             // if ($cargo_consignment->origin_hub_id != $cargo_consignment->junction_hub_1_id && $cargo_consignment->destination_hub_id != $cargo_consignment->junction_hub_1_id && !in_array($cargo_consignment->junction_hub_1_id, $city_ids)) {
             //     $city_ids[] = $cargo_consignment->junction_hub_1_id;
             // }
@@ -1967,9 +1979,12 @@ class AdminMasterCargoController extends Controller
         if ($cargo_consignment->exists()) {
             $cargo_consignment = $cargo_consignment->first();
             $master_cargo_junctions=array();
-            foreach ($cargo_consignment->route_management->junctions as  $value) {
-                array_push($master_cargo_junctions,$value->junction_id);
+            if($cargo_consignment->route_management_id){
+                foreach ($cargo_consignment->route_management->junctions as  $value) {
+                    array_push($master_cargo_junctions,$value->junction_id);
+                }
             }
+            
             // dd(array_intersect($master_cargo_junctions,session('hubs')));
             if (session('role_id') == 1 || (array_intersect($master_cargo_junctions,session('hubs')) )) {
             // if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
@@ -2084,9 +2099,12 @@ class AdminMasterCargoController extends Controller
 
         $master_bags = $cargo_consignment->master_bags;
         $master_cargo_junctions=array();
-        foreach ($cargo_consignment->route_management->junctions as  $value) {
-            array_push($master_cargo_junctions,$value->junction_id);
+        if($cargo_consignment->route_management_id){
+            foreach ($cargo_consignment->route_management->junctions as  $value) {
+                array_push($master_cargo_junctions,$value->junction_id);
+            }
         }
+        
         // dd(array_intersect($master_cargo_junctions,session('hubs')));
         // if (session('role_id') == 1 || (array_intersect($master_cargo_junctions,session('hubs')) )) {
             if (in_array($request->junction, $master_cargo_junctions)) {
@@ -2341,8 +2359,9 @@ class AdminMasterCargoController extends Controller
 
 //        end dispute short received
 //        dispute start for junction
-//here
-                        foreach ($cargo_consignment->route_management->junctions as $value) {
+//here                  
+                        if($cargo_consignment->route_management_id){
+                            foreach ($cargo_consignment->route_management->junctions as $value) {
 
                                 if($cargo_consignment->origin_hub_id != $value->junction->id && $cargo_consignment->destination_hub_id != $value->junction->id) {
                                     $junction = MasterCargoJunctionReceival::where(['master_cargo_id'=>$cargo_consignment_id,'junction_id'=>$value->junction->id])->exists();
@@ -2350,7 +2369,9 @@ class AdminMasterCargoController extends Controller
                                         DisputeController::add_junction_dispute($cargo_consignment_id,$value->junction->id, 1);
                                     }
                                 }
-                            }        
+                            }  
+                        }
+                              
                             // $junction_hub_1_id = $cargo_consignment->junction_hub_1_id;
                             // $junction_hub_2_id = $cargo_consignment->junction_hub_2_id;
                             // if($junction_hub_1_id != null){
@@ -2660,17 +2681,22 @@ class AdminMasterCargoController extends Controller
             ->addColumn('excel_junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
+                if($master_cargo->route_management_id){
                     foreach ($master_cargo->route_management->junctions as $value) {
                         $junctions .=  $value->junction->name.' , ';
-                    }
+                    }  
+                }
+                    
 
                     return $junctions;
                 
             })
             ->addColumn('junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
-                
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                if($master_cargo->route_management_id){
+                    
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                }
             
             })
             ->addColumn('shipments', function ($master_cargo) {
@@ -2785,16 +2811,21 @@ class AdminMasterCargoController extends Controller
             ->addColumn('excel_junctions', function ($master_cargo) {
                 $master_cargo = MasterCargo::find($master_cargo->id);
                 $junctions = '';
+                if($master_cargo->route_management_id){
                     foreach ($master_cargo->route_management->junctions as $value) {
                         $junctions .=  $value->junction->name.'  ';
-                    }
+                    }  
+                }
+                    
 
                     return $junctions;
                 
             })
             ->addColumn('junctions', function ($receive_cargo) {
                 $master_cargo = MasterCargo::find($receive_cargo->id);
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                if($master_cargo->route_management_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($master_cargo->route_management->junctions) . '</button>';
+                }
             })
             ->filterColumn('master_cargoes.id', function ($query, $keyword) {
                 return $query->where('master_cargoes.id', '=', $keyword);
