@@ -33,8 +33,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
+use Validator;
+use Illuminate\Validation\Rule;
 
 class RetailShipmentBookController extends Controller
 {
@@ -1513,7 +1515,7 @@ class RetailShipmentBookController extends Controller
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
         $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
-        $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
+        $payment_modes = RetailPaymentMode::where('id', 1)->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
         return view('retail.shipment.booking.excel')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'international_cities' => $international_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
@@ -1528,6 +1530,8 @@ class RetailShipmentBookController extends Controller
             'product_id' => 'Shipment ID',
             'business_category_id' => 'Business Category ID',
             'shipping_mode_id' => 'Product ID',
+            'destination' => 'Destination',
+            'volumetric_weight' => 'Volumetric Weight',
             'weight' => 'Weight (kg)',
             'length' => 'Length (cm)',
             'breadth' => 'Breadth (cm)',
@@ -1543,7 +1547,8 @@ class RetailShipmentBookController extends Controller
             'consignee_cnic' => 'Consignee CNIC',
             'consignee_address' => 'Consignee Address',
             'order_id' => 'Order ID',
-            'insurance_offered' => 'Insurance Offered',
+//            'insurance_offered' => 'Insurance Offered',
+            'trax_box_id' => 'Trax Box ID',
             'weight_charges' => 'Weight Charges',
             'fuel_surcharge' => 'Fuel Surcharge',
             'iban_number' => 'IBAN Number',
@@ -1571,20 +1576,180 @@ class RetailShipmentBookController extends Controller
         ];
 
         $rules = [
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'product_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('products', 'id')],
+            'business_category_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('business_categories', 'id')->where('id', 1)],
+            'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_shipping_modes', 'id')],
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'volumetric_weight' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+//            'weight' => ['required', 'numeric', 'between:0.1,100000'],
+//            'length' => [],
+//            'breadth' => [],
+//            'height' => [],
+            'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_payment_modes', 'id')->where('id', 1)],
+            'shipper_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'shipper_name' => ['required', 'between:1,100'],
+            'shipper_cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'shipper_address' => ['required', 'between:1,255'],
+            'consignee_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'consignee_name' => ['required', 'between:1,100'],
+            'consignee_cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
             'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
-            'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
-            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'weight' => ['required', 'numeric', 'between:0.1,100000'],
-            'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [2, 3]);
-            })],
-            'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10']
-
+            'order_id' => [],
+//            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'trax_box_id' => ['required_if:shipping_mode_id,5', 'integer', Rule::exists('retail_trax_boxes', 'id')],
+            'weight_charges' => ['required', 'integer'],
+            'fuel_surcharge' => ['required', 'integer'],
+            'iban_number' => ['between:1,50'],
+            'account_number' => ['integer'],
+            'bank_id' => ['integer', 'between:1,100', Rule::exists('banks_lists', 'id')]
         ];
-        dd($request);
+
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+        }
+
+        if (isset($spreadsheet)) {
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'shipper_cell_number', 12 => 'shipper_name', 13 => 'shipper_cnic', 14 => 'shipper_address', 15 => 'consignee_cell_number', 16 => 'consignee_name', 17 => 'consignee_cnic', 18 => 'consignee_address', 19 => 'order_id', 20 => 'trax_box_id', 21 => 'weight_charges', 22 => 'fuel_surcharge', 23 => 'iban_number', 24 => 'account_number', 25 => 'bank_id'];
+            if (count($spreadsheet[0]) != 26){
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            unset($spreadsheet[0]);
+        }
+
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            }
+            else
+            {
+                $forms=$request->all();
+
+                $forms = $forms['form'];
+                foreach($forms as $form) {
+                    $row = array();
+                    foreach ($form as $key=>$value){
+                        $row[$key] = $value;
+                    }
+                    $rows[] = $row;
+                }
+                $service_type_check_id = $request->service_type_check_id;
+
+            }
+
+            $errors = array();
+
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                if(!isset($row['pieces']) || $row['pieces'] == null){
+                    $row['pieces'] = 1;
+                }
+
+                $rows[$key]['pieces'] = $row['pieces'];
+
+                if(!isset($row['insurance_offered']) || $row['insurance_offered'] == null){
+                    $row['insurance_offered'] = 'no';
+                }
+
+                $rows[$key]['insurance_offered'] = $row['insurance_offered'];
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    foreach ($validate->errors()->toArray() as $key => $error_array) {
+                        foreach ($error_array as $error) {
+                            if (!isset($errors[$row_id][$key])) {
+                                $errors[$row_id][$key] = $error;
+                            }
+                        }
+                    }
+                }
+
+//                if (empty($errors[$row_id])) {
+//                        $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
+//
+//                        if (!$user_shipping_info->status) {
+//                            $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
+//                        }
+//
+//                        if (!$user_shipping_info->city->status) {
+//                            $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
+//                        }
+//
+//                        if (!$user_shipping_info->city->zone_id) {
+//                            $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
+//                        }
+//
+//                        if (!$user_shipping_info->city->pickup) {
+//                            $errors[$row_id]['pickup_address_id'] = 'Pickup is not allowed for City: ' . $user_shipping_info->city->name;
+//                        }
+//
+//                        $consignee_city = City::where('name', $row['consignee_city_name'])->first();
+//
+//                        if (!$consignee_city->status) {
+//                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+//                        }
+//
+//                        if ($consignee_city->id == 1244 && $user_id != 5982 && $user_id != 3324) {
+//                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is not allowed for this shipper';
+//                        }
+//
+//                        if (!$consignee_city->zone_id) {
+//                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+//                        }
+//                        if (!$consignee_city->zone_id) {
+//                            $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+//                        }
+//
+//                        $pickup_city_id = $user_shipping_info->city_id;
+//
+//                        if ($consignee_city->id != $pickup_city_id && $row['shipping_mode_id'] == 4) {
+//                            $errors[$row_id]['consignee_city_name'] = 'Same Day Delivery is not available for Different City Shipment';
+//                        }
+//                }
+            }
+
+            if (empty($errors)) {
+//                        foreach ($rows as $key => $row) {
+//                            $row['user_id'] = $user_id;
+//                            $row['account_type_id'] = 1;
+
+//                                dispatch(new ProcessShipmentBookingDB($row));
+//                        }
+                        dd($rows);
+
+                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+            }
+            else {
+                dd($errors);
+//                $city_name = array();
+//                foreach ($cities as $city) {
+//                    $city_name[$city->name] = $city->name;
+//                }
+
+//                return view('client.shipment.book.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id]);
+            }
+        }
+        else {
+            return redirect()->back()->with('error', 'No Shipments in File');
+        }
     }
 }

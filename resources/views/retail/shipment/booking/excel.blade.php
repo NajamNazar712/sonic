@@ -116,23 +116,25 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <table class="table table-bordered">
-                                    <thead>
-                                    <tr role="row" class="bg-primary white text-center">
-                                        <th colspan="2" class="border-primary border-darken-1">Cities</th>
-                                    </tr>
-                                    <tr role="row" class="bg-primary bg-lighten-1 white">
-                                        <th class="border-primary border-lighten-2">Name</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    @foreach ($domestic_cities as $domestic_city)
-                                        <tr role="row">
-                                            <td>{{ $domestic_city->name }}</td>
+                                <div class="col">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white text-center">
+                                            <th colspan="2" class="border-primary border-darken-1">Cities</th>
                                         </tr>
-                                    @endforeach
-                                    </tbody>
-                                </table>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach ($domestic_cities as $domestic_city)
+                                            <tr role="row">
+                                                <td>{{ $domestic_city->name }}</td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
                                 <div class="col">
                                     <table class="table table-bordered">
                                         <thead>
