@@ -2138,6 +2138,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //Reports end
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
+
+        Route::prefix('add')->name('add.')->group(function(){
+            Route::get('','Admins\AdminShipmentCancelController@add_index')->name('index');
+            Route::post('shipment_info', 'Admins\AdminShipmentCancelController@get_shipment_info')->name('shipment_info');
+            Route::post('store','Admins\AdminShipmentCancelController@cancelled_shipments_store')->name('store');
+        });
+
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
         Route::put('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
@@ -2674,7 +2681,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('in_process')->name('in_process.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@in_process_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@in_process_list')->name('list');
             Route::post('tag', 'Admins\AdminCRMController@bulk_admin_tag')->name('tag');
             Route::post('un_tag', 'Admins\AdminCRMController@admin_un_tag')->name('un_tag');
             Route::post('special_request_tag', 'Admins\AdminCRMController@special_request_tag')->name('special_request_tag');
