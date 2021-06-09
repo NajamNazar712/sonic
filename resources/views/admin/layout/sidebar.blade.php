@@ -805,6 +805,10 @@
                         <li><a class="menu-item" href="{{ route('admin.international.tracking_upload.index') }}">International Tracking Upload</a></li>
                     @endif
 
+                    @if (session('role_id') == 1 || in_array(508, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.international.shipment_status.index') }}">International Shipment Status</a></li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(471, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.activity_trail.index') }}">Activity Trail</a></li>
                     @endif

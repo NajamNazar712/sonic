@@ -2831,7 +2831,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit_info')->name('edit');
             Route::post('edit', 'Admins\AdminInternationalShipmentsController@tracking_upload_edit')->name('edit');
         });
-        Route::prefix('rates')->name('rates.')->group(function () {
+        Route::prefix('shipment_status')->name('shipment_status.')->group(function () {
+            Route::get('', 'Admins\AdminInternationalShipmentsController@shipment_status_index')->name('index');
+            Route::post('shipment_info', 'Admins\AdminInternationalShipmentsController@get_shipment_info')->name('shipment_info');
+            Route::post('update', 'Admins\AdminInternationalShipmentsController@shipment_status_update')->name('update');
+
+        });
+            Route::prefix('rates')->name('rates.')->group(function () {
             Route::prefix('view')->name('view.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
             });
