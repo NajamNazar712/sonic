@@ -2432,12 +2432,14 @@ class V2AdminPickupsController extends Controller
 
                 $table_end .= '
                               </tr>';
-                if ($shipment->open_shipment == 1) {
+                if($shipment->shipment_detail()->exists()){
+                    if($shipment->shipment_detail->is_open==1){
                     $table_end .= '<tr>
                                 <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
                                 <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="' . asset('img/open_box_icon.png') . '" ></span></strong></td>
 
                                 </tr>';
+                }
                 }
                 $table_end .= '<tr>
                                 <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>

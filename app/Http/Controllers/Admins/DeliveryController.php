@@ -1281,10 +1281,15 @@ class DeliveryController extends Controller
                 else{
                     $shipment_details_row_start .= '<td class="'.$class.' ' . $details_change_class .'">-</td>';
                 }
-                if($shipment->open_shipment==1){
+                    if($shipment->shipment_detail()->exists()){
+                        if($shipment->shipment_detail->is_open==1){
                     $shipment_details_row_start .= '
                     <td class="'.$class.'"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>';
                 }else{
+                    $shipment_details_row_start .= '
+                    <td class="'.$class.'"><strong> No <span></span></strong></td>';
+              
+                }}else{
                     $shipment_details_row_start .= '
                     <td class="'.$class.'"><strong> No <span></span></strong></td>';
               

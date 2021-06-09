@@ -94,7 +94,7 @@
                                 <th>Shipper Reference 3</th>
                                 <th>Shipper Reference 4</th>
                                 <th>Shipper Reference 5</th>
-                                <th>Open Box</th>
+                                <th>Open Shipment</th>
                                 <th></th>
                             </tr>
                             </thead>

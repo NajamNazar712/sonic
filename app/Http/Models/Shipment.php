@@ -122,7 +122,7 @@ class Shipment extends Model
         return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipment', 'id', 'shipment_id');
     }
 
-    public function open_shipment() {
-		return $this->hasOne('App\Http\Models\OpenShipment');
+    public function shipment_detail() {
+		return $this->hasOne('App\Http\Models\ShipmentDetail');
 	}
 }

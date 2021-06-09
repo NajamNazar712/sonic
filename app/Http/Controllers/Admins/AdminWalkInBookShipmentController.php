@@ -40,6 +40,7 @@ use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\WalkInShipmentPackagingMaterialHistory;
 use Auth;
 use App\Http\Models\PackagingMaterialTypeSizes;
+use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\Warehouse\Warehouse;
@@ -128,10 +129,11 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
-        $open_shipment_check = new OpenShipment();
-        $open_shipment_check->shipment_id = $shipment_id;
-        $open_shipment_check->is_open = $open_shipment;
-        $open_shipment_check->save();
+
+        $shipment_info = new ShipmentDetail();
+        $shipment_info->shipment_id = $shipment_id;
+        $shipment_info->is_open = $open_shipment;
+        $shipment_info->save();
 
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, NULL, Auth::id());
         if($pickup == 0){
@@ -780,7 +782,8 @@ class AdminWalkInBookShipmentController extends Controller
                 
                 $table_end .= '
                               </tr>';
-                              if($shipment->open_shipment->count()==1){
+                                    if($shipment->shipment_detail()->exists()){
+                                        if($shipment->shipment_detail->is_open==1){
 
                     $table_end .= '<tr>
                     <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
@@ -788,6 +791,7 @@ class AdminWalkInBookShipmentController extends Controller
                     
                     </tr>';
                 }
+            }
 
                 $table_end .= '<tr>
                                 <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
