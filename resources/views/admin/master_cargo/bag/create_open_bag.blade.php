@@ -297,7 +297,7 @@
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
                         $.ajax({
-                            url: '{!! route('admin.master_cargo.bag.create.shipment_details') !!}',
+                            url: '{!! route('admin.master_cargo.bag.create.open_bag.shipment_details') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,

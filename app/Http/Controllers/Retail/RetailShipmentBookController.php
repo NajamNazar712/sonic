@@ -1502,6 +1502,6 @@ class RetailShipmentBookController extends Controller
             $datatable->whereDate('retail_shipments.created_at', $date);
         }
 
-        return  $datatable->make(true);
+        return  $datatable->make(true);A
     }
 }
