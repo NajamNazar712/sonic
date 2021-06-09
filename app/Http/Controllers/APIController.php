@@ -531,7 +531,7 @@ class APIController extends Controller
             }
 
             if ($request->filled('open_shipment')) {
-              $open_shipment = 1;
+              $open_shipment = $request->input('open_shipment');
             }else{
               $open_shipment = 0;
             }
