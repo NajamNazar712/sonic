@@ -2969,6 +2969,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminERFController@index')->name('index');
             Route::get('list', 'Admins\AdminERFController@list')->name('list');
             Route::get('add', 'Admins\AdminERFController@add')->name('add');
+            Route::post('add', 'Admins\AdminERFController@submit')->name('submit');
         });
     });
 

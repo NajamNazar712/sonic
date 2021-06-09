@@ -17,17 +17,17 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="user_form" class="form-inline" method="POST" action="{{ route('admin.user_management.users.add.store') }}" novalidate="novalidate">
+                            <form id="erf_form" class="form-inline" method="POST" action="{{ route('admin.human_resource.erf.submit') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
                                 <div class="row m-2">
                                     <h2 class="mr-2"> ERF Type</h2>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="additional"  value="1" checked />
+                                        <input class="form-check-input" type="radio" name="erf_type" id="additional"  value="1" checked />
                                         <label class="form-check-label" for="inlineRadio1" >Additional</label>
                                     </div>
 
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="replacement" value="2"/>
+                                        <input class="form-check-input" type="radio" name="erf_type" id="replacement" value="2"/>
                                         <label class="form-check-label" for="inlineRadio2">Replacement</label>
                                     </div>
                                 </div>
@@ -103,41 +103,40 @@
                                         <div class="form-group ">
                                             <h5 class="pull-left mr-2"><strong>Salary Range</strong></h5>
 
-                                                <input type="number" class="form-control mr-1" id="from" placeholder="From">
+                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="From">
 
-                                                 <input type="number" class="form-control" id="to" placeholder="To">
+                                                 <input type="number" class="form-control" id="to" name="salary_to" placeholder="To">
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-group ">
-                                            <textarea class="form-control" rows="5" cols="100" id="qualification" placeholder="Qualifications"></textarea>
+                                            <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-group ">
-                                            <textarea class="form-control" rows="5" cols="100" id="skills" placeholder="Required Skills"></textarea>
+                                            <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-group ">
-                                            <textarea class="form-control" rows="5" cols="100" id="job_description" placeholder="Job Description"></textarea>
+                                            <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-group ">
-                                            <h5 class="pull-left mr-2"><strong>Salary Range</strong></h5>
-
-                                            <input type="number" class="form-control mr-1" id="from" placeholder="From">
-
-                                            <input type="number" class="form-control" id="to" placeholder="To">
+                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple">
+                                              @foreach($allowances as $allowance)
+                                                  <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>
+                                              @endforeach
+                                          </select>
                                         </div>
                                     </div>
 
                                 </div>
-
-                                <div class="col-12 justify-content-center">
-                                    <div class="form-group text-center mt-2">
-                                        <button type="submit" class="btn btn-primary">Add</button>
+                                <div class="col-12">
+                                    <div class="form-group justify-content-center mt-2">
+                                        <button type="submit" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
 
@@ -164,41 +163,47 @@
 
     <script>
         $(document).ready(function() {
-            $('#user_form #department').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #department').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Department*'
             });
 
-            $('#user_form #hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Hub*'
             });
-            $('#user_form #city').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select City*'
             });
-            $('#user_form #designation').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #designation').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Designation*'
             });
 
-            $('#user_form #department_head').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #department_head').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Line Manager*'
             });
-            $('#user_form #vacancies').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #vacancies').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Number Of Vacancies'
             });
-            $('#user_form #position').prepend('<option value="" selected="selected"></option>').select2({
+            $('#erf_form #position').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Position Type'
+            });
+            $('#allowance').select2({
+                width:'100%',
+                placeholder:"Allowances",
+                allowClear:true,
+                dropdownParent:$('#erf_form')
             });
 
 
           
 
-            $('#user_form').validate({
+            $('#erf_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
@@ -212,7 +217,7 @@
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'User is being added!',
+                        text: 'Request is being submitted!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
@@ -222,41 +227,8 @@
                     form.submit();
                 }
             });
-            $('#selectAll .hub').each(function() {
-                var checkbox = $(this);
-                var label = checkbox.next();
-                var text = label.text();
-
-                label.remove();
-
-                checkbox.iCheck({
-                    checkboxClass: 'icheckbox_line pt-1 pb-1',
-                    checkedClass: 'checked bg-success',
-                    uncheckedClass: 'bg-danger',
-                    insert: '<div class="icheck_line-icon"></div>' + text
-                });
-            });
-
-            $("#selectAll").click(function() {
-
-                $('input.hub').each(function () {
-                    var _this = $(this);
-                    if(_this.is(':checked') == false) {
-                        _this.iCheck('check');
-                    }
-                });
-            });
-            $("#unselect").click(function() {
-
-                $('input.hub').each(function () {
-                    var _this = $(this);
-                    if(_this.is(':checked') == true) {
-                        _this.iCheck('uncheck');
-                    }
-                });
-            });
         });
-        $('#user_form').on('keypress',function (e) {
+        $('#erf_form').on('keypress',function (e) {
             if(e.keyCode == 13) {
                 e.preventDefault();
             }
