@@ -243,6 +243,10 @@
                     params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.crm.in_process.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -603,6 +607,10 @@
                 },
                 ajax: {
                     url: '{{ route('admin.crm.in_process.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                     }

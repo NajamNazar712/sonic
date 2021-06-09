@@ -1475,7 +1475,11 @@ class RetailShipmentBookController extends Controller
     }
 
     public function other_booking_index(){
-        return view('retail.shipment.other_booking');
+        if(session('category') == 2){
+            return view('retail.shipment.other_booking');
+        }else{
+            return redirect()->route('retail.404');
+        }
     }
 
     public function other_booking_list(Request $request){
