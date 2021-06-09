@@ -736,6 +736,226 @@ class AdminMasterCargoController extends Controller
         return view('admin.master_cargo.bag.create_open_bag')->with('print', session('print'));
     }
 
+    public function create_open_bag_shipment_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+            $bag = Bag::where('seal_number', $shipment->tracking_number);
+            if(!$bag->exists()){
+                $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
+                if($on_hold_shipment->exists()){
+                    if(!in_array(Auth::id(), [10, 288, 423])){
+                        $on_hold_shipment = $on_hold_shipment->first();
+                        $dispatch_date = Carbon::parse($on_hold_shipment->dispatch_date);
+                        $today = Carbon::today();
+                        if($dispatch_date > $today){
+                            $dispatch_date = $dispatch_date->toFormattedDateString();
+                            return ['status' => 1, 'error' => 'Shipment is marked as On-Hold until ' . $dispatch_date];
+                        }
+                    }
+                }
+                if($shipment->packaging_material_request == 1){
+
+
+                    $packaging_material_request = PackagingMaterialRequest::where('tracking_number',$shipment->tracking_number)->first();
+
+                    if($packaging_material_request != null){
+                        if($packaging_material_request->status_id != 3){
+                            return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
+                        }
+                    }
+                    $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number',$shipment->tracking_number)->first();
+                    if($packaging_material_request_stock != null){
+                        if($packaging_material_request_stock->status_id != 3){
+                            return ['status' => 1, 'error' => 'Warehouse Stock Request is not dispatched yet!'];
+                        }
+                    }
+                }
+
+
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
+                    if ($shipment->shipper_status_id == 2) {
+                        $hub_id = $shipment->pickup_address->city->hub_id;
+                    }
+                    else if ($shipment->shipper_status_id == 49) {
+                        $shipment_details = $shipment->misrouted_history()->latest()->first();
+                        $city_details = City::find($shipment_details->old_consignee_city_id);
+                        $hub_id = $city_details->hub_id;
+                    }
+                    else if ($shipment->shipper_status_id == 55) {
+                        $shipment_details = $shipment->intercept_history;
+                        $city_details = City::find($shipment_details->old_consignee_city_id);
+                        $hub_id = $city_details->hub_id;
+                    }
+                    else {
+                        $hub_id = $shipment->consignee_city->hub_id;
+
+                    }
+
+                    $allowed = FALSE;
+
+                    if (session('role_id') == 1) {
+                        $allowed = TRUE;
+                    }
+                    else if (in_array($hub_id, session('hubs'))) {
+                        $allowed = TRUE;
+                    }
+                    else if ($shipment->shipper_status_id == 49 && in_array($shipment->pickup_address->city->hub_id, session('hubs'))) {
+                        $allowed = TRUE;
+                    }
+
+                    if ($allowed) {
+                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id) )) {
+                            if ($request->bag_type != 0) {
+                                if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                                    $hub_id = $shipment->consignee_city->hub_id;
+                                }
+                                else {
+                                    $hub_id = $shipment->pickup_address->city->hub_id;
+                                }
+                            }
+                            else {
+                                $hub_id = 0;
+                            }
+
+                            if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
+//                            if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
+                                $details = array();
+
+                                if ($request->bag_type != 0) {
+                                    if ($request->bag_type == 1) {
+                                        if (!in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                                            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+                                        }
+
+                                        $bag_type = 1;
+                                    }
+                                    else {
+                                        if (!in_array($shipment->shipper_status_id, [20, 30, 37])) {
+                                            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                                        }
+
+                                        $bag_type = 2;
+                                    }
+                                }
+                                else {
+                                    if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                                        $details['bag_type'] = 1;
+
+                                        $bag_type = 1;
+                                    }
+                                    else {
+                                        $details['bag_type'] = 2;
+
+                                        $bag_type = 2;
+                                    }
+                                }
+
+                                if ($bag_type == 1) {
+                                    $destination = $shipment->consignee_city;
+                                }
+                                else {
+                                    $destination = $shipment->pickup_address->city;
+                                }
+                                if(!$request->has('pieces_confirm')){
+                                    if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
+                                        $details = array();
+                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                        $details['id'] = $shipment->id;
+                                        $details['tracking_number'] = $shipment->tracking_number;
+                                        $details['pieces_count'] = $shipment->pieces;
+                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                        return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                    }
+                                }
+                                $details['id'] = $shipment->id;
+                                $details['tracking_number'] = $shipment->tracking_number;
+                                $details['order_id'] = $shipment->order_id;
+                                $details['service_type'] = $shipment->booking_type->booking_type;
+                                $details['destination'] = $destination->name;
+                                $details['amount'] = number_format($shipment->amount);
+                                $hub = $destination->hub_city;
+
+                                $details['hub']['id'] = $hub->id;
+                                $details['hub']['name'] = $hub->name;
+
+                                $shipping_mode_id = $request->shipping_mode_id;
+
+                                if ($shipping_mode_id == 0) {
+                                    $shipping_mode_id = $shipment->shipping_mode->id;
+
+                                    $details['shipping_mode']['id'] = $shipment->shipping_mode->id;
+                                    $details['shipping_mode']['name'] = $shipment->shipping_mode->mode;
+                                }
+
+                                if ($request->hub_id == 0) {
+                                    if ($bag_type == 1) {
+                                        $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                                            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                                            ->join('cities as dc', function($join) {
+                                                $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                                                    ->on('oc.hub_id', '!=', 'dc.hub_id');
+                                            })
+                                            ->select(DB::raw('count(shipments.id) as count'))
+                                            ->where('dc.hub_id', $hub->id)
+                                            ->whereIn('shipments.shipper_status_id', [2, 49, 55])
+                                            ->where('shipments.shipping_mode_id', $shipping_mode_id);
+                                    }
+                                    else {
+                                        $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                                            ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
+                                            ->join('cities as oc', function($join) {
+                                                $join->on('shipments.consignee_city_id', '=', 'oc.id')
+                                                    ->on('dc.hub_id', '!=', 'oc.hub_id');
+                                            })
+                                            ->select(DB::raw('count(shipments.id) as count'))
+                                            ->where('dc.hub_id', $hub->id)
+                                            ->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                                            ->where('shipments.shipping_mode_id', $shipping_mode_id);
+                                    }
+
+                                    if (session('role_id') != 1) {
+                                        $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+                                    }
+
+                                    $shipments = $shipments->first();
+
+                                    $details['total'] = $shipments->count;
+                                }
+                                ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null,null);
+                                return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+//                            }
+//                            else {
+//                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
+//                            }
+                            }
+                            else {
+                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
+                            }
+                        }
+                        else {
+                            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+                        }
+                    }
+                    else {
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
+                    }
+                }
+                else {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                }
+            }
+            else{
+                return ['status' => 1, 'error' => 'Same Tracking Number is already used as Bag Seal Number'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+        }
+    }
+
     public function create_open_bag_store(Request $request) {
         $bag_numbers = '';
         $shipment_ids = explode(',', $request->input('shipment_ids'));
