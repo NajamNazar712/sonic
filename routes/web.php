@@ -454,8 +454,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('overall/commission/data', 'Admins\AdminCommissionController@overall_commission_dashboard_data')->name('overall.commission.data');
     });
 
-
-
+    Route::prefix('ftl')->name('ftl.')->group(function (){
+        Route::prefix('request')->name('request.')->group(function (){
+            Route::get('/','Admins\FTLController@ftl_request_index')->name('index');
+            Route::get('/list','Admins\FTLController@ftl_request_list')->name('list');
+            Route::post('/add','Admins\FTLController@ftl_request_add')->name('add');
+        });
+    });
 
     Route::prefix('operation_forecasting')->name('operation_forecasting.')->group(function () {
         Route::prefix('incoming')->name('incoming.')->group(function () {
