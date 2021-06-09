@@ -127,7 +127,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_arrived($shipment->id);
+//                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         else if(in_array($shipper_status_id, [9])){
@@ -163,7 +163,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                             (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_arrived($shipment->id);
+//                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                     }
@@ -180,7 +180,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                             (new self)->shipment_returned($shipment->id);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_arrived($shipment->id);
+//                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_returned($shipment->id);
                                         }
                                         else if(in_array($shipper_status_id, [9])){
