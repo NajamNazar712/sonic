@@ -19,16 +19,23 @@
 
                             <form id="erf_form" class="form-inline" method="POST" action="{{ route('admin.human_resource.erf.submit') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
-                                <div class="row m-2">
-                                    <h2 class="mr-2"> ERF Type</h2>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="erf_type" id="additional"  value="1" checked />
-                                        <label class="form-check-label" for="inlineRadio1" >Additional</label>
+                                <div class="row w-100">
+                                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 mb-2">
+                                        <h2 class="ml-2"> ERF Type</h2>
                                     </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 mb-2">
+                                        <div class="form-check form-check-inline pull-left">
+                                            <input class="form-check-input" type="radio" name="erf_type" id="additional"  value="1" checked />
+                                            <label class="form-check-label" for="inlineRadio1" >Additional</label>
+                                        </div>
 
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="erf_type" id="replacement" value="2"/>
-                                        <label class="form-check-label" for="inlineRadio2">Replacement</label>
+                                        <div class="form-check form-check-inline pull-left">
+                                            <input class="form-check-input" type="radio" name="erf_type" id="replacement" value="2"/>
+                                            <label class="form-check-label" for="inlineRadio2">Replacement</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-7 mb-2">
+                                        <button type="button" class="btn btn-primary pull-right">Export</button>
                                     </div>
                                 </div>
 
@@ -79,7 +86,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">
                                         <div class="form-group">
                                             <select name="vacancies" class="select2" id="vacancies">
                                                 @for ($i=1; $i<=10; $i++)
@@ -89,7 +96,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="position_div">
                                         <div class="form-group">
                                             <select name="position" class="select2" id="position">
                                                 @foreach($admin_positions as $position)
@@ -99,7 +106,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2 " id="range_div">
                                         <div class="form-group ">
                                             <h5 class="pull-left mr-2"><strong>Salary Range</strong></h5>
 
@@ -108,22 +115,22 @@
                                                  <input type="number" class="form-control" id="to" name="salary_to" placeholder="To">
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="qualification_div">
                                         <div class="form-group ">
                                             <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications"></textarea>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="skills_div">
                                         <div class="form-group ">
                                             <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills"></textarea>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="description_div">
                                         <div class="form-group ">
                                             <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description"></textarea>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">
                                         <div class="form-group ">
                                             <select name="allowances[]" class="select2" id="allowance" multiple="multiple">
                                               @foreach($allowances as $allowance)
@@ -200,7 +207,26 @@
                 dropdownParent:$('#erf_form')
             });
 
+            
+           $('#replacement').on('click',function () {
+               $('#vacancies_div').addClass('d-none');
+               $('#position_div').addClass('d-none');
+               $('#allowance_div').addClass('d-none');
+               $('#description_div').addClass('d-none');
+               $('#skills_div').addClass('d-none');
+               $('#qualification_div').addClass('d-none');
+               $('#range_div').addClass('d-none');
+           });
 
+            $('#additional').on('click',function () {
+                $('#vacancies_div').removeClass('d-none');
+                $('#position_div').removeClass('d-none');
+                $('#allowance_div').removeClass('d-none');
+                $('#description_div').removeClass('d-none');
+                $('#skills_div').removeClass('d-none');
+                $('#qualification_div').removeClass('d-none');
+                $('#range_div').removeClass('d-none');
+            });
           
 
             $('#erf_form').validate({

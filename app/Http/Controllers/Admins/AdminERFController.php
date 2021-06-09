@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\EmployeeRegistration;
-use App\EmployeeRegistrationAllowance;
+use App\Http\Models\EmployeeRegistration;
+use App\Http\Models\EmployeeRegistrationAllowance;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Allowances;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeRegistrationStatus;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Models\Admin\AdminPositionTypes;
 use Illuminate\Http\Request;
+use Yajra\Datatables\Datatables;
 
 class AdminERFController extends Controller
 {
@@ -22,17 +24,43 @@ class AdminERFController extends Controller
     }
 
     public function index(){
-        return view('admin.human_resource.erf.index');
+        $erf_status = EmployeeRegistrationStatus::all();
+        return view('admin.human_resource.erf.index')->with(['erf_status' => $erf_status]);
     }
 
-    public function list(){
-        $users = EmployeeRegistration::join('admins as a', 'a.id', '=', 'employee_registrations.department_head_id')
+    public function list(Request $request){
+        $erf = EmployeeRegistration::join('admins as a', 'a.id', '=', 'employee_registrations.department_head_id')
             ->join('cities as c', 'c.id', '=', 'employee_registrations.city_id')
             ->join('cities as h', 'h.id', '=', 'employee_registrations.hub_id')
-            ->join('designation as d', 'd.id', '=', 'employee_registrations.designation_id')
-            ->join('departments as dp', 'dp.id', '=', 'employee_registrations.department_id')
-            ->select('employee_registrations.id', 'a.name')
-            ->where('ar.id', '!=', 1);
+            ->join('employee_designations as d', 'd.id', '=', 'employee_registrations.designation_id')
+            ->join('admin_departments as dp', 'dp.id', '=', 'employee_registrations.department_id')
+            ->join('employee_registration_statuses as s', 's.id', '=', 'employee_registrations.status')
+            ->select('employee_registrations.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','s.id');
+
+
+
+        $datatables = Datatables::of($erf)
+            ->addColumn('actions', function($erf) {
+                if (session('role_id') == 1 || in_array(188, session('permissions'))) {
+                    return '<div class="btn-group">
+                          <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                          <div class="dropdown-menu dropdown-menu-sm">
+                            <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                          </div>
+                        </div>
+                ';
+                }
+                else {
+                    return '';
+                }
+            });
+
+        if($status = $request->get('status')){
+            $erf->where('employee_registrations.status', '=',$status);
+        }
+
+
+        return $datatables->make(true);
 
     }
 

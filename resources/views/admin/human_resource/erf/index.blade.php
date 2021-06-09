@@ -11,9 +11,29 @@
             <div class="col-12">
                 <div class="card">
                     @include('admin.inc.messages')
-
                     <div class="card-content">
                         <div class="card-body card-dashboard">
+
+                            <form id="track_form" class=" mb-1" novalidate="novalidate">
+                                <div class="row justify-content-center">
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <select name="status" id="status" class="form-control select2" >
+                                                @foreach($erf_status as $status)
+                                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -43,7 +63,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style>
         .heading_user{
             margin-top:50px;
@@ -58,71 +79,32 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
-        $(function () {
+        $(document).ready(function() {
 
-           /* jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    blockPagePermanently();
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resource.all_user_ajax') }}',
-                        data: params,
-                        success: function (result) {
-                            head = [];
-                            footer = [];
-
-                            head.push('S. No');
-                            head.push('Employee ID');
-                            head.push('Name');
-                            head.push('CNIC');
-                            head.push('Phone No.');
-                            head.push('Employee Role');
-                            head.push('Created at');
-                            $.each(result.data, function(index, values) {
-                                if(values.id!=null){
-
-                                    row = [];
-                                    row.push(index + 1);
-                                    row.push(values.trax_id);
-                                    row.push(values.name);
-                                    row.push(values.cnic);
-                                    row.push(values.phone);
-                                    row.push(values.role);
-                                    row.push(values.created_at);
-                                    body.push(row);
-                                }
-
-                            });
-
-                        },
-                        async: false
-                    });
-                    UnblockPagePermanently();
-
-                    return {body: body, header: head};
-                }
+            $('#track_form #status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Search Status',
+                allowClear:true
             });
-*/
 
+            var route = '<?php echo route('admin.human_resource.erf.add'); ?>';
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 "order": [[ 6, "desc" ]],
                 scrollX: false, scrollY: '500px',
                 buttons: [
+
                     {
-                        extend: 'excelHtml5',
+                        title: 'Add ERF',
                         className: 'btn btn-primary',
-                        title: 'All Employees List',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
+                        text: '<i class="la la-plus"></i> Add ERF',
+                        action:function (e) {
+                            window.location = route;
+                        }
+
 
                     },
                 ],
@@ -136,24 +118,25 @@
                 },
 
                 ajax:{
-                    url: '{{ route('admin.human_resource.all_user_ajax') }}'
+                    url: '{{ route('admin.human_resource.erf.list') }}',
+                    data: function (d) {
+                        d.status = $('#track_form #status').val();
+                    }
 
                 },
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
-                    {data: 'name', name: 'name', class: 'align-middle name'},
-                    {data: 'cnic', name: 'cnic', class: 'align-middle cnic'},
-                    {data: 'phone', name: 'phone', class: 'align-middle phone'},
-                    {data: 'role', name: 'role', class: 'align-middle role'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'id', name: 'employee_registrations.id', class: 'align-middle department'},
+                    {data: 'department', name: 'dp.name', class: 'align-middle name'},
+                    {data: 'designation', name: 'd.name', class: 'align-middle designation'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'admin', name: 'a.name', class: 'align-middle admin'},
+                    {data: 'status', name: 's.name', class: 'align-middle status'},
+                    {data: 'actions', name: 'actions', class: 'align-middle actions'},
                 ],rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    console.log(data['id']);
-                    if(data['id']!=null){
-
-                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    }
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -185,19 +168,13 @@
 
                         }
                     });
-
-
-                    $("#role_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
-                        placeholder: "Select Role",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     this.api().table().columns.adjust();
                 }
-            });*/
+            });
 
+            $('#track_form').bind('submit', function (e) {
+                table.draw();
+            });
 
         });
 
