@@ -780,8 +780,11 @@ class DeliveryController extends Controller
                 foreach ($valid_shipments as $index => $shipment) {
                     NotificationsController::send(10, $note->id, $shipment);
                     NotificationsController::send(11, $note->id, $shipment);
-
                     if($notifications[$index]) {
+                        NotificationsController::send(12, $note->id, $shipment);
+                    }
+
+                    /*if($notifications[$index]) {
                         if($shipment_details->amount == 0){
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
@@ -790,7 +793,7 @@ class DeliveryController extends Controller
                         }else{
                             NotificationsController::send(12, $note->id, $shipment);
                         }
-                    }
+                    }*/
                 }
                 NotificationsController::send(40, $note->id);
             }
