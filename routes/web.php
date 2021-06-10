@@ -1332,6 +1332,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::prefix('open_bag')->name('open_bag.')->group(function () {
                     Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
+                    Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_open_bag_shipment_details')->name('shipment_details');
                     Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
                 });
             });
