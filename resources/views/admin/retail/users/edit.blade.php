@@ -57,6 +57,7 @@
     $(document).ready(function () {
         $('#edit_eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $("#edit_cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
 
             $('#edit_user_form').validate({
