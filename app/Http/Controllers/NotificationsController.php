@@ -7377,6 +7377,142 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
+				else if ($id == 132) {
+                    $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
+
+                    $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
+
+                    $delivery_note = DeliveryNote::find($reference_1_id);
+
+                    $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
+
+                    $shipment = Shipment::find($reference_2_id);
+
+                    $shipper = $shipment->user;
+
+                    $to = $shipment->consignee_phone_number_1;
+
+                    foreach ($delivery_note_fields as $key => $field) {
+                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+                            if ($key == 'delivery_note_number') {
+                                $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                            } else {
+                                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                            }
+                        }
+                    }
+
+                    foreach ($shipment_fields as $key => $field) {
+                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+                            $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                        }
+                    }
+                    if ($delivery_note->special_rider) {
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->special_rider_name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                            } else {
+                                $body = str_replace('[rider]', '', $body);
+                            }
+                        }
+                    } else {
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->rider->name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->rider->phone), $body);
+                            } else {
+                                $body = str_replace('[rider]', '', $body);
+                            }
+                        }
+                    }
+
+                    if ($shipment->pickup_address->pickup_brand_name != NULL) {
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    } else {
+                        if ($shipper->brand_name != NULL) {
+                            $brand_name = $shipper->brand_name;
+                        } else {
+                            $brand_name = $shipper->name;
+                        }
+                    }
+                    if (strpos($body, '[company_name]') !== FALSE) {
+                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
+                    }
+
+                    if (strpos($body, '[payment_mode]') !== FALSE) {
+                        $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
+                    }
+
+                    self::sms($body, $to);
+                }
+				else if ($id == 135) {
+                    $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
+
+                    $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
+
+                    $delivery_note = DeliveryNote::find($reference_1_id);
+
+                    $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
+
+                    $shipment = Shipment::find($reference_2_id);
+
+                    $shipper = $shipment->user;
+
+                    $to = $shipment->consignee_phone_number_1;
+
+                    foreach ($delivery_note_fields as $key => $field) {
+                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+                            if ($key == 'delivery_note_number') {
+                                $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                            } else {
+                                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                            }
+                        }
+                    }
+
+                    foreach ($shipment_fields as $key => $field) {
+                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+                            $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                        }
+                    }
+                    if ($delivery_note->special_rider) {
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->special_rider_name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                            } else {
+                                $body = str_replace('[rider]', '', $body);
+                            }
+                        }
+                    } else {
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            if ($delivery_note_shipment->rider_information) {
+                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->rider->name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->rider->phone), $body);
+                            } else {
+                                $body = str_replace('[rider]', '', $body);
+                            }
+                        }
+                    }
+
+                    if ($shipment->pickup_address->pickup_brand_name != NULL) {
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    } else {
+                        if ($shipper->brand_name != NULL) {
+                            $brand_name = $shipper->brand_name;
+                        } else {
+                            $brand_name = $shipper->name;
+                        }
+                    }
+                    if (strpos($body, '[company_name]') !== FALSE) {
+                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
+                    }
+
+                    if (strpos($body, '[payment_mode]') !== FALSE) {
+                        $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
+                    }
+
+                    self::sms($body, $to);
+                }
             }
         }
     }
