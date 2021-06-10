@@ -343,7 +343,7 @@
                     {data: 'freight_charges', name: 'ftl_requests.freight_charges', class: 'align-middle freight_charges'},
                     {data: 'gst', name: 'ftl_requests.gst', class: 'align-middle gst'},
                     {data: 'total_charges', name: 'ftl_requests.total_charges', class: 'align-middle total_charges'},
-                    {orderable: false, searchable: false, name: 'action', class: 'align-middle action', targets: 0, render: function (data, type, row) { return ''; }},
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();

@@ -458,7 +458,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('request')->name('request.')->group(function (){
             Route::get('/','Admins\FTLController@ftl_request_index')->name('index');
             Route::get('/list','Admins\FTLController@ftl_request_list')->name('list');
+            Route::get('/view/{id}','Admins\FTLController@ftl_request_view')->name('view');
             Route::post('/add','Admins\FTLController@ftl_request_add')->name('add');
+            Route::prefix('update')->name('update.')->group(function (){
+                Route::post('/shipper/{id}','Admins\FTLController@ftl_request_update_shipper')->name('shipper');
+            });
         });
     });
 
