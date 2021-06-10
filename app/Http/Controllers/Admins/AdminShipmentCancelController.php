@@ -8,6 +8,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\http\Models\Admin\Retail\RetailCashDeposit;
 use App\http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\http\Models\Admin\Retail\RetailParcelReceiving;
+use App\http\Models\Admin\Retail\RetailParcelReceivingShipment;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\ShipmentScanningScreenLocation;
 use App\Http\Models\V2Pickup\V2PickupRequest;
@@ -398,7 +400,7 @@ class AdminShipmentCancelController extends Controller
                             }
                         }
                         else{
-
+                            $total_deductable_amount = 0;
                             $retail_cash_deposit_shipment = RetailCashDepositShipment::where('shipment_id', $shipment->id);
                             if($retail_cash_deposit_shipment->exists()){
                                 $retail_cash_deposit_shipment = $retail_cash_deposit_shipment->first();
@@ -415,6 +417,17 @@ class AdminShipmentCancelController extends Controller
                                     $retais_cash_deposit->save();
                                 }
 
+                            }
+
+                            $retail_parcel_receiving_shipment = RetailParcelReceivingShipment::where('shipment_id', $shipment->id);
+                            if($retail_parcel_receiving_shipment->exists()){
+                                $retail_parcel_receiving_shipment = $retail_parcel_receiving_shipment->latest()->first();
+                                $parcel_receiving_id = $retail_parcel_receiving_shipment->parcel_receiving_id;
+                                $retail_parcel_receiving_shipment->delete();
+                                $parcel_receiving = RetailParcelReceiving::find($parcel_receiving_id);
+                                $parcel_receiving->total_cn = $parcel_receiving->total_cn - 1;
+                                $parcel_receiving->total_cash = $parcel_receiving->total_cash - $total_deductable_amount;
+                                $parcel_receiving->save();
                             }
 
                         }
