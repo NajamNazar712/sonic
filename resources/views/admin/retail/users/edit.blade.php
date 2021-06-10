@@ -58,7 +58,10 @@
         $('#edit_eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $("#edit_cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-
+            $('#edit_phone_number').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
             $('#edit_store').select2({
                 width: '100%',
                 allowClear:true
