@@ -184,13 +184,14 @@
                         <th class="border-primary border-darken-1">Valid/Invalid Date</th>
                         <th class="border-primary border-darken-1">Resolved Date</th>
                         <th class="border-primary border-darken-1">Closed Date</th>
+                        <th class="border-primary border-darken-1">Last Comment By</th>
+                        <th class="border-primary border-darken-1">Last Comment</th>
+                        <th class="border-primary border-darken-1">Last Comment Date</th>
                         <th class="border-primary border-darken-1">Tagged To</th>
                         <th class="border-primary border-darken-1">Tagged Hub</th>
                         <th class="border-primary border-darken-1">Tagged At</th>
                         <th class="border-primary border-darken-1">Tagged TAT</th>
-                        <th class="border-primary border-darken-1">Last Comment By</th>
-                        <th class="border-primary border-darken-1">Last Comment</th>
-                        <th class="border-primary border-darken-1">Last Comment Date</th>
+                        
                     </tr>
                     </thead>
                 </table>
@@ -418,13 +419,14 @@
                             head.push('Valid/Invalid Date');
                             head.push('Resolved Date');
                             head.push('Closed Date');
+                            head.push('Last Comment By');
+                            head.push('Last Comment');
+                            head.push('Last Comment Date');
                             head.push('Tagged To');
                             head.push('Tagged Hub');
                             head.push('Tagged At');
                             head.push('Tagged TAT');
-                            head.push('Last Comment By');
-                            head.push('Last Comment');
-                            head.push('Last Comment Date');
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -456,13 +458,14 @@
                                 row.push(values.valid_invalid_date);
                                 row.push(values.resolved_date);
                                 row.push(values.closed_date);
+                                row.push(values.last_comment_name);
+                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
+                                row.push(values.last_comment_date);
                                 row.push(values.tagged_to);
                                 row.push(values.tagged_hub);
                                 row.push(values.tagged_at);
                                 row.push(values.tagged_aging);
-                                row.push(values.last_comment_name);
-                                row.push(values.last_comment.replace(/<br>/gi, '\n'));
-                                row.push(values.last_comment_date);
+                                
 
 
                                 body.push(row);
@@ -545,13 +548,14 @@
                     {data: 'valid_invalid_date', name: 'crsh.created_at', class: 'align-middle valid_invalid_date', orderable: false, searchable: false},
                     {data: 'resolved_date', name: 'crshr.created_at', class: 'align-middle resolved_date'},
                     {data: 'closed_date', name: 'crshc.created_at', class: 'align-middle closed_date'},
+                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
+                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
+                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
                     {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to', orderable: false, searchable: false},
                     {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub'},
                     {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at'},
                     {data: 'tagged_aging', name: 'crt.created_at', class: 'align-middle tagged_aging', orderable: false, searchable: false},
-                    {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
-                    {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
-                    {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
+                    
                     
                 ],
                 rowCallback: function(row, data, index) {
