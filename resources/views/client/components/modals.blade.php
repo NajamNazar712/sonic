@@ -1,7 +1,7 @@
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
     <div class="modal fade text-left" id="ShowAgreementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShowAgreementModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 @if(session('error'))
                     <div class="alert alert-danger">
@@ -9,7 +9,7 @@
                     </div>
                 @endif
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipment_charges_modal_heading">Agreement<span></span></h4>
+                    <h2 class="modal-title" style="margin:0 auto">Agreement</h2>
                 </div>
                @php
                    if(session('user_type') == 1){
