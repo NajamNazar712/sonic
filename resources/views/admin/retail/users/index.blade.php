@@ -286,7 +286,7 @@
                 ajax:{
                     url: '{{ route('admin.retail.users.list') }}',
                 },
-                order: [[9, 'desc']],
+                order: [[11, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
