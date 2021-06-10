@@ -229,8 +229,19 @@ class NotificationsController extends Controller
                         }
                     }
 
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipper->brand_name != NULL){
+                            $brand_name = $shipper->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipper->name;
+                        }
+                    }
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', $shipper->brand_name ?? $shipper->name, $body);
+                        $body = str_replace('[company_name]', $brand_name, $body);
                     }
 
                     if (strpos($body, '[service_type]') !== FALSE) {
@@ -263,9 +274,9 @@ class NotificationsController extends Controller
 
                     self::sms($body, $to);
                 } else if ($id == 4) {
-                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity'];
+                    $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
 
-                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity'];
+                    $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number', 'item_product_type' => 'Item Product Type', 'item_description' => 'Item Description', 'item_quantity' => 'Item Quantity', 'amount' => 'Amount'];
 
                     $present_fields = array();
 
@@ -314,6 +325,7 @@ class NotificationsController extends Controller
                         $details['order_id'] = $shipment->order_id;
                         $details['weight'] = $shipment->actual_weight;
                         $details['tracking_number'] = $shipment->tracking_number;
+                        $details['amount'] = $shipment->amount;
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -833,8 +845,19 @@ class NotificationsController extends Controller
                         }
                     }
 
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipper->brand_name != NULL){
+                            $brand_name = $shipper->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipper->name;
+                        }
+                    }
                     if (strpos($body, '[company_name]') !== FALSE) {
-                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $shipper->brand_name ?? $shipper->name ), 0, 25), $body);
+                        $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name ), 0, 25), $body);
                     }
 
                     if (strpos($body, '[payment_mode]') !== FALSE) {
@@ -2409,7 +2432,13 @@ class NotificationsController extends Controller
 
                     $to[] = $shipper->email;
 
-                    $to[] = $shipper->bank->billing_person_email;
+
+                    if(isset($shipper->bank)){
+                        foreach($shipper->bank as $bank)
+                        {
+                            $to[] = $bank->billing_person_email;
+                        }
+                    }
 
                     foreach ($shipper_fields as $key => $field) {
                         if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -2459,8 +2488,24 @@ class NotificationsController extends Controller
 
                     $cc = array();
 
-                    $general_admins = Admin::where('role_id', 2)->where('status', 1);
 
+                    $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
+                    // $sales_person_admin = Admin::find($sales_person->admin_id);
+                    
+                    if ($sales_person) {
+                        $cc[] = Admin::find($sales_person->admin_id)->email;
+                    }
+                    $regional_managers = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('role_id', 60)->where('admins.status', 1)->where('admin_hubs.hub_id', '=', $shipper->city->zone_id);
+
+                    // $regional_manager = Admin::whereIn('role_id', [44, 27])->where('default_hub_id', $sales_person_admin->default_hub1)->get()->first();
+                    // $general_admins = Admin::where('role_id', 2)->where('status', 1);
+                    if ($regional_managers->exists()) {
+                        $cc = array_merge($cc, $regional_managers->pluck('admins.email')->toArray());
+                        // $cc[] = $regional_manager->email;
+                    }
+
+                    $general_admins = Admin::whereIn('role_id',[4,31])->where('status', 1);
+                    
                     if ($general_admins->exists()) {
                         $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
                     }
@@ -2798,8 +2843,19 @@ class NotificationsController extends Controller
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
                     }
+                    if($shipment->pickup_address->pickup_brand_name != NULL){
+                        $brand_name = $shipment->pickup_address->pickup_brand_name;
+
+                    }else{
+                        if($shipment->user->brand_name != NULL){
+                            $brand_name = $shipment->user->brand_name;
+                        }
+                        else{
+                            $brand_name = $shipment->user->name;
+                        }
+                    }
                     if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->user->brand_name ?? $shipment->user->name, $body);
+                        $body = str_replace('[shipper_name]', $brand_name, $body);
                     }
                     if (strpos($body, '[receiver_name]') !== FALSE) {
                         $body = str_replace('[receiver_name]', $shipment_journey->received_or_refused_by, $body);
@@ -7168,6 +7224,8 @@ class NotificationsController extends Controller
                     if ($master_cargo_id) {
 
                         $master_cargo = MasterCargo::find($master_cargo_id);
+
+                        
                         $destination = $master_cargo->destination_hub_id;
                         $html = '<table style="width:100%;">';
                         $html .= '<thead><tr>
@@ -7190,11 +7248,40 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->shipments . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->origin_hub['name'] . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->destination_hub['name']  . '</td>';
+
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->junction_hub_1['name']  . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->junction_hub_2['name']  . '</td>';
+                        
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $master_cargo->actual_weight . '</td>';
                         $html .= '</tr>';
 
+                        $html .= '</tbody></table> <br>';
+
+
+
+
+//juction table
+
+                    
+                    
+                        $html .= '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                       <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Junctions</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        $serial = 1;
+
+                        if($master_cargo->route_management_id){
+
+                            foreach ($master_cargo->route_management->junctions as $value) {
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->junction['name'] . '</td>';
+                                $html .= '</tr>';
+                                $serial++;
+                            }
+                        }
                         $html .= '</tbody></table>';
 
                         if (strpos($body, '[preview]') !== FALSE) {
@@ -7203,21 +7290,34 @@ class NotificationsController extends Controller
 
                         $admins = Admin::where('role_id',10)->where('status',1)->get();
                         foreach($admins as $admin) {
-                            if ($master_cargo->junction_hub_1_id != null) {
-                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_1_id);
-                                if ($assign_hubs->exists()) {
-                                    $to = $admin->email;
-                                    self::email($subject, $body, $to);
-                                }
-                            }
+                            if($master_cargo->route_management_id){
 
-                            if ($master_cargo->junction_hub_2_id != null) {
-                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_2_id);
-                                if ($assign_hubs->exists()) {
-                                    $to = $admin->email;
-                                    self::email($subject, $body, $to);
+                                foreach ($master_cargo->route_management->junctions as $value) {
+                                    $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $value->junction['id']);
+                                    if ($assign_hubs->exists()) {
+                                        $to = $admin->email;
+                                        
+                                    }
                                 }
                             }
+                            if($to != null){
+                                self::email($subject, $body, $to); 
+                            }
+                            // if ($master_cargo->junction_hub_1_id != null) {
+                            //     $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_1_id);
+                            //     if ($assign_hubs->exists()) {
+                            //         $to = $admin->email;
+                            //         self::email($subject, $body, $to);
+                            //     }
+                            // }
+
+                            // if ($master_cargo->junction_hub_2_id != null) {
+                            //     $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->junction_hub_2_id);
+                            //     if ($assign_hubs->exists()) {
+                            //         $to = $admin->email;
+                            //         self::email($subject, $body, $to);
+                            //     }
+                            // }
 
                             if ($master_cargo->destination_hub_id) {
                                 $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $master_cargo->destination_hub_id);
@@ -7261,6 +7361,19 @@ class NotificationsController extends Controller
                     }
 
                     $to = ['fawad.ahmed@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk'];
+
+                    self::email($subject, $body, $to);
+                }
+				else if($id == 131) {
+                  
+                    $request_no = $reference_1_id;
+                    $admin_id = $reference_2_id;
+
+                    if (strpos($body, '[request_no]') !== FALSE) {
+                        $body = str_replace('[request_no]', $request_no, $body);
+                    }
+                    $admin = Admin::find($admin_id);
+                    $to = $admin->email;
 
                     self::email($subject, $body, $to);
                 }
@@ -7309,4 +7422,32 @@ class NotificationsController extends Controller
             $notification_history->save();
         }
     }
+
+    static public function bolt_forget_pin($phone_number, $pin, $name)
+    {
+        $notification = Notification::find(61);
+        $body = $notification->body;
+        if (strpos($body, '[rider_name]') !== FALSE) {
+            $body = str_replace('[rider_name]', $name, $body);
+        }
+        if (strpos($body, '[pin]') !== FALSE) {
+            $body = str_replace('[pin]', $pin, $body);
+        }
+
+        $to = $phone_number;
+        self::sms($body, $to);
+    }
+
+    static public function trax_otp_verification($phone_number, $pin)
+    {
+        $body = "Dear Consignee,
+ Your OTP for Trax is: [pin]";
+        if (strpos($body, '[pin]') !== FALSE) {
+            $body = str_replace('[pin]', $pin, $body);
+        }
+
+        $to = $phone_number;
+        self::sms($body, $to);
+    }
+
 }

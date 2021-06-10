@@ -10,6 +10,7 @@ use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
 use App\http\Models\DefaultWeight;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\ShipmentItem;
@@ -207,7 +208,9 @@ class AdminPickupsController extends Controller
                         $retail_pickup_note_create = new RetailPickupNote();
                         $retail_pickup_note_create->pickup_address_id = $shipment->pickup_address_id;
                         $retail_pickup_note_create->hub_id = $shipment->pickup_address->city->hub_id;
-                        $retail_pickup_note_create->retail_user_id = $retail_shipment->retail_user_id;
+                        $retail_pickup_note_create->retail_user_id = ($retail_shipment->retail_user_id) ? $retail_shipment->retail_user_id : null;
+                        $retail_pickup_note_create->rider_booking_id = ($retail_shipment->rider_id) ? $retail_shipment->rider_booking_id : null;
+                        $retail_pickup_note_create->admin_id = ($retail_shipment->admin_id) ? $retail_shipment->admin_id : null;
                         $retail_pickup_note_create->pickup_request_id = $pickup_request_id;
                         $retail_pickup_note_create->shipments = 1;
                         $retail_pickup_note_create->amount = $retail_shipment->total_charges;
@@ -3070,7 +3073,7 @@ class AdminPickupsController extends Controller
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if($pickup_request->current_rider_id != $rider_id){
-
+                    $pickup_request->rider_status = 2;
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = $global_admin_id;
                     $pickup_request->save();
@@ -3129,6 +3132,17 @@ class AdminPickupsController extends Controller
                     $pickup_note_request->pickup_request_id = $pickup_request_id;
 
                     $pickup_note_request->save();
+
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Pickup Request Assigned";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Auto Assigned To You";
+                        NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
+                    }
 //                        $pickup_request = V2PickupRequest::find($pickup_request_id);
 //                        $assigned_shipments = $pickup_request->pickup_request_shipments;
 //                        NotificationsController::send(42, $rider_id, $pickup_request->shipper_id);

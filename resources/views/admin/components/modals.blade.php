@@ -139,6 +139,45 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal fade text-left" id="editFleet" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editFleet"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit Fleet</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editFleetDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="modal fade text-left" id="editRouteManagement" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRouteManagement"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit Route</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editRouteManagementDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade text-left" id="editInternationalCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editCity"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">

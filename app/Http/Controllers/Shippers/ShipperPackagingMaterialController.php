@@ -24,6 +24,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\ShipperPackagingMaterailType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use phpDocumentor\Reflection\Types\Null_;
@@ -520,13 +521,16 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function packaging_request_cart_index(){
-       
+
+        $shipper = User::find(session('user_id'));
+        
         if(session('foc_account') == 1){
             $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
         }
         else{
             $packaging_types = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
         }
+        
 
 //        $user_charges = array();
         $standard_charges = array();
@@ -552,7 +556,17 @@ class ShipperPackagingMaterialController extends Controller
                 $pictures[$packaging_type->id] = 'img/trax_logo.png';
             }
         }
-        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures]);
+        if(count($shipper->packaging_materails) > 0) {
+            foreach ($shipper->packaging_materails as $value) {
+                if ($value->packaging_material->picture != NULL) {
+                    $pictures[$value->packaging_material->id] = Storage::url('packaging_pictures/' . $value->packaging_material->picture);
+                } else {
+                    $pictures[$value->packaging_material->id] = 'img/trax_logo.png';
+                }
+            }
+        }
+
+        return view('client.packaging.cart.index')->with(['packaging_types' => $packaging_types,'shipper_packaging_types' => $shipper->packaging_materails, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures]);
     }
 
     public function packaging_request_cart_details(Request $request){

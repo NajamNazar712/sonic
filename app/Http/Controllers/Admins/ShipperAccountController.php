@@ -22,7 +22,7 @@ class ShipperAccountController extends Controller
         $settings = GlobalSettings::where('type', 'auto_account_disabled_days')->first();
         $days = $settings->setting_value;
         $date = Carbon::now()->subDays($days);
-
+        $today = Carbon::now();
         //     $active_users = User::where('status', 3)->where('activated_at', '<', $date)->pluck('id')->toArray();
 
         //     if (count($active_users) > 0) {
@@ -48,7 +48,7 @@ class ShipperAccountController extends Controller
             $result = array_diff($users, $shipments);
             if (count($result) > 0) {
                 foreach ($result as $status) {
-                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
                 }
@@ -62,7 +62,7 @@ class ShipperAccountController extends Controller
             $result = array_diff($active_users, $shipments);
             if (count($result) > 0) {
                 foreach ($result as $status) {
-                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
+                    User::where('id', $status)->Update(['status' => 4, 'reactivated_at' => '', 'disable_at' => $today , 'disable_remarks' => 'Auto Disabled after ' . $days . ' Day(s)']);
                     NotificationsController::send(57, $status);
                     NotificationsController::send(58, $status);
                 }

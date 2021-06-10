@@ -54,6 +54,9 @@
                                         <th class="border-primary border-darken-1">Launched Date</th>
                                         <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                         <th class="border-primary border-darken-1">Agent Assigned By</th>
+                                        <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">Address Latitude</th>
+                                        <th class="border-primary border-darken-1">Address Longitude</th>
                                         <th class="border-primary border-darken-1">Valid Date</th>
                                         <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                         <th class="border-primary border-darken-1">Last Comment By</th>
@@ -160,6 +163,9 @@
                             head.push('Launched Date');
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
+                            head.push('Address');
+                            head.push('Address Latitude');
+                            head.push('Agent Longitude');
                             head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
@@ -190,6 +196,9 @@
                                 row.push(values.created_at);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
+                                row.push(values.address);
+                                row.push(values.address_latitude);
+                                row.push(values.address_longitude);
                                 row.push(values.valid_date);
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
@@ -255,6 +264,9 @@
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
+                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
@@ -283,6 +295,7 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
+                        '<option value="3">Consignee</option>' +
                         '</select>';
                     var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
                         '<option value="1">Department</option>' +

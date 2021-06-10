@@ -362,6 +362,7 @@ class V2AdminPickupsController extends Controller
                     $riders['old_rider_id'] = $pickup_request->current_rider_id;
                     $riders['new_rider_id'] = $rider_id;
 
+                    $pickup_request->rider_status = 2;
                     $pickup_request->current_rider_id = $rider_id;
                     $pickup_request->last_updated_by = Auth::id();
                     $pickup_request->save();
@@ -401,13 +402,13 @@ class V2AdminPickupsController extends Controller
                     if ($rider_device_token->exists()) {
                         $rider_device_token = $rider_device_token->first();
                         $device_token = $rider_device_token->device_token;
-                        $title = "Pickup Request Removed";
-                        $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Removed From Your Pickups";
+                        $title = "Pickup Request Reassigned";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Reassigned To ".$pickup_request->rider->name;
                         NotificationsController::bolt_app_notification($previous_rider_id, 2,$device_token, $title, $message);
                     }
                 }
 
-                if ($rider_id != null) {
+                if ($rider_id != null && $previous_rider_id == null) {
                     $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
                         ->where('employee_type_id', 2)
                         ->select('device_token');
@@ -415,7 +416,20 @@ class V2AdminPickupsController extends Controller
                         $rider_device_token = $rider_device_token->first();
                         $device_token = $rider_device_token->device_token;
                         $title = "Pickup Request Assigned";
-                        $message = "Dear Rider Pickup Request : " . $pickup_request->id . " Assigned To You";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Assigned To You";
+                        NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
+                    }
+                }
+                elseif ($rider_id != null && $previous_rider_id != null){
+                    $previous_rider = Rider::where('id', $previous_rider_id)->select('name')->first();
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id', $rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Pickup Request Ressigned";
+                        $message = "Dear Rider Pickup of " . $pickup_request->shipper->name . " Has Been Ressigned To You From ". $previous_rider->name;
                         NotificationsController::bolt_app_notification($rider_id, 2,$device_token, $title, $message);
                     }
                 }
@@ -608,6 +622,13 @@ class V2AdminPickupsController extends Controller
                 }
 
             }
+
+            if($shipment->warehouse == 1){
+                if($shipment->warehouse_order_status != 5){
+                    return ['status' => 1, 'error' => 'Shipment is not dispatched yet!'];
+                }
+            }
+
             if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62) {
                 if($shipment->booking_type_id == 3){
                     $details = array();
@@ -874,7 +895,7 @@ class V2AdminPickupsController extends Controller
                             NotificationsController::send(126,$shipment_id);
                         }
                     }
-                    $shipment->fresh();
+                    $shipment->refresh();
                     if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
@@ -1210,6 +1231,12 @@ class V2AdminPickupsController extends Controller
             if(session('role_id') != 1){
                 if(!in_array($shipment_origin, session('hubs'))){
                     return ['status' => 1, 'error' => 'You can not do arrival of this hub\'s shipment'];
+                }
+            }
+
+            if($shipment->warehouse == 1){
+                if($shipment->warehouse_order_status != 5){
+                    return ['status' => 1, 'error' => 'Shipment is not dispatched yet!'];
                 }
             }
 
@@ -1603,7 +1630,7 @@ class V2AdminPickupsController extends Controller
                             NotificationsController::send(126,$shipment_id);
                         }
                     }
-                    $shipment->fresh();
+                    $shipment->refresh();
                     if ($shipment->walk_in_delivery_type_id == 2 && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;

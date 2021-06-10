@@ -1366,9 +1366,17 @@
             });
             $('#tracking').on('click', '.payment_print', function () {
                 id = $(this).attr('data-id');
-                console.log(id);
+                shipment_type = $(this).attr('data-shipment_type');
+                
+                if(shipment_type == 1){
+                    var url = '{!! route('admin.finance.done_payments.details_print') !!}';
+                }
+                else{
+                    var url = '{!! route('admin.finance.retail.done_payments.details_print') !!}';
+                }
+
                 $.ajax({
-                    url: '{!! route('admin.finance.done_payments.details_print') !!}',
+                    url: url,
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',

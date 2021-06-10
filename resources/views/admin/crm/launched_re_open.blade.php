@@ -48,12 +48,16 @@
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Request Status</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-open Date</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
@@ -270,12 +274,16 @@
                             head.push('Description');
                             head.push('Channel');
                             head.push('Request Status');
+                            head.push('Complaint Re-Open Date');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Launched Date');
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
+                            head.push('Address');
+                            head.push('Address Latitude');
+                            head.push('Address Longitude');
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
@@ -298,12 +306,16 @@
                                 row.push(values.descr);
                                 row.push(values.channel);
                                 row.push(values.status);
+                                row.push(values.reopen_date);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.created_at);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
+                                row.push(values.address);
+                                row.push(values.address_latitude);
+                                row.push(values.address_longitude);
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
@@ -620,7 +632,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[19, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -637,12 +649,16 @@
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'status', name: 'crs.id', class: 'align-middle status'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'agent_assigned_date', name: 'res.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
+                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
@@ -677,6 +693,7 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
+                        '<option value="3">Consignee</option>' +
                         '</select>';
 
                     this.api().columns().every(function(column_id) {

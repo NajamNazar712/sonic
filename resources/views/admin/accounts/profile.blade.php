@@ -157,6 +157,7 @@
                                     <th class="border-primary border-darken-1">Pickup Address</th>
                                     <th class="border-primary border-darken-1">Person of Contact</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
+                                    <th class="border-primary border-darken-1">Brand Name</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Email Address</th>
@@ -860,6 +861,7 @@
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'vendor', name: 'vendor'},
+                    {data: 'pickup_brand_name', name: 'pickup_brand_name'},
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},

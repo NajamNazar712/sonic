@@ -42,6 +42,10 @@ class CoordinatesController extends Controller
             $new_coordinates->save();
         }
 
+        $shipment->consignee_latitude = $request->lat;
+        $shipment->consignee_longitude = $request->long;
+        $shipment->save();
+
         $shipment_coordinates = ConsigneeShipmentLocation::where('shipment_id', $shipment->id);
         if($shipment_coordinates->exists()){
             $new_shipment_coordinates = $shipment_coordinates->first();

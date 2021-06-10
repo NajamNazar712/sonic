@@ -18,6 +18,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\http\Models\CRM\CrmSettings;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -755,18 +756,38 @@ class AdminTrackingController extends Controller
                         $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
                         if($retail_shipment){
                             $retail_user_id = $retail_shipment->retail_user_id;
-                            $retail_user = RetailUser::find($retail_user_id);
-                            if($retail_user->category == 1){
-                                $franchise = RetailFranchise::find($retail_user->category_id);
-                                $details['retail_user']['name'] = $franchise->name;
-                                $details['retail_user']['code'] = 'Franchise';
-                                $details['shipper']['city'] = $franchise->pickup_address->city->name;
+                            $retail_admin_id = $retail_shipment->admin_id;
+                            $retail_rider_id = $retail_shipment->rider_id;
+                            if($retail_user_id){
+                                $retail_user = RetailUser::find($retail_user_id);
+                                if($retail_user->category == 1){
+                                    $franchise = RetailFranchise::find($retail_user->category_id);
+                                    $details['retail_user']['name'] = $franchise->name;
+                                    $details['retail_user']['code'] = 'Franchise';
+                                    $details['shipper']['city'] = $franchise->pickup_address->city->name;
+                                }
+                                else{
+                                    $trax_center  = RetailTraxCenter::find($retail_user->category_id);
+                                    $details['retail_user']['name'] = $trax_center->name;
+                                    $details['retail_user']['code'] = 'Trax Center';
+                                    $details['shipper']['city'] = $trax_center->pickup_address->city->name;
+                                }
                             }
-                            else{
-                                $trax_center  = RetailTraxCenter::find($retail_user->category_id);
-                                $details['retail_user']['name'] = $trax_center->name;
+                            elseif($retail_admin_id){
+                                $admin_id = $retail_shipment->admin_id;
+                                $admin_info = Admin::find($admin_id);
+                                $details['retail_user']['name'] = $admin_info->name;
                                 $details['retail_user']['code'] = 'Trax Center';
-                                $details['shipper']['city'] = $trax_center->pickup_address->city->name;
+                                $details['shipper']['city'] = $shipment->pickup_address->city->name;
+
+                            }
+                            elseif($retail_rider_id){
+                                $rider_id = $retail_shipment->rider_id;
+                                $rider_info = Rider::find($rider_id);
+                                $details['retail_user']['name'] = $rider_info->name;
+                                $details['retail_user']['code'] = 'Trax Center';
+                                $details['shipper']['city'] = $shipment->pickup_address->city->name;
+
                             }
 
                             $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
@@ -928,21 +949,30 @@ class AdminTrackingController extends Controller
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;
 
+
+
                     if ($shipment_payment_journey) {
+
                         foreach ($shipment_payment_journey as $journey) {
                             $journey_details = array();
-                            $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                        if($journey->payment_id == null){
-                                $journey_details['status'] = $journey->status->name;
+                            if($shipment->shipment_type == 1){
+                                $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             }
                             else{
-                                $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                                $payment = RetailDonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             }
-                            $journey_details['user'] = $journey->admin->name;
-                            $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 
-                            $details['payment_history'][] = $journey_details;
+                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        if($journey->payment_id == null){
+                            $journey_details['status'] = $journey->status->name;
+                        }
+                        else{
+                            $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-shipment_type="' . $shipment->shipment_type . '" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                        }
+                        $journey_details['user'] = $journey->admin->name;
+                        $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
+
+                        $details['payment_history'][] = $journey_details;
                         }
                     }
 

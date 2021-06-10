@@ -188,7 +188,7 @@
                                             </div>
                                             <div class="media-body text-white text-right">
                                                 <h3 class="text-white" id="return">0</h3>
-                                                <span>Return Shipment(s)</span>
+                                                <span>Returned Shipment(s)</span>
                                             </div>
                                         </div>
                                     </div>

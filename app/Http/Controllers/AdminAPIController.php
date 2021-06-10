@@ -2,22 +2,41 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailCashDeposit;
+use App\http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\http\Models\Admin\Retail\RetailPaymentMode;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\http\Models\Admin\Retail\RetailShipperInfo;
+use App\http\Models\Admin\Retail\RetailShippingMode;
+use App\http\Models\Admin\Retail\RetailTraxBox;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\BanksList;
+use App\Http\Models\BusinessCategory;
 use App\Http\Models\City;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -77,7 +96,8 @@ class AdminAPIController extends Controller
     {
         $rules = [
             'email_address' => ['required', 'email'],
-            'password' => ['required', 'min:6']
+            'password' => ['required', 'min:6'],
+            'device_token' => ['nullable']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -102,11 +122,41 @@ class AdminAPIController extends Controller
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
                     if ($employee->exists()) {
-                        $information['address'] = $employee->address;
+                        $employee = $employee->first();
+                        $information['address'] = ($employee->address) ? $employee->address : "" ;
                     } else {
                         $information['address'] = '';
                     }
                     $information['role'] = 'staff';
+
+                    if($request->has('device_token')){
+                        $employee_device_token = EmployeeDeviceToken::where('employee_id', $user->id)
+                            ->where('employee_type_id', 1);
+                        if ($employee_device_token->exists()) {
+                            $employee_device_token = $employee_device_token->first();
+                        } else {
+                            $employee_device_token = new EmployeeDeviceToken();
+                            $employee_device_token->employee_id = $user->id;
+                            $employee_device_token->employee_type_id = 1;
+                        }
+                        $employee_device_token->device_token = $request->get('device_token');
+                        $employee_device_token->save();
+                    }
+
+                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                        ->join('admins as a', 'e.id', 'a.employee_id')
+                        ->where('a.id', $user->id);
+
+                    if ($reporting_location->exists()) {
+                        $reporting_location = $reporting_location->first();
+                        $information['distance'] = $reporting_location->radius;
+                        $information['lat'] = $reporting_location->lat;
+                        $information['long'] = $reporting_location->long;
+                    }else{
+                        $information['distance'] = 0;
+                        $information['lat'] = 0;
+                        $information['long'] = 0;
+                    }
 
                     if ($user->api_token) {
                         $information['api_token'] = $user->api_token;
@@ -341,6 +391,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->action_date = $attendance_datetime;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
                 $admin_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
@@ -357,6 +408,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->action_date = $attendance_datetime;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
                 $admin_attendance_action->save();
                 return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
             }
@@ -382,7 +434,7 @@ class AdminAPIController extends Controller
             $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
                 ->whereDate('action_date', $request->attendance_date)
                 ->where('employee_type', 1)
-                ->select('action_id', 'action_date', 'latitude', 'longitude')
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status')
                 ->orderBy('action_date', 'ASC');
             if ($admin_attendance_action->exists()) {
                 $admin_attendance_action = $admin_attendance_action->get();
@@ -2544,6 +2596,246 @@ class AdminAPIController extends Controller
 
         }
         return response()->json(['status' => 0, 'message' => 'Attachment Has Been Deleted']);
+    }
+
+    public function retail_index(Request $request){
+        $admin_default_hub = Admin::where('id', $request->admin_id)->select('default_hub_id')->first();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->select('name','code', 'pickup_address_id')->get();
+        $products = Product::all();
+        $business_categories = BusinessCategory::where('id', '!=', 2)->get();
+        $shipping_modes = RetailShippingMode::all();
+        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
+        $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
+        $trax_boxes = RetailTraxBox::all();
+        $banks = BanksList::all();
+        return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers]);
+    }
+
+    public function retail_bank_info(Request $request){
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_phone_no)
+            ->select('iban', 'account_number', 'cheque_image', 'bank_id');
+        $shipment_count = RetailShipment::where('shipper_phone_no', $request->shipper_phone_no)->where('shipping_mode', 3)->count();
+        if($shipper_info->exists()){
+            $shipper_info = $shipper_info->get();
+            return response()->json(["status" => 0, "shipper_bank_info" => $shipper_info, "shipment_count" => $shipment_count]);
+        }
+        return response()->json(["status" => 0, "shipper_bank_info" => "", "shipment_count" => ""]);
+    }
+
+    public function retail_shipment_store(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $user_id = $setting->setting_value;
+        $pickup_address_id = $request->pickup_address_id;
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+        $pickup_city_id = $user_shipping_info->city_id;
+        $information_display = TRUE;
+
+        $consignee_name = $request->input('consignee_name');
+        $consignee_address = $request->input('consignee_address');
+        $consignee_phone_number_1 = $request->input('consignee_cell_no');
+        $consignee_phone_number_2 = NULL;
+        $consignee_email_address = NULL;
+        $order_id = $request->input('order_id');
+        $package_type = FALSE;
+        $special_instructions = NULL;
+
+
+        $shipping_mode_check = $request->input('shipping_mode_id');
+        $consignee_city_id = $request->input('city_id');
+        if ($shipping_mode_check == 1) {
+            $shipping_mode_id = 2;
+        } elseif ($shipping_mode_check == 4) {
+            $shipping_mode_id = 3;
+        } else {
+            $shipping_mode_id = 1;
+        }
+        $same_day_timing_id = NULL;
+
+        $request->weight_charges = str_replace(',', '', $request->input('weight_charges'));
+        $request->fuel_surcharge = str_replace(',', '', $request->input('fuel_surcharge'));
+
+        $city = City::find($pickup_city_id);
+        $gst = $city->zone->gst;
+        $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
+        $gst = $gst * $total_charges_without_gst;
+        $total_charges = $total_charges_without_gst + $gst;
+        if ($shipping_mode_check == 3) {
+            $amount = str_replace(',', '', $request->input('cod_amount'));
+            $r_amount = 0;
+        } else {
+            $amount = 0;
+            $r_amount = 0;
+        }
+        $payment_mode_id = 1;
+        $try_and_buy_charges = NULL;
+
+        $pieces_quantity = $request->input('pieces');
+        $business_category_id = $request->input('business_category_id');
+
+        $charges_mode_id = 1;
+
+        if ($request->volumetric_weight == 1) {
+            $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+            $length = $request->length;
+            $breadth = $request->breadth;
+            $height = $request->height;
+        } else {
+            $estimated_weight = $request->input('weight');
+            $length = null;
+            $breadth = null;
+            $height = null;
+        }
+
+        $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+        $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+        $product_type_id = $request->product_id;
+
+        $item_description = NULL;
+
+        $item_quantity = 1;
+
+        if ($request->input('insurance') == 1) {
+            $price = str_replace(',', '', $request->input('insurance_amount'));
+            $insurance = TRUE;
+        } else {
+            $price = NULL;
+            $insurance = FALSE;
+        }
+
+        $type = 0;
+
+        RetailShipmentBookController::add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+
+        if ($pieces_quantity > 1) {
+            RetailShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
+        }
+        $destination = $request->city_id;
+
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_cell_no);
+        if ($shipper_info->exists()) {
+            $shipper_info = $shipper_info->first();
+            $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $pickup_city_id;
+
+
+            if ($request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                $shipper_info->bank_id = $request->bank_id;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                    $file = $request->file('cheque');
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        } else {
+            $shipper_info = new RetailShipperInfo();
+            $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $pickup_city_id;
+            $shipper_info->save();
+            if ($request->hasFile('cheque') && $request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                $shipper_info->bank_id = $request->bank_id;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                    $file = $request->file('cheque');
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        }
+        $retail_shipment = new RetailShipment();
+        $retail_shipment->shipment_id = $shipment_id;
+        $retail_shipment->product_type_id = $request->product_id;
+        $retail_shipment->shipping_mode = $request->shipping_mode_id;
+        $retail_shipment->destination = $destination;
+        $retail_shipment->payment_mode_id = $request->payment_mode_id;
+        $retail_shipment->shipper_phone_no = $request->shipper_cell_no;
+        $retail_shipment->shipper_name = $request->shipper_name;
+        $retail_shipment->shipper_cnic = $request->shipper_cnic;
+        $retail_shipment->shipper_address = $request->shipper_address;
+        $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+        $retail_shipment->total_charges_without_gst = $total_charges_without_gst;
+        $retail_shipment->gst = $gst;
+        $retail_shipment->total_charges = $total_charges;
+        $retail_shipment->weight_charges = $request->weight_charges;
+//        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
+        $retail_shipment->fuel_surcharge = $request->fuel_surcharge;
+        $retail_shipment->shipper_account_no = $shipper_info->id;
+        $retail_shipment->weight = $estimated_weight;
+        $retail_shipment->length = $length;
+        $retail_shipment->breadth = $breadth;
+        $retail_shipment->height = $height;
+        $retail_shipment->admin_id = $admin_id;
+        $retail_shipment->save();
+
+
+        $date = Carbon::today()->toDateString();
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 3)->where('admin_id', $admin_id);
+        if($cash_deposit->exists()){
+            $cash_deposit = $cash_deposit->first();
+            $total_shipments = $cash_deposit->total_cn + 1;
+            $total_cash = $cash_deposit->total_cash + $total_charges;
+            $cash_deposit->total_cn = $total_shipments;
+            $cash_deposit->total_cash = $total_cash;
+            $cash_deposit->save();
+        }
+        else{
+            $cash_deposit = new RetailCashDeposit();
+            $cash_deposit->category = 3;
+            $cash_deposit->admin_id = $admin_id;
+            $cash_deposit->total_cn = 1;
+            $cash_deposit->total_cash = $total_charges;
+            $cash_deposit->save();
+
+        }
+
+        $cash_deposit_shipment = new RetailCashDepositShipment();
+        $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+        $cash_deposit_shipment->shipment_id = $shipment_id;
+        $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode_id;
+        $cash_deposit_shipment->save();
+
+
+        AdminPickupsController::generate($shipment_id);
+        NotificationsController::send(115, $tracking_number, $shipper_info->id);
+
+        return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
+
+    }
+
+    public function notification_history(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
+        $to_date = Carbon::now()->format('Y-m-d 23:59:59');
+
+        $notifiction_history = EmployeeNotificationHistory::where('employee_id', $admin_id)
+            ->where('employee_type_id', 1)
+            ->whereBetween('created_at', [$from_date, $to_date])
+            ->orderBy('created_at', 'desc');
+        if ($notifiction_history->exists()) {
+            $notifiction_history = $notifiction_history->get();
+            return response()->json(['status' => 0, 'data' => $notifiction_history]);
+        }
+        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 
 }

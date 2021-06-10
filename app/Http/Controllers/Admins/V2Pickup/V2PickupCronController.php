@@ -15,6 +15,26 @@ use App\Http\Controllers\Controller;
 use DB;
 class V2PickupCronController extends Controller
 {
+    static public function ready_pickups() {
+        V2PickupNote::where('status', 0)->update(['status' => 1]);
+
+        V2PickupRequest::whereIn('status_id', [1, 3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
+
+        V2PickupRequest::whereIn('status_id', [1, 3])->where('rider_status', 1)->where('current_rider_id', '!=', NULL)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL]);
+    }
+
+    static public function auto_pickup_assign() {
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1, 3])->where('rider_status', 1);
+
+        if ($pickup_requests->exists()) {
+            $pickup_requests = $pickup_requests->get();
+
+            foreach ($pickup_requests as $pickup_request) {
+                AdminPickupsController::auto_pickup_assign($pickup_request->id);
+            }
+        }
+    }
+
     static public function arrival_not_picked(){
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
         $arrival_cut_off_time = '6';
@@ -35,7 +55,8 @@ class V2PickupCronController extends Controller
         $yesterday = Carbon::yesterday();
         $today->setTime($arrival_cut_off_time,0,0);
         $yesterday->setTime($arrival_cut_off_time,0,1);
-        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->whereBetween('created_at', [$yesterday,$today]);
+
+        $pickup_requests = V2PickupRequest::whereIn('status_id', [1,3])->where('created_at', '<=', $today);
         if($pickup_requests->exists()){
             $pickup_requests = $pickup_requests->get();
             foreach ($pickup_requests as $pickup_request) {
@@ -79,22 +100,11 @@ class V2PickupCronController extends Controller
                     $pickup_request_attempt->attempt_date = $now;
                     $pickup_request_attempt->assigned_by = $global_admin_id;
                     $pickup_request_attempt->save();
-                    $auto_generate_pickup_ids[] = $pickup_request->id;
-                }
-
-            }
-            V2PickupNote::where('status', 0)->update(['status' => 1]);
-
-            self::remove_riders();
-            if(count($auto_generate_pickup_ids) > 0){
-                foreach ($auto_generate_pickup_ids as $pickup_request_id){
-                    AdminPickupsController::auto_pickup_assign($pickup_request_id);
                 }
             }
-
         }
     }
-    
+
     static public function remove_riders(){
         V2PickupRequest::whereIn('status_id', [1,3])->where('rider_status', 2)->update(['last_rider_id' => DB::raw('current_rider_id'), 'current_rider_id' => NULL, 'rider_status' => 1]);
     }
@@ -204,7 +214,7 @@ class V2PickupCronController extends Controller
             }
         }
     }
-    
+
     static public function arrival_not_picked_old(){
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
         $arrival_cut_off_time = '8';

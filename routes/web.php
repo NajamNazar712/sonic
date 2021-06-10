@@ -245,7 +245,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
         Route::prefix('sales')->name('sales.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@sales_index')->name('index');
-            Route::get('list','Shippers\ShipperReportsController@sales_list')->name('list');
+            Route::post('list','Shippers\ShipperReportsController@sales_list')->name('list');
 
             Route::prefix('telenor')->name('telenor.')->group(function (){
                 Route::get('','Shippers\ShipperReportsController@sales_telenor_index')->name('index');
@@ -357,6 +357,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add_iban', 'Shippers\ShipperGlobalSettingsController@shipping_information_add_iban')->name('add_iban');
             Route::get('bank_info','Shippers\ShipperGlobalSettingsController@shipping_information_bank_info')->name('bank_info');
         });
+        Route::prefix('subscription')->name('subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@subscription_submit')->name('store');
+        });
+
 
     });
 	Route::prefix('consolidation')->name('consolidation.')->group(function () {
@@ -394,6 +399,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipperTelenorController@data_conversion_index')->name('index');
             Route::post('', 'Shippers\ShipperTelenorController@data_conversion_store')->name('store');
         });
+    });
+
+    Route::prefix('quick_search')->name('quick_search.')->group(function(){
+        Route::get('','Shippers\ShipperDashboardController@quick_search_index')->name('index');
+        Route::get('list','Shippers\ShipperDashboardController@quick_search_list')->name('list');
     });
 });
 //Admin Routes Start
@@ -1322,6 +1332,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::prefix('open_bag')->name('open_bag.')->group(function () {
                     Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
+                    Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_open_bag_shipment_details')->name('shipment_details');
                     Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
                 });
             });
@@ -1365,6 +1376,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bag_cargo_details', 'Admins\AdminMasterCargoController@create_master_cargo_details')->name('cargo_details');
             Route::post('', 'Admins\AdminMasterCargoController@master_cargo_create_store')->name('store');
         });
+        Route::post('all_junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_all_junctions')->name('all_junctions');
 
         Route::prefix('in_transit')->name('in_transit.')->group(function () {
             Route::get('', 'Admins\AdminMasterCargoController@master_cargo_in_transit_index')->name('index');
@@ -1373,6 +1385,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bags')->name('bags');
             Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
             Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
+            
             Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
             Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
             Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
@@ -1785,6 +1798,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminPackagingMaterialController@types_index')->name('index');
             Route::get('list','Admins\AdminPackagingMaterialController@types_list')->name('list');
             Route::post('add','Admins\AdminPackagingMaterialController@type_add')->name('add');
+            Route::get('all_shippers','Admins\AdminPackagingMaterialController@all_shippers')->name('all_shippers');
+            Route::get('all_shippers_edit','Admins\AdminPackagingMaterialController@all_shippers_edit')->name('all_shippers_edit');
+            
             Route::post('details','Admins\AdminPackagingMaterialController@type_details')->name('details');
             Route::post('edit','Admins\AdminPackagingMaterialController@type_edit')->name('edit');
             Route::post('enable_disable','Admins\AdminPackagingMaterialController@type_enable_disable')->name('enable_disable');
@@ -1823,6 +1839,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('details', 'Admins\AdminNotificationsController@details')->name('details');
         Route::post('status', 'Admins\AdminNotificationsController@status')->name('status');
         Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+        Route::post('send_custom_notification', 'Admins\AdminNotificationsController@send_custom_notification')->name('send_custom_notification');
     });
 
     //Reports start
@@ -2110,6 +2127,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminRetailReportController@sales_list')->name('list');
 
         });
+
+        Route::prefix('shipper_insurance')->name('shipper_insurance.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@shipper_insurance_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@shipper_insurance_list')->name('list');
+            Route::post('charges', 'Admins\AdminReportsController@shipper_insurance_charges')->name('charges');
+
+        });
     });
 
     //Reports end
@@ -2139,6 +2163,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('pickup_settings', 'Admins\GlobalSettingsController@pickup_cut_off_settings_index')->name('pickup_settings');
             Route::post('pickup_settings_store', 'Admins\GlobalSettingsController@pickup_cut_off_settings_store')->name('pickup_settings_store');
         });
+
+
+
+        Route::prefix('fleet')->name('fleet.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@fleet_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@fleet_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@fleet_store')->name('store');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@fleet_enable_disable')->name('enable_disable');
+            Route::get('unique', 'Admins\GlobalSettingsController@fleet_unique')->name('unique');
+            Route::get('{id}/edit/form', 'Admins\GlobalSettingsController@fleet_edit')->name('edit');
+            Route::put('{id}/update', 'Admins\GlobalSettingsController@fleet_update')->name('update');
+        });
+
+        Route::prefix('route_management')->name('route_management.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@route_management_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@route_management_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@route_management_store')->name('store');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@route_management_enable_disable')->name('enable_disable');
+            Route::get('unique', 'Admins\GlobalSettingsController@route_management_unique')->name('unique');
+            Route::get('{id}/edit/form', 'Admins\GlobalSettingsController@route_management_edit')->name('edit');
+            Route::put('{id}/update', 'Admins\GlobalSettingsController@route_management_update')->name('update');
+
+
+        });
+
+
 
         Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_index')->name('index');
@@ -2614,6 +2664,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('image_submit','Admins\AdminCRMController@crm_image_submit')->name('image_submit');
             Route::post('image_delete','Admins\AdminCRMController@crm_image_delete')->name('image_delete');
             Route::post('/lost/claim', 'Admins\AdminCRMController@lost_claim')->name('lost.claim');
+            Route::post('request', 'Admins\AdminCRMController@special_request_appvove')->name('special_request_appvove');
         });
         Route::prefix('feedback')->name('feedback.')->group(function(){
             Route::post('add', 'Admins\AdminCRMController@add_feedback')->name('add');
@@ -2624,9 +2675,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('in_process')->name('in_process.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@in_process_index')->name('index');
-            Route::get('list', 'Admins\AdminCRMController@in_process_list')->name('list');
+            Route::post('list', 'Admins\AdminCRMController@in_process_list')->name('list');
             Route::post('tag', 'Admins\AdminCRMController@bulk_admin_tag')->name('tag');
             Route::post('un_tag', 'Admins\AdminCRMController@admin_un_tag')->name('un_tag');
+            Route::post('special_request_tag', 'Admins\AdminCRMController@special_request_tag')->name('special_request_tag');
         });
         Route::prefix('resolved')->name('resolved.')->group(function(){
             Route::get('', 'Admins\AdminCRMController@resolved_index')->name('index');
@@ -2749,6 +2801,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('edit/{id?}', 'Admins\AdminRunnerController@runner_details_edit_index')->name('edit');
         Route::post('edit/submit', 'Admins\AdminRunnerController@runner_details_edit_submit')->name('edit.submit');
         Route::post('/view_details', 'Admins\AdminRunnerController@runner_details_view')->name('view_details');
+        Route::get('in_transit', 'Admins\AdminRunnerController@vehicle_in_transit')->name('intransit');
+        Route::get('in_transit/list', 'Admins\AdminRunnerController@vehicle_in_transit_list')->name('intransit.list');
     });
 
     Route::prefix('open_parcel_history')->name('open_parcel_history.')->group(function () {
@@ -2947,6 +3001,10 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::get('/list', 'Retail\RetailShipmentBookController@tracking_slip_list')->name('list');
             Route::post('/upload', 'Retail\RetailShipmentBookController@tracking_slip_upload')->name('upload');
         });
+        Route::prefix('other_booking')->name('other_booking.')->group(function () {
+            Route::get('', 'Retail\RetailShipmentBookController@other_booking_index')->name('index');
+            Route::get('/list', 'Retail\RetailShipmentBookController@other_booking_list')->name('list');
+        });
     });
     Route::prefix('cash_deposit')->name('cash_deposit.')->group(function () {
         Route::get('', 'Retail\RetailCashDepositController@index')->name('index');
@@ -2980,5 +3038,13 @@ Route::prefix('retail')->name('retail.')->group(function () {
         });
 
     });
+
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::prefix('done_payments')->name('done_payments.')->group(function () {
+            Route::post('details_print', 'Retail\RetailFinanceController@retail_done_payments_details_print')->name('print');
+            Route::post('details', 'Retail\RetailFinanceController@retail_done_payments_details')->name('details');
+        });
+    });
+
 });
 

@@ -170,6 +170,7 @@
                                                 <th class="border-primary border-darken-1">Phone Number</th>
                                                 <th class="border-primary border-darken-1">City</th>
                                                 <th class="border-primary border-darken-1">Email Address</th>
+                                                <th class="border-primary border-darken-1">Brand Name</th>
                                                 <th class="border-primary border-darken-1">Status</th>
                                                 <th class="border-primary border-darken-1"></th>
                                             </tr>
@@ -391,8 +392,12 @@
                                     <textarea type="text" name="pickup_address" id="pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required></textarea>
                                 </div>
                                 <div class="col-6 form-group">
+                                    <input type="text" name="pickup_brand_name" id="pickup_brand_name" class="form-control numeric flyer"  placeholder="Brand Name" >
+                                </div>
+                                <div class="col-6 form-group">
                                     <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>
                                 </div>
+                                
                                 <div class="col-6 form-group">
                                     <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
                                 </div>
@@ -440,6 +445,9 @@
                                 <input type="hidden" name="id" id="edit_user_shipping_info_id" value="">
                                 <div class="col-6 form-group">
                                     <textarea type="text" name="pickup_address" id="edit_pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required></textarea>
+                                </div>
+                                <div class="col-6 form-group">
+                                    <input type="text" name="pickup_brand_name" id="edit_pickup_brand_name" class="form-control numeric flyer"  placeholder="Brand Name" >
                                 </div>
                                 <div class="col-6 form-group">
                                     <input type="text" name="phone" id="edit_phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>
@@ -835,6 +843,7 @@
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},
+                    {data: 'pickup_brand_name', name: 'pickup_brand_name'},
                     {data: 'status',orderable: false, name: 'status',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'}
                 ],
@@ -1043,6 +1052,8 @@
                 if ($(this).hasClass('edit')) {
                     var id = parseInt($(this).parents('tr').attr('id'));
                     var pickup_address = table.row($(this).parents('tr')).data().pickup_address;
+                    var pickup_brand_name = table.row($(this).parents('tr')).data().pickup_brand_name;
+                    
                     var phone_number = table.row($(this).parents('tr')).data().phone;
                     var poc = table.row($(this).parents('tr')).data().poc;
                     var vendor = table.row($(this).parents('tr')).data().vendor;
@@ -1051,12 +1062,15 @@
 
                     $('#edit_user_shipping_info_id').val(id);
                     $('#edit_pickup_address').val(pickup_address);
+                    $('#edit_pickup_brand_name').val(pickup_brand_name);
+                    
                     $('#edit_phone').val(phone_number);
                     $('#edit_poc').val(poc);
                     $('#edit_vendor').val(vendor);
                     $('#edit_email').val(email_address);
                     $('#edit_city_id').val(city_id).trigger('change');
                     $('#EditPickup').modal('show');
+                    
                 }
             });
 

@@ -52,10 +52,15 @@
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
                                     <th class="border-primary border-darken-1">Tagged To</th>
+                                  {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
                                     <th class="border-primary border-darken-1">Tagged At</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
+                                    <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th>
                                     <th class="border-primary border-darken-1">Valid Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
@@ -185,6 +190,25 @@
                 </div>
             </div>
         </div>
+
+    <div class="modal fade" id="ViewRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Special Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+
+                </div>
+                <div class="modal-footer d-flex justify-content-end">
+                    <button class="btn btn-grey" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -219,6 +243,10 @@
                     params.length = -1;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.crm.in_process.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -243,8 +271,12 @@
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
                             head.push('Launched Date');
+                            head.push('Complaint Re-Open Date');
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
+                            head.push('Address');
+                            head.push('Address Latitude');
+                            head.push('Address Longitude');
                             head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
                             head.push('Last Comment By');
@@ -274,8 +306,12 @@
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
                                 row.push(values.created_at);
+                                row.push(values.reopen_date);
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
+                                row.push(values.address);
+                                row.push(values.address_latitude);
+                                row.push(values.address_longitude);
                                 row.push(values.valid_date);
                                 row.push(values.current_tat);
                                 row.push(values.last_comment_name);
@@ -571,12 +607,16 @@
                 },
                 ajax: {
                     url: '{{ route('admin.crm.in_process.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                     }
                 },
                 rowId: 'id',
-                order: [[20, 'desc']],
+                order: [[21, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -598,10 +638,15 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                  /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
                     {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
+                    {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
+                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
+                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
@@ -636,6 +681,7 @@
                         '<option value="0">Admin</option>' +
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
+                        '<option value="3">Consignee</option>' +
                         '</select>';
                     var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
                         '<option value="1">Department</option>' +
@@ -1130,6 +1176,41 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
 
+            });
+
+            $('#datatable tbody').on('click', 'tr td.special_request button', function() {
+                var crm_request_id = table.row($(this).parents('tr')).data().id;
+
+                $.ajax({
+                    url: '{!! route('admin.crm.in_process.special_request_tag') !!}',
+                    method: 'POST',
+                    data: {
+                        'crm_request_id': crm_request_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+
+                    if (data.status === 1) {
+                        console.log(data);
+                        var html = '';
+                        html += '<table class="table table-sm datatable text-center">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.admin, function (index, value) {
+                            var ind = index + 1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value + '</td>';
+
+                        });
+                        html += '</tbody></table>';
+
+                        $('#ViewRequestModal .modal-body').html(html);
+                        $('#ViewRequestModal').modal('show');
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
             });
         });
     </script>

@@ -262,6 +262,7 @@
                 dom: 'lrtip',
                 scrollX: true, scrollY: '500px',
                 paging: false,
+
                 autoWidth: false,
                 processing: true,
                 language: {

@@ -681,6 +681,7 @@ class AdminWalkInBookShipmentController extends Controller
 
             $shipment = Shipment::where('id',$request->ids)->first();
 
+
             if ($user_id == $shipment->user_id) {
                 $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -906,7 +907,7 @@ class AdminWalkInBookShipmentController extends Controller
                                     </tr>
                                     <tr>
                                       <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                      <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
                                     </tr>
                                 </tbody>
                             </table>

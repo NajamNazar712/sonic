@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -30,6 +31,7 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->rider_id = $rider_id;
       $shipment_journey->reference_1_id = $reference_1_id;
       $shipment_journey->reference_2_id = $reference_2_id;
+      $shipment_journey->received_or_refused_by = $received_or_refused_by;
       $shipment_journey->received_or_refused_by = $received_or_refused_by;
 
       if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50, 61])) {
@@ -95,6 +97,12 @@ class ShipmentsJourneyController extends Controller
           $shipment_journey->city_id = $shipment->consignee_city_id;
         }
       }
+      else if (in_array($shipper_status_id, [54, 55])) {
+          $shipment = Shipment::find($shipment_id);
+          if ($shipment) {
+              $shipment_journey->city_id = $shipment->consignee_city_id;
+          }
+      }
 
       $whip = new Whip();
       $client_address = $whip->getValidIpAddress();
@@ -104,5 +112,10 @@ class ShipmentsJourneyController extends Controller
       }
 
       $shipment_journey->save();
+      if($verification == 1){
+          if($shipper_status_id != 1){
+              ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
+          }
+      }
     }
 }

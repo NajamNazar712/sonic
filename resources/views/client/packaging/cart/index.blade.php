@@ -51,6 +51,53 @@
                                     </div>
                                     <hr>
                                 @endforeach
+                                @if (count($shipper_packaging_types)>0)
+                                    
+                                    @foreach($shipper_packaging_types as $index => $shipper_packaging_type)
+                                    
+                                        @if ($shipper_packaging_type->packaging_material->status != 0)
+                                            
+                                    <div class="col">
+                                        <h1 class="mb-1">
+                                            {{$shipper_packaging_type->packaging_material->type}}
+                                        </h1>
+                                        <div class="row">
+                                            @foreach($shipper_packaging_type->packaging_material->sizes as $index => $size)
+                                                @if($size->id != 1)
+                                                    @php
+                                                        $row = $index + 1;
+                                                    @endphp
+                                                    <div class="col-2 m-1">
+                                                        <div class="col mb-1 text-center border border-3">
+                                                            <img class="" alt="flyer" src="{{asset($pictures[$size->type_id])}}" width="100" height="100">
+                                                        </div>
+                                                        <div class="col mb-1 text-center">
+                                                            <p><b>Size: </b>{{$size->size}}</p>
+                                                        </div>
+                                                        <div class="col mb-1 text-center">
+    {{--                                                            @if(array_key_exists($size->id, $user_charges))--}}
+    {{--                                                                <p><b>Charges: </b>{{$user_charges[$size->id]}}</p>--}}
+    {{--                                                            @else--}}
+                                                                <p><b>Charges: </b>{{$standard_charges[$size->id]}}</p>
+    {{--                                                            @endif--}}
+                                                        </div>
+                                                        <div class="col mb-1 text-center">
+                                                            <p><b>Flyer: </b> {{$row}}<p>
+                                                        </div>
+                                                        <div class="col mb-1 text-center">
+                                                            <button class="btn btn-outline-primary add_to_cart" id="size_{{$size->id}}" value="{{$size->id}}"><i class="la la-cart-plus" style="font-size:24px"></i></button>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    @endif
+
+                                @endforeach
+                            @endif
+
                             </div>
                         </div>
                     </div>

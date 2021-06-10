@@ -5409,6 +5409,13 @@ class AdminFinanceController extends Controller
 
                         $invoice->save();
 
+                        if( $invoice->total_invoice_amount < 50000){
+                            $users = User::find($user_id);
+                            $users->blacklist = 1;
+                            $users->blacklist_reason = '<strong> Auto Blacklisted - </strong>'. "Invoice Amount was less than PKR 50,000";
+                            $users->save();
+                        }
+
                         NotificationsController::send(27, $invoice_id);
                     }
                 }
@@ -8830,6 +8837,10 @@ class AdminFinanceController extends Controller
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $done_payment = RetailDonePayment::find($request->id);
+
+        if(!$done_payment){
+            return ['status' => 1, 'error' => 'Payment not found'];
+        }
 
         $shipper = $done_payment->shipper;
 

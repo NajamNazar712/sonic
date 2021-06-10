@@ -920,6 +920,14 @@ class AdminCargoController extends Controller
             if($master_cargo_bag->exists()){
                 $master_cargo_bag = $master_cargo_bag->first();
                 $master_cargo = MasterCargo::find($master_cargo_bag->master_cargo_id);
+                // <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . (($master_cargo->junction_hub_1_id) ? ($master_cargo->junction_hub_1->name . ' - ') : '') . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
+
+                $jucntion_names = '';
+                if($master_cargo->route_management_id){
+                    foreach ($master_cargo->route_management->junctions as $value) {
+                        $jucntion_names .= ' - '.$value->junction['name'].' - ';
+                    }
+                }
 
                 $sender = $master_cargo->sender;
                 $receiver = ($master_cargo->received_by) ? $master_cargo->receiver : NULL;
@@ -1050,7 +1058,7 @@ class AdminCargoController extends Controller
                           <td class="color primary"><strong>Route Information</strong></td>
                         </tr>
                         <tr>
-                          <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . (($master_cargo->junction_hub_1_id) ? ($master_cargo->junction_hub_1->name . ' - ') : '') . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
+                        <td class="text-center">' . $master_cargo->origin_hub->name . $jucntion_names . $master_cargo->destination_hub->name . '</td>
                         </tr>
                       </tbody>
                     </table>

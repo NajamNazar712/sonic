@@ -176,6 +176,14 @@
                                                         <h5 class="mb-0">{{$insurance}}</h5>
                                                 </td>
                                             </tr>
+                                           <tr>
+                                                <th scope="row">Special Request </th>
+                                                <td class="name">
+                                                    @foreach($approvers as $admin)
+                                                        <h5 class="mb-0">{{$admin}}</h5>
+                                                    @endforeach
+                                                </td>
+                                            </tr>
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
@@ -254,6 +262,9 @@
                                                     </form>
                                                 </div>
                                             @endif
+
+                                            <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
+
                                         </div>
                                     </div>
                                     <div class="col-7">
@@ -940,6 +951,77 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="special_request_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="special_request_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Special Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body  text-center">
+                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
+                        @csrf
+                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
+
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Admin</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Waqas Ahmed Dar</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Mursaleen Rafiq</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="661" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Waqas Sheikh</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]">
+                                    </div>
+                                </td>
+                                <td>Sohaib Jawaid</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="row justify-content-center mt-2 ml-2">
+                            <div class="col-4">
+                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
@@ -2144,6 +2226,14 @@
                 selected_rows = [];
                 rows_count = 0;
                 $('#crm_image_view_table tbody').html('');
+            });
+
+            $('#special_request').on('click',function () {
+              $('#special_request_modal').modal('show');
+            });
+
+            $('#special_request_modal').on('hide.bs.modal', function (e) {
+                $('.form-check-input').prop('checked', false);
             });
 
         });

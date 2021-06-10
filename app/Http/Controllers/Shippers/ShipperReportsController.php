@@ -30,7 +30,7 @@ class ShipperReportsController extends Controller
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses,'shipping_modes' => $shipping_modes,'service_types'=>$service_types]);
     }
     public function sales_list(Request $request){
-        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758])) {
+        if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982])) {
             $connection = 'reports';
         }
         else {
@@ -54,6 +54,15 @@ class ShipperReportsController extends Controller
                         ->where('cj.id','=',
                             DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
                 })
+                
+                ->leftJoin('shipments_journey as sjreason', function ($join) {
+                    $join->on('sjreason.shipment_id', '=', 'shipments.id')
+                        ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
+                        ->where('sjreason.id', '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
+                })
+                ->leftJoin('shipment_status_reason as ssreason', 'ssreason.id', '=', 'cj.status_reason_id')
+
                 ->leftJoin('shipment_status as ss','ss.id','=','cj.shipper_status_id')
                 ->leftJoin('pending_payment_shipments as pps', function ($join) use($connection) {
                     $join->on('pps.shipment_id', '=', 'shipments.id')
@@ -95,7 +104,7 @@ class ShipperReportsController extends Controller
                 });
         }
 
-        $sales->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor')
+        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
                 if(session('user_type') == 2){

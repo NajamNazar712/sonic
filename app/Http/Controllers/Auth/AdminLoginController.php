@@ -3,16 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\MultipleSaleLead;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-//use Illuminate\Support\MessageBag;
-use Illuminate\Validation\ValidationException;
 
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRoleModulePermission;
@@ -65,6 +61,7 @@ class AdminLoginController extends Controller
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
             $sales_coordinator = SalesCommissionUser::where('user_id',$id)->whereIn('sales_commission_users.tier_id',[2,3])->exists();
+
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);
 
             return redirect()->intended(route('admin.dashboard.index'));

@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Auth;
 
 class AdminNsaAccountShipmentController extends Controller
 {
@@ -255,17 +256,32 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 50);
+                                    if ($nsa_shipment->user_id == 7762) {
+                                        $admin_id = Auth::id();
+                                    }
+                                    else {
+                                        $admin_id = 50;
+                                    }
 
-                                    if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
-                                        $status_id = 4;
+                                    ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
 
-                                        ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, 50);
+                                    if ($nsa_shipment->user_id != 7762) {
+                                        if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
+                                            $status_id = 4;
+
+                                            ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
+                                        }
                                     }
 
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
-                                    $nsa_shipment->actual_weight = 0.10;
+
+                                    if ($nsa_shipment->user_id == 7762) {
+                                        $nsa_shipment->actual_weight = $nsa_shipment->estimated_weight;
+                                    }
+                                    else {
+                                        $nsa_shipment->actual_weight = 0.10;
+                                    }
 
                                     $nsa_shipment->save();
 

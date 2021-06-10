@@ -1622,6 +1622,7 @@ class AdminDashboardController extends Controller
                     $user->status = 3;
                     $user->disable_remarks = null;
                     $user->reactivated_at = Carbon::now();
+                    $user->disable_at = null;
 
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
@@ -1630,6 +1631,8 @@ class AdminDashboardController extends Controller
                 }
             }else if($status == 'disable'){
                 if($user->status == 3){
+                    $user->disable_at = Carbon::now();
+
                     $user->status = 4;
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User is now disabled!"]);
@@ -7211,7 +7214,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as k','k.id','=','st.kam')
             ->leftjoin('admins as r','r.id','=','st.ref')
             ->leftjoin('territories as t','t.id','=','users.territory_id')
-			->select(['rrb.name as rates_rejected_by','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id','users.new_rate_type_id as new_rate_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
+			->select(['rrb.name as rates_rejected_by','users.disable_at as disable_at','users.rates_added_at as rates_added_at','users.rates_approved_at as rates_approved_at','users.rates_rejected_at as rates_rejected_at','users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city','users.poc', 'p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status','users.account_type_id','at.name as account_type','users.documents_status','users.documents_status_reason as documents_rejection_reason','users.other_product_name','users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone','du.cnic as duplicate_cnic', 'du.iban as duplicate_iban','du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason','uda.uploaded_at as documents_uploaded_at','uda.approved_at as documents_approved_at','dab.name as documents_approved_by','drb.name as documents_rejected_by','uda.rejected_at as documents_rejected_at','poc.name as tagged_poc','k.name as kam','r.name as ref','users.address as address','users.email','t.name as territory','users.corporate_rate_type_id as corporate_rate_type_id','users.new_rate_type_id as new_rate_type_id'])->whereIn('users.status',[3,4])->where('blacklist',0);
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
@@ -7840,7 +7843,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a','a.id','=','st.poc')
             ->leftjoin('admins as d','d.id','=','st.kam')
             ->leftjoin('admins as h','h.id','=','st.ref')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc_tagged','d.name as kam','h.name as ref'])->where('blacklist',1);
+            ->select(['users.id', 'users.name','users.disable_at as disable_at', 'cities.name as city' ,'users.poc','users.blacklist_reason as reason','ad.name as admin_tag_id','a.name as poc_tagged','d.name as kam','h.name as ref'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -8030,7 +8033,7 @@ class AdminDashboardController extends Controller
     public function getPickups(Request $request)
     {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
+            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name', 'user_shipping_infos.vendor'])
             ->where('user_id',$request->user_id)
             ->where('hidden', 0);
 
@@ -8087,7 +8090,7 @@ class AdminDashboardController extends Controller
             ->leftjoin('admins as a', 'a.id', '=', 'ch.updated_by')
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'cities.business_category_id')
             ->join('zones as z', 'cities.zone_id', '=', 'z.id')
-            ->select(['cities.id as city_id','cities.city_code as city_code','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category']);
+            ->select(['cities.id as city_id','cities.city_code as city_code','cities.id as id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status', 'ch.created_at as updated_at' , 'a.name as updated_by', 'cities.gc_area as gc_area', 'cities.attempt_tat as attempt_tat','cities.location_latitude','cities.location_longitude', 'cities.address as address', 'cities.business_category_id as business_category_id', 'bc.name as business_category','cities.hub_location_latitude','cities.hub_location_longitude']);
 
         return Datatables::of($cities)
             ->editColumn('status', function ($cities) {
@@ -8109,6 +8112,16 @@ class AdminDashboardController extends Controller
                 $location = '<div class="text-center">';
                 if($result->location_latitude != null && $result->location_longitude != null) {
                     $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                }else{
+                    return '-';
+                }
+            })
+            ->addColumn('hub_location', function ($result){
+                $location = '<div class="text-center">';
+                if($result->hub_location_latitude != null && $result->hub_location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->hub_location_latitude . ',' . $result->hub_location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
                     $location .= '</div>';
                     return $location;
                 }else{
@@ -8193,6 +8206,7 @@ class AdminDashboardController extends Controller
     }
 
     public function updateCity(Request $request,$id){
+       
         $city_id = City::where('id',$id)->first();
         if($city_id){
             if($request->has('updatedelivery') && count($request->updatedelivery) > 0){
@@ -8208,6 +8222,8 @@ class AdminDashboardController extends Controller
                         'attempt_tat'=>$request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     CityHistory::create([
@@ -8222,6 +8238,8 @@ class AdminDashboardController extends Controller
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     WalkInCities::where('city_id',$id)->delete();
@@ -8261,6 +8279,8 @@ class AdminDashboardController extends Controller
                         'attempt_tat'=>$request->attempt_tat,
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     CityHistory::create([
@@ -8275,6 +8295,8 @@ class AdminDashboardController extends Controller
                         'updated_by' => Auth::id(),
                         'location_latitude' => $request->latitude,
                         'location_longitude' => $request->longitude,
+                        'hub_location_latitude' => $request->hub_latitude,
+                        'hub_location_longitude' => $request->hub_longitude,
                         'address' => $request->address
                     ]);
                     WalkInCities::where('city_id',$id)->delete();
@@ -8311,7 +8333,7 @@ class AdminDashboardController extends Controller
     }
     //update city end
     public function addCityHub(Request $request){
-        // dd($request->city_code);
+      
         if($request->postType == 'city'){
             $zone_id = City::find($request->hubs)->zone_id;
 
@@ -8327,6 +8349,8 @@ class AdminDashboardController extends Controller
                 'status'=>1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8342,6 +8366,8 @@ class AdminDashboardController extends Controller
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8399,6 +8425,8 @@ class AdminDashboardController extends Controller
                 'status'=>1,
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 
@@ -8413,6 +8441,8 @@ class AdminDashboardController extends Controller
                 'updated_by' => Auth::id(),
                 'location_latitude' => $request->latitude,
                 'location_longitude' => $request->longitude,
+                'hub_location_latitude' => $request->hub_latitude,
+                'hub_location_longitude' => $request->hub_longitude,
                 'address' => $request->address
             ]);
 

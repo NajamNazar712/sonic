@@ -23,6 +23,7 @@ use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\BanksList;
@@ -703,8 +704,17 @@ class DeliveryController extends Controller
                     'last_updated_at' => Carbon::now(),
                     'ordering' => $order
                 ]);
+                $rider_device_token = EmployeeDeviceToken::where('employee_id',$request->selected_rider_id)
+                    ->where('employee_type_id', 2)
+                    ->select('device_token');
+                if ($rider_device_token->exists()) {
+                    $rider_device_token = $rider_device_token->first();
+                    $device_token = $rider_device_token->device_token;
+                    $title = "Delivery Note Assigned";
+                    $message = "Dear Rider Delivery Note # " . $note->id . " Has Been Assigned To You";
+                    NotificationsController::bolt_app_notification($request->selected_rider_id, 2,$device_token, $title, $message);
+                }
             }
-
             if ($note) {
                 if (!$order) {  //Default
                     sort($valid_shipments); //sort_valid_shipments;
@@ -772,8 +782,8 @@ class DeliveryController extends Controller
                     NotificationsController::send(11, $note->id, $shipment);
 
                     if($notifications[$index]) {
-                        NotificationsController::send(12, $note->id, $shipment);
-                    }
+                            NotificationsController::send(12, $note->id, $shipment);
+                        }
                 }
                 NotificationsController::send(40, $note->id);
             }
@@ -1061,7 +1071,7 @@ class DeliveryController extends Controller
                     $delivery = $delivery->first();
                     $count = $delivery->shipments_count;
                     $cod = $delivery->total_cod_amount;
-                    $count-=1;
+                    $count -= 1;
                     if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                         $cod = $cod - $parcel->amount;
                     }
@@ -6274,9 +6284,9 @@ class DeliveryController extends Controller
                           $parcel = Shipment::where('id',$shipment_id)->first();
                           DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $shipment_id])->delete();
                           $delivery = $delivery->first();
-                          $count = $delivery->shipments_count;
+                          $count = $delivery->shipments_count - 1;
                           $cod = $delivery->total_cod_amount;
-                          $count = $count - 1;
+
                           if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                               $cod = $cod - $parcel->amount;
                           }
