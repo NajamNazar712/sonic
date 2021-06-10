@@ -59,6 +59,18 @@
             $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $("#edit_cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
+            $('#edit_store').select2({
+                width: '100%',
+                allowClear:true
+            });
+            $('#edit_franchise').select2({
+                width: '100%',
+                allowClear:true
+            });
+            $('#edit_trax_center').select2({
+                width: '100%',
+                allowClear:true
+            });
 
             $('#edit_user_form').validate({
                 ignore: ":not(:visible),:disabled",
