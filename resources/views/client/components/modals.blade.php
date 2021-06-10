@@ -11,17 +11,31 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="shipment_charges_modal_heading">Agreement<span></span></h4>
                 </div>
+               @php
+                   if(session('user_type') == 1){
+                       $shipper_name = ucfirst(Auth::user()->name);
+                       $poc = Auth::user()->poc;
+                       $address = Auth::user()->address;
+
+                   }else {
+                    $shipper_name = ucfirst(Auth::user()->shipper->name);
+                    $poc = Auth::user()->shipper->poc;
+                    $address = Auth::user()->shipper->address;
+
+                   }
+                    
+               @endphp
+
                 <div class="modal-body password_change_body text-left" id="password_change_body">
                     <p>You have to change your password to make your sonic account more secure.</p>
-                            <p>This Services Agreement (“Agreement”) is hereby made on ……….. day of …………………….. 2019 (“Effective Date”) by and between TRAX Online (Private) Limited, a registered private limited company having incorporation number 0111649 and registered address at Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi duly represented by Mr. Fawad Ahmed s/o Mr. Muhammad Ayub in his capacity as Company Secretary (hereinafter referred to “TRAX” along with its agents, representatives, successors-in-interests, assigns etc) for the first part And ………………………………...a registered private limited company having incorporation number ………………………..and registered address at  …………………………………………………
-                                ……………………… duly represented by Mr. /Ms.  …………...………. s/o …….…………….. in his capacity as ………………………… (hereinafter referred to “Shipper” along with its agents, representatives, successors-in-interests, assigns etc) for the other part
+                            <p>This Services Agreement (“Agreement”) is hereby made on {{ date("l") }} day of {{date("d-m-Y")}}, (“Effective Date”) by and between TRAX Online (Private) Limited, a registered private limited company having incorporation number 0111649 and registered address at Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi duly represented by Mr. Fawad Ahmed s/o Mr. Muhammad Ayub in his capacity as Company Secretary (hereinafter referred to “TRAX” along with its agents, representatives, successors-in-interests, assigns etc) for the first part And <strong>{{$shipper_name}}</strong> a registered private limited company and registered address at <strong>{{$address}}</strong> duly represented by Mr. /Ms. <strong>{{$poc}}</strong>. in his capacity as (hereinafter referred to “Shipper” along with its agents, representatives, successors-in-interests, assigns etc) for the other part
                                 
-                                TRAX Online and …………………………………. shall be hereinafter collectively referred to as “Parties” and individually as “Party”. 
+                                TRAX Online and <strong>{{$shipper_name}}</strong>. shall be hereinafter collectively referred to as “Parties” and individually as “Party”. 
                                 </p>
                                 <hr>
                                 <h4>Recitals:</h4>
                                 <p> 
-                                    Whereas TRAX Online is an E-Commerce Fulfillment Company with a focus on Cash on Delivery & Logistics Services having a respectable clientele and providing services all over Pakistan. And Shipper is …………………………………………………………………………………………….. Shipper wishes to introduce Cash on Delivery + E-fulfillment services to its customers (referred to as consignees) and hereby wish to indulge TRAX Online in regards to this particular venture. TRAX Online in return, is willing to provide services to the Shipper. 
+                                    Whereas TRAX Online is an E-Commerce Fulfillment Company with a focus on Cash on Delivery & Logistics Services having a respectable clientele and providing services all over Pakistan. Shipper wishes to introduce Cash on Delivery + E-fulfillment services to its customers (referred to as consignees) and hereby wish to indulge TRAX Online in regards to this particular venture. TRAX Online in return, is willing to provide services to the Shipper. 
                                     </p>
                                     <h6>Now hereinafter witnesseth on the following terms and conditions:</h6>
                                     <ol>
@@ -36,7 +50,7 @@
                                         <li>This Agreement embodies the entire and final agreement of the Partners with regard to the arrangement and no representations, warranties, agreements, understandings, verbal or otherwise, exist between the Partners except as herein expressly set out.</li>
                                         <li>After the start of every fiscal year 10% increment will be applied on the base fare rates.</li>
                                     </ol>
-                                    <p><strong>IN WITNESS WHEREOF</strong> the parties hereto have duly executed this Agreement this ……………. day of ………………….. 2021, to be effective as of the Original Effective Date.</p>
+                                    <p><strong>IN WITNESS WHEREOF</strong> the parties hereto have duly executed this Agreement this {{ date("l") }} day of {{date("d-m-Y")}}, to be effective as of the Original Effective Date.</p>
                     <form id="agreement-form" class="form form-horizontal" method="post" action="{{route('cod.update.agreement_status')}}">
                         @csrf
                         <div class="form-body">
