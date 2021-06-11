@@ -2723,8 +2723,15 @@ class AdminMasterCargoController extends Controller
                         $consignee_status_id = 22;
                     }
                     else if ($shipment->booking_type_id == 2) {
-                        $shipper_status_id = 27;
-                        $consignee_status_id = 27;
+                        if($shipment->shipper_status_id == 21){
+                            $shipper_status_id = 22;
+                            $consignee_status_id = 22;
+                        }
+                        else{
+                            $shipper_status_id = 27;
+                            $consignee_status_id = 27;
+                        }
+
                     }
                     else if ($shipment->booking_type_id == 3) {
                         $shipper_status_id = 33;
