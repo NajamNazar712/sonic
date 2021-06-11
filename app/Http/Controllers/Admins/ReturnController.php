@@ -1554,10 +1554,16 @@ class ReturnController extends Controller
                             if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                                 ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
-                                $shipment->shipper_status_id = 28;
-                                $shipment->consignee_status_id = 28;
+                                $shipper_status_id = 28;
+                                $consignee_status_id = 28;
+                                if($shipment->shipper_status_id == 22){
+                                    $shipper_status_id = 23;
+                                    $consignee_status_id = 23;
+                                }
+                                $shipment->shipper_status_id = $shipper_status_id;
+                                $shipment->consignee_status_id = $consignee_status_id;
                                 $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 28, 28, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                                ShipmentsJourneyController::add($shipment->id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
 
 
                             } else if ($shipment->booking_type_id == 3) {//attempt failed and arrived at origin center
