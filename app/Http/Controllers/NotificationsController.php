@@ -109,6 +109,7 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
+        
         $notification = Notification::find($id);
 
         if ($notification) {
@@ -118,6 +119,7 @@ class NotificationsController extends Controller
                 }
 
                 $body = $notification->body;
+                
 
                 if ($id == 1) {
                     $fields = ['account_id' => 'id', 'company_name' => 'name', 'email' => 'email', 'person_of_contact' => 'poc', 'phone_no_1' => 'phone', 'phone_no_2' => 'phone2', 'address' => 'address', 'cnic' => 'cnic', 'ntn_no' => 'ntn_no', 'api_token' => 'api_token'];
@@ -7408,7 +7410,6 @@ class NotificationsController extends Controller
                                 }
                                 $to = array_merge($to, $pickup_address->pluck('email')->toArray());
                             }
-                            // $to = array_merge($to, $user->pluck('email')->toArray());
                             $to = array_merge($to, User::where('id', $user->id)->pluck('email')->toArray());
                             self::email($subject, $body, $to);
                         }
