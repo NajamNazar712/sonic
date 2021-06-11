@@ -2174,7 +2174,7 @@ class ReturnController extends Controller
                         if ($parcel->booking_type_id == 2) {
                             $shipper_status_id = 31;
                             $consignee_status_id = 31;
-                            if($parcel->shipper_status_id == 23 || $parcel->shipper_status_id == 24){
+                            if(in_array($parcel->shipper_status_id, [23, 24])){
                                 $shipper_status_id = 25;
                                 $consignee_status_id = 25;
                             }
