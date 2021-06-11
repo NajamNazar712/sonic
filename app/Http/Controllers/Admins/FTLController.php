@@ -7,6 +7,7 @@ use App\Http\Models\Admin\VehicleType;
 use App\Http\Models\City;
 use App\Http\Models\TransportModeVendor;
 use App\Models\Admin\FtlRequest;
+use App\Models\Admin\FtlRequestAdditionalCost;
 use App\Models\Admin\FtlRequestStatus;
 use App\Models\Admin\FtlRequestStatusHistory;
 use App\User;
@@ -119,13 +120,16 @@ class FTLController extends Controller
     public function ftl_request_view($id)
     {
         $ftl = FtlRequest::leftjoin('cities as origin','origin.id','ftl_requests.origin_id')
+            ->leftjoin('zones as z',function ($join){
+                $join->on('z.id','origin.zone_id')
+                    ->where('z.status',1);
+            })
             ->leftjoin('cities as destination','destination.id','ftl_requests.destination_id')
             ->leftjoin('admins as updated_by','updated_by.id','ftl_requests.updated_by')
             ->leftjoin('vehicle_types as vt','vt.id','ftl_requests.vehicle_id')
-            ->leftjoin('transport_mode_vendors as tmv','tmv.id','ftl_requests.vendor_id')
             ->leftjoin('admins as sale_person','sale_person.id','ftl_requests.salesperson_id')
             ->leftjoin('users as shipper','shipper.id','ftl_requests.shipper_id')
-            ->select(['ftl_requests.id as id','origin.name as origin','destination.name as destination','ftl_requests.weight as weight','vt.name as vehicle','ftl_requests.quantity as quantity','ftl_requests.date as date','ftl_requests.status_id as status_id','tmv.name as vendor','ftl_requests.freight_charges as freight_charges','ftl_requests.total_charges as total_charges','ftl_requests.gst as gst','shipper.name as shipper','ftl_requests.shipper_name as shipper_name','sale_person.name as sale_person','ftl_requests.shipper_id as shipper_id'])
+            ->select(['ftl_requests.id as id','origin.name as origin','destination.name as destination','ftl_requests.weight as weight','vt.name as vehicle','ftl_requests.quantity as quantity','ftl_requests.date as date','ftl_requests.status_id as status_id','ftl_requests.vendor_id as vendor_id','ftl_requests.freight_charges as freight_charges','ftl_requests.total_charges as total_charges','ftl_requests.gst as gst','shipper.name as shipper','ftl_requests.shipper_name as shipper_name','sale_person.name as sale_person','ftl_requests.shipper_id as shipper_id','ftl_requests.freight_cost as freight_cost','z.gst as gst'])
             ->where('ftl_requests.id',$id);
        if($ftl->doesntExist())
        {
@@ -135,8 +139,9 @@ class FTLController extends Controller
        $ftl = $ftl->first();
        $ftl_status_history = FtlRequestStatusHistory::leftjoin('admins as updated_by','updated_by.id','ftl_request_status_histories.updated_by')
            ->leftjoin('ftl_request_statuses as frs','frs.id','ftl_request_status_histories.status_id')
-           ->select(['frs.status as status','updated_by.name as admin','ftl_request_status_histories.updated_at as updated_at'])
+           ->select(['frs.status as status','updated_by.name as admin','ftl_request_status_histories.created_at as updated_at'])
            ->where('ftl_request_id',$id)
+           ->orderBy('updated_at','asc')
            ->get();
 
         $shippers = User::leftjoin('sale_person_tags as spt',function ($join){
@@ -150,7 +155,9 @@ class FTLController extends Controller
 
         $vendors = TransportModeVendor::get(['id','name']);
 
-       return view('admin.ftl.request.view',compact('ftl','ftl_status_history','shippers','sale_persons','vendors'));
+        $ftl_costs = FtlRequestAdditionalCost::where('ftl_request_id',$ftl->id)->get(['amount','cost_type']);
+
+       return view('admin.ftl.request.view',compact('ftl','ftl_status_history','shippers','sale_persons','vendors','ftl_costs'));
     }
 
      public function ftl_request_update_shipper($id,Request $request)
@@ -164,6 +171,76 @@ class FTLController extends Controller
         $ftl->salesperson_id = $request->sale_person;
         $ftl->update();
         return back()->with(['success'=>'Shipper Updated Successfully']);
+     }
+
+     public function ftl_request_update_status($id,Request $request)
+     {
+//        return $request;
+        if($request->btn == "Update")
+        {
+            $ftl = FtlRequest::find($id);
+            if(!$ftl)
+            {
+                return back()->with(['error'=>'Invalid FTL Request']);
+            }
+
+            if($request->has('other_cost') && $request->has('other_cost_type'))
+            {
+                $ftl->additional_cost()->delete();
+                $other_cost_count = count($request->other_cost);
+                for($i = 0; $i < $other_cost_count; $i++)
+                {
+                    $cost = new FtlRequestAdditionalCost();
+                    $cost->ftl_request_id = $ftl->id;
+                    $cost->amount = $request->other_cost[$i];
+                    $cost->cost_type = $request->other_cost_type[$i];
+                    $cost->save();
+                }
+            }
+            $ftl->vendor_id = $request->vendor;
+            $ftl->freight_cost = $request->freight_cost;
+            $ftl->freight_charges = $request->freight_charges;
+            $ftl->gst = $request->gst;
+            $ftl->total_charges = $request->total_charges;
+
+            if($request->freight_charges > 0)
+            {
+                $ftl->status_id = 2;
+                $this::FTLRequestStatusHistory($ftl->id,2,Auth::id());
+            }
+
+            $ftl->update();
+            return back()->with(['success'=>'FTL Request Updated Successfully']);
+        }
+        else if($request->btn == "Approve")
+        {
+            $ftl = FtlRequest::find($id);
+            if(!$ftl)
+            {
+                return back()->with(['error'=>'Invalid FTL Request']);
+            }
+
+            $ftl->status_id = 3;
+            $ftl->update();
+            $this::FTLRequestStatusHistory($ftl->id,3,Auth::id());
+            return back()->with(['success'=>'FTL Request Approved Successfully']);
+        }
+        else if($request->btn == "Reject")
+        {
+            $ftl = FtlRequest::find($id);
+            if(!$ftl)
+            {
+                return back()->with(['error'=>'Invalid FTL Request']);
+            }
+
+            $ftl->status_id = 4;
+            $ftl->update();
+            $this::FTLRequestStatusHistory($ftl->id,4,Auth::id());
+            return back()->with(['success'=>'FTL Request Rejected Successfully']);
+        }
+        else{
+            return back()->with(['error'=>'Invalid Action']);
+        }
      }
 
     static public function FTLRequestStatusHistory($request_id,$status_id,$user_id)

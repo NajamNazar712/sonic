@@ -78,10 +78,11 @@
                                         </table>
                                         <div class="row border-accent-2 justify-content-center">
                                             <div class="text-center col-12">
-                                                <form id="update_ftl_request_form" method="post" action="">
+                                                <form id="update_ftl_request_form" method="post" action="{{route('admin.ftl.request.update.status',$ftl->id)}}">
                                                     @csrf
                                                     <div class="row mb-2">
                                                             <div class="col-6">
+                                                                <label for="" class="pull-left font-weight-bold">Select Vendor</label>
                                                                 <select name="vendor" id="vendor" class="form-control select2" data-rule-required="true" data-msg-required="Vendor is required">
                                                                     @foreach($vendors as $vendor)
                                                                         <option value="{{$vendor->id}}"> {{$vendor->name}} </option>
@@ -89,7 +90,8 @@
                                                                 </select>
                                                             </div>
                                                             <div class="col-6">
-                                                                <input type="text" name="freight_cost" id="freight_cost" class="form-control" placeholder="Freight Cost">
+                                                                <label for="freight_cost" class="pull-left font-weight-bold">Freight Cost</label>
+                                                                <input type="text" name="freight_cost" id="freight_cost" value="{{$ftl->freight_cost}}" class="form-control to_calc_total_cost" placeholder="Freight Cost" data-rule-required="true" data-msg-required="Freight Cost is required" data-rule-min="0.1" data-msg-min="Freight Cost can not be less than 0.1">
                                                             </div>
                                                     </div>
                                                     <div class="row mb-2">
@@ -100,16 +102,17 @@
                                                             <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">
                                                         </div>
                                                         <div class="col-2">
-                                                            <button type="button" class="btn btn-info"><i class="fa fa-plus-circle"></i>Add</button>
+                                                            <button type="button" id="add_other_cost" class="btn btn-info"><i class="fa fa-plus-circle"></i>Add</button>
                                                         </div>
                                                     </div>
                                                     <div class="row mb-2">
                                                        <div class="col-8 offset-2">
-                                                            <table class="table table-bordered table-lg">
+                                                            <table class="table table-bordered table-lg" id="cost_table">
                                                                 <thead>
                                                                     <tr>
                                                                         <th>Amount</th>
                                                                         <th>Cost Type</th>
+                                                                        <th>Action</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -119,17 +122,21 @@
                                                     </div>
                                                     <div class="row mb-2">
                                                         <div class="col-6">
+                                                            <label for="" class="pull-left font-weight-bold">Total Cost</label>
                                                             <input type="text" readonly name="total_cost" class="form-control" id="total_cost" placeholder="Total Cost">
                                                         </div>
                                                         <div class="col-6">
-                                                            <input type="text" name="freight_charges" id="freight_charges" class="form-control" placeholder="Freight Charges">
+                                                            <label for="freight_charges" class="pull-left font-weight-bold">Freigt Charges</label>
+                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{$ftl->freight_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges">
                                                         </div>
                                                     </div>
                                                     <div class="row mb-2">
                                                         <div class="col-6">
+                                                            <label for="" class="pull-left font-weight-bold">GST</label>
                                                             <input type="text" name="gst" readonly class="form-control" id="gst" placeholder="GST">
                                                         </div>
                                                         <div class="col-6">
+                                                            <label for="" class="pull-left font-weight-bold">Total Charges</label>
                                                             <input type="text" readonly name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges">
                                                         </div>
                                                     </div>
@@ -608,302 +615,125 @@
                 allowClear: true,
                 dropdownParent: $('#EditShipperModal')
             });
+
+            $('#update_ftl_request_form #vendor').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Select Vendor',
+                width: '100%',
+                allowClear: true,
+            });
+
+            $('#update_ftl_request_form #freight_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+            });
+
+            $('#update_ftl_request_form #other_cost').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+            });
+
+            $('#update_ftl_request_form #freight_charges').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+                'min': 0.00,
+            });
+
+            $("#update_ftl_request_form").validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.col-6'));
+                },
+            });
+
+            $("#update_ftl_request_form #add_other_cost").on('click',function (){
+                var other_cost = $('#update_ftl_request_form #other_cost').val();
+                var other_cost_type = $('#update_ftl_request_form #other_cost_type').val();
+                if(other_cost != '' && other_cost_type != '') {
+                    add_cost(other_cost,other_cost_type);
+                    calc_total_cost();
+                }
+            });
+
+            $(document).on('click',"#update_ftl_request_form #cost_table tbody .remove_cost",function (){
+                $(this).closest("tr").remove();
+                calc_total_cost();
+            });
+
+            $("#update_ftl_request_form #freight_cost").on('keyup',function (){
+                calc_total_cost();
+            });
+
+            $("#update_ftl_request_form #freight_charges").on('keyup',function (){
+               calc_gst();
+            });
+
+            @if($ftl->vendor_id != null)
+                $("#update_ftl_request_form #vendor").val("{{$ftl->vendor_id}}").trigger('change');
+            @endif
+
+            @foreach($ftl_costs as $ftl_cost)
+            add_cost("{{$ftl_cost->amount}}","{{$ftl_cost->cost_type}}");
+            @endforeach
+
+            calc_total_cost();
+
+            calc_gst();
+
+            function add_cost(other_cost,other_cost_type)
+            {
+                var html = "<tr>" +
+                    "<td>" + other_cost + "<input type='hidden' name='other_cost[]' value='"+other_cost+"' class='to_calc_total_cost'> </td>" +
+                    "<td>" + other_cost_type + "<input type='hidden' name='other_cost_type[]' value='"+other_cost_type+"'></td>" +
+                    "<td><button type='button' class='btn btn-danger btn-sm remove_cost'><i class='la la-close'></i></button></td>" +
+                    "</tr>";
+
+                $("#update_ftl_request_form #cost_table tbody").append(html);
+                $('#update_ftl_request_form #other_cost').val('');
+                $('#update_ftl_request_form #other_cost_type').val('');
+            }
+
+            function calc_total_cost()
+            {
+                var total_cost = 0;
+                $(".to_calc_total_cost").each(function (){
+                    if(!Number.isNaN(parseFloat($(this).val()))) {
+                        total_cost += parseFloat($(this).val());
+                    }
+                });
+                $("#update_ftl_request_form #total_cost").val(total_cost);
+            }
+
+            function calc_gst()
+            {
+                var gst = "{{$ftl->gst ?? 0}}";
+                var freight_charges = parseFloat($("#update_ftl_request_form #freight_charges").val());
+                if(Number.isNaN(freight_charges))
+                {
+                    freight_charges = 0;
+                }
+                var gst_calc = gst * freight_charges;
+                $("#update_ftl_request_form #gst").val(gst_calc);
+                cal_total_charges(gst_calc,freight_charges);
+            }
+
+            function cal_total_charges(gst,freight_charges)
+            {
+                $("#update_ftl_request_form #total_charges").val(gst + freight_charges);
+            }
+
         });
-            // $('#claim_product_cost').inputmask({
-            //     'alias': 'decimal',
-            //     'allowMinus': false,
-            //     'allowPlus': false,
-            //     'rightAlign': false,
-            //     'digits': 2,
-            //     'min': 0.00,
-            //     'max': 1000000.00
-            // });
-
-            {{--$('#valid').on('click', function (e) {--}}
-            {{--e.preventDefault();--}}
-            {{--$.ajax({--}}
-            {{--url: '{!! route('admin.crm.valid') !!}',--}}
-            {{--method: 'POST',--}}
-            {{--data: {--}}
-            {{--'_token': '{{ csrf_token() }}',--}}
-            {{--'id': $('#req_id').val(),--}}
-            {{--'prev_status' : $('#prev_status').val()--}}
-            {{--}--}}
-            {{--})--}}
-            {{--.done(function(data) {--}}
-            {{--if (data.status == 0) {--}}
-            {{--toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-            {{--}--}}
-            {{--else {--}}
-            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--});--}}
-            {{--});--}}
-
-            {{--$('#invalid').on('click', function (e) {--}}
-            {{--e.preventDefault();--}}
-            {{--$.ajax({--}}
-            {{--url: '{!! route('admin.crm.invalid') !!}',--}}
-            {{--method: 'POST',--}}
-            {{--data: {--}}
-            {{--'_token': '{{ csrf_token() }}',--}}
-            {{--'id': $('#req_id').val(),--}}
-            {{--'prev_status' : $('#prev_status').val()--}}
-            {{--}--}}
-            {{--})--}}
-            {{--.done(function(data) {--}}
-            {{--if (data.status == 0) {--}}
-            {{--toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--else {--}}
-            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--});--}}
-            {{--});--}}
-        {{--    $('.tracking_number').inputmask({--}}
-        {{--        'alias': 'integer',--}}
-        {{--        'allowMinus': false,--}}
-        {{--        'allowPlus': false,--}}
-        {{--        dropdownParent:$('#edit_request_form')--}}
-        {{--    });--}}
-        {{--    $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({--}}
-        {{--        width:'100%',--}}
-        {{--        placeholder:"Select Case Nature",--}}
-        {{--        allowClear:true,--}}
-        {{--        dropdownParent:$('#edit_request_form')--}}
-        {{--    }).bind('change', function () {--}}
-        {{--        var id = parseInt($(this).val());--}}
-        {{--        if(id === 1){--}}
-        {{--            $('#request_service').addClass('d-none');--}}
-        {{--            $('#request_complaints').removeClass('d-none');--}}
-        {{--            $('#description_div').removeClass('d-none');--}}
-        {{--            $('#request_feedback').addClass('d-none');--}}
-        {{--            $('#editRequest').removeClass('d-none');--}}
-        {{--            $('#request_claims').addClass('d-none');--}}
-        {{--        }else if(id === 2){--}}
-        {{--            $('#request_complaints').addClass('d-none');--}}
-        {{--            $('#request_service').removeClass('d-none');--}}
-        {{--            $('#description_div').removeClass('d-none');--}}
-        {{--            $('#request_feedback').addClass('d-none');--}}
-        {{--            $('#editRequest').removeClass('d-none');--}}
-        {{--            $('#request_claims').addClass('d-none');--}}
-        {{--        } else if(id === 4){--}}
-        {{--            $('#request_complaints').addClass('d-none');--}}
-        {{--            $('#request_service').addClass('d-none');--}}
-        {{--            $('#request_feedback').addClass('d-none');--}}
-        {{--            $('#request_claims').removeClass('d-none');--}}
-        {{--            $('#description_div').addClass('d-none');--}}
-        {{--            $('#editRequest').removeClass('d-none');--}}
-        {{--        }else{--}}
-        {{--            $('#request_complaints').addClass('d-none');--}}
-        {{--            $('#request_service').addClass('d-none');--}}
-        {{--            $('#description_div').addClass('d-none');--}}
-        {{--            $('#editRequest').addClass('d-none');--}}
-        {{--        }--}}
-        {{--    });$('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({--}}
-        {{--        width:'100%',--}}
-        {{--        placeholder:"Select Complaint Type",--}}
-        {{--        allowClear:true,--}}
-        {{--        dropdownParent:$('#edit_request_form')--}}
-        {{--    });--}}
-        {{--    $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({--}}
-        {{--        width:'100%',--}}
-        {{--        placeholder:"Select Claim Type",--}}
-        {{--        allowClear:true,--}}
-        {{--        dropdownParent:$('#edit_request_form')--}}
-        {{--    });--}}
-        {{--    $('#case_nature_requests').prepend('<option value="" selected="selected"></option>').select2({--}}
-        {{--        width:'100%',--}}
-        {{--        placeholder:"Select Request Type",--}}
-        {{--        allowClear:true,--}}
-        {{--        dropdownParent:$('#edit_request_form')--}}
-        {{--    });--}}
-        {{--    $('#edit_request').on('click', function(){--}}
-        {{--        @if (isset($crm_details->shipment->tracking_number))--}}
-        {{--        var tracking_no = @json($crm_details->shipment->tracking_number);--}}
-        {{--        $('.tracking_number').val(tracking_no);--}}
-        {{--        $('.tracking_number').attr('disabled', true);--}}
-        {{--        @endif--}}
-
-        {{--        $('#editRequestModal').modal('show');--}}
-        {{--    });--}}
-        {{--    $("#tag_admin").prepend('<option value="" selected></option>').select2({--}}
-        {{--        placeholder: "Select User",--}}
-        {{--        width: '100%',--}}
-        {{--        dropdownParent: $('#tagModal')--}}
-        {{--    });--}}
-
-        {{--    $("#tag_department").prepend('<option value="" selected></option>').select2({--}}
-        {{--        placeholder: "Select Department",--}}
-        {{--        width: '100%',--}}
-        {{--        dropdownParent: $('#tagModal')--}}
-        {{--    });--}}
-
-        {{--    $("#tag_hub").prepend('<option value="" selected></option>').select2({--}}
-        {{--        placeholder: "Select Hub",--}}
-        {{--        width: '100%',--}}
-        {{--        dropdownParent: $('#tagModal')--}}
-        {{--    });--}}
-
-        {{--    $("#tag_type").prepend('<option value="" selected></option>').select2({--}}
-        {{--        placeholder: "Select Type",--}}
-        {{--        width: '100%',--}}
-        {{--        dropdownParent: $('#tagModal')--}}
-        {{--    }).bind('change', function () {--}}
-        {{--        var id = parseInt($(this).val());--}}
-        {{--        if (id === 1) {--}}
-        {{--            $('#admin_tag_div').addClass('d-none');--}}
-        {{--            $('#department_tag_div').removeClass('d-none');--}}
-        {{--        } else if (id === 2) {--}}
-        {{--            $('#department_tag_div').addClass('d-none');--}}
-        {{--            $('#admin_tag_div').removeClass('d-none');--}}
-        {{--        } else {--}}
-        {{--            $('#admin_tag_div').addClass('d-none');--}}
-        {{--            $('#department_tag_div').addClass('d-none');--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--    $('#tag').on('click', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--        $('#tagModal').modal('show');--}}
-        {{--    });--}}
-        {{--    $('#un_tag').on('click', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--        swal({--}}
-        {{--            text: 'Are you sure, you want to un tag this Request?',--}}
-        {{--            icon: 'info',--}}
-        {{--            buttons: {--}}
-        {{--                cancel: {--}}
-        {{--                    text: 'No',--}}
-        {{--                    value: null,--}}
-        {{--                    visible: true,--}}
-        {{--                    closeModal: true,--}}
-        {{--                },--}}
-        {{--                confirm: {--}}
-        {{--                    text: 'Yes',--}}
-        {{--                    value: true,--}}
-        {{--                    visible: true,--}}
-        {{--                    closeModal: true--}}
-        {{--                }--}}
-        {{--            },--}}
-        {{--            closeOnClickOutside: false,--}}
-        {{--            closeOnEsc: false,--}}
-        {{--            dangerMode: true--}}
-        {{--        }).then(function(confirm) {--}}
-        {{--            if(confirm){--}}
-        {{--                swal({--}}
-        {{--                    title: 'Please Wait!',--}}
-        {{--                    text: 'Request is being un tagged.',--}}
-        {{--                    icon: 'info',--}}
-        {{--                    buttons: false,--}}
-        {{--                    closeOnClickOutside: false,--}}
-        {{--                    closeOnEsc: false--}}
-        {{--                });--}}
-        {{--                $.ajax({--}}
-        {{--                    url: '{!! route('admin.crm.in_process.un_tag') !!}',--}}
-        {{--                    method: 'POST',--}}
-        {{--                    data: {--}}
-        {{--                        'multiple': 0,--}}
-        {{--                        'crm_request_id': $('#crm_request_id').val(),--}}
-        {{--                        '_token': '{{ csrf_token() }}'--}}
-        {{--                    }--}}
-        {{--                })--}}
-        {{--                    .done(function (data) {--}}
-        {{--                        if (data.status == 0) {--}}
-        {{--                            toastr.success(data.success, 'Success!', {--}}
-        {{--                                positionClass: 'toast-bottom-center',--}}
-        {{--                                containerId: 'toast-bottom-center'--}}
-        {{--                            });--}}
-        {{--                            setTimeout(function () {--}}
-        {{--                                window.location.reload();--}}
-        {{--                            }, 2000);--}}
-        {{--                        }--}}
-        {{--                        else {--}}
-        {{--                            toastr.error(data.error, 'Error!', {--}}
-        {{--                                positionClass: 'toast-top-center',--}}
-        {{--                                containerId: 'toast-top-center'--}}
-        {{--                            });--}}
-        {{--                        }--}}
-        {{--                        swal.close();--}}
-        {{--                    });--}}
-        {{--            }--}}
-        {{--        });--}}
-        {{--    });--}}
-        {{--    $('#tagModal').on('hide.bs.modal', function (e) {--}}
-        {{--        $('#tag_type').val('').trigger('change');--}}
-        {{--        $('#admin_tag_div').addClass('d-none');--}}
-        {{--        $('#department_tag_div').addClass('d-none');--}}
-        {{--    });--}}
-        {{--    $('#tag_adminSubmit').on('click', function () {--}}
-        {{--        var type = parseInt($('#tag_type').val());--}}
-        {{--        var tag_hub = null;--}}
-        {{--        if (type === 1) {--}}
-        {{--            var tag = parseInt($('#tag_department').val());--}}
-        {{--            tag_hub = parseInt($('#tag_hub').val());--}}
-        {{--            if(!tag_hub){--}}
-        {{--                tag_hub = null;--}}
-        {{--            }--}}
-        {{--        }--}}
-        {{--        else if (type === 2) {--}}
-        {{--            var tag = parseInt($('#tag_admin').val());--}}
-        {{--        }--}}
-        {{--        if (tag) {--}}
-        {{--            $('#tag_adminSubmit').attr('disabled', true);--}}
-        {{--            swal({--}}
-        {{--                title: 'Please Wait!',--}}
-        {{--                text: 'Request is being tagged.',--}}
-        {{--                icon: 'info',--}}
-        {{--                buttons: false,--}}
-        {{--                closeOnClickOutside: false,--}}
-        {{--                closeOnEsc: false--}}
-        {{--            });--}}
-        {{--            $.ajax({--}}
-        {{--                url: '{!! route('admin.crm.tag') !!}',--}}
-        {{--                method: 'POST',--}}
-        {{--                data: {--}}
-        {{--                    'tagged_id': tag,--}}
-        {{--                    'tagged_hub': tag_hub,--}}
-        {{--                    'crm_request_id': $('#crm_request_id').val(),--}}
-        {{--                    'prev_status': $('#prev_status').val(),--}}
-        {{--                    'crm_request_tagging_type_id': type,--}}
-        {{--                    '_token': '{{ csrf_token() }}'--}}
-        {{--                }--}}
-        {{--            })--}}
-        {{--                .done(function (data) {--}}
-        {{--                    if (data.status == 0) {--}}
-        {{--                        $('#tagModal').modal('hide');--}}
-        {{--                        toastr.success(data.success, 'Success!', {--}}
-        {{--                            positionClass: 'toast-bottom-center',--}}
-        {{--                            containerId: 'toast-bottom-center'--}}
-        {{--                        });--}}
-        {{--                        setTimeout(function () {--}}
-        {{--                            window.location.reload();--}}
-        {{--                        }, 2000);--}}
-        {{--                    }--}}
-        {{--                    else {--}}
-        {{--                        toastr.error(data.error, 'Error!', {--}}
-        {{--                            positionClass: 'toast-top-center',--}}
-        {{--                            containerId: 'toast-top-center'--}}
-        {{--                        });--}}
-        {{--                    }--}}
-        {{--                    swal.close();--}}
-        {{--                    $('#tag_adminSubmit').attr('disabled', false);--}}
-        {{--                });--}}
-        {{--        }--}}
-        {{--        else {--}}
-        {{--            if (type === 1) {--}}
-        {{--                var error = "Department Not Selected!";--}}
-        {{--            }--}}
-        {{--            else if (type === 2) {--}}
-        {{--                var error = "User Not Selected!";--}}
-        {{--            }--}}
-        {{--            else {--}}
-        {{--                error = "Type Not Selected!";--}}
-        {{--            }--}}
-        {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--        }--}}
-
-        {{--    });--}}
 
         {{--    $('#chat_form').on('submit', function (e) {--}}
         {{--        e.preventDefault();--}}
@@ -1115,328 +945,7 @@
         {{--    }--}}
 
         {{--    updateScroll();--}}
-        {{--    $( "#edit_request_form" ).bind('submit', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--        var case_nature_id = parseInt($('#case_nature_select').val());--}}
-        {{--        var tracking_number = $('.tracking_number').val();--}}
-        {{--        var nature_flag = true;--}}
-        {{--        if(case_nature_id === 1 || case_nature_id === 2){--}}
-        {{--            if(case_nature_id === 1) {--}}
-        {{--                var case_nature_complaint_id = $('#case_nature_complaints').val();--}}
-        {{--                var description = $('#description').val();--}}
-        {{--                if (!case_nature_complaint_id) {--}}
-        {{--                    nature_flag = false;--}}
-        {{--                    var error = "Please select Complaint type!";--}}
-        {{--                    toastr.error(error, 'Error!', {--}}
-        {{--                        positionClass: 'toast-top-center',--}}
-        {{--                        containerId: 'toast-top-center'--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--                if (!description) {--}}
-        {{--                    nature_flag = false;--}}
-        {{--                    var error = "Please Enter Description!";--}}
-        {{--                    toastr.error(error, 'Error!', {--}}
-        {{--                        positionClass: 'toast-top-center',--}}
-        {{--                        containerId: 'toast-top-center'--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--                if(!tracking_number){--}}
-        {{--                    nature_flag = false;--}}
-        {{--                    var error = "Tracking Number Required!";--}}
-        {{--                    toastr.error(error, 'Error!', {--}}
-        {{--                        positionClass: 'toast-top-center',--}}
-        {{--                        containerId: 'toast-top-center'--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--            }--}}
-        {{--            else if(case_nature_id === 2){--}}
-        {{--                var case_nature_complaint_id = $('#case_nature_requests').val();--}}
-        {{--                var description = $('#description').val();--}}
-        {{--                if(!case_nature_complaint_id){--}}
-        {{--                    nature_flag = false;--}}
-        {{--                    var error = "Please select Request type!";--}}
-        {{--                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                }--}}
-        {{--                if (!description) {--}}
-        {{--                    nature_flag = false;--}}
-        {{--                    var error = "Please Enter Description!";--}}
-        {{--                    toastr.error(error, 'Error!', {--}}
-        {{--                        positionClass: 'toast-top-center',--}}
-        {{--                        containerId: 'toast-top-center'--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--                if(!tracking_number){--}}
-        {{--                    nature_flag = false;--}}
-        {{--                    var error = "Tracking Number Required!";--}}
-        {{--                    toastr.error(error, 'Error!', {--}}
-        {{--                        positionClass: 'toast-top-center',--}}
-        {{--                        containerId: 'toast-top-center'--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--            }--}}
-        {{--            if(nature_flag){--}}
-        {{--                $('#editRequest').attr('disabled',true);--}}
-        {{--                $.ajax({--}}
-        {{--                    url: '{!! route('admin.crm.request.edit') !!}',--}}
-        {{--                    method: 'POST',--}}
-        {{--                    data: {--}}
-        {{--                        '_token': '{{ csrf_token() }}',--}}
-        {{--                        'tracking_number': $('.tracking_number').val(),--}}
-        {{--                        'request_id': $('#request_id').val(),--}}
-        {{--                        'case_nature_id' : case_nature_id,--}}
-        {{--                        'complaint_id' : case_nature_complaint_id,--}}
-        {{--                        'description' : description--}}
-        {{--                    }--}}
-        {{--                })--}}
-        {{--                    .done(function(data) {--}}
-        {{--                        if(data.status == 0){--}}
-        {{--                            toastr.success(data.success, 'Success!', {--}}
-        {{--                                positionClass: 'toast-bottom-center',--}}
-        {{--                                containerId: 'toast-bottom-center'--}}
-        {{--                            });--}}
-        {{--                            setTimeout(function(){--}}
-        {{--                                window.location.reload(1);--}}
-        {{--                            }, 1500);--}}
-        {{--                        }--}}
-        {{--                        else {--}}
-        {{--                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                        }--}}
-
-        {{--                        $('#editRequestModal').modal('hide');--}}
-        {{--                        $('#editRequest').attr('disabled',false);--}}
-        {{--                    });--}}
-        {{--            }--}}
-        {{--        }--}}
-        {{--        else if(case_nature_id === 4){--}}
-        {{--            var nature_flag = true;--}}
-        {{--            var case_nature_claim_id = $('#case_nature_claim').val();--}}
-        {{--            var product_cost = $('#claim_product_cost').val();--}}
-        {{--            var check_product_picture = $('#product_picture').val();--}}
-        {{--            var check_invoice_picture = $('#invoice_picture').val();--}}
-        {{--            $('#tracking_number').val(tracking_number);--}}
-        {{--            // $('#case_nature_id').val(case_nature_id);--}}
-        {{--            // $('#complaint_id').val(case_nature_claim_id);--}}
-        {{--            var formData = new FormData($('#edit_request_form')[0]);--}}
-        {{--            if(!case_nature_claim_id){--}}
-        {{--                nature_flag = false;--}}
-        {{--                var error = "Please select Claim type!";--}}
-        {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--            }--}}
-        {{--            if(!check_product_picture){--}}
-        {{--                nature_flag = false;--}}
-        {{--                var error = "Please attach Product Picture!";--}}
-        {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--            }--}}
-        {{--            if(!product_cost){--}}
-        {{--                nature_flag = false;--}}
-        {{--                var error = "Please enter Product Cost!";--}}
-        {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--            }--}}
-        {{--            if(!check_invoice_picture){--}}
-        {{--                nature_flag = false;--}}
-        {{--                var error = "Please attach Invoice Picture!";--}}
-        {{--                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--            }--}}
-        {{--            if(!tracking_number){--}}
-        {{--                nature_flag = false;--}}
-        {{--                var error = "Tracking Number Required!";--}}
-        {{--                toastr.error(error, 'Error!', {--}}
-        {{--                    positionClass: 'toast-top-center',--}}
-        {{--                    containerId: 'toast-top-center'--}}
-        {{--                });--}}
-        {{--            }--}}
-        {{--            if(nature_flag){--}}
-        {{--                $('#editRequestModal').attr('disabled',true);--}}
-        {{--                $.ajax({--}}
-        {{--                    url: '{!! route('admin.crm.request.edit') !!}',--}}
-        {{--                    method: 'POST',--}}
-        {{--                    enctype: 'multipart/form-data',--}}
-        {{--                    data: formData,--}}
-        {{--                    dataType: 'json',--}}
-        {{--                    processData: false,--}}
-        {{--                    contentType: false,--}}
-        {{--                })--}}
-        {{--                    .done(function(data) {--}}
-        {{--                        if(data.status == 0){--}}
-        {{--                            toastr.success(data.success, 'Success!', {--}}
-        {{--                                positionClass: 'toast-bottom-center',--}}
-        {{--                                containerId: 'toast-bottom-center'--}}
-        {{--                            });--}}
-        {{--                            setTimeout(function(){--}}
-        {{--                                window.location.reload(1);--}}
-        {{--                            }, 1500);--}}
-        {{--                        }--}}
-        {{--                        else {--}}
-        {{--                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                        }--}}
-        {{--                        $('#editRequestModal').modal('hide');--}}
-        {{--                        $('#editRequest').attr('disabled',false);--}}
-        {{--                    });--}}
-        {{--            }--}}
-
-        {{--        }--}}
-        {{--    });--}}
-        {{--    $('#editRequestModal').on('hide.bs.modal', function (e) {--}}
-        {{--        $('#edit_request_form')[0].reset();--}}
-        {{--        $('#case_nature_complaints').val('').trigger('change');--}}
-        {{--        $('#case_nature_select').val('').trigger('change');--}}
-        {{--        $('#case_nature_requests').val('').trigger('change');--}}
-        {{--        $('.tracking_number').val('');--}}
-        {{--        $('#request_complaints').addClass('d-none');--}}
-        {{--        $('#request_service').addClass('d-none');--}}
-        {{--        $('#description_div').addClass('d-none');--}}
-        {{--        $('#request_claims').addClass('d-none');--}}
-        {{--        $('#case_nature_claim').val('').trigger('change');--}}
-        {{--        $('#claim_channel').val('').trigger('change');--}}
-        {{--        $('#claim_product_cost').val('');--}}
-        {{--    });--}}
-
-        {{--    $("#crm_escalation_level").prepend('<option value="" selected></option>').select2({--}}
-        {{--        placeholder: "Select Escalation",--}}
-        {{--        width: '100%',--}}
-        {{--        dropdownParent: $('#escalateModal')--}}
-        {{--    });--}}
-        {{--    $('#halt_start_escalation').on('click', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--        var request_id = @json($crm_details->id);--}}
-        {{--        var status = $(this).val();--}}
-        {{--        if(status == 0){--}}
-        {{--            var status_text = 'Halt';--}}
-        {{--        }--}}
-        {{--        else{--}}
-        {{--            var status_text = 'Start';--}}
-        {{--        }--}}
-        {{--        swal({--}}
-        {{--            text: 'Are you sure, you want to '+status_text+' Escalation of this Request?',--}}
-        {{--            icon: 'warning',--}}
-        {{--            buttons: {--}}
-        {{--                cancel: {--}}
-        {{--                    text: 'No',--}}
-        {{--                    value: null,--}}
-        {{--                    visible: true,--}}
-        {{--                    closeModal: true,--}}
-        {{--                },--}}
-        {{--                confirm: {--}}
-        {{--                    text: 'Yes',--}}
-        {{--                    value: true,--}}
-        {{--                    visible: true,--}}
-        {{--                    closeModal: true--}}
-        {{--                }--}}
-        {{--            },--}}
-        {{--            closeOnClickOutside: false,--}}
-        {{--            closeOnEsc: false,--}}
-        {{--            dangerMode: true--}}
-        {{--        }).then(function(confirm) {--}}
-        {{--            if (confirm) {--}}
-        {{--                $.ajax({--}}
-        {{--                    url: '{!! route('admin.crm.escalation_status') !!}',--}}
-        {{--                    method: 'POST',--}}
-        {{--                    data: {--}}
-        {{--                        'crm_request_id': request_id,--}}
-        {{--                        'status': status,--}}
-        {{--                        '_token': '{{ csrf_token() }}'--}}
-        {{--                    }--}}
-        {{--                })--}}
-        {{--                    .done(function(data) {--}}
-        {{--                        if (data.status == 0) {--}}
-        {{--                            toastr.success(data.success, 'Success!', {--}}
-        {{--                                positionClass: 'toast-bottom-center',--}}
-        {{--                                containerId: 'toast-bottom-center'--}}
-        {{--                            });--}}
-        {{--                            setTimeout(function(){--}}
-        {{--                                window.location.reload(1);--}}
-        {{--                            }, 1500);--}}
-        {{--                        }--}}
-        {{--                        else {--}}
-        {{--                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                        }--}}
-        {{--                    });--}}
-        {{--            }--}}
-        {{--        });--}}
-        {{--    });--}}
-        {{--    $('#escalate').on('click', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--        $('#escalateModal').modal('show');--}}
-        {{--    });--}}
-        {{--    $('#escalateSubmit').on('click', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--        var crm_request_id = $('#escalate_crm_request_id').val();--}}
-        {{--        var escalation_tagging_id = $('#escalation_tagging_id').val();--}}
-        {{--        var selected_escalation = $('#crm_escalation_level').val();--}}
-        {{--        var flag = true;--}}
-        {{--        if(selected_escalation == null || selected_escalation == ''){--}}
-        {{--            var error = "Please select Escalation";--}}
-        {{--            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--            flag = false--}}
-        {{--        }--}}
-        {{--        if(flag == true){--}}
-        {{--            swal({--}}
-        {{--                text: 'Are you sure, you want to Escalate this Request?',--}}
-        {{--                icon: 'warning',--}}
-        {{--                buttons: {--}}
-        {{--                    cancel: {--}}
-        {{--                        text: 'No',--}}
-        {{--                        value: null,--}}
-        {{--                        visible: true,--}}
-        {{--                        closeModal: true,--}}
-        {{--                    },--}}
-        {{--                    confirm: {--}}
-        {{--                        text: 'Yes',--}}
-        {{--                        value: true,--}}
-        {{--                        visible: true,--}}
-        {{--                        closeModal: true--}}
-        {{--                    }--}}
-        {{--                },--}}
-        {{--                closeOnClickOutside: false,--}}
-        {{--                closeOnEsc: false,--}}
-        {{--                dangerMode: true--}}
-        {{--            }).then(function(confirm) {--}}
-        {{--                if (confirm){--}}
-        {{--                    swal({--}}
-        {{--                        title: 'Please Wait!',--}}
-        {{--                        text: 'Escalation is in process!',--}}
-        {{--                        icon: 'info',--}}
-        {{--                        buttons: false,--}}
-        {{--                        closeOnClickOutside: false,--}}
-        {{--                        closeOnEsc: false--}}
-        {{--                    });--}}
-        {{--                    $.ajax({--}}
-        {{--                        url: '{!! route('admin.crm.escalate') !!}',--}}
-        {{--                        method: 'POST',--}}
-        {{--                        data: {--}}
-        {{--                            'crm_request_id': crm_request_id,--}}
-        {{--                            'escalation_tagging_id': escalation_tagging_id,--}}
-        {{--                            'selected_escalation': selected_escalation,--}}
-        {{--                            '_token': '{{ csrf_token() }}'--}}
-        {{--                        }--}}
-        {{--                    })--}}
-        {{--                        .done(function(data) {--}}
-        {{--                            if (data.status == 0) {--}}
-        {{--                                toastr.success(data.success, 'Success!', {--}}
-        {{--                                    positionClass: 'toast-bottom-center',--}}
-        {{--                                    containerId: 'toast-bottom-center'--}}
-        {{--                                });--}}
-        {{--                                setTimeout(function(){--}}
-        {{--                                    window.location.reload(1);--}}
-        {{--                                }, 1500);--}}
-        {{--                            }--}}
-        {{--                            else {--}}
-        {{--                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                            }--}}
-        {{--                        });--}}
-        {{--                }--}}
-        {{--            });--}}
-        {{--        }--}}
-        {{--    });--}}
-
-
-        {{--    $('#valid_form').on('submit', function (e) {--}}
-        {{--        blockPagePermanently();--}}
-        {{--    });--}}
-        {{--    $('#invalid_form').on('submit', function (e) {--}}
-        {{--        blockPagePermanently();--}}
-        {{--    })--}}
-
+        {{--
         {{--    @foreach($comments as $comment)--}}
         {{--    @if($comment->comment_by == 0)--}}
         {{--    @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))--}}
@@ -1508,218 +1017,6 @@
         {{--    @endif--}}
         {{--    @endforeach--}}
 
-        {{--    var images_count = {{ $crm_images_count }};--}}
-        {{--    var rows_count = 0;--}}
-        {{--    var selected_rows = [];--}}
-        {{--    $('#image_upload_btn').on('click', function () {--}}
-        {{--        $('#image_upload_btn').attr('disabled', true);--}}
-        {{--        var crm_request_id = $('#crm_request_id').val();--}}
-        {{--        if(crm_request_id){--}}
-        {{--            $('#image_crm_request_id').val(crm_request_id);--}}
-        {{--            $.ajax({--}}
-        {{--                url: '{!! route('admin.crm.request.image_details') !!}',--}}
-        {{--                method: 'POST',--}}
-        {{--                data: {--}}
-        {{--                    'crm_request_id': crm_request_id,--}}
-        {{--                    '_token': '{{ csrf_token() }}'--}}
-        {{--                }--}}
-        {{--            }).done(function (data) {--}}
-
-        {{--                if(data.status == 0){--}}
-        {{--                    var image_html = '';--}}
-        {{--                    $.each(data.images, function (index, image) {--}}
-        {{--                        index++;--}}
-        {{--                        var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';--}}
-        {{--                        var remove = '';--}}
-        {{--                        remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';--}}
-        {{--                        image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';--}}
-        {{--                    });--}}
-        {{--                    $('#crm_image_view_table tbody').append(image_html);--}}
-        {{--                    $('#image_upload_modal').modal('show');--}}
-        {{--                }else if(data.status == 2){--}}
-        {{--                    var image_html = '<tr><td colspan="4">No Images found!</td></tr>';--}}
-
-        {{--                    $('#crm_image_view_table tbody').append(image_html);--}}
-        {{--                    $('#image_upload_modal').modal('show');--}}
-        {{--                }else{--}}
-        {{--                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                }--}}
-        {{--                $('#image_upload_btn').attr('disabled', false);--}}
-
-        {{--            });--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--    $.validator.addMethod('maxsize', function(value, element, params) {--}}
-        {{--        if ($(element).attr('type') === 'file') {--}}
-        {{--            if (element.files && element.files.length) {--}}
-        {{--                for (var c = 0; c < element.files.length; c++) {--}}
-        {{--                    if (element.files[c].size > params) {--}}
-        {{--                        return false;--}}
-        {{--                    }--}}
-        {{--                }--}}
-        {{--            }--}}
-        {{--        }--}}
-
-        {{--        return true;--}}
-        {{--    }, $.validator.format("File Size must not exceed {0} bytes."));--}}
-        {{--    var crm_image_table;--}}
-        {{--    function add_row() {--}}
-        {{--        var tr_id = $('#image_upload_table tbody tr').attr('id');--}}
-        {{--        if (typeof tr_id !== typeof undefined && tr_id !== false) {--}}
-        {{--            var new_img_rows = $('#image_upload_table tbody tr').length;--}}
-        {{--            new_img_rows = images_count + new_img_rows;--}}
-        {{--            if(new_img_rows >= 2){--}}
-        {{--                $('#image_upload_table .img_add_btn').attr('disabled', true);--}}
-        {{--                return false;--}}
-        {{--            }--}}
-        {{--        }--}}
-
-        {{--        rows_count++;--}}
-
-        {{--        var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';--}}
-        {{--        if(rows_count == 1){--}}
-        {{--            var remove = '';--}}
-        {{--        }else{--}}
-        {{--            var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';--}}
-
-        {{--        }--}}
-        {{--        crm_image_table.row.add([0, crm_image,remove]).node().id = rows_count;--}}
-        {{--        crm_image_table.draw(true);--}}
-        {{--        $('#CRMImageSubmitButton').attr('disabled', false);--}}
-        {{--        selected_rows.push(rows_count);--}}
-        {{--    }--}}
-        {{--    crm_image_table = $('#image_upload_table').DataTable({--}}
-        {{--        dom: '<"d-inline-block"l><"pull-right"B>tipr',--}}
-        {{--        buttons:[{--}}
-        {{--            title: 'Add Row',--}}
-        {{--            className: 'btn btn-primary img_add_btn',--}}
-        {{--            text: '<i class="la la-plus"></i> Add Row',--}}
-        {{--            action:function (e) {--}}
-        {{--                if(images_count < 2){--}}
-        {{--                    add_row();--}}
-        {{--                }--}}
-        {{--            }--}}
-        {{--        }],--}}
-        {{--        ordering:false,--}}
-        {{--        paging:false,--}}
-        {{--        columns: [--}}
-        {{--            {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},--}}
-        {{--            {name: 'image', class: 'align-middle image form-group'},--}}
-        {{--            {name: 'action', class: 'align-middle action'},--}}
-        {{--        ],--}}
-
-        {{--        rowCallback: function(row, data, index) {--}}
-        {{--            var info = crm_image_table.page.info();--}}
-
-        {{--            $('td:eq(0)', row).html(index + 1 + info.page * info.length);--}}
-
-        {{--        },--}}
-        {{--        initComplete: function() {--}}
-
-        {{--            // this.api().table().columns.adjust();--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--    $('#crm_image_view_table').on('click','a.remove_row', function () {--}}
-        {{--        var row_id = $(this).parents('tr').attr('id');--}}
-        {{--        var crm_request_id = $('#image_crm_request_id').val();--}}
-        {{--        var current = $(this);--}}
-        {{--        if(row_id){--}}
-        {{--            swal({--}}
-        {{--                title: 'Are You Sure?',--}}
-        {{--                text: 'Select Yes if you want to delete this image!',--}}
-        {{--                icon: 'warning',--}}
-        {{--                buttons: {--}}
-        {{--                    cancel: {--}}
-        {{--                        text: 'No',--}}
-        {{--                        value: null,--}}
-        {{--                        visible: true,--}}
-        {{--                        closeModal: true,--}}
-        {{--                    },--}}
-        {{--                    confirm: {--}}
-        {{--                        text: 'Yes',--}}
-        {{--                        value: true,--}}
-        {{--                        visible: true,--}}
-        {{--                        closeModal: true--}}
-        {{--                    }--}}
-        {{--                },--}}
-        {{--                closeOnClickOutside: false,--}}
-        {{--                closeOnEsc: false,--}}
-        {{--                dangerMode: true--}}
-        {{--            }).then(function (confirm) {--}}
-        {{--                if (confirm) {--}}
-        {{--                    $.ajax({--}}
-        {{--                        url: '{!! route('admin.crm.request.image_delete') !!}',--}}
-        {{--                        method: 'POST',--}}
-        {{--                        data: {--}}
-        {{--                            'crm_image_id': row_id,--}}
-        {{--                            'crm_request_id':crm_request_id,--}}
-        {{--                            '_token': '{{ csrf_token() }}'--}}
-        {{--                        }--}}
-        {{--                    }).done(function (data) {--}}
-        {{--                        if(data.status == 0){--}}
-        {{--                            images_count = images_count - 1;--}}
-        {{--                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-        {{--                            current.parents('tr').remove();--}}
-        {{--                        }else{--}}
-        {{--                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-        {{--                        }--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--            });--}}
-        {{--        }--}}
-        {{--    });--}}
-
-        {{--    $('body').on('click', 'a.remove_row',function () {--}}
-        {{--        var rid = parseInt($(this).parents('tr').attr('id'));--}}
-        {{--        var index = $.inArray(rid, selected_rows);--}}
-
-        {{--        if (index !== -1) {--}}
-        {{--            selected_rows.splice(index, 1);--}}
-        {{--        }--}}
-        {{--        crm_image_table.row( $(this).parents('tr') ).remove().draw();--}}
-        {{--    });--}}
-        {{--    $('#crm_upload_form').validate({--}}
-
-        {{--        errorClass: 'danger',--}}
-        {{--        successClass: 'success',--}}
-        {{--        normalizer: function(value) {--}}
-        {{--            return $.trim(value);--}}
-        {{--        },--}}
-        {{--        errorPlacement: function(error, element) {--}}
-        {{--            error.addClass('w-100').appendTo(element.parent('.form-group'));--}}
-        {{--        },--}}
-        {{--        submitHandler: function(form) {--}}
-        {{--            $(form).find('button[type=submit]').attr('disabled', 'disabled');--}}
-        {{--            $('#selected_ids').val(selected_rows);--}}
-        {{--            swal({--}}
-        {{--                title: 'Please Wait!',--}}
-        {{--                text: 'Image is being uploaded!',--}}
-        {{--                icon: 'info',--}}
-        {{--                buttons: false,--}}
-        {{--                closeOnClickOutside: false,--}}
-        {{--                closeOnEsc: false--}}
-        {{--            });--}}
-        {{--            form.submit();--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--    $('#image_upload_modal').on('hidden.bs.modal', function () {--}}
-        {{--        $('#image_crm_request_id').val('');--}}
-        {{--        crm_image_table.clear();--}}
-        {{--        crm_image_table.draw();--}}
-        {{--        selected_rows = [];--}}
-        {{--        rows_count = 0;--}}
-        {{--        $('#crm_image_view_table tbody').html('');--}}
-        {{--    });--}}
-
-        {{--    $('#special_request').on('click',function () {--}}
-        {{--        $('#special_request_modal').modal('show');--}}
-        {{--    });--}}
-
-        {{--    $('#special_request_modal').on('hide.bs.modal', function (e) {--}}
-        {{--        $('.form-check-input').prop('checked', false);--}}
-        {{--    });--}}
-
-        {{--});--}}
 
 
 
