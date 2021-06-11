@@ -10,6 +10,7 @@ use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Allowances;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeRegistrationStatus;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Models\Admin\AdminPositionTypes;
 use Illuminate\Http\Request;
@@ -72,11 +73,13 @@ class AdminERFController extends Controller
         $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 18, 19, 22, 25, 34, 36])->where('status', 1)->select('id','name')->get();
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
-        return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances]);
+        $employee_trax_id = Employee::select('trax_id')->get();
+
+        return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id]);
     }
 
     public function submit(Request $request){
-
+         return $request;
         $erf = new EmployeeRegistration();
         $erf->department_id = $request->department;
         $erf->designation_id = $request->designation;

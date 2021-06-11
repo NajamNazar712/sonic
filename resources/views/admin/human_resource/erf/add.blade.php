@@ -17,9 +17,9 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="erf_form" class="form-inline" method="POST" action="{{ route('admin.human_resource.erf.submit') }}" novalidate="novalidate">
+                            <form id="erf_form" class="form-horizontal" method="POST" novalidate="novalidate">
                                 {{ csrf_field() }}
-                                <div class="row w-100">
+                                <div class="row w-100 div_row">
                                     <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 mb-2">
                                         <h2 class="ml-2"> ERF Type</h2>
                                     </div>
@@ -34,12 +34,8 @@
                                             <label class="form-check-label" for="inlineRadio2">Replacement</label>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-7 mb-2">
-                                        <button type="button" class="btn btn-primary pull-right">Export</button>
-                                    </div>
                                 </div>
-
-                                <div class="row">
+                                <div class="row div_row">
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-group">
                                             <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
@@ -77,7 +73,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="departmrnt_div">
                                         <div class="form-group">
                                             <select name="department_head" class="select2" id="department_head" data-rule-required="true" data-msg-required="Department Head is required">
                                                 @foreach($department_heads as $head)
@@ -106,13 +102,17 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2 " id="range_div">
-                                        <div class="form-group ">
-                                            <h5 class="pull-left mr-2"><strong>Salary Range</strong></h5>
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="range_div">
 
-                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="From">
-
-                                                 <input type="number" class="form-control" id="to" name="salary_to" placeholder="To">
+                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">
+                                            <div class="form-group ">
+                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="Salary From">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">
+                                            <div class="form-group ">
+                                                <input type="number" class="form-control" id="to" name="salary_to" placeholder=" Salary To">
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="qualification_div">
@@ -139,11 +139,10 @@
                                           </select>
                                         </div>
                                     </div>
-
                                 </div>
-                                <div class="col-12">
-                                    <div class="form-group justify-content-center mt-2">
-                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                <div class="col-12 button_div">
+                                    <div class="form-group text-center mt-2">
+                                        <button type="button" class="btn btn-primary" id="form_btn">Submit</button>
                                     </div>
                                 </div>
 
@@ -154,49 +153,69 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="EmailModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EmailModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Send Email To</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email">
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button class="btn btn-primary" id="modal_submit_btn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 
     <script>
         $(document).ready(function() {
-            $('#erf_form #department').prepend('<option value="" selected="selected"></option>').select2({
+            $('#department').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Department*'
             });
-
-            $('#erf_form #hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Hub*'
             });
-            $('#erf_form #city').prepend('<option value="" selected="selected"></option>').select2({
+            $('#city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select City*'
             });
-            $('#erf_form #designation').prepend('<option value="" selected="selected"></option>').select2({
+            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Designation*'
             });
-
-            $('#erf_form #department_head').prepend('<option value="" selected="selected"></option>').select2({
+            $('#department_head').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Line Manager*'
             });
-            $('#erf_form #vacancies').prepend('<option value="" selected="selected"></option>').select2({
+            $('#vacancies').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Number Of Vacancies'
             });
-            $('#erf_form #position').prepend('<option value="" selected="selected"></option>').select2({
+            $('#position').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Position Type'
             });
@@ -207,53 +226,270 @@
                 dropdownParent:$('#erf_form')
             });
 
+
+            $('#additional').click(function () {
+                 $("#department").val('').change();
+                 $("#designation").val('').change();
+                 $("#department_head").val('').change();
+                 $("#city").val('').change();
+                 $("#hub").val('').change();
+                 $('#new_div').remove();
+
+
+                var vacancies = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">\n' +
+                    '                                        <div class="form-group">\n' +
+                    '                                            <select name="vacancies" class="select2" id="vacancies">\n' +
+                    '                                                @for ($i=1; $i<=10; $i++)\n' +
+                    '                                                    <option value="{{$i}}">{{$i}}</option>\n' +
+                    '                                                 @endfor\n' +
+                    '                                            </select>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>';
+
+                $("#erf_form #departmrnt_div").after(vacancies);
+                $('#vacancies').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Number Of Vacancies'
+                });
+
+
+                var position = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="position_div">\n' +
+                    '                                        <div class="form-group">\n' +
+                    '                                            <select name="position" class="select2" id="position">\n' +
+                    '                                                @foreach($admin_positions as $position)\n' +
+                    '                                                    <option value="{{ $position->id }}">{{ $position->name }}</option>\n' +
+                    '                                                @endforeach\n' +
+                    '                                            </select>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>';
+
+                $("#erf_form #vacancies_div").after(position);
+                $('#position').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Position Type'
+                });
+
+
+                var range = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2 " id="range_div">\n' +
+
+                    '                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">\n' +
+                    '                                            <div class="form-group ">\n' +
+                    '                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="From">\n' +
+                    '                                            </div>\n' +
+                    '                                        </div>\n' +
+                    '                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">\n' +
+                    '                                            <div class="form-group ">\n' +
+                    '                                                <input type="number" class="form-control" id="to" name="salary_to" placeholder="To">\n' +
+                    '                                            </div>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>';
+
+                $("#erf_form #position_div").after(range);
+
+                var qualification = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="qualification_div">\n' +
+                    '                                        <div class="form-group ">\n' +
+                    '                                            <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications"></textarea>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>';
+
+                $("#erf_form #range_div").after(qualification);
+
+                var skills = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="skills_div">\n' +
+                    '                                        <div class="form-group ">\n' +
+                    '                                            <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills"></textarea>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>';
+
+                $("#erf_form #qualification_div").after(skills);
+
+                var description = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="description_div">\n' +
+                '                                        <div class="form-group ">\n' +
+                '                                            <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description"></textarea>\n' +
+                '                                        </div>\n' +
+                '                                    </div>';
+
+                $("#erf_form #skills_div").after(description);
+
+
+                var allowance = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">\n' +
+                    '                                        <div class="form-group ">\n' +
+                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple">\n' +
+                    '                                              @foreach($allowances as $allowance)\n' +
+                    '                                                  <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>\n' +
+                    '                                              @endforeach\n' +
+                    '                                          </select>\n' +
+                    '                                        </div>\n' +
+                    '                                    </div>';
+
+                $("#erf_form #description_div").after(allowance);
+                $('#allowance').select2({
+                    width:'100%',
+                    placeholder:"Allowances",
+                    allowClear:true,
+                    dropdownParent:$('#erf_form')
+                });
+
+            });
+
+            $('#replacement').click(function () {
+                $("#department").val('').change();
+                $("#designation").val('').change();
+                $("#department_head").val('').change();
+                $("#city").val('').change();
+                $("#hub").val('').change();
+                $("div").remove("#vacancies_div,#position_div,#allowance_div,#description_div,#skills_div,#qualification_div,#range_div");
+
+                var new_row ='<hr>'+
+                    '<div class="row w-100 justify-content-center" id="new_div">' +
+                    /*   '<div class="form-group text-center"> <button class="btn btn-primary">Add More</button> </div>'+*/
+                    '<table>  <table class="table table-bordered" id="dynamic_field">  \n' +
+                    '                    <tr>  \n' +
+                    '<td><select class="form-control select2 trax_id" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td> \n' +
+                    '                        <td><input type="number" id="last_salary" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control last_salary" /></td>  \n' +
+                    '                        <td><input type="date" id="date" name="addmore[0][date]" placeholder="Date" class="form-control date"/></td>  \n' +
+                    '                        <td><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +
+                    '                    </tr>  \n' +
+                    '                </table>  </table>'+
+
+                    '</div>';
+                $("#erf_form .button_div").prepend(new_row);
+                $('#trax_id').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Trax Id'
+                });
+
+            });
+
+
             
-           $('#replacement').on('click',function () {
-               $('#vacancies_div').addClass('d-none');
-               $('#position_div').addClass('d-none');
-               $('#allowance_div').addClass('d-none');
-               $('#description_div').addClass('d-none');
-               $('#skills_div').addClass('d-none');
-               $('#qualification_div').addClass('d-none');
-               $('#range_div').addClass('d-none');
-           });
+             $('#erf_form #form_btn').on('click',function(){
+                 var  erf_type = $("input[name='erf_type']:checked").val();
+                 var department = $("#department");
+                 var designation = $("#designation");
+                 var department_head = $("#department_head");
+                 var city = $("#city");
+                 var hub = $("#hub");
 
-            $('#additional').on('click',function () {
-                $('#vacancies_div').removeClass('d-none');
-                $('#position_div').removeClass('d-none');
-                $('#allowance_div').removeClass('d-none');
-                $('#description_div').removeClass('d-none');
-                $('#skills_div').removeClass('d-none');
-                $('#qualification_div').removeClass('d-none');
-                $('#range_div').removeClass('d-none');
+                 if((department.val() == '' || department.val() == null) || (designation.val() == '' || designation.val() == null) || (department_head.val() == '' || department_head.val() == null) ||  (city.val() == '' || city.val() == null) ||  (hub.val() == '' || hub.val() == null) ){
+                     var error = "Department ,Designation ,City ,Hub ,Line Manager are Required";
+                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                     return false;
+                 }
+                  if(erf_type == 1){
+                      var vacancies = $("#vacancies");
+                      var position = $("#position");
+                      var salary_from = $("#from");
+                      var salary_to = $("#to");
+                      var qualification = $("#qualification");
+                      var skills = $("#skills");
+                      var description = $("#job_description");
+                      var allowances = $("#allowance");
+
+                      if(vacancies.val() == '' || vacancies.val() == null){
+                          var error = "Vacancies is Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      }
+                      else if(position.val() == '' || position.val() == null ){
+                          var error = "Position is Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      } else if((salary_from.val() == '' || salary_from.val() == null || (salary_to.val() == null || salary_to.val() == null)) ){
+                          var error = "Salary Range is Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      } else if(qualification.val() == '' || qualification.val() == null ){
+                          var error = "Qualification is Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      } else if(skills.val() == '' || skills.val() == null ){
+                          var error = "Skills is Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      } else if(description.val() == '' || description.val() == null ){
+                          var error = "Description is Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      } else if(allowances.val() == '' || allowances.val() == null ){
+                          var error = "Allowances are Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      }
+                      else{
+                          $('#EmailModal').modal('show');
+                      }
+                 }
+                  if(erf_type == 2){
+                      var trax_id = $(".trax_id");
+                      var gross_salary = $(".last_salary");
+                      var date = $(".date");
+                      if(trax_id.val() == '' || trax_id.val() == null || gross_salary.val() == '' || gross_salary.val() == null || date.val() == '' || date.val() == null){
+                          var error = "Trax ID , Gross Salary and Date are Required";
+                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                      }
+                      else{
+                          $('#EmailModal').modal('show');
+                      }
+                  }
             });
-          
 
-            $('#erf_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                normalizer: function(value) {
-                    return $.trim(value);
-                },
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+             $('#modal_submit_btn').on('click',function(){
+               var email = $('#email').val();
+               if(email === '' || email === null){
+                   var error = "Email is required";
+                   toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                   return false;
+               }
+               else{
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Request is being submitted!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
+               }
+             });
 
-                    form.submit();
-                }
+             $('body').on('click','#add',function(){
+                 var sal = $('#last_salary');
+                 var date = $('#date');
+                 var trax_id = $('#trax_id');
+
+                 if(sal.val() == '' || sale.val() == null || date.val() == '' || date.val() == null || trax_id.val() == '' || trax_id.val() == null){
+                     var check_error = "Please fill previous fields to add new row";
+                     toastr.error(check_error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                     return false;
+                 }
+             });
+
+
+
+            var i = 0;
+            $(document).on('click','#add',function(){
+                ++i;
+                $("#dynamic_field").append('<tr><td><select class="form-control select2" id="trax_id" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td><td><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list" /></td> <td><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" /></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
             });
-        });
+
+
+            $(document).on('click', '.remove-tr', function(){
+                $(this).parents('tr').remove();
+            });
+
+
+                $('#erf_form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Request is being submitted!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
+                });
+            });
+
         $('#erf_form').on('keypress',function (e) {
             if(e.keyCode == 13) {
                 e.preventDefault();
