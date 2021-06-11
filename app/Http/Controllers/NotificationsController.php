@@ -7380,10 +7380,10 @@ class NotificationsController extends Controller
                 else if ($id == 134) {
                     $user = User::find($reference_1_id);
                     $shipments = Shipment::where('user_id',$reference_1_id)
-                    ->where('shipper_status_id',1)
-                    ->whereBetween('created_at', [Carbon::now()->subMinutes(2880), Carbon::now()->subMinutes(2882)]);
+                    ->where('shipper_status_id',1);
+                    // ->whereBetween('created_at', [Carbon::now()->subMinutes(2880), Carbon::now()->subMinutes(2882)]);
                     if ($shipments->exists()) {
-                        foreach ($shipments as $shipment) {
+                        foreach ($shipments->get() as $shipment) {
                             $subject = $notification->subject;
                             $body = $notification->body;
                             if (strpos($subject, '[tracking_number]') !== FALSE) {
@@ -7400,17 +7400,19 @@ class NotificationsController extends Controller
                             }
                             $to = array();
                             
-                            $pickup_address = UserShippingInfo::where('id',$shipment->pickup_address_id)->where('status', 1);
+                            $pickup_address = UserShippingInfo::where('user_id',$reference_1_id)->where('status', 1);
                             if ($pickup_address->exists()) {
                                 if (strpos($body, '[pickup_address]') !== FALSE) {
                                     $body = str_replace('[pickup_address]', $pickup_address->first()->pickup_address, $body);
                                 }
-                                $to = array_merge($to, $pickup_address->first()->pluck('email')->toArray());
+                                $to = array_merge($to, $pickup_address->pluck('email')->toArray());
                             }
-                            $to = array_merge($to, $user->pluck('email')->toArray());
-                            
+                            // $to = array_merge($to, $user->pluck('email')->toArray());
+                            // $to = array_merge($to, User::where('id', $user->id)->pluck('email')->toArray());
                             self::email($subject, $body, $to);
                         }
+                        self::email($subject, $body, $user->email);
+
                     }
                     
                 }
