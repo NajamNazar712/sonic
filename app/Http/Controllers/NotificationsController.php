@@ -7381,9 +7381,10 @@ class NotificationsController extends Controller
                     $user = User::find($reference_1_id);
                     $shipments = Shipment::where('user_id',$reference_1_id)
                     ->where('shipper_status_id',1);
-                    // ->whereBetween('created_at', [Carbon::now()->subMinutes(2880), Carbon::now()->subMinutes(2882)]);
+                    // ->whereBetween('created_at', [Carbon::now()->subHours(48), Carbon::now()->subHours(49)]);
                     if ($shipments->exists()) {
-                        foreach ($shipments->get() as $shipment) {
+                        $shipments = $shipments->get();
+                        foreach ($shipments as $shipment) {
                             $subject = $notification->subject;
                             $body = $notification->body;
                             if (strpos($subject, '[tracking_number]') !== FALSE) {
