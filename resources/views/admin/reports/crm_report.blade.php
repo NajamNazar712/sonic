@@ -184,9 +184,9 @@
                         <th class="border-primary border-darken-1">Valid/Invalid Date</th>
                         <th class="border-primary border-darken-1">Resolved Date</th>
                         <th class="border-primary border-darken-1">Closed Date</th>
-                        <th class="border-primary border-darken-1">Last Comment By</th>
-                        <th class="border-primary border-darken-1">Last Comment</th>
-                        <th class="border-primary border-darken-1">Last Comment Date</th>
+                        <th class="border-primary border-darken-1">Last Internal Comment By</th>
+                        <th class="border-primary border-darken-1">Last Internal Comment</th>
+                        <th class="border-primary border-darken-1">Last Internal Comment Date</th>
                         <th class="border-primary border-darken-1">Tagged To</th>
                         <th class="border-primary border-darken-1">Tagged Hub</th>
                         <th class="border-primary border-darken-1">Tagged At</th>
@@ -419,9 +419,9 @@
                             head.push('Valid/Invalid Date');
                             head.push('Resolved Date');
                             head.push('Closed Date');
-                            head.push('Last Comment By');
-                            head.push('Last Comment');
-                            head.push('Last Comment Date');
+                            head.push('Last Internal Comment By');
+                            head.push('Last Internal Comment');
+                            head.push('Last Internal Comment Date');
                             head.push('Tagged To');
                             head.push('Tagged Hub');
                             head.push('Tagged At');
