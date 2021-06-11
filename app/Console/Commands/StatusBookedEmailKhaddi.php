@@ -38,7 +38,7 @@ class StatusBookedEmailKhaddi extends Command
      */
     public function handle()
     {
-        dd(NotificationsController::send(134, 1099));
+        NotificationsController::send(134, 1099);
         
     }
 }
