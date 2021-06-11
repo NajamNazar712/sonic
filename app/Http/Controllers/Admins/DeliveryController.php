@@ -782,7 +782,8 @@ class DeliveryController extends Controller
                     NotificationsController::send(11, $note->id, $shipment);
 
                     if($notifications[$index]) {
-                        if($shipment->amount == 0){
+                        $shipment_obj = Shipment::find($shipment);
+                        if($shipment_obj->amount == 0){
                             //English
                             NotificationsController::send(132, $note->id, $shipment);
                             //Urdu
