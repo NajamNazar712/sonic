@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmployeeRegistrationsTable extends Migration
+class CreateEmployeeRequisitionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,22 +13,23 @@ class CreateEmployeeRegistrationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_registrations', function (Blueprint $table) {
+        Schema::create('employee_requisitions', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('hub_id')->index();
             $table->integer('city_id')->index();
             $table->integer('designation_id')->index();
             $table->integer('department_id')->index();
-            $table->integer('department_head_id')->index()->nullable();
+            $table->integer('department_head_id')->index();
+            $table->text('type');
+            $table->integer('submitted_by')->index();
+            $table->integer('status')->index();
             $table->integer('vacancies')->nullable();
-            $table->integer('position_type_id')->index();
+            $table->integer('position_type_id')->index()->nullable();
             $table->integer('salary_from')->nullable();
             $table->integer('salary_to')->nullable();
             $table->text('qualifications')->nullable();
             $table->text('skills')->nullable();
             $table->text('job_description')->nullable();
-            $table->integer('status')->index();
-            $table->text('type');
             $table->timestamps();
         });
     }
@@ -40,6 +41,6 @@ class CreateEmployeeRegistrationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_registrations');
+        Schema::dropIfExists('employee_requisitions');
     }
 }

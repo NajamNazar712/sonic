@@ -2970,6 +2970,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminERFController@list')->name('list');
             Route::get('add', 'Admins\AdminERFController@add')->name('add');
             Route::post('submit', 'Admins\AdminERFController@submit')->name('submit');
+            Route::post('print', 'Admins\AdminERFController@print')->name('print');
         });
     });
 

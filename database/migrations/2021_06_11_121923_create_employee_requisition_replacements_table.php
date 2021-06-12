@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmployeeRegistrationStatusesTable extends Migration
+class CreateEmployeeRequisitionReplacementsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,12 @@ class CreateEmployeeRegistrationStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_registration_statuses', function (Blueprint $table) {
+        Schema::create('employee_requisition_replacements', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->integer('er_id')->index();
+            $table->integer('trax_id');
+            $table->integer('last_gross_salary');
+            $table->timestamp('date');
             $table->timestamps();
         });
     }
@@ -27,6 +30,6 @@ class CreateEmployeeRegistrationStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_registration_statuses');
+        Schema::dropIfExists('employee_requisition_replacements');
     }
 }

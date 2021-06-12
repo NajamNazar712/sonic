@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeRegistrationAllowance extends Model
+class EmployeeRequisitionStatus extends Model
 {
     //
 }

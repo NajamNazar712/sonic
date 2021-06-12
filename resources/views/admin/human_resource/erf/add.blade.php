@@ -17,7 +17,8 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="erf_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                            <form id="erf_form" class="form-horizontal" method="POST" novalidate="novalidate" action="{{route('admin.human_resource.erf.submit')}}">
+                                @method('POST')
                                 {{ csrf_field() }}
                                 <div class="row w-100 div_row">
                                     <div class="col-xs-12 col-sm-12 col-md-3 col-lg-2 mb-2">
@@ -38,6 +39,7 @@
                                 <div class="row div_row">
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                         <div class="form-group">
+                                            <input type="hidden" name="admin_email" id="admin_email">
                                             <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
                                                 @foreach($departments as $department)
                                                     <option value="{{ $department->id }}">{{ $department->name }}</option>
@@ -341,12 +343,11 @@
 
                 var new_row ='<hr>'+
                     '<div class="row w-100 justify-content-center" id="new_div">' +
-                    /*   '<div class="form-group text-center"> <button class="btn btn-primary">Add More</button> </div>'+*/
                     '<table>  <table class="table table-bordered" id="dynamic_field">  \n' +
                     '                    <tr>  \n' +
-                    '<td><select class="form-control select2 trax_id" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td> \n' +
-                    '                        <td><input type="number" id="last_salary" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control last_salary" /></td>  \n' +
-                    '                        <td><input type="date" id="date" name="addmore[0][date]" placeholder="Date" class="form-control date"/></td>  \n' +
+                    '<td><select class="form-control select2 trax_id" id="trax_id" name="addmore[0][trax_id]"><option value="" required> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td> \n' +
+                    '                        <td><input type="number" id="last_salary" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control last_salary" required /></td>  \n' +
+                    '                        <td><input type="date" id="date" name="addmore[0][date]" placeholder="Date" class="form-control date" required/></td>  \n' +
                     '                        <td><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +
                     '                    </tr>  \n' +
                     '                </table>  </table>'+
@@ -361,70 +362,6 @@
             });
 
 
-            
-             $('#erf_form #form_btn').on('click',function(){
-                 var  erf_type = $("input[name='erf_type']:checked").val();
-                 var department = $("#department");
-                 var designation = $("#designation");
-                 var department_head = $("#department_head");
-                 var city = $("#city");
-                 var hub = $("#hub");
-
-                 if((department.val() == '' || department.val() == null) || (designation.val() == '' || designation.val() == null) || (department_head.val() == '' || department_head.val() == null) ||  (city.val() == '' || city.val() == null) ||  (hub.val() == '' || hub.val() == null) ){
-                     var error = "Department ,Designation ,City ,Hub ,Line Manager are Required";
-                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                     return false;
-                 }
-                  if(erf_type == 1){
-                      var vacancies = $("#vacancies");
-                      var position = $("#position");
-                      var salary_from = $("#from");
-                      var salary_to = $("#to");
-                      var qualification = $("#qualification");
-                      var skills = $("#skills");
-                      var description = $("#job_description");
-                      var allowances = $("#allowance");
-
-                      if(vacancies.val() == '' || vacancies.val() == null){
-                          var error = "Vacancies is Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      }
-                      else if(position.val() == '' || position.val() == null ){
-                          var error = "Position is Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      } else if((salary_from.val() == '' || salary_from.val() == null || (salary_to.val() == null || salary_to.val() == null)) ){
-                          var error = "Salary Range is Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      } else if(qualification.val() == '' || qualification.val() == null ){
-                          var error = "Qualification is Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      } else if(skills.val() == '' || skills.val() == null ){
-                          var error = "Skills is Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      } else if(description.val() == '' || description.val() == null ){
-                          var error = "Description is Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      } else if(allowances.val() == '' || allowances.val() == null ){
-                          var error = "Allowances are Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      }
-                      else{
-                          $('#EmailModal').modal('show');
-                      }
-                 }
-                  if(erf_type == 2){
-                      var trax_id = $(".trax_id");
-                      var gross_salary = $(".last_salary");
-                      var date = $(".date");
-                      if(trax_id.val() == '' || trax_id.val() == null || gross_salary.val() == '' || gross_salary.val() == null || date.val() == '' || date.val() == null){
-                          var error = "Trax ID , Gross Salary and Date are Required";
-                          toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                      }
-                      else{
-                          $('#EmailModal').modal('show');
-                      }
-                  }
-            });
 
              $('#modal_submit_btn').on('click',function(){
                var email = $('#email').val();
@@ -434,7 +371,8 @@
                    return false;
                }
                else{
-
+                   $('#admin_email').val(email);
+                  $('#erf_form').submit();
                }
              });
 
@@ -443,52 +381,94 @@
                  var date = $('#date');
                  var trax_id = $('#trax_id');
 
-                 if(sal.val() == '' || sale.val() == null || date.val() == '' || date.val() == null || trax_id.val() == '' || trax_id.val() == null){
+
+                /* if(sal.val() == '' || sal.val() == null || date.val() == '' || date.val() == null || trax_id.val() == '' || trax_id.val() == null){
                      var check_error = "Please fill previous fields to add new row";
                      toastr.error(check_error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                      return false;
-                 }
+                 }*/
              });
 
 
 
             var i = 0;
-            $(document).on('click','#add',function(){
+            $('body').on('click','#add',function(){
                 ++i;
-                $("#dynamic_field").append('<tr><td><select class="form-control select2" id="trax_id" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td><td><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list" /></td> <td><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" /></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
+                $("#dynamic_field").append('<tr><td><select class="form-control select2" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value="" data-rule-required="true" data-msg-required="Department is required"> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td><td><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Department is required" /></td> <td><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Department is required"/></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
+               /* $("#leavers_trax_id[i]").prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Trax Id'
+                });*/
             });
+
+            $('#erf_form #form_btn').on('click',function(){
+                var  erf_type = $("input[name='erf_type']:checked").val();
+                var department = $("#department");
+                var designation = $("#designation");
+                var department_head = $("#department_head");
+                var city = $("#city");
+                var hub = $("#hub");
+
+                if((department.val() == '' || department.val() == null) || (designation.val() == '' || designation.val() == null) || (department_head.val() == '' || department_head.val() == null) ||  (city.val() == '' || city.val() == null) ||  (hub.val() == '' || hub.val() == null) ){
+                    var error = "Department ,Designation ,City ,Hub ,Line Manager are Required";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return false;
+                }
+                if(erf_type == 1){
+                    var vacancies = $("#vacancies");
+                    var position = $("#position");
+                    var salary_from = $("#from");
+                    var salary_to = $("#to");
+                    var qualification = $("#qualification");
+                    var skills = $("#skills");
+                    var description = $("#job_description");
+                    var allowances = $("#allowance");
+
+                    if(vacancies.val() == '' || vacancies.val() == null){
+                        var error = "Vacancies is Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    else if(position.val() == '' || position.val() == null ){
+                        var error = "Position is Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else if((salary_from.val() == '' || salary_from.val() == null || (salary_to.val() == null || salary_to.val() == null)) ){
+                        var error = "Salary Range is Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else if(qualification.val() == '' || qualification.val() == null ){
+                        var error = "Qualification is Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else if(skills.val() == '' || skills.val() == null ){
+                        var error = "Skills is Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else if(description.val() == '' || description.val() == null ){
+                        var error = "Description is Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    } else if(allowances.val() == '' || allowances.val() == null ){
+                        var error = "Allowances are Required";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                    else{
+                        $('#EmailModal').modal('show');
+                    }
+                }
+                if(erf_type == 2){
+                    var trax_id = $(".trax_id");
+                    var gross_salary = $(".last_salary");
+                    var date = $(".date");
+
+                    
+                    $('#EmailModal').modal('show');
+                }
+            });
+
 
 
             $(document).on('click', '.remove-tr', function(){
                 $(this).parents('tr').remove();
             });
+        });
 
 
-                $('#erf_form').validate({
-                    errorClass: 'danger',
-                    successClass: 'success',
-                    normalizer: function(value) {
-                        return $.trim(value);
-                    },
-                    errorPlacement: function(error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
-                    },
-                    submitHandler: function(form) {
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Request is being submitted!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                        form.submit();
-                    }
-                });
-            });
 
         $('#erf_form').on('keypress',function (e) {
             if(e.keyCode == 13) {

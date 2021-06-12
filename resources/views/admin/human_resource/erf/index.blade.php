@@ -16,7 +16,7 @@
 
                             <form id="track_form" class=" mb-1" novalidate="novalidate">
                                 <div class="row justify-content-center">
-                                    <div class="col-3">
+                                  {{-- <div class="col-3">
                                         <div class="form-group">
                                             <select name="status" id="status" class="form-control select2" >
                                                 @foreach($erf_status as $status)
@@ -29,7 +29,7 @@
                                         <div class="form-group">
                                             <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
                                         </div>
-                                    </div>
+                                    </div>--}}
 
                                 </div>
                             </form>
@@ -93,7 +93,6 @@
             var route = '<?php echo route('admin.human_resource.erf.add'); ?>';
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                "order": [[ 6, "desc" ]],
                 scrollX: false, scrollY: '500px',
                 buttons: [
 
@@ -124,10 +123,11 @@
                     }
 
                 },
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id', name: 'employee_registrations.id', class: 'align-middle department'},
-                    {data: 'department', name: 'dp.name', class: 'align-middle name'},
+                    {data: 'erf_id', name: 'employee_requisitions.id', class: 'align-middle erf_id'},
+                    {data: 'department', name: 'dp.name', class: 'align-middle department'},
                     {data: 'designation', name: 'd.name', class: 'align-middle designation'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
@@ -172,10 +172,38 @@
                 }
             });
 
-            $('#track_form').bind('submit', function (e) {
-                table.draw();
-            });
+            $('body').on('click', '.view_print', function () {
 
+                var id = table.row( $(this).parents('tr') ).data().erf_id;
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.erf.print') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+                }
+            });
+            
         });
 
     </script>

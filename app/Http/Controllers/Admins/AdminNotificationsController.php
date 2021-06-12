@@ -422,7 +422,7 @@ class AdminNotificationsController extends Controller
         }
 		else if ($id == 133)
         {
-            $details['fields'] = ['erf_id','admin','date'];
+            $details['fields'] = ['erf_id','admin','date','preview'];
         }
 
 		return $details;

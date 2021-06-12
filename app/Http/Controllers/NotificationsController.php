@@ -23,6 +23,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
@@ -7359,13 +7360,17 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
-				else if($id == 131) {
+				else if($id == 133) {
                   
-                    $request_no = $reference_1_id;
-                    $admin_id = $reference_2_id;
+                    $email = $reference_1_id;
+                    $erf_id = $reference_2_id;
+
+                   //$erf = EmployeeRequisition::find($erf_id);
+
+
 
                     if (strpos($body, '[request_no]') !== FALSE) {
-                        $body = str_replace('[request_no]', $request_no, $body);
+                        $body = str_replace('[request_no]', $erf_id, $body);
                     }
                     $admin = Admin::find($admin_id);
                     $to = $admin->email;
