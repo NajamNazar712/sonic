@@ -1580,7 +1580,7 @@ class RetailShipmentBookController extends Controller
         $rules = [
             'product_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('products', 'id')],
             'business_category_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('business_categories', 'id')->where('id', 1)],
-            'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_shipping_modes', 'id')],
+            'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_shipping_modes', 'id')->whereNotIn('id', [3])],
             'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
             'volumetric_weight' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'weight' => ['nullable', 'numeric', 'between:0.1,100000'],
@@ -1731,12 +1731,12 @@ class RetailShipmentBookController extends Controller
                     dispatch(new ProcessRetailShipmentBookingDB($row));
                 }
 
-                return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                return redirect()->route('retail.shipment.book.excel')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
             }
             else {
                 $products = Product::pluck('product_name', 'id');
-                $business_categories = BusinessCategory::pluck('name', 'id');
-                $shipping_modes = RetailShippingMode::pluck('name', 'id');
+                $business_categories = BusinessCategory::where('id', '!=', 2)->pluck('name', 'id');
+                $shipping_modes = RetailShippingMode::where('id', '!=', 3)->pluck('name', 'id');
                 $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
 //                $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
                 $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.name')->get();
