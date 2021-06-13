@@ -22,7 +22,7 @@ class CreateEmployeeRequisitionsTable extends Migration
             $table->integer('department_head_id')->index();
             $table->text('type');
             $table->integer('submitted_by')->index();
-            $table->integer('status')->index();
+            $table->integer('status_id')->index();
             $table->integer('vacancies')->nullable();
             $table->integer('position_type_id')->index()->nullable();
             $table->integer('salary_from')->nullable();

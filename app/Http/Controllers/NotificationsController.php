@@ -7362,20 +7362,33 @@ class NotificationsController extends Controller
                 }
 				else if($id == 133) {
                   
-                    $email = $reference_1_id;
-                    $erf_id = $reference_2_id;
+                    $data = $reference_1_id;
+                    $erf = EmployeeRequisition::find($data['id']);
+                    $admin = Admin::where('email',$data['email'])->first();
+                    if($admin){
+                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
 
-                   //$erf = EmployeeRequisition::find($erf_id);
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
 
+                        if (strpos($subject, '[erf_id]') !== FALSE) {
+                            $subject = str_replace('[erf_id]', $erf->id, $subject);
+                        }
 
+                        if (strpos($body, '[erf_id]') !== FALSE) {
+                            $body = str_replace('[erf_id]', $erf->id, $body);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $erf->created_at, $body);
+                        }
 
-                    if (strpos($body, '[request_no]') !== FALSE) {
-                        $body = str_replace('[request_no]', $erf_id, $body);
+                        $to = $admin->email;
+                        self::email($subject, $body, $to);
                     }
-                    $admin = Admin::find($admin_id);
-                    $to = $admin->email;
-
-                    self::email($subject, $body, $to);
                 }
             }
         }

@@ -172,7 +172,7 @@
                 }
             });
 
-            $('body').on('click', '.view_print', function () {
+            /*$('body').on('click', '.view_print', function () {
 
                 var id = table.row( $(this).parents('tr') ).data().erf_id;
                 if (id) {
@@ -202,7 +202,7 @@
                         }
                     });
                 }
-            });
+            });*/
             
         });
 
