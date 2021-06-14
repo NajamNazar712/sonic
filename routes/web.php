@@ -3052,7 +3052,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('details', 'Retail\RetailFinanceController@retail_done_payments_details')->name('details');
         });
     });
-    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function(){
+    Route::prefix('cancel_shipments')->name('cancel_shipments.')->group(function(){
         Route::get('','Retail\RetailCancelShipmentsController@add_index')->name('index');
         Route::post('shipment_info', 'Retail\RetailCancelShipmentsController@get_shipment_info')->name('shipment_info');
         Route::post('store','Retail\RetailCancelShipmentsController@cancelled_shipments_store')->name('store');

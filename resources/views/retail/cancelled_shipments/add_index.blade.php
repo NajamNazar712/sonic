@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+@extends('retail.layout.master')
 @section('title','Add Cancelled Shipments')
 
 @section('content')
@@ -21,7 +21,7 @@
                     </div>
                 </form>
 
-                <form id="update_cancelled_form" action="{{route('retail.cancelled_shipments.store')}}" class="form-horizontal" method="POST">
+                <form id="update_cancelled_form" action="{{route('retail.cancel_shipments.store')}}" class="form-horizontal" method="POST">
                     {{ csrf_field() }}
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
@@ -126,7 +126,7 @@
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
                         blockPagePermanently();
                         $.ajax({
-                            url: '{!! route('retail.cancelled_shipments.shipment_info') !!}',
+                            url: '{!! route('retail.cancel_shipments.shipment_info') !!}',
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
