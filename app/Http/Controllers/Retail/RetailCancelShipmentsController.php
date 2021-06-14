@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Retail;
 
+use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
@@ -75,7 +76,7 @@ class RetailCancelShipmentsController extends Controller
                     ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, NULL, NULL, Auth::id());
 
                     ShipmentsPickupJourneyController::add($shipment->id, 4);
-
+                    V2AdminPickupsController::cancel($shipment->id);
 
                     $total_deductable_amount = 0;
                     $retail_cash_deposit_shipment = RetailCashDepositShipment::where('shipment_id', $shipment->id);
