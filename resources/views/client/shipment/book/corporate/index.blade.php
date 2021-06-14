@@ -205,7 +205,7 @@
                                             <div id="pieces_quantity" class="form-group input-group d-none">
                                                 <input  type="text" name="pieces_quantity" class="form-control text-center pieces" placeholder="Pieces*" data-rule-required="true" data-msg-required="Pieces is required">
                                             </div>
-                                            <div class="form-group text-center p-1 border border-light rounded">
+                                            <div class="form-group text-center p-1 border border-light rounded" id="insurance_div">
                                                 <label class="d-block">Insurance</label>
                                                 <input type="checkbox" name="insurance" class="switch hidden insurance">
                                             </div>
@@ -346,6 +346,13 @@
                                                 @endforeach
                                             </select>
                                         </div>
+                                        <div id="frieght_div" class="form-group d-none">
+                                            <select name="approve_frieght_request" class="select2" id="approve_frieght_request" data-rule-required="true" data-msg-required="Request ID is required">
+                                                @foreach($approve_ftl_requests as $request)
+                                                    <option value="{{ $request->id }}" selected="selected">{{ $request->id }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
 
                                     <div id="payment_info" class="col col_custom">
@@ -362,7 +369,7 @@
                                             <input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group" id="payment_div">
                                             <select name="payment_mode" class="select2" id="payment_mode" data-rule-required="true" data-msg-required="Mode of Payment is required">
                                                 @foreach($payment_modes as $payment_mode)
                                                     <option value="{{ $payment_mode->id }}">{{ $payment_mode->mode }}</option>
@@ -599,6 +606,11 @@
                 }
             });
 
+            $('#approve_frieght_request').select2({
+                width: '100%',
+                placeholder: 'Approvde Frieght Request*'
+            });
+
             $('#amount').bind('keypress', function () {
                 $('#booking_form .submission').attr('disabled', true);
             });
@@ -766,6 +778,7 @@
                         $('#amount').prop('disabled', false);
                         $('#pieces_quantity').removeClass('d-none');
                         $('#self_collection_div').removeClass('d-none');
+                        $('#frieght_div').addClass('d-none');
                     }
                     else if (service_type == 2) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -788,6 +801,7 @@
                         $('#try_and_buy_charges_div').addClass('d-none');
                         $('#consignee_header_info').html('Consignee Information');
                         $('#self_collection_div').addClass('d-none');
+                        $('#frieght_div').addClass('d-none');
                     }
                     else if (service_type == 3) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -810,6 +824,7 @@
                         $('#try_and_buy_charges_div').removeClass('d-none');
                         $('#consignee_header_info').html('Consignee Information');
                         $('#self_collection_div').addClass('d-none');
+                        $('#frieght_div').addClass('d-none');
                     }
                     else if (service_type == 5) {
                         $('#shipping_header_div').removeClass('col col_custom');
@@ -832,11 +847,19 @@
                         $('#amount').prop('disabled', false);
                         $('#try_and_buy_charges_div').addClass('d-none');
                         $('#self_collection_div').addClass('d-none');
+                        $('#frieght_div').addClass('d-none');
                         var consignee_email = $('input[name="consignee_email_address"]');
                         consignee_email.attr('data-toggle', 'tooltip');
                         consignee_email.attr('data-placement', 'top');
                         consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
                         consignee_email.tooltip('show');
+                    }
+                    else if(service_type == 6){
+                       $('#insurance_div').addClass('d-none');
+                        $('#self_collection_div').addClass('d-none');
+                        $('#frieght_div').removeClass('d-none');
+                        $('#payment_div').addClass('d-none');
+                        $('#try_and_buy_charges_div').addClass('d-none');
                     }
                     $('#booking_form #selected_service_type').val(service_type);
 
