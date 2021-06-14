@@ -30,7 +30,9 @@ class RetailCancelShipmentsController extends Controller
     {
         $tracking_number = $request->tracking_number;
         if ($tracking_number != '') {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', 1)->where('shipment_type', 2);
+            $shipment = Shipment::whereHas('retail', function ($query) {
+                $query->where('retail_user_id', Auth::id());
+            })->where('tracking_number', $tracking_number)->where('shipper_status_id', 1)->where('shipment_type', 2);
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
