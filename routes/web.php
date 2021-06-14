@@ -3032,6 +3032,17 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('/generate', 'Retail\RetailParcelReceivingController@generate')->name('generate');
         Route::post('/shipments', 'Retail\RetailParcelReceivingController@shipments')->name('shipments');
         Route::post('print','Retail\RetailParcelReceivingController@print')->name('print');
+        
+        Route::get('other_parcel', 'Retail\RetailParcelReceivingController@other_parcel')->name('other_parcel');
+        Route::get('other_index', 'Retail\RetailParcelReceivingController@other_index')->name('other_index');
+        Route::post('/other_shipment_details', 'Retail\RetailParcelReceivingController@other_shipment_details')->name('other_shipment_details');
+        Route::post('/other_parcel_shipments', 'Retail\RetailParcelReceivingController@other_parcel_shipments')->name('other_parcel_shipments');
+        Route::get('/other_list', 'Retail\RetailParcelReceivingController@other_list')->name('other_list');
+        Route::post('/other_generate', 'Retail\RetailParcelReceivingController@other_generate')->name('other_generate');
+        Route::post('/other_shipments', 'Retail\RetailParcelReceivingController@other_shipments')->name('other_shipments');
+        Route::post('other_print','Retail\RetailParcelReceivingController@other_print')->name('other_print');
+        
+        
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function () {
