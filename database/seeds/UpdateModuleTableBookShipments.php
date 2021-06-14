@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModuleTableBookShipments extends Seeder
+    class UpdateModuleTableBookShipments extends Seeder
 {
     /**
      * Run the database seeds.
