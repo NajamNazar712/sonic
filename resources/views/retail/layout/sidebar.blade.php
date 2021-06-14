@@ -6,7 +6,7 @@
 {{--            </li>--}}
             <li><a class="menu-item" href="{{route('retail.shipment.book.index')}}"><i class="la la-cart-plus"></i>Booking</a></li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.index')}}"><i class="la la-dropbox"></i>Parcel Receiving</a></li>
-            <li class="menu-item"><a href="{{ route('retail.cancelled_shipments.add.index') }}"><i class="la la-trash"></i>Cancelled</a>
+            <li class="menu-item"><a href="{{ route('retail.cancelled_shipments.index') }}"><i class="la la-trash"></i>Cancelled</a>
             </li>
             <li><a class="menu-item" href="{{route('retail.cash_deposit.index')}}"><i class="la la-money"></i>Cash Deposit</a></li>
             <li><a class="menu-item" href="{{route('retail.shipment.tracking_slip.index')}}"><i class="la la-image"></i>Tracking Slip</a></li>
