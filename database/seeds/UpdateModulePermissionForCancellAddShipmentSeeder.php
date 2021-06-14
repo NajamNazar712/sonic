@@ -12,7 +12,7 @@ class UpdateModulePermissionForCancellAddShipmentSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 505, 'name' => 'Add - Cancel Shipments', 'module_id' => 15),
+            array('id' => 505, 'name' => 'Add - Cancel Retail Shipments', 'module_id' => 15),
         ));
     }
 }

@@ -281,15 +281,15 @@ class AdminShipmentCancelController extends Controller
         }
     }
 
-    public function add_index(){
-        return view('admin.cancelled_shipments.add_index');
+    public function retail_add_index(){
+        return view('admin.cancelled_shipments.retail.add_index');
     }
 
-    public function get_shipment_info(Request $request)
+    public function retail_get_shipment_info(Request $request)
     {
         $tracking_number = $request->tracking_number;
         if ($tracking_number != '') {
-            $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', 1);
+            $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', 1)->where('shipment_type', 2);
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
@@ -316,7 +316,7 @@ class AdminShipmentCancelController extends Controller
 
     }
 
-    public function cancelled_shipments_store(Request $request){
+    public function retail_cancelled_shipments_store(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
         $shipments_count = count($shipment_ids);
 
@@ -327,13 +327,6 @@ class AdminShipmentCancelController extends Controller
             if ($shipments->exists()) {
                 foreach ($shipments->get() as $shipment) {
 
-                    if($shipment->warehouse){
-                        if($shipment->warehouse_order_status == 10){
-                            continue;
-                        }
-                        $shipment->warehouse_order_status = 9;
-                    }
-
 
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
@@ -343,94 +336,35 @@ class AdminShipmentCancelController extends Controller
 
                     ShipmentsPickupJourneyController::add($shipment->id, 4);
 
-                    if($shipment->warehouse){
-                        $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->get();
-                        if($shipment_products){
-                            foreach ($shipment_products as $shipment_product){
 
-                                $pending_pickings_products = WmsPendingPicking::leftjoin('wms_pending_picking_shipments as wpps', 'wpps.picking_id', '=', 'wms_pending_pickings.id')
-                                    ->select('wms_pending_pickings.id as id')
-                                    ->where('wpps.shipment_id', $shipment->id)
-                                    ->where('wms_pending_pickings.product_id', $shipment_product->product_id)->first();
-                                if($pending_pickings_products){
-                                    $pending_picking = WmsPendingPicking::find($pending_pickings_products->id);
-                                    $current_stock = $pending_picking->quantity;
-                                    if($current_stock > $shipment_product->quantity){
-                                        $pending_picking->quantity = $current_stock - $shipment_product->quantity;
-                                        $pending_picking->save();
-                                    }
+                    $total_deductable_amount = 0;
+                    $retail_cash_deposit_shipment = RetailCashDepositShipment::where('shipment_id', $shipment->id);
+                    if($retail_cash_deposit_shipment->exists()){
+                        $retail_cash_deposit_shipment = $retail_cash_deposit_shipment->first();
+                        $cash_deposit_id = $retail_cash_deposit_shipment->cash_deposit_id;
+                        $retail_cash_deposit_shipment->delete();
+                        $retais_cash_deposit = RetailCashDeposit::find($cash_deposit_id);
 
-                                    $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
-                                    if($current_stock_addition){
-                                        $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
-                                        $current_stock_addition->save();
-                                    }
-
-                                    if($pending_picking->quantity <= 0){
-                                        $pending_picking->status = 1;
-                                        $pending_picking->save();
-                                    }
-                                }
-                            }
+                        $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
+                        if($retail_shipment->exists()){
+                            $retail_shipment = $retail_shipment->first();
+                            $total_deductable_amount = $retail_shipment->total_charges;
+                            $retais_cash_deposit->total_cn = $retais_cash_deposit->total_cn - 1;
+                            $retais_cash_deposit->total_cash = $retais_cash_deposit->total_cash - $total_deductable_amount;
+                            $retais_cash_deposit->save();
                         }
+
                     }
-                    else{
 
-                        if($shipment->shipment_type == 1){
-                            V2AdminPickupsController::cancel($shipment->id);
-
-                            $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
-                            if($pickup_request_shipment){
-                                $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
-                                if($pickup_requests->exists()){
-                                    $pickup_requests = $pickup_requests->get();
-                                    $flag = true;
-                                    foreach ($pickup_requests as $pickup_request){
-                                        $is_shipment = Shipment::find($pickup_request->shipment_id);
-                                        if($is_shipment->shipper_status_id != 17){
-                                            $flag = false;
-                                        }
-                                    }
-                                    if($flag == true){
-                                        $pickup_request = V2PickupRequest::find($pickup_request_shipment->pickup_request_id);
-                                        $pickup_request->status_id = 4;
-                                        $pickup_request->save();
-                                    }
-                                }
-                            }
-                        }
-                        else{
-                            $total_deductable_amount = 0;
-                            $retail_cash_deposit_shipment = RetailCashDepositShipment::where('shipment_id', $shipment->id);
-                            if($retail_cash_deposit_shipment->exists()){
-                                $retail_cash_deposit_shipment = $retail_cash_deposit_shipment->first();
-                                $cash_deposit_id = $retail_cash_deposit_shipment->cash_deposit_id;
-                                $retail_cash_deposit_shipment->delete();
-                                $retais_cash_deposit = RetailCashDeposit::find($cash_deposit_id);
-
-                                $retail_shipment = RetailShipment::where('shipment_id', $shipment->id);
-                                if($retail_shipment->exists()){
-                                    $retail_shipment = $retail_shipment->first();
-                                    $total_deductable_amount = $retail_shipment->total_charges;
-                                    $retais_cash_deposit->total_cn = $retais_cash_deposit->total_cn - 1;
-                                    $retais_cash_deposit->total_cash = $retais_cash_deposit->total_cash - $total_deductable_amount;
-                                    $retais_cash_deposit->save();
-                                }
-
-                            }
-
-                            $retail_parcel_receiving_shipment = RetailParcelReceivingShipment::where('shipment_id', $shipment->id);
-                            if($retail_parcel_receiving_shipment->exists()){
-                                $retail_parcel_receiving_shipment = $retail_parcel_receiving_shipment->latest()->first();
-                                $parcel_receiving_id = $retail_parcel_receiving_shipment->parcel_receiving_id;
-                                $retail_parcel_receiving_shipment->delete();
-                                $parcel_receiving = RetailParcelReceiving::find($parcel_receiving_id);
-                                $parcel_receiving->total_cn = $parcel_receiving->total_cn - 1;
-                                $parcel_receiving->total_cash = $parcel_receiving->total_cash - $total_deductable_amount;
-                                $parcel_receiving->save();
-                            }
-
-                        }
+                    $retail_parcel_receiving_shipment = RetailParcelReceivingShipment::where('shipment_id', $shipment->id);
+                    if($retail_parcel_receiving_shipment->exists()){
+                        $retail_parcel_receiving_shipment = $retail_parcel_receiving_shipment->latest()->first();
+                        $parcel_receiving_id = $retail_parcel_receiving_shipment->parcel_receiving_id;
+                        $retail_parcel_receiving_shipment->delete();
+                        $parcel_receiving = RetailParcelReceiving::find($parcel_receiving_id);
+                        $parcel_receiving->total_cn = $parcel_receiving->total_cn - 1;
+                        $parcel_receiving->total_cash = $parcel_receiving->total_cash - $total_deductable_amount;
+                        $parcel_receiving->save();
                     }
 
                 }

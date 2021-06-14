@@ -2140,11 +2140,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
 
-        Route::prefix('add')->name('add.')->group(function(){
-            Route::get('','Admins\AdminShipmentCancelController@add_index')->name('index');
-            Route::post('shipment_info', 'Admins\AdminShipmentCancelController@get_shipment_info')->name('shipment_info');
-            Route::post('store','Admins\AdminShipmentCancelController@cancelled_shipments_store')->name('store');
+        Route::prefix('retail')->name('retail.')->group(function(){
+            Route::prefix('add')->name('add.')->group(function(){
+                Route::get('','Admins\AdminShipmentCancelController@retail_add_index')->name('index');
+                Route::post('shipment_info', 'Admins\AdminShipmentCancelController@retail_get_shipment_info')->name('shipment_info');
+                Route::post('store','Admins\AdminShipmentCancelController@retail_cancelled_shipments_store')->name('store');
+            });
         });
+
 
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
