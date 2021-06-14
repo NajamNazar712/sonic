@@ -63,7 +63,8 @@ class AdminERFController extends Controller
                     ';
 
                     if (session('role_id') == 1 || in_array(94, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+
                     }
 
                    /* if (session('role_id') == 1 || in_array(95, session('permissions'))) {
@@ -113,7 +114,7 @@ class AdminERFController extends Controller
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id]);
     }
 
-    public function submit(Request $request){
+    public function submit_form(Request $request){
 
         $erf = new EmployeeRequisition();
         $erf->department_id = $request->department;
@@ -165,7 +166,7 @@ class AdminERFController extends Controller
         $data['id'] = $erf->id;
         $data['email'] = $email;
         NotificationsController::send(133, $data, url('/') . '/' . 'reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
-        return view('admin.human_resource.erf.index')->with(['success' => 'Request Submitted']);
+        return redirect()->route('admin.human_resource.erf.index')->with(['success' => 'Request Submitted']);
 
     }
 

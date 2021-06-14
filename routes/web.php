@@ -2969,7 +2969,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminERFController@index')->name('index');
             Route::get('list', 'Admins\AdminERFController@list')->name('list');
             Route::get('add', 'Admins\AdminERFController@add')->name('add');
-            Route::post('submit', 'Admins\AdminERFController@submit')->name('submit');
+            Route::post('submit', 'Admins\AdminERFController@submit_form')->name('submit');
             Route::post('print', 'Admins\AdminERFController@print')->name('print');
             Route::post('file_upload', 'Admins\AdminERFController@file_upload')->name('file_upload');
         });
