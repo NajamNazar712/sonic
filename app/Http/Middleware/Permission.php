@@ -808,7 +808,7 @@ class Permission
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
 
-            'cancelled_shipments.retail.add.index' => 505,
+
 
             'shipment.book.walk_in' => 155,
             'shipment.book.store' => 155,

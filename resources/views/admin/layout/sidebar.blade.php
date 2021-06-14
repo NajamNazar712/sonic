@@ -101,10 +101,6 @@
                             <li class="menu-item"><a href="{{ route('admin.cancelled_shipments.index') }}">Cancelled</a>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(505, session('permissions')))
-                            <li class="menu-item"><a href="{{ route('admin.cancelled_shipments.retail.add.index') }}">Retail Bulk Cancelled</a>
-                            </li>
-                        @endif
                         @if (session('role_id') == 1 || in_array(254, session('permissions')))
                             <li class="menu-item"><a href="{{ route('admin.shipment.consolidation.history.index') }}">Consolidation History</a>
                             </li>
