@@ -57,6 +57,34 @@
         </div>
     </section>
 
+    <div class="modal fade" id="file_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="file_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">Input File</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+                    <form method="post" id="file_upload" enctype="multipart/form-data" novalidate="novalidate" action="{{route('admin.human_resource.erf.file_upload')}}">
+                        @method('POST')
+                        @csrf
+                        <div class="form-group">
+                            <input type="hidden" name="erf_id" id="erf_id">
+                            <input type="file" class="form-control" id="file" name="file" placeholder="Select File" data-rule-required="true" data-msg-required="File is required">
+                        </div>
+                        <div class="form-group text-center mt-2">
+                            <button type="submit" class="btn btn-primary" id="form_btn">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 
@@ -133,7 +161,7 @@
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
-                    {data: 'actions', name: 'actions', class: 'align-middle actions'},
+                    {data: 'action', name: 'action', class: 'align-middle action'},
                 ],rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
@@ -172,38 +200,36 @@
                 }
             });
 
-            /*$('body').on('click', '.view_print', function () {
 
-                var id = table.row( $(this).parents('tr') ).data().erf_id;
-                if (id) {
-                    $.ajax({
-                        url: '{!! route('admin.human_resource.erf.print') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        var tab = window.open('', '_blank');
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var erf_id = table.row( $(this).parents('tr') ).data().erf_id;
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
+                if ($(this).hasClass('admin_approve')) {
+                    $('#erf_id').val(erf_id);
+                    $('#file_modal').modal('show');
                 }
-            });*/
-            
+            });
+
+            $("#file_upload").validate({
+
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Route is being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
         });
 
     </script>

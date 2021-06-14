@@ -2971,6 +2971,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('add', 'Admins\AdminERFController@add')->name('add');
             Route::post('submit', 'Admins\AdminERFController@submit')->name('submit');
             Route::post('print', 'Admins\AdminERFController@print')->name('print');
+            Route::post('file_upload', 'Admins\AdminERFController@file_upload')->name('file_upload');
         });
     });
 

@@ -11,6 +11,7 @@ use App\Http\Models\Allowances;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\EmployeeRequisitionAllowances;
+use App\Http\Models\EmployeeRequisitionAttachments;
 use App\Http\Models\EmployeeRequisitionReplacement;
 use App\Http\Models\EmployeeRequisitionStatus;
 use App\Http\Models\EmployeeRequisitionStatusLog;
@@ -18,8 +19,10 @@ use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Models\Admin\AdminPositionTypes;
 use Barryvdh\Snappy\Facades\SnappyPdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
 class AdminERFController extends Controller
@@ -48,26 +51,44 @@ class AdminERFController extends Controller
 
 
         $datatables = Datatables::of($erf)
-            ->addColumn('actions',function ($erf) {
-              /*  $view_charges_button = '<button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>';*/
-                $view_button = '<button type="button" class="dropdown-item view_print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-crosshair"></i></div><div class="col-9 offset-1">View</div></button>';
-               /* $dispute_button = '<button type="button" class="dropdown-item dispute_modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Dispute</div></button>';*/
-
-
-
+            ->editColumn('erf_id', function ($erf) {
+                return "ERF" . $erf->erf_id;
+            })
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
                     $dropdown = '
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                        $dropdown .= $view_button;
+                    if (session('role_id') == 1 || in_array(94, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
+                    }
+
+                   /* if (session('role_id') == 1 || in_array(95, session('permissions'))) {
+                        if ($result->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
+                        }
+                    }
+                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Shipper</div></button>';
+
+
+                    $dropdown .= '<button type="button" class="dropdown-item view_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipper</div></button>';*/
 
                     $dropdown .= '
-                            </div>
                         </div>
+                      </div>
                     ';
-                return $dropdown;
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
             });
 
         if($status = $request->get('status')){
@@ -352,5 +373,55 @@ class AdminERFController extends Controller
 
             $pdf = SnappyPDF::loadHTML($html)->save('reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
             return $pdf;
+        }
+
+        public function file_upload(Request $request){
+
+      
+        $erf_id = str_replace("ERF","",$request->erf_id);
+        $erf =EmployeeRequisition::find($erf_id);
+        $date = Carbon::now()->format('Y_m_d');
+
+        $request->validate([
+            'file' => 'required|mimes:jpeg,png,pdf,doc,docx|max:5120',
+        ]);
+
+        $file_type = request()->file->getClientOriginalExtension();
+
+            $file = $request->file('file');
+            $filename = 'form_'. $date . '_' . $erf_id .'.' .$file_type;
+            $path = 'employee_requisition/'.$erf_id;
+
+        if(!Storage::disk('public')->exists($path)){
+            Storage::disk('public')->putFileAs('employee_requisition/'. $erf_id .'', $file, $filename);
+        }
+        else{
+            $file->storeAs($path,$filename, 'public');
+
+        }
+        
+        $attachments = new EmployeeRequisitionAttachments();
+        $attachments->er_id = $erf_id;
+        $attachments->uploaded_by = Auth::id();
+        $attachments->file = $filename;
+        $attachments->save();
+
+
+        if($erf->status_id == 1){
+            $erf->status_id = 2;
+        }
+        else if ($erf->status_id == 2){
+           $erf->status_id = 3;
+        }
+
+        $erf->save();
+
+            $log = new EmployeeRequisitionStatusLog();
+            $log->er_id = $erf_id;
+            $log->admin_id = Auth::id();
+            $log->status_id = $erf->status_id;
+            $log->save();
+
+            return redirect()->back()->with('success', 'Document Uploaded!');
         }
     }
