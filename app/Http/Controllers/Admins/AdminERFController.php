@@ -175,17 +175,14 @@ class AdminERFController extends Controller
 
         $erf = EmployeeRequisition::find($erf_id);
 
-        $city = City::find($erf->city_id);
-        $hub = City::where('hub',1)->where('id',$erf->hub_id)->first();
-        $department = AdminDepartment::find($erf->department_id);
-        $line_manager = Admin::find($erf->department_head_id);
         if($erf->type == 1){
-            $position_type = AdminPositionTypes::find($erf->position_type_id);
-            $designation = EmployeeDesignation::find($erf->designation_id);
+            $position = AdminPositionTypes::find($erf->position_type_id);
             $type = 'Additional';
             $benefits = EmployeeRequisitionAllowances::join('allowances as a','a.id','=','employee_requisition_allowances.allowance_id')->where('er_id',$erf->id)->select('a.name as name')->get();
         }
-
+        else{
+            $type = 'Replacement';
+        }
 
 
         $html = '
@@ -201,7 +198,7 @@ class AdminERFController extends Controller
 
                      <style>
                       body {
-                        font-size: 0.75rem !important;
+                        font-size: 0.95rem !important;
                         font-weight: bold !important;
                       }
 
@@ -258,29 +255,31 @@ class AdminERFController extends Controller
                               <tr>
                                   <td class="text-center align-middle color secondary" >ERF Type : '.$type.'</td>
                                   
-                              </tr>
-                            <tr>
+                              </tr> ';
+                             if($erf->type == 1){
+
+                             $html .= '  <tr>
                          
                               <td class="color secondary"><strong>Department</strong></td>
-                              <td>' . $department->name . '</td>
+                              <td>' . $erf->department->name . '</td>
                             
                                  <td class="color secondary"> <strong>Position Type</strong></td>
-                               <td>' . $position_type->name . '</td>
+                               <td>' . $position->name . '</td>
                           
                             
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Designation</strong></td>
-                              <td>' . $designation->name . '</td>
+                              <td>' . $erf->designation->name . '</td>
                                <td class="color secondary"><strong>Employee Category</strong></td>
-                              <td>' . $department->name . '</td>
+                              <td>' . $erf->department->name . '</td>
                             </tr>
                            
                             <tr>
                               <td class="color secondary"><strong>Hub</strong></td>
-                              <td>' . $hub->name. '</td>
+                              <td>' . $erf->hub->name. '</td>
                                <td class="color secondary"><strong>City</strong></td>
-                              <td>' . $city->name . '</td>
+                              <td>' . $erf->city->name . '</td>
                             </tr>
                              
                              <tr>
@@ -292,15 +291,47 @@ class AdminERFController extends Controller
                             
                             <tr>
                               <td class="color secondary"><strong>Line Manager</strong></td>
-                              <td>' . $line_manager->name. '</td>
+                              <td>' . $erf->manager->name. '</td>
                                <td class="color secondary"><strong>Vacancies</strong></td>
                               <td>' . $erf->vacancies. '</td>
+                            </tr>';
+                             }
+                             else{
+                                 $html .= '  <tr>
+                         
+                              <td class="color secondary"><strong>Department</strong></td>
+                              <td>' . $erf->department->name . '</td>
+                            
                             </tr>
-                         </tbody>
+                            <tr>
+                              <td class="color secondary"><strong>Designation</strong></td>
+                              <td>' . $erf->designation->name . '</td>
+                            
+                            </tr>
+                           
+                            <tr>
+                              <td class="color secondary"><strong>Hub</strong></td>
+                              <td>' . $erf->hub->name. '</td>
+                            
+                            </tr>
+                             
+                             <tr>
+                               <td class="color secondary"><strong>City</strong></td>
+                              <td>' . $erf->city->name . '</td>
+                            </tr>
+                            
+                            <tr>
+                              <td class="color secondary"><strong>Line Manager</strong></td>
+                              <td>' . $erf->manager->name. '</td>
+                            
+                            </tr>';
+                             }
+
+
+                      $html .=  '</tbody>
                          </table> 
-                      </div>
-                       
-                              ';
+                      </div>';
+
         if($erf->type == 1){
             $html .= '<div class="additional">
                            <table class="table table-sm table-bordered border">
@@ -337,6 +368,37 @@ class AdminERFController extends Controller
                          </tbody>
                          </table> 
                         </div>';
+        }
+        else{
+
+            $html .= '<div class="replacement">
+            <table class="table table-sm table-bordered border">
+               <thead>
+                    <tr>
+                      <th scope="col">Leaver Trax Id</th>
+                      <th scope="col">Leaver Name</th>
+                      <th scope="col">Date of Seperation</th>
+                      <th scope="col">Last Gross Salary</th>
+        
+                    </tr>
+                </thead>
+               <tbody>';
+            foreach($erf->replacement as $replacement) {
+                     $employee = Employee::where('trax_id',$replacement->trax_id)->first();
+                    $html .= '<tr>
+                            <td>' . $replacement->trax_id . '</td>
+                            <td>' . $employee->name . '</td>
+                            <td>' . $replacement->date . '</td>
+                            <td>' . $replacement->last_gross_salary . '</td>
+                        </tr>';
+
+            }
+
+            $html .='
+                
+               </tbody>
+            </table>
+            </div>';
         }
 
         $status_logs = EmployeeRequisitionStatusLog::join('admins as a','a.id','=','employee_requisition_status_logs.admin_id')
