@@ -97,6 +97,9 @@
                                 </ul>
                             </li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(116, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.ftl.request.index')}}">FTL Requests</a></li>
+                        @endif
                         @if (session('role_id') == 1 || in_array(117, session('permissions')))
                             <li class="menu-item"><a href="{{ route('admin.cancelled_shipments.index') }}">Cancelled</a>
                             </li>
@@ -1068,6 +1071,7 @@
                         @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197, 256, 375], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Bookings</span></a>
                                 <ul class="menu-content">
+
                                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.shipment_cancellation_cut_off_days.index')}}">Shipment Cancellation Cut-Off Days</a></li>
                                     @endif

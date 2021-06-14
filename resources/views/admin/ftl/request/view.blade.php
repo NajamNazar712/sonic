@@ -163,254 +163,154 @@
                                             </div>
                                         </div>
                                     </div>
-{{--                                    <div class="col-7">--}}
-{{--                                        <div class="content-body chat-application">--}}
-{{--                                            <section--}}
-{{--                                                    class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible">--}}
-{{--                                                <div class="chats">--}}
-{{--                                                    @if(!empty($comments))--}}
+                                    <div class="col-7">
+                                        <div class="content-body chat-application">
+                                            <section
+                                                    class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible">
+                                                <div class="chats">
+                                                    @if(!empty($comments))
 
-{{--                                                        @foreach($comments as $comment)--}}
-{{--                                                            @if($comment->comment_by == 0)--}}
-{{--                                                                <div id="chat_{{$comment->id}}"--}}
-{{--                                                                     class="chat admin {{($comment->comment_type == 1)? 'internal':'' }} {{($comment->comment_type == 2)? 'rider':'' }} ">--}}
+                                                        @foreach($comments as $comment)
+                                                            @if($comment->comment_by == 0)
+                                                                <div id="chat_{{$comment->id}}"
+                                                                     class="chat sales {{($comment->comment_by == 1) ? 'operation' : '' }} {{($comment->comment_type == 2) ? 'finance' : '' }} ">
 
-{{--                                                                    <div class="chat-avatar">--}}
-{{--                                                                        <div class="badge block badge-admin">--}}
-{{--                                                                            <i class="la la-user font-medium-2"></i>{{$comment->admin->name}}--}}
-{{--                                                                        </div>--}}
-{{--                                                                    </div>--}}
+                                                                    <div class="chat-avatar">
+                                                                        <div class="badge block badge-admin">
+                                                                            <i class="la la-user font-medium-2"></i>{{$comment->commenter}}
+                                                                        </div>
+                                                                    </div>
 
-{{--                                                                    <div class="chat-body">--}}
-{{--                                                                        <div class="chat-content text-left">--}}
-{{--                                                                            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))--}}
-{{--                                                                                <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>--}}
-{{--                                                                            @endif--}}
-{{--                                                                            <p>{!! $comment->comment !!}</p>--}}
-{{--                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>--}}
-{{--                                                                            <div id="updated_by_div_{{$comment->id}}">--}}
-{{--                                                                                @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)--}}
-{{--                                                                                    <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>--}}
-{{--                                                                                @endif--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
-{{--                                                                    </div>--}}
+                                                                    <div class="chat-body">
+                                                                        <div class="chat-content text-left">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            <div id="updated_by_div_{{$comment->id}}">
+                                                                                @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
+                                                                                    <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-{{--                                                                </div>--}}
+                                                                </div>
 
-{{--                                                            @elseif($comment->comment_by == 1)--}}
-{{--                                                                <div class="chat chat-left shipper">--}}
+                                                            @elseif($comment->comment_by == 1)
+                                                                <div class="chat chat-left shipper">
 
-{{--                                                                    <div class="chat-avatar">--}}
-{{--                                                                        <div class="badge block badge-info">--}}
-{{--                                                                            <i class="la la-user font-medium-2"></i>--}}
-{{--                                                                            @if($shipper != null)--}}
-{{--                                                                                {{$shipper}}--}}
-{{--                                                                            @else--}}
-{{--                                                                                Shipper--}}
-{{--                                                                            @endif--}}
-{{--                                                                        </div>--}}
-{{--                                                                    </div>--}}
+                                                                    <div class="chat-avatar">
+                                                                        <div class="badge block badge-info">
+                                                                            <i class="la la-user font-medium-2"></i>
+                                                                            @if($shipper != null)
+                                                                                {{$shipper}}
+                                                                            @else
+                                                                                Shipper
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
 
-{{--                                                                    <div class="chat-body">--}}
-{{--                                                                        <div class="chat-content text-left">--}}
-{{--                                                                            <p>{!! $comment->comment !!}</p>--}}
-{{--                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>--}}
-{{--                                                                        </div>--}}
-{{--                                                                    </div>--}}
-{{--                                                                </div>--}}
-{{--                                                            @else--}}
-{{--                                                                @if($comment->comment_type == 2)--}}
-{{--                                                                    <div id="chat_{{$comment->id}}"--}}
-{{--                                                                         class="chat admin rider">--}}
+                                                                    <div class="chat-body">
+                                                                        <div class="chat-content text-left">
+                                                                            <p>{!! $comment->comment !!}</p>
+                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            @else
+                                                                @if($comment->comment_type == 2)
+                                                                    <div id="chat_{{$comment->id}}"
+                                                                         class="chat admin rider">
 
-{{--                                                                        <div class="chat-avatar">--}}
-{{--                                                                            <div class="badge block badge-admin">--}}
-{{--                                                                                <i class="la la-user font-medium-2"></i>{{$comment->rider->name}}--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
+                                                                        <div class="chat-avatar">
+                                                                            <div class="badge block badge-admin">
+                                                                                <i class="la la-user font-medium-2"></i>{{$comment->rider->name}}
+                                                                            </div>
+                                                                        </div>
 
-{{--                                                                        <div class="chat-body">--}}
-{{--                                                                            <div class="chat-content text-left">--}}
-{{--                                                                                <p>{!! $comment->comment !!}</p>--}}
-{{--                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
+                                                                        <div class="chat-body">
+                                                                            <div class="chat-content text-left">
+                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            </div>
+                                                                        </div>
 
-{{--                                                                    </div>--}}
-{{--                                                                @else--}}
-{{--                                                                    <div class="chat chat-left substitute-user">--}}
+                                                                    </div>
+                                                                @else
+                                                                    <div class="chat chat-left substitute-user">
 
-{{--                                                                        <div class="chat-avatar">--}}
-{{--                                                                            <div class="badge block badge-substitute-user">--}}
-{{--                                                                                <i class="la la-user font-medium-2"></i>--}}
-{{--                                                                                @if($shipper != null)--}}
-{{--                                                                                    {{$shipper}}--}}
-{{--                                                                                @else--}}
-{{--                                                                                    Shipper--}}
-{{--                                                                                @endif--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
+                                                                        <div class="chat-avatar">
+                                                                            <div class="badge block badge-substitute-user">
+                                                                                <i class="la la-user font-medium-2"></i>
+                                                                                @if($shipper != null)
+                                                                                    {{$shipper}}
+                                                                                @else
+                                                                                    Shipper
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
 
-{{--                                                                        <div class="chat-body">--}}
-{{--                                                                            <div class="chat-content text-left">--}}
-{{--                                                                                <p>{!! $comment->comment !!}</p>--}}
-{{--                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>--}}
-{{--                                                                            </div>--}}
-{{--                                                                        </div>--}}
-{{--                                                                    </div>--}}
+                                                                        <div class="chat-body">
+                                                                            <div class="chat-content text-left">
+                                                                                <p>{!! $comment->comment !!}</p>
+                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
 
-{{--                                                                @endif--}}
+                                                                @endif
 
 
-{{--                                                            @endif--}}
-{{--                                                        @endforeach--}}
-{{--                                                    @endif--}}
+                                                            @endif
+                                                        @endforeach
+                                                    @endif
 
-{{--                                                </div>--}}
-{{--                                            </section>--}}
+                                                </div>
+                                            </section>
 
-{{--                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || ($sale_person && $sale_person->admin_id == Auth::id()) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))--}}
-{{--                                                <section class="chat-app-form">--}}
-{{--                                                    <form class="chat-app-input row" id="chat_form">--}}
-{{--                                                        <fieldset--}}
-{{--                                                                class="form-group position-relative has-icon-left col-10 m-0">--}}
-{{--                                                            <input type="hidden" id="last_comment_id"--}}
-{{--                                                                   value="{{$last_comment_id}}">--}}
-{{--                                                            <div class="form-control-position">--}}
-{{--                                                                <i class="la la-chevron-right"></i>--}}
-{{--                                                            </div>--}}
-{{--                                                            --}}{{--<input type="text" class="form-control" id="chat_input"--}}
-{{--                                                            --}}{{--placeholder="Type your message">--}}
-{{--                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>--}}
-{{--                                                        </fieldset>--}}
-{{--                                                        <div class="display-inline-block col-2">--}}
-{{--                                                            <fieldset--}}
-{{--                                                                    class="form-group has-icon-left m-0 mb-1">--}}
-{{--                                                                <button id="chat_send" type="button"--}}
-{{--                                                                        class="btn btn-block btn-purple chat_send" to="1"><i--}}
-{{--                                                                            class="la la-paper-plane-o d-lg-none"></i>--}}
-{{--                                                                    <span class="">Internal</span>--}}
-{{--                                                                </button>--}}
-{{--                                                            </fieldset>--}}
-{{--                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))--}}
-{{--                                                                <fieldset--}}
-{{--                                                                        class="form-group position-relative has-icon-left mb-1">--}}
-{{--                                                                    <button id="chat_send" type="button"--}}
-{{--                                                                            class="btn btn-block btn-outline-primary chat_send" to="0">--}}
-{{--                                                                        <i class="la la-paper-plane-o d-lg-none"></i>--}}
-{{--                                                                        <span class="">Shipper</span>--}}
-{{--                                                                    </button>--}}
-{{--                                                                </fieldset>--}}
-{{--                                                            @endif--}}
-{{--                                                            <fieldset--}}
-{{--                                                                    class="form-group has-icon-left">--}}
-{{--                                                                <button id="chat_send" type="button"--}}
-{{--                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i--}}
-{{--                                                                            class="la la-paper-plane-o d-lg-none"></i>--}}
-{{--                                                                    <span class="">Rider</span>--}}
-{{--                                                                </button>--}}
-{{--                                                            </fieldset>--}}
 
-{{--                                                        </div>--}}
-{{--                                                    </form>--}}
-{{--                                                </section>--}}
-{{--                                                <div class="row justify-content-center mt-1">--}}
-{{--                                                    <div class="col-2">--}}
-{{--                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="col-2">--}}
-{{--                                                        <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="col-3">--}}
-{{--                                                        <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="row">--}}
-{{--                                                        @if ($crm_details->damage_product_picture != null && $crm_details->product_packaging_picture != null && $crm_details->actual_product_picture != null)--}}
-{{--                                                            <div class="col-3 mr-2">--}}
-{{--                                                                <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.damage_product_image', ['id' => $crm_details->id])}}" target="_blank">View Damage Product</a></button>--}}
-{{--                                                            </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="row justify-content-center mt-1">--}}
-{{--                                                        <div class="col-4 mr-2">--}}
-{{--                                                            <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>--}}
-{{--                                                        </div>--}}
-{{--                                                        <div class="col-4 ml-4">--}}
-{{--                                                            <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image', ['id' => $crm_details->id])}}" target="_blank">View Actual Product</a></button>--}}
-{{--                                                        </div>--}}
-{{--                                                        @endif--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="row">--}}
-{{--                                                        @if ($crm_details->missing_product_picture != null && $crm_details->product_packaging_picture_for_content_short != null && $crm_details->actual_product_picture_for_content_short != null)--}}
-{{--                                                            <div class="col-3 mr-2">--}}
-{{--                                                                <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.missing_product_image', ['id' => $crm_details->id])}}" target="_blank">View Missing Product</a></button>--}}
-{{--                                                            </div>--}}
-{{--                                                            <div class="col-3 mr-1">--}}
-{{--                                                                <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image_for_content_short', ['id' => $crm_details->id])}}" target="_blank">View Actual Product</a></button>--}}
-{{--                                                            </div>--}}
-{{--                                                            <div class="col-3">--}}
-{{--                                                                <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image_for_content_short', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>--}}
-{{--                                                            </div>--}}
-{{--                                                        @endif--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))--}}
-{{--                                                <section class="chat-app-form">--}}
-{{--                                                    <form class="chat-app-input row" id="chat_form">--}}
-{{--                                                        <fieldset--}}
-{{--                                                                class="form-group position-relative has-icon-left col-10 m-0">--}}
-{{--                                                            <input type="hidden" id="last_comment_id"--}}
-{{--                                                                   value="{{$last_comment_id}}">--}}
-{{--                                                            <div class="form-control-position">--}}
-{{--                                                                <i class="la la-chevron-right"></i>--}}
-{{--                                                            </div>--}}
-{{--                                                            --}}{{--<input type="text" class="form-control" id="chat_input"--}}
-{{--                                                            --}}{{--placeholder="Type your message">--}}
-{{--                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>--}}
-{{--                                                        </fieldset>--}}
-{{--                                                        <div class="display-inline-block col-2">--}}
-{{--                                                            <fieldset--}}
-{{--                                                                    class="form-group position-relative has-icon-left m-0 mb-1">--}}
-{{--                                                                <button id="chat_send" type="button"--}}
-{{--                                                                        class="btn btn-block btn-purple chat_send" to="1"><i--}}
-{{--                                                                            class="la la-paper-plane-o d-lg-none"></i>--}}
-{{--                                                                    <span class="">Internal</span>--}}
-{{--                                                                </button>--}}
-{{--                                                            </fieldset>--}}
-{{--                                                            @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)))--}}
-{{--                                                                <fieldset--}}
-{{--                                                                        class="form-group position-relative has-icon-left m-0">--}}
-{{--                                                                    <button id="chat_send" type="button"--}}
-{{--                                                                            class="btn btn-block btn-outline-primary chat_send" to="0">--}}
-{{--                                                                        <i class="la la-paper-plane-o d-lg-none"></i>--}}
-{{--                                                                        <span class="">Shipper</span>--}}
-{{--                                                                    </button>--}}
-{{--                                                                </fieldset>--}}
-{{--                                                            @endif--}}
-{{--                                                            <fieldset--}}
-{{--                                                                    class="form-group has-icon-left">--}}
-{{--                                                                <button id="chat_send" type="button"--}}
-{{--                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i--}}
-{{--                                                                            class="la la-paper-plane-o d-lg-none"></i>--}}
-{{--                                                                    <span class="">Rider</span>--}}
-{{--                                                                </button>--}}
-{{--                                                            </fieldset>--}}
-{{--                                                        </div>--}}
-{{--                                                    </form>--}}
-{{--                                                </section>--}}
-{{--                                                <div class="row justify-content-center mt-1">--}}
-{{--                                                    <div class="col-2">--}}
-{{--                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="col-2">--}}
-{{--                                                        <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>--}}
-{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            @endif--}}
+                                                <section class="chat-app-form">
+                                                    <form class="chat-app-input row" id="chat_form">
+                                                        <fieldset
+                                                                class="form-group position-relative has-icon-left col-10 m-0">
+                                                            <input type="hidden" id="last_comment_id"
+                                                                   value="">
+                                                            <div class="form-control-position">
+                                                                <i class="la la-chevron-right"></i>
+                                                            </div>
+                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"></textarea>
+                                                        </fieldset>
+                                                        <div class="display-inline-block col-2">
+                                                            <fieldset
+                                                                    class="form-group has-icon-left m-0 mb-1">
+                                                                <label id="chat_send" type="button"
+                                                                        class="btn btn-block btn-purple chat_send" to="1"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">NOCR</span>
+                                                                </label>
+                                                            </fieldset>
+                                                            <fieldset
+                                                                    class="form-group position-relative has-icon-left mb-1">
+                                                                <label id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-primary chat_send" to="0">
+                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Sales</span>
+                                                                </label>
+                                                            </fieldset>
+                                                            <fieldset
+                                                                    class="form-group has-icon-left">
+                                                                <label id="chat_send" type="button"
+                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
+                                                                            class="la la-paper-plane-o d-lg-none"></i>
+                                                                    <span class="">Finance</span>
+                                                                </label>
+                                                            </fieldset>
 
-{{--                                        </div>--}}
+                                                        </div>
+                                                    </form>
+                                                </section>
+                                        </div>
 
-{{--                                    </div>--}}
+                                    </div>
                                 </div>
 
                                 <hr>
@@ -546,12 +446,12 @@
             border-right-color: deepskyblue;
         }
 
-        .chat-application .chats .admin .chat-content {
+        .chat-application .chats .sales .chat-content {
             color: #000000;
             background-color: #edeef0;
         }
 
-        .chat-application .chats .admin .chat-body .chat-content:before {
+        .chat-application .chats .sales .chat-body .chat-content:before {
             border-left-color: #edeef0;
         }
 
@@ -563,20 +463,20 @@
             vertical-align: middle !important;
         }
 
-        .chat-application .chats .admin.internal .chat-content {
+        .chat-application .chats .sales.operation .chat-content {
             color: #ffffff;
             background-color: #ab45d7;
         }
 
-        .chat-application .chats .admin.internal .chat-body .chat-content:before {
+        .chat-application .chats .sales.operation .chat-body .chat-content:before {
             border-left-color: #ab45d7;
         }
-        .chat-application .chats .admin.rider .chat-content {
+        .chat-application .chats .sales.finance .chat-content {
             color: #ffffff;
             background-color: #18374A;
         }
 
-        .chat-application .chats .admin.rider .chat-body .chat-content:before {
+        .chat-application .chats .sales.finance .chat-body .chat-content:before {
             border-left-color: #18374A;
         }
     </style>
