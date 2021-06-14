@@ -6,6 +6,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Jobs\ProcessShipmentStatusWebhook;
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class ShipmentStatusWebhookController extends Controller
 {
     static public function webhook_subscription($shipment_id, $shipper_status_id){
 
+        $date = Carbon::now()->toDateTimeString();
         $shipment = Shipment::find($shipment_id);
         $user_id = $shipment->user_id;
 
@@ -27,13 +29,14 @@ class ShipmentStatusWebhookController extends Controller
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
             $data['status'] = ShipmentStatus::find($shipper_status_id)->name;
+            $data['date_time'] = $date;
             $data['url'] = $subscriber->url;
             dispatch(new ProcessShipmentStatusWebhook($data));
 
         }
     }
 
-    static public function webhook_dispatch($url, $user_id, $tracking_number, $status){
+    static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date){
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 3, 'timeout' => 3]);
         for($i = 0; $i < $attempts; $i++){
@@ -42,7 +45,8 @@ class ShipmentStatusWebhookController extends Controller
                 $response = $client->post('', [
                     'form_params' => [
                         'tracking_number' => $tracking_number,
-                        'status' => $status
+                        'status' => $status,
+                        'date_time' => $date
                     ]
                 ]);
                 $status_code = $response->getStatusCode();
