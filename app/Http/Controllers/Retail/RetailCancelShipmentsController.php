@@ -13,6 +13,7 @@ use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Auth;
 
 class RetailCancelShipmentsController extends Controller
 {
