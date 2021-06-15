@@ -43,7 +43,9 @@ class FTLController extends Controller
                 $join->on('spt.user_id','users.id')
                     ->where('spt.status',0);
         })->leftjoin('admins as sale_person','sale_person.id','spt.admin_id')
-            ->where('users.status',3)->where('users.blacklist',0)
+            ->where('users.status',3)
+            ->where('users.blacklist',0)
+            ->where('users.account_type_id',2)
             ->get(['users.id as id','users.name as name','sale_person.id as sale_person_id']);
 
         $cities = City::where('status',1)->where('business_category_id',1)->get(['id','name']);
@@ -92,7 +94,7 @@ class FTLController extends Controller
                         }
                     }
                     if(session('role_id') == 1 || in_array(516,session('permissions'))) {
-                        if ($data->status_id == 3) {
+                        if ($data->status_id == 3 && $data->shipper_id == null) {
                             $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Book</div></button>';
                         }
                     }
@@ -161,7 +163,9 @@ class FTLController extends Controller
             $join->on('spt.user_id','users.id')
                 ->where('spt.status',0);
         })->leftjoin('admins as sale_person','sale_person.id','spt.admin_id')
-            ->where('users.status',3)->where('users.blacklist',0)
+            ->where('users.status',3)
+            ->where('users.blacklist',0)
+            ->where('users.account_type_id',2)
             ->get(['users.id as id','users.name as name','sale_person.id as sale_person_id']);
 
         $sale_persons = Admin::where('status',1)->where('role_id',7)->get(['id','name']);
