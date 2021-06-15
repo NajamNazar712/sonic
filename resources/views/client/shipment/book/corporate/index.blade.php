@@ -349,7 +349,7 @@
                                         <div id="frieght_div" class="form-group d-none">
                                             <select name="approve_frieght_request" class="select2" id="approve_frieght_request" data-rule-required="true" data-msg-required="Request ID is required">
                                                 @foreach($approve_ftl_requests as $request)
-                                                    <option value="{{ $request->id }}" selected="selected">{{ $request->id }}</option>
+                                                    <option value="{{ $request->id }}">{{ $request->id }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -376,6 +376,19 @@
                                                 @endforeach
                                             </select>
                                         </div>
+
+                                        <div class="form-group d-none" id="charges_div">
+                                           <h6>Charges</h6>
+                                            <input type="text" name="ftl_charges" id="ftl_charges" class="form-control" readonly>
+                                        </div>
+
+                                        <div class="form-group d-none" id="ftl_collection_type_div">
+                                            <select name="ftl_collection_type" class="select2" id="ftl_collection_type" data-rule-required="true" data-msg-required="Mode of Collection is required">
+                                                <option value="1">Invoice</option>
+                                                <option value="2">Cash</option>
+                                            </select>
+                                        </div>
+
                                     </div>
                                 </div>
 
@@ -606,9 +619,39 @@
                 }
             });
 
-            $('#approve_frieght_request').select2({
+            $('#approve_frieght_request').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Approvde Frieght Request*'
+            }).bind('change',function(){
+                var id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('cod.shipment.book.get_ftl_info') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status == 1) {
+                          
+                             $('#consignee_city').val(data.data.destination_id).trigger('change');
+                             //$('#new_pickup_city').val(data.data.origin_id).trigger('change');
+                             $('.quantity').val(data.data.quantity).trigger('change');
+                             $('#estimated_weight').val(data.data.weight).trigger('change');
+                             $('#ftl_charges').val(data.data.total_charges);
+                             $('#shipping_mode').val(2).trigger('change');
+
+                        } else {
+
+                            var error = 'No Data found for the selected request';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
             });
 
             $('#amount').bind('keypress', function () {
@@ -779,6 +822,8 @@
                         $('#pieces_quantity').removeClass('d-none');
                         $('#self_collection_div').removeClass('d-none');
                         $('#frieght_div').addClass('d-none');
+                        $('#ftl_collection_type_div').addClass('d-none');
+                        $('#charges_div').addClass('d-none');
                     }
                     else if (service_type == 2) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -802,6 +847,8 @@
                         $('#consignee_header_info').html('Consignee Information');
                         $('#self_collection_div').addClass('d-none');
                         $('#frieght_div').addClass('d-none');
+                        $('#ftl_collection_type_div').addClass('d-none');
+                        $('#charges_div').addClass('d-none');
                     }
                     else if (service_type == 3) {
                         $('#shipping_header_div').removeClass('col col_6');
@@ -825,6 +872,8 @@
                         $('#consignee_header_info').html('Consignee Information');
                         $('#self_collection_div').addClass('d-none');
                         $('#frieght_div').addClass('d-none');
+                        $('#ftl_collection_type_div').addClass('d-none');
+                        $('#charges_div').addClass('d-none');
                     }
                     else if (service_type == 5) {
                         $('#shipping_header_div').removeClass('col col_custom');
@@ -848,6 +897,8 @@
                         $('#try_and_buy_charges_div').addClass('d-none');
                         $('#self_collection_div').addClass('d-none');
                         $('#frieght_div').addClass('d-none');
+                        $('#ftl_collection_type_div').addClass('d-none');
+                        $('#charges_div').addClass('d-none');
                         var consignee_email = $('input[name="consignee_email_address"]');
                         consignee_email.attr('data-toggle', 'tooltip');
                         consignee_email.attr('data-placement', 'top');
@@ -860,6 +911,10 @@
                         $('#frieght_div').removeClass('d-none');
                         $('#payment_div').addClass('d-none');
                         $('#try_and_buy_charges_div').addClass('d-none');
+                        $('#charges_div').removeClass('d-none');
+                        $('#ftl_collection_type_div').removeClass('d-none');
+                        //$('#shipping_mode').prop('disabled', false);
+
                     }
                     $('#booking_form #selected_service_type').val(service_type);
 
@@ -1284,6 +1339,12 @@
                 placeholder: 'Same-day Timing*'
             }).bind('change', function() {
                 $(this).valid();
+            });
+
+
+            $('#ftl_collection_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Collection Type*'
             });
 
             $('#payment_mode').select2({
