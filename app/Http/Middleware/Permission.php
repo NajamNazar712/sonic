@@ -958,8 +958,8 @@ class Permission
             'runner.intransit' => 501,
             'fleet.index' => 498,
             'route_management.index' => 499,
-
-
+            'settings.escalation.launched.edit.index' => 507,
+           
 
            
         ],
