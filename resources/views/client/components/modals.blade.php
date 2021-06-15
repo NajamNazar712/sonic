@@ -26,7 +26,7 @@
                     
                @endphp
 
-                <div class="modal-body password_change_body text-left" id="password_change_body">
+                <div class="modal-body password_change_body text-justify" id="password_change_body">
                             <p>This Services Agreement (“Agreement”) is hereby made on {{ date("l") }} day of {{date("d-m-Y")}}, (“Effective Date”) by and between TRAX Online (Private) Limited, a registered private limited company having incorporation number 0111649 and registered address at Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi duly represented by Mr. Fawad Ahmed s/o Mr. Muhammad Ayub in his capacity as Company Secretary (hereinafter referred to “TRAX” along with its agents, representatives, successors-in-interests, assigns etc) for the first part And <strong>{{$shipper_name}}</strong> a registered private limited company and registered address at <strong>{{$address}}</strong> duly represented by Mr. /Ms. <strong>{{$poc}}</strong>. in his capacity as (hereinafter referred to “Shipper” along with its agents, representatives, successors-in-interests, assigns etc) for the other part</p>
                                 <p>TRAX Online and <strong>{{$shipper_name}}</strong>. shall be hereinafter collectively referred to as “Parties” and individually as “Party”. 
                                 </p>
