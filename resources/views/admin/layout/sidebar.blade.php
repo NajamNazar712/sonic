@@ -492,7 +492,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455,509], session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                     <ul class="menu-content">
@@ -542,11 +542,15 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(120, session('permissions')))
+                        @if (session('role_id') == 1 || count(array_intersect([120,509], session('permissions'))))
                             <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
                                 <ul class="menu-content">
                                     <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
                                     <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
+                                    @if (session('role_id') == 1 || in_array(509, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.finance.ftl_invoice.index') }}">FTL Invoices</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
