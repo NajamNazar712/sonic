@@ -9264,4 +9264,116 @@ class AdminFinanceController extends Controller
         $writer->save('php://output');
     }
 
+    public function ftl_invoice_index()
+    {
+        return view('admin.finance.ftl_invoices');
+    }
+
+    public function ftl_invoice_list(Request $request)
+    {
+        $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
+            ->join('cities as c', 'u.city_id', '=', 'c.id')
+            ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
+            ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->whereIn('is.id',[1,2]);
+
+        $datatables = Datatables::of($invoices)
+            ->addColumn('invoice_number_button', function($invoice) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
+            })
+            ->editColumn('total_charges', function($invoice) {
+                return number_format($invoice->total_charges, 2);
+            })
+            ->editColumn('total_gst', function($invoice) {
+                return number_format($invoice->total_gst, 2);
+            })
+            ->editColumn('total_invoice_amount', function($invoice) {
+                return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
+            })
+            ->editColumn('created_at', function($invoice) {
+                return Carbon::parse($invoice->created_at)->format('Y-m-d');
+            })
+            ->editColumn('invoicing_date', function($invoice) {
+                return Carbon::parse($invoice->invoicing_date)->format('Y-m-d');
+            })
+            ->addColumn('aging', function($invoice) {
+                if ($invoice->status_id == 1) {
+                    $days = Carbon::now()->diffInDays($invoice->created_at);
+
+                    if ($days == 0) {
+                        return '-';
+                    }
+                    else {
+                        return $days;
+                    }
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->editColumn('due_date', function($invoice) {
+                return Carbon::parse($invoice->due_date)->format('Y-m-d');
+            })
+            ->editColumn('received_date', function($invoice) {
+                if ($invoice->received_date) {
+                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('deposit_date', function($invoice) {
+                if ($invoice->deposit_date) {
+                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('due_date', function($invoice) {
+                return Carbon::parse($invoice->due_date)->format('Y-m-d');
+            })
+            ->addColumn('overdue_by', function($invoice) {
+                if ($invoice->status_id == 1) {
+                    $days = Carbon::now()->diffInDays($invoice->due_date);
+
+                    if ($days == 0) {
+                        return '-';
+                    }
+                    else {
+                        return $days;
+                    }
+                }
+                else {
+                    return '-';
+                }
+            })
+            ->addColumn('action', function($invoice) {
+                $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+                $mark_as_received_button = '<button type="button" class="dropdown-item mark_as_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $dropdown .= $export_to_excel_button;
+
+                if (session('role_id') == 1 || in_array(510, session('permissions')) ) {
+                    $dropdown .= $mark_as_received_button;
+                }
+
+
+                $dropdown .= '
+                </div>
+              </div>
+            ';
+
+                return $dropdown;
+            });
+
+        return $datatables->make(true);
+    }
+
 }

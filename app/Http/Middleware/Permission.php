@@ -960,7 +960,7 @@ class Permission
             'runner.intransit' => 501,
             'fleet.index' => 498,
             'route_management.index' => 499,
-
+            'finance.ftl_invoice.index' => 509,
 
 
            

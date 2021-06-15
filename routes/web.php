@@ -1662,7 +1662,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@invoice_for_reimbursement_index')->name('index');
             Route::get('generate', 'Admins\AdminFinanceController@invoice_for_reimbursement_generate')->name('generate');
         });
-
+        Route::prefix('ftl_invoice')->name('ftl_invoice.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@ftl_invoice_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@ftl_invoice_list')->name('list');
+        });
 
 
         Route::prefix('retail')->name('retail.')->group(function () {
