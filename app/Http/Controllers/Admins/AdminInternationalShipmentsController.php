@@ -253,7 +253,7 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function shipment_status_index(){
-        $shipment_status = ShipmentStatus::where('status', 1)->whereNotIn('id', [1])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [1,2,3,4,5,8,12,13,14,17,18,20,21,22,23,24,25,47,48])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 

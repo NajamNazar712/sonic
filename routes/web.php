@@ -2140,12 +2140,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
 
-        Route::prefix('add')->name('add.')->group(function(){
-            Route::get('','Admins\AdminShipmentCancelController@add_index')->name('index');
-            Route::post('shipment_info', 'Admins\AdminShipmentCancelController@get_shipment_info')->name('shipment_info');
-            Route::post('store','Admins\AdminShipmentCancelController@cancelled_shipments_store')->name('store');
-        });
-
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
         Route::put('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
@@ -3057,6 +3051,11 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('details_print', 'Retail\RetailFinanceController@retail_done_payments_details_print')->name('print');
             Route::post('details', 'Retail\RetailFinanceController@retail_done_payments_details')->name('details');
         });
+    });
+    Route::prefix('cancel_shipments')->name('cancel_shipments.')->group(function(){
+        Route::get('','Retail\RetailCancelShipmentsController@add_index')->name('index');
+        Route::post('shipment_info', 'Retail\RetailCancelShipmentsController@get_shipment_info')->name('shipment_info');
+        Route::post('store','Retail\RetailCancelShipmentsController@cancelled_shipments_store')->name('store');
     });
 
 });
