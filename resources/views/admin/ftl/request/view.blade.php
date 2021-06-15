@@ -454,6 +454,7 @@
                 dropdownParent: $('#EditShipperModal')
             });
 
+
             $('#update_ftl_request_form #vendor').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Vendor',
                 width: '100%',
@@ -494,6 +495,15 @@
                     error.addClass('w-100').appendTo(element.parent('.col-6'));
                 },
             });
+
+            $('#edit_shipper_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+            });
+
 
             $("#update_ftl_request_form #add_other_cost").on('click',function (){
                 var other_cost = $('#update_ftl_request_form #other_cost').val();
