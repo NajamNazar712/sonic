@@ -1336,7 +1336,8 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>
                               <tr>
-                                
+                                <td class="color primary border twice-bottom twice-left"><strong>Return City</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>
                               <tr>
                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
