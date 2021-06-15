@@ -460,6 +460,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list','Admins\FTLController@ftl_request_list')->name('list');
             Route::get('/view/{id}','Admins\FTLController@ftl_request_view')->name('view');
             Route::post('/add','Admins\FTLController@ftl_request_add')->name('add');
+            Route::prefix('comment')->name('comment.')->group(function (){
+                Route::post('/add','Admins\FTLController@ftl_request_add_comment')->name('add');
+                Route::post('/get','Admins\FTLController@ftl_request_get_comments')->name('get');
+            });
             Route::prefix('update')->name('update.')->group(function (){
                 Route::post('/shipper/{id}','Admins\FTLController@ftl_request_update_shipper')->name('shipper');
                 Route::post('/status/{id}','Admins\FTLController@ftl_request_update_status')->name('status');

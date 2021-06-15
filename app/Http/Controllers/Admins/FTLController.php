@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\VehicleType;
 use App\Http\Models\City;
 use App\Http\Models\TransportModeVendor;
@@ -21,11 +22,19 @@ use Yajra\Datatables\Datatables;
 
 class FTLController extends Controller
 {
+    public $sale_role_ids = array();
+    public $finance_role_ids = array();
+    public $operation_role_ids = array();
+
     public function __construct()
     {
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
+
+        $this->sale_role_ids = AdminRole::where('department_id',7)->pluck('id')->toArray();
+        $this->finance_role_ids = AdminRole::where('department_id',4)->pluck('id')->toArray();
+        $this->operation_role_ids = AdminRole::where('department_id',6)->pluck('id')->toArray();
     }
 
     public function ftl_request_index()
@@ -39,7 +48,7 @@ class FTLController extends Controller
 
         $cities = City::where('status',1)->where('business_category_id',1)->get(['id','name']);
 
-        $sale_persons = Admin::where('status',1)->where('role_id',7)->get(['id','name']);
+        $sale_persons = Admin::where('status',1)->whereIn('role_id',$this->sale_role_ids)->get(['id','name']);
 
         $vehicles = VehicleType::get(['id','name']);
 
@@ -158,7 +167,10 @@ class FTLController extends Controller
 
         $ftl_costs = FtlRequestAdditionalCost::where('ftl_request_id',$ftl->id)->get(['amount','cost_type']);
 
-        $comments = FtlComment::where('ftl_request_id',$ftl->id)->get();
+        $comments = FtlComment::leftjoin('admins as a','a.id','ftl_comments.comment_by_id')
+            ->where('ftl_comments.ftl_request_id',$ftl->id)
+            ->select(['ftl_comments.id as id','ftl_comments.comment as comment','ftl_comments.comment_by as comment_by','ftl_comments.comment_by_id as commenter_id','ftl_comments.created_at as created_at','a.name as commenter'])
+            ->get();
 
        return view('admin.ftl.request.view',compact('ftl','ftl_status_history','shippers','sale_persons','vendors','ftl_costs','comments'));
     }
@@ -209,6 +221,7 @@ class FTLController extends Controller
             if($request->freight_charges > 0)
             {
                 $ftl->status_id = 2;
+                $ftl->updated_by = Auth::id();
                 $this::FTLRequestStatusHistory($ftl->id,2,Auth::id());
             }
 
@@ -224,6 +237,7 @@ class FTLController extends Controller
             }
 
             $ftl->status_id = 3;
+            $ftl->updated_by = Auth::id();
             $ftl->update();
             $this::FTLRequestStatusHistory($ftl->id,3,Auth::id());
             return back()->with(['success'=>'FTL Request Approved Successfully']);
@@ -237,6 +251,7 @@ class FTLController extends Controller
             }
 
             $ftl->status_id = 4;
+            $ftl->updated_by = Auth::id();
             $ftl->update();
             $this::FTLRequestStatusHistory($ftl->id,4,Auth::id());
             return back()->with(['success'=>'FTL Request Rejected Successfully']);
@@ -244,6 +259,51 @@ class FTLController extends Controller
         else{
             return back()->with(['error'=>'Invalid Action']);
         }
+     }
+
+     public function ftl_request_get_comments(Request $request)
+     {
+         $comments = FtlComment::leftjoin('admins as a','a.id','ftl_comments.comment_by_id')
+             ->where('ftl_comments.ftl_request_id',$request->request_id)
+             ->select(['ftl_comments.id as id','ftl_comments.comment as comment','ftl_comments.comment_by as comment_by','ftl_comments.comment_by_id as commenter_id','ftl_comments.created_at as created_at','a.name as commenter']);
+        if($comments->exists())
+         {
+             $comments = $comments->get();
+             return response()->json(['status'=>1,'comments'=>$comments]);
+         }
+     }
+
+     public function ftl_request_add_comment(Request $request)
+     {
+         if(in_array(Auth::user()->role_id,$this->sale_role_ids))
+         {
+             $comment_by = 0;
+         }
+         elseif(in_array(Auth::user()->role_id,$this->finance_role_ids))
+         {
+             $comment_by = 2;
+         }
+         elseif(in_array(Auth::user()->role_id,$this->operation_role_ids))
+         {
+             $comment_by = 1;
+         }
+         else {
+             return response()->json(['status'=>0,'error'=>'You are not allowed to comment on the request']);
+         }
+
+         $comment = new FtlComment();
+         $comment->ftl_request_id = $request->request_id;
+         $comment->comment_by_id = Auth::id();
+         $comment->comment_by = $comment_by;
+         $comment->comment = $request->comment;
+         $comment->save();
+
+         $data = FtlComment::leftjoin('admins as a','a.id','ftl_comments.comment_by_id')
+             ->where('ftl_comments.id',$comment->id)
+             ->select(['ftl_comments.comment as comment','ftl_comments.comment_by as commented_by','ftl_comments.created_at as created_at','a.name as commenter'])
+             ->first();
+
+         return response()->json(['status'=>1,'comment'=>$data]);
      }
 
     static public function FTLRequestStatusHistory($request_id,$status_id,$user_id)
