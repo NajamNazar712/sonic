@@ -97,8 +97,17 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || in_array(116, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.ftl.request.index')}}">FTL Requests</a></li>
+                        @if (session('role_id') == 1 || count(array_intersect([511, 516], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">FTL</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(511, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.ftl.request.index')}}">FTL Requests</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(516, session('permissions')))
+                                        <li><a class="menu-item" href="">Walkin FTL Booking</a></li>
+                                    @endif
+                                </ul>
+                            </li>
                         @endif
                         @if (session('role_id') == 1 || in_array(117, session('permissions')))
                             <li class="menu-item"><a href="{{ route('admin.cancelled_shipments.index') }}">Cancelled</a>

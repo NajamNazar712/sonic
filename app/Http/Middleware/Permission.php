@@ -281,6 +281,10 @@ class Permission
             'delivery.signature.index' => 441,
             'delivery.signature.list' => 441,
 
+            'ftl.request.index' => 511,
+            'ftl.request.list' => 511,
+            'ftl.request.add' => 512,
+            'ftl.request.view' => 513,
 
             'return.index' => 44,
             'return.list' => 44,
