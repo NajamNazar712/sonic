@@ -55,7 +55,7 @@
                     <form id="agreement-form" class="form form-horizontal" method="post" action="{{route('cod.update.agreement_status')}}">
                         @csrf
                         <div class="form-body">
-                            <p><label class="checkbox-inline form-group"><input type="checkbox" id="agreement_signed" value="1" required name="agreement_signed" data-msg-required=""></label> &nbsp; &nbsp;I Agree</p>
+                            <p><label class="checkbox-inline form-group"><input type="checkbox" id="agreement_signed" value="1" required name="agreement_signed" data-msg-required="Please accept company's service terms and conditions."> &nbsp; &nbsp;I Agree</label></p>
                             
                                     {{-- <label class="checkbox-inline  form-group"><input type="checkbox" id="agreement_signed" value="1" required name="agreement_signed" data-msg-required="Tracking Number is required"></label> --}}
                     
