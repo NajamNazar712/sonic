@@ -86,12 +86,12 @@ class RetailCashDepositController extends Controller
         foreach ($cash_deposit_shipments as $cash_deposit_shipment){
             if(array_key_exists($cash_deposit_shipment->shipping_mode_id, $shipping_mode_data)){
                 $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cn']++;
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] + $cash_deposit_shipment->shipment->amount;
+                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] + $cash_deposit_shipment->retail_shipment->total_charges;
             }
             else{
                 $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['name'] = $cash_deposit_shipment->shipping_mode->name;
                 $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cn'] = 1;
-                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $cash_deposit_shipment->shipment->amount;
+                $shipping_mode_data[$cash_deposit_shipment->shipping_mode_id]['total_cash'] = $cash_deposit_shipment->retail_shipment->total_charges;
             }
         }
         $html = '<!doctype html>

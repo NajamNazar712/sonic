@@ -630,8 +630,8 @@
                     <li><a class="menu-item" href="{{ route('admin.quick_tracking.index') }}">Quick Tracking</a></li>
 
                     @if(session('role_id') == 1 || in_array(204, session('permissions')))
-                        <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a>
-                        </li>
+                        <li class=" nav-item"><a href="{{ route('admin.cx_quick_tracking.cx_index') }}"><span class="menu-title">CX Quick Tracking</span></a></li>
+
                     @endif
                     @if (session('role_id') == 1 || in_array(1, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Dispute</a></li>
@@ -803,6 +803,10 @@
 
                     @if (session('role_id') == 1 || in_array(398, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.international.tracking_upload.index') }}">International Tracking Upload</a></li>
+                    @endif
+
+                    @if (session('role_id') == 1 || in_array(508, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.international.shipment_status.index') }}">International Shipment Status</a></li>
                     @endif
 
                     @if (session('role_id') == 1 || in_array(471, session('permissions')))

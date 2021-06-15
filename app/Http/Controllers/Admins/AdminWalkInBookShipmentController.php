@@ -796,6 +796,9 @@ class AdminWalkInBookShipmentController extends Controller
                 $table_end .= '<tr>
                                 <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
                               </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top"><em><strong>Disclaimer: </strong>Shipment Lost/Damaged *will be treated for 100 rs /KG according to our *Claim Policy</em></td>
+                              </tr>
                             </tbody>
                           </table>
 

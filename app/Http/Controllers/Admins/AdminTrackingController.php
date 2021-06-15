@@ -18,6 +18,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\http\Models\CRM\CrmSettings;
 use App\http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -948,21 +949,30 @@ class AdminTrackingController extends Controller
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;
 
+
+
                     if ($shipment_payment_journey) {
+
                         foreach ($shipment_payment_journey as $journey) {
                             $journey_details = array();
-                            $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                        if($journey->payment_id == null){
-                                $journey_details['status'] = $journey->status->name;
+                            if($shipment->shipment_type == 1){
+                                $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             }
                             else{
-                                $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                                $payment = RetailDonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             }
-                            $journey_details['user'] = $journey->admin->name;
-                            $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 
-                            $details['payment_history'][] = $journey_details;
+                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        if($journey->payment_id == null){
+                            $journey_details['status'] = $journey->status->name;
+                        }
+                        else{
+                            $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-shipment_type="' . $shipment->shipment_type . '" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                        }
+                        $journey_details['user'] = $journey->admin->name;
+                        $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
+
+                        $details['payment_history'][] = $journey_details;
                         }
                     }
 
