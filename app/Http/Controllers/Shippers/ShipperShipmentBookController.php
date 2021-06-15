@@ -126,7 +126,7 @@ class ShipperShipmentBookController extends Controller
         $user_return_info = new UserReturnInfo();
 
         $user_return_info->user_id = $user_id;
-        $user_return_info->pickup_address = $address;
+        $user_return_info->return_address = $address;
         $user_return_info->poc = $person_of_contact;
         $user_return_info->vendor = $vendor;
         $user_return_info->phone = $phone_number;
@@ -182,11 +182,11 @@ class ShipperShipmentBookController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
-        $shipment_info = new ShipmentDetail();
-        $shipment_info->shipment_id = $shipment_id;
-        $shipment_info->is_open = $open_shipment;
+        $shipment_detail = new ShipmentDetail();
+        $shipment_detail->shipment_id = $shipment_id;
+        $shipment_detail->is_open = $open_shipment;
 		$shipment_detail->return_address_id = $return_address_id;
-        $shipment_info->save();
+        $shipment_detail->save();
 
         if($self_collection == TRUE){
             $shipment_self_collection = new SelfCollectionShipment();
@@ -336,7 +336,7 @@ class ShipperShipmentBookController extends Controller
         //     $date = Carbon::tomorrow();
         // }
         $booking_types = BookingType::where('id','!=', 4)->get();
-        $user = User::with('shipping.city')->find(session('user_id'));
+        $user = User::with('shipping.city', 'return.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         if(session('user_id') == 5982 || session('user_id') == 3324){
@@ -503,7 +503,7 @@ class ShipperShipmentBookController extends Controller
                         }*/
 
                         $return_city_id = $request->input('new_return_city');
-                        if($request->input('make_default_address') == 1){
+                        if($request->input('make_return_default_address') == 1){
                             $return_default = 1;
                         }
                         else{

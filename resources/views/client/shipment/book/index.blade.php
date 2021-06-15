@@ -93,6 +93,65 @@
 
 										</div>
 
+										<h4 class="form-section mb-2 text-center">Return Information</h4>
+										<div class="form-group">
+											<select name="return_address" class="select2" id="return_address" data-rule-required="true" data-msg-required="Return Address is required">
+
+												@php ($default_return_address = FALSE)
+
+												@foreach($user->return as $return_information)
+													@if ($return_information['hidden'] == 0 && $return_information['status'] == 1)
+														@if ($return_information['default_address'] == 1)
+															@php ($default_return_address = TRUE)
+
+															<option value="{{ $return_information['id'] }}" data-city-id="{{ $return_information['city']['id'] }}" data-city-name="{{ $return_information['city']['name'] }}" selected >{{ $return_information['poc'] }}: {{ $return_information['return_address'] }}, {{ $return_information['city']['name'] }}</option>
+														@else
+															<option value="{{ $return_information['id'] }}" data-city-id="{{ $return_information['city']['id'] }}" data-city-name="{{ $return_information['city']['name'] }}">{{ $return_information['poc'] }}: {{ $return_information['return_address'] }}, {{ $return_information['city']['name'] }}</option>
+														@endif
+													@endif
+												@endforeach
+												<option value="0">New</option>
+											</select>
+										</div>
+
+										<div class="form-group">
+											<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="return_city_name"></p>
+										</div>
+
+
+										<div id="new_return_address" class="d-none">
+											<div class="form-group">
+												<textarea name="new_return_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+												<input type="checkbox" name="make_return_default_address" value="1">Make default address<br>
+											</div>
+
+											<div class="form-group">
+												<input type="text" name="new_return_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters">
+											</div>
+
+											<div class="form-group">
+												<input type="text" name="new_return_vendor" class="form-control" placeholder="Vendor" data-rule-maxlength="100" data-msg-maxlength="Vendor can be maximum 100 characters">
+											</div>
+
+											<div class="form-group">
+												<input type="text" name="new_return_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+											</div>
+
+											<div class="form-group">
+												<input type="email" name="new_return_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
+											</div>
+
+											<div class="form-group">
+												<select name="new_return_city" class="select2" id="new_return_city" data-rule-required="true" data-msg-required="City is required">
+													@foreach($cities as $city)
+														<option value="{{ $city->id }}">{{ $city->name }}</option>
+													@endforeach
+												</select>
+											</div>
+
+										</div>
+
+
 
 										@if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
@@ -1016,6 +1075,48 @@
 
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
+
+			//return address start
+
+			function set_return_city(){
+				if ($('#return_address').val() == 0) {
+					var return_city_id = $('#new_return_city').val();
+					$('#return_city_name').addClass('d-none');
+				}
+				else {
+					var return_city_id = $('#return_address').find(':selected').data('city-id');
+					var return_city_name = $('#return_address').find(':selected').data('city-name');
+					$('#return_city_name').removeClass('d-none');
+					$('#return_city_name').html('City : ' + return_city_name);
+				}
+			}
+			$('#return_address').select2({
+				width: '100%',
+				placeholder: 'Return Address*'
+			}).bind('change', function () {
+				$(this).valid();
+
+				set_return_city();
+
+				if (this.value == 0) {
+					$('#new_return_address').removeClass('d-none');
+				} else {
+					$('#new_return_address').addClass('d-none');
+				}
+
+			});
+
+			$('#new_return_city').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'City*'
+			}).bind('change', function() {
+				$(this).valid();
+
+			});
+
+			//return address end
+
+
 
 			$("#consignee_info").select2({
 				width:'100%',
