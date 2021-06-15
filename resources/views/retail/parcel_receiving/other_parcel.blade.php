@@ -157,7 +157,7 @@
                                             var rowNo = table.rows().count();
                                             table.row.add([rowNo + 1, data.details.tracking_number]).node().id = data.details.id;
                                             table.draw(false);
-                                            table.order([0, 'desc']).draw();
+                                            table.order([0, 'asc']).draw();
                                             $('#add_shipment_form button.add').prop('disabled', false);
                                             $('#other_parcel_receiving_from button.confirm').prop('disabled', false);
                                             all_shipment_ids.push(data.details.id);

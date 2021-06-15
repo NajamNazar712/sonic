@@ -1,13 +1,13 @@
 @extends('retail.layout.master')
 
-@section('title', 'Parcel Receiving')
+@section('title', 'Other Parcel Receiving')
 
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-header row">
                 <h1 class="mb-1">
-                    Parcel Receiving
+                   Other Parcel Receiving
                 </h1>
             </div>
             <div class="card">
@@ -240,7 +240,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
-                scrollX: true, scrollY: '500px',
+                scrollX: false, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
