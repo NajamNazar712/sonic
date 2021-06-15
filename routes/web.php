@@ -2642,6 +2642,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('international_store', 'Admins\AdminWalkInBookShipmentController@international_walk_in_store')->name('international_store');
             Route::post('check_international_min_charges', 'Admins\AdminWalkInBookShipmentController@check_international_min_charges')->name('check_international_min_charges');
             Route::post('check_international_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_international_standard_weight')->name('check_international_standard_weight');
+
+            Route::prefix('ftl')->name('ftl.')->group(function () {
+                Route::get('', 'Admins\AdminWalkInBookShipmentController@ftl_book_index')->name('walk_in');
+                Route::post('', 'Admins\AdminWalkInBookShipmentController@get_ftl_info')->name('get_ftl_info');
+                Route::post('store', 'Admins\AdminWalkInBookShipmentController@ftl_store')->name('store');
+            });
+
         });
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@history_index')->name('walk_in_history');

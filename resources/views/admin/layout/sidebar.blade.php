@@ -104,7 +104,7 @@
                                         <li><a class="menu-item" href="{{route('admin.ftl.request.index')}}">FTL Requests</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(516, session('permissions')))
-                                        <li><a class="menu-item" href="">Walkin FTL Booking</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.shipment.book.ftl.walk_in')}}">Walkin FTL Booking</a></li>
                                     @endif
                                 </ul>
                             </li>

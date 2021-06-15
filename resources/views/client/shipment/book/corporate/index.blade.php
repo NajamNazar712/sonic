@@ -621,7 +621,7 @@
 
             $('#approve_frieght_request').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Approvde Frieght Request*'
+                placeholder: 'Approve Frieght Request*'
             }).bind('change',function(){
                 var id = $(this).val();
                 if(id) {
