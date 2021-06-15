@@ -25,6 +25,7 @@ use App\Http\Models\ShipmentInvoiceItem;
 use App\http\Models\ShipmentOrderDate;
 use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Models\Shipper\UserReturnInfo;
 use App\http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
 use Carbon\Carbon;
@@ -120,7 +121,27 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id) {
+    static public function add_return_address($user_id, $address, $person_of_contact, $vendor, $phone_number, $email_address, $city_id, $default, $hidden = FALSE) {
+        $user_return_info = new UserReturnInfo();
+
+        $user_return_info->user_id = $user_id;
+        $user_return_info->pickup_address = $address;
+        $user_return_info->poc = $person_of_contact;
+        $user_return_info->vendor = $vendor;
+        $user_return_info->phone = $phone_number;
+        $user_return_info->email = $email_address;
+        $user_return_info->city_id = $city_id;
+        $user_return_info->default_address = $default;
+        if ($hidden) {
+            $user_return_info->hidden = 2;
+        }
+
+        $user_return_info->save();
+
+        return $user_return_info->id;
+    }
+
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $return_address_id) {
 
 
         $shipment = new Shipment();
@@ -162,6 +183,14 @@ class ShipperShipmentBookController extends Controller
         $shipment->save();
 
         $shipment_id = $shipment->id;
+
+        if($pickup_address_id){
+            $shipment_detail = new ShipmentDetail();
+            $shipment_detail->shipment_id = $shipment_id;
+            $shipment_detail->return_address_id = $return_address_id;
+            $shipment_detail->save();
+        }
+
 
         if($self_collection == TRUE){
             $shipment_self_collection = new SelfCollectionShipment();
@@ -465,6 +494,42 @@ class ShipperShipmentBookController extends Controller
                             $pickup_address_id_for_delivery = $request->input('pickup_address');
                         }
                     }
+
+                    if ($request->input('return_address') == 0) {
+                        /*if ($service_type_id == 5) {
+                            return redirect()->back()->with('error', 'New Return Address cannot be selected for Reverse Pickup');
+                        }*/
+
+                        $return_city_id = $request->input('new_return_city');
+                        if($request->input('make_default_address') == 1){
+                            $return_default = 1;
+                        }
+                        else{
+                            $return_default = 0;
+                        }
+                        UserReturnInfo::where('user_id', $user_id)->update(['default_address' => 0]);
+
+                        $return_address_id = $this->add_return_address($user_id, $request->input('new_return_address'), $request->input('new_return_person_of_contact'), $request->input('new_return_vendor'), $request->input('new_return_phone_number'), $request->input('new_return_email_address'), $return_city_id, $return_default);
+                    }
+                    else {
+                        if ($service_type_id != 5) {
+                            $return_address_id = $request->input('return_address');
+
+                            $user_return_info = UserReturnInfo::find($return_address_id);
+
+                            $return_city_id = $user_return_info->city_id;
+                        }
+                        else {
+                            $return_address_id = $this->add_return_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
+
+                            $return_city_id = $request->input('consignee_city');
+
+                            $return_address_id_for_delivery = $request->input('return_address');
+                        }
+                    }
+
+
+
                     if ($service_type_id != 5) {
                         if ($request->filled('information_display')) {
                             $information_display = TRUE;
@@ -2605,6 +2670,31 @@ class ShipperShipmentBookController extends Controller
 
                         $pickup_city_id = $request->input('consignee_city');
                         $pickup_address_id_for_delivery = $request->input('pickup_address');
+                    }
+                }
+
+                if ($request->input('return_address') == 0) {
+                    /*if ($service_type_id == 5) {
+                        return redirect()->back()->with('error', 'New Pickup Address cannot be selected for Reverse Pickup');
+                    }*/
+
+                    $return_city_id = $request->input('new_return_city');
+
+                    $return_address_id = $this->add_return_address($user_id, $request->input('new_return_address'), $request->input('new_return_person_of_contact'), $request->input('new_return_vendor'), $request->input('new_return_phone_number'), $request->input('new_return_email_address'), $return_city_id, 0);
+                }
+                else {
+                    if ($service_type_id != 5) {
+                        $return_address_id = $request->input('return_address');
+
+                        $user_shipping_info = UserShippingInfo::find($return_address_id);
+
+                        $return_city_id = $user_shipping_info->city_id;
+                    }
+                    else {
+                        $return_address_id = $this->add_return_address($user_id, $request->input('consignee_address'), $request->input('consignee_name'), NULL, $request->input('consignee_phone_number_1'), $user_email_id, $request->input('consignee_city'), 0, TRUE);
+
+                        $return_city_id = $request->input('consignee_city');
+                        $return_address_id_for_delivery = $request->input('return_address');
                     }
                 }
 

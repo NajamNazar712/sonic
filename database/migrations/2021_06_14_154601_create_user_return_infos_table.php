@@ -21,8 +21,10 @@ class CreateUserReturnInfosTable extends Migration
             $table->string('phone');
             $table->string('email');
             $table->integer('city_id')->index();
+            $table->string('vendor')->nullable();
             $table->tinyInteger('default_address')->default(0);
             $table->tinyInteger('status')->default(1);
+            $table->tinyInteger('hidden')->default(0);
             $table->timestamps();
         });
     }
