@@ -26,7 +26,7 @@
                     
                @endphp
 
-                <div class="modal-body password_change_body text-justify" id="password_change_body">
+                <div class="modal-body password_change_body text-left" id="password_change_body">
                             <p>This Services Agreement (“Agreement”) is hereby made on {{ date("l") }} day of {{date("d-m-Y")}}, (“Effective Date”) by and between TRAX Online (Private) Limited, a registered private limited company having incorporation number 0111649 and registered address at Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi duly represented by Mr. Fawad Ahmed s/o Mr. Muhammad Ayub in his capacity as Company Secretary (hereinafter referred to “TRAX” along with its agents, representatives, successors-in-interests, assigns etc) for the first part And <strong>{{$shipper_name}}</strong> a registered private limited company and registered address at <strong>{{$address}}</strong> duly represented by Mr. /Ms. <strong>{{$poc}}</strong>. in his capacity as (hereinafter referred to “Shipper” along with its agents, representatives, successors-in-interests, assigns etc) for the other part</p>
                                 <p>TRAX Online and <strong>{{$shipper_name}}</strong>. shall be hereinafter collectively referred to as “Parties” and individually as “Party”. 
                                 </p>
@@ -55,7 +55,7 @@
                     <form id="agreement-form" class="form form-horizontal" method="post" action="{{route('cod.update.agreement_status')}}">
                         @csrf
                         <div class="form-body">
-                            <p><label class="checkbox-inline form-group"><input type="checkbox" id="agreement_signed" value="1" required name="agreement_signed" data-msg-required="Please accept company's service terms and conditions."> &nbsp; &nbsp;I Agree</label></p>
+                            <p><label class="checkbox-inline form-group text-left"><input type="checkbox" id="agreement_signed" value="1" required name="agreement_signed" data-msg-required="Please accept company's service terms and conditions."> &nbsp; &nbsp;I Agree</label></p>
                             
                                     {{-- <label class="checkbox-inline  form-group"><input type="checkbox" id="agreement_signed" value="1" required name="agreement_signed" data-msg-required="Tracking Number is required"></label> --}}
                     
