@@ -2568,7 +2568,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function corporate_store(Request $request) {
-
+         //dd($request);
         if (!empty($request->input('shipping_mode'))) {
                 $user_id = session('user_id');
                 if($request->input('consignee_email_address')){
@@ -2741,6 +2741,14 @@ class ShipperShipmentBookController extends Controller
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
                 }
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
+
+                 if($service_type_id == 6){
+
+                     $ftl_request_id = $request->approve_frieght_request;
+                     FtlRequest::where('id',$ftl_request_id)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
+                 }
+
+
 
                 if($request->has('order_date_formatted')){
                     if($request->order_date_formatted != null){
@@ -4957,6 +4965,18 @@ class ShipperShipmentBookController extends Controller
         }
         else {
             return redirect()->back()->with('error', 'No Shipments in File');
+        }
+    }
+
+    public function get_ftl_info(Request $request){
+        if($request->id){
+            $ftl_request = FtlRequest::find($request->id);
+            $data = array('origin_id' => $ftl_request->origin_id,'destination_id' => $ftl_request->destination_id, 'weight' => $ftl_request->weight, 'quantity' => $ftl_request->quantity ,'total_charges' => $ftl_request->total_charges);
+
+            return response()->json(['status' => 1, 'data' => $data ]);
+        }
+        else{
+            return response()->json(['status' => 0]);
         }
     }
 }

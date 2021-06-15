@@ -75,7 +75,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('shipment_check', 'Shippers\ShipperShipmentBookController@shipment_check')->name('shipment_check');
             Route::get('get_consignee_infos', 'Shippers\ShipperShipmentBookController@get_consignee_infos')->name('get_consignee_infos');
             Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
-
+            Route::post('get_ftl_info', 'Shippers\ShipperShipmentBookController@get_ftl_info')->name('get_ftl_info');
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
 
@@ -95,6 +95,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
                     Route::post('', 'Shippers\ShipperInternationalShipmentBookController@excel_store')->name('store');
                 });
             });
+
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');
@@ -460,6 +461,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/list','Admins\FTLController@ftl_request_list')->name('list');
             Route::get('/view/{id}','Admins\FTLController@ftl_request_view')->name('view');
             Route::post('/add','Admins\FTLController@ftl_request_add')->name('add');
+            Route::prefix('comment')->name('comment.')->group(function (){
+                Route::post('/add','Admins\FTLController@ftl_request_add_comment')->name('add');
+                Route::post('/get','Admins\FTLController@ftl_request_get_comments')->name('get');
+            });
             Route::prefix('update')->name('update.')->group(function (){
                 Route::post('/shipper/{id}','Admins\FTLController@ftl_request_update_shipper')->name('shipper');
                 Route::post('/status/{id}','Admins\FTLController@ftl_request_update_status')->name('status');

@@ -13,6 +13,38 @@
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
                                 @include('admin.inc.messages')
+                                <div class="row justify-content-end">
+                                    <div class="col-3">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="heading-elements">
+                                                    <ul class="list-inline mb-0">
+                                                        <li class="primary border-primary round"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-content collapse">
+                                                <div class="card-body p-1">
+                                                    <h4 class=" info">Legend</h4>
+                                                    <table class="table mb-0">
+                                                        <tbody>
+                                                            <tr style="color:#fff;" class="btn-purple">
+                                                                <td class="align-middle">NOCR</td>
+                                                            </tr>
+                                                            <tr style="color:#fff;" class="btn-primary">
+                                                                <td class="align-middle">Sales</td>
+                                                            </tr>
+                                                            <tr style="color:#fff;" class="btn-dark">
+                                                                <td class="align-middle">Finance</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
                                 <div class="row mb-2">
                                     <div class="col-5">
                                         <table class="table table-bordered table-lg">
@@ -171,40 +203,16 @@
                                                     @if(!empty($comments))
 
                                                         @foreach($comments as $comment)
-                                                            @if($comment->comment_by == 0)
                                                                 <div id="chat_{{$comment->id}}"
-                                                                     class="chat sales {{($comment->comment_by == 1) ? 'operation' : '' }} {{($comment->comment_type == 2) ? 'finance' : '' }} ">
+                                                                     class="chat {{($comment->comment_by == 1) ? 'operation' : '' }} {{($comment->comment_by == 2) ? 'finance' : '' }} ">
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">
-                                                                            <i class="la la-user font-medium-2"></i>{{$comment->commenter}}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="chat-body">
-                                                                        <div class="chat-content text-left">
-                                                                            <p>{!! $comment->comment !!}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                            <div id="updated_by_div_{{$comment->id}}">
-                                                                                @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
-                                                                                    <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                </div>
-
-                                                            @elseif($comment->comment_by == 1)
-                                                                <div class="chat chat-left shipper">
-
-                                                                    <div class="chat-avatar">
-                                                                        <div class="badge block badge-info">
                                                                             <i class="la la-user font-medium-2"></i>
-                                                                            @if($shipper != null)
-                                                                                {{$shipper}}
+                                                                            @if($comment->commenter_id == Auth::id())
+                                                                                YOU
                                                                             @else
-                                                                                Shipper
+                                                                                {{$comment->commenter}}
                                                                             @endif
                                                                         </div>
                                                                     </div>
@@ -212,55 +220,13 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
                                                                             <p>{!! $comment->comment !!}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <div id="updated_by_div_{{$comment->id}}">
+                                                                            </div>
                                                                         </div>
                                                                     </div>
+
                                                                 </div>
-                                                            @else
-                                                                @if($comment->comment_type == 2)
-                                                                    <div id="chat_{{$comment->id}}"
-                                                                         class="chat admin rider">
-
-                                                                        <div class="chat-avatar">
-                                                                            <div class="badge block badge-admin">
-                                                                                <i class="la la-user font-medium-2"></i>{{$comment->rider->name}}
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="chat-body">
-                                                                            <div class="chat-content text-left">
-                                                                                <p>{!! $comment->comment !!}</p>
-                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-                                                                @else
-                                                                    <div class="chat chat-left substitute-user">
-
-                                                                        <div class="chat-avatar">
-                                                                            <div class="badge block badge-substitute-user">
-                                                                                <i class="la la-user font-medium-2"></i>
-                                                                                @if($shipper != null)
-                                                                                    {{$shipper}}
-                                                                                @else
-                                                                                    Shipper
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="chat-body">
-                                                                            <div class="chat-content text-left">
-                                                                                <p>{!! $comment->comment !!}</p>
-                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                @endif
-
-
-                                                            @endif
                                                         @endforeach
                                                     @endif
 
@@ -272,8 +238,6 @@
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
                                                                 class="form-group position-relative has-icon-left col-10 m-0">
-                                                            <input type="hidden" id="last_comment_id"
-                                                                   value="">
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
@@ -282,29 +246,12 @@
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
                                                                     class="form-group has-icon-left m-0 mb-1">
-                                                                <label id="chat_send" type="button"
-                                                                        class="btn btn-block btn-purple chat_send" to="1"><i
+                                                                <button  type="button" id="chat_send"
+                                                                        class="btn btn-block btn-outline-success" ><i
                                                                             class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">NOCR</span>
-                                                                </label>
+                                                                    <span class="">Send</span>
+                                                                </button>
                                                             </fieldset>
-                                                            <fieldset
-                                                                    class="form-group position-relative has-icon-left mb-1">
-                                                                <label id="chat_send" type="button"
-                                                                        class="btn btn-block btn-outline-primary chat_send" to="0">
-                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Sales</span>
-                                                                </label>
-                                                            </fieldset>
-                                                            <fieldset
-                                                                    class="form-group has-icon-left">
-                                                                <label id="chat_send" type="button"
-                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
-                                                                            class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Finance</span>
-                                                                </label>
-                                                            </fieldset>
-
                                                         </div>
                                                     </form>
                                                 </section>
@@ -446,15 +393,6 @@
             border-right-color: deepskyblue;
         }
 
-        .chat-application .chats .sales .chat-content {
-            color: #000000;
-            background-color: #edeef0;
-        }
-
-        .chat-application .chats .sales .chat-body .chat-content:before {
-            border-left-color: #edeef0;
-        }
-
         .height-430 {
             height: 430px !important;
         }
@@ -463,20 +401,20 @@
             vertical-align: middle !important;
         }
 
-        .chat-application .chats .sales.operation .chat-content {
+        .chat-application .chats .operation .chat-content {
             color: #ffffff;
             background-color: #ab45d7;
         }
 
-        .chat-application .chats .sales.operation .chat-body .chat-content:before {
+        .chat-application .chats .operation .chat-body .chat-content:before {
             border-left-color: #ab45d7;
         }
-        .chat-application .chats .sales.finance .chat-content {
+        .chat-application .chats .finance .chat-content {
             color: #ffffff;
             background-color: #18374A;
         }
 
-        .chat-application .chats .sales.finance .chat-body .chat-content:before {
+        .chat-application .chats .finance .chat-body .chat-content:before {
             border-left-color: #18374A;
         }
     </style>
@@ -633,292 +571,108 @@
                 $("#update_ftl_request_form #total_charges").val(gst + freight_charges);
             }
 
+            $('#chat_form').on('submit', function (e) {
+                e.preventDefault();
+            });
+
+            $('#chat_send').on('click',function (){
+                var flag = true;
+                var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
+                $('#chat_input').val('');
+                var request_id = '{{$ftl->id}}';
+
+                if (comment == '') {
+                    flag = false;
+                    toastr.error("Please Enter Comment first!", 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                if (flag) {
+                    $.ajax({
+                        url: '{!! route('admin.ftl.request.comment.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'comment': comment,
+                            'request_id': request_id,
+                        }
+                    }).done(function (data) {
+                        if (data.status == 1) {
+                            get_latest_comment(request_id);
+                            updateScroll();
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
+
+            $('body').on('change', '#chat_form input', function () {
+                $(this).val($(this).val().trim());
+            });
+
+            function updateScroll() {
+                const container = document.querySelector('.chat-app-window');
+                container.scrollTop = $('.chat-app-window')[0].scrollHeight;
+            }
+
+            function get_latest_comment(request_id) {
+                    $.ajax({
+                        url: '{!! route('admin.ftl.request.comment.get') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'request_id': request_id
+                        }
+                    }).done(function (data) {
+                        if (data.status == 1) {
+                            html = "";
+                            $(data.comments).each(function (i,comment){
+                                let type = '';
+                                let commenter = '';
+                                if(comment.comment_by == 1)
+                                {
+                                    type = "operation";
+                                }
+                                else if(comment.comment_by == 2)
+                                {
+                                    type = "finance";
+                                }
+                                else{
+                                    type = "";
+                                }
+                                if(comment.commenter_id == {{Auth::id()}})
+                                    commenter = "YOU";
+                                else {
+                                    commenter = comment.commenter;
+                                }
+                                html += `<div id="chat_${comment.id}" class="chat ${type} ">
+                                                <div class="chat-avatar">
+                                                     <div class="badge block badge-admin">
+                                                        <i class="la la-user font-medium-2"></i>${commenter}
+                                                     </div>
+                                                </div>
+                                                <div class="chat-body">
+                                                    <div class="chat-content text-left">
+                                                        <p>${comment.comment}</p>
+                                                        <small>${comment.created_at}</small>
+                                                    </div>
+                                                </div>
+                                          </div>`;
+                            });
+                            $('section.chat-app-window .chats').html(html);
+                            updateScroll();
+                        }
+                    });
+            }
+
+            setInterval(function () {
+                var request_id = '{{$ftl->id}}';
+                get_latest_comment(request_id);
+            }, 10000);
+
         });
-
-        {{--    $('#chat_form').on('submit', function (e) {--}}
-        {{--        e.preventDefault();--}}
-        {{--    });--}}
-        {{--    $('body').on('change', '#chat_form input', function () {--}}
-        {{--        $(this).val($(this).val().trim());--}}
-        {{--    });--}}
-
-        {{--    function last_comment_edit(last_comment, comment){--}}
-        {{--        $('#edit_comment_' + last_comment).on('click', function (e) {--}}
-        {{--            var comment_id = $(this).attr("value");--}}
-        {{--            e.preventDefault();--}}
-        {{--            var text_edit  = "Are you sure, you want to edit this comment as Internal? \n \t "+comment;--}}
-        {{--            swal({--}}
-        {{--                text: text_edit,--}}
-        {{--                icon: 'info',--}}
-        {{--                buttons: {--}}
-        {{--                    cancel: {--}}
-        {{--                        text: 'No',--}}
-        {{--                        value: null,--}}
-        {{--                        visible: true,--}}
-        {{--                        closeModal: true,--}}
-        {{--                    },--}}
-        {{--                    confirm: {--}}
-        {{--                        text: 'Yes',--}}
-        {{--                        value: true,--}}
-        {{--                        visible: true,--}}
-        {{--                        closeModal: true--}}
-        {{--                    }--}}
-        {{--                },--}}
-        {{--                closeOnClickOutside: false,--}}
-        {{--                closeOnEsc: false,--}}
-        {{--                dangerMode: true--}}
-        {{--            }).then(function(confirm) {--}}
-        {{--                if(confirm){--}}
-        {{--                    swal({--}}
-        {{--                        title: 'Please Wait!',--}}
-        {{--                        text: 'Comment is being updated.',--}}
-        {{--                        icon: 'info',--}}
-        {{--                        buttons: false,--}}
-        {{--                        closeOnClickOutside: false,--}}
-        {{--                        closeOnEsc: false--}}
-        {{--                    });--}}
-        {{--                    $.ajax({--}}
-        {{--                        url: '{!! route('admin.crm.comment.edit') !!}',--}}
-        {{--                        method: 'POST',--}}
-        {{--                        data: {--}}
-        {{--                            'comment_id': last_comment,--}}
-        {{--                            '_token': '{{ csrf_token() }}'--}}
-        {{--                        }--}}
-        {{--                    })--}}
-        {{--                        .done(function (data) {--}}
-        {{--                            if (data.status == 0) {--}}
-        {{--                                $('#edit_comment_' + last_comment).remove();--}}
-        {{--                                $('#chat_' + last_comment).addClass('internal');--}}
-        {{--                                $('#updated_by_div_' + last_comment).append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');--}}
-        {{--                                toastr.success(data.success, 'Success!', {--}}
-        {{--                                    positionClass: 'toast-bottom-center',--}}
-        {{--                                    containerId: 'toast-bottom-center'--}}
-        {{--                                });--}}
-        {{--                            }--}}
-        {{--                            else {--}}
-        {{--                                toastr.error(data.error, 'Error!', {--}}
-        {{--                                    positionClass: 'toast-top-center',--}}
-        {{--                                    containerId: 'toast-top-center'--}}
-        {{--                                });--}}
-        {{--                            }--}}
-        {{--                            swal.close();--}}
-        {{--                        });--}}
-        {{--                }--}}
-        {{--            });--}}
-        {{--        });--}}
-        {{--    }--}}
-        {{--    $('.chat_send').on('click', function () {--}}
-        {{--        var flag = true;--}}
-        {{--        var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');--}}
-        {{--        $('#chat_input').val('');--}}
-        {{--        var request_id = '{{$crm_details->id}}';--}}
-        {{--        var internal_switch = parseInt($(this).attr('to'));--}}
-        {{--        var internal_class = '';--}}
-
-        {{--        if (internal_switch == 1) {--}}
-        {{--            internal_class = 'internal';--}}
-        {{--        }else if(internal_switch === 2){--}}
-        {{--            internal_class = 'rider';--}}
-        {{--        } else {--}}
-        {{--            internal_class = '';--}}
-        {{--        }--}}
-        {{--        if (comment == '') {--}}
-        {{--            flag = false;--}}
-        {{--            toastr.error("Please Enter Comment first!", 'Error!', {--}}
-        {{--                positionClass: 'toast-top-center',--}}
-        {{--                containerId: 'toast-top-center'--}}
-        {{--            });--}}
-        {{--        }--}}
-        {{--        if (flag) {--}}
-        {{--            $.ajax({--}}
-        {{--                url: '{!! route('admin.crm.comment.add') !!}',--}}
-        {{--                method: 'POST',--}}
-        {{--                data: {--}}
-        {{--                    '_token': '{{ csrf_token() }}',--}}
-        {{--                    'comment': comment,--}}
-        {{--                    'request_id': request_id,--}}
-        {{--                    'internal_switch': internal_switch--}}
-        {{--                }--}}
-        {{--            }).done(function (data) {--}}
-        {{--                if (data.status) {--}}
-
-        {{--                    // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-        {{--                    var user = '{{Auth::user()->name}}';--}}
-        {{--                    // if($('div.chat:last-child').hasClass('admin')) {--}}
-        {{--                    //     var html = '<div class="chat-content"><p>' + comment + '</p></div>';--}}
-        {{--                    //     $('div.chat:last-child').find('.chat-body').append(html);--}}
-        {{--                    // }else{--}}
-        {{--                    if (internal_switch == 1) {--}}
-        {{--                        var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                    }else if(internal_switch == 2){--}}
-        {{--                        var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                    } else {--}}
-        {{--                        var last_comment = data.last_comment_id;--}}
-
-        {{--                        var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left">';--}}
-        {{--                        @if(session('role_id') == 1 || in_array(310, session('permissions')))--}}
-        {{--                            html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';--}}
-        {{--                        @endif--}}
-        {{--                            html += '<p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small><div id="updated_by_div_' + last_comment + '"></div></div></div>';--}}
-        {{--                    }--}}
-        {{--                    $('section.chat-app-window .chats').append(html);--}}
-
-        {{--                    // }--}}
-
-        {{--                    $('#last_comment_id').val(data.last_comment_id);--}}
-        {{--                    last_comment_edit(last_comment, comment);--}}
-
-        {{--                    updateScroll();--}}
-        {{--                }--}}
-        {{--            });--}}
-        {{--        }--}}
-        {{--    });--}}
-        {{--    @if($crm_details->status_id != 4)--}}
-        {{--    setInterval(function () {--}}
-        {{--        var last_comment_id = parseInt($('#last_comment_id').val());--}}
-        {{--        var request_id = '{{$crm_details->id}}';--}}
-        {{--        get_latest_comment(last_comment_id, request_id);--}}
-        {{--    }, 10000);--}}
-
-        {{--    @endif--}}
-        {{--    function get_latest_comment(comment_id, request_id) {--}}
-        {{--        if (comment_id) {--}}
-        {{--            $.ajax({--}}
-        {{--                url: '{!! route('admin.crm.comment.get') !!}',--}}
-        {{--                method: 'POST',--}}
-        {{--                data: {--}}
-        {{--                    '_token': '{{ csrf_token() }}',--}}
-        {{--                    'comment_id': comment_id,--}}
-        {{--                    'request_id': request_id--}}
-        {{--                }--}}
-        {{--            }).done(function (data) {--}}
-        {{--                if (data.status) {--}}
-        {{--                    var user = data.comment.comment_by;--}}
-        {{--                    var name = data.name;--}}
-        {{--                    if (user == 0) {--}}
-        {{--                        if (data.comment.comment_type == 0) {--}}
-
-        {{--                            var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                        } else if(data.comment.comment_type == 1) {--}}
-        {{--                            var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                        }else{--}}
-        {{--                            var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                        }--}}
-        {{--                        $('section.chat-app-window .chats').append(html);--}}
-
-        {{--                    } else if (user == 1) {--}}
-        {{--                        if ($('div.chat:last-child').hasClass('shipper')) {--}}
-        {{--                            var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now  ({{Carbon\Carbon::now()}})</small></div>';--}}
-        {{--                            $('div.chat:last-child').find('.chat-body').append(html);--}}
-        {{--                        } else {--}}
-        {{--                            var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                            $('section.chat-app-window .chats').append(html);--}}
-        {{--                        }--}}
-        {{--                    } else {--}}
-        {{--                        if(data.comment.comment_type == 0){--}}
-        {{--                            if ($('div.chat:last-child').hasClass('substitute-user')) {--}}
-        {{--                                var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';--}}
-        {{--                                $('div.chat:last-child').find('.chat-body').append(html);--}}
-        {{--                            } else {--}}
-        {{--                                var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-        {{--                                $('section.chat-app-window .chats').append(html);--}}
-        {{--                            }--}}
-        {{--                        }else{--}}
-        {{--                            var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';--}}
-
-        {{--                            $('section.chat-app-window .chats').append(html);--}}
-        {{--                        }--}}
-
-
-        {{--                    }--}}
-        {{--                    $('#last_comment_id').val(data.comment.id);--}}
-        {{--                    updateScroll();--}}
-        {{--                }--}}
-        {{--            });--}}
-        {{--        }--}}
-        {{--    }--}}
-
-        {{--    function updateScroll() {--}}
-        {{--        const container = document.querySelector('.chat-app-window');--}}
-        {{--        container.scrollTop = $('.chat-app-window')[0].scrollHeight;--}}
-
-        {{--    }--}}
-
-        {{--    updateScroll();--}}
-        {{--
-        {{--    @foreach($comments as $comment)--}}
-        {{--    @if($comment->comment_by == 0)--}}
-        {{--    @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))--}}
-        {{--    $('#edit_comment_{{$comment->id}}').on('click', function (e) {--}}
-        {{--        var comment_id = $(this).attr("value");--}}
-        {{--        e.preventDefault();--}}
-        {{--        var cmt = @json($comment->comment);--}}
-        {{--        var text_edit  = "Are you sure, you want to edit this comment as Internal? \n \t "+cmt;--}}
-        {{--        swal({--}}
-        {{--            text: text_edit,--}}
-        {{--            icon: 'info',--}}
-        {{--            buttons: {--}}
-        {{--                cancel: {--}}
-        {{--                    text: 'No',--}}
-        {{--                    value: null,--}}
-        {{--                    visible: true,--}}
-        {{--                    closeModal: true,--}}
-        {{--                },--}}
-        {{--                confirm: {--}}
-        {{--                    text: 'Yes',--}}
-        {{--                    value: true,--}}
-        {{--                    visible: true,--}}
-        {{--                    closeModal: true--}}
-        {{--                }--}}
-        {{--            },--}}
-        {{--            closeOnClickOutside: false,--}}
-        {{--            closeOnEsc: false,--}}
-        {{--            dangerMode: true--}}
-        {{--        }).then(function(confirm) {--}}
-        {{--            if(confirm){--}}
-        {{--                swal({--}}
-        {{--                    title: 'Please Wait!',--}}
-        {{--                    text: 'Comment is being updated.',--}}
-        {{--                    icon: 'info',--}}
-        {{--                    buttons: false,--}}
-        {{--                    closeOnClickOutside: false,--}}
-        {{--                    closeOnEsc: false--}}
-        {{--                });--}}
-        {{--                $.ajax({--}}
-        {{--                    url: '{!! route('admin.crm.comment.edit') !!}',--}}
-        {{--                    method: 'POST',--}}
-        {{--                    data: {--}}
-        {{--                        'comment_id': comment_id,--}}
-        {{--                        '_token': '{{ csrf_token() }}'--}}
-        {{--                    }--}}
-        {{--                })--}}
-        {{--                    .done(function (data) {--}}
-        {{--                        if (data.status == 0) {--}}
-        {{--                            $('#edit_comment_{{$comment->id}}').remove();--}}
-        {{--                            $('#chat_{{$comment->id}}').addClass('internal');--}}
-        {{--                            $('#updated_by_div_{{$comment->id}}').append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');--}}
-        {{--                            toastr.success(data.success, 'Success!', {--}}
-        {{--                                positionClass: 'toast-bottom-center',--}}
-        {{--                                containerId: 'toast-bottom-center'--}}
-        {{--                            });--}}
-        {{--                        }--}}
-        {{--                        else {--}}
-        {{--                            toastr.error(data.error, 'Error!', {--}}
-        {{--                                positionClass: 'toast-top-center',--}}
-        {{--                                containerId: 'toast-top-center'--}}
-        {{--                            });--}}
-        {{--                        }--}}
-        {{--                        swal.close();--}}
-        {{--                    });--}}
-        {{--            }--}}
-        {{--        });--}}
-        {{--    });--}}
-        {{--    @endif--}}
-        {{--    @endif--}}
-        {{--    @endforeach--}}
-
-
-
-
     </script>
 @endsection
