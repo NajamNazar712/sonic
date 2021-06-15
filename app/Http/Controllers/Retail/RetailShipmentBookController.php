@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
 use App\http\Models\Admin\Retail\RetailCashDeposit;
 use App\http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
@@ -154,8 +155,10 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-        $user_id = session('user_id');
-        $pickup_address_id = session('pickup_address_id');
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $shipper_user_id = $setting->setting_value;
+        $user_id = $shipper_user_id;
+        $pickup_address_id = Auth::user()->store->pickup_address_id;
         $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         $pickup_city_id = $user_shipping_info->city_id;
         $information_display = TRUE;
