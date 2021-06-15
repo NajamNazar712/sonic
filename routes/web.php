@@ -75,7 +75,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('shipment_check', 'Shippers\ShipperShipmentBookController@shipment_check')->name('shipment_check');
             Route::get('get_consignee_infos', 'Shippers\ShipperShipmentBookController@get_consignee_infos')->name('get_consignee_infos');
             Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
-
+            Route::post('get_ftl_info', 'Shippers\ShipperShipmentBookController@get_ftl_info')->name('get_ftl_info');
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
 
@@ -95,6 +95,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
                     Route::post('', 'Shippers\ShipperInternationalShipmentBookController@excel_store')->name('store');
                 });
             });
+
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');
