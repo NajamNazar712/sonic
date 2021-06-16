@@ -18,22 +18,25 @@
 							<th class="border-primary border-darken-1"></th>
 							<th class="border-primary border-darken-1">S. No.</th>
 							<th class="border-primary border-darken-1">Invoice Number</th>
-							<th class="border-primary border-darken-1">Shipper</th>
-							<th class="border-primary border-darken-1">City</th>
-							<th class="border-primary border-darken-1">Total Charges</th>
-							<th class="border-primary border-darken-1">Total GST</th>
-							<th class="border-primary border-darken-1">Total Invoice Amount</th>
-							<th class="border-primary border-darken-1">Generation Date</th>
-							<th class="border-primary border-darken-1">Invoicing Date</th>
-							<th class="border-primary border-darken-1">Aging</th>
-							<th class="border-primary border-darken-1">Due Date</th>
-							<th class="border-primary border-darken-1">Overdue By</th>
-							{{--<th class="border-primary border-darken-1">Received Date</th>--}}
-							{{--<th class="border-primary border-darken-1">Company Bank</th>
+							<th class="border-primary border-darken-1">Req ID</th>
+							<th class="border-primary border-darken-1">Origin</th>
+							<th class="border-primary border-darken-1">Destination</th>
+							<th class="border-primary border-darken-1">Tracking Number</th>
+							<th class="border-primary border-darken-1">Weight</th>
+							<th class="border-primary border-darken-1">Required Vehicle</th>
+							<th class="border-primary border-darken-1">Quantity</th>
+							<th class="border-primary border-darken-1">Request Date</th>
+							<th class="border-primary border-darken-1">Vendor</th>
+							<th class="border-primary border-darken-1">Total Cost</th>
+							<th class="border-primary border-darken-1">Charges</th>
+							<th class="border-primary border-darken-1">GST</th>
+							{{-- <th class="border-primary border-darken-1">Charges Collection</th> --}}
+							<th class="border-primary border-darken-1">Status</th>
+							<th class="border-primary border-darken-1">Receiving Date</th>
+							<th class="border-primary border-darken-1">Company Bank</th>
 							<th class="border-primary border-darken-1">Received Amount</th>
 							<th class="border-primary border-darken-1">Tax Amount</th>
-							<th class="border-primary border-darken-1">Deposit Date</th>--}}
-							<th class="border-primary border-darken-1">Status</th>
+							<th class="border-primary border-darken-1">Deposit Date</th>
 							<th class="border-primary border-darken-1"></th>
 						</tr>
 					</thead>
@@ -42,10 +45,11 @@
 				<div class="modal fade" id="mark_as_received" role="dialog" aria-labelledby="mark_as_received_title" aria-hidden="true">
 					<div class="modal-dialog modal-sm" role="document">
 						<div class="modal-content">
-							<form class="form-horizontal" method="POST" action="{{ route('admin.finance.invoices.mark_as_received') }}" novalidate="novalidate">
+							<form class="form-horizontal" method="POST" action="{{ route('admin.finance.ftl_invoice.received') }}" novalidate="novalidate">
 								{{ csrf_field() }}
 
 								<input type="hidden" name="id" class="id">
+								<input type="hidden" name="ids" class="ids">
 
 								<div class="modal-header">
 									<h4 class="modal-title" id="mark_as_received_title">Mark as Received<span></span></h4>
@@ -66,7 +70,11 @@
 									</div>
 
                                     <div class="form-group">
-										<input type="text" name="company_bank" class="form-control company_bank" placeholder="Company Bank*" data-rule-required="true" data-msg-required="Company Bank is required" data-rule-number="true" >
+										<select name="company_bank" class="select2 company_bank" data-rule-required="true" data-msg-required="Company Bank is required">
+											@foreach($company_banks as $bank)
+												<option value="{{ $bank->id }}">{{ $bank->name }}</option>
+											@endforeach
+										</select>
 									</div>
 
 
@@ -121,6 +129,14 @@
 	<script>
 		$(document).ready(function() {
 			
+			$('#mark_as_received form select.company_bank').prepend('<option value="" selected></option>').select2({
+                placeholder: 'Select Company Bank',
+                width:'100%'
+            }).bind('change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+			});
 
 			$('#mark_as_received form input.received_amount').inputmask({
 				'alias': 'decimal',
@@ -171,47 +187,53 @@
                         data: params,
                         success: function (result) {
                             head = [];
-
+							
                             head.push('S.No');
                             head.push('Invoice No.');
-                            head.push('Shipper');
-                            head.push('City');
-                            head.push('Total Charges');
-                            head.push('Total GST');
-                            head.push('Total Invoice Amount');
-                            head.push('Generation Date');
-                            head.push('Invoicing Date');
-                            head.push('Aging');
-                            head.push('Due Date');
-                            head.push('Overdue By');
-                           /* head.push('Received Date');
+                            head.push('Req ID');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Tracking Number');
+                            head.push('Weight');
+                            head.push('Required Vehicle');
+                            head.push('Quantity');
+                            head.push('Request Date');
+                            head.push('Vendor');
+                            head.push('Total Cost');
+                            head.push('Charges');
+                            head.push('GST');
+                            head.push('Charges Collection');
+                            head.push('Status');
+                            head.push('Received Date');
                             head.push('Company Bank');
                             head.push('Received Amount');
                             head.push('Tax Amount');
-                            head.push('Deposit Date');*/
-                            head.push('Status');
+                            head.push('Deposit Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.invoice_number);
-                                row.push(values.shipper);
-                                row.push(values.city);
-                                row.push(values.total_charges);
-                                row.push(values.total_gst);
-                                row.push(values.total_invoice_amount);
-                                row.push(values.created_at);
-                                row.push(values.invoicing_date);
-                                row.push(values.aging);
-                                row.push(values.due_date);
-                                row.push(values.overdue_by);
-                                /*row.push(values.received_date);
+                                row.push(values.request_id);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.tracking_number);
+                                row.push(values.weight);
+                                row.push(values.vehicle);
+                                row.push(values.quantity);
+                                row.push(values.request_date);
+                                row.push(values.vendor);
+                                row.push(values.total_cost);
+                                row.push(values.charges);
+                                row.push(values.gst);
+                                row.push('');
+                                row.push(values.status);
+                                row.push(values.receiving_date);
                                 row.push(values.company_bank);
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
-                                row.push(values.deposit_date);*/
-                                row.push(values.status);
+                                row.push(values.deposit_date);
 
                                 body.push(row);
                             });
@@ -230,65 +252,77 @@
 					@if ((session('role_id') == 1 || in_array(510, session('permissions'))))
 					{
 						text: '<i class="ft-plus-circle"></i> Receive',
-						className: 'btn btn-primary mark_as_received_all_btn',
+						className: 'btn btn-primary mark_as_received',
 						enabled: false,
 						action: function (e, dt, node, config) {
 							if(selected_rows.length > 0){
-								swal({
-									title: 'Are You Sure?',
-									text: 'Select Yes to mark invoices recieved!',
-									icon: 'warning',
-									buttons: {
-										cancel: {
-											text: 'No',
-											value: null,
-											visible: true,
-											closeModal: true,
-										},
-										confirm: {
-											text: 'Yes',
-											value: true,
-											visible: true,
-											closeModal: true
-										}
-									},
-									closeOnClickOutside: false,
-									closeOnEsc: false,
-									dangerMode: true
-								}).then(function (confirm) {
-									if (confirm) {
-										blockPagePermanently();
-										$.ajax({
-											url: '{!! route('admin.finance.invoices.mark_as_received_all') !!}',
-											method: 'POST',
-											data: {
-												'_token': '{{ csrf_token() }}',
-												'id': selected_rows,
-											}
-										}).done(function(data) {
-											UnblockPagePermanently();
-											if(data == 1)
-											{
-												swal({
-													title: 'Invoice Marked as Received',
-													icon: 'success',
-													closeOnClickOutside: false,
-													closeOnEsc: false
-												});
+								console.log(selected_rows);
+								$('#mark_as_received form input.ids').val(selected_rows);
+								$('#mark_as_received form select.company_bank').val('').change();
 
-												table.draw();
-											}
-											else{
-												swal({
-													title: 'Error Occurred In Marking Invoice Received',
-													icon: 'error',
-													closeOnClickOutside: false,
-													closeOnEsc: false
-												});
-											}
-										});
-									}
-								});
+								$('#mark_as_received form input.received_amount').val('');
+								$('#mark_as_received form input.tax_amount').val('');
+								$('#mark_as_received form input.pickadate').val('');
+
+								$('#mark_as_received form label.danger').remove();
+
+
+								$('#mark_as_received').modal('show');
+								// swal({
+								// 	title: 'Are You Sure?',
+								// 	text: 'Select Yes to mark invoices recieved!',
+								// 	icon: 'warning',
+								// 	buttons: {
+								// 		cancel: {
+								// 			text: 'No',
+								// 			value: null,
+								// 			visible: true,
+								// 			closeModal: true,
+								// 		},
+								// 		confirm: {
+								// 			text: 'Yes',
+								// 			value: true,
+								// 			visible: true,
+								// 			closeModal: true
+								// 		}
+								// 	},
+								// 	closeOnClickOutside: false,
+								// 	closeOnEsc: false,
+								// 	dangerMode: true
+								// }).then(function (confirm) {
+								// 	if (confirm) {
+								// 		blockPagePermanently();
+								// 		$.ajax({
+								// 			url: '{!! route('admin.finance.invoices.mark_as_received_all') !!}',
+								// 			method: 'POST',
+								// 			data: {
+								// 				'_token': '{{ csrf_token() }}',
+								// 				'id': selected_rows,
+								// 			}
+								// 		}).done(function(data) {
+								// 			UnblockPagePermanently();
+								// 			if(data == 1)
+								// 			{
+								// 				swal({
+								// 					title: 'Invoice Marked as Received',
+								// 					icon: 'success',
+								// 					closeOnClickOutside: false,
+								// 					closeOnEsc: false
+								// 				});
+
+								// 				table.draw();
+								// 			}
+								// 			else{
+								// 				swal({
+								// 					title: 'Error Occurred In Marking Invoice Received',
+								// 					icon: 'error',
+								// 					closeOnClickOutside: false,
+								// 					closeOnEsc: false
+								// 				});
+								// 			}
+								// 		});
+								// 	}
+								// });
 
 							}
 
@@ -316,7 +350,7 @@
 										selected_rows.push(id);
 									}
 
-									table.button('.mark_as_received_all_btn').enable();
+									table.button('.mark_as_received').enable();
 								}
 							});
 						}
@@ -342,7 +376,7 @@
 									}
 
 									if (selected_rows.length == 0) {
-										table.button('.mark_as_received_all_btn').disable();
+										table.button('.mark_as_received').disable();
 									}
 								}
 							});
@@ -367,25 +401,29 @@
 				rowId: 'id',
 				order: [[8, 'desc']],
 				columns: [
+					
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
-					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-					{data:'city', name: 'c.name', class: 'align-middle text-center shipper'},
-					{data:'total_charges', name: 'invoices.total_charges', class: 'align-middle text-center total_charges'},
-					{data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
-					{data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
-					{data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
-					{data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
-					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
-					{data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},
-					{data:'overdue_by', name: 'overdue_by', class: 'align-middle text-center overdue_by', orderable: false, searchable: false},
-					/*{data:'received_date', name: 'invoices.received_date', class: 'align-middle text-center received_date'},
-					{data:'company_bank', name: 'invoices.company_bank_id', class: 'align-middle text-center company_bank'},
-					{data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
-					{data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
-					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},*/
-					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
+					{data:'invoice_number_button', name: 'walkin_ftl_invoices.invoice_number', class: 'align-middle text-center invoice_number'},
+					{data:'request_id', name: 'ftlr.id', class: 'align-middle text-center request_id'},
+					{data:'origin', nashipperme: 'origin.name', class: 'align-middle text-center origin'},
+					{data:'destination', nashipperme: 'destination.name', class: 'align-middle text-center destination'},
+					{data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
+					{data:'weight', name: 'ftlr.weight', class: 'align-middle text-center weight'},
+					{data:'vehicle', name: 'vt.name', class: 'align-middle text-center vehicle'},
+					{data:'quantity', name: 'ftlr.quantity', class: 'align-middle text-center quantity'},
+					{data:'request_date', name: 'ftlr.date', class: 'align-middle text-center request_date'},
+					{data:'vendor', name: 'ven.name', class: 'align-middle text-center vendor'},
+					{data:'total_cost', name: 'ftlr.freight_cost', class: 'align-middle text-center total_cost'},
+					{data:'charges', name: 'ftlr.freight_charges', class: 'align-middle text-center charges'},
+					{data:'gst', name: 'ftlr.gst', class: 'align-middle text-center gst'},
+					// {data:'', name: '', class: 'align-middle text-center '},
+					{data:'status', name: 'walkin_ftl_invoices.status_id', class: 'align-middle text-center status'},
+					{data:'receiving_date', name: 'walkin_ftl_invoices.receiving_date', class: 'align-middle text-center receiving_date'},
+					{data:'company_bank', name: 'bl.name', class: 'align-middle text-center company_bank'},
+					{data:'received_amount', name: 'walkin_ftl_invoices.received_amount', class: 'align-middle text-center received_amount'},
+					{data:'tax_amount', name: 'walkin_ftl_invoices.tax_amount', class: 'align-middle text-center tax_amount'},
+					{data:'deposit_date', name: 'walkin_ftl_invoices.deposit_date', class: 'align-middle text-center deposit_date'},
 					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -407,6 +445,7 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -415,6 +454,12 @@
 						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
+						else if ($(header).is('.company_bank')) {
+                            $(company_bank_select).appendTo($(search))
+							.on('change', function() {
+								column.search($(this).val(), false, false, true).draw();
+							}).wrap(td);
+                        }
 						
                         else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
@@ -433,25 +478,30 @@
 						}
 					});
 
-				
+					var company_banks = $.map({!! $company_banks !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
 
-                    // $('#company_bank_select').prepend('<option value="" selected></option>').select2({
-                    //     data: company_banks,
-                    //     placeholder: 'Select Company Bank',
-                    //     width:'100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
+                        return obj;
+                    });
+					console.log(company_banks);
+                    $('#company_bank_select').prepend('<option value="" selected></option>').select2({
+                        data: company_banks,
+                        placeholder: 'Select Company Bank',
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     
 
-                    // $('#status_select').prepend('<option value="" selected></option>').select2({
-                    //     data: statuses,
-                    //     placeholder: 'Select Status',
-                    //     width:'100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
+                    $('#status_select').prepend('<option value="" selected></option>').select2({
+                        data: [{id: 1, name: "Pending", text: "Pending"},{id: 2, name: "Received", text: "Received"}],
+                        placeholder: 'Select Status',
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
 					this.api().table().columns.adjust();
 				}
@@ -474,7 +524,7 @@
 
                 if (id) {
                     $.ajax({
-						url: '{!! route('admin.finance.invoices.print') !!}',
+						url: '{!! route('admin.finance.ftl_invoice.print') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -515,10 +565,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button('.mark_as_received_all_btn').enable();
+					table.button('.mark_as_received').enable();
 				}
 				else {
-					table.button('.mark_as_received_all_btn').disable();
+					table.button('.mark_as_received').disable();
 				}
 			});
 
@@ -526,7 +576,7 @@
 				var id = parseInt($(this).parents('tr').attr('id'));
 
 				if ($(this).hasClass('export_to_excel')) {
-					window.open('{!! route('admin.finance.invoices.export_to_excel') !!}?id=' + id, '_blank');
+					window.open('{!! route('admin.finance.ftl_invoice.export_to_excel') !!}?id=' + id, '_blank');
 				}
 				else if ($(this).hasClass('email_reminder')) {
 					$.ajax({
@@ -550,8 +600,8 @@
 				}
 				else if ($(this).hasClass('mark_as_received')) {
 					$('#mark_as_received form input.id').val(id);
+					$('#mark_as_received form select.company_bank').val('').change();
 
-					$('#mark_as_received form input.company_bank').val('');
 					$('#mark_as_received form input.received_amount').val('');
 					$('#mark_as_received form input.tax_amount').val('');
 					$('#mark_as_received form input.pickadate').val('');

@@ -19,9 +19,9 @@ class CreateWalkinFtlInvoicesTable extends Migration
             $table->bigInteger('invoice_number')->nullable()->index();
             $table->integer('status_id')->default(1);
             $table->integer('company_bank_id')->nullable()->index();
-            $table->decimal('recieved_amount')->nullable();
+            $table->decimal('received_amount')->nullable();
             $table->decimal('tax_amount')->nullable();
-            $table->timestamp('recieving_date')->nullable();
+            $table->timestamp('receiving_date')->nullable();
             $table->timestamp('deposit_date')->nullable();
             $table->timestamps();
         });

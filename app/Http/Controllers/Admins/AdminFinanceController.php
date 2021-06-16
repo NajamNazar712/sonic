@@ -91,6 +91,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use NumberToWords\NumberToWords;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\WalkinFtlInvoice;
 
 class AdminFinanceController extends Controller
 {
@@ -9266,16 +9267,20 @@ class AdminFinanceController extends Controller
 
     public function ftl_invoice_index()
     {
-        return view('admin.finance.ftl_invoices');
+        $company_banks = BanksList::where('affiliate', 1)->get();
+        return view('admin.finance.ftl_invoices')->with(['company_banks' => $company_banks]);
     }
 
     public function ftl_invoice_list(Request $request)
     {
-        $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
-            ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
-            ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->whereIn('is.id',[1,2]);
+        $invoices = WalkinFtlInvoice::join('ftl_requests as ftlr', 'walkin_ftl_invoices.ftl_request_id', '=', 'ftlr.id')
+            ->join('cities as origin', 'ftlr.origin_id', '=', 'origin.id')
+            ->join('cities as destination', 'ftlr.destination_id', '=', 'destination.id')
+            ->join('vehicle_types as vt','vt.id','ftlr.vehicle_id')
+            ->leftjoin('shipments as s', 'ftlr.shipment_id', '=', 's.id')
+            ->leftjoin('banks_lists as bl', 'walkin_ftl_invoices.company_bank_id', '=', 'bl.id')
+            ->leftjoin('transport_mode_vendors as ven', 'ftlr.vendor_id', '=', 'ven.id')
+            ->select('walkin_ftl_invoices.id', 'walkin_ftl_invoices.invoice_number', 'ftlr.id as request_id', 'origin.name as origin', 'destination.name as destination', 's.tracking_number', 'ftlr.weight', 'vt.name as vehicle', 'ftlr.quantity', 'ftlr.date as request_date', 'ven.name as vendor', 'ftlr.freight_cost as total_cost', 'ftlr.freight_charges as charges', 'ftlr.gst', 'ftlr.total_charges as total_charges', 'walkin_ftl_invoices.status_id as status', 'walkin_ftl_invoices.receiving_date', 'walkin_ftl_invoices.received_amount as received_amount', 'bl.name as company_bank', 'walkin_ftl_invoices.tax_amount as tax_amount', 'walkin_ftl_invoices.deposit_date as deposit_date');
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
@@ -9284,38 +9289,18 @@ class AdminFinanceController extends Controller
             ->editColumn('total_charges', function($invoice) {
                 return number_format($invoice->total_charges, 2);
             })
-            ->editColumn('total_gst', function($invoice) {
-                return number_format($invoice->total_gst, 2);
+            ->editColumn('request_date', function($invoice) {
+                return Carbon::parse($invoice->request_date)->format('Y-m-d');
+
+            })
+            ->editColumn('gst', function($invoice) {
+                return number_format($invoice->gst, 2);
             })
             ->editColumn('total_invoice_amount', function($invoice) {
                 return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
             })
-            ->editColumn('created_at', function($invoice) {
-                return Carbon::parse($invoice->created_at)->format('Y-m-d');
-            })
-            ->editColumn('invoicing_date', function($invoice) {
-                return Carbon::parse($invoice->invoicing_date)->format('Y-m-d');
-            })
-            ->addColumn('aging', function($invoice) {
-                if ($invoice->status_id == 1) {
-                    $days = Carbon::now()->diffInDays($invoice->created_at);
-
-                    if ($days == 0) {
-                        return '-';
-                    }
-                    else {
-                        return $days;
-                    }
-                }
-                else {
-                    return '-';
-                }
-            })
-            ->editColumn('due_date', function($invoice) {
-                return Carbon::parse($invoice->due_date)->format('Y-m-d');
-            })
-            ->editColumn('received_date', function($invoice) {
-                if ($invoice->received_date) {
+            ->editColumn('receiving_date', function($invoice) {
+                if ($invoice->receiving_date) {
                     return Carbon::parse($invoice->received_date)->format('Y-m-d');
                 }
                 else {
@@ -9330,22 +9315,12 @@ class AdminFinanceController extends Controller
                     return '';
                 }
             })
-            ->editColumn('due_date', function($invoice) {
-                return Carbon::parse($invoice->due_date)->format('Y-m-d');
-            })
-            ->addColumn('overdue_by', function($invoice) {
-                if ($invoice->status_id == 1) {
-                    $days = Carbon::now()->diffInDays($invoice->due_date);
+            ->editColumn('status', function($invoice) {
+                if($invoice->status==1){
+                    return 'Pending';
+                }else{
+                    return 'Received';
 
-                    if ($days == 0) {
-                        return '-';
-                    }
-                    else {
-                        return $days;
-                    }
-                }
-                else {
-                    return '-';
                 }
             })
             ->addColumn('action', function($invoice) {
@@ -9359,11 +9334,13 @@ class AdminFinanceController extends Controller
             ';
 
                 $dropdown .= $export_to_excel_button;
-
-                if (session('role_id') == 1 || in_array(510, session('permissions')) ) {
-                    $dropdown .= $mark_as_received_button;
+                if($invoice->status==2){
+                    if (session('role_id') == 1 || in_array(510, session('permissions')) ) {
+                        $dropdown .= $mark_as_received_button;
+                    }
+    
                 }
-
+                
 
                 $dropdown .= '
                 </div>
@@ -9374,6 +9351,111 @@ class AdminFinanceController extends Controller
             });
 
         return $datatables->make(true);
+    }
+
+    public function ftl_invoice_received(Request $request){
+        if($request->ids){
+            $ids = explode(',', $request->ids);
+            foreach ($ids as $id) {
+                $walkin_ftl_invoice = WalkinFtlInvoice::find($id);
+                $walkin_ftl_invoice->receiving_date = $request->receiving_date_formatted;
+                $walkin_ftl_invoice->company_bank_id = $request->company_bank;
+                $walkin_ftl_invoice->deposit_date = $request->deposit_date_formatted;
+                $walkin_ftl_invoice->received_amount = $request->received_amount;
+                $walkin_ftl_invoice->tax_amount = $request->tax_amount;
+                $walkin_ftl_invoice->status_id = 2;
+                $walkin_ftl_invoice->save();
+            }
+        }elseif($request->id){
+            $walkin_ftl_invoice = WalkinFtlInvoice::find($request->id);
+                $walkin_ftl_invoice->receiving_date = $request->receiving_date_formatted;
+                $walkin_ftl_invoice->company_bank_id = $request->company_bank;
+                $walkin_ftl_invoice->deposit_date = $request->deposit_date_formatted;
+                $walkin_ftl_invoice->received_amount = $request->received_amount;
+                $walkin_ftl_invoice->status_id = 2;
+                $walkin_ftl_invoice->save();
+
+        }
+        return redirect()->back()->with('success', 'Invoice has been marked as Received');
+    }
+
+    public function ftl_invoice_print(Request $request){
+        $walkin_ftl_invoice = WalkinFtlInvoice::find($request->id);
+
+        // if ($walkin_ftl_invoice) {
+        //     return self::generate_invoice_print($invoice->id);
+        // }
+        // else {
+        //     return '';
+        // }
+    }
+
+    public function ftl_invoice_export_to_excel(Request $request){
+        $walkin_ftl_invoice = WalkinFtlInvoice::find($request->id);
+
+        $filename = 'sonic_ftl_invoice_details_' . $request->id . '.xlsx';
+
+        // $details = array();
+
+        // $details[] = ['S. No.', 'Tracking No.', 'Origin', 'Destination', 'Arrival Date', 'Weight (kg)', 'Weight Charges (PKR)', 'Fuel Surcharge (PKR)', 'OSA Charges (PKR)', 'Adjustment Charges (PKR)', 'Total Charges (PKR)', 'GST (PKR)', 'Invoice Amount (PKR)'];
+
+        // $serial_number = 1;
+
+        // foreach ($invoice->invoice_shipments as $invoice_shipment) {
+        //     $shipment = $invoice_shipment->shipment;
+
+        //     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2);
+
+        //     if ($shipment_journey->exists()) {
+        //         $date = $shipment_journey->first()->created_at;
+        //     }
+        //     else {
+        //         $date = $shipment->created_at;
+        //     }
+
+        //     $date = Carbon::parse($date)->format('Y-m-d');
+
+        //     $row = array();
+
+        //     $row[] = $serial_number;
+        //     $row[] = $shipment->tracking_number;
+        //     $row[] = $shipment->pickup_address->city->name;
+        //     $row[] = $shipment->consignee_city->name;
+        //     $row[] = $shipment->created_at;
+        //     $row[] = $shipment->actual_weight;
+        //     $row[] = (($invoice_shipment->type != 2) ? $shipment->weight_charges : 0);
+        //     $row[] = (($invoice_shipment->type != 2) ? $shipment->fuel_surcharge : 0);
+        //     $row[] = (($invoice_shipment->type != 2) ? $shipment->nsa_osa_charges : 0);
+        //     $row[] = (($invoice_shipment->type == 2) ? $shipment->adjustment_charges : 0);
+        //     $row[] = $invoice_shipment->charges;
+        //     $row[] = $invoice_shipment->gst;
+        //     $row[] = $invoice_shipment->invoice_amount;
+
+        //     $details[] = $row;
+
+        //     $serial_number++;
+        // }
+
+        // $spreadsheet = new Spreadsheet();
+
+        // $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        // $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode('#,##0.00');
+        // $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode('#,##0.00');
+        // $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0.00');
+        // $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0.00');
+        // $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0.00');
+        // $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0.00');
+        // $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0.00');
+
+        // $spreadsheet->getActiveSheet()->fromArray($details);
+
+        // $writer = new Xlsx($spreadsheet);
+
+        // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        // header('Content-Disposition: attachment;filename="' . $filename .'"');
+        // header('Cache-Control: max-age=0');
+
+        // $writer->save('php://output');
     }
 
 }

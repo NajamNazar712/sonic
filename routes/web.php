@@ -1665,6 +1665,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ftl_invoice')->name('ftl_invoice.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@ftl_invoice_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@ftl_invoice_list')->name('list');
+            Route::post('received', 'Admins\AdminFinanceController@ftl_invoice_received')->name('received');
+            Route::post('print', 'Admins\AdminFinanceController@ftl_invoice_print')->name('print');
+            Route::get('export_to_excel', 'Admins\AdminFinanceController@ftl_invoice_export_to_excel')->name('export_to_excel');
+
+            
         });
 
 
