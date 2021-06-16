@@ -19,6 +19,12 @@
                         <div class="col-4">
                             <h3 class="text-center mb-4"><strong>Employee Requisition Documents</strong></h3>
                             <table class="table table-sm table-bordered text-center">
+                                <thead>
+                                <tr>
+                                    <td><strong>Admin</strong></td>
+                                    <td></td>
+                                </tr>
+                                </thead>
                                 <tbody>
                                 @foreach($documents as $document)
                                     <tr style="height: 50px">
