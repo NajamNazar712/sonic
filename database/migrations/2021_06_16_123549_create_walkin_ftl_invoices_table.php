@@ -16,7 +16,7 @@ class CreateWalkinFtlInvoicesTable extends Migration
         Schema::create('walkin_ftl_invoices', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('ftl_request_id')->index();
-            $table->bigInteger('invoice_number')->index();
+            $table->bigInteger('invoice_number')->nullable()->index();
             $table->integer('status_id')->default(1);
             $table->integer('company_bank_id')->nullable()->index();
             $table->decimal('recieved_amount')->nullable();

@@ -24,7 +24,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
-
+use App\Http\Models\Admin\WalkinFtlInvoice;
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -1597,6 +1597,14 @@ class AdminWalkInBookShipmentController extends Controller
                 }
 
                  FtlRequest::where('id',$request->approve_frieght_request)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
+                
+                  $walkin_ftl_invoice = new WalkinFtlInvoice();
+                  $walkin_ftl_invoice->ftl_request_id = $request->approve_frieght_request;
+                  $walkin_ftl_invoice->save();
+                  $invoice_number = $user_id . str_pad($walkin_ftl_invoice->id, 6, '0', STR_PAD_LEFT);
+                  WalkinFtlInvoice::where('id',$walkin_ftl_invoice->id)->update(['invoice_number' => $invoice_number]);
+
+                  
 
                 if ($request->filled('book_and_print')) {
                     $print = $shipment_id;
