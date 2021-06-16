@@ -1448,6 +1448,8 @@ class AdminWalkInBookShipmentController extends Controller
                     $pickup_city_id = $user_shipping_info->city_id;
                 }
 
+                $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
+
                 $information_display = TRUE;
 
                 if(isset($request->consignee_address)) {
@@ -1526,32 +1528,13 @@ class AdminWalkInBookShipmentController extends Controller
 
                 }else{
                     $actual_weight = $request->actual_weight;
-                    //$charges_per_kg = $request->charges_per_kg;
-                    //$weight_charges = ROUND(($actual_weight * $charges_per_kg), 0, PHP_ROUND_HALF_DOWN);
-                    $fuel = StandardFuelSurcharge::where('shipping_mode_id',$shipping_mode_id)->first();
-                    //$fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
                     $city = City::where('id',$pickup_city_id)->first();
                     $zone = Zone::where('id',$city['zone_id'])->first();
-                   // $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
-
-                  /*  if($request->charges_mode == 1) {
-                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
-
-                        $amount = 0;
-
-                        $r_amount = $receivable;
-                    }
-                    else{
-                        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
-
-                        $amount = $receivable;
-
-                        $r_amount = NULL;
-                    }*/
 
                 }
+                $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
                 $business_category_id = 1;
-                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, 0, null, $actual_weight, null, 0, 0, $delivery_type, $charges_mode_id, null, $pickup, $business_category_id);
+                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $ftl_request->total_charges, $delivery_type, $charges_mode_id, null, $pickup, $business_category_id);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -1570,12 +1553,6 @@ class AdminWalkInBookShipmentController extends Controller
 
                 $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
 
-               /* if($request->filled('pickup')){
-                    $walkin_weight = new WalkinShipmentWeightCharges();
-                    $walkin_weight->shipment_id = $shipment_id;
-                    $walkin_weight->charges_per_kg = $request->charges_per_kg;
-                    $walkin_weight->save();
-                }*/
 
                 if($request->has('pack_type')){
 
@@ -1597,7 +1574,8 @@ class AdminWalkInBookShipmentController extends Controller
                 }
 
                  FtlRequest::where('id',$request->approve_frieght_request)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
-                
+
+
                   $walkin_ftl_invoice = new WalkinFtlInvoice();
                   $walkin_ftl_invoice->ftl_request_id = $request->approve_frieght_request;
                   $walkin_ftl_invoice->save();

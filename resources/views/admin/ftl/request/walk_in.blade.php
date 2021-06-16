@@ -166,7 +166,7 @@
                                         <div id="frieght_div" class="form-group ">
                                             <select name="approve_frieght_request" class="select2" id="approve_frieght_request" data-rule-required="true" data-msg-required="Request ID is required">
                                                 @foreach($approve_ftl_requests as $request)
-                                                    <option value="{{ $request->id }}">{{ $request->id }}</option>
+                                                    <option value="{{ $request->id }}">{{ str_pad($request->id, 6, '0', STR_PAD_LEFT) }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -263,11 +263,10 @@
                         }
                     }).done(function (data) {
                         if (data.status == 1) {
-
+                            console.log(data);
                             $('#consignee_city').val(data.data.destination_id).trigger('change');
-                            //$('#new_pickup_city').val(data.data.origin_id).trigger('change');
                             $('.quantity').val(data.data.quantity).trigger('change');
-                            $('#actual_weight').val(data.data.weight).trigger('change');
+                            $('#actual_weight').val(data.data.weight);
                             $('#ftl_charges').val(data.data.total_charges);
                             $('#shipping_mode').val(2).trigger('change');
 
@@ -286,118 +285,7 @@
             @if(request()->has('ftl_req'))
                 $('#approve_frieght_request').val("{{request()->get('ftl_req')}}").trigger('change');
             @endif
-
-            $('#new_pickup_city, #pickup_address, #consignee_city, #shipping_mode, #delivery_type').change(function(){
-                if ($('#pickup_address').val() == 0) {
-                    var pickup_city_id = $('#new_pickup_city').val();
-                }
-                else {
-                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
-                }
-                $.ajax({
-                    url:'{!! route('admin.shipment.book.check_min_charges') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'pickup_city': pickup_city_id,
-                        'consignee_city': $('#consignee_city').val(),
-                        'delivery_type': $('#delivery_type').val(),
-                        'shipping_mode': $('#shipping_mode').val()
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        $('#span_charges').remove();
-                        if(data.min_charges < $('#charges_per_kg').val()) {
-                            var span_charges = '<span id="span_charges" style="color: blue">Minimum charges per kg will be ' + data.min_charges + '</span>';
-                            $('#charges_per_kg').parent('div').append(span_charges);
-                        }
-                    }
-                });
-
-            });
-            var shipment_pickup = 0;
-          /*  $('#actual_weight, #charges_per_kg').change(function(){
-                $('#span').remove();
-                var pickup;
-                if ($('#pickup_address').val() == 0) {
-                    var pickup_city_id = $('#new_pickup_city').val();
-                }
-                else {
-                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
-                }
-
-                $.ajax({
-                    url:'{!! route('admin.shipment.book.check_standard_weight') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'actual_weight': $('#actual_weight').val(),
-                        'charges_per_kg': $('#charges_per_kg').val(),
-                        'pickup_city': pickup_city_id,
-                        'consignee_city': $('#consignee_city').val(),
-                        'delivery_type': $('#delivery_type').val(),
-                        'shipping_mode': $('#shipping_mode').val(),
-                        'pickup' : $('#pickup').prop('checked')
-                    }
-                }).done(function (data) {
-                    if(data.status === 0 || data.status === 1 || data.status === 3 || data.status === 4 || data.status === 5 || data.status === 6){
-                        // if(shipment_pickup == 0){
-                        $('#sub_book').prop('disabled', true);
-                        $('#sub_book_print').prop('disabled', true);
-                        // }
-
-                    }
-                    if(data.status === 1){
-                        $('#span').remove();
-                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                        $('#actual_weight').parent('div').append(span);
-                    }
-                    if(data.status === 0) {
-                        $('#span').remove();
-                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                        $('#charges_per_kg').parent('div').append(span);
-                    }
-                    if(data.status === 3) {
-                        $('#span').remove();
-                        if ($('#pickup_address').val() == "") {
-                            var span = '<span id="span" style="color: red">Pickup address is required</span>';
-                            $('#pickup_address').parent('div').append(span);
-                        }
-                        else{
-                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                            $('#new_pickup_city').parent('div').append(span);
-                        }
-                        $('#actual_weight').val('');
-                        $('#charges_per_kg').val('');
-                    }
-                    if(data.status === 4) {
-                        $('#span').remove();
-                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                        $('#delivery_type').parent('div').append(span);
-                        $('#actual_weight').val('');
-                        $('#charges_per_kg').val('');
-                    }
-                    if(data.status === 5) {
-                        $('#span').remove();
-                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                        $('#consignee_city').parent('div').append(span);
-                        $('#actual_weight').val('');
-                        $('#charges_per_kg').val('');
-                    }
-                    if(data.status === 6) {
-                        $('#span').remove();
-                        var span = '<span id="span" style="color: red">'+data.error+'</span>';
-                        $('#shipping_mode').parent('div').append(span);
-                        $('#actual_weight').val('');
-                        $('#charges_per_kg').val('');
-                    }
-                    if(data.status === 2) {
-                        $('#span').remove();
-                        $('#sub_book').prop('disabled', false);
-                        $('#sub_book_print').prop('disabled', false);
-                    }
-                });
-            });*/
+                    
 
             $('#delivery_type, #consignee_city').change(function () {
                 if($('#delivery_type').val() == 2){
@@ -442,7 +330,7 @@
                     var pickup_city_id = $('#new_pickup_city').val();
                 }
 
-                consignee_city_id = $('#consignee_city').val();
+                //consignee_city_id = $('#consignee_city').val();
             }
 
 
@@ -462,7 +350,7 @@
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
                 }
-                $('#actual_weight').val('');
+                //$('#actual_weight').val('');
                 $('#charges_per_kg').val('');
                 $('#span').remove();
             });
@@ -527,7 +415,7 @@
                     $(this).valid();
                 }
 
-                $('#actual_weight').val(null);
+                //$('#actual_weight').val(null);
                 $('#charges_per_kg').val(null);
                 $('#fuel_surcharge').val(null);
                 $('#total_charges').val(null);
