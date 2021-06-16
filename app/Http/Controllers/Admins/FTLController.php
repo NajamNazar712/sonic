@@ -81,12 +81,12 @@ class FTLController extends Controller
             ->addColumn('action', function($data) {
                 $dropdown = '';
                 if (session('role_id') == 1 || count(array_intersect([513, 516], session('permissions'))) !== 0){
-                    $route = route('admin.ftl.request.view', ['id' => $data->id]);
                     $dropdown .= '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
                     if(session('role_id') == 1 || in_array(513,session('permissions'))) {
+                        $route = route('admin.ftl.request.view', ['id' => $data->id]);
                         if ($data->status_id == 1 || $data->status_id == 4) {
                             $dropdown .= '<button onclick="window.open(\'' . $route . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Estimate</div></button>';
                         } else {
@@ -95,7 +95,8 @@ class FTLController extends Controller
                     }
                     if(session('role_id') == 1 || in_array(516,session('permissions'))) {
                         if ($data->status_id == 3 && $data->shipper_id == null) {
-                            $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Book</div></button>';
+                            $route = route('admin.shipment.book.ftl.walk_in').'?ftl_req='.$data->req_id;
+                            $dropdown .= '<button type="button" onclick="window.open(\''.$route.'\')" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Book</div></button>';
                         }
                     }
                     $dropdown .= '</div>

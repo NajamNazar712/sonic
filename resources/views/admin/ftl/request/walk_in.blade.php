@@ -283,6 +283,9 @@
                 }
             });
 
+            @if(request()->has('ftl_req'))
+                $('#approve_frieght_request').val("{{request()->get('ftl_req')}}").trigger('change');
+            @endif
 
             $('#new_pickup_city, #pickup_address, #consignee_city, #shipping_mode, #delivery_type').change(function(){
                 if ($('#pickup_address').val() == 0) {
