@@ -55,7 +55,20 @@
 									</button>
 								</div>
 								<div class="modal-body">
-									
+									<div class="form-group input-group">
+										<div class="input-group-prepend">
+											<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+												<span class="la la-calendar-o"></span>
+											</span>
+										</div>
+
+										<input type="text" name="receiving_date" class="form-control pickadate bg-primary border-primary white rounded-right receiving_date" id="receiving_date" placeholder="Rreceiving Date*" data-rule-required="true" data-msg-required="Rreceiving Date is required">
+									</div>
+
+                                    <div class="form-group">
+										<input type="text" name="company_bank" class="form-control company_bank" placeholder="Company Bank*" data-rule-required="true" data-msg-required="Company Bank is required" data-rule-number="true" >
+									</div>
+
 
 									<div class="form-group">
 										<input type="text" name="received_amount" class="form-control received_amount" placeholder="Received Amount*" data-rule-required="true" data-msg-required="Received Amount is required" data-rule-number="true" data-msg-number="Received Amount should to be a valid number">
@@ -77,8 +90,7 @@
 
 								</div>
 								<div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-									<button type="submit" class="btn btn-primary ml-auto">Mark as Received</button>
+									<button type="submit" class="btn btn-primary ml-auto">Update</button>
 								</div>
 							</form>
 						</div>
@@ -108,14 +120,7 @@
 
 	<script>
 		$(document).ready(function() {
-			$('#mark_as_received form select.company_bank').prepend('<option value="" selected></option>').select2({
-                placeholder: 'Select Company Bank',
-                width:'100%'
-            }).bind('change', function() {
-				if ($(this).hasClass('danger')) {
-					$(this).valid();
-				}
-			});
+			
 
 			$('#mark_as_received form input.received_amount').inputmask({
 				'alias': 'decimal',
@@ -130,7 +135,18 @@
 				'allowPlus': false,
 				'digits': 2
 			});
-
+            
+            $('#mark_as_received form input.receiving_date').pickadate({
+				firstDay: 1,
+				clear: '',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onSet: function(context) {
+					$('#mark_as_received input.receiving_date').valid();
+				}
+			});
 			$('#mark_as_received form input.deposit_date').pickadate({
 				firstDay: 1,
 				clear: '',
@@ -390,7 +406,6 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
@@ -400,12 +415,7 @@
 						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
-						else if ($(header).is('.company_bank')) {
-                            $(company_bank_select).appendTo($(search))
-							.on('change', function() {
-								column.search($(this).val(), false, false, true).draw();
-							}).wrap(td);
-                        }
+						
                         else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
                             .on('change', function() {
@@ -450,6 +460,9 @@
 			$('#mark_as_received form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				}
@@ -538,20 +551,7 @@
 				else if ($(this).hasClass('mark_as_received')) {
 					$('#mark_as_received form input.id').val(id);
 
-					$('#mark_as_received form select.company_bank').val('').change();
-					$('#mark_as_received form input.received_amount').val('');
-					$('#mark_as_received form input.tax_amount').val('');
-					$('#mark_as_received form input.pickadate').val('');
-
-					$('#mark_as_received form label.danger').remove();
-
-
-					$('#mark_as_received').modal('show');
-				}
-				else if ($(this).hasClass('mark_as_received')) {
-					$('#mark_as_received form input.id').val(id);
-
-					$('#mark_as_received form select.company_bank').val('').change();
+					$('#mark_as_received form input.company_bank').val('');
 					$('#mark_as_received form input.received_amount').val('');
 					$('#mark_as_received form input.tax_amount').val('');
 					$('#mark_as_received form input.pickadate').val('');
