@@ -591,6 +591,7 @@ class RetailParcelReceivingController extends Controller
                               <table class="table table-bordered border">
                                       <tbody>
                                           <tr>
+                                              <td class="color primary"><b>Product</b></td>
                                               <td class="color primary"><b>Booked At</b></td>
                                               <td class="color primary"><b>CN. Number</b></td>
                                           </tr>';
@@ -598,6 +599,7 @@ class RetailParcelReceivingController extends Controller
         foreach ($other_parcel_receiving_shipments as $other_parcel_receiving_shipment) {
             $html .= '
                                           <tr>
+                                          <td style="border-bottom: none !important;">' . $other_parcel_receiving_shipment->shipment->shipping_mode->name . '</td>
                                               <td>' . $other_parcel_receiving_shipment->shipment->created_at . '</td>
                                               <td>' . $other_parcel_receiving_shipment->shipment->tracking_number . '</td>
                                           </tr>';
