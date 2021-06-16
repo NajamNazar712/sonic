@@ -1599,12 +1599,12 @@ class RetailShipmentBookController extends Controller
             'consignee_address' => ['required', 'between:1,255'],
             'order_id' => ['nullable'],
 //            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'trax_box_id' => ['required_if:shipping_mode_id,5', 'integer', Rule::exists('retail_trax_boxes', 'id')],
-            'weight_charges' => ['required', 'integer'],
-            'fuel_surcharge' => ['required', 'integer'],
-            'iban_number' => ['between:1,50'],
-            'account_number' => ['integer'],
-            'bank_id' => ['integer', 'between:1,100', Rule::exists('banks_lists', 'id')]
+            'trax_box_id' => ['required_if:shipping_mode_id,5', 'nullable', 'integer', Rule::exists('retail_trax_boxes', 'id')],
+            'weight_charges' => ['required', 'numeric'],
+            'fuel_surcharge' => ['required', 'numeric'],
+            'iban_number' => ['nullable', 'between:1,50'],
+            'account_number' => ['nullable', 'numeric'],
+            'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')]
         ];
 
         if($file = $request->file('shipments')) {
