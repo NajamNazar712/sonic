@@ -1688,7 +1688,8 @@ class RetailShipmentBookController extends Controller
                     $city_name = $row['destination'];
                     if($shipping_mode_id == 1){
                         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->pluck('c.name')->toArray();
-                        if(!in_array($city_name, $domestic_overland_cities)){
+                        $domestic_overland_cities = array_map('strtolower', $domestic_overland_cities);
+                        if(!in_array(strtolower($city_name), $domestic_overland_cities)){
                             $errors[$row_id]['destination'] = 'City ' . $city_name . ' is not allowed for Product ID# ' . $shipping_mode_id;
                         }
                     }
