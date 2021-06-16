@@ -56,13 +56,13 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $order_id = $this->booking['order_id'];
         $package_type = FALSE;
         $special_instructions = NULL;
-
+        $city_id = City::where('name', $this->booking['destination'])->first()->id;
 
         $shipping_mode_check = $this->booking['shipping_mode_id'];
         if ($shipping_mode_check == 1) {
 //            if($this->booking['business_category']== 1)
 //            {
-                $consignee_city_id = $this->booking['destination'];
+                $consignee_city_id = $city_id;
 //            }
 //            else{
 //                $consignee_city_id = $this->booking['international_destination'];
@@ -71,7 +71,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         }
         elseif ($shipping_mode_check == 4){
 //            if($this->booking['business_category'] == 1) {
-                $consignee_city_id = $this->booking['destination'];
+                $consignee_city_id = $city_id;
 //            }
 //            else{
 //                $consignee_city_id = $this->booking['international_destination'];
@@ -80,7 +80,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         }
         else{
 //            if($this->booking['business_category'] == 1) {
-                $consignee_city_id = $this->booking['destination'];
+                $consignee_city_id = $city_id;
 //            }
 //            else{
 //                $consignee_city_id = $this->booking['international_destination'];
