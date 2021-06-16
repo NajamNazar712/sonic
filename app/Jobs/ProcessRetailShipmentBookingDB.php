@@ -197,7 +197,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
             if ($this->booking['iban_number'] != null && $this->booking['account_number'] != null && $this->booking['bank_id'] != null) {
                 $shipper_info->bank_id = $this->booking['bank_id'];
                 $shipper_info->iban = $this->booking['iban_number'];
-                $shipper_info->account_number = $this->booking['account_no'];
+                $shipper_info->account_number = $this->booking['account_number'];
             }
             $shipper_info->save();
         }
