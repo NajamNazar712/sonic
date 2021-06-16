@@ -259,6 +259,7 @@ class DeliveryController extends Controller
                 }
             });
             if($mode = $request->get('search_shipping_mode')){
+
                 $datatables->where('sm.id', '=', $mode);
             }
            return $datatables->make(true);

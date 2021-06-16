@@ -93,8 +93,10 @@ class AdminERFController extends Controller
                 }
             });
 
-        if($status = $request->get('status')){
-            $erf->where('employee_registrations.status', '=',$status);
+
+        if($status = $request->get('search_status')){
+           // dd($status);
+            $datatables->where('s.id', '=', $status);
         }
 
 
