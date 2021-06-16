@@ -85,6 +85,30 @@
         </div>
     </div>
 
+  {{--  <div class="modal fade" id="ViewDocumentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDocumentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">View Document</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+                    <form id="document_form" method="post" action="{{route('admin.human_resource.erf.document')}}">
+                        @csrf
+                        <input type="hidden" name="er_id" id="er_id">
+                    </form>
+
+                </div>
+                <div class="modal-footer d-flex justify-content-end">
+                    <button class="btn btn-grey" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>--}}
+
 
 @endsection
 
@@ -115,7 +139,7 @@
 
             $('#track_form #status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Status',
-                allowClear:true
+                allowClear: true
             });
 
             var route = '<?php echo route('admin.human_resource.erf.add'); ?>';
@@ -128,7 +152,7 @@
                         title: 'Add ERF',
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Add ERF',
-                        action:function (e) {
+                        action: function (e) {
                             window.location = route;
                         }
 
@@ -144,7 +168,7 @@
                     processing: data_table_loader
                 },
 
-                ajax:{
+                ajax: {
                     url: '{{ route('admin.human_resource.erf.list') }}',
                     data: function (d) {
                         d.status = $('#track_form #status').val();
@@ -153,7 +177,16 @@
                 },
                 order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
                     {data: 'erf_id', name: 'employee_requisitions.id', class: 'align-middle erf_id'},
                     {data: 'department', name: 'dp.name', class: 'align-middle department'},
                     {data: 'designation', name: 'd.name', class: 'align-middle designation'},
@@ -162,10 +195,10 @@
                     {data: 'admin', name: 'a.name', class: 'align-middle admin'},
                     {data: 'status', name: 's.name', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action'},
-                ],rowCallback: function(row, data, index) {
+                ], rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },initComplete: function() {
+                }, initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -173,20 +206,19 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var role_select = '<select name="role_select" id="role_select" class="select2 form-control"></select>';
 
-                    this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.role')){
+                        } else if ($(header).is('.role')) {
                             $(role_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -201,14 +233,49 @@
             });
 
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var erf_id = table.row( $(this).parents('tr') ).data().erf_id;
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
 
                 if ($(this).hasClass('admin_approve')) {
                     $('#erf_id').val(erf_id);
                     $('#file_modal').modal('show');
                 }
             });
+
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+                if ($(this).hasClass('approve_request')) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.erf.approve') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': erf_id,
+
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 1) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
+                }
+            });
+
+        });
+
 
             $("#file_upload").validate({
 
@@ -230,7 +297,7 @@
                     form.submit();
                 }
             });
-        });
+
 
     </script>
 

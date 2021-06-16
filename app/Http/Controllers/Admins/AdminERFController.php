@@ -46,7 +46,8 @@ class AdminERFController extends Controller
             ->join('employee_designations as d', 'd.id', '=', 'employee_requisitions.designation_id')
             ->join('admin_departments as dp', 'dp.id', '=', 'employee_requisitions.department_id')
             ->join('employee_requisition_statuses as s', 's.id', '=', 'employee_requisitions.status_id')
-            ->select(['employee_requisitions.id as erf_id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','s.id']);
+            ->leftjoin('employee_requisition_attachments as documents','documents.er_id','=','employee_requisitions.id')
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','documents.id as document']);
 
 
 
@@ -62,23 +63,23 @@ class AdminERFController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (session('role_id') == 1 || in_array(94, session('permissions'))) {
+                    if (($result->status_id == 1) && session('role_id') == 1 || in_array(94, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
 
                     }
+                    if (($result->status_id == 2) && session('role_id') == 1 || in_array(94, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By CEO</div></button>';
 
-                   /* if (session('role_id') == 1 || in_array(95, session('permissions'))) {
-                        if ($result->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
-                        }
-                        else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
-                        }
                     }
-                    $dropdown .= '<button type="button" class="dropdown-item assign_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Shipper</div></button>';
+                    if (($result->status_id == 3) && session('role_id') == 1 || in_array(94, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
+
+                    }
+                     if($result->document != null){
+                         $dropdown .= '<a  class="dropdown-item view_document btn" rel="#" data-toggle="modal"  href="'.route('admin.human_resource.erf.documents',['id' => $result->id]) .'" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></a>';
+                     }
 
 
-                    $dropdown .= '<button type="button" class="dropdown-item view_location" data-target-id=' . $result->id . ' rel="assignlocation" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipper</div></button>';*/
 
                     $dropdown .= '
                         </div>
@@ -438,7 +439,7 @@ class AdminERFController extends Controller
             return $pdf;
         }
 
-        public function file_upload(Request $request){
+    public function file_upload(Request $request){
 
       
         $erf_id = str_replace("ERF","",$request->erf_id);
@@ -465,7 +466,7 @@ class AdminERFController extends Controller
         
         $attachments = new EmployeeRequisitionAttachments();
         $attachments->er_id = $erf_id;
-        $attachments->uploaded_by = Auth::id();
+        $attachments->admin_id = Auth::id();
         $attachments->file = $filename;
         $attachments->save();
 
@@ -487,4 +488,32 @@ class AdminERFController extends Controller
 
             return redirect()->back()->with('success', 'Document Uploaded!');
         }
+
+    public function approve(Request $request){
+        $erf_id = str_replace("ERF","",$request->id);
+        $erf = EmployeeRequisition::find($erf_id);
+     
+        if($erf->status_id == 3){
+            $erf->status_id = 4;
+            $erf->save();
+            return response()->json(['status' => 1,'success' => 'Status Updated']);
+        }
+        else{
+            return response()->json(['status' => 0,'error'=> 'Status already approved']);
+        }
     }
+
+    public function documents($id){
+
+        $user_documents = EmployeeRequisitionAttachments::where('er_id', $id);
+        if($user_documents->exists()){
+            $user_documents = $user_documents->get();
+            return view('admin.human_resource.erf.view_documents')->with([/*'urls' => $urls,*/'id' => $id,'documents' => $user_documents]);
+        }
+        else{
+            return redirect()->back()->with('error', 'File not found!');
+        }
+    }
+
+
+}

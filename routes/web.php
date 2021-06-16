@@ -2972,6 +2972,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit', 'Admins\AdminERFController@submit_form')->name('submit');
             Route::post('print', 'Admins\AdminERFController@print')->name('print');
             Route::post('file_upload', 'Admins\AdminERFController@file_upload')->name('file_upload');
+            Route::post('approve', 'Admins\AdminERFController@approve')->name('approve');
+            Route::get('{id}/documents','Admins\AdminERFController@documents')->name('documents');
+           // Route::get('{id}/documents/view','Admins\AdminERFController@viewAttachments')->name('view.attachments');
         });
     });
 

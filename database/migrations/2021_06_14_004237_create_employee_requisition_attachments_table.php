@@ -16,7 +16,7 @@ class CreateEmployeeRequisitionAttachmentsTable extends Migration
         Schema::create('employee_requisition_attachments', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('er_id')->index();
-            $table->integer('uploaded_by')->index();
+            $table->integer('admin_id')->index();
             $table->string('file');
             $table->timestamps();
         });
