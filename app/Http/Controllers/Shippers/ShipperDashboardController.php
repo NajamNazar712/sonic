@@ -90,6 +90,8 @@ use Illuminate\Support\Facades\Hash;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -380,6 +382,18 @@ class ShipperDashboardController extends Controller
 
                 if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
 
+                    $other_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $shipment_id);
+                    if ($other_parcel_receiving_shipment->exists()) {
+                        $other_parcel_receiving_shipment = $other_parcel_receiving_shipment->get()->first();
+                        $other_parcel_receiving_id = $other_parcel_receiving_shipment->other_parcel_receiving_id;
+                        $other_parcel_receiving_shipment->delete();
+                        $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
+                        $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn-1;
+                        $other_parcel_receiving->save();
+                        if($other_parcel_receiving->total_cn < 1){
+                            $other_parcel_receiving->delete();
+                        } 
+                    }    
                     if($shipment->warehouse == 1){
                         return response()->json(['status' => 0,'error' => 'Warehouse Shipment can not be cancelled from Sonic!']);
                     }
@@ -473,6 +487,18 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
+                    $other_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $id);
+                    if ($other_parcel_receiving_shipment->exists()) {
+                        $other_parcel_receiving_shipment = $other_parcel_receiving_shipment->get()->first();
+                        $other_parcel_receiving_id = $other_parcel_receiving_shipment->other_parcel_receiving_id;
+                        $other_parcel_receiving_shipment->delete();
+                        $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
+                        $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn-1;
+                        $other_parcel_receiving->save();
+                        if($other_parcel_receiving->total_cn < 1){
+                            $other_parcel_receiving->delete();
+                        } 
+                    }
                     if($shipment->warehouse == 1){
                         continue;
                     }
@@ -1328,5 +1354,13 @@ class ShipperDashboardController extends Controller
         }
 
         return $datatable->make(true);
+    }
+
+    public function agreement_status(Request $request){
+        if(session()->has('agreement_signed') && session('agreement_signed') != 1){
+            session(['agreement_signed' => 1]);
+            User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
+        }
+        return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
     }
 }

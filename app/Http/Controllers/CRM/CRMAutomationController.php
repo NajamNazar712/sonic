@@ -30,12 +30,12 @@ class CRMAutomationController extends Controller
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $row->crm_request_id,
                             'status_id' => 3,
-                            'agent_id' => 61
+                            'agent_id' => 306
                         ]);
                         $setting = GlobalSettings::where('type', 'crm_delay_in_delivery_message');
                         if($setting->exists()){
                             $setting = $setting->first();
-                            CRMCommentController::add($row->crm_request_id,61,0,0, $setting->text);
+                            CRMCommentController::add($row->crm_request_id,306,0,0, $setting->text);
                         }
                         $row->delete();
                     }
@@ -58,7 +58,7 @@ class CRMAutomationController extends Controller
                         CrmRequestStatusHistory::create([
                             'crm_request_id' => $row->crm_request_id,
                             'status_id' => 3,
-                            'agent_id' => 61
+                            'agent_id' => 306
                         ]);
                         $row->delete();
                     }
