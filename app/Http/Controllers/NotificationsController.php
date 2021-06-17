@@ -7369,6 +7369,7 @@ class NotificationsController extends Controller
                   
                     $data = $reference_1_id;
                     $erf = EmployeeRequisition::find($data['id']);
+                    $erf_id = str_pad($erf->id,6,0,STR_PAD_LEFT);
                     $admin = Admin::where('email',$data['email'])->first();
                     if($admin){
                         $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
@@ -7378,11 +7379,11 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($subject, '[erf_id]') !== FALSE) {
-                            $subject = str_replace('[erf_id]', $erf->id, $subject);
+                            $subject = str_replace('[erf_id]', $erf_id, $subject);
                         }
 
                         if (strpos($body, '[erf_id]') !== FALSE) {
-                            $body = str_replace('[erf_id]', $erf->id, $body);
+                            $body = str_replace('[erf_id]', $erf_id, $body);
                         }
                         if (strpos($body, '[admin]') !== FALSE) {
                             $body = str_replace('[admin]', $admin->name, $body);

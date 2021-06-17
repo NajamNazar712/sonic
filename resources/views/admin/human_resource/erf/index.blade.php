@@ -73,6 +73,24 @@
         </div>
     </div>
 
+    <div class="modal fade" id="documents_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="documents_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title w-100 font-weight-bold">View Documents</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body mx-3">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 
 @endsection
@@ -331,6 +349,50 @@
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
+            }
+        });
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+
+            var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+            if ($(this).hasClass('view_document')) {
+                $.ajax({
+                    url: '{!! route('admin.human_resource.erf.documents') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': erf_id,
+
+                    }
+                }).done(function (data) {
+
+                    if (data.status == 1) {
+                        var url = '{{ Storage::url('employee_requisition/') }}';
+                        var html = '';
+                        html += '<table class="table table-sm datatable text-center">';
+                        html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th><th><strong>Document</strong></th></tr></thead>';
+                        html += '<tbody>';
+                        $.each(data.documents, function (index, value) {
+                            
+                            var ind = index + 1;
+                            html += '<tr class=""><td>' + ind + '</td>';
+                            html += '<td>' + value.admin + '</td>';
+                            html += '<td><a class="white" href=" '+ url + value.id + '/' + value.file +'" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>';
+
+                        });
+                        html += '</tbody></table>';
+
+                        $('#documents_modal .modal-body').html(html);
+                        $('#documents_modal').modal('show');
                     } else {
                         toastr.error(data.error, 'Error!', {
                             positionClass: 'toast-top-center',

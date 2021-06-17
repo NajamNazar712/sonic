@@ -81,10 +81,10 @@ class AdminERFController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
-                     if($result->document != null && session('role_id') == 1 || in_array(521, session('permissions'))){
-                         $route = route('admin.human_resource.erf.documents',['id' => $result->id]);
-                         $dropdown .= '<button type="button" class="dropdown-item view_document"  onclick="window.open(\''.$route .'\')" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View</div></button>';
-                     }
+                    if ($result->document != null && session('role_id') == 1 || in_array(521, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
+
+                    }
 
 
 
@@ -178,7 +178,6 @@ class AdminERFController extends Controller
 
         $email = $request->admin_email;
         $path = $this::erf_print($erf->id);
-      /*  return $path;*/
         $data['id'] = $erf->id;
         $data['email'] = $email;
         NotificationsController::send(133, $data, url('/') . '/' . 'reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
@@ -523,15 +522,16 @@ class AdminERFController extends Controller
         }
     }
 
-    public function documents($id){
-
-        $user_documents = EmployeeRequisitionAttachments::where('er_id', $id);
+    public function documents(Request $request){
+        
+        $erf_id = str_replace("ERF","",$request->id);
+        $user_documents = EmployeeRequisitionAttachments::where('er_id', $erf_id);
         if($user_documents->exists()){
-            $user_documents = $user_documents->get();
-            return view('admin.human_resource.erf.view_documents')->with(['id' => $id,'documents' => $user_documents]);
+            $user_documents = $user_documents->join('admins as a','a.id','=','employee_requisition_attachments.admin_id')->where('er_id',$erf_id)->select(['a.name as admin','employee_requisition_attachments.file as file','employee_requisition_attachments.er_id as id'])->get();
+            return response()->json(['status' => 1,'documents' => $user_documents]);
         }
         else{
-            return redirect()->back()->with('error', 'File not found!');
+            return response()->json(['status' => 0,'error' => 'No Documents Found']);
         }
     }
 
