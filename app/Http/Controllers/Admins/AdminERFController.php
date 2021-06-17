@@ -366,18 +366,18 @@ class AdminERFController extends Controller
                             <tr>
                          
                               <td class="color secondary"><strong>Job Description</strong></td>
-                              <td>' . $erf->job_description . '</td>
+                              <td class="text-justify">' . $erf->job_description . '</tdc>
                               </tr>
                               <tr>
                             
                                  <td class="color secondary"> <strong>Required Skills</strong></td>
-                               <td >' . $erf->skills . '</td>
+                               <td class="text-justify">' . $erf->skills . '</td>
                       
                             
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Qualification Required</strong></td>
-                              <td>' . $erf->qualifications . '</td>
+                              <td class="text-justify">' . $erf->qualifications . '</td>
          
                             </tr>                
                          </tbody>

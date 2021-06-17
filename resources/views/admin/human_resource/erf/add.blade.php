@@ -184,6 +184,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
 @endsection
 
 @section('js')
@@ -408,7 +409,8 @@
                     formatSubmit: 'yyyy-mm-dd 23:59:59',
                     hiddenSuffix: '_formatted',
                     onOpen: function() {
-                        $('#to_date_root').css('top', '40px');
+                       // $('#to_date_root').css('top', '40px');
+                        $('.picker').css('position','relative');
                     },
                     onSet: function(context) {
 
@@ -438,15 +440,15 @@
             var i = 0;
             $('body').on('click','#add',function(){
                 ++i;
-                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="text" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> ' +
-                    ' <td><div class="form-group"> <input type="text" name="addmore['+i+'][date]" class="form-control bg-primary border-primary white rounded-right append_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date is required"></div></td>' +
+                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id'+i+'" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="text" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> ' +
+                    ' <td><div class="form-group"> <input type="text" name="addmore['+i+'][date]" class="form-control bg-primary border-primary white rounded-right " id="append_date'+i+'" placeholder="Date To" data-rule-required="true" data-msg-required="Date is required"></div></td>' +
                     '<td class="text-center"><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
-                $(".trax_id").prepend('<option value="" selected="selected"></option>').select2({
+                $('#leavers_trax_id'+i+'').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id'
                 });
 
-                var date = $('.append_date').pickadate({
+                var date = $('#append_date'+i+'').pickadate({
                     firstDay: 1,
                     clear: 'Clear',
                     max : new Date(today),
