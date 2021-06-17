@@ -2446,7 +2446,20 @@ class ReturnController extends Controller
                     }
                     if ($user_total_shipments[$filtered_shipments_user->user_id] > 0) {
                         $total_users++;
-                        $shipment_details_row_start_summary = '
+                        if($filtered_shipments_user->return_address_id != NULL){
+                            $shipment_details_row_start_summary = '
+                                  <tr>
+                                    <td>' . $total_users . '</td>
+                                    <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                    <td>' . $filtered_shipments_user->return_address->poc . '</td>
+                                    <td>' . $filtered_shipments_user->return_address->phone . '</td>
+                                    <td>' . $filtered_shipments_user->return_address->pickup_address . '</td>
+                                    <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                    <td></td>
+                        ';
+                        }
+                        else{
+                            $shipment_details_row_start_summary = '
                                   <tr>
                                     <td>' . $total_users . '</td>
                                     <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
@@ -2456,6 +2469,8 @@ class ReturnController extends Controller
                                     <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
                                     <td></td>
                         ';
+                        }
+
 
                         $shipment_details .= $shipment_details_row_start_summary;
                     }
@@ -2495,7 +2510,20 @@ class ReturnController extends Controller
                     }
                     if($user_total_shipments[$filtered_shipments_user->user_id] > 0){
                         $replacement_total_users++;
-                        $shipment_details_row_start_summary = '
+                        if($filtered_shipments_user->return_address_id != NULL){
+                            $shipment_details_row_start_summary = '
+                              <tr>
+                                <td>' . $replacement_total_users . '</td>
+                                <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                <td>' . $filtered_shipments_user->return_address->poc . '</td>
+                                <td>' . $filtered_shipments_user->return_address->phone . '</td>
+                                <td>' . $filtered_shipments_user->return_address->pickup_address . '</td>
+                                <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                <td></td>
+                    ';
+                        }
+                        else{
+                            $shipment_details_row_start_summary = '
                               <tr>
                                 <td>' . $replacement_total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
@@ -2505,6 +2533,8 @@ class ReturnController extends Controller
                                 <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
                                 <td></td>
                     ';
+                        }
+
 
                         $shipment_details .= $shipment_details_row_start_summary;
                     }
@@ -2597,7 +2627,20 @@ class ReturnController extends Controller
                         if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                             $class = 'complaint';
                         }
-                        $shipment_details_row_start = '
+                        if($shipment->return_address_id != NULL){
+                            $shipment_details_row_start = '
+                              <tr>
+                                <td>' . $total_shipments . '</td>
+                                <td class="'. $class .'">' . $shipment->tracking_number . '</td>
+                                <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
+                                <td>' . $shipment->return_address->poc . '</td>
+                                <td>' . $shipment->return_address->phone . '</td>
+                                <td>' . $shipment->return_address->pickup_address . '</td>
+                                <td>' . $shipment->items->where('bought', 0)->sum('quantity') . '</td>
+                    ';
+                        }
+                        else{
+                            $shipment_details_row_start = '
                               <tr>
                                 <td>' . $total_shipments . '</td>
                                 <td class="'. $class .'">' . $shipment->tracking_number . '</td>
@@ -2607,6 +2650,8 @@ class ReturnController extends Controller
                                 <td>' . $shipment->pickup_address->pickup_address . '</td>
                                 <td>' . $shipment->items->where('bought', 0)->sum('quantity') . '</td>
                     ';
+                        }
+
 
                         if ($shipment->booking_type_id != 4) {
                             $shipment_details_row_start .= '
