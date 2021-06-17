@@ -232,7 +232,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[17, 'desc']],
+                order: [[19, 'desc']],
                 columns: [
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
