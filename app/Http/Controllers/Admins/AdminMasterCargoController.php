@@ -278,11 +278,11 @@ class AdminMasterCargoController extends Controller
                     })
                 ->orWhere(function($sub_query) use ($keyword){
                     $sub_query->where(function ($sub_sub_query) use ($keyword) {
-                        $sub_sub_query->whereNotNull('shipments.shipper_status_id', 20)
+                        $sub_sub_query->whereNotNull('shipments.return_address_id')
                             ->where('rc.name', 'like', '%' . $keyword . '%');
                     })
                     ->orWhere(function($sub_sub_query) use ($keyword){
-                        $sub_sub_query->orWhereNull('shipments.shipper_status_id', 20)
+                        $sub_sub_query->orWhereNull('shipments.return_address_id')
                             ->where('dc.name', 'like', '%' . $keyword . '%');
                     });
 
