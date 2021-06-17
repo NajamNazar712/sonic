@@ -9280,7 +9280,7 @@ class AdminFinanceController extends Controller
             ->leftjoin('shipments as s', 'ftlr.shipment_id', '=', 's.id')
             ->leftjoin('banks_lists as bl', 'walkin_ftl_invoices.company_bank_id', '=', 'bl.id')
             ->leftjoin('transport_mode_vendors as ven', 'ftlr.vendor_id', '=', 'ven.id')
-            ->select('walkin_ftl_invoices.id', 'walkin_ftl_invoices.invoice_number', 'ftlr.id as request_id', 'origin.name as origin', 'destination.name as destination', 's.tracking_number', 'ftlr.weight', 'vt.name as vehicle', 'ftlr.quantity', 'ftlr.date as request_date', 'ven.name as vendor', 'ftlr.freight_cost as total_cost', 'ftlr.freight_charges as charges', 'ftlr.gst', 'ftlr.total_charges as total_charges', 'walkin_ftl_invoices.status_id as status', 'walkin_ftl_invoices.receiving_date', 'walkin_ftl_invoices.received_amount as received_amount', 'bl.name as company_bank', 'walkin_ftl_invoices.tax_amount as tax_amount', 'walkin_ftl_invoices.deposit_date as deposit_date');
+            ->select('walkin_ftl_invoices.id', 'walkin_ftl_invoices.invoice_number', 'ftlr.id as request_id', 'origin.name as origin', 'destination.name as destination', 's.tracking_number', 'ftlr.weight', 'vt.name as vehicle', 'ftlr.quantity', 'ftlr.date as request_date', 'ven.name as vendor', 'ftlr.freight_cost as total_cost', 'ftlr.freight_charges as charges', 'ftlr.gst', 'ftlr.total_charges as total_charges', 'walkin_ftl_invoices.status_id as status', 'walkin_ftl_invoices.receiving_date', 'walkin_ftl_invoices.received_amount as received_amount', 'bl.name as company_bank', 'walkin_ftl_invoices.tax_amount as tax_amount', 'walkin_ftl_invoices.deposit_date as deposit_date', 'ftlr.collection_type');
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
@@ -9296,6 +9296,14 @@ class AdminFinanceController extends Controller
             ->editColumn('gst', function($invoice) {
                 return number_format($invoice->gst, 2);
             })
+            ->editColumn('collection_type', function($invoice) {
+                if($invoice->collection_type==1){
+                    return 'Invoice';
+                }else{
+                    return 'Cash';
+                }
+            })
+            
             ->editColumn('total_invoice_amount', function($invoice) {
                 return number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN));
             })
@@ -9324,7 +9332,6 @@ class AdminFinanceController extends Controller
                 }
             })
             ->addColumn('action', function($invoice) {
-                $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
                 $mark_as_received_button = '<button type="button" class="dropdown-item mark_as_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
 
                 $dropdown = '
@@ -9333,8 +9340,7 @@ class AdminFinanceController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                $dropdown .= $export_to_excel_button;
-                if($invoice->status==2){
+                if($invoice->status==1){
                     if (session('role_id') == 1 || in_array(510, session('permissions')) ) {
                         $dropdown .= $mark_as_received_button;
                     }
@@ -9382,12 +9388,262 @@ class AdminFinanceController extends Controller
     public function ftl_invoice_print(Request $request){
         $walkin_ftl_invoice = WalkinFtlInvoice::find($request->id);
 
-        // if ($walkin_ftl_invoice) {
-        //     return self::generate_invoice_print($invoice->id);
-        // }
-        // else {
-        //     return '';
-        // }
+        if ($walkin_ftl_invoice) {
+            
+                $html = '';
+        
+                
+                    $html .= '
+                    <!doctype html>
+                    <html lang="en">
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                        <title>Air Waybill</title>
+
+                        <style>
+                          @page {
+                            size: A4 portrait;
+                          }
+
+                          * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                          }
+
+                          body {
+                            background: none !important;
+                            color: #09262e !important;
+                            font-size: 0.9rem !important;
+                          }
+
+                          hr {
+                            border-top: 1px dashed #000000;
+                          }
+
+                          table.table-bordered {
+                            page-break-inside: avoid;
+                          }
+
+                          table.table-bordered tbody tr td {
+                            width: 12.5% !important;
+                            border: 1px solid #09262e !important;
+                          }
+
+                          .color.primary {
+                            background: #c8c8c8 !important;
+                          }
+
+                          .color.secondary {
+                            background: #ebebeb !important;
+                          }
+
+                          .border {
+                            border: 1px solid #09262e !important;
+                          }
+
+                          .border.twice {
+                            border-width: 2px !important;
+                          }
+
+                          .border.twice-top {
+                            border-top-width: 2px !important;
+                          }
+
+                          .border.twice-bottom {
+                            border-bottom-width: 2px !important;
+                          }
+
+                          .border.twice-left {
+                            border-left-width: 2px !important;
+                          }
+
+                          .border.twice-right {
+                            border-right-width: 2px !important;
+                          }
+
+                          td.replacement span {
+                            width: 22px;
+                          }
+
+                          td.replacement span img {
+                            display: block;
+                            width: 100%;
+                            margin: auto;
+                            background: #c8c8c8;
+                            border-radius: 25px;
+                          }
+                           
+                          .invoice table.table-bordered tbody tr td {
+                            width: auto !important;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                    ';
+                
+        
+                    $html .= '<div class="invoice p-1">
+                    <table class="table table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-left align-middle">
+                            <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1">
+                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
+                            <div><strong>NTN:</strong> 7930679-5</div>
+                          </td>
+                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Sender Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->pickup_address->poc .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->pickup_address->phone .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>Tracking No.</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->tracking_number .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row align-items-start justify-content-between summary">
+                    <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Receiver Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->consignee_name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->consignee_address .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->consignee_phone_number_1 . (($walkin_ftl_invoice->ftl_request->shipment->consignee_phone_number_2) ? (' / ' . $walkin_ftl_invoice->ftl_request->shipment->consignee_phone_number_2) : '') .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr class="color primary">
+                                    <td colspan="4"><strong>Shipment Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Shipping Mode</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->shipping_mode->mode .'</td>
+                                    <td class="color secondary"><strong>Order ID</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->shipment->order_id .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Origin</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->origin->name .'</td>
+                                    <td class="color secondary"><strong>Destination</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->destination->name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Booking Date</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->date .'</td>
+                                    <td class="color secondary"><strong>Weight</strong></td>
+                                    <td>'. $walkin_ftl_invoice->ftl_request->weight .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+            ';
+
+              
+                $html .= '
+            <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                            <td class="color primary text-left"><strong>Invoice Summary</strong></td>
+                            <td class="color primary text-right" style="width: 20% !important;"><strong>Amount (PKR)</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Frieght Charges</td>
+                          <td class="text-right">' . number_format($walkin_ftl_invoice->ftl_request->freight_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Received Amount</td>
+                          <td class="text-right">' . number_format($walkin_ftl_invoice->received_amount) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Tax Amount</td>
+                          <td class="text-right">' . number_format($walkin_ftl_invoice->tax_amount) . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+            
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                
+                                <tr>
+                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($walkin_ftl_invoice->ftl_request->gst) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format($walkin_ftl_invoice->ftl_request->total_charges) . '</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+            ';
+        
+                    $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+                    ';
+        
+                return $html;
+        }
+        else {
+            return '';
+        }
     }
 
     public function ftl_invoice_export_to_excel(Request $request){
