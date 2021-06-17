@@ -7386,34 +7386,49 @@ class NotificationsController extends Controller
                     ->whereBetween('created_at', [Carbon::now()->subHours(48), Carbon::now()->subHours(47)]);
                     if ($shipments->exists()) {
                         $shipments = $shipments->get();
+                        $html = '';
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        if (strpos($body, '[company_name]') !== FALSE) {
+                            $body = str_replace('[company_name]', 'Khaddi', $body);
+                        }
+                        
+                        $html .= '<table style="width:100%;">';
+                                    $html .= '<thead><tr>
+                                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>';
+                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipment Booked Date</th>';
+                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking No.</th>';
+                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickup Address</th>';
+                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th>';
+                                    $html .= '</tr></thead><tbody>';
+                        $tracking_numbers= array();
+                        $serial = 0;
                         foreach ($shipments as $shipment) {
-                            $subject = $notification->subject;
-                            $body = $notification->body;
-                            if (strpos($subject, '[tracking_number]') !== FALSE) {
-                                $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
-                            }
-                            if (strpos($body, '[company_name]') !== FALSE) {
-                                $body = str_replace('[company_name]', 'Khaddi', $body);
-                            }
-                            if (strpos($body, '[tracking_number]') !== FALSE) {
-                                $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
-                            }
-                            if (strpos($body, '[shipment_booked_date]') !== FALSE) {
-                                $body = str_replace('[shipment_booked_date]', $shipment->created_at->toDateString(), $body);
-                            }
+                            $tracking_numbers[]=$shipment->tracking_number;
+                            $html .= '<tr>';
+                                        
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ++$serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->created_at->toDateString() . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
+
                             $to = array();
                             $pickup_address = UserShippingInfo::where('id',$shipment->pickup_address_id)->where('status', 1);
                             
                             if ($pickup_address->exists()) {
-                                if (strpos($body, '[pickup_address]') !== FALSE) {
-                                    $body = str_replace('[pickup_address]', $pickup_address->first()->pickup_address, $body);
-                                }
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_address->first()->pickup_address . '</td>';
                                 $to = array_merge($to, $pickup_address->pluck('email')->toArray());
                             }
-                            $to = array_merge($to, User::where('id', $user->id)->pluck('email')->toArray());
-                            self::email($subject, $body, $to);
-                        }
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booked</td>';
 
+                            $html .= '</tr>';
+                            $to = array_merge($to, User::where('id', $user->id)->pluck('email')->toArray());
+                        }
+                        $to = array_unique($to);
+                        $html .= '</table>';
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+                        self::email($subject, $body, $to);
                     }
                     
                 }
