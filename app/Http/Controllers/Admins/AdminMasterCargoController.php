@@ -1017,7 +1017,8 @@ class AdminMasterCargoController extends Controller
                                             ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
                                             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
                                             ->join('cities as oc', function ($join) {
-                                                $join->where(function ($query) {
+                                                $join->on('shipments.consignee_city_id', '=', 'oc.id')
+                                                    ->where(function ($query) {
                                                     $query->whereIn('shipments.shipper_status_id', [30, 37])
                                                         ->where('dc.hub_id', '!=', 'oc.hub_id');
                                                 })
