@@ -30,7 +30,7 @@
 							<th class="border-primary border-darken-1">Total Cost</th>
 							<th class="border-primary border-darken-1">Charges</th>
 							<th class="border-primary border-darken-1">GST</th>
-							{{-- <th class="border-primary border-darken-1">Charges Collection</th> --}}
+							<th class="border-primary border-darken-1">Charges Collection</th>
 							<th class="border-primary border-darken-1">Status</th>
 							<th class="border-primary border-darken-1">Receiving Date</th>
 							<th class="border-primary border-darken-1">Company Bank</th>
@@ -183,7 +183,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.finance.invoices.list') }}',
+                        url: '{{ route('admin.finance.ftl_invoice.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -227,7 +227,7 @@
                                 row.push(values.total_cost);
                                 row.push(values.charges);
                                 row.push(values.gst);
-                                row.push('');
+                                row.push(values.collection_type);
                                 row.push(values.status);
                                 row.push(values.receiving_date);
                                 row.push(values.company_bank);
@@ -259,70 +259,11 @@
 								console.log(selected_rows);
 								$('#mark_as_received form input.ids').val(selected_rows);
 								$('#mark_as_received form select.company_bank').val('').change();
-
 								$('#mark_as_received form input.received_amount').val('');
 								$('#mark_as_received form input.tax_amount').val('');
 								$('#mark_as_received form input.pickadate').val('');
-
 								$('#mark_as_received form label.danger').remove();
-
-
 								$('#mark_as_received').modal('show');
-								// swal({
-								// 	title: 'Are You Sure?',
-								// 	text: 'Select Yes to mark invoices recieved!',
-								// 	icon: 'warning',
-								// 	buttons: {
-								// 		cancel: {
-								// 			text: 'No',
-								// 			value: null,
-								// 			visible: true,
-								// 			closeModal: true,
-								// 		},
-								// 		confirm: {
-								// 			text: 'Yes',
-								// 			value: true,
-								// 			visible: true,
-								// 			closeModal: true
-								// 		}
-								// 	},
-								// 	closeOnClickOutside: false,
-								// 	closeOnEsc: false,
-								// 	dangerMode: true
-								// }).then(function (confirm) {
-								// 	if (confirm) {
-								// 		blockPagePermanently();
-								// 		$.ajax({
-								// 			url: '{!! route('admin.finance.invoices.mark_as_received_all') !!}',
-								// 			method: 'POST',
-								// 			data: {
-								// 				'_token': '{{ csrf_token() }}',
-								// 				'id': selected_rows,
-								// 			}
-								// 		}).done(function(data) {
-								// 			UnblockPagePermanently();
-								// 			if(data == 1)
-								// 			{
-								// 				swal({
-								// 					title: 'Invoice Marked as Received',
-								// 					icon: 'success',
-								// 					closeOnClickOutside: false,
-								// 					closeOnEsc: false
-								// 				});
-
-								// 				table.draw();
-								// 			}
-								// 			else{
-								// 				swal({
-								// 					title: 'Error Occurred In Marking Invoice Received',
-								// 					icon: 'error',
-								// 					closeOnClickOutside: false,
-								// 					closeOnEsc: false
-								// 				});
-								// 			}
-								// 		});
-								// 	}
-								// });
 
 							}
 
@@ -381,6 +322,11 @@
 								}
 							});
 						}
+					},{
+						extend: 'excel',
+						title: 'Ftl Invoices',
+						className: 'btn btn-primary',
+						text: '<i class="la la-file-excel-o"></i> Excel',
 					}],
 				scrollX: true, scrollY: '500px',
 				select: {
@@ -417,7 +363,7 @@
 					{data:'total_cost', name: 'ftlr.freight_cost', class: 'align-middle text-center total_cost'},
 					{data:'charges', name: 'ftlr.freight_charges', class: 'align-middle text-center charges'},
 					{data:'gst', name: 'ftlr.gst', class: 'align-middle text-center gst'},
-					// {data:'', name: '', class: 'align-middle text-center '},
+					{data:'collection_type', name: 'ftlr.collection_type', class: 'align-middle text-center collection_type'},
 					{data:'status', name: 'walkin_ftl_invoices.status_id', class: 'align-middle text-center status'},
 					{data:'receiving_date', name: 'walkin_ftl_invoices.receiving_date', class: 'align-middle text-center receiving_date'},
 					{data:'company_bank', name: 'bl.name', class: 'align-middle text-center company_bank'},
@@ -430,7 +376,7 @@
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
-					if (data.status_id != 3) {
+					if (data.status_id == 1) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {

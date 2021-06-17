@@ -85,9 +85,9 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
-                                                @foreach($consignee_cities as $city)
-                                                    <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
+                                            <select name="consignee_city" class="select2 consignee_city" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
+                                                @foreach($cities as $city)
+                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -185,13 +185,13 @@
                                                 <option value="2">Cash</option>
                                             </select>
                                         </div>
-                                        <div class="form-group">
+                                       {{-- <div class="form-group">
                                             <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
                                                     <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
                                                 @endforeach
                                             </select>
-                                        </div>
+                                        </div>--}}
 
                                     </div>
 
@@ -263,8 +263,9 @@
                         }
                     }).done(function (data) {
                         if (data.status == 1) {
-                            console.log(data);
-                            $('#consignee_city').val(data.data.destination_id).trigger('change');
+                           console.log(data.data.origin_id);
+                            $('#consignee_city').val(data.data.origin_id).trigger('change');
+                            console.log(data.data.origin_id);
                             $('.quantity').val(data.data.quantity).trigger('change');
                             $('#actual_weight').val(data.data.weight);
                             $('#ftl_charges').val(data.data.total_charges);
@@ -287,7 +288,7 @@
             @endif
                     
 
-            $('#delivery_type, #consignee_city').change(function () {
+            $('#delivery_type').change(function () {
                 if($('#delivery_type').val() == 2){
                     $('#consignee_address').prop('disabled', true);
                 }
@@ -298,7 +299,7 @@
 
             @if (session('print'))
             $.ajax({
-                url: '{!! route('admin.shipment.book.print_air_waybill') !!}',
+                url: '{!! route('admin.shipment.book.ftl.print_air_waybill') !!}',
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
@@ -391,7 +392,7 @@
                 }
 
                 var pickup_city = $(this).find(':selected').data('city-id');
-                var consignee_city = $('#consignee_city').val();
+             /*   var consignee_city = $('#consignee_city').val();*/
             });
 
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
@@ -403,7 +404,7 @@
                 shipping_modes();
 
                 var pickup_city = $(this).val();
-                var consignee_city = $('#consignee_city').val();
+               /* var consignee_city = $('#consignee_city').val();*/
 
             });
 
