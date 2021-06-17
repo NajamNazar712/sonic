@@ -126,7 +126,7 @@ class AdminMasterCargoController extends Controller
                     ->where('crm.case_nature_id', 1);
             })
 
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept','crm.id as complaint')->whereNotIn('shipments.id', $on_hold_shipments);
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc','csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept','crm.id as complaint', 'rc.name as return_city_name')->whereNotIn('shipments.id', $on_hold_shipments);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -182,7 +182,13 @@ class AdminMasterCargoController extends Controller
             })
             ->editColumn('destination', function ($shipments) {
                 if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
-                    return $shipments->origin;
+                    if($shipments->return_address_id != NULL){
+                        return $shipments->return_city_name;
+                    }
+                    else{
+                        return $shipments->origin;
+                    }
+
                 }
                 else {
                     return $shipments->destination;
@@ -261,13 +267,24 @@ class AdminMasterCargoController extends Controller
                 $keyword = strtolower($keyword);
 
                 $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                    $sub_query->whereIn('shipments.shipper_status_id', [30, 37])
                         ->where('oc.name', 'like', '%' . $keyword . '%');
                 })
-                    ->orWhere(function ($sub_query) use ($keyword) {
+                ->orWhere(function ($sub_query) use ($keyword) {
                         $sub_query->whereIn('shipments.shipper_status_id', [2, 49, 55])
                             ->where('dc.name', 'like', '%' . $keyword . '%');
+                    })
+                ->orWhere(function($sub_query) use ($keyword){
+                    $sub_query->where(function ($sub_sub_query) use ($keyword) {
+                        $sub_sub_query->whereNotNull('shipments.shipper_status_id', 20)
+                            ->where('rc.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function($sub_sub_query) use ($keyword){
+                        $sub_sub_query->orWhereNull('shipments.shipper_status_id', 20)
+                            ->where('dc.name', 'like', '%' . $keyword . '%');
                     });
+
+                });
             })
             ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
