@@ -103,7 +103,7 @@
                                                 <tr>
                                                     <th scope="row">Date</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$ftl->date}}</h5>
+                                                        <h5 class="mb-0">{{date('Y-m-d',strtotime($ftl->date))}}</h5>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -172,14 +172,14 @@
                                                             <input type="text" readonly name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges">
                                                         </div>
                                                     </div>
-                                                    @if($ftl->status_id != 5)
+                                                    @if($ftl->status_id != 5 && (session('role_id') == 1 || in_array(514,session('permissions'))))
                                                         <button type="submit" name="btn" value="Update" class="btn btn-secondary mr-1">
                                                             <span class="d-none d-lg-block">
                                                                 Update
                                                             </span>
                                                         </button>
                                                     @endif
-                                                    @if($ftl->status_id == 2)
+                                                    @if($ftl->status_id == 2 && (session('role_id') == 1 || in_array(515,session('permissions'))))
                                                         <button type="submit" name="btn" value="Approve" class="btn btn-success mr-1">
                                                             <span class="d-none d-lg-block">
                                                                 Approve
