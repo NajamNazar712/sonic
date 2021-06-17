@@ -158,7 +158,9 @@ class ShipperShipmentBookController extends Controller
         $shipment->booked_by = session('user_type');
         $shipment->pieces = $pieces;
         $shipment->business_category_id = $business_category_id;
-        $shipment->return_address_id = $return_address_id;
+        if($return_address_id){
+            $shipment->return_address_id = $return_address_id;
+        }
         $shipment->save();
 
         $shipment_id = $shipment->id;
