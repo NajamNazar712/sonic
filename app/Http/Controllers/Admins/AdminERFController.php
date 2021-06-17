@@ -63,7 +63,7 @@ class AdminERFController extends Controller
             })
 
             ->filterColumn('erf_id', function($query, $keyword) {
-                $keyword = str_replace('erf', '', $keyword);
+                $keyword = str_replace('erf', '', strtolower($keyword));
                 if($keyword != ''){
                     $query->where('employee_requisitions.id', $keyword);
                 }
