@@ -7393,29 +7393,22 @@ class NotificationsController extends Controller
                         if (strpos($body, '[company_name]') !== FALSE) {
                             $body = str_replace('[company_name]', 'Khaddi', $body);
                         }
-                        
-                        
                         $html .= '<table style="width:100%;">';
-                                    $html .= '<thead><tr>
-                                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>';
-                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipment Booked Date</th>';
-                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking No.</th>';
-                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickup Address</th>';
-                                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th>';
-                                    $html .= '</tr></thead><tbody>';
-
-
-                       
-                                    
-                        // $tracking_numbers= array();
+                        $html .= '<thead><tr>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>';
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipment Booked Date</th>';
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking No.</th>';
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Pickup Address</th>';
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th>';
+                        $html .= '</tr></thead><tbody>';
                         $serial = 0;
                         $to = array();
                         
                         foreach($user->shipping as $user_shipping_info){
-                        $pickup_body = $notification->body;
-                        if (strpos($pickup_body, '[company_name]') !== FALSE) {
-                            $pickup_body = str_replace('[company_name]', 'Khaddi', $pickup_body);
-                        }
+                            $pickup_body = $notification->body;
+                            if (strpos($pickup_body, '[company_name]') !== FALSE) {
+                                $pickup_body = str_replace('[company_name]', 'Khaddi', $pickup_body);
+                            }
                             $pickup_html = '';
                             $pickup_html .= '<table style="width:100%;">';
                             $pickup_html .= '<thead><tr>
@@ -7471,7 +7464,6 @@ class NotificationsController extends Controller
                                 $html .= '</tr>';
                         }
                         $to = array_merge($to, User::where('id', $user->id)->pluck('email')->toArray());
-                        // $tracking_numbers[]=$shipment->tracking_number;
                         $html .= '</table>';
                         if (strpos($body, '[preview]') !== FALSE) {
                             $body = str_replace('[preview]', $html, $body);
