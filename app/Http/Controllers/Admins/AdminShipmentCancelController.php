@@ -379,8 +379,21 @@ class AdminShipmentCancelController extends Controller
                     else{
 
                         if($shipment->shipment_type == 1){
-                            V2AdminPickupsController::cancel($shipment->id);
 
+                            $other_retail_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $shipment->id);
+                            if($other_retail_parcel_receiving_shipment->exists()){
+                                $other_retail_parcel_receiving_shipment = $other_retail_parcel_receiving_shipment->latest()->first();
+                                $other_parcel_receiving_id = $other_retail_parcel_receiving_shipment->other_parcel_receiving_id;
+                                $other_retail_parcel_receiving_shipment->delete();
+                                $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
+                                $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn - 1;
+                                $other_parcel_receiving->save();
+                                if($other_parcel_receiving->total_cn==0){
+                                    $other_parcel_receiving->delete();
+                                }
+                            }
+                            V2AdminPickupsController::cancel($shipment->id);
+                            
                             $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment->id)->latest()->first();
                             if($pickup_request_shipment){
                                 $pickup_requests = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_shipment->pickup_request_id);
@@ -432,15 +445,7 @@ class AdminShipmentCancelController extends Controller
                                 $parcel_receiving->save();
                             }
 
-                            $other_retail_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $shipment->id);
-                            if($other_retail_parcel_receiving_shipment->exists()){
-                                $other_retail_parcel_receiving_shipment = $other_retail_parcel_receiving_shipment->latest()->first();
-                                $other_parcel_receiving_id = $other_retail_parcel_receiving_shipment->other_parcel_receiving_id;
-                                $other_retail_parcel_receiving_shipment->delete();
-                                $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
-                                $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn - 1;
-                                $other_parcel_receiving->save();
-                            }
+                            
 
                         }
                     }
