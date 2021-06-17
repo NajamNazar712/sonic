@@ -273,7 +273,7 @@
                     }
                 },
 
-                {data: 'erf_id', name: 'employee_requisitions.id', class: 'align-middle erf_id'},
+                {data: 'erf_id', name: 'erf_id', class: 'align-middle erf_id'},
                 {data: 'department', name: 'dp.name', class: 'align-middle department'},
                 {data: 'designation', name: 'd.name', class: 'align-middle designation'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},

@@ -939,6 +939,7 @@ class Permission
 
             'human_resource.erf.index' => 506,
             'human_resource.erf.list' => 506,
+            'human_resource.erf.add' => 522,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,

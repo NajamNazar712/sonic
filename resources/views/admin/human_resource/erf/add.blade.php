@@ -39,7 +39,7 @@
                                     <div class="row div_row">
                                         <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2">
                                             <div class="form-group">
-                                                <input type="hidden" name="admin_email" id="admin_email">
+                                                <input type="hidden"  name="admin_email" id="admin_email">
                                                 <select name="department" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
                                                     @foreach($departments as $department)
                                                         <option value="{{ $department->id }}">{{ $department->name }}</option>
@@ -168,12 +168,16 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body mx-3">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email">
-                </div>
-                <div class="modal-footer d-flex justify-content-center">
-                    <button class="btn btn-primary" id="modal_submit_btn">Submit</button>
-                </div>
+                <form id="email_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                    <div class="modal-body mx-3">
+                        <div class="form-group">
+                            <input type="email" class="form-control" id="email" name="email" data-rule-pattern="/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/" data-msg-pattern="Invalid email"   data-rule-required="true" data-msg-required="Email is required" placeholder="Enter Email">
+                        </div>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="submit" class="btn btn-primary" id="modal_submit_btn">Submit</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -440,17 +444,18 @@
 
 
 
-             $('#modal_submit_btn').on('click',function(){
-               var email = $('#email').val();
-               if(email === '' || email === null){
-                   var error = "Email is required";
-                   toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                   return false;
-               }
-               else{
-                   $('#admin_email').val(email);
-                  $('#erf_form').submit();
-               }
+             $('#email_form').validate({
+                 ignore: [],
+                 errorClass: 'danger',
+                 successClass: 'success',
+                 errorPlacement: function (error, element) {
+                     error.addClass('w-100').appendTo(element.parents('.form-group'));
+                 },
+                 submitHandler: function (form) {
+                     var email = $('#email').val();
+                     $('#admin_email').val(email);
+                     $('#erf_form').submit();
+                 }
              });
 
 

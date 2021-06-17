@@ -61,6 +61,13 @@ class AdminERFController extends Controller
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
             })
+
+            ->filterColumn('erf_id', function($query, $keyword) {
+                $keyword = str_replace('erf', '', $keyword);
+                if($keyword != ''){
+                    $query->where('employee_requisitions.id', $keyword);
+                }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
