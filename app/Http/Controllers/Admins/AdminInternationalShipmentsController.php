@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -247,5 +250,56 @@ class AdminInternationalShipmentsController extends Controller
             return redirect()->back()->with('error', 'Shipment Not found in International Shipments!');
         }
         return redirect()->back()->with('error', 'International Shipment not selected!');
+    }
+
+    public function shipment_status_index(){
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [1,2,3,4,5,8,12,13,14,17,18,20,21,22,23,24,25,47,48])->get();
+        return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
+    }
+
+    public function get_shipment_info(Request $request)
+    {
+        $tracking_number = $request->tracking_number;
+        if ($tracking_number != '') {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', '!=', 17)->where('business_category_id', 2);
+            if ($shipment->exists()) {
+                $data = array();
+                $shipment = $shipment->first();
+
+                $data['id'] = $shipment->id;
+                $data['tracking_number'] = $shipment->tracking_number;
+                $data['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
+                $data['origin'] = $shipment->consignee_city->name;
+                $data['destination'] = $shipment->pickup_address->city->name;
+                $data['status'] = $shipment->status_shipper->name;
+
+                ShipmentScanningJourneyController::add($shipment->id, 17, 1, Auth::id(), null,null);
+                return response()->json(['status' => 1, 'details' => $data]);
+
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Shipment is Cancelled OR not International Shipment!']);
+            }
+
+        }
+        return response()->json(['status' => 0, 'error' => 'Tracking number empty!']);
+
+    }
+
+    public function shipment_status_update(Request $request){
+        $shipper_status_id = $request->shipment_status_id;
+        if($shipper_status_id){
+            $shipments = explode(',', $request->shipment_ids);
+            if(count($shipments) > 0){
+                foreach ($shipments as $shipment_id){
+                    Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
+                    ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
+
+                }
+                return redirect()->back()->with('success', 'Shipments updated successfully!');
+            }
+            return redirect()->back()->with('error', 'No shipment selected!');
+
+        }
+        return redirect()->back()->with('error', 'Shipment Status not selected!');
     }
 }

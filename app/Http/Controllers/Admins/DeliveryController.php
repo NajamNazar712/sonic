@@ -783,8 +783,8 @@ class DeliveryController extends Controller
                     NotificationsController::send(11, $note->id, $shipment);
 
                     if($notifications[$index]) {
-                        NotificationsController::send(12, $note->id, $shipment);
-                    }
+                            NotificationsController::send(12, $note->id, $shipment);
+                        }
                 }
                 NotificationsController::send(40, $note->id);
             }
@@ -1072,7 +1072,7 @@ class DeliveryController extends Controller
                     $delivery = $delivery->first();
                     $count = $delivery->shipments_count;
                     $cod = $delivery->total_cod_amount;
-                    $count-=1;
+                    $count -= 1;
                     if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                         $cod = $cod - $parcel->amount;
                     }
@@ -1207,6 +1207,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Item Qty</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
                             <td class="color primary"><strong>Special Instructions</strong></td>
+                            <td class="color primary"><strong>Open Shipment</strong></td>
                             <td class="color primary"><strong>Remarks</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Receiver\'s Name</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
@@ -1281,7 +1282,19 @@ class DeliveryController extends Controller
                 else{
                     $shipment_details_row_start .= '<td class="'.$class.' ' . $details_change_class .'">-</td>';
                 }
-
+                    if($shipment->shipment_detail()->exists()){
+                        if($shipment->shipment_detail->is_open==1){
+                    $shipment_details_row_start .= '
+                    <td class="'.$class.'"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>';
+                }else{
+                    $shipment_details_row_start .= '
+                    <td class="'.$class.'"><strong> No <span></span></strong></td>';
+              
+                }}else{
+                    $shipment_details_row_start .= '
+                    <td class="'.$class.'"><strong> No <span></span></strong></td>';
+              
+                }
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('remarks', '!=', null)->select('remarks');
 
                 if ($shipment_journey->exists()) {
@@ -6285,9 +6298,9 @@ class DeliveryController extends Controller
                           $parcel = Shipment::where('id',$shipment_id)->first();
                           DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $shipment_id])->delete();
                           $delivery = $delivery->first();
-                          $count = $delivery->shipments_count;
+                          $count = $delivery->shipments_count - 1;
                           $cod = $delivery->total_cod_amount;
-                          $count = $count - 1;
+
                           if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                               $cod = $cod - $parcel->amount;
                           }

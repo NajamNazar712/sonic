@@ -923,9 +923,12 @@ class AdminCargoController extends Controller
                 // <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . (($master_cargo->junction_hub_1_id) ? ($master_cargo->junction_hub_1->name . ' - ') : '') . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
 
                 $jucntion_names = '';
-                foreach ($master_cargo->route_management->junctions as $value) {
-                    $jucntion_names .= ' - '.$value->junction['name'].' - ';
+                if($master_cargo->route_management_id){
+                    foreach ($master_cargo->route_management->junctions as $value) {
+                        $jucntion_names .= ' - '.$value->junction['name'].' - ';
+                    }
                 }
+
                 $sender = $master_cargo->sender;
                 $receiver = ($master_cargo->received_by) ? $master_cargo->receiver : NULL;
 

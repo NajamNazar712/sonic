@@ -808,6 +808,8 @@ class Permission
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
 
+
+
             'shipment.book.walk_in' => 155,
             'shipment.book.store' => 155,
 
@@ -879,6 +881,8 @@ class Permission
 
             'international.tracking_upload.index' => 398,
             'international.tracking_upload.list' => 398,
+
+            'international.shipment_status.index' => 508,
 
             'telenor.arrival.index' => 421,
             'telenor.arrival.submit' => 421,
