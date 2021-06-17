@@ -19,7 +19,7 @@ class CRMCommentController extends Controller
         $comment->comment = $comments;
         $comment->save();
 
-        if($comment_type == 0){
+        if($comment_type == 0 && $comment_by == 0){
             $crm_request = CrmRequest::find($crm_request_id);
             $shipper_id = $crm_request->shipper_id;
             NotificationsController::send(136,$shipper_id,$comment->id);

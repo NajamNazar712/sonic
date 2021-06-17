@@ -14,7 +14,7 @@ class UpdateNotificationForShipperCrmCommentSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('notifications')->insert(array(
-            array('id' => 136, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipper CRM Comment', 'type_id' => 1, 'subject' => 'Trax Response', 'body' => 'Dear Shipper [shipper],' . PHP_EOL .'[message]', 'updated_by' => 3, 'status' => 1)
+            array('id' => 136, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipper CRM Comment', 'type_id' => 1, 'subject' => 'Claim Response', 'body' => 'Dear Shipper [shipper],' . PHP_EOL .'[message]', 'updated_by' => 3, 'status' => 0)
         ));
     }
 }
