@@ -7390,13 +7390,10 @@ class NotificationsController extends Controller
                         
                         $subject = $notification->subject;
                         $body = $notification->body;
-                        $pickup_body = $notification->body;
                         if (strpos($body, '[company_name]') !== FALSE) {
                             $body = str_replace('[company_name]', 'Khaddi', $body);
                         }
-                        if (strpos($pickup_body, '[company_name]') !== FALSE) {
-                            $pickup_body = str_replace('[company_name]', 'Khaddi', $pickup_body);
-                        }
+                        
                         
                         $html .= '<table style="width:100%;">';
                                     $html .= '<thead><tr>
@@ -7410,11 +7407,15 @@ class NotificationsController extends Controller
 
                        
                                     
-                        $tracking_numbers= array();
+                        // $tracking_numbers= array();
                         $serial = 0;
                         $to = array();
                         
                         foreach($user->shipping as $user_shipping_info){
+                        $pickup_body = $notification->body;
+                        if (strpos($pickup_body, '[company_name]') !== FALSE) {
+                            $pickup_body = str_replace('[company_name]', 'Khaddi', $pickup_body);
+                        }
                             $pickup_html = '';
                             $pickup_html .= '<table style="width:100%;">';
                             $pickup_html .= '<thead><tr>
@@ -7426,19 +7427,17 @@ class NotificationsController extends Controller
                             $pickup_html .= '</tr></thead><tbody>';
                             $pickup_address_to = '';
                             foreach ($shipments as $shipment) {
-                                
-
                                 if($user_shipping_info->id == $shipment->pickup_address_id){
                                     $pickup_html .= '<tr>';
                                             
                                     $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ++$serial . '</td>';
                                     $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->created_at->toDateString() . '</td>';
-                                        $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number.'-'.$user_shipping_info->email . '</td>';
+                                        $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number.'</td>';
         
                                     $pickup_address = UserShippingInfo::where('id',$user_shipping_info->id)->where('status', 1);
                                     
                                     if ($pickup_address->exists()) {
-                                        $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_address->first()->pickup_address .'-'.$user_shipping_info->email. '</td>';
+                                        $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_address->first()->pickup_address .'</td>';
                                         $pickup_address_to = $user_shipping_info->email;
                                     }
                                     $pickup_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booked</td>';
@@ -7466,7 +7465,7 @@ class NotificationsController extends Controller
                                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
                                 $pickup_address = UserShippingInfo::where('id',$shipment->pickup_address_id)->where('status', 1);
                                 if ($pickup_address->exists()) {
-                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_address->first()->pickup_address .'-'.$pickup_address->first()->email. '</td>';
+                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup_address->first()->pickup_address . '</td>';
                                 }
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booked</td>';
                                 $html .= '</tr>';
