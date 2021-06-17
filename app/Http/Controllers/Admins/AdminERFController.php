@@ -56,26 +56,26 @@ class AdminERFController extends Controller
                 return "ERF" . $erf->erf_id;
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (($result->status_id == 1) && session('role_id') == 1 || in_array(94, session('permissions'))) {
+                    if (($result->status_id == 1) && session('role_id') == 1 || in_array(518, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
 
                     }
-                    if (($result->status_id == 2) && session('role_id') == 1 || in_array(94, session('permissions'))) {
+                    if (($result->status_id == 2) && session('role_id') == 1 || in_array(519, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By CEO</div></button>';
 
                     }
-                    if (($result->status_id == 3) && session('role_id') == 1 || in_array(94, session('permissions'))) {
+                    if (($result->status_id == 3) && session('role_id') == 1 || in_array(520, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
-                     if($result->document != null){
+                     if($result->document != null && session('role_id') == 1 || in_array(521, session('permissions'))){
                          $route = route('admin.human_resource.erf.documents',['id' => $result->id]);
                          $dropdown .= '<button type="button" class="dropdown-item view_document"  onclick="window.open(\''.$route .'\')" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View</div></button>';
                      }
