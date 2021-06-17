@@ -81,7 +81,7 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
-
+use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
 {
@@ -357,6 +357,19 @@ class DeliveryController extends Controller
             $rider_name='';
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+                
+
+                if($shipment->shipment_detail()->exists()){
+                    if($shipment->shipment_detail->is_open==1){
+                $is_open_box = 1;
+                }else{
+                    $is_open_box = 0;
+
+                }
+                }else{
+                    $is_open_box = 0;
+
+                }
                 $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                 if($on_hold_shipment->exists()){
                     if(!in_array(Auth::id(), [10, 288, 423])){
@@ -502,7 +515,7 @@ class DeliveryController extends Controller
                                 else{
                                     $crm_request['phone_one_change'] = null;
                                 }
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request]);
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request, 'is_open_box' => $is_open_box]);
 
                             } else {
                                 return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
@@ -584,7 +597,7 @@ class DeliveryController extends Controller
                             else{
                                 $crm_request['phone_one_change'] = null;
                             }
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request]);
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request, 'is_open_box' => $is_open_box]);
                         }
                     } else {
                         return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
@@ -737,8 +750,13 @@ class DeliveryController extends Controller
                     $shipment_data->shipper_status_id = 5;
                     $shipment_data->consignee_status_id = 5;
                     if(in_array($shipment, $open_box_ids)){
+                        ShipmentDetail::where('shipment_id', $shipment)->update(['is_open' => 1]);
+                        
                         $shipment_data->open_box = 1;
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
+                    }else{
+                        ShipmentDetail::where('shipment_id', $shipment)->update(['is_open' => 0]);
+                        
                     }
                     $shipment_data->save();
 

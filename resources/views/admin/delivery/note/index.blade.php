@@ -585,7 +585,13 @@
                                 var rowNo = rowsCount;
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
+                                if(data.is_open_box==1){
+                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                }else{
+
                                 var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                }
                                 var consolidation = '';
                                 if(data.consolidation_flag){
                                     consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -719,7 +725,13 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    if(data.is_open_box==1){
+                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                }else{
+
+                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                }
                                     var consolidation = '';
                                     if(data.consolidation_flag){
                                         consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -1200,7 +1212,13 @@
                                     var rowNo = rowsCount;
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
-                                    var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                    if(data.is_open_box==1){
+                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                }else{
+
+                                var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                }
                                     var consolidation = '';
                                     if(data.consolidation_flag){
                                         consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;
@@ -1250,7 +1268,13 @@
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
+                                if(data.is_open_box==1){
+                                    var open_box = '<input type="checkbox" checked="checked" class="form-control open_box" name="open_box['+ data.shId+']">';
+
+                                }else{
+
                                 var open_box = '<input type="checkbox" class="form-control open_box" name="open_box['+ data.shId+']">';
+                                }
                                 var consolidation = '';
                                 if(data.consolidation_flag){
                                     consolidation = data.consolidation_details.order+'/'+data.consolidation_details.count;

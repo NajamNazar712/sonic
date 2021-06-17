@@ -38,6 +38,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/email/verified/{id?}','Auth\RegisterController@email_verified')->name('email.verified');
     Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
     Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
+    Route::post('update/agreement_status','Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
 
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
     Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
@@ -2904,7 +2905,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\Retail\RetailAdminUserManagementController@user_list')->name('list');
             Route::post('status', 'Admins\Retail\RetailAdminUserManagementController@user_enable_disable')->name('status');
             Route::post('add', 'Admins\Retail\RetailAdminUserManagementController@user_add')->name('add');
+            Route::get('edit/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit')->name('edit');
+            Route::put('update/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_update')->name('update');
             Route::get('name', 'Admins\Retail\RetailAdminUserManagementController@user_name')->name('name');
+            Route::get('edit/name/{id}', 'Admins\Retail\RetailAdminUserManagementController@user_edit_name')->name('edit.name');
         });
 
         Route::prefix('accounts')->name('accounts.')->group(function () {
