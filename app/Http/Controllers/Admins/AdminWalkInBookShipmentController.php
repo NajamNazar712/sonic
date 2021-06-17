@@ -1396,8 +1396,7 @@ class AdminWalkInBookShipmentController extends Controller
         $user_id = $check_id['setting_value'];
         $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
         $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
-        $cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
-            ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.pickup', 1)->get();
+        $cities = City::where('status',1)->where('business_category_id',1)->get();
         $consignee_cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
             ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.delivery', 1)->get();
         $products = Product::orderBy('product_name')->get();
@@ -1432,7 +1431,7 @@ class AdminWalkInBookShipmentController extends Controller
 
             if (!empty($request->input('shipping_mode'))) {
 
-                $service_type_id = $request->input('selected_service_type');
+                $service_type_id = 6;
 
                 if ($request->input('pickup_address') == 0) {
                     $pickup_city_id = $request->input('new_pickup_city');
@@ -1534,7 +1533,7 @@ class AdminWalkInBookShipmentController extends Controller
                 }
                 $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
                 $business_category_id = 1;
-                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $ftl_request->total_charges, $delivery_type, $charges_mode_id, null, $pickup, $business_category_id);
+                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $ftl_request->total_charges, $delivery_type, null, null, $pickup, $business_category_id);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
