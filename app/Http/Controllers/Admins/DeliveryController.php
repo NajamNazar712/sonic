@@ -753,6 +753,9 @@ class DeliveryController extends Controller
                         
                         $shipment_data->open_box = 1;
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
+                    }else{
+                        ShipmentDetail::where('shipment_id', $shipment)->update(['is_open' => 0]);
+                        
                     }
                     $shipment_data->save();
 
