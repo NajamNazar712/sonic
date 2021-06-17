@@ -199,7 +199,7 @@
                                                 <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters" rows="5"></textarea>
                                             </div>
 
-                                            <div class="form-group input-group">
+                                            <div class="form-group input-group item_quantity_div">
                                                 <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
                                             </div>
                                             <div id="pieces_quantity" class="form-group input-group d-none">
@@ -296,11 +296,11 @@
                                                 </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group quantity_label_div">
                                                 <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_quantity">Total Quantity: <span>0</span></p>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group product_label_div">
                                                 <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
                                             </div>
 
@@ -874,6 +874,9 @@
                         $('#frieght_div').addClass('d-none');
                         $('#ftl_collection_type_div').addClass('d-none');
                         $('#charges_div').addClass('d-none');
+                        $('.quantity_label_div ').removeClass('d-none');
+                        $('.product_label_div ').removeClass('d-none');
+                        $('.repeater ').removeClass('d-none');
                     }
                     else if (service_type == 5) {
                         $('#shipping_header_div').removeClass('col col_custom');
@@ -913,7 +916,16 @@
                         $('#try_and_buy_charges_div').addClass('d-none');
                         $('#charges_div').removeClass('d-none');
                         $('#ftl_collection_type_div').removeClass('d-none');
-                        //$('#shipping_mode').prop('disabled', false);
+                        $('#replacement').addClass('d-none');
+                        $('#pieces_quantity').addClass('d-none');
+                        $('.repeater ').addClass('d-none');
+                        $('.quantity_label_div ').addClass('d-none');
+                        $('.product_label_div ').addClass('d-none');
+                        $('#delivery_type_div ').removeClass('d-none');
+                        $('#payment_info ').removeClass('d-none');
+                        $('#shipper_header_info h6').addClass('d-none');
+                        $('#consignee_header_info h6').addClass('d-none');
+
 
                     }
                     $('#booking_form #selected_service_type').val(service_type);

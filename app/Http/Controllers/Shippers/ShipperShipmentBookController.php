@@ -311,7 +311,8 @@ class ShipperShipmentBookController extends Controller
         // if($current_time > $time){
         //     $date = Carbon::tomorrow();
         // }
-        $booking_types = BookingType::where('id','!=', 4)->get();
+        //$booking_types = BookingType::where('id','!=', 4)->get();
+        $booking_types = BookingType::whereNotIn('id', [4,6])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
@@ -825,7 +826,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL) {
-
+        // dd($user_type, $user_id, $ids, $body_only, $type);
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         if ($user_type == 3) {
@@ -1776,7 +1777,7 @@ class ShipperShipmentBookController extends Controller
 
         if ($user_type) {
             $air_waybill_type = Session::get('air_waybill_type', 1);
-
+            //dd($request->ids,$air_waybill_type,$request->sticker);
             if ($air_waybill_type != 3) {
                 if ($request->sticker) {
                     $shipment_ids = Shipment::whereIn('id', $request->ids)->orderBy('order_id', 'ASC')->orderBy('id', 'ASC')->pluck('id')->toArray();
@@ -1784,6 +1785,7 @@ class ShipperShipmentBookController extends Controller
                     return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
                 }
                 else {
+
                     return $this->air_waybill($user_type, $user_id, $request->ids);
                 }
             }
@@ -1791,11 +1793,12 @@ class ShipperShipmentBookController extends Controller
                 return $this->air_waybill_sticker_barcode($user_type, $user_id, $request->ids);
             }
         }
+
     }
 
     public function excel_index() {
 
-        $booking_types = BookingType::whereNotIn('id',[4])->get();
+        $booking_types = BookingType::whereNotIn('id',[4,6])->get();
         $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
