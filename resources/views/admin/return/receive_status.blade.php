@@ -430,7 +430,7 @@
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'current_status_name',name: 'current_status_name', class: 'align-middle current_status_name',orderable: false, searchable: false},
-                    {data:'address',name: 'usi.pickup_address', class: 'align-middle address'},
+                    {data:'return_address',name: 'return_address', class: 'align-middle return_address',orderable: false, searchable: false},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'charges',name: 'shipments.charges', class: 'align-middle charges'},
@@ -472,7 +472,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.current_status_name') || $(header).is('.received_or_refused_by')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.current_status_name') || $(header).is('.received_or_refused_by') || $(header).is('.return_address')) {
                             $(td).appendTo($(search));
                         }
                         else {
