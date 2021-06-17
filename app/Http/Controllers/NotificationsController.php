@@ -18,6 +18,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\CRFTermsConditions;
+use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
@@ -7375,6 +7376,24 @@ class NotificationsController extends Controller
                     $admin = Admin::find($admin_id);
                     $to = $admin->email;
 
+                    self::email($subject, $body, $to);
+                }
+				else if($id == 136) {
+                    $shipper_id = $reference_1_id;
+                    $crm_comment_id = $reference_2_id;
+
+                    $user = User::find($shipper_id);
+                    $crm_comment = CrmComments::find($crm_comment_id);
+
+                    if (strpos($body, '[shipper]') !== FALSE) {
+                        $body = str_replace('[shipper]', $user->name, $body);
+                    }
+
+                    if (strpos($body, '[message]') !== FALSE) {
+                        $body = str_replace('[message]', $crm_comment->comment, $body);
+                    }
+
+                    $to = $user->email;
                     self::email($subject, $body, $to);
                 }
             }
