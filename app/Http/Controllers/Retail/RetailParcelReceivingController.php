@@ -327,16 +327,25 @@ class RetailParcelReceivingController extends Controller
 
     public function other_shipment_details(Request $request)
     {
-        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+        $shipment = Shipment::where('tracking_number', $request->tracking_number)->where('shipper_status_id',1);
         if ($shipment->exists()) {
+            
             $shipment = $shipment->first();
-            // dd($shipment->other_retail);
-            if (!$shipment->other_retail) {
-                $details = array();
-                $details['id'] = $shipment->id;
-                $details['tracking_number'] = $shipment->tracking_number;
-                return ['status' => 0, 'success' => 'Shipment found!', 'details' => $details];
-            } else {
+            if (!$shipment->retail) {
+
+              if (!$shipment->other_retail) {
+
+                    $details = array();
+                    $details['id'] = $shipment->id;
+                    $details['tracking_number'] = $shipment->tracking_number;
+                    $details['shipper_name'] = $shipment->user->name;
+                    return ['status' => 0, 'success' => 'Shipment found!', 'details' => $details];
+
+                } else {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                }
+
+            }else{
                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
             }
 
@@ -591,16 +600,16 @@ class RetailParcelReceivingController extends Controller
                               <table class="table table-bordered border">
                                       <tbody>
                                           <tr>
-                                              <td class="color primary"><b>Product</b></td>
                                               <td class="color primary"><b>Booked At</b></td>
+                                              <td class="color primary"><b>Shipper Name</b></td>
                                               <td class="color primary"><b>CN. Number</b></td>
                                           </tr>';
 
         foreach ($other_parcel_receiving_shipments as $other_parcel_receiving_shipment) {
             $html .= '
                                           <tr>
-                                          <td style="border-bottom: none !important;">' . $other_parcel_receiving_shipment->shipment->shipping_mode->name . '</td>
-                                              <td>' . $other_parcel_receiving_shipment->shipment->created_at . '</td>
+                                          <td>' . $other_parcel_receiving_shipment->shipment->created_at . '</td>
+                                          <td>' . $other_parcel_receiving_shipment->shipment->user->name . '</td>
                                               <td>' . $other_parcel_receiving_shipment->shipment->tracking_number . '</td>
                                           </tr>';
         }

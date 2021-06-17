@@ -32,6 +32,7 @@
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Tracking Number</th>
+                                <th class="border-primary border-darken-1">Shipper</th>
                             </tr>
                             </thead>
                         </table>
@@ -95,6 +96,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'shipper_name', class: 'align-middle shipper_name', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     // var info = table.page.info();
@@ -155,7 +157,7 @@
                                         var shipment_index = $.inArray(parseInt(data.details.id), all_shipment_ids);
                                         if (shipment_index === -1) {
                                             var rowNo = table.rows().count();
-                                            table.row.add([rowNo + 1, data.details.tracking_number]).node().id = data.details.id;
+                                            table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name]).node().id = data.details.id;
                                             table.draw(false);
                                             table.order([0, 'asc']).draw();
                                             $('#add_shipment_form button.add').prop('disabled', false);

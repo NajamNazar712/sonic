@@ -245,49 +245,49 @@
             var name_check = $('#name').valid();
             var password_check = $('#password').valid();
             if(name_check && password_check){
-                if(latitude == null && longitude == null){
-                    swal({
-                        title: 'Location Not Found',
-                        text: 'Please allow browser to access your location!',
-                        icon: 'warning',
-                        buttons: {
-                            confirm: {
-                                text: 'Ok',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    });
-                }
-                else{
-                    getLocation();
-                    name = $('#name').val();
-                    password = $('#password').val();
-                    $.ajax({
-                        url: '{!! route('retail.login.radius') !!}',
-                        method: 'POST',
-                        data: {
-                            'name': name,
-                            'password': password,
-                            'lat': latitude,
-                            'lng': longitude,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if(data.status === 1){
-                            $('#radius_error').addClass('d-none');
+                // if(latitude == null && longitude == null){
+                //     swal({
+                //         title: 'Location Not Found',
+                //         text: 'Please allow browser to access your location!',
+                //         icon: 'warning',
+                //         buttons: {
+                //             confirm: {
+                //                 text: 'Ok',
+                //                 value: true,
+                //                 visible: true,
+                //                 closeModal: true
+                //             }
+                //         },
+                //         closeOnClickOutside: false,
+                //         closeOnEsc: false,
+                //         dangerMode: true
+                //     });
+                // }
+                // else{
+                    // getLocation();
+                    // name = $('#name').val();
+                    // password = $('#password').val();
+                    // $.ajax({
+                    //     url: '{!! route('retail.login.radius') !!}',
+                    //     method: 'POST',
+                    //     data: {
+                    //         'name': name,
+                    //         'password': password,
+                    //         'lat': latitude,
+                    //         'lng': longitude,
+                    //         '_token': '{{ csrf_token() }}'
+                    //     }
+                    // }).done(function (data) {
+                    //     if(data.status === 1){
+                    //         $('#radius_error').addClass('d-none');
                             $('#OtpModal').modal('show');
-                        }else{
-                            $('#radius_error').removeClass('d-none');
-                            $('#radius_error').text(data.error);
-                        }
-                    });
+                    //     }else{
+                    //         $('#radius_error').removeClass('d-none');
+                    //         $('#radius_error').text(data.error);
+                    //     }
+                    // });
                     // form.submit();
-                }
+                // }
             }
             else{
                 $('#name-error').addClass('danger');

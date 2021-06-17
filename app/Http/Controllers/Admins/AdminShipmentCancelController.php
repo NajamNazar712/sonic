@@ -23,6 +23,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
@@ -428,6 +430,16 @@ class AdminShipmentCancelController extends Controller
                                 $parcel_receiving->total_cn = $parcel_receiving->total_cn - 1;
                                 $parcel_receiving->total_cash = $parcel_receiving->total_cash - $total_deductable_amount;
                                 $parcel_receiving->save();
+                            }
+
+                            $other_retail_parcel_receiving_shipment = OtherParcelReceivingShipment::where('shipment_id', $shipment->id);
+                            if($other_retail_parcel_receiving_shipment->exists()){
+                                $other_retail_parcel_receiving_shipment = $other_retail_parcel_receiving_shipment->latest()->first();
+                                $other_parcel_receiving_id = $other_retail_parcel_receiving_shipment->other_parcel_receiving_id;
+                                $other_retail_parcel_receiving_shipment->delete();
+                                $other_parcel_receiving = OtherParcelReceiving::find($other_parcel_receiving_id);
+                                $other_parcel_receiving->total_cn = $other_parcel_receiving->total_cn - 1;
+                                $other_parcel_receiving->save();
                             }
 
                         }
