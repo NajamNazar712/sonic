@@ -1511,7 +1511,7 @@
                     </ul>
                 </li>
             @endif
-            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492,506], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
@@ -1541,6 +1541,11 @@
                         @if (session('role_id') == 1 || in_array(492, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.rider_incentive.index')}}">Rider Incentives</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(506, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.erf.index')}}">ERF</a></li>
+                        @endif
+                   
+
                 </ul>
             </li>
             @endif

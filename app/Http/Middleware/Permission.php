@@ -937,6 +937,9 @@ class Permission
             'human_resource.rider_incentive.index' => 492,
             'human_resource.rider_incentive.list' => 492,
 
+            'human_resource.erf.index' => 506,
+            'human_resource.erf.list' => 506,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
