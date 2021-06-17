@@ -81,7 +81,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254,516,511], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([155, 209], session('permissions'))) !== 0)

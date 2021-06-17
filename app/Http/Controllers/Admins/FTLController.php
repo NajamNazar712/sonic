@@ -169,7 +169,7 @@ class FTLController extends Controller
             ->where('users.account_type_id',2)
             ->get(['users.id as id','users.name as name','sale_person.id as sale_person_id']);
 
-        $sale_persons = Admin::where('status',1)->where('role_id',$this->sale_role_ids)->get(['id','name']);
+        $sale_persons = Admin::where('status',1)->whereIn('role_id',$this->sale_role_ids)->get(['id','name']);
 
         $vendors = TransportModeVendor::get(['id','name']);
 
