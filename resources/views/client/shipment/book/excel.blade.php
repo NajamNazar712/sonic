@@ -80,27 +80,27 @@
 										<div class="row">
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
+													<a href="{{ asset('file/Trax Book Regular Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-												<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
+												<a href="{{ asset('file/Trax Book Replacement Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Replacement</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Try And Buy</a>
+													<a href="{{ asset('file/Trax Book Try And Buy Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Try And Buy</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Reverse Pickup</a>
+													<a href="{{ asset('file/Trax Book Reverse Pickup Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Reverse Pickup</a>
 												</div>
 											</div>
 											<div class="col">
 												<div class="form-group text-right">
-													<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
+													<a href="{{ asset('file/Trax Book Shipment Template.xlsx') }}?v=09_06_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
 												</div>
 											</div>
 										</div>
@@ -250,6 +250,20 @@
 												<td>{{ $payment_mode->mode }}</td>
 											</tr>
 										@endforeach
+										</tbody>
+									</table>
+
+									<table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Open Shipment</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr role="row">
+											<td class="text-center">No</td>
+											<td class="text-center">Yes</td>
+										</tr>
 										</tbody>
 									</table>
 								</div>

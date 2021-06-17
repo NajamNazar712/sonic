@@ -46,6 +46,7 @@ use App\Http\Models\WMS\WmsPackingCharge;
 use App\Http\Models\WMS\WmsPendingPicking;
 use App\Http\Models\WMS\WmsPendingPickingShipments;
 use App\Http\Models\WMS\WmsProduct;
+use App\Http\Models\WMS\WmsProductBarcode;
 use App\Http\Models\WMS\WmsProductCategory;
 use App\http\Models\WMS\WmsReplacementShipmentProduct;
 use App\Http\Models\WMS\WmsShipmentProduct;
@@ -532,6 +533,50 @@ class AdminPackagingMaterialController extends Controller
 
         return $user_shipping_info->id;
     }
+    static public function add_product_location($shipment_id, $product_id, $quantity, $pickup_address_id, $courier){
+        $processed_quantity = $quantity;
+        while ($processed_quantity != 0){
+            $product_barcodes = WmsProductBarcode::join('wms_store_requests as wsr', 'wsr.id', '=', 'wms_product_barcodes.store_request_id')->select('leaf_id')->where('wms_product_barcodes.product_id', $product_id)->where('wsr.warehouse_pickup_address_id', $pickup_address_id)->whereNull('wms_product_barcodes.shipment_id')->where('wms_product_barcodes.status', 3)->first();
+            if($product_barcodes){
+                $product_barcode_locations = WmsProductBarcode::where('product_id', $product_id)->whereNull('shipment_id')->where('leaf_id', $product_barcodes->leaf_id)->where('status', 3)->take($processed_quantity)->get();
+                $total_location_count = count($product_barcode_locations);
+                if($processed_quantity <= $total_location_count){
+                    foreach ($product_barcode_locations as $product_barcode_location_index => $product_barcode_location){
+                        if($product_barcode_location_index < $quantity){
+                            $product_barcode_location->shipment_id = $shipment_id;
+                            $product_barcode_location->courier_id = $courier;
+                            $product_barcode_location->save();
+                        }
+                    }
+                    $pending_picking = new WmsPendingPicking();
+                    $pending_picking->leaf_id = $product_barcodes->leaf_id;
+                    $pending_picking->product_id = $product_id;
+                    $pending_picking->quantity = $processed_quantity;
+                    $pending_picking->shipment_id = $shipment_id;
+                    $pending_picking->courier_id = $courier;
+                    $pending_picking->save();
+
+                    $processed_quantity = 0;
+                }
+                else{
+                    foreach ($product_barcode_locations as $product_barcode_location_index => $product_barcode_location){
+                        $product_barcode_location->shipment_id = $shipment_id;
+                        $product_barcode_location->courier_id = $courier;
+                        $product_barcode_location->save();
+                    }
+                    $pending_picking = new WmsPendingPicking();
+                    $pending_picking->leaf_id = $product_barcodes->leaf_id;
+                    $pending_picking->product_id = $product_id;
+                    $pending_picking->quantity = count($product_barcode_locations);
+                    $pending_picking->shipment_id = $shipment_id;
+                    $pending_picking->courier_id = $courier;
+                    $pending_picking->save();
+
+                    $processed_quantity = $processed_quantity - $total_location_count;
+                }
+            }
+        }
+    }
 
     public function request_confirm(Request $request){
         $request_id = $request->id;
@@ -643,30 +688,32 @@ class AdminPackagingMaterialController extends Controller
                         $shipment_product->courier_id = 1;
                         $shipment_product->save();
 
-                        $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('status', 0)->first();
-                        if($existing_pending_picking){
-                            $new_quantity = $existing_pending_picking->quantity + $item->quantity;
-                            $existing_pending_picking->quantity = $new_quantity;
-                            $existing_pending_picking->save();
+                        $this->add_product_location($shipment->id, $product->id, $item->quantity, $trax_address->id, 1);
 
-                            $pending_picking_shipment = new WmsPendingPickingShipments();
-                            $pending_picking_shipment->picking_id = $existing_pending_picking->id;
-                            $pending_picking_shipment->shipment_id = $shipment->id;
-                            $pending_picking_shipment->courier_id = 1;
-                            $pending_picking_shipment->save();
-                        }
-                        else{
-                            $pending_picking = new WmsPendingPicking();
-                            $pending_picking->product_id = $product->id;
-                            $pending_picking->quantity = $item->quantity;
-                            $pending_picking->save();
-
-                            $pending_picking_shipment = new WmsPendingPickingShipments();
-                            $pending_picking_shipment->picking_id = $pending_picking->id;
-                            $pending_picking_shipment->shipment_id = $shipment->id;
-                            $pending_picking_shipment->courier_id = 1;
-                            $pending_picking_shipment->save();
-                        }
+//                        $existing_pending_picking = WmsPendingPicking::where('product_id', $product->id)->where('status', 0)->first();
+//                        if($existing_pending_picking){
+//                            $new_quantity = $existing_pending_picking->quantity + $item->quantity;
+//                            $existing_pending_picking->quantity = $new_quantity;
+//                            $existing_pending_picking->save();
+//
+//                            $pending_picking_shipment = new WmsPendingPickingShipments();
+//                            $pending_picking_shipment->picking_id = $existing_pending_picking->id;
+//                            $pending_picking_shipment->shipment_id = $shipment->id;
+//                            $pending_picking_shipment->courier_id = 1;
+//                            $pending_picking_shipment->save();
+//                        }
+//                        else{
+//                            $pending_picking = new WmsPendingPicking();
+//                            $pending_picking->product_id = $product->id;
+//                            $pending_picking->quantity = $item->quantity;
+//                            $pending_picking->save();
+//
+//                            $pending_picking_shipment = new WmsPendingPickingShipments();
+//                            $pending_picking_shipment->picking_id = $pending_picking->id;
+//                            $pending_picking_shipment->shipment_id = $shipment->id;
+//                            $pending_picking_shipment->courier_id = 1;
+//                            $pending_picking_shipment->save();
+//                        }
                         $serial++;
                         $current_stock = WmsCurrentStock::where('product_id', $product->id)->where('warehouse_pickup_address_id', $trax_address->id)->where('user_id', $wms_user_id)->first();
                         $new_available_stock = $current_stock->stock - $item->quantity;

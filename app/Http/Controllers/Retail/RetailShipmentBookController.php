@@ -24,6 +24,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Jobs\ProcessRetailShipmentBookingDB;
 use Barryvdh\Snappy\Facades\SnappyImage;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -33,7 +34,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
+use Validator;
+use Illuminate\Validation\Rule;
 
 class RetailShipmentBookController extends Controller
 {
@@ -1503,5 +1507,257 @@ class RetailShipmentBookController extends Controller
         }
 
         return  $datatable->make(true);
+    }
+
+    public function excel_index() {
+        $products = Product::all();
+        $business_categories = BusinessCategory::where('id', 1)->get();
+        $shipping_modes = RetailShippingMode::where('id', '!=', 3)->get();
+        $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
+        $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
+        $payment_modes = RetailPaymentMode::where('id', 1)->get();
+        $trax_boxes = RetailTraxBox::all();
+        $banks = BanksList::all();
+        return view('retail.shipment.booking.excel')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'international_cities' => $international_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
+    }
+    public function excel_store(Request $request) {
+        $retail_user_id = Auth::id();
+        $user_id = session('user_id');
+        $pickup_address_id = session('pickup_address_id');
+        $category = session('category');
+        $category_id = session('category_id');
+
+        $names = [
+            'product_id' => 'Shipment ID',
+            'business_category_id' => 'Business Category ID',
+            'shipping_mode_id' => 'Product ID',
+            'destination' => 'Destination',
+            'volumetric_weight' => 'Volumetric Weight',
+            'weight' => 'Weight (kg)',
+            'length' => 'Length (cm)',
+            'breadth' => 'Breadth (cm)',
+            'height' => 'Height (cm)',
+            'pieces' => 'Pieces',
+            'payment_mode_id' => 'Payment Mode ID',
+            'shipper_cell_number' => 'Shipper Cell Number',
+            'shipper_name' => 'Shipper Name',
+            'shipper_cnic' => 'Shipper CNIC',
+            'shipper_address' => 'Shipper Address',
+            'consignee_cell_number' => 'Consignee Cell Number',
+            'consignee_name' => 'Consignee Name',
+            'consignee_cnic' => 'Consignee CNIC',
+            'consignee_address' => 'Consignee Address',
+            'order_id' => 'Order ID',
+//            'insurance_offered' => 'Insurance Offered',
+            'trax_box_id' => 'Trax Box ID',
+            'weight_charges' => 'Weight Charges',
+            'fuel_surcharge' => 'Fuel Surcharge',
+            'iban_number' => 'IBAN Number',
+            'account_number' => 'Account Number',
+            'bank_id' => 'Bank ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+
+            'consignee_city_name.exists' => 'Given :attribute is of Invalid Name.',
+
+            'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
+        ];
+
+        $rules = [
+            'product_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('products', 'id')],
+            'business_category_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('business_categories', 'id')->where('id', 1)],
+            'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_shipping_modes', 'id')->whereNotIn('id', [3])],
+            'destination' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'volumetric_weight' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'weight' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'length' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'breadth' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'height' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_payment_modes', 'id')->where('id', 1)],
+            'shipper_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'shipper_name' => ['required', 'between:1,100'],
+            'shipper_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'shipper_address' => ['required', 'between:1,255'],
+            'consignee_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_name' => ['required', 'between:1,100'],
+            'consignee_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+            'consignee_address' => ['required', 'between:1,255'],
+            'order_id' => ['nullable'],
+//            'insurance_offered' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'trax_box_id' => ['required_if:shipping_mode_id,5', 'nullable', 'integer', Rule::exists('retail_trax_boxes', 'id')],
+            'weight_charges' => ['required', 'numeric'],
+            'fuel_surcharge' => ['required', 'numeric'],
+            'iban_number' => ['nullable', 'between:1,50'],
+            'account_number' => ['nullable', 'numeric'],
+            'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')]
+        ];
+
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+        }
+
+        if (isset($spreadsheet)) {
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'shipper_cell_number', 12 => 'shipper_name', 13 => 'shipper_cnic', 14 => 'shipper_address', 15 => 'consignee_cell_number', 16 => 'consignee_name', 17 => 'consignee_cnic', 18 => 'consignee_address', 19 => 'order_id', 20 => 'trax_box_id', 21 => 'weight_charges', 22 => 'fuel_surcharge', 23 => 'iban_number', 24 => 'account_number', 25 => 'bank_id'];
+            if (count($spreadsheet[0]) != 26){
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            unset($spreadsheet[0]);
+        }
+
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            }
+            else
+            {
+                $forms=$request->all();
+
+                $forms = $forms['form'];
+                foreach($forms as $form) {
+                    $row = array();
+                    foreach ($form as $key=>$value){
+                        $row[$key] = $value;
+                    }
+                    $rows[] = $row;
+                }
+            }
+
+            $errors = array();
+
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                if(!isset($row['pieces']) || $row['pieces'] == null){
+                    $row['pieces'] = 1;
+                }
+
+                $rows[$key]['pieces'] = $row['pieces'];
+
+                if(!isset($row['insurance_offered']) || $row['insurance_offered'] == null){
+                    $row['insurance_offered'] = 'no';
+                }
+
+                $rows[$key]['insurance_offered'] = $row['insurance_offered'];
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    foreach ($validate->errors()->toArray() as $key => $error_array) {
+                        foreach ($error_array as $error) {
+                            if (!isset($errors[$row_id][$key])) {
+                                $errors[$row_id][$key] = $error;
+                            }
+                        }
+                    }
+                }
+
+                if (empty($errors[$row_id])) {
+                    $shipping_mode_id = $row['shipping_mode_id'];
+                    $city_name = $row['destination'];
+                    if($shipping_mode_id == 1){
+                        $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->pluck('c.name')->toArray();
+                        $domestic_overland_cities = array_map('strtolower', $domestic_overland_cities);
+                        if(!in_array(strtolower($city_name), $domestic_overland_cities)){
+                            $errors[$row_id]['destination'] = 'City ' . $city_name . ' is not allowed for Product ID# ' . $shipping_mode_id;
+                        }
+                    }
+
+                    if(strtolower($row['volumetric_weight']) == 'yes'){
+                        if($row['length'] == null){
+                            $errors[$row_id]['length'] = 'Length is required when Volumetric Weight is set to Yes';
+                        }
+                        if($row['breadth'] == null){
+                            $errors[$row_id]['breadth'] = 'Breadth is required when Volumetric Weight is set to Yes';
+                        }
+                        if($row['height'] == null){
+                            $errors[$row_id]['height'] = 'Height is required when Volumetric Weight is set to Yes';
+                        }
+                        $row['weight'] = null;
+                        $rows[$key]['weight'] = $row['weight'];
+                    }
+                    else{
+                        if($row['weight'] == null){
+                            $errors[$row_id]['weight'] = 'Weight is required when Volumetric Weight is set to No';
+                        }
+                        $row['length'] = null;
+                        $row['breadth'] = null;
+                        $row['height'] = null;
+                        $rows[$key]['length'] = $row['length'];
+                        $rows[$key]['breadth'] = $row['breadth'];
+                        $rows[$key]['height'] = $row['height'];
+                    }
+                }
+            }
+
+            if (empty($errors)) {
+                foreach ($rows as $key => $row) {
+                    $row['user_id'] = $user_id;
+                    $row['retail_user_id'] = $retail_user_id;
+                    $row['pickup_address_id'] = $pickup_address_id;
+                    $row['category'] = $category;
+                    $row['category_id'] = $category_id;
+
+                    dispatch(new ProcessRetailShipmentBookingDB($row));
+                }
+
+                return redirect()->route('retail.shipment.book.excel')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+            }
+            else {
+                $products = Product::pluck('product_name', 'id');
+                $business_categories = BusinessCategory::where('id', '!=', 2)->pluck('name', 'id');
+                $shipping_modes = RetailShippingMode::where('id', '!=', 3)->pluck('name', 'id');
+                $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+//                $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
+                $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.name')->get();
+                $payment_modes = RetailPaymentMode::where('id', 1)->pluck('name', 'id');
+                $trax_boxes = RetailTraxBox::pluck('name', 'id');
+                $banks = BanksList::pluck('name', 'id');
+                $domestic_city_name = array();
+                $domestic_overland_city_name = array();
+                foreach ($domestic_cities as $domestic_city) {
+                    $domestic_city_name[$domestic_city->name] = $domestic_city->name;
+                }
+                foreach ($domestic_overland_cities as $domestic_overland_city) {
+                    $domestic_overland_city_name[$domestic_overland_city->name] = $domestic_overland_city->name;
+                }
+
+                return view('retail.shipment.booking.errors')->with(['data' => $rows, 'errors' => $errors, 'domestic_cities' => $domestic_city_name, 'domestic_overland_cities' => $domestic_overland_city_name, 'business_categories' => $business_categories, 'trax_boxes' => $trax_boxes, 'products' => $products, 'shipping_modes' => $shipping_modes, 'banks' => $banks, 'payment_modes' => $payment_modes]);
+            }
+        }
+        else {
+            return redirect()->back()->with('error', 'No Shipments in File');
+        }
     }
 }
