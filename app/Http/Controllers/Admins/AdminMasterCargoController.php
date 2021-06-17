@@ -482,8 +482,8 @@ class AdminMasterCargoController extends Controller
                                         ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
                                         ->join('cities as oc', function($join) {
                                             $join->on('shipments.consignee_city_id', '=', 'oc.id')
-                                                ->on('dc.hub_id', '!=', 'oc.hub_id')
-                                                ->on('dc.hub_id', '!=', 'rc.hub_id');
+                                                ->where('dc.hub_id', '!=', 'oc.hub_id')
+                                                ->orWhere('dc.hub_id', '!=', 'rc.hub_id');
                                         })
                                         ->select(DB::raw('count(shipments.id) as count'))
                                         ->where('dc.hub_id', $hub->id)
@@ -974,8 +974,8 @@ class AdminMasterCargoController extends Controller
                                             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
                                             ->join('cities as oc', function($join) {
                                                 $join->on('shipments.consignee_city_id', '=', 'oc.id')
-                                                    ->on('dc.hub_id', '!=', 'oc.hub_id')
-                                                    ->on('dc.hub_id', '!=', 'rc.hub_id');
+                                                    ->where('dc.hub_id', '!=', 'oc.hub_id')
+                                                    ->orWhere('dc.hub_id', '!=', 'rc.hub_id');
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('dc.hub_id', $hub->id)
