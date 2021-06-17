@@ -125,8 +125,9 @@ class AdminERFController extends Controller
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $employee_trax_id = Employee::select('trax_id')->get();
+        $today = Carbon::now()->endOfDay();
 
-        return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id]);
+        return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
     }
 
     public function submit_form(Request $request){
@@ -423,7 +424,8 @@ class AdminERFController extends Controller
             <table class="table table-sm table-bordered border">
                <thead>
                     <tr>
-                      <th scope="col">Date & Time</th>
+                      <th scope="col">Date And Time</th>
+                    
                       <th scope="col">User</th>
                       <th scope="col">Status</th>
         
@@ -434,6 +436,7 @@ class AdminERFController extends Controller
 
                 $html .= '<tr>
                             <td>'.$log->date.'</td>
+                          
                             <td>'.$log->admin.'</td>
                             <td>'.$log->status.'</td>
                         </tr>';

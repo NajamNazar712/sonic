@@ -182,6 +182,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
@@ -189,6 +191,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
 
     <script>
@@ -242,6 +247,8 @@
                 'rightAlign': false,
                 'digits': 2,
             });
+
+
 
             $('#additional').click(function () {
                  $("#department").val('').change();
@@ -364,6 +371,8 @@
 
             });
 
+
+            var today = '{{ $today }}';
             $('#replacement').click(function () {
                 $("#department").val('').change();
                 $("#designation").val('').change();
@@ -378,7 +387,7 @@
                     '                    <tr>  \n' +
                     '<td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td> \n' +
                     '                        <td><div class="form-group"><input type="text" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td>  \n' +
-                    '                        <td><div class="form-group"><input type="date" name="addmore[0][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td>  \n' +
+                    '                        <td><div class="form-group"> <input type="text" name="addmore[0][date]" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date is required"></div></td>  \n' +
                     '                        <td class="text-center"><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +
                     '                    </tr>  \n' +
                     '                </table>  </table>'+
@@ -389,8 +398,26 @@
                     width: '100%',
                     placeholder: 'Trax Id'
                 });
+                var to_date = $('#to_date').pickadate({
+                    firstDay: 1,
+                    clear: 'Clear',
+                    max : new Date(today),
+                    format:'dd mmmm, yyyy',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 23:59:59',
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('#to_date_root').css('top', '40px');
+                    },
+                    onSet: function(context) {
+
+                    }
+                });
 
             });
+
+
 
 
 
@@ -411,10 +438,30 @@
             var i = 0;
             $('body').on('click','#add',function(){
                 ++i;
-                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="text" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> <td><div class="form-group"><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td><td class="text-center"><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
+                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="text" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> ' +
+                    ' <td><div class="form-group"> <input type="text" name="addmore['+i+'][date]" class="form-control bg-primary border-primary white rounded-right append_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date is required"></div></td>' +
+                    '<td class="text-center"><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
                 $(".trax_id").prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id'
+                });
+
+                var date = $('.append_date').pickadate({
+                    firstDay: 1,
+                    clear: 'Clear',
+                    max : new Date(today),
+                    format:'dd mmmm, yyyy',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 23:59:59',
+                    hiddenSuffix: '_formatted',
+                    onOpen: function() {
+                        $('.date_root').css('top', '40px');
+                        $('.picker').css('position','relative');
+                    },
+                    onSet: function(context) {
+
+                    }
                 });
             });
 
