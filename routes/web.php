@@ -2655,6 +2655,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminWalkInBookShipmentController@ftl_book_index')->name('walk_in');
                 Route::post('', 'Admins\AdminWalkInBookShipmentController@get_ftl_info')->name('get_ftl_info');
                 Route::post('store', 'Admins\AdminWalkInBookShipmentController@ftl_store')->name('store');
+                Route::post('print_ftl_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_ftl_air_waybill')->name('print_air_waybill');
             });
 
         });

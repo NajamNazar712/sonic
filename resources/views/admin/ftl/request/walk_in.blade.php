@@ -299,7 +299,7 @@
 
             @if (session('print'))
             $.ajax({
-                url: '{!! route('admin.shipment.book.print_air_waybill') !!}',
+                url: '{!! route('admin.shipment.book.ftl.print_air_waybill') !!}',
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
