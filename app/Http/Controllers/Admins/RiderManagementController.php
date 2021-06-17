@@ -266,6 +266,7 @@ class RiderManagementController extends Controller
         $rider->phone = $request->phone;
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
+        $rider->trax_id = $request->trax_id;
 
 
         $rider->rider_category_id = $request->rider_category;

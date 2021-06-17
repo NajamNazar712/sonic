@@ -373,6 +373,42 @@
                 }
             });
 
+            $('#datatable tbody').on('contextmenu', 'tr td.invoice_number button', function(e) {
+                e.preventDefault();
+
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.finance.invoices.print') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id,
+                            'header': true
+                        }
+                    })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+                }
+            });
+
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 

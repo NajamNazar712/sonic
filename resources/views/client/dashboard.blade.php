@@ -443,7 +443,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-
+                    <input type="hidden" name="cancel_shipment_id" id="cancel_shipment_id" value="">
                     <textarea type="text" rows="5" class="form-control" cols="50" id="bulk_cancel_reason" name="cancel_reason" placeholder="Enter Reason"></textarea>
 
 
@@ -1149,17 +1149,17 @@
                     }
                 });
             });
-
             $('body').on('click', '.cancel_order', function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                if (id) {
+                var cancel_shipment_id = parseInt($(this).parents('tr').attr('id'));
+                if (cancel_shipment_id) {
+                    $('#cancel_shipment_id').val(cancel_shipment_id);
                     $('#CancelReasonModal').modal('show');
                 }
             });
 
             $('#CancelReasonSubmit').on('click',function () {
                 var reason = $('#cancel_reason').val();
-                var id = parseInt($('.cancel_order').parents('tr').attr('id'));
+                var id = parseInt($('#cancel_shipment_id').val());
                 $.ajax({
                     url: '{!! route('cod.orders.cancel') !!}',
                     method: 'POST',
