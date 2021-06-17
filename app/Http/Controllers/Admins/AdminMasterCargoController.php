@@ -69,7 +69,12 @@ class AdminMasterCargoController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
-            ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
+//            ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
+            ->leftjoin('user_shipping_infos as rsi', function ($join) {
+                $join->on('shipments.return_address_id', '=', 'rsi.id')
+                    ->whereNotNull('shipments.return_address_id')
+                    ->where('shipments.shipper_status_id', '!=', 30);
+            })
             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
