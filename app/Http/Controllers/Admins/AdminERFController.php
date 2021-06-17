@@ -22,6 +22,7 @@ use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 
@@ -46,11 +47,13 @@ class AdminERFController extends Controller
             ->join('employee_designations as d', 'd.id', '=', 'employee_requisitions.designation_id')
             ->join('admin_departments as dp', 'dp.id', '=', 'employee_requisitions.department_id')
             ->join('employee_requisition_statuses as s', 's.id', '=', 'employee_requisitions.status_id')
-            ->leftjoin('employee_requisition_attachments as documents','documents.er_id','=','employee_requisitions.id')
-            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','documents.id as document']);
+            ->leftjoin('employee_requisition_attachments',function($join){
+                $join->on('employee_requisition_attachments.er_id','=','employee_requisitions.id')
+                    ->where('employee_requisition_attachments.created_at','=',DB::raw('(select max(created_at) from employee_requisition_attachments where employee_requisition_attachments.er_id= employee_requisitions.id)'));
+            })
+            ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document']);
 
-
-
+        
         $datatables = Datatables::of($erf)
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
