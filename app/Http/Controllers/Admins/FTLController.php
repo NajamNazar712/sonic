@@ -72,7 +72,7 @@ class FTLController extends Controller
 
         $datatables = Datatables::of($data)
             ->editColumn('req_id',function ($data){
-                return str_pad($data->req_id, 4, '0', STR_PAD_LEFT);
+                return str_pad($data->req_id, 3, '0', STR_PAD_LEFT);
             })
             ->addColumn('tracking_number_link', function ($data) {
                 $route = route('admin.tracking.index');
