@@ -100,7 +100,7 @@ class AdminMasterCargoController extends Controller
                                 ->where('rc.hub_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->where('shipments.shipper_status_id', [2, 20, 30, 37])
+                                $sub_query->whereIn('shipments.shipper_status_id', [2, 20, 30, 37])
                                     ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
