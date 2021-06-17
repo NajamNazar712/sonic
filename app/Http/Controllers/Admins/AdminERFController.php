@@ -167,6 +167,7 @@ class AdminERFController extends Controller
 
         $email = $request->admin_email;
         $path = $this::erf_print($erf->id);
+      /*  return $path;*/
         $data['id'] = $erf->id;
         $data['email'] = $email;
         NotificationsController::send(133, $data, url('/') . '/' . 'reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
@@ -241,23 +242,22 @@ class AdminERFController extends Controller
                       <div class="erf_slip">
                           <table class="table table-sm table-bordered border">
                           <tbody>
-                            <tr colspan="3">
-                              <td class="text-center align-middle" rowspan="6"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                            <tr >
+                              <td class="text-center align-middle" rowspan="5" colspan="2"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
                        
-                                 <td class="text-center align-middle color secondary" >Employee Requisition</td>
-                              </tr>
-                              <tr colspan="3"></tr>
-                              <tr colspan="3">
-                                  <td class="text-center align-middle color secondary" >ERF ID : '.$erf->id.'</td>
+                                 <td class="text-center align-middle color secondary" colspan="2" >Employee Requisition</td>
+                             </tr>
+                              <tr>
+                                  <td class="text-center align-middle color secondary"  colspan="2">ERF ID : '.$erf->id.'</td>
                               </tr>
                               <tr>
-                                  <td class="text-center align-middle color secondary" >Requested Date : '.$erf->created_at.'</td>
+                                  <td class="text-center align-middle color secondary"  colspan="2">Requested Date : '.$erf->created_at.'</td>
                                   </tr>
                               <tr>
-                                  <td class="text-center align-middle color secondary" >Status : '.$erf->status->name.'</td>
+                                  <td class="text-center align-middle color secondary" colspan="2">Status : '.$erf->status->name.'</td>
                                   </tr>
                               <tr>
-                                  <td class="text-center align-middle color secondary" >ERF Type : '.$type.'</td>
+                                  <td class="text-center align-middle color secondary" colspan="2" >ERF Type : '.$type.'</td>
                                   
                               </tr> ';
                              if($erf->type == 1){
@@ -303,30 +303,30 @@ class AdminERFController extends Controller
                              else{
                                  $html .= '  <tr>
                          
-                              <td class="color secondary"><strong>Department</strong></td>
-                              <td>' . $erf->department->name . '</td>
+                              <td class="color secondary" colspan="2"><strong>Department</strong></td>
+                              <td colspan="2">' . $erf->department->name . '</td>
                             
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Designation</strong></td>
-                              <td>' . $erf->designation->name . '</td>
+                              <td class="color secondary" colspan="2"><strong>Designation</strong></td>
+                              <td colspan="2">' . $erf->designation->name . '</td>
                             
                             </tr>
                            
                             <tr>
-                              <td class="color secondary"><strong>Hub</strong></td>
-                              <td>' . $erf->hub->name. '</td>
+                              <td class="color secondary" colspan="2"><strong>Hub</strong></td>
+                              <td colspan="2">' . $erf->hub->name. '</td>
                             
                             </tr>
                              
                              <tr>
-                               <td class="color secondary"><strong>City</strong></td>
-                              <td>' . $erf->city->name . '</td>
+                               <td colspan="2" class="color secondary"><strong>City</strong></td>
+                              <td colspan="2">' . $erf->city->name . '</td>
                             </tr>
                             
                             <tr>
-                              <td class="color secondary"><strong>Line Manager</strong></td>
-                              <td>' . $erf->manager->name. '</td>
+                              <td colspan="2" class="color secondary"><strong>Line Manager</strong></td>
+                              <td colspan="2">' . $erf->manager->name. '</td>
                             
                             </tr>';
                              }
@@ -437,7 +437,7 @@ class AdminERFController extends Controller
             </div>
             </body>
             </html>';
-
+       
             $pdf = SnappyPDF::loadHTML($html)->save('reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
             return $pdf;
         }
