@@ -96,11 +96,18 @@ class AdminMasterCargoController extends Controller
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
-                            $sub_query->whereIn('shipments.shipper_status_id', [20])
-                                ->where('rc.hub_id', '!=', DB::raw('dc.hub_id'));
+                            $sub_query->where('shipments.shipper_status_id', 20)
+                                ->where(function ($sub_sub_query) {
+                                    $sub_sub_query->whereNull('shipments.return_address_id')
+                                        ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
+                                })
+                                ->orWhere(function ($sub_sub_query) {
+                                    $sub_sub_query->whereNotNull('shipments.return_address_id')
+                                        ->where('rc.hub_id', '!=', DB::raw('dc.hub_id'));
+                                });
                             })
                             ->orWhere(function ($sub_query) {
-                                $sub_query->whereIn('shipments.shipper_status_id', [2, 20, 30, 37])
+                                $sub_query->whereIn('shipments.shipper_status_id', [2, 30, 37])
                                     ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
                             })
                             ->orWhere(function ($sub_query) {
@@ -486,13 +493,22 @@ class AdminMasterCargoController extends Controller
                                         ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
                                         ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
                                         ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
-                                        ->join('cities as oc', function($join) {
-                                            $join->on('shipments.consignee_city_id', '=', 'oc.id')
-                                                ->on('dc.hub_id', '!=', 'oc.hub_id');
-                                        })
-                                        ->leftjoin('cities as roc', function($join) {
-                                            $join->on('shipments.consignee_city_id', '=', 'roc.id')
-                                                ->on('rc.hub_id', '!=', 'oc.hub_id');
+                                        ->join('cities as oc', function ($join) {
+                                            $join->where(function ($query) {
+                                                $query->whereIn('shipments.shipper_status_id', [30, 37])
+                                                    ->where('dc.hub_id', '!=', 'oc.hub_id');
+                                            })
+                                                ->orWhere(function ($query) {
+                                                    $query->where('shipments.shipper_status_id', 20)
+                                                        ->where(function ($sub_sub_query) {
+                                                            $sub_sub_query->whereNull('shipments.return_address_id')
+                                                                ->where('dc.hub_id', '!=', 'oc.hub_id');
+                                                        })
+                                                        ->orWhere(function ($sub_sub_query) {
+                                                            $sub_sub_query->whereNotNull('shipments.return_address_id')
+                                                                ->where('rc.hub_id', '!=', 'oc.hub_id');
+                                                        });
+                                                });
                                         })
                                         ->select(DB::raw('count(shipments.id) as count'))
                                         ->where('dc.hub_id', $hub->id)
@@ -981,13 +997,22 @@ class AdminMasterCargoController extends Controller
                                             ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
                                             ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
                                             ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
-                                            ->join('cities as oc', function($join) {
-                                                $join->on('shipments.consignee_city_id', '=', 'oc.id')
-                                                    ->on('dc.hub_id', '!=', 'oc.hub_id');
-                                            })
-                                            ->leftjoin('cities as roc', function($join) {
-                                                $join->on('shipments.consignee_city_id', '=', 'roc.id')
-                                                    ->on('rc.hub_id', '!=', 'oc.hub_id');
+                                            ->join('cities as oc', function ($join) {
+                                                $join->where(function ($query) {
+                                                    $query->whereIn('shipments.shipper_status_id', [30, 37])
+                                                        ->where('dc.hub_id', '!=', 'oc.hub_id');
+                                                })
+                                                ->orWhere(function ($query) {
+                                                    $query->where('shipments.shipper_status_id', 20)
+                                                        ->where(function ($sub_sub_query) {
+                                                            $sub_sub_query->whereNull('shipments.return_address_id')
+                                                            ->where('dc.hub_id', '!=', 'oc.hub_id');
+                                                        })
+                                                        ->orWhere(function ($sub_sub_query) {
+                                                            $sub_sub_query->whereNotNull('shipments.return_address_id')
+                                                                ->where('rc.hub_id', '!=', 'oc.hub_id');
+                                                        });
+                                                });
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('dc.hub_id', $hub->id)
