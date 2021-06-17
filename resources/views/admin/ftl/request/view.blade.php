@@ -158,7 +158,7 @@
                                                             <input type="text" readonly name="total_cost" class="form-control" id="total_cost" placeholder="Total Cost">
                                                         </div>
                                                         <div class="col-6">
-                                                            <label for="freight_charges" class="pull-left font-weight-bold">Freigt Charges</label>
+                                                            <label for="freight_charges" class="pull-left font-weight-bold">Freight Charges</label>
                                                             <input type="text" name="freight_charges" id="freight_charges" value="{{$ftl->freight_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges">
                                                         </div>
                                                     </div>
