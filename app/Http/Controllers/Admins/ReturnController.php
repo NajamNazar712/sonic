@@ -1947,7 +1947,16 @@ class ReturnController extends Controller
                 }
 
             })
+            ->addColumn('reason', function ($deliveries) {
+                $delivered_array = array(25,31,38);
+                if(in_array($deliveries->shipper_status_id,$delivered_array)) {
+                    return '';
+                }else{
+                    $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
+                    return $reason;
+                }
 
+            })
             ->addColumn('remarks', function ($deliveries) {
                 $delivered_array = array(25,31,38);
                 if(in_array($deliveries->shipper_status_id,$delivered_array)) {
