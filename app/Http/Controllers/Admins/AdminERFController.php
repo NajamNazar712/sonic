@@ -69,19 +69,19 @@ class AdminERFController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (($result->status_id == 1) && session('role_id') == 1 || in_array(518, session('permissions'))) {
+                    if (($result->status_id == 1) && (session('role_id') == 1 || in_array(518, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By HOD</div></button>';
 
                     }
-                    if (($result->status_id == 2) && session('role_id') == 1 || in_array(519, session('permissions'))) {
+                    if (($result->status_id == 2) && (session('role_id') == 1 || in_array(519, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item admin_approve" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By CEO</div></button>';
 
                     }
-                    if (($result->status_id == 3) && session('role_id') == 1 || in_array(520, session('permissions'))) {
+                    if (($result->status_id == 3) && (session('role_id') == 1 || in_array(520, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
-                    if ($result->document != null && session('role_id') == 1 || in_array(521, session('permissions'))) {
+                    if ($result->document != null && (session('role_id') == 1 || in_array(521, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
 
                     }
@@ -120,7 +120,7 @@ class AdminERFController extends Controller
         else{
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
-        $designations = EmployeeDesignation::select('id','name')->get();
+        $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
         $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 18, 19, 22, 25, 34, 36])->where('status', 1)->select('id','name')->get();
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
@@ -209,7 +209,7 @@ class AdminERFController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Cargo Slip & Checklist</title>
+                    <title>Employee Requisition Form</title>
 
                      <style>
                       body {
