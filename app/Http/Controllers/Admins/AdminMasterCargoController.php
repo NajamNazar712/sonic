@@ -269,8 +269,25 @@ class AdminMasterCargoController extends Controller
                 $keyword = strtolower($keyword);
 
                 $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+
+                    $sub_query->whereIn('shipments.shipper_status_id', [30, 37])
                         ->where('oc.name', 'like', '%' . $keyword . '%');
+                })
+                ->orWhere(function ($sub_query) use ($keyword) {
+
+                    $sub_query->where(function ($sub_query) use ($keyword) {
+
+                        $sub_query->where('shipments.shipper_status_id', 20)
+                            ->where(function ($sub_sub_query) use ($keyword) {
+                                $sub_sub_query->whereNull('shipments.return_address_id')
+                                    ->where('oc.name', 'like', '%' . $keyword . '%');
+                            })
+                            ->orWhere(function ($sub_sub_query) use ($keyword) {
+                                $sub_sub_query->whereNotNull('shipments.return_address_id')
+                                    ->where('rc.name', 'like', '%' . $keyword . '%');
+                            });
+
+                    });
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
                         $sub_query->whereIn('shipments.shipper_status_id', [2, 49, 55])
