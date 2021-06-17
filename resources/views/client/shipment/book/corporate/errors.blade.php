@@ -79,7 +79,7 @@
                                         <th>Estimated Weight (kg)</th>
                                         <th>Mode of Shipment ID</th>
                                         <th>Same Day Timing ID</th>
-                                        @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                        @if($service_type_check_id == 3)
                                             <th>Try and Buy Charges</th>
                                         @endif
                                         @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
@@ -95,6 +95,8 @@
                                         <th>Shipper Reference 3</th>
                                         <th>Shipper Reference 4</th>
                                         <th>Shipper Reference 5</th>
+                                        <th>Open Shipment</th>
+
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -231,7 +233,7 @@
                                                     <td>{!! Form::text('form[' . $no . '][replacement_item_quantity]', $ro['replacement_item_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                                 @endif
                                             @endif
-                                            @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                            @if($service_type_check_id == 3)
                                                 @if(isset($errors[$no]['item_product_type_id_1']))
                                                     <td>{!! Form::select('form[' . $no . '][item_product_type_id_1]',$products,null,['class' => 'form-control is-invalid item_product_type_id select2','id'=>'item_product_type_id_1','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id_1']}}</font></td>
                                                 @else
@@ -382,7 +384,7 @@
                                                     <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', null,['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                                 @endif
                                             @endif
-                                            @if($service_type_check_id == 3 || $service_type_check_id == null)
+                                            @if($service_type_check_id == 3)
                                                     @if(isset($errors[$no]['try_and_buy_charges']))
                                                         <td>{!! Form::text('form[' . $no . '][try_and_buy_charges]', $ro['try_and_buy_charges'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['try_and_buy_charges']}}</font></td>
                                                     @else
@@ -437,6 +439,11 @@
                                                 <td>{!! Form::text('form[' . $no . '][shipper_reference_number_5]', $ro['shipper_reference_number_5'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_5']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][shipper_reference_number_5]', $ro['shipper_reference_number_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                            @if(isset($errors[$no]['open_shipment']))
+                                                <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['open_shipment']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                                 <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
