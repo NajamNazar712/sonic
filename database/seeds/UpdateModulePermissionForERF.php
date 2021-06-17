@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionForCancellAddShipmentSeeder extends Seeder
+class UpdateModulePermissionForERF extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionForCancellAddShipmentSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 505, 'name' => 'Add - Cancel Shipments', 'module_id' => 15),
+            array('id' => 506, 'name' => 'ERF - View', 'module_id' => 28)
         ));
     }
 }
