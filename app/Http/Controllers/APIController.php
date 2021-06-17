@@ -579,17 +579,17 @@ class APIController extends Controller
 
                 if($service_type_id == 1 || $service_type_id == 2){
                     if($request->has('return_address_id') && $request->input('return_address_id') != null){
-                        $user_shipping_info = UserShippingInfo::find($request->input('return_address_id'));
+                        $user_shipping_info_return = UserShippingInfo::find($request->input('return_address_id'));
 
-                        if (!$user_shipping_info->status) {
+                        if (!$user_shipping_info_return->status) {
                             return response()->json(['status' => 1, 'message' => 'Return Address ID #' . $request->input('return_address_id') . ' is disabled']);
                         }
 
-                        if (!$user_shipping_info->city->status) {
-                            return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
+                        if (!$user_shipping_info_return->city->status) {
+                            return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info_return->city_id . ' is deactivated']);
                         }
-                        if (!$user_shipping_info->city->zone_id) {
-                            return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
+                        if (!$user_shipping_info_return->city->zone_id) {
+                            return response()->json(['status' => 1, 'message' => 'Return Address\'s City ID #' . $user_shipping_info_return->city_id . ' is deactivated']);
                         }
                     }
                 }
