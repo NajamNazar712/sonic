@@ -471,6 +471,45 @@
 <!--Password Change Modal -->
 
 
+<div class="modal fade text-left" id="editCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editCity"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit City</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editCityDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{-- edit retail user --}}
+<div class="modal fade" id="editRetailUser" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRetailUser"
+     aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="add_remarks_title">Edit User</h4>
+
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body text-center" id="editRetailUserDiv">
+
+            </div>
+                
+        </div>
+    </div>
+</div>
+
+
 
 
 

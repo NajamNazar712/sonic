@@ -23,6 +23,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
@@ -7272,13 +7273,16 @@ class NotificationsController extends Controller
 
                         $serial = 1;
 
-                    foreach ($master_cargo->route_management->junctions as $value) {
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->junction['name'] . '</td>';
-                        $html .= '</tr>';
-                        $serial++;
-                    }
+                        if($master_cargo->route_management_id){
+
+                            foreach ($master_cargo->route_management->junctions as $value) {
+                                $html .= '<tr>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->junction['name'] . '</td>';
+                                $html .= '</tr>';
+                                $serial++;
+                            }
+                        }
                         $html .= '</tbody></table>';
 
                         if (strpos($body, '[preview]') !== FALSE) {
@@ -7287,12 +7291,14 @@ class NotificationsController extends Controller
 
                         $admins = Admin::where('role_id',10)->where('status',1)->get();
                         foreach($admins as $admin) {
+                            if($master_cargo->route_management_id){
 
-                            foreach ($master_cargo->route_management->junctions as $value) {
-                                $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $value->junction['id']);
-                                if ($assign_hubs->exists()) {
-                                    $to = $admin->email;
-                                    
+                                foreach ($master_cargo->route_management->junctions as $value) {
+                                    $assign_hubs = AdminHub::where('admin_id', $admin->id)->where('hub_id', $value->junction['id']);
+                                    if ($assign_hubs->exists()) {
+                                        $to = $admin->email;
+                                        
+                                    }
                                 }
                             }
                             if($to != null){
@@ -7359,18 +7365,35 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
-				else if($id == 131) {
+				else if($id == 133) {
                   
-                    $request_no = $reference_1_id;
-                    $admin_id = $reference_2_id;
+                    $data = $reference_1_id;
+                    $erf = EmployeeRequisition::find($data['id']);
+                    $admin = Admin::where('email',$data['email'])->first();
+                    if($admin){
+                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
 
-                    if (strpos($body, '[request_no]') !== FALSE) {
-                        $body = str_replace('[request_no]', $request_no, $body);
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+
+                        if (strpos($subject, '[erf_id]') !== FALSE) {
+                            $subject = str_replace('[erf_id]', $erf->id, $subject);
+                        }
+
+                        if (strpos($body, '[erf_id]') !== FALSE) {
+                            $body = str_replace('[erf_id]', $erf->id, $body);
+                        }
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $erf->created_at, $body);
+                        }
+
+                        $to = $admin->email;
+                        self::email($subject, $body, $to);
                     }
-                    $admin = Admin::find($admin_id);
-                    $to = $admin->email;
-
-                    self::email($subject, $body, $to);
                 }
             }
         }

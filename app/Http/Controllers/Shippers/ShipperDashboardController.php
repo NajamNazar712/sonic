@@ -371,6 +371,7 @@ class ShipperDashboardController extends Controller
     }
     public function order_cancel(Request $request){
         $shipment_id = $request->shipment_id;
+        $reason = $request->reason;
 
         if($shipment_id){
             $shipment = Shipment::where('id',$shipment_id)->where('user_id', session('user_id'));
@@ -378,6 +379,7 @@ class ShipperDashboardController extends Controller
                 $shipment = $shipment->first();
 
                 if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
+
                     if($shipment->warehouse == 1){
                         return response()->json(['status' => 0,'error' => 'Warehouse Shipment can not be cancelled from Sonic!']);
                     }
@@ -447,11 +449,12 @@ class ShipperDashboardController extends Controller
 
                     V2AdminPickupsController::cancel($shipment_id);
 
-                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
+                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Cancelled by Shipper '.'- '. $reason , session('user_id'), NULL);
 
                     return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
                 }
                 else {
+                  
                     return response()->json(['status'=>0,'error'=>'Shipment\'s Status has already been changed']);
                 }
             }else{
@@ -463,8 +466,8 @@ class ShipperDashboardController extends Controller
     {
         $correct = FALSE;
         $reason = $request->reason;
+        
         foreach ($request->ids as $id) {
-
             $shipment = Shipment::where('id', $id)->where('user_id', session('user_id'));
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
