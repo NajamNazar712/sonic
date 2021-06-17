@@ -937,6 +937,9 @@ class Permission
             'human_resource.rider_incentive.index' => 492,
             'human_resource.rider_incentive.list' => 492,
 
+            'human_resource.erf.index' => 506,
+            'human_resource.erf.list' => 506,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
@@ -960,9 +963,10 @@ class Permission
             'runner.intransit' => 501,
             'fleet.index' => 498,
             'route_management.index' => 499,
-
-
-
+            'settings.escalation.launched.edit.index' => 507,
+            'settings.escalation.in_process.edit.index' => 517,
+           
+            
            
         ],
 
