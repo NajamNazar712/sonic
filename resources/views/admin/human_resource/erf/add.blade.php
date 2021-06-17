@@ -84,9 +84,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div" >
                                         <div class="form-group">
-                                            <select name="vacancies" class="select2" id="vacancies">
+                                            <select name="vacancies" class="select2" id="vacancies" data-rule-required="true" data-msg-required="Vacancy is required">
                                                 @for ($i=1; $i<=10; $i++)
                                                     <option value="{{$i}}">{{$i}}</option>
                                                  @endfor
@@ -96,7 +96,7 @@
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="position_div">
                                         <div class="form-group">
-                                            <select name="position" class="select2" id="position">
+                                            <select name="position" class="select2" id="position" data-rule-required="true" data-msg-required="Position is required">
                                                 @foreach($admin_positions as $position)
                                                     <option value="{{ $position->id }}">{{ $position->name }}</option>
                                                 @endforeach
@@ -108,33 +108,33 @@
 
                                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">
                                             <div class="form-group ">
-                                                <input type="text" class="form-control mr-1" id="from" name="salary_from" placeholder="Salary From">
+                                                <input type="text" class="form-control mr-1" id="from" name="salary_from" placeholder="Salary From" data-rule-required="true" data-msg-required="Salary From is required">
                                             </div>
                                         </div>
                                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">
                                             <div class="form-group ">
-                                                <input type="text" class="form-control" id="to" name="salary_to" placeholder=" Salary To">
+                                                <input type="text" class="form-control" id="to" name="salary_to" placeholder=" Salary To" data-rule-required="true" data-msg-required="Salary To is required">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="qualification_div">
                                         <div class="form-group ">
-                                            <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications"></textarea>
+                                            <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications" data-rule-required="true" data-msg-required="Qualification is required"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="skills_div">
                                         <div class="form-group ">
-                                            <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills"></textarea>
+                                            <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills" data-rule-required="true" data-msg-required="Skills are required"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="description_div">
                                         <div class="form-group ">
-                                            <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description"></textarea>
+                                            <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description" data-rule-required="true" data-msg-required="Job Description is required"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">
                                         <div class="form-group ">
-                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple">
+                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple" data-rule-required="true" data-msg-required="Allowance is required">
                                               @foreach($allowances as $allowance)
                                                   <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>
                                               @endforeach
@@ -144,7 +144,7 @@
                                 </div>
                                 <div class="col-12 button_div">
                                     <div class="form-group text-center mt-2">
-                                        <button type="button" class="btn btn-primary" id="form_btn">Submit</button>
+                                        <button type="submit" class="btn btn-primary" id="form_btn">Submit</button>
                                     </div>
                                 </div>
 
@@ -255,7 +255,7 @@
 
                 var vacancies = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">\n' +
                     '                                        <div class="form-group">\n' +
-                    '                                            <select name="vacancies" class="select2" id="vacancies">\n' +
+                    '                                            <select name="vacancies" class="select2" id="vacancies" data-rule-required="true" data-msg-required="Vacancy is required">\n' +
                     '                                                @for ($i=1; $i<=10; $i++)\n' +
                     '                                                    <option value="{{$i}}">{{$i}}</option>\n' +
                     '                                                 @endfor\n' +
@@ -272,7 +272,7 @@
 
                 var position = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="position_div">\n' +
                     '                                        <div class="form-group">\n' +
-                    '                                            <select name="position" class="select2" id="position">\n' +
+                    '                                            <select name="position" class="select2" id="position data-rule-required="true" data-msg-required="Position is required"">\n' +
                     '                                                @foreach($admin_positions as $position)\n' +
                     '                                                    <option value="{{ $position->id }}">{{ $position->name }}</option>\n' +
                     '                                                @endforeach\n' +
@@ -291,21 +291,21 @@
 
                     '                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">\n' +
                     '                                            <div class="form-group ">\n' +
-                    '                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="From">\n' +
+                    '                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="From" data-rule-required="true" data-msg-required="Salary From is required">\n' +
                     '                                            </div>\n' +
                     '                                        </div>\n' +
                     '                                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">\n' +
                     '                                            <div class="form-group ">\n' +
-                    '                                                <input type="number" class="form-control" id="to" name="salary_to" placeholder="To">\n' +
+                    '                                                <input type="number" class="form-control" id="to" name="salary_to" placeholder="To" data-rule-required="true" data-msg-required="Salary To is required">\n' +
                     '                                            </div>\n' +
                     '                                        </div>\n' +
                     '                                    </div>';
 
                 $("#erf_form #position_div").after(range);
 
-                var qualification = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="qualification_div">\n' +
+                var qualification = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="qualification_div" >\n' +
                     '                                        <div class="form-group ">\n' +
-                    '                                            <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications"></textarea>\n' +
+                    '                                            <textarea class="form-control" rows="5" cols="100" id="qualification" name="qualification" placeholder="Qualifications" data-rule-required="true" data-msg-required="Qualification is required"></textarea>\n' +
                     '                                        </div>\n' +
                     '                                    </div>';
 
@@ -313,7 +313,7 @@
 
                 var skills = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="skills_div">\n' +
                     '                                        <div class="form-group ">\n' +
-                    '                                            <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills"></textarea>\n' +
+                    '                                            <textarea class="form-control" rows="5" cols="100" id="skills" name="skills" placeholder="Required Skills" data-rule-required="true" data-msg-required="Skills are required"></textarea>\n' +
                     '                                        </div>\n' +
                     '                                    </div>';
 
@@ -321,7 +321,7 @@
 
                 var description = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="description_div">\n' +
                 '                                        <div class="form-group ">\n' +
-                '                                            <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description"></textarea>\n' +
+                '                                            <textarea class="form-control" rows="5" cols="100" id="job_description" name="job_description" placeholder="Job Description" data-rule-required="true" data-msg-required="Job Description is required"></textarea>\n' +
                 '                                        </div>\n' +
                 '                                    </div>';
 
@@ -330,7 +330,7 @@
 
                 var allowance = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="allowance_div">\n' +
                     '                                        <div class="form-group ">\n' +
-                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple">\n' +
+                    '                                            <select name="allowances[]" class="select2" id="allowance" multiple="multiple" data-rule-required="true" data-msg-required="Allowances are required">\n' +
                     '                                              @foreach($allowances as $allowance)\n' +
                     '                                                  <option value="{{ $allowance->id }}">{{ $allowance->name }}</option>\n' +
                     '                                              @endforeach\n' +
@@ -360,9 +360,9 @@
                     '<div class="row w-100 justify-content-center" id="new_div">' +
                     '<table>  <table class="table table-bordered" id="dynamic_field">  \n' +
                     '                    <tr>  \n' +
-                    '<td><select class="form-control select2 trax_id" id="trax_id" name="addmore[0][trax_id]"><option value="" required> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td> \n' +
-                    '                        <td><input type="number" id="last_salary" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control last_salary" required /></td>  \n' +
-                    '                        <td><input type="date" id="date" name="addmore[0][date]" placeholder="Date" class="form-control date" required/></td>  \n' +
+                    '<td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td> \n' +
+                    '                        <td><div class="form-group"><input type="number" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td>  \n' +
+                    '                        <td><div class="form-group"><input type="date" name="addmore[0][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td>  \n' +
                     '                        <td><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +
                     '                    </tr>  \n' +
                     '                </table>  </table>'+
@@ -391,86 +391,15 @@
                }
              });
 
-             $('body').on('click','#add',function(){
-                 var sal = $('#last_salary');
-                 var date = $('#date');
-                 var trax_id = $('#trax_id');
-
-
-                /* if(sal.val() == '' || sal.val() == null || date.val() == '' || date.val() == null || trax_id.val() == '' || trax_id.val() == null){
-                     var check_error = "Please fill previous fields to add new row";
-                     toastr.error(check_error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                     return false;
-                 }*/
-             });
-
-
 
             var i = 0;
             $('body').on('click','#add',function(){
                 ++i;
-                $("#dynamic_field").append('<tr><td><select class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value="" data-rule-required="true" data-msg-required="Department is required"> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td><td><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Department is required" /></td> <td><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Department is required"/></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
+                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> <td><div class="form-group"><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
                 $(".trax_id").prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id'
                 });
-            });
-
-            $('#erf_form #form_btn').on('click',function(){
-                var  erf_type = $("input[name='erf_type']:checked").val();
-                var department = $("#department");
-                var designation = $("#designation");
-                var department_head = $("#department_head");
-                var city = $("#city");
-                var hub = $("#hub");
-
-                if((department.val() == '' || department.val() == null) || (designation.val() == '' || designation.val() == null) || (department_head.val() == '' || department_head.val() == null) ||  (city.val() == '' || city.val() == null) ||  (hub.val() == '' || hub.val() == null) ){
-                    var error = "Department ,Designation ,City ,Hub ,Line Manager are Required";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    return false;
-                }
-                if(erf_type == 1){
-                    var vacancies = $("#vacancies");
-                    var position = $("#position");
-                    var salary_from = $("#from");
-                    var salary_to = $("#to");
-                    var qualification = $("#qualification");
-                    var skills = $("#skills");
-                    var description = $("#job_description");
-                    var allowances = $("#allowance");
-
-                    if(vacancies.val() == '' || vacancies.val() == null){
-                        var error = "Vacancies is Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    else if(position.val() == '' || position.val() == null ){
-                        var error = "Position is Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    } else if((salary_from.val() == '' || salary_from.val() == null || (salary_to.val() == null || salary_to.val() == null)) ){
-                        var error = "Salary Range is Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    } else if(qualification.val() == '' || qualification.val() == null ){
-                        var error = "Qualification is Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    } else if(skills.val() == '' || skills.val() == null ){
-                        var error = "Skills is Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    } else if(description.val() == '' || description.val() == null ){
-                        var error = "Description is Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    } else if(allowances.val() == '' || allowances.val() == null ){
-                        var error = "Allowances are Required";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    else{
-                        $('#EmailModal').modal('show');
-                    }
-                }
-                if(erf_type == 2){
-
-                    
-                    $('#EmailModal').modal('show');
-                }
             });
 
             $(document).on('click', '.remove-tr', function(){
@@ -478,6 +407,22 @@
             });
         });
 
+        $('#erf_form').validate({
+            ignore: [],
+            errorClass: 'danger',
+            successClass: 'success',
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parents('.form-group'));
+            },
+            submitHandler: function(form) {
+                $('#EmailModal').modal('show');
+                if($('#email').val() !== '' && $('#email').val() !== null ){
+                    console.log(1);
+                    form.submit();
+                }
+                
+            }
+        });
 
 
         $('#erf_form').on('keypress',function (e) {

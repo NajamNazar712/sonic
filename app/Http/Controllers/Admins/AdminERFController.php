@@ -76,7 +76,8 @@ class AdminERFController extends Controller
 
                     }
                      if($result->document != null){
-                         $dropdown .= '<a type="button" class="dropdown-item view_document"  href="'.route('admin.human_resource.erf.documents',['id' => $result->id]) .'" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View</div></button>';
+                         $route = route('admin.human_resource.erf.documents',['id' => $result->id]);
+                         $dropdown .= '<button type="button" class="dropdown-item view_document"  onclick="window.open(\''.$route .'\')" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View</div></button>';
                      }
 
 
