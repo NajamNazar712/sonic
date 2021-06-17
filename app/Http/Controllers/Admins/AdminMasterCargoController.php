@@ -482,7 +482,7 @@ class AdminMasterCargoController extends Controller
                                         ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
                                         ->join('cities as oc', function($join) {
                                             $join->on('shipments.consignee_city_id', '=', 'oc.id')
-                                                ->on('dc.hub_id', '!=', 'oc.hub_id')
+                                                ->on('dc.hub_id', '!=', 'oc.hub_id');
                                         })
                                         ->leftjoin('cities as roc', function($join) {
                                             $join->on('shipments.consignee_city_id', '=', 'roc.id')
