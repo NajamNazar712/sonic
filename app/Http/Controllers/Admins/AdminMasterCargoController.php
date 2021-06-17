@@ -422,7 +422,13 @@ class AdminMasterCargoController extends Controller
                                 $destination = $shipment->consignee_city;
                             }
                             else {
-                                $destination = $shipment->pickup_address->city;
+                                if($shipment->return_address_id != NULL){
+                                    $destination = $shipment->return_address->city;
+                                }
+                                else{
+                                    $destination = $shipment->pickup_address->city;
+                                }
+
                             }
                             if(!$request->has('pieces_confirm')){
                                 if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -822,7 +828,17 @@ class AdminMasterCargoController extends Controller
                         $hub_id = $city_details->hub_id;
                     }
                     else {
-                        $hub_id = $shipment->consignee_city->hub_id;
+                        if(in_array($shipment->shipper_status_id, [20])){
+                            if($shipment->return_address_id != null){
+                                $hub_id = $shipment->return_address->city->hub_id;
+                            }
+                            else{
+                                $hub_id = $shipment->consignee_city->hub_id;
+                            }
+                        }
+                        else{
+                            $hub_id = $shipment->consignee_city->hub_id;
+                        }
 
                     }
 
@@ -839,13 +855,23 @@ class AdminMasterCargoController extends Controller
                     }
 
                     if ($allowed) {
-                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id) )) {
+                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id) ) || (in_array($shipment->shipper_status_id, [20]) && ($shipment->pickup_address->city->hub_id != $hub_id))) {
                             if ($request->bag_type != 0) {
                                 if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                     $hub_id = $shipment->consignee_city->hub_id;
                                 }
                                 else {
-                                    $hub_id = $shipment->pickup_address->city->hub_id;
+                                    if(in_array($shipment->shipper_status_id, [20])){
+                                        if($shipment->return_address_id != null){
+                                            $hub_id = $shipment->return_address->city->hub_id;
+                                        }
+                                        else{
+                                            $hub_id = $shipment->pickup_address->city->hub_id;
+                                        }
+                                    }
+                                    else{
+                                        $hub_id = $shipment->pickup_address->city->hub_id;
+                                    }
                                 }
                             }
                             else {
@@ -889,7 +915,12 @@ class AdminMasterCargoController extends Controller
                                     $destination = $shipment->consignee_city;
                                 }
                                 else {
-                                    $destination = $shipment->pickup_address->city;
+                                    if($shipment->return_address_id != NULL){
+                                        $destination = $shipment->return_address->city;
+                                    }
+                                    else{
+                                        $destination = $shipment->pickup_address->city;
+                                    }
                                 }
                                 if(!$request->has('pieces_confirm')){
                                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -939,9 +970,12 @@ class AdminMasterCargoController extends Controller
                                     else {
                                         $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
                                             ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
+                                            ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
+                                            ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
                                             ->join('cities as oc', function($join) {
                                                 $join->on('shipments.consignee_city_id', '=', 'oc.id')
-                                                    ->on('dc.hub_id', '!=', 'oc.hub_id');
+                                                    ->on('dc.hub_id', '!=', 'oc.hub_id')
+                                                    ->on('dc.hub_id', '!=', 'rc.hub_id');
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('dc.hub_id', $hub->id)
