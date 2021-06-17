@@ -166,7 +166,7 @@
                                         <div id="frieght_div" class="form-group ">
                                             <select name="approve_frieght_request" class="select2" id="approve_frieght_request" data-rule-required="true" data-msg-required="Request ID is required">
                                                 @foreach($approve_ftl_requests as $request)
-                                                    <option value="{{ $request->id }}">{{ str_pad($request->id, 6, '0', STR_PAD_LEFT) }}</option>
+                                                    <option value="{{ $request->id }}">{{ str_pad($request->id, 3, '0', STR_PAD_LEFT) }}</option>
                                                 @endforeach
                                             </select>
                                         </div>

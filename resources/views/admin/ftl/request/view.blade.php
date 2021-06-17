@@ -1,13 +1,13 @@
 @extends('admin.layout.master')
 
-@section('title', 'FTL Request ('.str_pad($ftl->id,4, '0', STR_PAD_LEFT).')')
+@section('title', 'FTL Request ('.str_pad($ftl->id,3, '0', STR_PAD_LEFT).')')
 @section('content')
     <section>
         <div class="app-content content">
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        FTL Request ({{str_pad($ftl->id, 4, '0', STR_PAD_LEFT)}})
+                        FTL Request ({{str_pad($ftl->id, 3, '0', STR_PAD_LEFT)}})
                     </h1>
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
