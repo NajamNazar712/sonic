@@ -17,7 +17,7 @@ class CreateWalkinFtlInvoicesTable extends Migration
             $table->increments('id');
             $table->integer('ftl_request_id')->index();
             $table->bigInteger('invoice_number')->nullable()->index();
-            $table->integer('status_id')->default(1);
+            $table->integer('status_id')->default(1)->index();
             $table->integer('company_bank_id')->nullable()->index();
             $table->decimal('received_amount')->nullable();
             $table->decimal('tax_amount')->nullable();
