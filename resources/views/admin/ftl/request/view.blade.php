@@ -59,7 +59,7 @@
                                                                 {{$ftl->shipper}}
                                                             @endif
                                                             @if($ftl->status_id != 5)
-                                                                <button data-toggle="modal" data-target="#EditShipperModal" class="btn btn-info pull-right">Edit</button>
+                                                                <button data-toggle="modal" data-target="#EditShipperModal" class="btn btn-sm btn-info pull-right">Edit</button>
                                                             @endif
                                                         </h5>
                                                     </td>
@@ -508,10 +508,19 @@
             $("#update_ftl_request_form #add_other_cost").on('click',function (){
                 var other_cost = $('#update_ftl_request_form #other_cost').val();
                 var other_cost_type = $('#update_ftl_request_form #other_cost_type').val();
-                if(other_cost != '' && other_cost_type != '') {
-                    add_cost(other_cost,other_cost_type);
-                    calc_total_cost();
+                if(other_cost == '')
+                {
+                    toastr.error('Other Cost Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
                 }
+                if(other_cost_type == '')
+                {
+                    toastr.error('Other Cost Type Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
+                }
+                add_cost(other_cost,other_cost_type);
+                calc_total_cost();
+
             });
 
             $(document).on('click',"#update_ftl_request_form #cost_table tbody .remove_cost",function (){
