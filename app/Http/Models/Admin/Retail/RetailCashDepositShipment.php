@@ -12,4 +12,8 @@ class RetailCashDepositShipment extends Model
     public function shipping_mode() {
         return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShippingMode', 'shipping_mode_id', 'id');
     }
+
+    public function retail_shipment() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipment', 'shipment_id', 'shipment_id');
+    }
 }

@@ -140,6 +140,10 @@
                                         <div class="form-group">
                                             <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters" rows="5"></textarea>
                                         </div>
+                                        <div id="open_shipment_div" class="form-group text-center p-1 border border-light rounded">
+                                            <label class="d-block">Open Shipment</label>
+                                            <input type="checkbox" name="open_shipment" class="switch hidden" id="open_shipment">
+                                        </div>
                                     </div>
 
                                     <div class="col col_custom_middle">
@@ -878,6 +882,7 @@
             });
 
             $('#pickup').checkboxpicker();
+            $('#open_shipment').checkboxpicker();
 
             $('#pickup').checkboxpicker().bind('change', function() {
 

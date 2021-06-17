@@ -127,12 +127,15 @@ class DHLInternationalShipmentSyncController extends Controller
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_arrived($shipment->id);
+//                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         else if(in_array($shipper_status_id, [9])){
                                             (new self)->shipment_delivered($shipment->id);
                                         }
+                                        $intl_shipment->sync = 0;
+                                        $intl_shipment->save();
+
                                     }
                                     else if(in_array($international_shipment_description, $undelivered_status)){
                                         $shipment_status = NULL;
@@ -163,7 +166,7 @@ class DHLInternationalShipmentSyncController extends Controller
                                             (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_arrived($shipment->id);
+//                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_undelivered($shipment->id, $shipment_status, $shipment_reason);
                                         }
                                     }
@@ -180,12 +183,14 @@ class DHLInternationalShipmentSyncController extends Controller
                                             (new self)->shipment_returned($shipment->id);
                                         }
                                         else if($shipper_status_id == 4){
-                                            (new self)->shipment_arrived($shipment->id);
+//                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_returned($shipment->id);
                                         }
                                         else if(in_array($shipper_status_id, [9])){
                                             (new self)->shipment_returned($shipment->id);
                                         }
+                                        $intl_shipment->sync = 0;
+                                        $intl_shipment->save();
 
                                     }
 
