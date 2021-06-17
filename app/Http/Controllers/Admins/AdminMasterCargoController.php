@@ -69,6 +69,8 @@ class AdminMasterCargoController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
+            ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
@@ -94,9 +96,13 @@ class AdminMasterCargoController extends Controller
                 $join->on('shipments.consignee_city_id', '=', 'dc.id')
                     ->where(function ($query) {
                         $query->where(function ($sub_query) {
-                            $sub_query->whereIn('shipments.shipper_status_id', [2, 20, 30, 37])
-                                ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
-                        })
+                            $sub_query->whereIn('shipments.shipper_status_id', [20])
+                                ->where('rc.hub_id', '!=', DB::raw('dc.hub_id'));
+                            })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('shipments.shipper_status_id', [2, 20, 30, 37])
+                                    ->where('oc.hub_id', '!=', DB::raw('dc.hub_id'));
+                            })
                             ->orWhere(function ($sub_query) {
                                 $sub_query->where('shipments.shipper_status_id', '=', 49)
                                     ->where('mh.old_consignee_city_id', '!=', DB::raw('dc.hub_id'));
