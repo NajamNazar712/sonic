@@ -335,7 +335,18 @@ class AdminMasterCargoController extends Controller
                     $hub_id = $city_details->hub_id;
                 }
                 else {
-                    $hub_id = $shipment->consignee_city->hub_id;
+                    if(in_array($shipment->shipper_status_id, [20])){
+                        if($shipment->return_address_id != null){
+                            $hub_id = $shipment->return_address->city->hub_id;
+                        }
+                        else{
+                            $hub_id = $shipment->consignee_city->hub_id;
+                        }
+                    }
+                    else{
+                        $hub_id = $shipment->consignee_city->hub_id;
+                    }
+
                 }
 
                 $allowed = FALSE;
@@ -812,6 +823,7 @@ class AdminMasterCargoController extends Controller
                     }
                     else {
                         $hub_id = $shipment->consignee_city->hub_id;
+
                     }
 
                     $allowed = FALSE;
