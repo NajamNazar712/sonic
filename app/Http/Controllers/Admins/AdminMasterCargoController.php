@@ -269,24 +269,13 @@ class AdminMasterCargoController extends Controller
                 $keyword = strtolower($keyword);
 
                 $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->whereIn('shipments.shipper_status_id', [30, 37])
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 37])
                         ->where('oc.name', 'like', '%' . $keyword . '%');
                 })
-                ->orWhere(function ($sub_query) use ($keyword) {
+                    ->orWhere(function ($sub_query) use ($keyword) {
                         $sub_query->whereIn('shipments.shipper_status_id', [2, 49, 55])
                             ->where('dc.name', 'like', '%' . $keyword . '%');
-                    })
-                ->orWhere(function($sub_query) use ($keyword){
-                    $sub_query->where(function ($sub_sub_query) use ($keyword) {
-                        $sub_sub_query->whereNotNull('shipments.return_address_id')
-                            ->where('rc.name', 'like', '%' . $keyword . '%');
-                    })
-                    ->orWhere(function($sub_sub_query) use ($keyword){
-                        $sub_sub_query->orWhereNull('shipments.return_address_id')
-                            ->where('dc.name', 'like', '%' . $keyword . '%');
                     });
-
-                });
             })
             ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
