@@ -81,7 +81,7 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
-
+use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
 {
@@ -749,6 +749,8 @@ class DeliveryController extends Controller
                     $shipment_data->shipper_status_id = 5;
                     $shipment_data->consignee_status_id = 5;
                     if(in_array($shipment, $open_box_ids)){
+                        ShipmentDetail::where('shipment_id', $shipment)->update(['is_open' => 1]);
+                        
                         $shipment_data->open_box = 1;
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
                     }
