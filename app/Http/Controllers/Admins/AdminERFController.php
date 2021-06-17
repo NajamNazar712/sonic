@@ -95,7 +95,7 @@ class AdminERFController extends Controller
 
 
         if($status = $request->get('search_status')){
-           // dd($status);
+          
             $datatables->where('s.id', '=', $status);
         }
 
@@ -498,6 +498,12 @@ class AdminERFController extends Controller
         if($erf->status_id == 3){
             $erf->status_id = 4;
             $erf->save();
+
+            $log = new EmployeeRequisitionStatusLog();
+            $log->er_id = $erf_id;
+            $log->admin_id = Auth::id();
+            $log->status_id = 4;
+            $log->save();
             return response()->json(['status' => 1,'success' => 'Status Updated']);
         }
         else{
@@ -510,7 +516,7 @@ class AdminERFController extends Controller
         $user_documents = EmployeeRequisitionAttachments::where('er_id', $id);
         if($user_documents->exists()){
             $user_documents = $user_documents->get();
-            return view('admin.human_resource.erf.view_documents')->with([/*'urls' => $urls,*/'id' => $id,'documents' => $user_documents]);
+            return view('admin.human_resource.erf.view_documents')->with(['id' => $id,'documents' => $user_documents]);
         }
         else{
             return redirect()->back()->with('error', 'File not found!');

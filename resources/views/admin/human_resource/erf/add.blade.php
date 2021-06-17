@@ -108,12 +108,12 @@
 
                                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">
                                             <div class="form-group ">
-                                                <input type="number" class="form-control mr-1" id="from" name="salary_from" placeholder="Salary From">
+                                                <input type="text" class="form-control mr-1" id="from" name="salary_from" placeholder="Salary From">
                                             </div>
                                         </div>
                                         <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style=" float: left;">
                                             <div class="form-group ">
-                                                <input type="number" class="form-control" id="to" name="salary_to" placeholder=" Salary To">
+                                                <input type="text" class="form-control" id="to" name="salary_to" placeholder=" Salary To">
                                             </div>
                                         </div>
                                     </div>
@@ -227,7 +227,21 @@
                 allowClear:true,
                 dropdownParent:$('#erf_form')
             });
+            $('#from').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+            });
 
+            $('#to').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 2,
+            });
 
             $('#additional').click(function () {
                  $("#department").val('').change();
@@ -236,6 +250,7 @@
                  $("#city").val('').change();
                  $("#hub").val('').change();
                  $('#new_div').remove();
+                 $('hr').remove();
 
 
                 var vacancies = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="vacancies_div">\n' +
@@ -394,11 +409,11 @@
             var i = 0;
             $('body').on('click','#add',function(){
                 ++i;
-                $("#dynamic_field").append('<tr><td><select class="form-control select2" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value="" data-rule-required="true" data-msg-required="Department is required"> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td><td><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Department is required" /></td> <td><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Department is required"/></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
-               /* $("#leavers_trax_id[i]").prepend('<option value="" selected="selected"></option>').select2({
+                $("#dynamic_field").append('<tr><td><select class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value="" data-rule-required="true" data-msg-required="Department is required"> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></td><td><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Department is required" /></td> <td><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Department is required"/></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
+                $(".trax_id").prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id'
-                });*/
+                });
             });
 
             $('#erf_form #form_btn').on('click',function(){
@@ -452,16 +467,11 @@
                     }
                 }
                 if(erf_type == 2){
-                    var trax_id = $(".trax_id");
-                    var gross_salary = $(".last_salary");
-                    var date = $(".date");
 
                     
                     $('#EmailModal').modal('show');
                 }
             });
-
-
 
             $(document).on('click', '.remove-tr', function(){
                 $(this).parents('tr').remove();
