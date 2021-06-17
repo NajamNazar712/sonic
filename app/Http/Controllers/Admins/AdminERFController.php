@@ -53,7 +53,10 @@ class AdminERFController extends Controller
             })
             ->select(['employee_requisitions.id as erf_id','employee_requisitions.id as id', 'a.name as admin','c.name as city','h.name as hub','d.name as designation','dp.name as department','s.name as status','employee_requisitions.status_id as status_id','employee_requisition_attachments.id as document']);
 
-        
+        if (session('role_id') != 1 && session('department_id') != 10) {
+            $erf = $erf->where('dp.id', session('department_id'));
+        }
+
         $datatables = Datatables::of($erf)
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
@@ -111,7 +114,12 @@ class AdminERFController extends Controller
     public function add(){
         $cities = City::where('status',1)->where('business_category_id',1)->select('id','name')->get();
         $hubs =  City::where('hub',1)->select('id','name')->get();
-        $departments = AdminDepartment::where('id', '!=', 1)->select('id', 'name')->get();
+        if (session('role_id') == 1 || session('department_id') == 10) {
+            $departments = AdminDepartment::where('id', '!=', 1)->select('id', 'name')->get();
+        }
+        else{
+            $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
+        }
         $designations = EmployeeDesignation::select('id','name')->get();
         $department_heads = Admin::whereIn('role_id', [2, 3, 4, 6, 15, 18, 19, 22, 25, 34, 36])->where('status', 1)->select('id','name')->get();
         $admin_positions = AdminPositionTypes::select('id','name')->get();

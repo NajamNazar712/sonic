@@ -272,7 +272,7 @@
 
                 var position = ' <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 mb-2" id="position_div">\n' +
                     '                                        <div class="form-group">\n' +
-                    '                                            <select name="position" class="select2" id="position data-rule-required="true" data-msg-required="Position is required"">\n' +
+                    '                                            <select name="position" class="select2" id="position" data-rule-required="true" data-msg-required="Position is required">\n' +
                     '                                                @foreach($admin_positions as $position)\n' +
                     '                                                    <option value="{{ $position->id }}">{{ $position->name }}</option>\n' +
                     '                                                @endforeach\n' +
@@ -361,7 +361,7 @@
                     '<table>  <table class="table table-bordered" id="dynamic_field">  \n' +
                     '                    <tr>  \n' +
                     '<td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="trax_id" name="addmore[0][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td> \n' +
-                    '                        <td><div class="form-group"><input type="number" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td>  \n' +
+                    '                        <td><div class="form-group"><input type="text" name="addmore[0][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td>  \n' +
                     '                        <td><div class="form-group"><input type="date" name="addmore[0][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td>  \n' +
                     '                        <td><button type="button" name="add" id="add" class="btn btn-success">Add </button></td> \n' +
                     '                    </tr>  \n' +
@@ -395,7 +395,7 @@
             var i = 0;
             $('body').on('click','#add',function(){
                 ++i;
-                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="number" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> <td><div class="form-group"><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
+                $("#dynamic_field").append('<tr><td><div class="form-group"><select data-rule-required="true" data-msg-required="Trax Id is required" class="form-control select2 trax_id" id="leavers_trax_id['+i+']" name="addmore['+i+'][trax_id]"><option value=""> Trax Id </option>@foreach($employee_trax_id as $employee)<option value="{{$employee->trax_id}}">{{$employee->trax_id}}</option>@endforeach</select></div></td><td><div class="form-group"><input type="text" name="addmore['+i+'][salary]" placeholder="Last Gross Salary" class="form-control name_list"  data-rule-required="true" data-msg-required="Salary is required" /></div></td> <td><div class="form-group"><input type="date" name="addmore['+i+'][date]" placeholder="Date" class="form-control name_list" data-rule-required="true" data-msg-required="Date is required"></div></td><td><button type="button" class="btn btn-danger remove-tr">Remove</button></td></tr>');
                 $(".trax_id").prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Trax Id'
@@ -417,7 +417,6 @@
             submitHandler: function(form) {
                 $('#EmailModal').modal('show');
                 if($('#email').val() !== '' && $('#email').val() !== null ){
-                    console.log(1);
                     form.submit();
                 }
                 

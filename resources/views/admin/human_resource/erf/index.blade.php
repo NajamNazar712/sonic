@@ -260,7 +260,7 @@
                 {data: 'city', name: 'c.name', class: 'align-middle city'},
                 {data: 'admin', name: 'a.name', class: 'align-middle admin'},
                 {data: 'status', name: 's.name', class: 'align-middle status'},
-                {data: 'action', name: 'action', class: 'align-middle action'},
+                {data: 'action', name: 'action', class: 'align-middle action',orderable:false,sortable:false },
 
 
             ],
