@@ -1845,6 +1845,7 @@ class ReturnController extends Controller
             ->join('shipments','shipments.id','=','dns.shipment_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
+            ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
             ->join('users','shipments.user_id','=','users.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -1860,7 +1861,7 @@ class ReturnController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -1917,6 +1918,15 @@ class ReturnController extends Controller
                 }
 
             })
+            ->addColumn('return_city', function ($deliveries) {
+                if($deliveries->return_city_name != NULL){
+                    return $deliveries->return_city_name;
+                }
+                else{
+                    return $deliveries->destination;
+                }
+            })
+
             ->addColumn('status', function ($deliveries) {
                 $delivered_array = array(25,31,38);
                 $return_array = array(23, 25);
