@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateShipmentDetailsForReturnAddressIdTable extends Migration
+class UpdateShipmentsTableForReturnAddress extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class UpdateShipmentDetailsForReturnAddressIdTable extends Migration
      */
     public function up()
     {
-        Schema::table('shipment_details', function (Blueprint $table) {
-            $table->integer('return_address_id')->index();
+        Schema::table('shipments', function (Blueprint $table) {
+            $table->integer('return_address_id')->nullable()->index();
         });
     }
 
@@ -25,8 +25,8 @@ class UpdateShipmentDetailsForReturnAddressIdTable extends Migration
      */
     public function down()
     {
-        Schema::table('shipment_details', function (Blueprint $table) {
-            $table->dropColumn('return_address_id');
+        Schema::table('shipments', function (Blueprint $table) {
+            $table->dropColumn('retunr_address_id');
         });
     }
 }

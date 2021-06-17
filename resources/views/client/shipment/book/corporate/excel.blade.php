@@ -304,6 +304,36 @@
                                         </tbody>
                                     </table>
 
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white text-center">
+                                            <th colspan="2" class="border-primary border-darken-1">Return Addresses</th>
+                                        </tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">ID</th>
+                                            <th class="border-primary border-lighten-2">Address</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr rol="row">
+                                            <td colspan="2"><strong>Note: Select if you want return shipment to another address</strong></td>
+                                        </tr>
+                                        @if ($pickup_addresses->count())
+                                            @foreach ($pickup_addresses as $pickup_address)
+                                                <tr role="row">
+                                                    <td class="text-center">{{ $pickup_address->id }}</td>
+                                                    <td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr role="row">
+                                                <td colspan="2" class="text-center">No Active Pickup Addresses</td>
+                                            </tr>
+                                        @endif
+                                        </tbody>
+
+                                    </table>
+
                                     @if(session('rate_type_id') != 3){
                                         <table class="table table-bordered">
                                         <thead>
