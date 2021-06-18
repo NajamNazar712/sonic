@@ -1618,7 +1618,7 @@ class ShipperShipmentBookController extends Controller
                     if ($shipment->booking_type_id == 6) {
 
                         $shipment_details .= $table_start;
-                          dd($shipment->items);
+                        
                       /*  $items = $shipment->items;
 
                         $item = $items[0];
