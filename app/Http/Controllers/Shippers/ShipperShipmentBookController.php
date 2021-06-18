@@ -1453,7 +1453,7 @@ class ShipperShipmentBookController extends Controller
                             if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
                                 <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="2" class="border twice-right">' . $return_address . '</td>
+                                <td colspan="2" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
                         ';
                             } else {
                                 $table_start .= '
