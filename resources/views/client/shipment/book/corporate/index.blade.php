@@ -637,7 +637,7 @@
                           
                              $('#consignee_city').val(data.data.destination_id).trigger('change');
                              //$('#new_pickup_city').val(data.data.origin_id).trigger('change');
-                             $('.quantity').val(data.data.quantity).trigger('change');
+                             //$('.quantity').val(data.data.quantity).trigger('change');
                              $('#estimated_weight').val(data.data.weight).trigger('change');
                              $('#ftl_charges').val(data.data.total_charges);
                              $('#shipping_mode').val(2).trigger('change');

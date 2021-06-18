@@ -266,7 +266,7 @@
                            console.log(data.data.origin_id);
                             $('#consignee_city').val(data.data.origin_id).trigger('change');
                             console.log(data.data.origin_id);
-                            $('.quantity').val(data.data.quantity).trigger('change');
+                            //$('.quantity').val(data.data.quantity).trigger('change');
                             $('#actual_weight').val(data.data.weight);
                             $('#ftl_charges').val(data.data.total_charges);
                             $('#shipping_mode').val(2).trigger('change');
