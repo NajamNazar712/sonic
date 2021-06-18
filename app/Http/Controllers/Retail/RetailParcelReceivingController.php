@@ -346,7 +346,7 @@ class RetailParcelReceivingController extends Controller
                 }
 
             }else{
-                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
             }
 
         }
