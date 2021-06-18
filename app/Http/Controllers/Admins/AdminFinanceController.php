@@ -9378,6 +9378,8 @@ class AdminFinanceController extends Controller
                 $walkin_ftl_invoice->company_bank_id = $request->company_bank;
                 $walkin_ftl_invoice->deposit_date = $request->deposit_date_formatted;
                 $walkin_ftl_invoice->received_amount = $request->received_amount;
+                $walkin_ftl_invoice->tax_amount = $request->tax_amount;
+
                 $walkin_ftl_invoice->status_id = 2;
                 $walkin_ftl_invoice->save();
 
