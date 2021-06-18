@@ -581,6 +581,14 @@ class ShipperShipmentBookController extends Controller
                         $payment_mode_id = 1;
                     }
 
+                    if ($service_type_id == 3 && $payment_mode_id == 4) {
+                        $payment_mode_id == 1;
+                    }
+
+                    if ($payment_mode_id == 4) {
+                        $amount = 0;
+                    }
+
                     if ($service_type_id == 3) {
                         $try_and_buy_charges = $request->input('try_and_buy_charges');
                         $amount = 0;
@@ -2449,6 +2457,14 @@ class ShipperShipmentBookController extends Controller
                                 }
                                 $row['business_category_id'] = 1;
 
+                                if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
+                                    $row['payment_mode_id'] == 1;
+                                }
+
+                                if ($row['payment_mode_id'] == 4) {
+                                    $row['amount'] = 0;
+                                }
+
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));
                                 }
@@ -2779,6 +2795,14 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 $amount = str_replace(',', '', $request->input('amount'));
+
+                if ($service_type_id == 3 && $payment_mode_id == 4) {
+                    $payment_mode_id == 1;
+                }
+
+                if ($payment_mode_id == 4) {
+                    $amount = 0;
+                }
 
                 if ($service_type_id == 3) {
                     $try_and_buy_charges = $request->input('try_and_buy_charges');
@@ -4093,6 +4117,15 @@ class ShipperShipmentBookController extends Controller
                                 $row['substitute_user_id'] = null;
                             }
                             $row['business_category_id'] = 1;
+
+                            if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
+                                $row['payment_mode_id'] == 1;
+                            }
+
+                            if ($row['payment_mode_id'] == 4) {
+                                $row['amount'] = 0;
+                            }
+
                             if ($user_id != 3324) {
                                 dispatch(new ProcessShipmentBookingDB($row));
                             }
@@ -4992,6 +5025,14 @@ class ShipperShipmentBookController extends Controller
                             }
                             else{
                                 $row['prefix'] = NULL;
+                            }
+
+                            if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
+                                $row['payment_mode_id'] == 1;
+                            }
+
+                            if ($row['payment_mode_id'] == 4) {
+                                $row['amount'] = 0;
                             }
 
                             if ($user_id != 3324) {
