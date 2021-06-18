@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
 use App\Http\Models\Admin\FtlRequest;
@@ -2782,6 +2783,7 @@ class ShipperShipmentBookController extends Controller
 
                      $ftl_request_id = $request->approve_frieght_request;
                      FtlRequest::where('id',$ftl_request_id)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
+                     FTLController::FTLRequestStatusHistory($ftl_request_id,5, Auth::id());
                  }
 
 

@@ -176,7 +176,7 @@
                                         <h4 class="form-section mb-2 text-center">Charges Information</h4>
 
                                         <div class="form-group" id="charges_div">
-                                            <input type="text" name="ftl_charges" id="ftl_charges" class="form-control" placeholder="Charges" readonly>
+                                            <input type="text" name="ftl_charges" id="ftl_charges" class="form-control" placeholder="FTLCharges" readonly>
                                         </div>
 
                                         <div class="form-group" id="ftl_collection_type_div">

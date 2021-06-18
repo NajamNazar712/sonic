@@ -379,7 +379,7 @@
 
                                         <div class="form-group d-none" id="charges_div">
                                            <h6>Charges</h6>
-                                            <input type="text" name="ftl_charges" id="ftl_charges" class="form-control" readonly>
+                                            <input type="text" name="ftl_charges" id="ftl_charges" class="form-control" placeholder="FTL Charges" readonly>
                                         </div>
 
                                         <div class="form-group d-none" id="ftl_collection_type_div">
@@ -789,6 +789,7 @@
                 $('#pieces_quantity').addClass('d-none');
                 $('#insurance_div').addClass('d-none');
                 $('#self_collection_div').addClass('d-none');
+                $('#payment_div').addClass('d-none');
             }
             else{
                 $('#amount').prop('disabled', false);

@@ -1574,6 +1574,7 @@ class AdminWalkInBookShipmentController extends Controller
 
                  FtlRequest::where('id',$request->approve_frieght_request)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
 
+                FTLController::FTLRequestStatusHistory($request->approve_frieght_request,5, Auth::id());
 
                   $walkin_ftl_invoice = new WalkinFtlInvoice();
                   $walkin_ftl_invoice->ftl_request_id = $request->approve_frieght_request;
