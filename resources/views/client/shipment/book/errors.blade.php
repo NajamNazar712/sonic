@@ -94,6 +94,7 @@
                                 <th>Shipper Reference 3</th>
                                 <th>Shipper Reference 4</th>
                                 <th>Shipper Reference 5</th>
+                                <th>Open Shipment</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -428,6 +429,11 @@
                                     <td>{!! Form::text('form[' . $no . '][shipper_reference_number_5]', $ro['shipper_reference_number_5'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_reference_number_5']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][shipper_reference_number_5]', $ro['shipper_reference_number_5'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
+                                @endif
+                                @if(isset($errors[$no]['open_shipment']))
+                                <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['open_shipment']}}</font></td>
+                                @else
+                                    <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
 
                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>

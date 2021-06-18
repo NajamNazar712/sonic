@@ -33,7 +33,7 @@
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Consignee Name</th>
-                                    <th class="border-primary border-darken-1">Agent</th>
+                                    <th class="border-primary border-darken-1">Reattempt By</th>
                                     <th class="border-primary border-darken-1">Phone</th>
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Collection Amount</th>
@@ -158,7 +158,7 @@
                         head.push('Destination');
                         head.push('Hub');
                         head.push('Consignee Name');
-                        head.push('Agent');
+                        head.push('Reattempted By');
                         head.push('Phone');
                         head.push('Address');
                         head.push('Collection Amount');

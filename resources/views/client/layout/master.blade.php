@@ -22,6 +22,7 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
       </div>
     </div>
   </div>
+  @include('client.components.modals')
   @include('client.layout.footer')
 
   <audio id="audio_success" autostart="false">

@@ -1079,6 +1079,9 @@ class ReturnController extends Controller
 				        return '';
 				    }
             });
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
         if($mode = $request->get('search_shipping_mode')){
             $datatables->where('sm.id', '=', $mode);
         }

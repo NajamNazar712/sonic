@@ -128,6 +128,7 @@ class APIController extends Controller
     'shipper_reference_number_3' => 'Shipper Reference Number 3',
     'shipper_reference_number_4' => 'Shipper Reference Number 4',
     'shipper_reference_number_5' => 'Shipper Reference Number 5',
+    'open_shipment' => 'Open Shipment',
     ];
 
     private $messages = [
@@ -428,7 +429,9 @@ class APIController extends Controller
                 'shipper_reference_number_2' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_3' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_5' => ['nullable', 'between:0,190']
+                'shipper_reference_number_5' => ['nullable', 'between:0,190'],
+                'open_shipment' => ['nullable', 'boolean']
+                
             ];
         }
         else {
@@ -483,7 +486,9 @@ class APIController extends Controller
                 'shipper_reference_number_2' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_3' => ['nullable', 'between:0,190'],
                 'shipper_reference_number_4' => ['nullable', 'between:0,190'],
-                'shipper_reference_number_5' => ['nullable', 'between:0,190']
+                'shipper_reference_number_5' => ['nullable', 'between:0,190'],
+                'open_shipment' => ['nullable', 'boolean']
+                
             ];
 
             if($user_type['corporate_rate_type_id'] == 3){
@@ -525,6 +530,12 @@ class APIController extends Controller
               $consignee_phone_number_2 = $this->phone_number($request->consignee_phone_number_2);
             }
 
+            if ($request->filled('open_shipment')) {
+              $open_shipment = $request->input('open_shipment');
+            }else{
+              $open_shipment = 0;
+            }
+
             $service_type_id = $request->input('service_type_id');
             if($shipment_pre_book->exists()){
                 $shipment_pre_book = $shipment_pre_book->first();
@@ -548,11 +559,10 @@ class APIController extends Controller
                 if (!$user_shipping_info->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
                 }
-
+                
                 if (!$user_shipping_info->city->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
                 }
-
                 if (!$user_shipping_info->city->zone_id) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated']);
                 }
@@ -819,14 +829,14 @@ class APIController extends Controller
 
             $business_category_id = 1;
             if($user_type['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id);
+                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment);
             }
             else {
 
                 if($user_type['corporate_rate_type_id'] == 3){
                     $delivery_type_id = 1;
                 }
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges);
+                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment);
             }
 
 			if($shipment_pre_book){
@@ -2329,7 +2339,7 @@ class APIController extends Controller
             }
 
             $business_category_id = 1;
-            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $reference_number, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id,0);
+            $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $reference_number, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id,0,0);
 
             if($shipment_pre_book){
                 $tracking_number = ShipperShipmentBookController::generate_prefix_tracking_number($shipment_id, $order_id);

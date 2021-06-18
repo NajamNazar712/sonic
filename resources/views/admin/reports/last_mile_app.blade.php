@@ -247,6 +247,8 @@
                             <th class="border-primary border-darken-1">Status Reason</th>
                             <th class="border-primary border-darken-1">Received By/Refused By</th>
                             <th class="border-primary border-darken-1">POD</th>
+                            <th class="border-primary border-darken-1">CNIC</th>
+                            <th class="border-primary border-darken-1">House</th>
                             <th class="border-primary border-darken-1">Audio</th>
                         </tr>
                         </thead>
@@ -699,6 +701,8 @@
                             { data:'shipment_reason' ,name: 'ssr.name', class: 'align-middle shipment_reason'},
                             { data:'received_or_refused_by' ,name: 'received_or_refused_by', class: 'align-middle received_or_refused_by'},
                             { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
+                            { data:'cnic_image' ,name: 'cnic_image', class: 'align-middle cnic_image',orderable: false, searchable: false},
+                            { data:'house_image' ,name: 'house_image', class: 'align-middle house_image',orderable: false, searchable: false},
                             { data:'audio_path' ,name: 'rider_deliveries.audio_path', class: 'align-middle audio_path',orderable: false, searchable: false},
 
                         ],
