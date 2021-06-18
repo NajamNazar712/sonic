@@ -587,7 +587,10 @@
 
             function cal_total_charges(gst,freight_charges)
             {
-                $("#update_ftl_request_form #total_charges").val((gst + freight_charges).toFixed(2));
+                freight_charges = parseFloat(freight_charges);
+                gst = parseFloat(gst);
+                var total = (gst + freight_charges).toFixed(2);
+                $("#update_ftl_request_form #total_charges").val(total);
             }
 
             $('#chat_form').on('submit', function (e) {
