@@ -2684,13 +2684,15 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->booked_by = session('user_type');
         $shipment->pieces = $pieces;
+        if($return_address_id){
+            $shipment->return_address_id = $return_address_id;
+        }
         $shipment->save();
 
         $shipment_id = $shipment->id;
         $shipment_detail = new ShipmentDetail();
         $shipment_detail->shipment_id = $shipment_id;
         $shipment_detail->is_open = $open_shipment;
-        $shipment_detail->return_address_id = $return_address_id;
         $shipment_detail->save();
         if($self_collection == TRUE){
             $shipment_self_collection = new SelfCollectionShipment();
