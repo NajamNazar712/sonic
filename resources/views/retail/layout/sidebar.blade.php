@@ -11,9 +11,11 @@
                     <li><a class="menu-item" href="{{ route('retail.shipment.book.excel') }}">Excel Sheet</a></li>
                 </ul>
             </li>
+            <li><a class="menu-item" href="{{route('retail.parcel_receiving.other_parcel')}}"><i class="la la-dropbox"></i>Other Parcels</a></li>
             <li><a class="menu-item" href="{{route('retail.parcel_receiving.index')}}"><i class="la la-dropbox"></i>Parcel Receiving</a></li>
             <li class="menu-item"><a href="{{ route('retail.cancel_shipments.index') }}"><i class="la la-trash"></i>Cancelled</a>
             </li>
+ 			<li><a class="menu-item" href="{{route('retail.parcel_receiving.other_index')}}"><i class="la la-dropbox"></i>Other Parcel Receiving</a></li>
             <li><a class="menu-item" href="{{route('retail.cash_deposit.index')}}"><i class="la la-money"></i>Cash Deposit</a></li>
             <li><a class="menu-item" href="{{route('retail.shipment.tracking_slip.index')}}"><i class="la la-image"></i>Tracking Slip</a></li>
             @if (session('category') == 2)

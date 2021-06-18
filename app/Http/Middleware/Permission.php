@@ -281,6 +281,12 @@ class Permission
             'delivery.signature.index' => 441,
             'delivery.signature.list' => 441,
 
+            'ftl.request.index' => 511,
+            'ftl.request.list' => 511,
+            'ftl.request.add' => 512,
+            'ftl.request.view' => 513,
+            'shipment.book.ftl.walk_in' => 516,
+            'shipment.book.ftl.store' => 516,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -966,7 +972,7 @@ class Permission
             'route_management.index' => 499,
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
-           
+			'finance.ftl_invoice.index' => 509,           
             
            
         ],

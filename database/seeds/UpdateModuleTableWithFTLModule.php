@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-    class UpdateModuleTableBookShipments extends Seeder
+class UpdateModuleTableWithFTLModule extends Seeder
 {
     /**
      * Run the database seeds.
@@ -11,9 +11,8 @@ use Illuminate\Database\Seeder;
      */
     public function run()
     {
-        //
         DB::table('modules')->insert(array(
-            array('id' => 17, 'name' => 'Book Shipments')
+            array('id' =>30, 'name' => 'Full Truck Load (FTL)'),
         ));
     }
 }

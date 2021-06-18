@@ -3,6 +3,7 @@
 namespace App\Http\controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
@@ -23,7 +24,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
-
+use App\Http\Models\Admin\WalkinFtlInvoice;
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -1418,4 +1419,640 @@ class AdminWalkInBookShipmentController extends Controller
             return ['status' => 1, 'min_charges' => $min_charges];
         }
     }
+
+    public function ftl_book_index(){
+        $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
+        $user_id = $check_id['setting_value'];
+        $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
+        $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
+        $cities = City::where('status',1)->where('business_category_id',1)->get();
+        $consignee_cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
+            ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.delivery', 1)->get();
+        $products = Product::orderBy('product_name')->get();
+        $shipping_mode = ShippingMode::where('id','!=', 4)->get();
+        $delivery_type = DeliveryType::orderBy('delivery_type')->get();
+        $charges_modes = ChargesModes::whereIn('id', [1, 2])->get();
+        $approve_ftl_requests = FtlRequest::where('status_id',3)->get();
+        
+        return view('admin.ftl.request.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities,'approve_ftl_requests' => $approve_ftl_requests]);
+    }
+
+    public function get_ftl_info(Request $request){
+        if($request->id){
+            $ftl_request = FtlRequest::find($request->id);
+            $data = array('origin_id' => $ftl_request->origin_id,'destination_id' => $ftl_request->destination_id, 'weight' => $ftl_request->weight, 'quantity' => $ftl_request->quantity ,'total_charges' => $ftl_request->total_charges,'gst' => $ftl_request->gst);
+
+            return response()->json(['status' => 1, 'data' => $data ]);
+        }
+        else{
+            return response()->json(['status' => 0]);
+        }
+    }
+
+    public function ftl_store(Request $request) {
+       
+        $test = 0;
+        $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
+
+        $user_id = $check_id['setting_value'];
+
+        if (BookingType::where('id', '!=', 3)->where('id', $request->input('selected_service_type'))->exists()) {
+
+            if (!empty($request->input('shipping_mode'))) {
+
+                $service_type_id = 6;
+
+                if ($request->input('pickup_address') == 0) {
+                    $pickup_city_id = $request->input('new_pickup_city');
+                    $new_pickup_address = City::select('name')->where('id',$pickup_city_id)->first();
+                    $pickup_address = 'TRAX Office ' . $new_pickup_address['name'];
+                    $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address, $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
+                }
+                else {
+                    $pickup_address_id = $request->input('pickup_address');
+
+                    $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+
+                    $pickup_city_id = $user_shipping_info->city_id;
+                }
+
+                $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
+
+                $information_display = TRUE;
+
+                if(isset($request->consignee_address)) {
+                    $address = $request->input('consignee_address');
+                }
+                else{
+                    $city_check = City::select('name')->where('id',$request->input('consignee_city'))->first();
+                    $address = 'TRAX Office ' . $city_check['name'];
+                }
+                $consignee_city_id = $request->input('consignee_city');
+                $consignee_name = $request->input('consignee_name');
+                $consignee_address = $address;
+                $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
+
+                if ($request->filled('consignee_phone_number_2')) {
+                    $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
+                }
+                else {
+                    $consignee_phone_number_2 = NULL;
+                }
+
+                if ($request->filled('consignee_email_address')) {
+                    $consignee_email_address = $request->input('consignee_email_address');
+                }
+                else {
+                    $consignee_email_address = NULL;
+                }
+
+                if ($request->filled('order_id')) {
+                    $order_id = $request->input('order_id');
+                }
+                else {
+                    $order_id = NULL;
+                }
+
+                if ($request->filled('package_type')) {
+                    $package_type = TRUE;
+                }
+                else {
+                    $package_type = FALSE;
+                }
+
+                $packaging_charges = $request->packaging_charges;
+
+
+                $pickup_date = Carbon::now();
+
+                if ($request->filled('special_instructions')) {
+                    $special_instructions = $request->input('special_instructions');
+                }
+                else {
+                    $special_instructions = NULL;
+                }
+
+                $shipping_mode_id = $request->input('shipping_mode');
+
+                if ($request->input('shipping_mode') == 4) {
+                    $same_day_timing_id = $request->input('same-day_timing');
+                }
+                else {
+                    $same_day_timing_id = NULL;
+                }
+
+                $delivery_type = $request->delivery_type;
+                $charges_mode_id = $request->charges_mode;
+                $pickup = 0;
+                if($request->filled('pickup')){
+                    $pickup = 1;
+                    $actual_weight = 0;
+                    $charges_per_kg = 0;
+                    $weight_charges = 0;
+                    $fuel_surcharge = 0;
+                    $gst = 0;
+                    $amount = 0;
+                    $r_amount = 0;
+
+                }else{
+                    $actual_weight = $request->actual_weight;
+                    $city = City::where('id',$pickup_city_id)->first();
+                    $zone = Zone::where('id',$city['zone_id'])->first();
+
+                }
+                $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
+                $business_category_id = 1;
+                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $ftl_request->total_charges, $delivery_type, null, null, $pickup, $business_category_id);
+
+                $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+                $product_type_id = $request->input('product_type');
+
+                if ($request->filled('item_description')) {
+                    $item_description = $request->input('item_description');
+                }
+                else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $request->input('item_quantity');
+
+                $type = 0;
+
+                $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
+
+
+                if($request->has('pack_type')){
+
+                    $pickup_address_details = UserShippingInfo::find($pickup_address_id);
+                    $hub_id = $pickup_address_details->city->hub_id;
+
+                    $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id',$hub_id);
+
+                    $fulfilment_hub = $fulfilment_hub->first();
+
+                    $warehouse_id = $fulfilment_hub->warehouse_id;
+
+                }
+                NotificationsController::send(2, $shipment_id);
+
+                $shipment_ids = array($shipment_id);
+                if($pickup == 0){
+                    NotificationsController::send(85, $shipment_ids , Auth::id());
+                }
+
+                 FtlRequest::where('id',$request->approve_frieght_request)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
+
+                FTLController::FTLRequestStatusHistory($request->approve_frieght_request,5, Auth::id());
+
+                  $walkin_ftl_invoice = new WalkinFtlInvoice();
+                  $walkin_ftl_invoice->ftl_request_id = $request->approve_frieght_request;
+                  $walkin_ftl_invoice->save();
+                  $invoice_number = $user_id . str_pad($walkin_ftl_invoice->id, 6, '0', STR_PAD_LEFT);
+                  WalkinFtlInvoice::where('id',$walkin_ftl_invoice->id)->update(['invoice_number' => $invoice_number]);
+
+                  
+
+                if ($request->filled('book_and_print')) {
+                    $print = $shipment_id;
+                }
+                else {
+                    $print = FALSE;
+                }
+                return redirect()->back()->with(['success' => $test .' Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+            }
+            else {
+                return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
+            }
+        }
+        else {
+            return redirect()->back()->with('error', 'Invalid Service Type Selected');
+        }
+    }
+
+    public function print_ftl_air_waybill(Request $request) {
+        $user_type = NULL;
+        $user_id = NULL;
+
+        if (Auth::guard('admin')->check()) {
+            $user_type = 3;
+
+            $user_id = Auth::id();
+
+            $user_name = Auth::user()->name . ' (Admin) #' . $user_id;
+        }
+        else {
+            $user_name = 'Unknown';
+        }
+
+        $print_details = '
+            <div class="small mt-1">Printed By: ' . $user_name . '</div>
+        ';
+
+        if ($user_type) {
+            $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+            $html = '
+                    <!doctype html>
+                    <html lang="en">
+                      <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                        <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                        <title>Air Waybill</title>
+
+                        <style>
+                          @page {
+                            size: A4 portrait;
+                          }
+
+                          * {
+                            -webkit-print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                          }
+
+                          body {
+                            background: none !important;
+                            color: #09262e !important;
+                            font-size: 0.9rem !important;
+                          }
+
+                          hr {
+                            border-top: 1px dashed #000000;
+                          }
+
+                          table.table-bordered {
+                            page-break-inside: avoid;
+                          }
+
+                          table.table-bordered tbody tr td {
+                            width: 12.5% !important;
+                            border: 1px solid #09262e !important;
+                          }
+
+                          .color.primary {
+                            background: #c8c8c8 !important;
+                          }
+
+                          .color.secondary {
+                            background: #ebebeb !important;
+                          }
+
+                          .border {
+                            border: 1px solid #09262e !important;
+                          }
+
+                          .border.twice {
+                            border-width: 2px !important;
+                          }
+
+                          .border.twice-top {
+                            border-top-width: 2px !important;
+                          }
+
+                          .border.twice-bottom {
+                            border-bottom-width: 2px !important;
+                          }
+
+                          .border.twice-left {
+                            border-left-width: 2px !important;
+                          }
+
+                          .border.twice-right {
+                            border-right-width: 2px !important;
+                          }
+
+                          td.replacement span {
+                            width: 22px;
+                          }
+
+                          td.replacement span img {
+                            display: block;
+                            width: 100%;
+                            margin: auto;
+                            background: #c8c8c8;
+                            border-radius: 25px;
+                          }
+                           
+                          .invoice table.table-bordered tbody tr td {
+                            width: auto !important;
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div>
+            ';
+
+            $shipment_details = '';
+
+            $check_id = GlobalSettings::select('setting_value')->where('type', 'Walk-In')->first();
+            $user_id = $check_id['setting_value'];
+
+            $shipment = Shipment::where('id',$request->ids)->first();
+
+            if ($user_id == $shipment->user_id) {
+                $table_start = '
+                      <table class="table table-sm table-bordered border twice">
+                        <tbody>
+                          <tr>
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+
+                            <td class="color primary border twice-left"><strong>Service</strong></td>
+                            ';
+                $table_start  .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                            <td class="color primary"><strong>Datetime</strong></td>
+                            <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+                ';
+
+                $table_start .= '
+                                <td class="color primary"><strong>Order ID</strong></td>
+                                <td>' . $shipment->order_id . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                                <td class="color primary border twice-bottom"><strong>Destination</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                              </tr>
+                              <tr>
+                                <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
+                                <td colspan="4" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary"><strong>Name</strong></td>
+                                <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
+                                <td class="color secondary border twice-left"><strong>Name</strong></td>
+                                <td colspan="3">' . $shipment->consignee_name . '</td>
+                              </tr>
+
+                              <tr>
+                                <td class="color secondary"><strong>Address</strong></td>
+                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                                <td class="color secondary border twice-left"><strong>Address</strong></td>
+                                <td colspan="3">' . $shipment->consignee_address . '</td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
+                                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
+                                <td colspan="3" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                              </tr>
+                ';
+                        if($shipment->ftl->collection_type == 1){
+                             $type = 'invoice';
+                        }
+                        else{
+                            $type = 'cash';
+                        }
+                $table_end = '
+                              <tr>
+                                <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                                <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="color primary border twice-top twice-bottom twice-left"><strong>Collection Type Mode</strong></td>
+                                <td class="border twice-top twice-bottom twice-left"><strong>' . $type . '</strong></td>
+                              </tr>
+                              <tr>
+                                <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
+                                <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>' . $shipment->received_amount . '</strong></td>
+                ';
+/*
+                if ($shipment->charges_mode_id == 1) {
+                    $table_end .= '
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                    ';
+                }
+                else {
+                    $table_end .= '
+                                <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                    ';
+                }*/
+
+                $table_end .= '
+                              </tr>
+                              <tr>
+                                <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
+                              </tr>
+                            </tbody>
+                          </table>
+
+                          <hr>
+                ';
+
+                $shipment_details .= $table_start;
+
+                $item = $shipment->items->first();
+
+                $shipment_details .= '
+                            <tr>
+                              <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                              <td class="color secondary border twice-top"><strong>Type</strong></td>
+                              <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                              <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                              <td>' . $item->quantity . '</td>
+                              <td colspan="2" class="border twice-top"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                              <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                            </tr>
+                ';
+
+                $shipment_details .= $table_end;
+            }
+
+            $html .= $shipment_details;
+            if($shipment->actual_weight > 0){
+                $item = $shipment->items->first();
+                $invoice = '<div class="invoice p-1">
+                    <table class="table table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-left align-middle">
+                            <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1">
+                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
+                            <div><strong>NTN:</strong> 7930679-5</div>
+                          </td>
+                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Sender Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $shipment->pickup_address->poc .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $shipment->pickup_address->phone .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>Tracking No.</strong></td>
+                                    <td>'. $shipment->tracking_number .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row align-items-start justify-content-between summary">
+                    <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Receiver Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>'. $shipment->consignee_name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>'. $shipment->consignee_address .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>'. $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border invoice">
+                              <tbody>
+                                <tr class="color primary">
+                                    <td colspan="4"><strong>Shipment Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Shipping Mode</strong></td>
+                                    <td>'. $shipment->shipping_mode->mode .'</td>
+                                    <td class="color secondary"><strong>Order ID</strong></td>
+                                    <td>'. $shipment->order_id .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Origin</strong></td>
+                                    <td>'. $shipment->pickup_address->city->name .'</td>
+                                    <td class="color secondary"><strong>Destination</strong></td>
+                                    <td>'. $shipment->consignee_city->name .'</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Booking Date</strong></td>
+                                    <td>'. $shipment->created_at->format('Y-m-d H:i:s') .'</td>
+                                    <td class="color secondary"><strong>Weight</strong></td>
+                                    <td>'. $shipment->actual_weight .'</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                        <div class="col-12">
+                            <table class="table table-sm table-bordered border invoice">
+                                  <tbody>
+                                    <tr>
+                                      <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                                      <td class="color secondary border twice-top"><strong>Type</strong></td>
+                                      <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                      <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                      <td class="border twice-top">' . $item->quantity . '</td>
+                                    </tr>
+                                    <tr>
+                                      <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                      <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+            ';
+
+                $invoice_serial_number = 1;
+
+
+
+                $invoice_details = '';
+                $invoice_details .= '
+            <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                            <td class="color primary text-left"><strong>Invoice Summary</strong></td>
+                            <td class="color primary text-right" style="width: 20% !important;"><strong>Amount (PKR)</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Freight Charges</td>
+                          <td class="text-right">' . number_format($shipment->ftl->freight_charges) . '</td>
+                        </tr>
+                 
+                       
+                      </tbody>
+                    </table>
+            
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                              
+                                <tr>
+                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($shipment->ftl->gst) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format($shipment->ftl->total_charges) . '</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+            ';
+                $invoice .= $invoice_details;
+                $html .= $invoice;
+            }
+
+
+
+            $html .= '
+                        </div>
+
+                        <script>
+                          window.onload = function() {
+                            window.print();
+                          }
+                        </script>
+                      </body>
+                    </html>
+            ';
+
+            return $html;
+        }
+    }
+
 }

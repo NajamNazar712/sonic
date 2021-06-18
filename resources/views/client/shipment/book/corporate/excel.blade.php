@@ -130,7 +130,7 @@
                                         </tbody>
                                     </table>
 
-                                    @if(session('rate_type_id') != 3){
+                                    @if(session('rate_type_id') != 3)
                                      <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
@@ -304,7 +304,7 @@
                                         </tbody>
                                     </table>
 
-                                    @if(session('rate_type_id') != 3){
+                                    @if(session('rate_type_id') != 3)
                                         <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">

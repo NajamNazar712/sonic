@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
+use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
@@ -313,7 +315,8 @@ class ShipperShipmentBookController extends Controller
         // if($current_time > $time){
         //     $date = Carbon::tomorrow();
         // }
-        $booking_types = BookingType::where('id','!=', 4)->get();
+        //$booking_types = BookingType::where('id','!=', 4)->get();
+        $booking_types = BookingType::whereNotIn('id', [4,6])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $multi_piece = $user->multipiece_status;
         $cities = City::where('pickup', 1)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
@@ -841,7 +844,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL) {
-
+        // dd($user_type, $user_id, $ids, $body_only, $type);
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         if ($user_type == 3) {
@@ -1075,12 +1078,12 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
-
+           
             ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
-
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
+
                     foreach ($shipment->items as $shipment_item){
                         if($page_items == 0){
                             $table_start = '
@@ -1174,6 +1177,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                 } else {
+
                     $page_items = $page_items + 3;
                     if($page_items >= 5){
                         $page_items = 0;
@@ -1200,6 +1204,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     if ($type != 'pdf') {
+
                         $table_start .= '
                                 <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
@@ -1214,6 +1219,7 @@ class ShipperShipmentBookController extends Controller
                                     ';
                                 }
                     } else {
+
                         $table_start .= '
                                 <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
@@ -1231,7 +1237,7 @@ class ShipperShipmentBookController extends Controller
 
                     }
 
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 6) {
                         $table_start .= '
                                 <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                     ';
@@ -1345,7 +1351,6 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     
-
                     if ($shipment->booking_type_id != 4) {
                         $table_start .= '
                                 <td colspan="3" class="border twice-right">' . $company_name . '</td>
@@ -1428,6 +1433,8 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                     ';
                     }
+
+                   // dd($table_start);
 
                     if ($type != 'pdf') {
                         $table_end = '
@@ -1636,6 +1643,34 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
 
                     }
+                    if ($shipment->booking_type_id == 6) {
+
+                        $shipment_details .= $table_start;
+                        
+                      /*  $items = $shipment->items;
+
+                        $item = $items[0];
+
+                        $shipment_details .= '
+                              <tr>
+                                <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
+                                <td class="color secondary border twice-top"><strong>Type</strong></td>
+                                <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                <td>' . $item->quantity . '</td>
+                                <td colspan="2" class="border twice-top"></td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                              </tr>
+                    ';
+
+                        $item = $items[1];*/
+                        
+                        $shipment_details .= $table_end;
+                    }
+
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
@@ -1739,6 +1774,7 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
+
         $html .= $shipment_details;
 
 
@@ -1802,7 +1838,7 @@ class ShipperShipmentBookController extends Controller
 
         if ($user_type) {
             $air_waybill_type = Session::get('air_waybill_type', 1);
-
+            //dd($request->ids,$air_waybill_type,$request->sticker);
             if ($air_waybill_type != 3) {
                 if ($request->sticker) {
                     $shipment_ids = Shipment::whereIn('id', $request->ids)->orderBy('order_id', 'ASC')->orderBy('id', 'ASC')->pluck('id')->toArray();
@@ -1810,6 +1846,7 @@ class ShipperShipmentBookController extends Controller
                     return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
                 }
                 else {
+
                     return $this->air_waybill($user_type, $user_id, $request->ids);
                 }
             }
@@ -1817,11 +1854,12 @@ class ShipperShipmentBookController extends Controller
                 return $this->air_waybill_sticker_barcode($user_type, $user_id, $request->ids);
             }
         }
+
     }
 
     public function excel_index() {
 
-        $booking_types = BookingType::whereNotIn('id',[4])->get();
+        $booking_types = BookingType::whereNotIn('id',[4,6])->get();
         $user = User::find(session('user_id'));
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
@@ -2603,8 +2641,9 @@ class ShipperShipmentBookController extends Controller
         else{
             $air_waybill = null;
         }
+        $approve_ftl_requests = FtlRequest::where('shipper_id',session('user_id'))->where('status_id',3)->get();
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests]);
     }
 
     public function corporate_store(Request $request) {
@@ -2794,6 +2833,15 @@ class ShipperShipmentBookController extends Controller
                     $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
                 }
                 $this->add_consignee_info($user_id, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address);
+
+                 if($service_type_id == 6){
+
+                     $ftl_request_id = $request->approve_frieght_request;
+                     FtlRequest::where('id',$ftl_request_id)->update(['shipment_id' => $shipment_id,'status_id' => 5,'collection_type' => $request->ftl_collection_type]);
+                     FTLController::FTLRequestStatusHistory($ftl_request_id,5, Auth::id());
+                 }
+
+
 
                 if($request->has('order_date_formatted')){
                     if($request->order_date_formatted != null){
@@ -3364,9 +3412,7 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_index() {
 
-        
-
-        $booking_types = BookingType::whereNotIn('id',[4])->get();
+        $booking_types = BookingType::whereNotIn('id',[4,6])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
             $query->where('pickup', 1)->where('business_category_id', 1)->where('status', 1)->whereNotNull('zone_id');
         })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
@@ -5036,6 +5082,18 @@ class ShipperShipmentBookController extends Controller
         }
         else {
             return redirect()->back()->with('error', 'No Shipments in File');
+        }
+    }
+
+    public function get_ftl_info(Request $request){
+        if($request->id){
+            $ftl_request = FtlRequest::find($request->id);
+            $data = array('origin_id' => $ftl_request->origin_id,'destination_id' => $ftl_request->destination_id, 'weight' => $ftl_request->weight, 'quantity' => $ftl_request->quantity ,'total_charges' => $ftl_request->total_charges);
+
+            return response()->json(['status' => 1, 'data' => $data ]);
+        }
+        else{
+            return response()->json(['status' => 0]);
         }
     }
 }
