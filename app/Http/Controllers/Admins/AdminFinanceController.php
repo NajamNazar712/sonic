@@ -5447,7 +5447,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function generate_invoice_print($id, $email = FALSE) {
+    static public function generate_invoice_print($id, $email = FALSE, $header = FALSE) {
         $invoice = Invoice::find($id);
 
         $shipper = $invoice->shipper;
@@ -5478,6 +5478,12 @@ class AdminFinanceController extends Controller
             <style>@page{size:A4 portrait; margin-top: 12rem; margin-bottom: 2rem; margin-left: 0rem; margin-right: 0rem;}*{-webkit-print-color-adjust:exact!important;color-adjust:exact!important}body{background:none!important;color:#09262e!important;font-size:0.7rem!important}hr{border-top:1px dashed #000}table.table-bordered{page-break-inside:avoid}table.table-bordered thead tr th, table.table-bordered tbody tr td{border:1px solid #09262e!important}.color.primary{background:#c8c8c8!important}.color.secondary{background:#ebebeb!important}.border{border:1px solid #09262e!important}.summary{page-break-inside:avoid}.shipments_summary{page-break-before:always}</style>
         ';
 
+        if ($header) {
+            $html .= '
+            <style>@page{margin-top: 1rem; margin-bottom: 1rem;}.summary_header .header{width: 10%;}.summary_header .heading{width: 15%;}.summary_footer .footer{width: 75%;}</style>
+            ';
+        }
+
         if (!$email) {
             $html .= '
               </head>
@@ -5488,6 +5494,22 @@ class AdminFinanceController extends Controller
         $html .= '
                 <div>
                   <div class="p-1">
+        ';
+
+        if ($header) {
+            $html .= '
+                    <div class="row no-gutters align-items-center summary_header mb-2">
+                        <div class="col-12 text-right">
+                            <img src="' . asset('img/invoice_summary_header_logo.png') . '" class="header">
+                        </div>
+                        <div class="col-12 text-center">
+                            <img src="' . asset('img/invoice_summary_header_heading.png') . '" class="heading">
+                        </div>
+                    </div>
+            ';
+        }
+
+        $html .= '
                     <div class="row align-items-start justify-content-between summary">
                         <div class="col-6">
                             <table class="table table-sm table-bordered border">
@@ -5803,6 +5825,16 @@ class AdminFinanceController extends Controller
 
                     <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
         ';
+
+        if ($header) {
+            $html .= '
+                    <div class="row no-gutters align-items-center summary_footer mt-2">
+                        <div class="col-12 text-center">
+                            <img src="' . asset('img/invoice_summary_header_footer.png') . '" class="footer">
+                        </div>
+                    </div>
+            ';
+        }
 
         foreach ($origins as $origin) {
             $html .= '
@@ -6546,7 +6578,12 @@ class AdminFinanceController extends Controller
         $invoice = Invoice::find($request->id);
 
         if ($invoice) {
-            return self::generate_invoice_print($invoice->id);
+            if ($request->has('header')) {
+                return self::generate_invoice_print($invoice->id, FALSE, TRUE);
+            }
+            else {
+                return self::generate_invoice_print($invoice->id);
+            }
         }
         else {
             return '';
@@ -8838,6 +8875,10 @@ class AdminFinanceController extends Controller
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $done_payment = RetailDonePayment::find($request->id);
+
+        if(!$done_payment){
+            return ['status' => 1, 'error' => 'Payment not found'];
+        }
 
         $shipper = $done_payment->shipper;
 

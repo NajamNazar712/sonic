@@ -4,7 +4,14 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\http\Models\Admin\Retail\RetailCashDeposit;
+use App\http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\http\Models\Admin\Retail\RetailParcelReceiving;
+use App\http\Models\Admin\Retail\RetailParcelReceivingShipment;
+use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\ShipmentScanningScreenLocation;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\http\Models\WMS\WmsCurrentStock;
@@ -16,6 +23,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
@@ -273,5 +282,6 @@ class AdminShipmentCancelController extends Controller
             return response()->json(['status' => 0, 'error' => 'Invalid Shipper']);
         }
     }
+
 
 }

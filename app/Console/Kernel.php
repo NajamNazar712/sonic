@@ -89,8 +89,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\MonthAverageRM',
         'App\Console\Commands\RiderIncentiveCalculate',
         'App\Console\Commands\DHLTrackingSync',
-
-
+        'App\Console\Commands\StatusBookedEmailKhaddi',
+        
     ];
 
     /**
@@ -295,6 +295,11 @@ class Kernel extends ConsoleKernel
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
         $schedule->command('dhl:shipmentstatussync')->dailyAt( '04:00')->runInBackground();
+        $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
+        $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
+
+        $schedule->command('email:shipmentbookedkhaddi')->hourly()->runInBackground();
+
     }
     /**
      * Register the commands for the application.

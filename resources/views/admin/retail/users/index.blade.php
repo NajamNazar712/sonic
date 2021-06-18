@@ -286,7 +286,7 @@
                 ajax:{
                     url: '{{ route('admin.retail.users.list') }}',
                 },
-                order: [[9, 'desc']],
+                order: [[11, 'desc']],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -437,5 +437,17 @@
             });
         });
 
+        $("#editRetailUser").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+            var id = $(e.relatedTarget).data('target-id');
+            
+
+            if(action == 'editretailuser'){
+                $.get( "/admin/retail/users/edit/"+id+"", function( data ) {
+                    $("#editRetailUserDiv").html(data);
+                });
+            }
+        });
     </script>
 @endsection

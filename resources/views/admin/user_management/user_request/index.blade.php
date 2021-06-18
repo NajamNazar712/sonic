@@ -255,7 +255,7 @@
                     text: '<i class="la la-user-plus"></i> Add',
                     className: 'btn btn-primary add',
                     action: function (e, dt, node, config) {
-                        window.location = '{{ route('admin.user_management.user_requests.add.index') }}';
+                        window.location = '{{ route('admin.cancelled_shipments.add.index') }}';
                     }
                 },{
                         extend: 'excel',

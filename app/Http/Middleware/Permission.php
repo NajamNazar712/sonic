@@ -814,6 +814,8 @@ class Permission
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118,
 
+
+
             'shipment.book.walk_in' => 155,
             'shipment.book.store' => 155,
 
@@ -886,6 +888,8 @@ class Permission
             'international.tracking_upload.index' => 398,
             'international.tracking_upload.list' => 398,
 
+            'international.shipment_status.index' => 508,
+
             'telenor.arrival.index' => 421,
             'telenor.arrival.submit' => 421,
             'telenor.delivery.index' => 399,
@@ -939,6 +943,10 @@ class Permission
             'human_resource.rider_incentive.index' => 492,
             'human_resource.rider_incentive.list' => 492,
 
+            'human_resource.erf.index' => 506,
+            'human_resource.erf.list' => 506,
+            'human_resource.erf.add' => 522,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
@@ -962,9 +970,10 @@ class Permission
             'runner.intransit' => 501,
             'fleet.index' => 498,
             'route_management.index' => 499,
-            'finance.ftl_invoice.index' => 509,
-
-
+            'settings.escalation.launched.edit.index' => 507,
+            'settings.escalation.in_process.edit.index' => 517,
+			'finance.ftl_invoice.index' => 509,           
+            
            
         ],
 
