@@ -1060,12 +1060,12 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
-
+           
             ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
-
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
+
                     foreach ($shipment->items as $shipment_item){
                         if($page_items == 0){
                             $table_start = '
@@ -1159,6 +1159,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                 } else {
+
                     $page_items = $page_items + 3;
                     if($page_items >= 5){
                         $page_items = 0;
@@ -1185,6 +1186,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     if ($type != 'pdf') {
+
                         $table_start .= '
                                 <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
@@ -1199,6 +1201,7 @@ class ShipperShipmentBookController extends Controller
                                     ';
                                 }
                     } else {
+
                         $table_start .= '
                                 <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
@@ -1216,7 +1219,7 @@ class ShipperShipmentBookController extends Controller
 
                     }
 
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 6) {
                         $table_start .= '
                                 <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
                     ';
@@ -1330,7 +1333,6 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     
-
                     if ($shipment->booking_type_id != 4) {
                         $table_start .= '
                                 <td colspan="3" class="border twice-right">' . $company_name . '</td>
@@ -1413,6 +1415,8 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                     ';
                     }
+
+                   // dd($table_start);
 
                     if ($type != 'pdf') {
                         $table_end = '
@@ -1611,6 +1615,34 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
 
                     }
+                    if ($shipment->booking_type_id == 6) {
+
+                        $shipment_details .= $table_start;
+                          dd($shipment->items);
+                      /*  $items = $shipment->items;
+
+                        $item = $items[0];
+
+                        $shipment_details .= '
+                              <tr>
+                                <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
+                                <td class="color secondary border twice-top"><strong>Type</strong></td>
+                                <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                <td>' . $item->quantity . '</td>
+                                <td colspan="2" class="border twice-top"></td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                              </tr>
+                    ';
+
+                        $item = $items[1];*/
+                        
+                        $shipment_details .= $table_end;
+                    }
+
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
@@ -1713,6 +1745,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         }
+
 
         $html .= $shipment_details;
 
