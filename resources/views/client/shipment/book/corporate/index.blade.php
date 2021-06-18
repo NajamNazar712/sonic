@@ -932,8 +932,10 @@
                         $('.product_label_div ').addClass('d-none');
                         $('#delivery_type_div ').removeClass('d-none');
                         $('#payment_info ').removeClass('d-none');
+                        $('#regular ').removeClass('d-none');
                         $('#shipper_header_info h6').addClass('d-none');
                         $('#consignee_header_info h6').addClass('d-none');
+
 
 
                     }
