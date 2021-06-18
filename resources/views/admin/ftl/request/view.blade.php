@@ -580,14 +580,14 @@
                 {
                     freight_charges = 0;
                 }
-                var gst_calc = gst * freight_charges;
+                var gst_calc = (gst * freight_charges).toFixed(2);
                 $("#update_ftl_request_form #gst").val(gst_calc);
                 cal_total_charges(gst_calc,freight_charges);
             }
 
             function cal_total_charges(gst,freight_charges)
             {
-                $("#update_ftl_request_form #total_charges").val(gst + freight_charges);
+                $("#update_ftl_request_form #total_charges").val((gst + freight_charges).toFixed(2));
             }
 
             $('#chat_form').on('submit', function (e) {
