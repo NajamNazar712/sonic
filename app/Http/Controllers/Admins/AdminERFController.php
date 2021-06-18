@@ -61,6 +61,13 @@ class AdminERFController extends Controller
             ->editColumn('erf_id', function ($erf) {
                 return "ERF" . $erf->erf_id;
             })
+
+            ->filterColumn('erf_id', function($query, $keyword) {
+                $keyword = str_replace('erf', '', strtolower($keyword));
+                if($keyword != ''){
+                    $query->where('employee_requisitions.id', $keyword);
+                }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -366,18 +373,18 @@ class AdminERFController extends Controller
                             <tr>
                          
                               <td class="color secondary"><strong>Job Description</strong></td>
-                              <td>' . $erf->job_description . '</td>
+                              <td class="text-justify">' . $erf->job_description . '</tdc>
                               </tr>
                               <tr>
                             
                                  <td class="color secondary"> <strong>Required Skills</strong></td>
-                               <td >' . $erf->skills . '</td>
+                               <td class="text-justify">' . $erf->skills . '</td>
                       
                             
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Qualification Required</strong></td>
-                              <td>' . $erf->qualifications . '</td>
+                              <td class="text-justify">' . $erf->qualifications . '</td>
          
                             </tr>                
                          </tbody>
