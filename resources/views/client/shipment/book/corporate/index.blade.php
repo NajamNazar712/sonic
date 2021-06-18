@@ -781,6 +781,15 @@
                 $('#try_and_buy_charges_div').removeClass('d-none');
                 $('#amount').prop('disabled', true);
             }
+            if (service_type == 6) {
+                $('#ftl_collection_type_div').removeClass('d-none');
+                $('#frieght_div').removeClass('d-none');
+                $('#charges_div').removeClass('d-none');
+                $('#try_and_buy_charges_div').addClass('d-none');
+                $('#pieces_quantity').addClass('d-none');
+                $('#insurance_div').addClass('d-none');
+                $('#self_collection_div').addClass('d-none');
+            }
             else{
                 $('#amount').prop('disabled', false);
                 $('#try_and_buy_charges_div').addClass('d-none');
