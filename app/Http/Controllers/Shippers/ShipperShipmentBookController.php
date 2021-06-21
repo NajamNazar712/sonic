@@ -2966,6 +2966,24 @@ class ShipperShipmentBookController extends Controller
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                     }
                 }
+                elseif ($service_type_id == 6 ) {
+                $product_type_id = $request->input('product_type');
+
+                if ($request->filled('item_description')) {
+                    $item_description = $request->input('item_description');
+                }
+                else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $request->input('item_quantity');
+
+                $type = 0;
+                $price = 0;
+                $insurance = FALSE;
+
+                $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+            }
 
                 NotificationsController::send(2, $shipment_id);
 
