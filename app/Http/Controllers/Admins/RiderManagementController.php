@@ -207,6 +207,7 @@ class RiderManagementController extends Controller
             'operation_rider_id'=>$request->operation_rider_id,
             'status'=>1,
             'special_rider' => ($request->has('special_rider_checkbox')? 1:0),
+            'ccd' => ($request->has('ccd_rider_checkbox')? 1:0),
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
@@ -275,6 +276,12 @@ class RiderManagementController extends Controller
             $rider->special_rider = 1;
         }else{
             $rider->special_rider = 0;
+        }
+
+        if($request->has('edit_ccd_rider_checkbox')){
+            $rider->ccd = 1;
+        }else{
+            $rider->ccd = 0;
         }
 
         $rider->updated_by = Auth::id();

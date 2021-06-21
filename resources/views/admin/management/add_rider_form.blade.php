@@ -156,8 +156,8 @@
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
 
-        var elem = document.querySelector('.ccd_rider_checkbox');
-        var switchery = new Switchery(elem);
+        var ccd_elem = document.querySelector('.ccd_rider_checkbox');
+        var ccd_switchery = new Switchery(ccd_elem);
 
         $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a city',
