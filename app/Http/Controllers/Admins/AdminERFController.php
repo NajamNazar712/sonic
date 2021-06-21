@@ -89,7 +89,11 @@ class AdminERFController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
-                    if ($result->document != null && (session('role_id') == 1 || in_array(521, session('permissions')))) {
+                    /*if ($result->document != null && (session('role_id') == 1 || in_array(521, session('permissions')))) {
+                        $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
+
+                    }*/
+                    if (session('role_id') == 1 || in_array(521, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item view_document" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View </div></button>';
 
                     }
@@ -187,7 +191,7 @@ class AdminERFController extends Controller
 
         $email = $request->admin_email;
 
-        $path = $this::erf_print($erf->id);
+        $path = $this::erf_print($erf->id,'pdf');
         $data['id'] = $erf->id;
         $data['email'] = $email;
         NotificationsController::send(133, $data, url('/') . '/' . 'reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
@@ -195,7 +199,8 @@ class AdminERFController extends Controller
 
     }
 
-    public static function erf_print($erf_id) {
+    public static function erf_print($erf_id,$document_type) {
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $erf = EmployeeRequisition::find($erf_id);
@@ -452,16 +457,34 @@ class AdminERFController extends Controller
 
              }
 
-        $html .='
+            if($document_type == 'pdf'){
+                $html .='
                
                </tbody>
             </table>
             </div>
             </body>
             </html>';
-       
-            $pdf = SnappyPDF::loadHTML($html)->save('reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
-            return $pdf;
+                $pdf = SnappyPDF::loadHTML($html)->save('reports/employee_requisition_'. str_pad($erf->id, 6, '0', STR_PAD_LEFT) .'.pdf');
+                return $pdf;
+            }
+            else{
+                $html .='
+               
+               </tbody>
+            </table>
+            </div>
+             <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+            </body>
+            </html>';
+
+                return $html;
+
+            }
         }
 
     public function file_upload(Request $request){
@@ -540,11 +563,19 @@ class AdminERFController extends Controller
         $user_documents = EmployeeRequisitionAttachments::where('er_id', $erf_id);
         if($user_documents->exists()){
             $user_documents = $user_documents->join('admins as a','a.id','=','employee_requisition_attachments.admin_id')->where('er_id',$erf_id)->select(['a.name as admin','employee_requisition_attachments.file as file','employee_requisition_attachments.er_id as id'])->get();
-            return response()->json(['status' => 1,'documents' => $user_documents]);
+            return response()->json(['status' => 1,'documents' => $user_documents,'erf_id' => $erf_id]);
         }
         else{
-            return response()->json(['status' => 0,'error' => 'No Documents Found']);
+            return response()->json(['status' => 2,'erf_id' => $erf_id]);
         }
+    }
+
+    public function print(Request $request){
+
+        $erf_id = str_replace("ERF","",$request->id);
+        $html = $this::erf_print($erf_id,'html');
+        return $html;
+
     }
 
 
