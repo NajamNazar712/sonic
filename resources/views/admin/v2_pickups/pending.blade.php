@@ -29,16 +29,18 @@
                                         <div class="card-content collapse">
                                             <div class="card-body p-1">
                                                 <h4 class=" info">Legend</h4>
+                                                <input type="hidden" id="legend_filter">
+
                                                 <table class="table mb-0">
                                                     <tbody>
                                                     @foreach($legends as $legend)
                                                         @if($legend->id == 7)
-                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;">
+                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;" id="{{$legend->id}}">
 {{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width text-white" style="background-color: {{$legend->color}}" disabled>{{$cut_off_time}}:00</button></td>--}}
                                                                 <td class="align-middle">{{ $legend->name }} <b>({{$cut_off_time}}:00)</b></td>
                                                             </tr>
                                                             @else
-                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;">
+                                                            <tr style="background-color: {{$legend->color}}; color:#010a10;" id="{{$legend->id}}">
 {{--                                                                <td><button type="button" class="btn btn-sm round btn-min-width p-1" style="background-color: {{$legend->color}}" disabled> </button></td>--}}
                                                                 <td class="align-middle">{{ $legend->name }}</td>
                                                             </tr>
@@ -449,7 +451,12 @@
                 processing: data_table_loader
             },
             serverSide: true,
-            ajax: '{{ route('admin.v2_pickups.pending.list') }}',
+            ajax:{
+                    url: '{{ route('admin.v2_pickups.pending.list') }}',
+                    data: function (d) {
+                        d.legend_filter = $('#legend_filter').val();
+                    }
+                },
             rowId: 'id',
             order: [[2, 'desc']],
             columns: [
@@ -763,6 +770,13 @@
                             tab.focus();
                         }
                     });
+            }
+
+            for (let i = 1; i <= 8; i++) {
+                $('#'+i+'').on('click', function () {
+                $('#legend_filter').val(i);
+                table.draw();
+            });
             }
 
         });

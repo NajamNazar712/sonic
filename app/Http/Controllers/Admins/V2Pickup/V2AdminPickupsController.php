@@ -246,8 +246,60 @@ class V2AdminPickupsController extends Controller
                     return '';
                 }
             });
+            if($legend_filter = $request->get('legend_filter')){
+                if($legend_filter==8){
+                    $datatables->where('v2_pickup_requests.reverse_pickup',1);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==2){
+                    $datatables->where('v2_pickup_requests.vendor','<>',null);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==3){
+                    $datatables->where('v2_pickup_requests.try_and_buy',1)
+                    ->where('v2_pickup_requests.vendor',null);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==4){
+                    $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts',1)
+                    ->where('v2_pickup_requests.try_and_buy',null)
+                    ->where('v2_pickup_requests.vendor',null);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==5){
+                    $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts',2)
+                    ->where('v2_pickup_requests.try_and_buy',null)
+                    ->where('v2_pickup_requests.vendor',null);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==6){
+                    $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts','>',2)
+                    ->where('v2_pickup_requests.try_and_buy',null)
+                    ->where('v2_pickup_requests.vendor',null);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==7){
+                    $datatables->where('v2_pickup_requests.after_cut_off_time','<>',null)
+                    ->where('v2_pickup_requests.status_id','<>',3)
+                    ->where('v2_pickup_requests.try_and_buy',null)
+                    ->where('v2_pickup_requests.vendor',null);
+                    return $datatables->make(true);
+                }
+                elseif($legend_filter==1){
+                    $datatables->where('v2_pickup_requests.created_at','<=',Carbon::now()->startOfDay()->addDays(6))
+                    ->where('v2_pickup_requests.after_cut_off_time',null)
+                    ->where('v2_pickup_requests.status_id','<>',3)
+                    ->where('v2_pickup_requests.try_and_buy',null)
+                    ->where('v2_pickup_requests.vendor',null)
+                    ->where('v2_pickup_requests.reverse_pickup',null);
 
-        return $datatables->make(true);
+                    return $datatables->make(true);
+                }
+            }else{
+                    return $datatables->make(true);
+            }
+
+        
     }
 
     public function pending_assign(Request $request)
