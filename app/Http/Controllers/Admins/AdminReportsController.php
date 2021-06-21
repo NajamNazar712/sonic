@@ -6053,7 +6053,8 @@ class AdminReportsController extends Controller
                 }
             });
         if($tracking = $request->get('search_tracking_no')){
-            $datatable->where('s.tracking_number', '=', $tracking);
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('s.tracking_number', $tracking_numbers);
         }
         if($rnumber = $request->get('search_request_number')){
             $rnumber = explode(',',$rnumber);

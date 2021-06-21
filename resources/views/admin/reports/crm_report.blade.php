@@ -15,7 +15,7 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number(s)">
                         </fieldset>
                     </div>
                     <div class="col-4">
@@ -267,11 +267,41 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_tracking_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
+
+            var select = $('#search_tracking_no').selectize({
+                    placeholder: 'Search Tracking Number(s)',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function (dropdown) {
+                        dropdown.remove();
+                    },
+                    onType: function (str) {
+                        var regex = /^[0-9,]+$/;
+
+                        if (!regex.test(str)) {
+                            select[0].selectize.setTextboxValue('');
+                        }
+                    },
+                    create: function (input) {
+                        if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                });
+
+            // $('#search_tracking_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
 
             var select = $('#search_request_number').selectize({
                 placeholder: 'Search Request Number(s)*',
@@ -491,7 +521,12 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                language: {
+                    processing: data_table_loader
+                },
                 serverSide: true,
+                deferLoading: 0,
+
                 ajax: {
                     url: '{{ route('admin.reports.crm.list') }}',
                     method: 'POST',
