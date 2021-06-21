@@ -2344,6 +2344,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('crm_case_nature_types')->name('crm_case_nature_types.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@crm_case_nature_types_index')->name('index');
             Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
+            Route::post('status', 'Admins\GlobalSettingsController@crm_case_nature_types_status')->name('status');
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
         });
 
