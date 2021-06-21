@@ -202,9 +202,7 @@
         .btn-min-width {
             min-width: 5.5rem;
         }
-        .reverse_pickup_row{
-            background-color: #bfefe2;
-        }
+        
 @foreach($legends as $legend)
     @if($legend->id == 1)
         .new_pickup{
@@ -233,6 +231,10 @@
     @elseif($legend->id == 7)
         .after_cut_off_time{
             background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 8)
+        .reverse_pickup_row{
+            background-color: {{$legend->color}};
         }
     @endif
 @endforeach
