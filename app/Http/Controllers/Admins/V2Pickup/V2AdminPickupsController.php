@@ -2749,7 +2749,7 @@ class V2AdminPickupsController extends Controller
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
+            $to = strval(Carbon::parse($request->get('search_date_to'))->addDay());
             $rider = $rider->whereBetween('v2_pickup_notes.created_at', [$from, $to]);
         }
 
