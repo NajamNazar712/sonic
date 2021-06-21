@@ -128,7 +128,7 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        $department_heads = Admin::whereIn('role_id', [406,12,3,57,70,372,69,32])->where('status', 1)->select('id','name')->get();
+        $department_heads = Admin::whereIn('id', [406,12,3,57,70,372,69,32])->where('status', 1)->select('id','name')->get();
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
         $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',4)->get();
@@ -185,6 +185,7 @@ class AdminERFController extends Controller
         $log->save();
 
         $email = $request->admin_email;
+
         $path = $this::erf_print($erf->id);
         $data['id'] = $erf->id;
         $data['email'] = $email;
