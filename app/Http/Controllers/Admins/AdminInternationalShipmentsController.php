@@ -271,8 +271,8 @@ class AdminInternationalShipmentsController extends Controller
                     $data['id'] = $shipment->id;
                     $data['tracking_number'] = $shipment->tracking_number;
                     $data['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
-                    $data['origin'] = $shipment->consignee_city->name;
-                    $data['destination'] = $shipment->pickup_address->city->name;
+                    $data['origin'] = $shipment->pickup_address->city->name;
+                    $data['destination'] = $shipment->consignee_city->name;
                     $data['status'] = $shipment->status_shipper->name;
                     $data['status_id'] = $shipment->shipper_status_id;
 
