@@ -376,7 +376,7 @@
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
-					if (data.status_id == 1) {
+					if (data.status == 'Pending') {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
 						if ($.inArray(data.id, selected_rows) !== -1) {
