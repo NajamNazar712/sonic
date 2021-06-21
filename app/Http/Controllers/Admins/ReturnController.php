@@ -383,15 +383,16 @@ class ReturnController extends Controller
 
     public static function check_tat($last_status_date,$tat_value)
     {
-        $status_date = Carbon::parse($last_status_date);
-        $temp_tat_date = Carbon::parse($last_status_date)->addDays($tat_value);
+        $temp_status_date = Carbon::parse($last_status_date)->format("Y-m-d 00:00:00");
+        $status_date = Carbon::parse($temp_status_date);
+        $temp_tat_date = Carbon::parse($temp_status_date)->addDays($tat_value);
         $sundays = $status_date->diffInDaysFiltered(function(Carbon $date) {
             if($date->format('D') == "Sun")
             {
                 return $date;
             }
         }, $temp_tat_date->addDay());
-        $tat_date = Carbon::parse($last_status_date)->addDays($tat_value+$sundays);
+        $tat_date = Carbon::parse($temp_status_date)->addDays($tat_value+$sundays);
         $diff_days = now()->diffInDaysFiltered(function(Carbon $date) {
                 if($date->format('D') != "Sun")
                 {
