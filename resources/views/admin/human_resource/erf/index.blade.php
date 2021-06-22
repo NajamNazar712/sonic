@@ -396,14 +396,14 @@
                             });
                             html += '</tbody></table>';
 
-                            html += '<div class="form-group mt-4 text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="btn btn-primary  document_view">View Document</button></div>';
+                            html += '<div class="form-group mt-4 text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="btn btn-primary  document_view">View Request</button></div>';
 
                             $('#documents_modal .modal-body').html(html);
                             $('#documents_modal').modal('show');
                         } else {
 
                             var html = '';
-                            html += '<div class="form-group  text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="document_view btn btn-primary">View Document</button></div>';
+                            html += '<div class="form-group  text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="document_view btn btn-primary">View Request</button></div>';
 
                             $('#documents_modal .modal-body').html(html);
                             $('#documents_modal').modal('show');

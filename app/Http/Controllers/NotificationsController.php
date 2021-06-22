@@ -7373,30 +7373,35 @@ class NotificationsController extends Controller
                     $data = $reference_1_id;
                     $erf = EmployeeRequisition::find($data['id']);
                     $erf_id = str_pad($erf->id,6,0,STR_PAD_LEFT);
-                    $admin = Admin::where('email',$data['email'])->first();
-                    if($admin){
-                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+                    $admin_emails = explode(',', $data['email']);
 
-                        if (strpos($body, '[link]') !== FALSE) {
-                            $body = str_replace('[link]', $link, $body);
+                    foreach($admin_emails as $email){
+                        $admin = Admin::where('email',$email)->first();
+                        if($admin){
+                            $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
+                            if (strpos($subject, '[erf_id]') !== FALSE) {
+                                $subject = str_replace('[erf_id]', $erf_id, $subject);
+                            }
+
+                            if (strpos($body, '[erf_id]') !== FALSE) {
+                                $body = str_replace('[erf_id]', $erf_id, $body);
+                            }
+                            if (strpos($body, '[admin]') !== FALSE) {
+                                $body = str_replace('[admin]', $admin->name, $body);
+                            }
+                            if (strpos($body, '[date]') !== FALSE) {
+                                $body = str_replace('[date]', $erf->created_at, $body);
+                            }
+
+                            $to = $email;
+                            self::email($subject, $body, $to);
                         }
 
-                        if (strpos($subject, '[erf_id]') !== FALSE) {
-                            $subject = str_replace('[erf_id]', $erf_id, $subject);
-                        }
-
-                        if (strpos($body, '[erf_id]') !== FALSE) {
-                            $body = str_replace('[erf_id]', $erf_id, $body);
-                        }
-                        if (strpos($body, '[admin]') !== FALSE) {
-                            $body = str_replace('[admin]', $admin->name, $body);
-                        }
-                        if (strpos($body, '[date]') !== FALSE) {
-                            $body = str_replace('[date]', $erf->created_at, $body);
-                        }
-
-                        $to = $admin->email;
-                        self::email($subject, $body, $to);
                     }
                 }
 				else if($id == 136) {
