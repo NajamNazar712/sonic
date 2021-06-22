@@ -253,7 +253,7 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function shipment_status_index(){
-        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [1,2,3,4,5,8,12,13,14,17,18,20,21,22,23,24,25,47,48])->get();
+        $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,12,13,14,17,18,20,21,22,23,24,25,47,48])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }
 
@@ -268,6 +268,9 @@ class AdminInternationalShipmentsController extends Controller
                     $data = array();
                     $shipment = $shipment->first();
 
+                    if($shipment->shipper->status_id == 14){
+                        return response()->json(['status' => 0, 'error' => 'Shipment is already delivered!']);
+                    }
                     $data['id'] = $shipment->id;
                     $data['tracking_number'] = $shipment->tracking_number;
                     $data['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
@@ -289,6 +292,10 @@ class AdminInternationalShipmentsController extends Controller
                     $data = array();
                     $shipment = $shipment->first();
 
+                    if($shipment->shipper->status_id == 14){
+                        return response()->json(['status' => 0, 'error' => 'Shipment is already delivered!']);
+                    }
+
                     $data['id'] = $shipment->id;
                     $data['tracking_number'] = $shipment->tracking_number;
                     $data['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
@@ -303,7 +310,6 @@ class AdminInternationalShipmentsController extends Controller
                     return response()->json(['status' => 0, 'error' => 'Shipment is Cancelled OR not International Shipment OR with different status!']);
                 }
             }
-
 
         }
         return response()->json(['status' => 0, 'error' => 'Tracking number empty!']);
