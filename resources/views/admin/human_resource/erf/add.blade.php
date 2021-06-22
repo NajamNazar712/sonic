@@ -541,7 +541,16 @@
             submitHandler: function(form) {
                 $('#EmailModal').modal('show');
                 if($('#email').val() !== '' && $('#email').val() !== null ){
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your request is being processed!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
                     form.submit();
+
                 }
                 
             }

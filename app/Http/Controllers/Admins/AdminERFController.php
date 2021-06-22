@@ -494,7 +494,7 @@ class AdminERFController extends Controller
         $date = Carbon::now()->format('Y_m_d');
 
         $request->validate([
-            'file' => 'required|mimes:png,jpeg,pdf,doc,docx|max:5120',
+            'file' => 'required|mimes:png,jpg,pdf,doc,docx|max:5120',
         ]);
 
         $file_type = request()->file->getClientOriginalExtension();
