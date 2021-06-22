@@ -1765,7 +1765,7 @@ class DeliveryController extends Controller
     {
         $status_id = $request->status;
 
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+        $statuses = ShipmentStatus::find($status_id)->reasons()->whereNotIn('id',[4,6])->select('id', 'name')->orderBy('name')->get();
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
