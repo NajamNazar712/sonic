@@ -172,12 +172,9 @@ class AdminCrmSettingsController extends Controller
         $shipment_statuses = $request->shipment_statuses;
         $tat = $request->input('tat');
         $mark_as = $request->input('mark_as_select');
-        if($mark_as == 1){
-            $comment = $request->input('auto_comment');
-        }
-        else{
-            $comment = NULL;
-        }
+            
+        $comment = $request->input('auto_comment');
+        
         $launched_escalation = new CrmEscalation();
         $launched_escalation->crm_request_status = 1;
         $launched_escalation->case_nature = $case_nature_id;
