@@ -951,7 +951,6 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
-						$('#open_shipment_div').removeClass('d-none');
 
 					}
 					if(service_type == 5){
