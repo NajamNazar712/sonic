@@ -101,15 +101,15 @@ class AdminReportsController extends Controller
                     ->where('si.type','=',0);
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'usi.poc','u.id as account_no','sm.mode as shipping_mode']);
+            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc','u.id as account_no','sm.mode as shipping_mode']);
 
         $type = $request->get('search_types');
 
         if ($type && $type == 2) {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43]);
+            $shipments = $shipments->whereNotIn('shipments.shipper_status_id',[14,16,17,25,31,36,38,39,40,41,43]);
         }
         else {
-            $shipments = $shipments->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47,51]);
+            $shipments = $shipments->whereNotIn('shipments.shipper_status_id',[14,16,17,25,31,36,38,39,40,41,43,47,51]);
         }
 
         if (session('role_id') != 1) {
@@ -5831,7 +5831,12 @@ class AdminReportsController extends Controller
                  $join->on('change_shipment_weight_logs.shipment_id','=','crm_requests.shipment_id')
                      ->where('change_shipment_weight_logs.created_at','=',DB::raw('(select max(created_at) from change_shipment_weight_logs where change_shipment_weight_logs.shipment_id= crm_requests.shipment_id)'));
              })
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges')
+             ->leftjoin('crm_comments as ccs', function($join){
+                $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
+                    ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 1)')) ;
+            })
+            ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin')
             ->groupBy('crm_requests.id');
 
         $datatable = Datatables::of($crm)
@@ -5999,6 +6004,49 @@ class AdminReportsController extends Controller
             ->editColumn('resolved_date', function($requests){
                 if($requests->current_status_id == 3 || $requests->current_status_id == 4) {
                     return $requests->resolved_date;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('last_comment_name', function($requests){
+                if($requests->last_comment_by == 0){
+                    return $requests->last_comment_admin;
+                }
+                else if($requests->last_comment_by == 1){
+                    return $requests->last_comment_shipper;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->editColumn('last_comment_date', function($requests){
+                if($requests->last_comment_date != null){
+                    return $requests->last_comment_date;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->filterColumn('last_comment_name', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('ccs.comment_by', '=', 0)
+                            ->where('accs.name', 'like', '%' . $keyword . '%');
+                    });
+                        
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('last_comment_name', DB::raw('accs.name') . ' $1')
+
+            ->editColumn('last_comment', function($requests){
+                if($requests->last_comment != null){
+                    return $requests->last_comment;
                 }
                 else{
                     return '-';
@@ -8234,6 +8282,40 @@ class AdminReportsController extends Controller
                 else{
                     return '-';
                 }
+            })
+            ->addColumn('cnic_image', function ($shipments) {
+                $image = '';
+                if ($shipments->cnic_image != null) {
+                    $exists = Storage::disk('public')->exists($shipments->cnic_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->cnic_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->cnic_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return '-';
+                }
+
+            })
+            ->addColumn('house_image', function ($shipments) {
+                $image = '';
+                if ($shipments->house_image != null) {
+                    $exists = Storage::disk('public')->exists($shipments->house_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return '-';
+                }
+
             })
             ->editColumn('audio_path', function ($shipments) {
                 $audio = '';

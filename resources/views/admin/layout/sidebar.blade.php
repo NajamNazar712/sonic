@@ -81,7 +81,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([155, 117, 209, 254,516,511], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cart-plus"></i>Bookings</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([155, 209], session('permissions'))) !== 0)
@@ -93,6 +93,18 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(209, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.shipment.history.walk_in_history')}}">History</a></li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
+                        @if (session('role_id') == 1 || count(array_intersect([511, 516], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">FTL</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(511, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.ftl.request.index')}}">FTL Requests</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(516, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.shipment.book.ftl.walk_in')}}">Walkin FTL Booking</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -480,7 +492,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147,232, 238, 243,454,455,509], session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-money"></i>Financials</span></a>
                     <ul class="menu-content">
@@ -530,11 +542,15 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(120, session('permissions')))
+                        @if (session('role_id') == 1 || count(array_intersect([120,509], session('permissions'))))
                             <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
                                 <ul class="menu-content">
                                     <li><a class="menu-item" href="{{ route('admin.finance.invoices.index') }}">Pending </a></li>
                                     <li><a class="menu-item" href="{{ route('admin.finance.invoices.received_index') }}">Received </a></li>
+                                    @if (session('role_id') == 1 || in_array(509, session('permissions')))
+                                        <li><a class="menu-item"
+                                               href="{{ route('admin.finance.ftl_invoice.index') }}">FTL Invoices</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -1072,6 +1088,7 @@
                         @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197, 256, 375], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Bookings</span></a>
                                 <ul class="menu-content">
+
                                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.shipment_cancellation_cut_off_days.index')}}">Shipment Cancellation Cut-Off Days</a></li>
                                     @endif
@@ -1511,7 +1528,7 @@
                     </ul>
                 </li>
             @endif
-            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492,506], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
@@ -1541,6 +1558,11 @@
                         @if (session('role_id') == 1 || in_array(492, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.rider_incentive.index')}}">Rider Incentives</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(506, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.erf.index')}}">ERF</a></li>
+                        @endif
+                   
+
                 </ul>
             </li>
             @endif

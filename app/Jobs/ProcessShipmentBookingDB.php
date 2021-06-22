@@ -46,12 +46,17 @@ class ProcessShipmentBookingDB implements ShouldQueue
     {
         $user_id = $this->booking['user_id'];
         $service_type_id = $this->booking['service_type_id'];
-        
-        if (strtolower($this->booking['open_shipment']) == 'yes') {
-            $open_shipment = 1;
-        } else {
+        if(array_key_exists("open_shipment",$this->booking)){
+            if (strtolower($this->booking['open_shipment']) == 'yes') {
+                $open_shipment = 1;
+            } else {
+                $open_shipment = 0;
+            }
+        }else{
             $open_shipment = 0;
+
         }
+        
         
         if($service_type_id == 5){
             if (!empty(trim($this->booking['consignee_email_address']))) {

@@ -130,7 +130,7 @@
                                         </tbody>
                                     </table>
 
-                                    @if(session('rate_type_id') != 3){
+                                    @if(session('rate_type_id') != 3)
                                      <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
@@ -275,6 +275,19 @@
                                         @endforeach
                                         </tbody>
                                     </table>
+                                    <table class="table table-bordered">
+										<thead>
+										<tr role="row" class="bg-primary white text-center">
+											<th colspan="2" class="border-primary border-darken-1">Open Shipment</th>
+										</tr>
+										</thead>
+										<tbody>
+										<tr role="row">
+											<td class="text-center">No</td>
+											<td class="text-center">Yes</td>
+										</tr>
+										</tbody>
+									</table>
                                 </div>
 
                                 <div class="col">
@@ -304,8 +317,7 @@
                                         </tbody>
                                     </table>
 
-
-                                    @if(session('rate_type_id') != 3){
+                                    @if(session('rate_type_id') != 3)
                                         <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">

@@ -658,10 +658,50 @@ class ShipmentChargesController extends Controller
             $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
             if($international_rate->exists()){
                 $international_rate = $international_rate->first();
-                $margin = $international_rate->margin;
                 $zone_id = $shipment->consignee_city->zone_id;
+
+                $margin = 0;
                 $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
                 if($international_zone){
+                    $international_zone_id = $international_zone->zone_name;
+                    switch($international_zone_id){
+                        case 1:
+                            $margin = $international_rate->margin_1;
+                            break;
+                        case 2:
+                            $margin = $international_rate->margin_2;
+                            break;
+                        case 3:
+                            $margin = $international_rate->margin_3;
+                            break;
+                        case 4:
+                            $margin = $international_rate->margin_4;
+                            break;
+                        case 5:
+                            $margin = $international_rate->margin_5;
+                            break;
+                        case 6:
+                            $margin = $international_rate->margin_6;
+                            break;
+                        case 7:
+                            $margin = $international_rate->margin_7;
+                            break;
+                        case 8:
+                            $margin = $international_rate->margin_8;
+                            break;
+                        case 9:
+                            $margin = $international_rate->margin_9;
+                            break;
+                        case 10:
+                            $margin = $international_rate->margin_10;
+                            break;
+                        case 11:
+                            $margin = $international_rate->margin_11;
+                            break;
+                        default:
+                            $margin = 0;
+                            break;
+                    }
                     $result = self::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
                 }
                 else{

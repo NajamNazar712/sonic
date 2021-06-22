@@ -122,10 +122,16 @@ class Shipment extends Model
         return $this->belongsTo('App\Http\Models\Admin\Retail\RetailShipment', 'id', 'shipment_id');
     }
 
+ public function ftl() {
+        return $this->hasOne('App\Http\Models\Admin\FtlRequest');
+    }
     public function shipment_detail() {
 		return $this->hasOne('App\Http\Models\ShipmentDetail');
 	}
-    public function return_address() {
+	public function return_address() {
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo', 'return_address_id');
+    }
+	public function other_retail() {
+        return $this->belongsTo('App\Http\Models\Admin\Retail\OtherRetailShipment', 'id', 'shipment_id');
     }
 }

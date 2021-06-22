@@ -123,6 +123,7 @@
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
+                        <th class="border-primary border-darken-1">Booked Status Date</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -300,6 +301,7 @@
                             head.push('Service Type');
                             head.push('Arrival');
                             head.push('Last Status Date');
+                            head.push('Booked Status Date');
                             head.push('Shipping Mode');
                             head.push('Origin');
                             head.push('Destination');
@@ -322,6 +324,7 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.created_at);
                                 row.push(values.shipping_mode);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -390,6 +393,7 @@
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},
+                    {data: 'created_at', name: 'shipments.created_at', class: 'align-middle created_at'},
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},

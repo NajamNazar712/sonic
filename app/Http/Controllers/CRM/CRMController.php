@@ -155,6 +155,20 @@ class CRMController extends Controller
             }
         }
 
+        if ($case_nature_id == 4) {
+            $comment = "Dear concern, Please note your case is under scrutiny in the claims department, the circle of claim-resolution is 15 working days, if there’s any update about this CN/CLAIM, our claims team will get in touch with you by means of email, CRM or call and update you at their earliest.";
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($id, $default_agent_id, $comment_by, $comment_type, $comment);
+        }
         return $crm_request->id;
     }
 }

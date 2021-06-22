@@ -23,6 +23,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Retail\OtherParcelReceiving;
+use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;

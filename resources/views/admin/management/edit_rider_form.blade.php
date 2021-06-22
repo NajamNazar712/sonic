@@ -55,10 +55,15 @@
                 </fieldset>
             </div>
             <div class="col">
-            <fieldset class="form-group">
-                <input type="text" class="form-control" name="pin"  value="{{$rider->dummy_pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
-            </fieldset>
-        </div>
+                <fieldset class="form-group">
+                    <input type="text" class="form-control" name="pin"  value="{{$rider->dummy_pin}}" placeholder="PIN" data-rule-minlength="4" data-rule-maxlength="4">
+                </fieldset>
+            </div>
+            <div class="col">
+                <fieldset class="form-group">
+                    <input type="text" class="form-control" name="trax_id" value="{{$rider->trax_id}}"  placeholder="Trax ID">
+                </fieldset>
+            </div>
         </div>
 
         <div class="row mb-2">

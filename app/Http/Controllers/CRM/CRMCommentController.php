@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\CRM;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\CRM\CrmRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,5 +18,17 @@ class CRMCommentController extends Controller
         $comment->comment_type = $comment_type;
         $comment->comment = $comments;
         $comment->save();
+
+        if($comment_type == 0 && $comment_by == 0){
+            $crm_request = CrmRequest::find($crm_request_id);
+            if($crm_request->case_nature_id == 4){
+                $shipper_id = $crm_request->shipper_id;
+                if($shipper_id == NULL){
+                    $shipper_id = $crm_request->shipment->user_id;
+                }
+                NotificationsController::send(136,$shipper_id,$comment->id);
+            }
+
+        }
     }
 }
