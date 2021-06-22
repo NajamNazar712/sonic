@@ -263,7 +263,7 @@ class AdminInternationalShipmentsController extends Controller
         $default_status_id = $request->default_status_id;
         if ($tracking_number != '') {
             if($default_status_id == 0){
-                $shipment = Shipment::where('tracking_number', $tracking_number)->where('shipper_status_id', '!=', 17)->where('business_category_id', 2);
+                $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', [1, 2, 17])->where('business_category_id', 2);
                 if ($shipment->exists()) {
                     $data = array();
                     $shipment = $shipment->first();
