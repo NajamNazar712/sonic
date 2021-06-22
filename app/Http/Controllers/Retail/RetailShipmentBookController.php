@@ -959,7 +959,7 @@ class RetailShipmentBookController extends Controller
                           </tr>
                           <tr>
                     ';
-                    }  elseif ($shipment->booking_type_id != 4) {
+                    }  elseif ($shipment->charges_mode_id != 2) {
                         $table_end .= '
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->retail->payment_mode->name . '</strong></td>
