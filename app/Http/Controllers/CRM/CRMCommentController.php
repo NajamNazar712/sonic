@@ -21,11 +21,14 @@ class CRMCommentController extends Controller
 
         if($comment_type == 0 && $comment_by == 0){
             $crm_request = CrmRequest::find($crm_request_id);
-            $shipper_id = $crm_request->shipper_id;
-            if($shipper_id == NULL){
-                $shipper_id = $crm_request->shipment->user_id;
+            if($crm_request->case_nature_id == 4){
+                $shipper_id = $crm_request->shipper_id;
+                if($shipper_id == NULL){
+                    $shipper_id = $crm_request->shipment->user_id;
+                }
+                NotificationsController::send(136,$shipper_id,$comment->id);
             }
-            NotificationsController::send(136,$shipper_id,$comment->id);
+
         }
     }
 }
