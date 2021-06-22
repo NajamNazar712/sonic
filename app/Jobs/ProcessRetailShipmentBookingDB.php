@@ -111,7 +111,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $pieces_quantity = $this->booking['pieces'];
         $business_category_id = $this->booking['business_category_id'];
 
-        $charges_mode_id = 1;
+        $charges_mode_id = $this->booking['charges_mode_id'];
 
         if (strtolower($this->booking['volumetric_weight']) == 'yes') {
             $estimated_weight = (($this->booking['length'] * $this->booking['breadth'] * $this->booking['height']) / 5000);
