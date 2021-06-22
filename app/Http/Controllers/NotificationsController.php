@@ -6125,9 +6125,11 @@ class NotificationsController extends Controller
 
                     $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
                         ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
+                        ->join('v2_pickup_request_shipments as vs', 'vs.id', '=', 'v2_pickup_requests.id')
+                        ->join('shipments as ship', 'ship.id', '=', 'vs.shipment_id')
                         ->join('v2_pickup_request_attempts as vpra', 'vpra.pickup_request_id', '=', 'v2_pickup_requests.id')
                         ->join('v2_pickup_request_not_pick_reasons as npr', 'npr.id', '=', 'vpra.reason_id')
-                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id', 'u.name as shipper_name', 'npr.name as reason')
+                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id', 'u.name as shipper_name', 'npr.name as reason','ship.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time' , DB::raw('sum(v2_pickup_requests.after_cut_off_time) as after_cut_off_time_sum'))
                         ->where('v2_pickup_requests.status_id', 3)
                         ->whereNotNull('vpra.reason_id')
                         ->wherebetween('v2_pickup_requests.created_at', [$date_from, $date_to])
@@ -6142,6 +6144,7 @@ class NotificationsController extends Controller
                         $html .= '<thead><tr>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booking Date</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked</th>';
                         $html .= '</tr></thead><tbody>';
 
@@ -6151,12 +6154,21 @@ class NotificationsController extends Controller
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->booking_date . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
                             $html .= '</tr>';
                         }
                         $html .= '<tr>';
                         $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
-                        $html .= '<td colspan="2" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . count($pickup_requests) . '</td>';
+                        $html .= '<td colspan="4" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . count($pickup_requests) . '</td>';
+                        $html .= '</tr>';
+                        $html .= '<tr>';
+                        $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shipements</td>';
+                        $html .= '<td colspan="4" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . $pickup->shipment_count . '</td>';
+                        $html .= '</tr>';
+                        $html .= '<tr>';
+                        $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">After CutOff Time</td>';
+                        $html .= '<td colspan="4" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . $pickup->after_cut_off_time_sum . '</td>';
                         $html .= '</tr>';
 
                         if (strpos($body, '[preview]') !== FALSE) {
