@@ -1649,6 +1649,51 @@ class AdminDashboardController extends Controller
     public function addEconomyRatesView($id)
     {
         $user = User::find($id);
+        if(1 == 1) {
+            return view('economy_rates')->with(['shipper' => $user]);
+        }
+
+        return redirect()->back()->with('error','User rates not found!');
+    }
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Throwable
+     */
+    public function viewBankInfo($id){
+        $user = User::find($id);
+        $banks = $user->bank;
+//        return $banks;
+        $returnHTML = view('admin/components/bank')->with(['banks'=>$banks,'user'=>$user])->render();
+        return response()->json($returnHTML);
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Throwable
+     */
+    public function viewShippingInfo($id){
+        $user = User::find($id);
+        $shipping = $user->shipping()->where('hidden',0)->get();
+        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        return response()->json($returnHTML);
+    }
+
+    /**
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Throwable
+     */
+    public function viewShipperRates($id){
+        $user = User::find($id);
+        $shipping = $user->shipping;
+        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        return response()->json($returnHTML);
+    }
+
+    public function addRatesView($id){
+        $user = User::find($id);
         if(!RateStatus::where('user_id', $user->id)->exists()) {
             $sale_person = SalePersonTag::where('user_id', $id)->first();
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -1708,52 +1753,7 @@ class AdminDashboardController extends Controller
             $all_users['results'][1]['text'] = 'Admins';
             $all_users['results'][1]['children'] = $users;
             $all_users['pagination']['more'] = true;
-            return view('economy_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
-        }
-
-        return redirect()->back()->with('error','User rates not found!');
-    }
-
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Throwable
-     */
-    public function viewBankInfo($id){
-        $user = User::find($id);
-        $banks = $user->bank;
-//        return $banks;
-        $returnHTML = view('admin/components/bank')->with(['banks'=>$banks,'user'=>$user])->render();
-        return response()->json($returnHTML);
-    }
-
-    /**
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Throwable
-     */
-    public function viewShippingInfo($id){
-        $user = User::find($id);
-        $shipping = $user->shipping()->where('hidden',0)->get();
-        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
-        return response()->json($returnHTML);
-    }
-
-    /**
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Throwable
-     */
-    public function viewShipperRates($id){
-        $user = User::find($id);
-        $shipping = $user->shipping;
-        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
-        return response()->json($returnHTML);
-    }
-
-    public function addRatesView($id){
-        $user = User::find($id);
-        if(1 == 1) {
-            return view('admin.accounts.add_rates')->with(['shipper' => $user]);
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
