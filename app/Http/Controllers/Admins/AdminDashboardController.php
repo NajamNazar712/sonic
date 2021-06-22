@@ -1646,6 +1646,73 @@ class AdminDashboardController extends Controller
         }
     }
 
+    public function addEconomyRatesView($id)
+    {
+        $user = User::find($id);
+        if(!RateStatus::where('user_id', $user->id)->exists()) {
+            $sale_person = SalePersonTag::where('user_id', $id)->first();
+            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+            $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
+            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $packaging_sizes = array();
+            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
+            $storage_types = WmsStorageType::all()->where('status', 1);
+            if (count($packaging_material_types) > 0) {
+
+                foreach ($packaging_material_types as $type) {
+                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
+                }
+            }
+
+
+            $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
+            $on = null;
+            $ol = null;
+            $det = null;
+            $same_day = null;
+            foreach ($minimum_chargeable_weights as $minimum_chargeable_weight) {
+                if ($minimum_chargeable_weight->shipping_mode_id == 1) {
+                    $on = $minimum_chargeable_weight->weight;
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 2) {
+                    $ol = $minimum_chargeable_weight->weight;
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 3) {
+                    $det = $minimum_chargeable_weight->weight;
+                } else {
+                    $same_day = $minimum_chargeable_weight->weight;
+                }
+            }
+            $commission_percentage = '';
+            $settings = GlobalSettings::where('type', 'commission_percentage');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                $commission_percentage = $settings->text;
+            }
+            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name', 'ar.department_id'])->where('admins.status', 1)->get();
+            $users = array();
+            $sales = array();
+            $all_users = array();
+            foreach ($admin_users as $u) {
+                if ($u->department_id != 7) {
+                    $users[] = array('id' => $u->id, 'text' => $u->name);
+                } else {
+                    $sales[] = array('id' => $u->id, 'text' => $u->name);
+                }
+            }
+            $all_users['results'][0]['text'] = 'Sales';
+            $all_users['results'][0]['children'] = $sales;
+            $all_users['results'][1]['text'] = 'Admins';
+            $all_users['results'][1]['children'] = $users;
+            $all_users['pagination']['more'] = true;
+            return view('economy_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
+        }
+
+        return redirect()->back()->with('error','User rates not found!');
+    }
 
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -1685,70 +1752,8 @@ class AdminDashboardController extends Controller
 
     public function addRatesView($id){
         $user = User::find($id);
-        if(!RateStatus::where('user_id', $user->id)->exists()) {
-            $sale_person = SalePersonTag::where('user_id',$id)->first();
-            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
-            $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
-            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
-            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
-            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
-            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
-            $packaging_sizes = array();
-            $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
-            $storage_types = WmsStorageType::all()->where('status', 1);
-            if(count($packaging_material_types) > 0){
-
-                foreach($packaging_material_types as $type){
-                    $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                }
-            }
-
-
-            $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();
-            $on = null;
-            $ol = null;
-            $det = null;
-            $same_day = null;
-            foreach($minimum_chargeable_weights as $minimum_chargeable_weight){
-                if($minimum_chargeable_weight->shipping_mode_id == 1){
-                    $on = $minimum_chargeable_weight->weight;
-                }
-                elseif($minimum_chargeable_weight->shipping_mode_id == 2){
-                    $ol = $minimum_chargeable_weight->weight;
-                }
-                elseif($minimum_chargeable_weight->shipping_mode_id == 3){
-                    $det = $minimum_chargeable_weight->weight;
-                }
-                else{
-                    $same_day = $minimum_chargeable_weight->weight;
-                }
-            }
-            $commission_percentage = '';
-            $settings = GlobalSettings::where('type', 'commission_percentage');
-            if($settings->exists()){
-                $settings = $settings->first();
-                $commission_percentage = $settings->text;
-            }
-            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
-            $users = array();
-            $sales = array();
-            $all_users = array();
-            foreach ($admin_users as $u){
-                if($u->department_id != 7){
-                    $users[] = array('id' => $u->id, 'text' => $u->name);
-                }else{
-                    $sales[] = array('id' => $u->id, 'text' => $u->name);
-                }
-            }
-            $all_users['results'][0]['text'] = 'Sales';
-            $all_users['results'][0]['children'] = $sales;
-            $all_users['results'][1]['text'] = 'Admins';
-            $all_users['results'][1]['children'] = $users;
-            $all_users['pagination']['more'] = true;
-
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
+        if(1 == 1) {
+            return view('admin.accounts.add_rates')->with(['shipper' => $user]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
