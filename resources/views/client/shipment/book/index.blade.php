@@ -94,26 +94,6 @@
 										</div>
 
 
-										<div id="return_info_div" class="d-none">
-											<h4 class="form-section mb-2 text-center">Return Information</h4>
-											<h6 class="form-text mb-1 text-justify text-muted text-italic">*Select if you want return shipment to another address.</h6>
-											<div class="form-group">
-												<select name="return_address" class="select2" id="return_address">
-													@foreach($user->shipping as $shipping_information)
-														@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
-
-																<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}" data-city-name="{{ $shipping_information['city']['name'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
-
-														@endif
-													@endforeach
-												</select>
-											</div>
-											<div class="form-group">
-												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="return_city_name"></p>
-											</div>
-										</div>
-
-
 
 
 										@if($air_waybill != null)
@@ -912,7 +892,7 @@
 						$('#amount').prop('disabled', false);
 						$('#pieces_quantity').removeClass('d-none');
 						$('#self_collection_div').removeClass('d-none');
-						$('#return_info_div').removeClass('d-none');
+
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -933,7 +913,7 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
-						$('#return_info_div').removeClass('d-none');
+
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -954,7 +934,7 @@
 						$('#try_and_buy_charges_div').removeClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
-						$('#return_info_div').addClass('d-none');
+
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -976,7 +956,7 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
-						$('#return_info_div').addClass('d-none');
+
 
 					}
 					if(service_type == 5){
@@ -1042,33 +1022,6 @@
 
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
-
-
-
-
-			//return address start
-
-			function set_return_city(){
-
-				var return_city_id = $('#return_address').find(':selected').data('city-id');
-				var return_city_name = $('#return_address').find(':selected').data('city-name');
-				$('#return_city_name').removeClass('d-none');
-				$('#return_city_name').html('City : ' + return_city_name);
-			}
-
-			$('#return_address').prepend('<option value="" selected="selected"></option>').select2({
-				width: '100%',
-				placeholder: 'Return Address'
-			}).bind('change', function () {
-				$(this).valid();
-
-				set_return_city();
-
-			});
-
-			//return address end
-
-
 
 
 
