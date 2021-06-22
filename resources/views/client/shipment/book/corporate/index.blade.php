@@ -923,7 +923,6 @@
                         consignee_email.attr('data-placement', 'top');
                         consignee_email.attr('data-original-title', 'Please add email address so that we can sent address label to your customer.');
                         consignee_email.tooltip('show');
-                        $('#open_shipment_div').addClass('d-none');
 
                     }
                     else if(service_type == 6){

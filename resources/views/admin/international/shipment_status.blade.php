@@ -244,6 +244,7 @@
                 table.row( $(this).parents('tr') ).remove().draw();
                 if(shipment_ids.length == 0){
                     $('#update_shipment_form button[type="submit"]').attr('disabled', 'disabled');
+                    $('#default_status_id').val(0);
                 }
             });
 
