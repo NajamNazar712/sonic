@@ -9350,7 +9350,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('receiving_date', function($invoice) {
                 if ($invoice->receiving_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->receiving_date)->format('Y-m-d');
                 }
                 else {
                     return '';
@@ -9358,7 +9358,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('deposit_date', function($invoice) {
                 if ($invoice->deposit_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->deposit_date)->format('Y-m-d');
                 }
                 else {
                     return '';

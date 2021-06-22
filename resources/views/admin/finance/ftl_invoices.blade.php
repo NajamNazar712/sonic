@@ -154,6 +154,7 @@
             
             $('#mark_as_received form input.receiving_date').pickadate({
 				firstDay: 1,
+				max: new Date(),
 				clear: '',
 				selectYears: true,
 				selectMonths: true,
