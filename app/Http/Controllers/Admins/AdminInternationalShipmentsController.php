@@ -268,7 +268,7 @@ class AdminInternationalShipmentsController extends Controller
                     $data = array();
                     $shipment = $shipment->first();
 
-                    if($shipment->shipper->status_id == 14){
+                    if($shipment->shipper_status_id == 14){
                         return response()->json(['status' => 0, 'error' => 'Shipment is already delivered!']);
                     }
                     $data['id'] = $shipment->id;
@@ -283,7 +283,7 @@ class AdminInternationalShipmentsController extends Controller
                     return response()->json(['status' => 1, 'details' => $data]);
 
                 } else {
-                    return response()->json(['status' => 0, 'error' => 'Shipment is Cancelled OR not International Shipment!']);
+                    return response()->json(['status' => 0, 'error' => 'Shipment is Cancelled OR not International Shipment OR with different status!']);
                 }
             }
             else{
@@ -292,7 +292,7 @@ class AdminInternationalShipmentsController extends Controller
                     $data = array();
                     $shipment = $shipment->first();
 
-                    if($shipment->shipper->status_id == 14){
+                    if($shipment->shipper_status_id == 14){
                         return response()->json(['status' => 0, 'error' => 'Shipment is already delivered!']);
                     }
 
