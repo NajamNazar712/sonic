@@ -307,12 +307,15 @@
                 'allowPlus': false
             });
             var shipment_ids = [];
+            var ccd_shipment_ids = [];
+            var ccd_tracking_numbers = [];
             var tracking_ids = [];
             var consolidation_ids = [];
             var notification_ids = [];
             var rider_info_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
+            var ccd_rider = null;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -486,6 +489,7 @@
                         }
                     }).done(function(data){
                         if (data.status == 1) {
+                            ccd_rider = parseInt(data.ccd_rider);
                             $('#route').val(route).trigger('change');
                             $("#deliveryNoteSubmitBtn").attr('disabled',false);
                         }
@@ -613,6 +617,31 @@
                                 notification_ids.push(1);
                                 rider_info_ids.push(1);
                                 $('#hub_id').val(data.hub);
+
+                                if(parseInt(data.ccd_shipment) == 1){
+                                    ccd_shipment_ids.push(data.shId);
+                                    ccd_tracking_numbers.push(data.tracking_number);
+
+                                    var ccd_shipment_html = '';
+                                    ccd_shipment_html += 'This shipment ' + data.tracking_number +' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.<br/>';
+                                    content = document.createElement('div');
+                                    content.innerHTML = ccd_shipment_html;
+                                    swal({
+                                        content: content,
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }
                                 if(data.crm_request.cod_change != null || data.crm_request.address_change != null || data.crm_request.phone_one_change != null){
                                     var html = '';
 
@@ -752,7 +781,30 @@
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
                                     table.order([0, 'desc']).draw();
-                                    console.log(data.crm_request);
+                                    if(parseInt(data.ccd_shipment) == 1){
+                                        ccd_shipment_ids.push(data.shId);
+                                        ccd_tracking_numbers.push(data.tracking_number);
+
+                                        var ccd_shipment_html = '';
+                                        ccd_shipment_html += 'This shipment ' + data.tracking_number +' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.<br/>';
+                                        content = document.createElement('div');
+                                        content.innerHTML = ccd_shipment_html;
+                                        swal({
+                                            content: content,
+                                            icon: 'info',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    }
                                     if(data.crm_request.cod_change != null || data.crm_request.address_change != null || data.crm_request.phone_one_change != null){
                                         var html = '';
 
@@ -813,6 +865,13 @@
                     notification_ids.splice(index, 1);
                     rider_info_ids.splice(index, 1);
                     rowsCount -= 1;
+
+                    var ccd_index = $.inArray(rid, shipment_ids);
+
+                    if (ccd_index !== -1) {
+                        ccd_shipment_ids.splice(ccd_index, 1);
+                        ccd_tracking_numbers.splice(ccd_index, 1);
+                    }
                 }
 
                 table.row( $(this).parents('tr') ).remove().draw();
@@ -847,7 +906,14 @@
             function create_delivery_note(){
                  var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                table.rows().nodes().each(function (index) {
+                var ccd_flag = true;
+                if(ccd_shipment_ids.length > 0){
+                    if(ccd_rider != 1){
+                        ccd_flag = false;
+                    }
+                }
+                if(ccd_flag == true){
+                    table.rows().nodes().each(function (index) {
                         var row = table.row(index);
 
                         if ($(row.node()).attr('consolidation_id')) {
@@ -861,148 +927,177 @@
                             }
                         }
                     });
-                if (consolidation_ids.length > 0) {
+                    if (consolidation_ids.length > 0) {
+                        $.ajax({
+                            url: '{{route('admin.delivery.note.consolidation_check')}}',
+                            method: 'POST',
+                            data: {
+                                'consolidation_ids': consolidation_ids,
+                                'shipment_ids': shipment_ids,
+                                '_token': '{!! csrf_token() !!}'
+                            }
+                        }).done(function (data) {
+                            if (data.missing_flag) {
+                                errors = 1;
+                                var html = '';
 
-                    $.ajax({
-                        url: '{{route('admin.delivery.note.consolidation_check')}}',
-                        method: 'POST',
-                        data: {
-                            'consolidation_ids': consolidation_ids,
-                            'shipment_ids': shipment_ids,
-                            '_token': '{!! csrf_token() !!}'
-                        }
-                    }).done(function (data) {
-                        if (data.missing_flag) {
-                            errors = 1;
-                            var html = '';
+                                html += 'The following Shipment(s) are missing from consolidation:<br/>';
 
-                            html += 'The following Shipment(s) are missing from consolidation:<br/>';
+                                $.each(data.missing_shipments, function (index, tracking) {
+                                    html += tracking + ', ';
+                                });
 
-                            $.each(data.missing_shipments, function (index, tracking) {
-                                html += tracking + ', ';
-                            });
+                                html = html.slice(0, -2);
 
-                            html = html.slice(0, -2);
-
-                            content = document.createElement('div');
-                            content.innerHTML = html;
-                            swal({
-                                content: content,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'Close',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
+                                content = document.createElement('div');
+                                content.innerHTML = html;
+                                swal({
+                                    content: content,
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'Close',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
                                     },
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            });
-                        } else {
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                });
+                            } else {
 
-                            swal({
-                                title: 'Are You Sure?',
-                                text: 'Select Yes to create the Delivery Note!',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function (confirm) {
-                                if (confirm) {
-                                    blockPagePermanently();
-                                    open_box_ids = [];
-                                    table.rows().every(function (index) {
-                                        var node = $(this.node());
-                                        if (node.find('td.open_box input').is(':checked')) {
-                                            open_box_ids.push(parseInt(node.attr('id')));
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to create the Delivery Note!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
                                         }
-                                    });
-                                    $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                    $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                    $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
-                                    $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                                    $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                                    $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                    $('#create_delivery_note_form input#selected_route_id').val(route);
-                                    if (special_rider_flag) {
-                                        $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
-                                        $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        open_box_ids = [];
+                                        table.rows().every(function (index) {
+                                            var node = $(this.node());
+                                            if (node.find('td.open_box input').is(':checked')) {
+                                                open_box_ids.push(parseInt(node.attr('id')));
+                                            }
+                                        });
+                                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                        $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
+                                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                        $('#create_delivery_note_form input#selected_route_id').val(route);
+                                        if (special_rider_flag) {
+                                            $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
+                                            $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
+                                        }
+
+                                        this_form.submit();
                                     }
-
-                                    this_form.submit();
-                                }
-                            });
+                                });
 
 
-                        }
-                    });
-                }else{
-                    swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to create the Delivery Note!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if(confirm){
-                        blockPagePermanently();
-                        open_box_ids = [];
-                        table.rows().every(function(index) {
-                            var node = $(this.node());
-                            if(node.find('td.open_box input').is(':checked')){
-                                open_box_ids.push(parseInt(node.attr('id')));
                             }
                         });
-                        $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                        $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                        $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
-                        $('#create_delivery_note_form input#notification_ids').val(notification_ids);
-                        $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
-                        $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                        $('#create_delivery_note_form input#selected_route_id').val(route);
-                        if(special_rider_flag){
-                            $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
-                            $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
-                        }
-                        
-                        this_form.submit();
-
                     }
-                });
+                    else{
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to create the Delivery Note!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                blockPagePermanently();
+                                open_box_ids = [];
+                                table.rows().every(function(index) {
+                                    var node = $(this.node());
+                                    if(node.find('td.open_box input').is(':checked')){
+                                        open_box_ids.push(parseInt(node.attr('id')));
+                                    }
+                                });
+                                $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_delivery_note_form input#open_box_ids').val(open_box_ids);
+                                $('#create_delivery_note_form input#notification_ids').val(notification_ids);
+                                $('#create_delivery_note_form input#rider_info_ids').val(rider_info_ids);
+                                $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                $('#create_delivery_note_form input#selected_route_id').val(route);
+                                if(special_rider_flag){
+                                    $('#create_delivery_note_form input#special_rider_name').val(special_rider_name);
+                                    $('#create_delivery_note_form input#special_rider_phone').val(special_rider_phone);
+                                }
+
+                                this_form.submit();
+
+                            }
+                        });
+                    }
                 }
-                
+                else{
+                    var ccd_html = '';
+
+                    ccd_html += 'The following Shipment(s) are Credit Card on Delivery shipments and rider is not allowed/trained to use POS for CCD shipments:<br/>';
+
+                    $.each(ccd_tracking_numbers, function (index, ccd_tracking) {
+                        ccd_html += ccd_tracking + ', ';
+                    });
+
+                    ccd_html = ccd_html.slice(0, -2);
+
+                    content = document.createElement('div');
+                    content.innerHTML = ccd_html;
+                    swal({
+                        content: content,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'Close',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    });
+                }
             }
 
 
@@ -1241,6 +1336,30 @@
                                     rider_info_ids.push(1);
                                     $('#hub_id').val(data.hub);
 
+                                    if(parseInt(data.ccd_shipment) == 1){
+                                        ccd_shipment_ids.push(data.shId);
+                                        ccd_tracking_numbers.push(data.tracking_number);
+
+                                        var ccd_shipment_html = '';
+                                        ccd_shipment_html += 'This shipment ' + data.tracking_number +' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.<br/>';
+                                        content = document.createElement('div');
+                                        content.innerHTML = ccd_shipment_html;
+                                        swal({
+                                            content: content,
+                                            icon: 'info',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'Close',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        });
+                                    }
                                 }
                             });
                     }
@@ -1296,6 +1415,30 @@
                                 rider_info_ids.push(1);
                                 table.order([0, 'desc']).draw();
 
+                                if(parseInt(data.ccd_shipment) == 1){
+                                    ccd_shipment_ids.push(data.shId);
+                                    ccd_tracking_numbers.push(data.tracking_number);
+
+                                    var ccd_shipment_html = '';
+                                    ccd_shipment_html += 'This shipment ' + data.tracking_number +' requires POS machine for Card swiping on delivery, please ensure that the rider has the training for using POS machine and the necessary arrangements (paper rolls and ink ready) for printing receipts.<br/>';
+                                    content = document.createElement('div');
+                                    content.innerHTML = ccd_shipment_html;
+                                    swal({
+                                        content: content,
+                                        icon: 'info',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'Close',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    });
+                                }
                             }
                         });
                     }

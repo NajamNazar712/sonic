@@ -730,6 +730,12 @@ class AdminTrackingController extends Controller
                     $details['tracking_number'] = $tracking_number;
 
                     $details['open_box'] = $shipment->open_box;
+                    if($shipment->payment_mode_id == 5){
+                        $details['ccd'] = 1;
+                    }
+                    else{
+                        $details['ccd'] = 9;
+                    }
 
                     $shipper = $shipment->user;
 
