@@ -6284,12 +6284,12 @@ class DeliveryController extends Controller
                     if($ccd_flag == false || ($ccd_flag == true && $rider->ccd == 1)){
                         $delivery_note->rider_id = $rider_id;
                         $delivery_note->save();
-if($delivery_note->otp == null){
-                        $otp_pin = rand(1000, 9999);
-                        $delivery_note->otp = $otp_pin;
-                        $delivery_note->save();
-                    }
-                    NotificationsController::send(137,$rider_id, $delivery_note_id);
+                        if ($delivery_note->otp == null) {
+                            $otp_pin = rand(1000, 9999);
+                            $delivery_note->otp = $otp_pin;
+                            $delivery_note->save();
+                        }
+                        NotificationsController::send(137, $rider_id, $delivery_note_id);
                         return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
                     }
                     else{
