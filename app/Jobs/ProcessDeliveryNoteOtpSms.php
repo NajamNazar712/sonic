@@ -74,7 +74,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
 
                 $sms->save();
 
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
@@ -166,7 +166,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
             }
 
             if ($error) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Error in Generate Session ID SMS API.<br/>Response Received: ' . json_encode($xml);
 
@@ -188,7 +188,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
             }
         }
         catch (RequestException $e) {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error in Generate Session ID SMS API.<br/>No Response';
 
@@ -259,7 +259,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
                 }
 
                 if ($error) {
-                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] SMS API';
                     $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($xml);
 
@@ -275,7 +275,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Response';
 
@@ -287,7 +287,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
             }
         }
         else {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error in SMS SMS API.<br/>SMS ID: ' . $sms->id . '<br/>No Entry';
 
@@ -324,7 +324,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
                 }
 
                 if ($error) {
-                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] SMS API';
                     $body = 'Error in Ping SMS API.<br/>Response Received: ' . json_encode($xml);
 
@@ -332,7 +332,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API';
                 $body = 'Error in Ping SMS API.<br/>No Response';
 
@@ -340,7 +340,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
             }
         }
         else {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['muzaffar.kareem@trax.pk','muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error in Ping SMS API.<br/>No Entry';
 
