@@ -92,6 +92,7 @@
                         <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
                         <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
                         <li><a href="{{ route('cod.ledger') }}">General Ledger</a></li>
+                        <li><a href="{{ route('cod.finance.invoice.index') }}">Invoice</a></li>
 
                     </ul>
                 </li>
