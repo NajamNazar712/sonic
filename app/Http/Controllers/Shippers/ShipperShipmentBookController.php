@@ -4386,7 +4386,7 @@ class ShipperShipmentBookController extends Controller
 
             $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
 
-            $shipment = Shipment::where('user_id', session('user_id'))->where('consignee_phone_number_1', $consignee_phone_number);
+            $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('consignee_phone_number_1', $consignee_phone_number);
 
             if ($shipment->exists()) {
                 $shipment = $shipment->latest('id')->first();
