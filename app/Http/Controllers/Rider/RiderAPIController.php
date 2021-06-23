@@ -7029,6 +7029,7 @@ class RiderAPIController extends Controller
                 $information['delivery_note_id'] = $delivery_note->id;
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
+                $information['delivery_note_otp'] = $delivery_note->otp;
                 $information['summary'] = array();
                 $total_shipments = $delivery_note->shipments_count;
                 $information['summary']['deliveries'] = $total_shipments;
@@ -7075,6 +7076,7 @@ class RiderAPIController extends Controller
 
                     $shipment_data = $delivery_note_shipment->shipment;
                     $shipment_id = $shipment_data->id;
+                    $payment_mode = $shipment_data->payment_mode_id;
                     $tracking_number = $shipment_data->tracking_number;
                     $consignee_name = $shipment_data->consignee_name;
                     $consignee_address = $shipment_data->consignee_address;
@@ -7134,6 +7136,7 @@ class RiderAPIController extends Controller
                     $deliveries['latitude'] = NULL;
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
+                    $deliveries['ccd'] = ($payment_mode == 5) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();

@@ -301,7 +301,7 @@ class ShipperFinanceController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Payment Details</title>
+                    <title>Payment Details / Sales Tax Invoice</title>
 
                     <style>
                       @page {
@@ -356,11 +356,11 @@ class ShipperFinanceController extends Controller
                           <tbody>
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
-                              <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
+                              <td class="text-center align-middle color primary"><strong>Payment Details / Sales Tax Invoice</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Payment ID</strong></td>
+                              <td class="color secondary"><strong>Payment / Invoice ID</strong></td>
                               <td>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT). '</td>
                               <td rowspan="11" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
@@ -372,17 +372,6 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipper->name . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>NTN</strong></td>
-                              <td>' . $shipper->ntn_no . '</td>
-                            </tr>';
-                              if($shipper->strn_no){
-                                    $html .= '
-                                        <tr>
-                                          <td class="color secondary"><strong>STRN</strong></td>
-                                          <td>' . $shipper->strn_no . '</td>
-                                        </tr>';
-                              };
-                   $html .='<tr>
                               <td class="color secondary"><strong>Client Bank</strong></td>
                               <td>' . $shipper_bank->bank->name . '</td>
                             </tr>
@@ -401,6 +390,14 @@ class ShipperFinanceController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Reference Number</strong></td>
                               <td>' . $done_payment->reference_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>NTN</strong></td>
+                              <td>' . $shipper->ntn_no . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>STRN</strong></td>
+                              <td>' . $shipper->strn_no . '</td>
                             </tr>
       ';
 
