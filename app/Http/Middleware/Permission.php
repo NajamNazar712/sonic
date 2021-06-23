@@ -514,7 +514,7 @@ class Permission
 
             'reports.shipper_insurance.index' => 502,
             'reports.shipper_insurance.list' => 502,
-
+            
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -972,7 +972,11 @@ class Permission
             'route_management.index' => 499,
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
-			'finance.ftl_invoice.index' => 509,           
+			'finance.ftl_invoice.index' => 509,  
+            
+            'reports.operation_service_level.index' => 524,
+            'reports.operation_service_level.list' => 524,
+            
             
            
         ],

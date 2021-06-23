@@ -2158,6 +2158,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('charges', 'Admins\AdminReportsController@shipper_insurance_charges')->name('charges');
 
         });
+
+        Route::prefix('operation_service_level')->name('operation_service_level.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@operation_service_level_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@operation_service_level_list')->name('list');
+        });
     });
 
     //Reports end
