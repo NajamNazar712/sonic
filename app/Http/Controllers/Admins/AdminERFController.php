@@ -133,10 +133,10 @@ class AdminERFController extends Controller
             $departments = AdminDepartment::where('id', '=', session('department_id'))->select('id', 'name')->get();
         }
         $designations = EmployeeDesignation::where('status',1)->select('id','name')->get();
-        $department_heads = Admin::whereIn('id', [406,12,3,57,70,372,69,32])->where('status', 1)->select('id','name')->get();
+        $department_heads = Admin::whereIn('role_id', [2,3,4,5,6,52,58])->where('status', 1)->select('id','name')->get();
         $admin_positions = AdminPositionTypes::select('id','name')->get();
         $allowances = Allowances::all();
-        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',4)->get();
+        $employee_trax_id = Employee::select('trax_id')->where('status_id','!=',2)->get();
         $today = Carbon::now()->endOfDay();
 
         return view('admin.human_resource.erf.add')->with(['cities' => $cities,'hubs' => $hubs,'departments' => $departments,'designations' => $designations,'department_heads' => $department_heads,'admin_positions' => $admin_positions,'allowances' => $allowances,'employee_trax_id' => $employee_trax_id,'today' => $today]);
@@ -488,14 +488,13 @@ class AdminERFController extends Controller
         }
 
     public function file_upload(Request $request){
-
-      
+        //dd($request->file);
         $erf_id = str_replace("ERF","",$request->erf_id);
         $erf =EmployeeRequisition::find($erf_id);
         $date = Carbon::now()->format('Y_m_d');
 
         $request->validate([
-            'file' => 'required|mimes:jpeg,png,pdf,doc,docx|max:5120',
+            'file' => 'required|mimes:png,jpg,pdf,doc,docx|max:5120',
         ]);
 
         $file_type = request()->file->getClientOriginalExtension();
