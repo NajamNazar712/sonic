@@ -126,7 +126,7 @@
                             head.push('Received Amount');
                             head.push('Tax Amount');
                             head.push('Deposit Date');
-                            // head.push('Status');
+                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -145,7 +145,7 @@
                                 row.push(values.received_amount);
                                 row.push(values.tax_amount);
                                 row.push(values.deposit_date);
-                                //row.push(values.status);
+                                row.push(values.status);
 
                                 body.push(row);
                             });
