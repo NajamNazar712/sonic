@@ -734,7 +734,7 @@ class AdminTrackingController extends Controller
                         $details['ccd'] = 1;
                     }
                     else{
-                        $details['ccd'] = 9;
+                        $details['ccd'] = 0;
                     }
 
                     $shipper = $shipment->user;
