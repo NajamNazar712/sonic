@@ -7974,7 +7974,7 @@ class RiderAPIController extends Controller
         } else {
 
             $rider_id = $request->rider_id;
-
+            $status_reason_id = ($request->has('status_reason_id')) ? $request->status_reason_id : null;
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
             if (!RiderReturnDelivery::where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                 if (!Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 25)->exists()) {
@@ -7983,7 +7983,7 @@ class RiderAPIController extends Controller
                             ->where('reference_1_id', $request->return_note_id)
                             ->where('shipment_id', $request->shipment_id)
                             ->where('shipper_status_id', $request->shipper_status_id)
-                            ->where('status_reason_id', $request->status_reason_id)
+                            ->where('status_reason_id', $status_reason_id)
                             ->where('rider_id', $rider_id);
                         if (!$shipments->exists()) {
                             $shipment = Shipment::find($request->shipment_id);
@@ -8003,7 +8003,7 @@ class RiderAPIController extends Controller
                             $rider_return_delivery->actual_location_latitude = $request->actual_location_latitude;
                             $rider_return_delivery->actual_location_longitude = $request->actual_location_longitude;
                             $rider_return_delivery->rider_status_id = $request->shipper_status_id;
-                            $rider_return_delivery->rider_status_reason_id = ($request->status_reason_id != -1) ? $request->status_reason_id : null;;
+                            $rider_return_delivery->rider_status_reason_id = $status_reason_id;
                             $rider_return_delivery->delivered_status = 0;
                             $shipper_phone_number_1 = $pickup_address->phone;
                             $shipper_address = $pickup_address->pickup_address;
@@ -8071,7 +8071,7 @@ class RiderAPIController extends Controller
                                     $remarks = $request->remarks;
                                 }
 
-                                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, ($request->status_reason_id != -1) ? $request->status_reason_id : null, $remarks, NULL, NULL, $request->return_note_id, NULL, 1, NULL, $rider_id);
+                                ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $status_reason_id, $remarks, NULL, NULL, $request->return_note_id, NULL, 1, NULL, $rider_id);
                                 ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
                                 $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                                 if (!$rider_return_note_status->exists()) {
