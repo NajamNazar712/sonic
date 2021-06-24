@@ -1100,7 +1100,6 @@ class ShipperShipmentBookController extends Controller
             ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
-                if ($shipment->booking_type_id == 3 && $user_type != 3) {
 
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
                     foreach ($shipment->items as $shipment_item){
@@ -1256,7 +1255,7 @@ class ShipperShipmentBookController extends Controller
                                     $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>
                                     ';
                                 }
-                      
+
 
                     }
 
@@ -1291,7 +1290,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary"><strong>Datetime</strong></td>
                                 <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                               </tr>';
-                              
+
                                 if($shipment->business_category->id==1){
                                     $table_start.='<tr>
                                     <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
@@ -1304,7 +1303,7 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>
                                 ';
                                 }
-                      
+
 
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
@@ -1390,7 +1389,7 @@ class ShipperShipmentBookController extends Controller
                     if($shipment->pickup_address->pickup_brand_name != NULL){
                         // $company_name = $shipment->user->brand_name;
                         $company_name = $shipment->pickup_address->pickup_brand_name;
-                        
+
 
                     }else{
                         if($shipment->user->brand_name != NULL){
@@ -1400,7 +1399,7 @@ class ShipperShipmentBookController extends Controller
                             $company_name = $shipment->user->name;
                         }
                     }
-                    
+
 
                     if($return_address_id == NULL){
                         if ($shipment->booking_type_id != 4) {
@@ -1631,8 +1630,8 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
                         ';
                         }
-                        
-                        
+
+
                     } else {
                         $table_end = '
                               <tr>
@@ -1661,13 +1660,12 @@ class ShipperShipmentBookController extends Controller
                     }
                         if($shipment->shipment_detail()->exists()){
                             if($shipment->shipment_detail->is_open==1){
-                        $table_end .= '<tr>
-                        <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
-                        <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
-                        
-                        </tr>';
-                    }
-                }
+                                $table_end .= '<tr>
+                                <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Open Box</strong></td>
+                                <td colspan="4" class="border twice-top twice-bottom twice-left"><strong> Yes <span><img src="'.asset('img/open_box_icon.png').'" ></span></strong></td>
+                                </tr>';
+                            }
+                        }
                     if ($user_type != 4 && $type != 'pdf') {
                         $table_end .= '
                               </tr>
@@ -1796,33 +1794,6 @@ class ShipperShipmentBookController extends Controller
                               </tr>';
                         $shipment_details .= $table_end;
 
-                    }
-                    if ($shipment->booking_type_id == 6) {
-
-                        $shipment_details .= $table_start;
-                        
-                      /*  $items = $shipment->items;
-
-                        $item = $items[0];
-
-                        $shipment_details .= '
-                              <tr>
-                                <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
-                                <td class="color secondary border twice-top"><strong>Type</strong></td>
-                                <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                                <td>' . $item->quantity . '</td>
-                                <td colspan="2" class="border twice-top"></td>
-                              </tr>
-                              <tr>
-                                <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                                <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                              </tr>
-                    ';
-
-                        $item = $items[1];*/
-                        
-                        $shipment_details .= $table_end;
                     }
 
 
@@ -1967,6 +1938,7 @@ class ShipperShipmentBookController extends Controller
 
         return $html;
     }
+
 
     public function print_air_waybill(Request $request) {
 
