@@ -6408,7 +6408,10 @@ class DeliveryController extends Controller
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
                 if($delivery_note){
-
+                    $rider = $delivery_note->rider;
+                    if($shipment->payment_mode_id == 5 && $rider->ccd == 0){
+                        return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
+                    }
                     $total_shipments = $delivery_note->shipments_count;
                     $total_shipments++;
                     $cod_amount = $delivery_note->total_cod_amount;

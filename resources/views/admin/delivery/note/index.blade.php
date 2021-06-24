@@ -866,7 +866,7 @@
                     rider_info_ids.splice(index, 1);
                     rowsCount -= 1;
 
-                    var ccd_index = $.inArray(rid, shipment_ids);
+                    var ccd_index = $.inArray(rid, ccd_shipment_ids);
 
                     if (ccd_index !== -1) {
                         ccd_shipment_ids.splice(ccd_index, 1);
