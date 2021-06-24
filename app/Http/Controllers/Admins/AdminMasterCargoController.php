@@ -405,9 +405,9 @@ class AdminMasterCargoController extends Controller
                 }
 
                 if ($allowed) {
-                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id))) {
+                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
                         if($shipment->return_address_id != NULL){
-                            if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id != $hub_id)){
+                            if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id == $hub_id)){
                                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                             }
                         }
@@ -924,9 +924,9 @@ class AdminMasterCargoController extends Controller
                     }
 
                     if ($allowed) {
-                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id) )) {
+                        if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
                             if($shipment->return_address_id != NULL){
-                                if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id != $hub_id)){
+                                if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id == $hub_id)){
                                     return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
                                 }
                             }
