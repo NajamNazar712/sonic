@@ -2646,6 +2646,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update','Admins\GlobalSettingsController@rcp_tat_update')->name('update');
         });
 
+        Route::prefix('debriefing_time_setting')->name('debriefing_time_setting.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_time_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
+        });
+
     });
 
 

@@ -4270,4 +4270,37 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
         }
     }
+
+    public function debriefing_time_setting_index(){
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time = $settings->text;
+        }
+        else {
+            $time = '00:00';
+        }
+
+        return view('admin.settings.debriefing_time_setting_index')->with(['time' => $time]);
+
+    }
+
+    public function debriefing_time_setting_update(Request $request){
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $settings->text = $request->debriefing_time;
+        }
+        else {
+            $settings = new GlobalSettings();
+            $settings->text = $request->debriefing_time;
+            $settings->type = 'debriefing_time_setting';
+            $settings->setting_value = 0;
+        }
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

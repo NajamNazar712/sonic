@@ -796,7 +796,7 @@ class Permission
 
 			'settings.sms_shipper_wise.index' => 388,
             'settings.sms_shipper_wise.update' => 388,
-
+            
 
             'settings.pickup_address_wise_payment_accounts.index' => 391,
 
@@ -973,6 +973,8 @@ class Permission
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
 			'finance.ftl_invoice.index' => 509,           
+            'settings.debriefing_time_setting.index' => 526,
+            'settings.debriefing_time_setting.update' => 526,
             
            
         ],

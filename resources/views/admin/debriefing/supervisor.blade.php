@@ -27,6 +27,7 @@
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Target Cash</th>
                         <th class="border-primary border-darken-1">Pending Cash Collection</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -203,6 +204,8 @@
                     { data:'pending_shipments_link' ,name: 'pending_shipments_link', class: 'align-middle pending_shipments_link',orderable: false, searchable: false},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     { data:'pending_cash_collection' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle pending_cash_collection'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -355,7 +358,13 @@
                     });
 
             });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                console.log(id);
+               
+            });
             
 
             $('body').on('click','.printdeliverynote',function () {
