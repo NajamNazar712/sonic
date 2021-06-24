@@ -404,7 +404,7 @@
             });
 
             $("#addRider").on("show.bs.modal", function(e) {
-                $.get( "/admin/management/riders/add", function( data ) {
+                $.get( "/admin/management/riders/add/1", function( data ) {
                     $("#addRiderDiv").html(data);
                     var html = '<input name="rider_type" value="1" type="hidden">';
                     $('#addRiderForm').append(html);
@@ -414,7 +414,7 @@
 
                 var id = $(e.relatedTarget).data('target-id');
 
-                $.get( "/admin/management/riders/"+id+"/edit", function( data ) {
+                $.get( "/admin/management/riders/"+id+"/edit/1", function( data ) {
                     $("#editRiderDiv").html(data);
                     var html = '<input name="rider_type" value="1" type="hidden">';
                     $('#editRiderForm').append(html);
