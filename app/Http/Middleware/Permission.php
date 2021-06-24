@@ -899,6 +899,7 @@ class Permission
             'telenor.return.submit' => 400,
             'telenor.call.index' => 402,
             'telenor.call.list' => 402,
+            'telenor.return.bulk_return' => 525,
 
 
             'leads.index' => 416,

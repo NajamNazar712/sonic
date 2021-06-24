@@ -2903,6 +2903,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@return_index')->name('index');
             Route::post('shipment_info', 'Admins\AdminNsaAccountShipmentController@return_shipment_info')->name('shipment_info');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@return_submit')->name('submit');
+            Route::get('bulk_return', 'Admins\AdminNsaAccountShipmentController@bulk_return_index')->name('bulk_return');
+            Route::post('bulk_return/submit', 'Admins\AdminNsaAccountShipmentController@bulk_return_submit')->name('bulk_return_submit');
         });
 
         Route::prefix('call')->name('call.')->group(function () {
