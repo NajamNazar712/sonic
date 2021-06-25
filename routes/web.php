@@ -1235,6 +1235,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('supervisor')->name('supervisor.')->group(function (){
             Route::get('','Admins\LastMileDebriefingController@supervisor_view')->name('index');
             Route::get('list','Admins\LastMileDebriefingController@supervisor_list')->name('list');
+            Route::post('agents','Admins\LastMileDebriefingController@supervisor_agents')->name('agents');
+            Route::post('assign_agents','Admins\LastMileDebriefingController@supervisor_assign_agents')->name('assign_agents');
+            
+            
         });
         Route::prefix('agents_call_monitoring')->name('agents_call_monitoring.')->group(function (){
             Route::get('','Admins\LastMileDebriefingController@agents_call_monitoring_view')->name('index');

@@ -15,7 +15,10 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\City;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\http\Models\WarehouseStock;
@@ -38,7 +41,61 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_view()
     {
-        return view('admin.debriefing.supervisor');
+        $hubs = City::where('hub', 1)->get();
+
+        return view('admin.debriefing.supervisor')->with(['hubs' => $hubs]);
+    }
+
+    public function supervisor_agents(Request $request){
+        $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
+        if(count($admin_ids) > 0){
+
+            $agents = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->get();
+           
+            return response()->json(['status' => 1, 'agents' => $agents]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Agents Does\'nt exist!']);
+        }
+    }
+
+    public function supervisor_assign_agents(Request $request){
+        $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
+        $exists_count = 0;
+        $all_count = 0;
+        $not_exist = 0;
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $all_count++;
+                $agent_call_monitorings =  AgentCallMonitoring::where([
+                    ['agent_id', '=', $request->agent_id],
+                    ['shipment_id', '=', $delivery_note_shipment->shipment_id],
+                    ['delivery_note_id', '=', $request->delivery_note_id],
+                ]);
+                if($agent_call_monitorings->exists()){
+                    $exists_count++;
+                }else{
+                    $not_exist++;
+                    $agent_call_monitoring = new AgentCallMonitoring;
+                                $agent_call_monitoring->agent_id= $request->agent_id;
+                                $agent_call_monitoring->shipment_id= $delivery_note_shipment->shipment_id;
+                                $agent_call_monitoring->delivery_note_id= $request->delivery_note_id;
+                                $agent_call_monitoring->save();
+                }
+            }
+        }
+        if($not_exist==$all_count || $exists_count==0){
+            return redirect()->back()->with('success', 'Agents Assign successfully.');
+        }elseif($not_exist==0){
+            return redirect()->back()->with('error', 'Agents Already Assigned.');
+
+        }else{
+            return redirect()->back()->with('success', 'Agents Assign to '.$not_exist.' Shipments successfully.');
+
+        }
+
+        
     }
 
     public function supervisor_list(Request $request)

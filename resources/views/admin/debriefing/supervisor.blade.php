@@ -67,14 +67,15 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="assign_agent_form" class="form-horizontal" action="{{ route('admin.settings.route_management.store') }}" method="POST" novalidate="novalidate">
+                <form id="assign_agent_form" class="form-horizontal" action="{{ route('admin.debriefing.supervisor.assign_agents') }}" method="POST" novalidate="novalidate">
                     @csrf
                     <div class="modal-body">
+                        <input type="hidden" name="delivery_note_id" id="delivery_note_id_input">
                         <div class="row justify-content-center">
                             <div class="col-6 form-group">
-                                <label for="starting_point_id">Hub</label>
+                                <label for="hub_id">Hub</label>
 
-                                <select class="form-control starting_point_id" name="hub_id" id="hub_id" data-rule-required="true" data-msg-required="Hub is required">
+                                <select class="form-control hub_id" name="hub_id" id="hub_id" data-rule-required="true" data-msg-required="Hub is required">
                                     @foreach($hubs as $hub)
                                         <option value="{{$hub->id}}">{{$hub->name}}</option>
                                     @endforeach
@@ -83,16 +84,11 @@
                         </div>
                         
                         <div class="row justify-content-center">
-
-                            <div class="col-6 form-group">
-                                    <label for="end_point_id">Agents</label>
-                                    <select class="form-control" name="agent_id" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
-                                        @foreach($agents as $agent)
-                                            <option value="{{$agent->id}}">{{$agent->name}}</option>
-                                        @endforeach
-                                    </select>
+                            <div class="col-6 form-group d-none" id="agend_input">
+                                <label for="end_point_id">Agents</label>
+                                <select class="form-control" name="agent_id" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
+                                </select>
                             </div>
-                            
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -167,6 +163,44 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            
+            $('#agent_id').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder: 'Select Agent *',
+				width: '100%',
+			});
+
+            $('#hub_id').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Select Hub *'
+			}).bind('change', function(asd) {
+				
+                
+                console.log($(this).val());
+                $.ajax({
+                        url: '{!! route('admin.debriefing.supervisor.agents') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub_id': $(this).val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+
+                            if(data.status){
+                                $('#agend_input').removeClass('d-none');
+                                $.each(data.agents, function (index, agent) {
+                                    $('#agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
+                                });
+                            }else{
+                                $('#agend_input').addClass('d-none');
+
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            
+                });
+				
+			});
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -407,8 +441,11 @@
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
                 var id = parseInt($(this).parents('tr').attr('id'));
+                
+                $('#delivery_note_id_input').val(id);
 
-                console.log(id);
+                $('#AssignAgentModal').modal('show');
+                
                
             });
             
@@ -446,6 +483,8 @@
                         }
                     });
             }
+
+           
         });
     </script>
 @endsection
