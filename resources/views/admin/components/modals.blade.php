@@ -419,7 +419,7 @@
 <!--Shipment Charges Modal -->
 <!--Password Change Modal -->
 @if(Session::has('first_login') && session('first_login') != 1)
-    <div class="modal fade text-left" id="FirstLoginPasswordChangeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FirstLoginPasswordChangeModal"
+    <div class="modal fade text-left" id="FirstLoginPasswordChangeModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="FirstLoginPasswordChangeModal"
          aria-hidden="true">
         <div class="modal-dialog modal-m" role="document">
             <div class="modal-content">
