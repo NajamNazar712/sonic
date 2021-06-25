@@ -96,7 +96,7 @@ class AdminLoginController extends Controller
     }
     public function credentials(Request $request){
         $environment = config('app.env');
-        if($environment == 'production' || $environment == 'staging') {
+//        if($environment == 'production' || $environment == 'staging') {
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
                 $admin = $admin->first();
@@ -114,15 +114,15 @@ class AdminLoginController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
             }
-        }
-        else{
-            return response()->json(['status' => 1]);
-        }
+//        }
+//        else{
+//            return response()->json(['status' => 1]);
+//        }
     }
 
     public function verify_otp(Request $request){
         $environment = config('app.env');
-        if($environment == 'production' || $environment == 'staging') {
+//        if($environment == 'production' || $environment == 'staging') {
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
                 $admin = $admin->first();
@@ -134,9 +134,9 @@ class AdminLoginController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
             }
-        }
-        else{
-            return response()->json(['status' => 1]);
-        }
+//        }
+//        else{
+//            return response()->json(['status' => 1]);
+//        }
     }
 }
