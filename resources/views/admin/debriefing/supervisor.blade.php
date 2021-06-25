@@ -56,6 +56,52 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Assign Agent</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="assign_agent_form" class="form-horizontal" action="{{ route('admin.settings.route_management.store') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            <div class="col-6 form-group">
+                                <label for="starting_point_id">Hub</label>
+
+                                <select class="form-control starting_point_id" name="hub_id" id="hub_id" data-rule-required="true" data-msg-required="Hub is required">
+                                    @foreach($hubs as $hub)
+                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row justify-content-center">
+
+                            <div class="col-6 form-group">
+                                    <label for="end_point_id">Agents</label>
+                                    <select class="form-control" name="agent_id" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
+                                        @foreach($agents as $agent)
+                                            <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                        @endforeach
+                                    </select>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="AssignAgentBtn" type="submit" class="btn btn-info">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
