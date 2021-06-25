@@ -62,7 +62,7 @@ class AdminParcelHistoryController extends Controller
             ->leftjoin('riders as r', 'r.id', '=', 'open_parcel_histories.user_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
             ->leftjoin('admins as a', 'a.id', '=', 'open_parcel_histories.user_id')
-            ->select('open_parcel_histories.id as id', 's.tracking_number as tracking_number','r.name as rider_name', 'a.name as admin_name', 'open_parcel_histories.user_mode as user_mode', 'open_parcel_histories.remarks as remarks', 'open_parcel_histories.amount as amount', 'open_parcel_histories.date', 'c.name as city');
+            ->select('open_parcel_histories.id as id', 's.tracking_number as tracking_number','r.name as rider_name', 'a.name as admin_name', 'open_parcel_histories.user_mode as user_mode', 'open_parcel_histories.user_id as user', 'open_parcel_histories.remarks as remarks', 'open_parcel_histories.amount as amount', 'open_parcel_histories.date', 'c.name as city');
 
         $datatables = Datatables::of($open_parcel_history)
             ->editColumn('tracking_number_link', function ($open_parcel) {
