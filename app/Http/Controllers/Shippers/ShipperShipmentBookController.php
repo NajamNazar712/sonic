@@ -3491,7 +3491,7 @@ class ShipperShipmentBookController extends Controller
 
 
         if ($shipper_shipping_modes->exists()) {
-            dd(1);
+         
             $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
 
             $city_shipping_modes = CityDelivery::where('city_id', $request->consignee_city_id)->where('booking_type_id', $request->service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
