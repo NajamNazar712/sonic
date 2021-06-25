@@ -972,9 +972,10 @@ class Permission
             'route_management.index' => 499,
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
-			'finance.ftl_invoice.index' => 509,           
-            
-           
+			'finance.ftl_invoice.index' => 509,
+
+            'otp.admin.index' => 527,
+            'otp.admin.list' => 527,
         ],
 
         'shipper' => [
