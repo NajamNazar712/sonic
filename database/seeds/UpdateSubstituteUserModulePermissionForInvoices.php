@@ -12,7 +12,7 @@ class UpdateSubstituteUserModulePermissionForInvoices extends Seeder
     public function run()
     {
         DB::table('substitute_user_module_permissions')->insert(array(
-            array('id' => 14, 'name' => 'Invoice')
+            array('id' => 14, 'name' => 'Finance Payments - Invoices')
         ));
     }
 }
