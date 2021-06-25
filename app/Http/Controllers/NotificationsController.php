@@ -2485,7 +2485,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[invoice]') !== FALSE) {
-                        $invoice = AdminFinanceController::generate_invoice_print($reference_1_id, TRUE);
+                        $invoice = AdminFinanceController::email_print_invoice($reference_1_id, TRUE);
 
                         $body = str_replace('[invoice]', preg_replace('/\r|\n/', '', $invoice), $body);
                     }

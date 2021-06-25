@@ -76,7 +76,8 @@ use App\Http\Models\InvoiceShipment;
 use App\Http\Models\InvoiceStatus;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\InvoiceForReimbursement;
-
+use SnappyImage;
+use SnappyPDF;
 use Auth;
 use DB;
 
@@ -9765,4 +9766,10 @@ class AdminFinanceController extends Controller
         // $writer->save('php://output');
     }
 
+    static public function  email_print_invoice($id,$bool){
+        $invoice = self::generate_invoice_print($id,$bool);
+        SnappyPDF::loadHTML($invoice)->save('reports/invoice_'. $id .'.pdf');
+        $link = url('/') . '/' . 'reports/invoice'. $id .'.pdf';
+        return $link;
+    }
 }
