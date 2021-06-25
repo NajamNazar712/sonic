@@ -218,13 +218,8 @@
                 dropdownParent:$('#settings_form')
             }).bind('change', function () {
                 var id = parseInt($(this).val());
-                if(id === 1){
                     $('#auto_comment').val(comment_text);
                     $('#auto_comment').attr('disabled', false);
-                }else{
-                    $('#auto_comment').val('');
-                    $('#auto_comment').attr('disabled', true);
-                }
             });
 
             var checked;
