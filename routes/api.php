@@ -257,5 +257,13 @@ Route::name('api.')->group(function () {
 
     });
 
+    Route::prefix('shipper')->name('shipper.')->group(function() {
+        Route::post('login', 'ShipperAPIController@login')->name('login');
+        Route::middleware('ShipperAPIToken')->group(function () {
+            Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
+        });
+
+    });
+
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
 });
