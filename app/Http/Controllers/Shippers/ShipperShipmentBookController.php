@@ -1078,8 +1078,12 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
-           
-            ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+            if ($user_type != 2) {
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+            }
+            else {
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, Auth::id());
+            }
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
