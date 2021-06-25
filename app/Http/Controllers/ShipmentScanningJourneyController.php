@@ -17,12 +17,12 @@ class ShipmentScanningJourneyController extends Controller
         $add_scanning_history->user_id = $user_id;
         $add_scanning_history->substitute_user_id = $substitute_user_id;
 
-        $whip = new Whip();
-        $client_address = $whip->getValidIpAddress();
+        // $whip = new Whip();
+        // $client_address = $whip->getValidIpAddress();
 
-        if ($client_address != '') {
-            $add_scanning_history->ip_address = $client_address;
-        }
+        // if ($client_address != '') {
+        //     $add_scanning_history->ip_address = $client_address;
+        // }
 
         $add_scanning_history->save();
     }

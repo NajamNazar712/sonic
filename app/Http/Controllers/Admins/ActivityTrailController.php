@@ -29,12 +29,12 @@ class ActivityTrailController extends Controller
         $log->action_id = $action_id;
         $log->emailed = $dont_send_email;
 
-        $whip = new Whip();
-        $client_address = $whip->getValidIpAddress();
+        // $whip = new Whip();
+        // $client_address = $whip->getValidIpAddress();
 
-        if ($client_address != '') {
-            $log->ip_address = $client_address;
-        }
+        // if ($client_address != '') {
+        //     $log->ip_address = $client_address;
+        // }
 
         $log->save();
     }
