@@ -579,7 +579,6 @@ class AdminTrackingController extends Controller
     }
 
     public function cx_quick_tracking_index(){
-        return redirect()->route('admin.access_denied');
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();

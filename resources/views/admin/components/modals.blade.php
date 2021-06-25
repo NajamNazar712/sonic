@@ -437,6 +437,17 @@
                         <div class="form-body">
                             <p>You have to change your password to make your sonic account more secure.</p>
                             <div class="form-group col">
+                                <label for="password">Current Password:<span class="danger">*</span>
+                                </label>
+                                <div class="form-group position-relative">
+                                    <input type="password" class="form-control required" id="current_password" placeholder="Minimum 6 Character" value="" name="current_password" data-rule-minlength="6" data-msg-minlength="Current Password needs to be at-least 6 Characters">
+                                    <div class="form-control-position" id="peye">
+                                        <i class="la la-eye success"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col">
                                 <label for="password">Enter Password:<span class="danger">*</span>
                                 </label>
                                 <div class="form-group position-relative">

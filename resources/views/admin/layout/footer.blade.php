@@ -72,24 +72,30 @@
                 error.addClass('w-100').appendTo(element.parent('.form-group'));
             },
             submitHandler: function(form) {
+                var current_password = $('#current_password').val();
                 var new_password = $('#new_password').val();
                 var confirm_password = $('#confirm_password').val();
-                if(new_password === confirm_password){
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Password is being updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
+                if (current_password !== new_password) {
+                    if(new_password === confirm_password){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Password is being updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                    else{
+                        var error = "The password and confirmation password do not match";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
                 else{
-                    var error = "The password and confirmation password do not match";
+                    var error = "The current and new password cannot be same";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-
             }
         });
         @endif
