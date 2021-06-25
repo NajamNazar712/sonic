@@ -55,6 +55,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">CCD Receipts</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -104,6 +105,40 @@
         </div>
     </div>
     <!--Shipments popup -->
+    <!--CCD Slip popup-->
+    <div class="modal fade text-left" id="ViewCCDSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewCCDSlip"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">CCD Receipts View</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <table class="table table-bordered datatable" id="ccd_slip_table" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking No</th>
+                            <th class="border-primary border-darken-1">CCD Slip</th>
+
+                        </tr>
+                        </thead>
+                    </table>
+
+                    <hr>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -423,6 +458,7 @@
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -748,6 +784,58 @@
                         }
                     });
 
+            });
+
+            $('#datatable tbody').on('click','tr td.ccd_image button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                /*$('#ViewCCDSlip .modal-body').html('');*/
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.pending.shipments.ccd_slip') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function (data){
+                        if(data.status){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            $('#ViewCCDSlip').modal('show');
+                            ccd_slip_table = $('#ccd_slip_table').DataTable({
+                                dom: 'ltipr',
+                                ordering:false,
+                                paging:false,
+                                columns: [
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'tracking_number', class: 'align-middle tracking_number form-group'},
+                                    {name: 'ccd_image', class: 'align-middle ccd_image form-group'}
+                                ],
+
+                                rowCallback: function(row, data, index) {
+                                    var info = ccd_slip_table.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                },
+                                initComplete: function() {
+
+                                    // this.api().table().columns.adjust();
+                                }
+                            });
+
+                            $.each(data.ccd_slips, function (index, value) {
+                                ccd_slip_table.row.add([0, value.tracking_number, value.ccd_image]);
+                                ccd_slip_table.draw(true);
+                            });
+                        }
+                    });
+
+            });
+
+            $('#ViewCCDSlip').on('hidden.bs.modal', function () {
+                ccd_slip_table.clear();
+                ccd_slip_table.destroy();
             });
 
             $('#track_form').bind('submit',function (e) {

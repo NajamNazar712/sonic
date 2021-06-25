@@ -53,6 +53,7 @@
                             <th class="border-primary border-darken-1">Rider Location</th>
                             <th class="border-primary border-darken-1">Existing Location</th>
                             <th class="border-primary border-darken-1">Confirm Location</th>
+                            <th class="border-primary border-darken-1">CCD Slip</th>
                         </tr>
                         </thead>
                     </table>
@@ -370,7 +371,8 @@
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'rider_location',name: 'rider_location', class: 'align-middle text-center rider_location',orderable: false, searchable: false},
                     {data:'existing_location',name: 'existing_location', class: 'align-middle text-center existing_location',orderable: false, searchable: false},
-                    {data:'confirm_location',name: 'confirm_location', class: 'align-middle text-center confirm_location',orderable: false, searchable: false}
+                    {data:'confirm_location',name: 'confirm_location', class: 'align-middle text-center confirm_location',orderable: false, searchable: false},
+                    {data:'ccd_image',name: 'ccd_image', class: 'align-middle text-center ccd_image',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

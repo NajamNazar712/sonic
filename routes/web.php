@@ -974,6 +974,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('all','Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments','Admins\DeliveryController@cash_collection_shipments')->name('shipments');
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
+                Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
             });
             Route::prefix('retail')->name('retail.')->group(function(){
                 Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');

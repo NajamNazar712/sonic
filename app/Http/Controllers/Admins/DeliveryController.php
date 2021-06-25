@@ -1567,7 +1567,14 @@ class DeliveryController extends Controller
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.status_reason_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.id as shipper_id', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id','sjl.received_or_refused_by'])
+
+            ->leftJoin('rider_deliveries as rds', function ($join) {
+                $join->on('rds.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('rds.id', '=',
+                        DB::raw('(select max(id) from rider_deliveries where rider_deliveries.delivery_note_id = delivery_notes.id and rider_deliveries.shipment_id = shipments.id)'));
+            })
+
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.id as shipper_id', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id','sjl.received_or_refused_by', 'rds.ccd_image as ccd_image'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1757,6 +1764,22 @@ class DeliveryController extends Controller
                 $rem = ($journey_remarks->remarks != null) ? $journey_remarks->remarks:'';
                 $reason = '<input class="form-control form-control-sm" name="remarks[' . $deliveries->shId . ']" placeholder="Enter Remarks" value="'. $rem .'">';
                 return $reason;
+            })
+            ->addColumn('ccd_image', function ($deliveries) {
+                $image = '';
+                if ($deliveries->ccd_image != null) {
+                    $exists = Storage::disk('public')->exists($deliveries->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($deliveries->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($deliveries->ccd_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    return $image;
+                } else {
+                    return '-';
+                }
+
             })
             ->addColumn('action', function ($deliveries) {
                 return " <span class='dropdown'>
@@ -2444,7 +2467,7 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_shipment_locations as csl', 'csl.shipment_id', '=', 'shipments.id')
             ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2666,6 +2689,22 @@ class DeliveryController extends Controller
                 else{
                     return '-';
                 }
+            })
+            ->addColumn('ccd_image', function ($deliveries) {
+                $image = '';
+                if ($deliveries->ccd_image != null) {
+                    $exists = Storage::disk('public')->exists($deliveries->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($deliveries->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($deliveries->ccd_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    return $image;
+                } else {
+                    return '-';
+                }
+
             })
             ->make(true);
     }
@@ -3909,6 +3948,10 @@ class DeliveryController extends Controller
                     return $dropdown;
                 }
                 return '';
+            })
+            ->addColumn('ccd_image', function ($deliveries) {
+                $image = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm ccd_slip_list"><i class="la la-image"></i> View Receipts</button></div>';
+                return $image;
             });
         if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -5175,6 +5218,36 @@ class DeliveryController extends Controller
             return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
         }else{
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+    public function cash_collection_shipments_ccd_slip(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $rider_deliveries = RiderDelivery::join('shipments as s', 's.id', '=', 'rider_deliveries.shipment_id')
+            ->where('delivery_note_id', $delivery_note_id)
+            ->where('delivered_status', 1)
+            ->select('rider_deliveries.id as id','s.tracking_number as tracking_number', 'rider_deliveries.ccd_image as ccd_image')->get();
+        if(count($rider_deliveries) > 0){
+            $sorted_array = array();
+            $now = Carbon::now();
+            foreach ($rider_deliveries as $rider_delivery) {
+                $sorted_array[$rider_delivery->id]['tracking_number'] = $rider_delivery->tracking_number;
+                if ($rider_delivery->ccd_image != null) {
+                    $image = '';
+                    $exists = Storage::disk('public')->exists($rider_delivery->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($rider_delivery->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($rider_delivery->ccd_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    $sorted_array[$rider_delivery->id]['ccd_image'] = $image;
+                } else {
+                    $sorted_array[$rider_delivery->id]['ccd_image'] = '-';
+                }
+            }
+            return ['status' => 0, 'ccd_slips' => $sorted_array];
+        }else{
+            return ['status' => 1, 'error' => 'No CCD slips found!'];
         }
     }
     public function completed_shipments(Request $request){
