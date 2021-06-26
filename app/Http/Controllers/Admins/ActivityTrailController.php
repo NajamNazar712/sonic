@@ -29,12 +29,12 @@ class ActivityTrailController extends Controller
         $log->action_id = $action_id;
         $log->emailed = $dont_send_email;
 
-        // $whip = new Whip();
-        // $client_address = $whip->getValidIpAddress();
+        $whip = new Whip();
+        $client_address = $whip->getValidIpAddress();
 
-        // if ($client_address != '') {
-        //     $log->ip_address = $client_address;
-        // }
+        if ($client_address != '') {
+            $log->ip_address = $client_address;
+        }
 
         $log->save();
     }
@@ -56,9 +56,9 @@ class ActivityTrailController extends Controller
             $data->whereBetween('activity_trail_logs.created_at', [$request->get('search_from'), $request->get('search_to')]);
         }
 
-        $head_department_id = Auth::user()->role->department_id;
-        if(session('role_id') != 1)
+        if(session('role_id') != 1 || session('role_id') != 9)
         {
+            $head_department_id = Auth::user()->role->department_id;
             $data->where('ar.department_id',$head_department_id);
         }
 
