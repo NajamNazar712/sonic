@@ -28,7 +28,7 @@ class ProcessOTPSMS implements ShouldQueue
      */
     public function __construct(SMS $sms)
     {
-        $this->queue = 'otp_sms';
+        $this->queue = 'sms_otp';
         $this->sms = $sms;
     }
 
