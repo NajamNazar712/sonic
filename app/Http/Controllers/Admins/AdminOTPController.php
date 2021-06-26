@@ -8,11 +8,12 @@ use App\Http\Controllers\Controller;
 use Yajra\Datatables\Datatables;
 
 class AdminOTPController extends Controller
-{public function __construct() {
-    $this->middleware('auth:admin');
+{
+    public function __construct() {
+        $this->middleware('auth:admin');
 
-    $this->middleware('Permission');
-}
+        $this->middleware('Permission');
+    }
 
     public function admin_otp_index(){
         return view('admin.otp.admin');

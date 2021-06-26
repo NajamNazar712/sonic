@@ -245,7 +245,7 @@
                             $('#otp_submit').attr('disabled', true);
                         }else{
                             $('#OtpModal').modal('hide');
-                            $('#login_form').submit();
+                            $('#admin_login_form').submit();
                         }
                     });
                 }
