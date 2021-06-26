@@ -60,8 +60,9 @@
         @if(Session::has('first_login') && session('first_login') != 1)
             $('#FirstLoginPasswordChangeModal').modal('show');
 
-            $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
-            $('#cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
+            $('#first_peye').on('mousedown',function(){$('input[name="current_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="current_password"]').attr('type','password')});
+            $('#first_npeye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#first_cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
 
         $( "#password-form" ).validate({
             errorClass:"danger",
