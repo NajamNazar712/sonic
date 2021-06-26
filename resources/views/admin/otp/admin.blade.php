@@ -113,7 +113,7 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.delivery.pending.list') }}',
+                    url: '{{ route('admin.otp.admin.list') }}',
                     data: params,
                     success: function (result) {
                         head = [];
