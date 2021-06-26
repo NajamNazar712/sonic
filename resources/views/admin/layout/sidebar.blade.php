@@ -830,7 +830,7 @@
                     @endif
 
                     @if (session('role_id') == 1 || in_array(527, session('permissions')))
-                        <li><a class="menu-item" href="{{ route('admin.otp.admin.index') }}">Admin OTP</a></li>
+                        <li><a class="menu-item" href="{{ route('admin.admin_otp.index') }}">Admin OTP</a></li>
                     @endif
                 </ul>
             </li>

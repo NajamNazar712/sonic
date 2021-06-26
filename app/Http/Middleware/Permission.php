@@ -962,8 +962,8 @@ class Permission
             'retail.users.index' => 474,
             'retail.users.list' => 474,
 
-            'otp.admin.index' => 527,
-            'otp.admin.list' => 527,
+            'admin_otp.index' => 527,
+            'admin_otp.list' => 527,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,

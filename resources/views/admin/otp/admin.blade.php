@@ -113,7 +113,7 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.otp.admin.list') }}',
+                    url: '{{ route('admin.admin_otp.list') }}',
                     data: params,
                     success: function (result) {
                         head = [];
@@ -162,7 +162,7 @@
             },
             serverSide: true,
             ajax:{
-                url: '{{ route('admin.otp.admin.list') }}',
+                url: '{{ route('admin.admin_otp.list') }}',
             },
             rowId: 'shId',
             order: [[3, 'desc']],
