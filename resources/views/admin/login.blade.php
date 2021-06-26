@@ -32,6 +32,8 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
 </head>
@@ -209,6 +211,18 @@
                         $('#admin_login_form').submit();
                     }
                 });
+            }
+        });
+        $('#email').on('change', function () {
+            var email_check = $('#email').valid();
+            if(!email_check){
+                $('#email-error').addClass('danger');
+            }
+        });
+        $('#email').on('change', function () {
+            var password_check = $('#password').valid();
+            if(!password_check){
+                $('#password-error').addClass('danger');
             }
         });
         $('#otp_input').keypress(function (event) {

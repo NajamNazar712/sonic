@@ -962,6 +962,8 @@ class Permission
             'retail.users.index' => 474,
             'retail.users.list' => 474,
 
+            'otp.admin.index' => 527,
+            'otp.admin.list' => 527,
 
             'debriefing.supervisor.index' => 495,
             'debriefing.supervisor.list' => 495,
@@ -974,8 +976,6 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'finance.ftl_invoice.index' => 509,
 
-            'otp.admin.index' => 527,
-            'otp.admin.list' => 527,
         ],
 
         'shipper' => [
