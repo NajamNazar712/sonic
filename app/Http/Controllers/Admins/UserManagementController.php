@@ -44,7 +44,7 @@ class UserManagementController extends Controller
         ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation')
         ->where('ar.id', '!=', 1);
 
-        if (session('role_id') != 1 || session('role_id') != 58) {
+        if (session('role_id') != 1 && session('role_id') != 58) {
             $users = $users
                 ->where(function ($sub_query) {
                     $sub_query->where('ad.id', session('department_id'));
