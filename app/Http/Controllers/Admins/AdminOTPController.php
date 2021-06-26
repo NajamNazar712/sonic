@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Yajra\Datatables\Datatables;
 
 class AdminOTPController extends Controller
 {public function __construct() {
