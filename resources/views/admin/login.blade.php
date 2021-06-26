@@ -73,7 +73,7 @@
                                 </p>
                                 <div class="card-body">
                                     @include('admin.inc.messages')
-                                    <form class="form-horizontal" id="admin_login_form" method="POST" action="{{ route('admin.login.submit') }}">
+                                    <form class="form-horizontal" id="admin_login_form" method="POST" action="{{ route('admin.login.submit') }}" autocomplete="off">
                                     {{ csrf_field()  }}
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
@@ -277,6 +277,36 @@
             else{
                 $('#email-error').addClass('danger');
                 $('#password-error').addClass('danger');
+            }
+        });
+
+        $('#admin_login_form input').keypress(function () {
+            if(event.keyCode == 13){
+                var email_check = $('#email').valid();
+                var password_check = $('#password').valid();
+                if(email_check && password_check){
+                    email = $('#email').val();
+                    password = $('#password').val();
+                    $.ajax({
+                        url: '{!! route('admin.login.credentials') !!}',
+                        method: 'POST',
+                        data: {
+                            'email': email,
+                            'password': password,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#OtpModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+                else{
+                    $('#email-error').addClass('danger');
+                    $('#password-error').addClass('danger');
+                }
             }
         });
     });

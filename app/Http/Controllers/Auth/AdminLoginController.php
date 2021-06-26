@@ -95,28 +95,26 @@ class AdminLoginController extends Controller
 
     }
     public function credentials(Request $request){
-        $environment = config('app.env');
-        if($environment == 'production' || $environment == 'staging') {
-            $admin = Admin::where('email', $request->email);
-            if ($admin->exists()) {
-                $admin = $admin->first();
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
-            }
-            if (Hash::check($request->input('password'), $admin->password)) {
+        $admin = Admin::where('email', $request->email);
+        if ($admin->exists()) {
+            $admin = $admin->first();
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+        }
+        if (Hash::check($request->input('password'), $admin->password)) {
+            $environment = config('app.env');
+
+            if ($environment == 'production' || $environment == 'staging') {
                 $otp = mt_rand(100000, 999999);
                 $admin->otp = $otp;
                 $admin->last_login_attempt = Carbon::now();
                 $admin->save();
                 NotificationsController::send(138, $admin, $otp);
-
-                return response()->json(['status' => 1]);
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
             }
-        }
-        else{
+
             return response()->json(['status' => 1]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
         }
     }
 
