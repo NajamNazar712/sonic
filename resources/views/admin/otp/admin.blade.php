@@ -121,7 +121,7 @@
                         head.push('S.No');
                         head.push('Name');
                         head.push('OTP');
-                        head.push('Last Logine Attempt');
+                        head.push('Last Login Attempt');
                         $.each(result.data, function(index, values) {
                             row = [];
 

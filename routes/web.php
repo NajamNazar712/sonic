@@ -3030,8 +3030,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('otp')->name('otp.')->group(function () {
         Route::prefix('admin')->name('admin.')->group(function () {
-            Route::get('', 'Admins\AdminOtpController@admin_otp_index')->name('index');
-            Route::get('list', 'Admins\AdminOtpController@admin_otp_list')->name('list');
+            Route::get('', 'Admins\AdminOTPController@admin_otp_index')->name('index');
+            Route::get('list', 'Admins\AdminOTPController@admin_otp_list')->name('list');
         });
     });
 
