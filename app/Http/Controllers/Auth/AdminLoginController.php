@@ -95,7 +95,7 @@ class AdminLoginController extends Controller
 
     }
     public function credentials(Request $request){
-        $environment = config('app.env');
+//        $environment = config('app.env');
 //        if($environment == 'production' || $environment == 'staging') {
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
@@ -121,7 +121,7 @@ class AdminLoginController extends Controller
     }
 
     public function verify_otp(Request $request){
-        $environment = config('app.env');
+//        $environment = config('app.env');
 //        if($environment == 'production' || $environment == 'staging') {
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
