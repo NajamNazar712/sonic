@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Models\ConsigneeUser;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
@@ -57,7 +56,7 @@ class ShipperAPIController extends Controller
     public function shipment_history(Request $request)
     {
         $rules = [
-            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id']
+            'tracking_no' => ['required']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -67,30 +66,37 @@ class ShipperAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $shipment_info = array();
-            $shipment = Shipment::where('id', $request->shipment_id);
-            if ($shipment->exists()) {
-                $shipment = $shipment->first();
-                $shipment_info['tracking_no'] = $shipment->tracking_number;
-                $shipment_info['origin'] = $shipment->consignee_city->name;
-                $shipment_info['destination'] = $shipment->pickup_address->city->name;
-                $shipment_info['shipper'] = $shipment->pickup_address->user->name;
-                $shipment_info['amount'] = $shipment->amount;
+            $shipment = Shipment::where('tracking_number', $request->tracking_no);
+            if($request->shipper_id == $shipment->pickup_address->user->id){
+                $shipment_info = array();
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+                    $shipment_info['tracking_no'] = $shipment->tracking_number;
+                    $shipment_info['origin'] = $shipment->consignee_city->name;
+                    $shipment_info['destination'] = $shipment->pickup_address->city->name;
+                    $shipment_info['shipper'] = $shipment->pickup_address->user->name;
+                    $shipment_info['amount'] = $shipment->amount;
+                    $shipment_info['order_id'] = $shipment->order_id;
+                    $shipment_info['pickup_address'] = $shipment->pickup_address->pickup_address;
+                    $shipment_info['weight'] = $shipment->actual_weight;
 
-                $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
-                    ->where('shipments_journey.shipment_id', $request->shipment_id)
-                    ->where('shipments_journey.verification', 1)
-                    ->select('shipments_journey.shipper_status_id as status_id', 'ss.name as status', 'shipments_journey.created_at as created_at')
-                    ->orderBy('shipments_journey.id', 'DESC');
-                if ($consignee_shipments_journey->exists()) {
-                    $consignee_shipments_journey = $consignee_shipments_journey->get();
-                    return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => $consignee_shipments_journey]);
+                    $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
+                        ->where('shipments_journey.shipment_id', $shipment->id)
+                        ->where('shipments_journey.verification', 1)
+                        ->select('shipments_journey.shipper_status_id as status_id', 'ss.name as status', 'shipments_journey.created_at as created_at')
+                        ->orderBy('shipments_journey.id', 'DESC');
+                    if ($consignee_shipments_journey->exists()) {
+                        $consignee_shipments_journey = $consignee_shipments_journey->get();
+                        return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => $consignee_shipments_journey]);
+                    } else {
+                        return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => ""]);
+                    }
+
                 } else {
-                    return response()->json(['status' => 0, 'shipment_info' => $shipment_info, 'shipment_journey' => ""]);
+                    return response()->json(['status' => 1, 'message' => "Shipment Not Found"]);
                 }
-
-            } else {
-                return response()->json(['status' => 1, 'message' => "Shipment History Not Found"]);
+            }else{
+                return response()->json(['status' => 1, 'message' => "This Shipment does'nt belongs to you"]);
             }
 
         }
