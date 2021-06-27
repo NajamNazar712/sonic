@@ -81,7 +81,7 @@ class ShipperAPIController extends Controller
             $shipper = User::where('email', $request->email_address);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
-                if (Hash::check($request->input('passsword'), $shipper->password)) {
+                if (Hash::check($request->input('password'), $shipper->password)) {
                     $information = array();
                     $information['name'] = $shipper->name;
                     $information['phone_number'] = $shipper->phone;
