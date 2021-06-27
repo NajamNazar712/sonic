@@ -121,10 +121,10 @@ class ShipperAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking_no);
-            if($request->shipper_id == $shipment->pickup_address->user->id){
-                $shipment_info = array();
-                if ($shipment->exists()) {
-                    $shipment = $shipment->first();
+            $shipment_info = array();
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if ($request->shipper_id == $shipment->pickup_address->user->id) {
                     $shipment_info['tracking_no'] = $shipment->tracking_number;
                     $shipment_info['origin'] = $shipment->consignee_city->name;
                     $shipment_info['destination'] = $shipment->pickup_address->city->name;
@@ -147,10 +147,10 @@ class ShipperAPIController extends Controller
                     }
 
                 } else {
-                    return response()->json(['status' => 1, 'message' => "Shipment Not Found"]);
+                    return response()->json(['status' => 1, 'message' => "Shipment does'nt belongs to you"]);
                 }
-            }else{
-                return response()->json(['status' => 1, 'message' => "This Shipment does'nt belongs to you"]);
+            } else {
+                return response()->json(['status' => 1, 'message' => "Shipment not found"]);
             }
 
         }
