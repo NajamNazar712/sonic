@@ -295,11 +295,7 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-        $rider = Rider::find($request->rider_id);
-        $ccd_rider = $rider->ccd;
-        return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
-
-        /*$datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+        $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])
             ->whereDate('created_at', '>', $datetime);
         if ($delivery_note->exists()) {
@@ -308,7 +304,7 @@ class DeliveryController extends Controller
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
             return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
-        }*/
+        }
     }
 
 	public function note_consolidation_check(Request $request){
@@ -1119,9 +1115,9 @@ class DeliveryController extends Controller
                     $parcel = Shipment::where('id', $request->shipment_id)->first();
                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                     $delivery = $delivery->first();
-                    $count = $delivery->shipments_count;
+                    $count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note)->count();
                     $cod = $delivery->total_cod_amount;
-                    $count -= 1;
+
                     if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                         $cod = $cod - $parcel->amount;
                     }
@@ -6372,7 +6368,7 @@ class DeliveryController extends Controller
                           $parcel = Shipment::where('id',$shipment_id)->first();
                           DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $shipment_id])->delete();
                           $delivery = $delivery->first();
-                          $count = $delivery->shipments_count - 1;
+                          $count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note)->count();
                           $cod = $delivery->total_cod_amount;
 
                           if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
@@ -6401,7 +6397,7 @@ class DeliveryController extends Controller
     public function add_shipments_in_recieve_deliveries(Request $request){
 
         $shipment_id = $request->shipment_id;
-        $tracking_numbers = $request->tracking_number;
+
         $delivery_note_id = $request->delivery_note_id;
         $shipment = Shipment::find($shipment_id);
         $serial = '';
@@ -6412,11 +6408,11 @@ class DeliveryController extends Controller
                     if($shipment->payment_mode_id == 5 && $rider->ccd == 0){
                         return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
                     }
-                    $total_shipments = $delivery_note->shipments_count;
-                    $total_shipments++;
+                    $total_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->count();
+
                     $cod_amount = $delivery_note->total_cod_amount;
                     $total_cod_amount = $cod_amount + $shipment->amount;
-                    $delivery_note->shipments_count = $total_shipments;
+                    $delivery_note->shipments_count = $total_shipments + 1;
                     $delivery_note->total_cod_amount = $total_cod_amount;
                     $delivery_note->save();
 
