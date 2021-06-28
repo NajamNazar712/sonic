@@ -1549,11 +1549,11 @@ class GlobalSettingsController extends Controller
         if ($request->status == 1) {
                 $crm_case_nature_type->status_id = 1;
                 $crm_case_nature_type->save();
-                return response()->json(['status' => 1, 'success' => 'User Enabled Successfully']);
+                return response()->json(['status' => 1, 'success' => 'Case Nature Type Enabled Successfully']);
         } elseif ($request->status == 0) {
             $crm_case_nature_type->status_id = 0;
             $crm_case_nature_type->save();
-            return response()->json(['status' => 1, 'success' => 'User Disabled Successfully']);
+            return response()->json(['status' => 1, 'success' => 'Case Nature Type Disabled Successfully']);
         } else {
             return response()->json(['status' => 0, 'error' => 'Invalid Request']);
         }
