@@ -221,11 +221,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            /*$('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });*/
+            // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Select Shipper',
+            //     width:'100%',
+            //     allowClear:true
+            // });
             $('#search_shipper').select2({
                 width:'100%',
                 placeholder:"Select Shipper",
@@ -442,6 +442,10 @@
                         d.arrival_date_from = $('input[name="arrival_date_from_formatted"]').val();
                         d.booking_date_to = $('input[name="booking_date_to_formatted"]').val();
                         d.booking_date_from = $('input[name="booking_date_from_formatted"]').val();
+                        d.search_status = $('#search_status').val();
+                        d.search_zone = $('#search_zone').val();
+                        
+                        
                     }
                 },
                 rowId: 'shId',
