@@ -257,5 +257,18 @@ Route::name('api.')->group(function () {
 
     });
 
+    Route::prefix('shipper')->name('shipper.')->group(function () {
+        Route::post('login', 'ShipperAPIController@login')->name('login');
+        Route::middleware('ShipperAPIToken')->group(function () {
+            Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
+
+            Route::prefix('subscription')->name('subscription.')->group(function () {
+                Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
+                Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
+            });
+        });
+
+    });
+
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
 });
