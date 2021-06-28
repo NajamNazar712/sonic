@@ -973,7 +973,8 @@ class Permission
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
 			'finance.ftl_invoice.index' => 509,           
-            
+            'reports.work_code_master.index' => 527,
+            'reports.work_code_master.list' => 527,
            
         ],
 

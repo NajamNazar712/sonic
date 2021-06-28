@@ -8686,5 +8686,55 @@ class AdminReportsController extends Controller
 
         }
     }
+
+    public function work_code_master_index()
+    {
+        $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->where('status',1)->select('id','name')->get();
+        
+        return view('admin.reports.work_code_master')->with(['shippers'=>$shippers, 'statuses' => $statuses]);
+
+    }
+
+    public function work_code_master_list(Request $request){
+        
+        $shipments = DB::connection('reports')->table('shipments_journey')->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
+            ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
+            ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
+            ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
+            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','u.name as shipper','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id']);
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('shipper', function ($shipments) {
+                if($shipments->shipper == null){
+                    return 'Walk In';
+                }else{
+                    return $shipments->shipper;
+                }
+            })
+            ->editColumn('status_marked_by', function ($shipments) {
+                if($shipments->admin_id == null){
+                    return $shipments->shipper;
+                }else{
+                    return $shipments->status_marked_by;
+                }
+            })->filterColumn('ss.id', function($query, $keyword) {
+                    $query->where('ss.id','=',$keyword);
+                  
+            });
+            
+       
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
+        }
+
+        return $datatable->make(true);
+    }
 }
 
