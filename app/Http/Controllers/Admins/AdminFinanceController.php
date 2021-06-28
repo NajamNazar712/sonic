@@ -2681,9 +2681,14 @@ class AdminFinanceController extends Controller
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
 
             if($retail_shipment->shipping_mode == 3) {
-                $charges = 0;
+                if($shipment->charges_mode_id == 2){
+                    $charges = $retail_shipment->total_charges;
+                }
+                else{
+                    $charges = 0;
+                }
                 $gst = 0;
-                $payable = $amount;
+                $payable = $amount - $charges;
 
 //            $account_type_id = $retail_shipment->shipper->account_type_id;
 

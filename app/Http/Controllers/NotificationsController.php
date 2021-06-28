@@ -23,6 +23,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\DeliveryNoteOtpSms;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
@@ -47,6 +48,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
+use App\Jobs\ProcessDeliveryNoteOtpSms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -93,6 +95,17 @@ class NotificationsController extends Controller
       $sms->save();
 
       dispatch(new ProcessSMS($sms));
+    }
+
+    static private function delivery_note_otp_sms($body, $to) {
+      $sms = new DeliveryNoteOtpSms();
+
+      $sms->to = str_replace('-', '', $to);
+      $sms->body = $body;
+
+      $sms->save();
+
+      dispatch(new ProcessDeliveryNoteOtpSms($sms));
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
@@ -7655,6 +7668,28 @@ class NotificationsController extends Controller
 
                     self::sms($body, $to);
                 }
+                else if($id == 137) {
+                    $rider_id = $reference_1_id;
+                    $delivery_note_id = $reference_2_id;
+
+                    $rider = Rider::find($rider_id);
+                    $delivery_note = DeliveryNote::find($delivery_note_id);
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+
+                    if (strpos($body, '[delivery_note]') !== FALSE) {
+                        $body = str_replace('[delivery_note]', $delivery_note->id, $body);
+                    }
+
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $delivery_note->otp, $body);
+                    }
+
+                    $to = $rider->phone;
+                    self::delivery_note_otp_sms($body, $to);
+                }
             }
         }
     }
@@ -7718,8 +7753,7 @@ class NotificationsController extends Controller
 
     static public function trax_otp_verification($phone_number, $pin)
     {
-        $body = "Dear Consignee,
- Your OTP for Trax is: [pin]";
+        $body = 'Dear Consignee,'.PHP_EOL.'Your OTP for Trax is: [pin]';
         if (strpos($body, '[pin]') !== FALSE) {
             $body = str_replace('[pin]', $pin, $body);
         }

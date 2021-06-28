@@ -944,7 +944,7 @@ class V2AdminPickupsController extends Controller
                         }
                     }
 
-                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
+                    if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
@@ -1656,7 +1656,7 @@ class V2AdminPickupsController extends Controller
                         }
                     }
 
-                    if ($shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
+                    if ($shipment->shipment_type != 2 && $shipment->charges_mode_id == 2 && $shipment->booking_type_id != 4) {
                         $shipment = Shipment::find($shipment_id);
 
                         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge;
