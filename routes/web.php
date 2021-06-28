@@ -238,6 +238,16 @@ Route::prefix('cod')->name('cod.')->group(function () {
                 Route::get('list', 'Shippers\ShipperFinanceController@payments_reconcile_through_receiving_sheet_list')->name('list');
             });
         });
+        Route::prefix('invoice')->name('invoice.')->group(function () {
+            Route::get('', 'Shippers\ShipperFinanceController@invoice_index')->name('index');
+            Route::get('list', 'Shippers\ShipperFinanceController@invoice_list')->name('list');
+            Route::post('print', 'Shippers\ShipperFinanceController@invoices_print')->name('print');
+            Route::get('export_to_excel', 'Shippers\ShipperFinanceController@invoices_export_to_excel')->name('export_to_excel');
+            Route::put('email_reminder', 'Shippers\ShipperFinanceController@invoices_email_reminder')->name('email_reminder');
+            Route::post('print_origin_wise', 'Shippers\ShipperFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
+
+
+        });
     });
 
     Route::prefix('reports')->name('reports.')->group(function (){
@@ -666,10 +676,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/phone_unique', 'Admins\AdminDashboardController@rider_phone_unique')->name('phone_unique');
         });
         Route::prefix('riders')->name('riders.')->group(function (){
-            Route::get('/add', 'Admins\RiderManagementController@addRiderView')->name('add');
+            Route::get('/add/{type?}', 'Admins\RiderManagementController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\RiderManagementController@categoryListAjax')->name('category.ajax');
             Route::post('/add', 'Admins\RiderManagementController@addRiderDetails')->name('add');
-            Route::get('{id}/edit', 'Admins\RiderManagementController@editRiderView')->name('edit');
+            Route::get('{id}/edit/{type?}', 'Admins\RiderManagementController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\RiderManagementController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\RiderManagementController@riderStatus')->name('status');
             Route::get('/phone_unique', 'Admins\RiderManagementController@rider_phone_unique')->name('phone_unique');

@@ -295,18 +295,20 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-         $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]])
-             ->whereDate('created_at','>',$datetime);
-         if($delivery_note->exists())
-         {
-            return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
-         }
-         else{
+        $rider = Rider::find($request->rider_id);
+        $ccd_rider = $rider->ccd;
+        return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+
+        /*$datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+        $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])
+            ->whereDate('created_at', '>', $datetime);
+        if ($delivery_note->exists()) {
+            return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+        } else {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
-            return response()->json(['status'=> 1, 'ccd_rider' => $ccd_rider]);
-         }
+            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+        }*/
     }
 
 	public function note_consolidation_check(Request $request){
@@ -745,6 +747,9 @@ class DeliveryController extends Controller
                 }
             }
             if ($note) {
+                $otp_pin = rand(1000, 9999);
+                $note->otp = $otp_pin;
+                $note->save();
                 if (!$order) {  //Default
                     sort($valid_shipments); //sort_valid_shipments;
                 }
@@ -827,6 +832,7 @@ class DeliveryController extends Controller
                         }
                     }
                 }
+                NotificationsController::send(137,$rider->id, $note->id);
                 NotificationsController::send(40, $note->id);
             }
 
@@ -1772,9 +1778,9 @@ class DeliveryController extends Controller
         $status_id = $request->status;
         $shipment_id = $request->shipment_id;
         if(Shipment::where('id', $shipment_id)->where('nsa_osa_status', 1)->exists()){
-            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6,12, 34])->orderBy('name')->get();
         }else{
-            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6])->orderBy('name')->get();
         }
 
         if (!$statuses->isEmpty()) {
@@ -1789,7 +1795,7 @@ class DeliveryController extends Controller
     {
         $status_id = $request->status;
 
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+        $statuses = ShipmentStatus::find($status_id)->reasons()->whereNotIn('id',[4,6])->select('id', 'name')->orderBy('name')->get();
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
@@ -6280,6 +6286,12 @@ class DeliveryController extends Controller
                     if($ccd_flag == false || ($ccd_flag == true && $rider->ccd == 1)){
                         $delivery_note->rider_id = $rider_id;
                         $delivery_note->save();
+                        if ($delivery_note->otp == null) {
+                            $otp_pin = rand(1000, 9999);
+                            $delivery_note->otp = $otp_pin;
+                            $delivery_note->save();
+                        }
+                        NotificationsController::send(137, $rider_id, $delivery_note_id);
                         return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
                     }
                     else{
@@ -6396,7 +6408,10 @@ class DeliveryController extends Controller
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
                 if($delivery_note){
-
+                    $rider = $delivery_note->rider;
+                    if($shipment->payment_mode_id == 5 && $rider->ccd == 0){
+                        return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
+                    }
                     $total_shipments = $delivery_note->shipments_count;
                     $total_shipments++;
                     $cod_amount = $delivery_note->total_cod_amount;
