@@ -2424,6 +2424,7 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 27) {
+
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
                     $invoice_fields = ['invoice_number' => 'invoice_number', 'billing_period_from_date' => 'billing_period_from_date', 'billing_period_to_date' => 'billing_period_to_date', 'due_date' => 'due_date'];
@@ -2485,9 +2486,10 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[invoice]') !== FALSE) {
-                        $invoice = AdminFinanceController::email_print_invoice($reference_1_id, TRUE);
 
-                        $body = str_replace('[invoice]', preg_replace('/\r|\n/', '', $invoice), $body);
+                        $invoice = AdminFinanceController::email_print_invoice($reference_1_id, TRUE);
+                        $link = '<a href="' . $invoice . '" download>Invoice</a>';
+                        $body = str_replace('[invoice]', $link, $body);
                     }
 
                     $cc = array();

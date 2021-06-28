@@ -78,6 +78,7 @@ use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\InvoiceForReimbursement;
 use SnappyImage;
 use SnappyPDF;
+/*use Barryvdh\Snappy\Facades\SnappyPdf;*/
 use Auth;
 use DB;
 
@@ -9766,10 +9767,14 @@ class AdminFinanceController extends Controller
         // $writer->save('php://output');
     }
 
-    static public function  email_print_invoice($id,$bool){
-        $invoice = self::generate_invoice_print($id,$bool);
-        SnappyPDF::loadHTML($invoice)->save('reports/invoice_'. $id .'.pdf');
-        $link = url('/') . '/' . 'reports/invoice'. $id .'.pdf';
+    static public function email_print_invoice($id,$bool)
+    {
+        $html = self::generate_invoice_print($id,$bool);
+        $filename = 'invoice_'. $id;
+        $path = public_path() . '/' . 'reports/'. $filename . '.pdf';
+        $pdf = SnappyPDF::loadHTML($html)->save($path);
+        $link = url('/') . '/' . 'reports/invoice_'.$id.'.pdf';
         return $link;
     }
+
 }
