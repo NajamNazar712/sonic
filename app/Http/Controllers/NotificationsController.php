@@ -2488,13 +2488,13 @@ class NotificationsController extends Controller
                     if (strpos($body, '[invoice]') !== FALSE) {
 
                         $invoice = AdminFinanceController::email_print_invoice($reference_1_id, TRUE);
-                        $link = '<a href="' . $invoice . '" download>Invoice</a>';
+                        $link = '<a href="' . $invoice . '" download="invoice" target="_blank" >Invoice</a>';
                         $body = str_replace('[invoice]', $link, $body);
                     }
 
                     $cc = array();
 
-
+                    $cc[] = 'sarosh.tariq@trax.pk';
                     $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
                     // $sales_person_admin = Admin::find($sales_person->admin_id);
                     
