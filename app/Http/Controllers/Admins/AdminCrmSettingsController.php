@@ -166,7 +166,7 @@ class AdminCrmSettingsController extends Controller
         else if($case_nature_id == 2){
             $case_nature_type_id = $request->input('case_nature_request');
         }
-        else if($case_nature_id == 3){
+        else if($case_nature_id == 4){
             $case_nature_type_id = $request->input('case_nature_claim');
         }
         $shipment_statuses = $request->shipment_statuses;
