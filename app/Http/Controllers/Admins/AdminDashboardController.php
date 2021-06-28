@@ -42,6 +42,8 @@ use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Rates\HistoryCorporateRateStatus;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\Rates\PendingCorporateRateStatus;
 use App\Http\Models\Reference;
@@ -1646,15 +1648,7 @@ class AdminDashboardController extends Controller
         }
     }
 
-    public function addEconomyRatesView($id)
-    {
-        $user = User::find($id);
-        if(1 == 1) {
-            return view('economy_rates')->with(['shipper' => $user]);
-        }
 
-        return redirect()->back()->with('error','User rates not found!');
-    }
 
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -7506,6 +7500,21 @@ class AdminDashboardController extends Controller
                         }
                     }
 
+                    if (InternationalEconomyRate::where('user_id', $result->id)->doesntExist()) {
+                        if(session('role_id') == 1 || in_array(528, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
+                        }
+                    } else {
+                        if(InternationalEconomyRateStatus::where('user_id', $result->id)->first()->status != 2 && (session('role_id') == 1 || in_array(528, session('permissions')))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
+                        }
+
+                        if(session('role_id') == 1 || in_array(530, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
+                        }
+                    }
+
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -7823,8 +7832,20 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                         }
                     }
+                }
 
+                if (InternationalEconomyRateStatus::where('user_id', $result->id)->doesntExist()) {
+                    if(session('role_id') == 1 || in_array(528, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
+                    }
+                } else {
+                    if(InternationalEconomyRateStatus::where('user_id', $result->id)->first()->status != 2 && (session('role_id') == 1 || in_array(528, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
+                    }
 
+                    if(session('role_id') == 1 || in_array(530, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
+                    }
                 }
 
                 $dropdown .= '

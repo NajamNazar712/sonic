@@ -578,7 +578,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     //Datatables data using ajax calls
-    Route::get('{id}/economy/rates','Admins\AdminDashboardController@addEconomyRatesView')->name('add.economy.rates');
     //add rates view
     Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('add.rates');
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
@@ -2864,6 +2863,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
             Route::prefix('rates')->name('rates.')->group(function () {
+            Route::prefix('economy')->name('economy.')->group(function (){
+                Route::get('{id}/{view?}','Admins\AdminInternationalRatesController@addEconomyRatesView')->name('create');
+                Route::post('{id}','Admins\AdminInternationalRatesController@addEconomyRatesStore')->name('store');
+                Route::post('approve/{id}','Admins\AdminInternationalRatesController@addEconomyRatesApprove')->name('approve');
+            });
             Route::prefix('view')->name('view.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@view_rates_index')->name('index');
             });
