@@ -138,7 +138,7 @@ class ShipperAPIController extends Controller
                     $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
                     if ($shipper_subscription->count() < 5) {
                         $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
-                        if ($shipment_exists->exists()) {
+                        if (!$shipment_exists->exists()) {
                             $shipper_subscription_obj = new ShipperShipmentsSubscription();
                             $shipper_subscription_obj->shipper_id = $request->shipper_id;
                             $shipper_subscription_obj->shipment_id = $shipment->id;
