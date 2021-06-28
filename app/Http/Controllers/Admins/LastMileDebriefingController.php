@@ -62,40 +62,22 @@ class LastMileDebriefingController extends Controller
     public function supervisor_assign_agents(Request $request){
         $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
-        $exists_count = 0;
-        $all_count = 0;
-        $not_exist = 0;
         if($delivery_note_shipments->count() != 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $all_count++;
-                $agent_call_monitorings =  AgentCallMonitoring::where([
+                AgentCallMonitoring::where([
                     ['agent_id', '=', $request->agent_id],
                     ['shipment_id', '=', $delivery_note_shipment->shipment_id],
                     ['delivery_note_id', '=', $request->delivery_note_id],
-                ]);
-                if($agent_call_monitorings->exists()){
-                    $exists_count++;
-                }else{
-                    $not_exist++;
+                ])->delete();
+              
                     $agent_call_monitoring = new AgentCallMonitoring;
                                 $agent_call_monitoring->agent_id= $request->agent_id;
                                 $agent_call_monitoring->shipment_id= $delivery_note_shipment->shipment_id;
                                 $agent_call_monitoring->delivery_note_id= $request->delivery_note_id;
                                 $agent_call_monitoring->save();
-                }
             }
         }
-        if($not_exist==$all_count || $exists_count==0){
-            return redirect()->back()->with('success', 'Agents Assign successfully.');
-        }elseif($not_exist==0){
-            return redirect()->back()->with('error', 'Agents Already Assigned.');
-
-        }else{
-            return redirect()->back()->with('success', 'Agents Assign to '.$not_exist.' Shipments successfully.');
-
-        }
-
-        
+            return redirect()->back()->with('success', 'Agent Assign successfully.');
     }
 
     public function supervisor_list(Request $request)
@@ -114,8 +96,8 @@ class LastMileDebriefingController extends Controller
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
-            // ->where('delivery_notes.created_at','>=',Carbon::today())
-            // ->where('delivery_notes.created_at','<=',$time)
+            ->where('delivery_notes.created_at','>=',Carbon::today())
+            ->where('delivery_notes.created_at','<=',$time)
             ->where('delivery_notes.status', 0);
 
 
