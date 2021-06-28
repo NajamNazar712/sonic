@@ -480,7 +480,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.ccd_image')) {
                             $(td).appendTo($(search));
                         }
                         else {

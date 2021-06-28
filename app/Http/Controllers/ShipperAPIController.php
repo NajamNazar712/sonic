@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\ShipperShipmentsSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
@@ -134,6 +135,13 @@ class ShipperAPIController extends Controller
                     $shipment_info['pickup_address'] = $shipment->pickup_address->pickup_address;
                     $shipment_info['weight'] = $shipment->actual_weight;
 
+                    $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id',$request->shipper_id);
+                    if($shipper_subscription->count() < 5){
+                        $shipper_subscription_obj = new ShipperShipmentsSubscription();
+                        $shipper_subscription_obj->shipper_id = $request->shipper_id;
+                        $shipper_subscription_obj->shipment_id = $shipment->id;
+                        $shipper_subscription_obj->save();
+                    }
                     $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
                         ->where('shipments_journey.shipment_id', $shipment->id)
                         ->where('shipments_journey.verification', 1)
@@ -147,12 +155,45 @@ class ShipperAPIController extends Controller
                     }
 
                 } else {
-                    return response()->json(['status' => 1, 'message' => "Shipment does'nt belongs to you"]);
+                    return response()->json(['status' => 1, 'message' => "Shipment doesn't belongs to you"]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Shipment not found"]);
             }
 
+        }
+    }
+
+    public function shipper_subscription_list(Request $request){
+        $shipper_id = $request->shipper_id;
+        $subscription_list = ShipperShipmentsSubscription::join('shipments as s', 's.id', '=', 'shipper_shipments_subscriptions.shipment_id')
+            ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+            ->where('shipper_shipments_subscriptions.shipper_id', $shipper_id)
+            ->select('s.id as shipment_id', 'ss.name as shipment_status', 's.tracking_number as tracking_no');
+        if($subscription_list->exists()){
+            $subscription_list = $subscription_list->get();
+            return response()->json(['status' => 0, 'information' => $subscription_list]);
+        }
+        return response()->json(['status' => 1, 'message' => "No data found"]);
+    }
+
+    public function shipper_subscription_delete(Request $request)
+    {
+        $rules = [
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipper_id = $request->shipper_id;
+            ShipperShipmentsSubscription::where('shipper_id', $shipper_id)
+                ->where('shipment_id',$request->shipment_id)->delete();
+            return response()->json(['status' => 0, 'message' => 'Subscription Remove Successfully']);
         }
     }
 }
