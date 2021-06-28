@@ -1002,12 +1002,6 @@ class RetailShipmentBookController extends Controller
                     </table>
                 ';
 
-                    if ($shipment->booking_type_id != 4 && $shipment->charges_mode_id == 2 && $shipment->shipper_status_id == 1) {
-                        $table_end .= '
-                        <div class="void position-absolute m-auto text-center font-weight-bold">Void Air Waybill after Arrival</div>
-                    ';
-                    }
-
                     $table_end .= '
                       </div>
                 ';
