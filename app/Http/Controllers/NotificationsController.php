@@ -7687,6 +7687,61 @@ class NotificationsController extends Controller
 
                     $to = $rider->phone;
                     self::delivery_note_otp_sms($body, $to);
+                } else if ($id == 139) {
+                    
+                    $yesterday = Carbon::yesterday();
+                    $today = Carbon::today();
+                    dump($today);
+                    dump($yesterday);
+                    $rider_pickups = V2RiderPickup::join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+                    ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+                    ->join('riders as r', 'pn.rider_id', 'r.id')
+                    ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+                    ->join('cities as oc', 'usi.city_id', 'oc.id')
+                    ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
+                    ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub');
+                    // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
+                    dd($rider_pickups->get());
+
+                            if ($rider_pickups->exists()) {
+                                
+                                $html = '<table style="width:100%;">';
+                                $html .= '<thead><tr>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
+                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin Hub</th>';
+                                $html .= '</tr></thead><tbody>';
+        
+                                $serial = 1;
+                                $rider_pickups = $rider_pickups->get();
+
+                                foreach($rider_pickups as $rider_pickup){
+                        
+                                    $html .= '<tr>';
+                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial++ . '</td>';
+                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider . '</td>';
+                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider_id . '</td>';
+                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->shipments . '</td>';
+                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->origin_hub . '</td>';
+                                    $html .= '</tr>';
+                                    $html .= '</tbody></table> <br>';
+                                }
+                                if (strpos($body, '[preview]') !== FALSE) {
+                                    $body = str_replace('[preview]', $html, $body);
+                                }
+                                $to = array();
+
+                                $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
+                                if ($admins->exists()) {
+                                    $to = array_merge($to, $admins->pluck('email')->toArray());
+                                }
+
+                                self::email($subject, $body, $to);
+                            }
+
+                    
                 }
             }
         }
