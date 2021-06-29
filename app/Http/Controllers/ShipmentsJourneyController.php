@@ -143,7 +143,7 @@ class ShipmentsJourneyController extends Controller
         }
 
         if ($verification == 1) {
-            $shipment_subscription = ShipperShipmentsSubscription::where('shipment_id', $shipment->id);
+            $shipment_subscription = ShipperShipmentsSubscription::where('shipment_id',$shipment_id);
             if ($shipment_subscription->exists()) {
                 $shipment_subscription = $shipment_subscription->first();
                 $status = ShipmentStatus::find($shipper_status_id);
