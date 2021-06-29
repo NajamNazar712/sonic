@@ -64,16 +64,12 @@ class LastMileDebriefingController extends Controller
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
         if($delivery_note_shipments->count() != 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){
-                AgentCallMonitoring::where([
-                    ['agent_id', '=', $request->agent_id],
+                $agent_call_monitoring = AgentCallMonitoring::where([
                     ['shipment_id', '=', $delivery_note_shipment->shipment_id],
                     ['delivery_note_id', '=', $request->delivery_note_id],
-                ])->delete();
+                ])->get()->first();
               
-                    $agent_call_monitoring = new AgentCallMonitoring;
                                 $agent_call_monitoring->agent_id= $request->agent_id;
-                                $agent_call_monitoring->shipment_id= $delivery_note_shipment->shipment_id;
-                                $agent_call_monitoring->delivery_note_id= $request->delivery_note_id;
                                 $agent_call_monitoring->save();
             }
         }
