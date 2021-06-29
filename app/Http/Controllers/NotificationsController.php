@@ -7691,17 +7691,14 @@ class NotificationsController extends Controller
                     
                     $yesterday = Carbon::yesterday();
                     $today = Carbon::today();
-                    dump($today);
-                    dump($yesterday);
                     $rider_pickups = V2RiderPickup::join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
                     ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
                     ->join('riders as r', 'pn.rider_id', 'r.id')
                     ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
                     ->join('cities as oc', 'usi.city_id', 'oc.id')
                     ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
-                    ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub');
-                    // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
-                    dd($rider_pickups->get());
+                    ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub')
+                    ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
 
                             if ($rider_pickups->exists()) {
                                 
@@ -7726,8 +7723,9 @@ class NotificationsController extends Controller
                                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->shipments . '</td>';
                                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->origin_hub . '</td>';
                                     $html .= '</tr>';
-                                    $html .= '</tbody></table> <br>';
+                                    
                                 }
+                                $html .= '</tbody></table> <br>';
                                 if (strpos($body, '[preview]') !== FALSE) {
                                     $body = str_replace('[preview]', $html, $body);
                                 }
