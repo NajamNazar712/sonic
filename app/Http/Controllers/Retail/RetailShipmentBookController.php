@@ -1597,7 +1597,7 @@ class RetailShipmentBookController extends Controller
             'height' => ['nullable', 'numeric', 'between:0.1,100000'],
             'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_payment_modes', 'id')->where('id', 1)],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_mode', 'id')->whereIn('id', [1, 2])],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->whereIn('id', [1, 2])],
             'shipper_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'shipper_name' => ['required', 'between:1,100'],
             'shipper_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
