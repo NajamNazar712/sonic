@@ -215,7 +215,7 @@
                                         <td><b>Invoicing Cycle</b></td>
                                         <td>{{$user_bank_default->invoicing->name}}</td>
                                     </tr>
-                                    @if($user_bank_default->invoicing_cycle_id != 2)
+                                    @if($user_bank_default->invoicing_cycle_id != 2 || $user_bank_default->invoicing_cycle_id != 4)
                                         <tr>
                                             <td><b>Generation Date</b></td>
                                             <td>{{$user_bank_default->generation_date}}</td>
@@ -764,7 +764,7 @@
             var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
             var cycle = '{!! $user_bank_default->invoicing_cycle_id !!}';
             cycle = parseInt(cycle);
-            $('#invoicing_cycle').select2({
+          /*  $('#invoicing_cycle').select2({
                 width: '100%',
             }).bind('change', function() {
 
@@ -774,8 +774,47 @@
                 $('#generation_date').empty().trigger('change');
                 $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
 
-            });
+            }); */
             $('#invoicing_cycle').val(cycle).trigger('change');
+            if(cycle == 3){
+                $('#generation_div').removeClass('d-none');
+                $('#generation_date').removeClass('d-none');
+            }
+            else{
+                $('#generation_div').addClass('d-none');
+                $('#generation_date').addClass('d-none');
+            }
+
+
+          /*  $('#invoicing_cycle').select2({
+                width: '100%',
+            }).bind('change', function() {
+
+                if (this.value == 1) {
+                    var weekly = [1, 2, 3, 4, 5, 6, 7];
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').removeClass('d-none');
+                    $('#generation_date').addClass('required');
+                    $('#generation_date').empty().trigger('change');
+                    $('#generation_date').select2({data:weekly,placeholder:'Select Date'});
+                }
+                else if(this.value == 3){
+                    var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').removeClass('d-none');
+                    $('#generation_date').addClass('required');
+                    $('#generation_date').empty().trigger('change');
+                    $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
+                }
+                else if(this.value == 2 || this.value == 4){
+                    $('#generation_div').addClass('d-none');
+                    $('#generation_date').addClass('d-none');
+                    $('#generation_date').removeClass('required');
+                }
+
+            });*/
+
+
             // $('#generation_date').select2({
             //     width: '100%',
             // });
