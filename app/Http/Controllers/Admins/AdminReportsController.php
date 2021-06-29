@@ -8702,7 +8702,7 @@ class AdminReportsController extends Controller
             ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
-            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','u.name as shipper','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id']);
+            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','u.name as shipper','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id']);
 
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -8731,7 +8731,10 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('sj.created_at', [$from,$to]);
+            $datatable->whereBetween('shipments_journey.created_at', [$from,$to]);
+        }
+        if ($shipper_id = $request->get('search_shipper')) {
+            $datatable->where('shipments_journey.user_id', $shipper_id);
         }
 
         return $datatable->make(true);
