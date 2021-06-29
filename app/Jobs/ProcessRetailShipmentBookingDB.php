@@ -98,12 +98,19 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $total_charges_without_gst = $this->booking['weight_charges'] + $this->booking['fuel_surcharge'];
         $gst = $gst * $total_charges_without_gst;
         $total_charges = $total_charges_without_gst + $gst;
+        $charges_mode_id = $this->booking['charges_mode_id'];
 //        if($shipping_mode_check == 3){
 //            $amount = str_replace(',', '', $this->booking['cod']);
 //            $r_amount = 0;
+//            if($charges_mode_id == 2){
+//                $amount = $amount + $total_charges;
+//            }
 //        }
 //        else{
             $amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $total_charges;
+            }
             $r_amount = 0;
 //        }
         $payment_mode_id = 1;
@@ -112,7 +119,6 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $pieces_quantity = $this->booking['pieces'];
         $business_category_id = $this->booking['business_category_id'];
 
-        $charges_mode_id = $this->booking['charges_mode_id'];
 
         if (strtolower($this->booking['volumetric_weight']) == 'yes') {
             $estimated_weight = (($this->booking['length'] * $this->booking['breadth'] * $this->booking['height']) / 5000);
