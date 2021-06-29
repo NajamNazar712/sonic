@@ -1669,6 +1669,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('mark_as_received_all', 'Admins\AdminFinanceController@invoices_mark_as_received_all')->name('mark_as_received_all');
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
+            //Route::get('download/{id}', 'Admins\AdminFinanceController@email_print_invoice')->name('download');
         });
 
         Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {
