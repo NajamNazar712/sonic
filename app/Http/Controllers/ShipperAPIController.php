@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
@@ -85,6 +87,7 @@ class ShipperAPIController extends Controller
                 if (Hash::check($request->input('password'), $shipper->password)) {
                     $information = array();
                     $information['name'] = $shipper->name;
+                    $information['shipper_id'] = $shipper->id;
                     $information['phone_number'] = $shipper->phone;
                     if ($shipper->api_token) {
                         $information['api_token'] = $shipper->api_token;
@@ -198,5 +201,22 @@ class ShipperAPIController extends Controller
                 ->where('shipment_id',$request->shipment_id)->delete();
             return response()->json(['status' => 0, 'msg' => 'Subscription Remove Successfully']);
         }
+    }
+
+    public function notification_history(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
+        $to_date = Carbon::now()->format('Y-m-d 23:59:59');
+
+        $notifiction_history = EmployeeNotificationHistory::where('employee_id', $shipper_id)
+            ->where('employee_type_id', 3)
+            ->whereBetween('created_at', [$from_date, $to_date])
+            ->orderBy('created_at', 'desc');
+        if ($notifiction_history->exists()) {
+            $notifiction_history = $notifiction_history->get();
+            return response()->json(['status' => 0, 'data' => $notifiction_history]);
+        }
+        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 }

@@ -3381,4 +3381,34 @@ class APIController extends Controller
             }
         }
     }
+
+    public function store_device_token(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer'],
+            'type_id' => ['required', 'integer'],
+            'device_token' => ['required']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
+
+            if ($employee_device_token->exists()) {
+                $employee_device_token = $employee_device_token->first();
+            } else {
+                $employee_device_token = new EmployeeDeviceToken();
+                $employee_device_token->employee_id = $request->employee_id;
+                $employee_device_token->employee_type_id = $request->type_id;
+            }
+            $employee_device_token->device_token = $request->device_token;
+            $employee_device_token->save();
+            return response()->json(['status' => 0, 'message' => 'Device Token Store']);
+        }
+    }
 }
