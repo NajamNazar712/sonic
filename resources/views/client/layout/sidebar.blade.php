@@ -111,7 +111,7 @@
 
                         <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment Report</a></li>
 
-                        @if (in_array(session('user_id'), [405, 167, 1159, 2035]))
+                        @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
                         @endif
                     </ul>
