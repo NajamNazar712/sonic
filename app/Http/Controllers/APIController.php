@@ -3411,4 +3411,27 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Device Token Store']);
         }
     }
+
+    public function delete_device_token(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer'],
+            'type_id' => ['required', 'integer'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
+            if ($employee_device_token->exists()) {
+                $employee_device_token->delete();
+                return response()->json(['status' => 0, 'message' => 'Device Toke Deleted']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Not found']);
+        }
+    }
 }

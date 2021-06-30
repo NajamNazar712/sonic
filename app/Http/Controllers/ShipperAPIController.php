@@ -138,14 +138,16 @@ class ShipperAPIController extends Controller
                     $shipment_info['pickup_address'] = $shipment->pickup_address->pickup_address;
                     $shipment_info['weight'] = ($shipment->actual_weight) ? $shipment->actual_weight : $shipment->estimated_weight;
 
-                    $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
-                    if ($shipper_subscription->count() < 5) {
-                        $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
-                        if (!$shipment_exists->exists()) {
-                            $shipper_subscription_obj = new ShipperShipmentsSubscription();
-                            $shipper_subscription_obj->shipper_id = $request->shipper_id;
-                            $shipper_subscription_obj->shipment_id = $shipment->id;
-                            $shipper_subscription_obj->save();
+                    if(!in_array($shipment->shipper_status_id,[14, 8, 20])){
+                        $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
+                        if ($shipper_subscription->count() < 5) {
+                            $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
+                            if (!$shipment_exists->exists()) {
+                                $shipper_subscription_obj = new ShipperShipmentsSubscription();
+                                $shipper_subscription_obj->shipper_id = $request->shipper_id;
+                                $shipper_subscription_obj->shipment_id = $shipment->id;
+                                $shipper_subscription_obj->save();
+                            }
                         }
                     }
                     $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
