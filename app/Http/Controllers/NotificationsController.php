@@ -129,24 +129,24 @@ class NotificationsController extends Controller
                     $shipper = User::find($reference_1_id);
                     $sales_person = SalePersonTag::where('user_id', $reference_1_id)->where('status', 0)->first();
                     $cc = array();
-                    $bcc = array();
+//                    $bcc = array();
                     $cc[] = Admin::find($sales_person->admin_id)->email;
 
 
-                    $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('admin_roles.department_id', 6)->where('admin_hubs.hub_id', '=', $shipper->city_id)->where('status', 1)->where('role_id', '!=', 55);
+                    /*$admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')->where('admin_roles.department_id', 6)->where('admin_hubs.hub_id', '=', $shipper->city_id)->where('status', 1)->where('role_id', '!=', 55);
 
                     if ($admins->exists()) {
                         $bcc = $admins->pluck('admins.email')->toArray();
-                    }
+                    }*/
 
                     if (ShipperNotificationEmail::where('user_id', $shipper->id)->exists()) {
                         $to = ShipperNotificationEmail::where('user_id', $shipper->id)->pluck('email')->toArray();
                     } else {
                         $to = $shipper->email;
                     }
-                    if (empty($bcc)) {
+                    /*if (empty($bcc)) {
                         $bcc = NULL;
-                    }
+                    }*/
                     foreach ($fields as $key => $field) {
                         if (strpos($subject, '[' . $key . ']') !== FALSE) {
                             if ($key == 'account_id') {
@@ -173,7 +173,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[city]', $shipper->city->name, $body);
                     }
 
-                    self::email($subject, $body, $to, $cc, $bcc);
+                    self::email($subject, $body, $to, $cc);
                 } else if ($id == 2) {
                     $fields = ['order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
