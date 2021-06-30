@@ -8697,17 +8697,14 @@ class AdminReportsController extends Controller
     }
 
     public function work_code_master_list(Request $request){
-        $from = Carbon::today()->subDays(30)->toDateTimeString();
-        $to = Carbon::today()->toDateTimeString();
-       
+        
         $shipments = DB::connection('reports')->table('shipments_journey')->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
             ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
             ->join('users as su', 'sh.user_id', '=', 'su.id')
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
-            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','u.name as shipper_status_marked_by','su.name as shipper','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id'])
-            ->whereBetween('shipments_journey.created_at', [$from,$to]);
-
+            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id']);
+            
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -8732,7 +8729,7 @@ class AdminReportsController extends Controller
             $datatable->whereBetween('shipments_journey.created_at', [$from,$to]);
         }
         if ($shipper_id = $request->get('search_shipper')) {
-            $datatable->where('shipments_journey.user_id', $shipper_id);
+            $datatable->where('sh.user_id', $shipper_id);
         }
         if ($tracking_number = $request->get('tracking_number')) {
             $datatable->where('sh.tracking_number', $tracking_number);
@@ -8740,6 +8737,8 @@ class AdminReportsController extends Controller
         if ($status_marked = $request->get('status_marked')) {
             $datatable->where('ss.id', $status_marked);
         }
+        
+        
         
 
         return $datatable->make(true);

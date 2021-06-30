@@ -38,6 +38,12 @@
                             <input name="tracking_number" id="tracking_number" class="form-control tracking_number" required data-rule-required="true" data-msg-required="This field is required"  placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <input name="status_marked_by" id="status_marked_by" class="form-control status_marked_by" required data-rule-required="true" data-msg-required="This field is required"  placeholder="Search Status Marked By">
+                        </fieldset>
+                    </div>
                     <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="status_marked" id="status_marked" class="form-control status_marked">
@@ -57,7 +63,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today()->subMonths(1)  }}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -67,7 +73,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today()}}">
                         </div>
                     </div>
                    
@@ -276,6 +282,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: [50, 0],
                 ajax: {
                     url: '{{ route('admin.reports.work_code_master.list') }}',
                     data: function (d) {
@@ -311,8 +318,14 @@
 
 
             $('#search_filter_btn').on('click',function () {
+               if($('#status_marked_by').val() != ''){
+                table.column('ad.name:name').search($('#status_marked_by').val(), false, false, true);
+               }else{
+                table.column('ad.name:name').search('', false, false, true);
+               } 
                table.draw();
             });
+
 
         });
 
