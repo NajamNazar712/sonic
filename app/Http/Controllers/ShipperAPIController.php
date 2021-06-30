@@ -84,6 +84,12 @@ class ShipperAPIController extends Controller
             $shipper = User::where('email', $request->email_address);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
+                if($shipper->status == 4){
+                    return response()->json(['status' => 1, 'message' => 'Your account is disabled']);
+                }
+                elseif ($shipper->blacklist == 1){
+                    return response()->json(['status' => 1, 'message' => 'Your account is blocked']);
+                }
                 if (Hash::check($request->input('password'), $shipper->password)) {
                     $information = array();
                     $information['name'] = $shipper->name;
