@@ -161,7 +161,7 @@ class ShipmentsJourneyController extends Controller
             }
         }
 
-        if (in_array($shipper_status_id, [14, 8, 20]) && $verification == 1) {
+        if (in_array($shipper_status_id, [14, 8, 20])) {
             ShipperShipmentsSubscription::where('shipment_id', $shipment_id)->delete();
         }
     }
