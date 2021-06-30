@@ -978,6 +978,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::get('request','Admins\DeliveryController@request_index')->name('request_index');
 			Route::get('request/list','Admins\DeliveryController@request_list')->name('request_list');
 			Route::post('request/submit','Admins\DeliveryController@request_submit')->name('request_submit');
+			Route::post('request/info','Admins\DeliveryController@delivery_note_info')->name('request.info');
+			Route::post('request/approve','Admins\DeliveryController@request_approve')->name('request.approve');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {

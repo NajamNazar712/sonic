@@ -300,7 +300,15 @@ class DeliveryController extends Controller
         $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])
             ->whereDate('created_at', '>', $datetime);
         if ($delivery_note->exists()) {
-            return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+            $delivery_note_request = DeliveryNoteRequests::where('rider_id',$request->rider_id)->where('status',2)->latest()->first();
+            if($delivery_note_request){
+                $rider = Rider::find($request->rider_id);
+                $ccd_rider = $rider->ccd;
+                return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+            }
         } else {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
@@ -6662,29 +6670,35 @@ class DeliveryController extends Controller
     }
 
     public function request_index(){
-        return view('admin.delivery.note.request');
+       $riders = Rider::where('status',1)->select('id','name')->get();
+        return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
     public function request_list(){
-        $erf = DeliveryNoteRequests::join('delivery_notes as dn', 'dn.id', '=', 'delivery_note_requests.delivery_note_id')
+        $request = DeliveryNoteRequests::join('delivery_notes as dn', 'dn.id', '=', 'delivery_note_requests.delivery_note_id')
             ->join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
-            ->select(['r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by']);
+            ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status']);
 
-        if (session('role_id') != 1 && session('department_id') != 10) {
-            $erf = $erf->where('dp.id', session('department_id'));
-        }
 
-        $datatables = Datatables::of($erf)
+        $datatables = Datatables::of($request)
+            ->editColumn('status', function ($result) {
+               if($result->status == 1){
+                   return 'Requested';
+               }
+               else{
+                   return 'Approved';
+               }
+            })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                    if (($result->status_id == 3) && (session('role_id') == 1 || in_array(520, session('permissions')))) {
+                    if (($result->status == 1) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
                         $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
 
                     }
@@ -6701,5 +6715,48 @@ class DeliveryController extends Controller
             });
         return $datatables->make(true);
 
+    }
+
+    public function delivery_note_info(Request $request){
+       $rider = $request->id;
+       $delivery_note = DeliveryNote::where('rider_id',$rider)->latest()->first();
+       if($delivery_note){
+           return response()->json(['status' => 1,'note' => $delivery_note]);
+       }
+       else{
+           return response()->json(['status' => 0,'error' => 'No Delivery Note Found For the Rider']);
+       }
+    }
+
+    public function request_submit(Request $request){
+
+        $note = new DeliveryNoteRequests();
+        $note->rider_id = $request->rider_id;
+        $note->delivery_note_id = $request->dncc;
+        $note->amount = $request->amount;
+        $note->reason = $request->reason;
+        $note->requested_at = Carbon::now();
+        $note->requested_by = Auth::id();
+        $note->status = 1;
+        $note->save();
+
+        return redirect()->route('admin.delivery.note.request_index')->with(['success' => 'Request Added']);
+    }
+
+    public function request_approve(Request $request){
+
+        $note = DeliveryNoteRequests::find($request->id);
+
+        if($note->status == 1){
+            $note->status = 2;
+            $note->approved_at = Carbon::now();
+            $note->approved_by = Auth::id();
+            $note->save();
+
+            return response()->json(['status' => 1,'success' => 'Status Updated']);
+        }
+        else{
+            return response()->json(['status' => 0,'error'=> 'Status already approved']);
+        }
     }
 }

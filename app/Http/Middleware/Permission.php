@@ -280,8 +280,8 @@ class Permission
             'delivery.completed.retail.index' => 424,
             'delivery.signature.index' => 441,
             'delivery.signature.list' => 441,
-            'delivery.note.request_index' => 532,
-            'delivery.note.request_list' => 532,
+            'delivery.note.request_index' => 531,
+            'delivery.note.request_list' => 531,
 
             'ftl.request.index' => 511,
             'ftl.request.list' => 511,

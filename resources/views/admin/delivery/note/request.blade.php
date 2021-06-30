@@ -25,6 +25,7 @@
                                     <th class="border-primary border-darken-1">Requested By</th>
                                     <th class="border-primary border-darken-1">Approved Date</th>
                                     <th class="border-primary border-darken-1">Approved By</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -53,7 +54,11 @@
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <div class="form-group">
-                                    <input type="text" name="rider_id" id="rider_id" class="form-control">
+                                    <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
+                                        @foreach($riders as $rider)
+                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
@@ -64,14 +69,14 @@
 
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <div class="form-group">
-                                    <input type="text" name="amount" id="amount" class="form-control"  placeholder="Amount"readonly>
+                                    <input type="text" name="amount" id="amount" class="form-control"  placeholder="Amount" readonly>
                                 </div>
                             </div>
                         </div>
                         <div class="row justify-content-center">
 
                             <div class="form-group">
-                                <textarea id="reason" cols="100" rows="5" placeholder="Reason*"></textarea>
+                                <textarea id="reason" cols="100" name="reason" rows="5" placeholder="Reason*" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                             </div>
 
                         </div>
@@ -165,6 +170,30 @@
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Rider Name',
+            }).bind('change', function () {
+                var rider_id = this.value;
+                $.ajax({
+                    url: '{!! route('admin.delivery.note.request.info') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': rider_id,
+
+                    }
+                }).done(function (data) {
+
+                    if (data.status == 1) {
+                      $('#dncc').val(data.note.id);
+                      $('#amount').val(data.note.total_cod_amount);
+
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+
+                });
             });
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -225,11 +254,10 @@
 
                         }
                     },
-                    
 
                     {
                         extend: 'excel',
-                        title: 'ERF List',
+                        title: 'Delivery Note List',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -246,9 +274,6 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.delivery.note.request_list') }}',
-                    data: function (d) {
-                        d.search_status = $('#search_status').val();
-                    }
                 },
                 rowId: 'shId',
                 order: [[1, 'desc']],
@@ -272,6 +297,7 @@
                     {data: 'requested_by', name: 'a.name', class: 'align-middle requested_by'},
                     {data: 'approved_at', name: 'delivery_note_requests.approved_at', class: 'align-middle approved_at'},
                     {data: 'approved_by', name: 'ad.name', class: 'align-middle approved_by'},
+                    {data: 'status', name: 'delivery_note_requests.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 
@@ -315,15 +341,15 @@
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
 
-                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+                var delivery_note_id = table.row($(this).parents('tr')).data().id;
 
                 if ($(this).hasClass('approve_request')) {
                     $.ajax({
-                        url: '{!! route('admin.human_resource.erf.approve') !!}',
+                        url: '{!! route('admin.delivery.note.request.approve') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'id': erf_id,
+                            'id': delivery_note_id,
 
                         }
                     }).done(function (data) {
@@ -347,7 +373,7 @@
 
         });
 
-        $("#file_upload").validate({
+        $("#request_form").validate({
 
             errorClass:"danger",
             errorPlacement: function(error, element) {
@@ -357,7 +383,7 @@
 
                 swal({
                     title: 'Please Wait!',
-                    text: 'Route is being updated!',
+                    text: 'Request is being submitted!',
                     icon: 'info',
                     buttons: false,
                     closeOnClickOutside: false,

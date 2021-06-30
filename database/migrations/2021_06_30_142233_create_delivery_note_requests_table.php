@@ -23,6 +23,7 @@ class CreateDeliveryNoteRequestsTable extends Migration
             $table->integer('requested_by')->index()->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->integer('approved_by')->index()->nullable();
+            $table->integer('status')->index();
             $table->timestamps();
         });
     }
