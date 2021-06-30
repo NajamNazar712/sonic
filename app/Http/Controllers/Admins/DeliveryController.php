@@ -23,6 +23,7 @@ use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\DeliveryNoteRequests;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
 use App\Http\Models\Handover\HandoverShipments;
@@ -6658,5 +6659,47 @@ class DeliveryController extends Controller
         }
 
         return back()->with(['success' => 'Shipments Received Successfully']);
+    }
+
+    public function request_index(){
+        return view('admin.delivery.note.request');
+    }
+    public function request_list(){
+        $erf = DeliveryNoteRequests::join('delivery_notes as dn', 'dn.id', '=', 'delivery_note_requests.delivery_note_id')
+            ->join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
+            ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
+            ->select(['r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by']);
+
+        if (session('role_id') != 1 && session('department_id') != 10) {
+            $erf = $erf->where('dp.id', session('department_id'));
+        }
+
+        $datatables = Datatables::of($erf)
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || count(array_intersect([518,519,520,521], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (($result->status_id == 3) && (session('role_id') == 1 || in_array(520, session('permissions')))) {
+                        $dropdown .= '<button type="button" class="dropdown-item approve_request" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve </div></button>';
+
+                    }
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+
     }
 }
