@@ -121,7 +121,7 @@ class ShipmentsJourneyController extends Controller
               ShipmentStatusWebhookController::webhook_subscription($shipment_id, $shipper_status_id);
           }
       }
-        if (in_array($shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11]) && $verification == 1) {
+        if (in_array($shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11, 14, 16, 30, 36, 37, 20, 12]) && $verification == 1) {
             $shipment = Shipment::find($shipment_id);
             $status = ShipmentStatus::find($shipper_status_id);
             $consignee_user = ConsigneeUser::where('phone_number_1', $shipment->consignee_phone_number_1)
@@ -159,6 +159,10 @@ class ShipmentsJourneyController extends Controller
                     NotificationsController::bolt_app_notification($shipment_subscription->shipper_id, 3, $device_token, $title, $message);
                 }
             }
+        }
+
+        if (in_array($shipper_status_id, [14, 8, 20]) && $verification == 1) {
+            ShipperShipmentsSubscription::where('shipment_id', $shipment_id)->delete();
         }
     }
 }
