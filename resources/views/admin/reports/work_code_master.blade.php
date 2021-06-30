@@ -32,6 +32,23 @@
                             </select>
                         </fieldset>
                     </div>
+
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <input name="tracking_number" id="tracking_number" class="form-control tracking_number" required data-rule-required="true" data-msg-required="This field is required"  placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <select name="status_marked" id="status_marked" class="form-control status_marked">
+                                @foreach($statuses as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
+                    
                     
                     <div class="col-4 ">
                         <div class="form-group input-group">
@@ -148,11 +165,21 @@
                 allowClear:true,
             });
            
+            $('#status_marked').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Status",
+                allowClear:true,
+            });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
+            var from_min = '{{ Carbon\Carbon::today()->subMonths(1)->toDateString() }}';
+            var to_min = '{{ Carbon\Carbon::today()->subMonths(1)->toDateString() }}';
+
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
+                min: new Date(from_min),
                 max: from_max,
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -170,6 +197,7 @@
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
+                min: new Date(to_min),
                 max: to_max,
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -254,13 +282,17 @@
                         d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.tracking_number = $('#tracking_number').val();
+                        d.status_marked = $('#status_marked').val();
+                        
+                        
                     }
                 },
                 rowId: 'shId',
-                order: [[5, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'sh.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'tracking_number_link', name: 'sh.tracking_number', class: 'align-middle tracking_number_link', searchable: false},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'status_marked', name: 'ss.id', class: 'align-middle status_marked'},
                     {data: 'status_marking_date', name: 'shipments_journey.created_at', class: 'align-middle status_marking_date'},
@@ -272,51 +304,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.status_marking_date')) {
-                            $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.status_marked')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                    var data = $.map({!! $statuses !!}, function (obj) {
-                    obj.id = obj.id; // replace pk with your identifier
-                    obj.text = obj.name;
-                    return obj;
-                });
-
-                $("#status_select").prepend('<option value="" selected></option>').select2({
-                    data:data,
-                    placeholder: "Select Status",
-                    width:'100%',
-                    containerCssClass: 'select-xs',
-                    dropdownCssClass: 'form-control-sm p-0'
-                });
+                    
                     this.api().table().columns.adjust();
                 }
             });
