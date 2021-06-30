@@ -8732,7 +8732,7 @@ class AdminReportsController extends Controller
             $datatable->where('sh.user_id', $shipper_id);
         }
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatable->where('sh.tracking_number', $tracking_number);
+            $datatable->whereIn('sh.tracking_number', explode(',', $tracking_number));
         }
         if ($status_marked = $request->get('status_marked')) {
             $datatable->where('ss.id', $status_marked);

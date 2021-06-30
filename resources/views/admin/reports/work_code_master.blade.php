@@ -34,8 +34,9 @@
                     </div>
 
                     <div class="col-4 mb-1">
+
                         <fieldset class="form-group">
-                            <input name="tracking_number" id="tracking_number" class="form-control tracking_number" required data-rule-required="true" data-msg-required="This field is required"  placeholder="Search Tracking Number">
+                             <input name="tracking_number" id="tracking_number" class="form-control tracking_number" required data-rule-required="true" data-msg-required="This field is required"  placeholder="Tracking Number(s)">
                         </fieldset>
                     </div>
 
@@ -105,6 +106,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
+    
         table.dataTable {
             font-size: 12px;
         }
@@ -150,6 +152,8 @@
             width: auto !important;
             text-align: left;
         }
+        
+        
     </style>
 @endsection
 @section('js')
@@ -157,6 +161,8 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -165,6 +171,35 @@
                 width:'100%',
                 allowClear:true
             });*/
+            var select = $('.tracking_number').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+
             $('#search_shipper').select2({
                 width:'100%',
                 placeholder:"Select Shipper",
