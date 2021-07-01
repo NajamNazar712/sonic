@@ -7727,7 +7727,7 @@ class NotificationsController extends Controller
                     // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
                     
                             if ($rider_pickups->exists()) {
-                                $hubss = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name');
+                                $hubss = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
                                 foreach ($hubss as $hub) {
                                     $html = '<table style="width:100%;">';
                                     $html .= '<thead><tr>
