@@ -35,6 +35,7 @@ use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
@@ -151,7 +152,7 @@ class ShipperAgreementController extends Controller
         $sales_person_name = '';
         $sales_person = $shipper->sales_person()->where('status', 0)->first();
         if($sales_person){
-            $sales_person_name = Admin::find($sales_person->admin_id)->name;
+            $sales_person_name = Admin::find($sales_person->admin_id)->name ?? "";
         }
         $claim_policy = '<h2 class="text-center mt-4">Claim Policy</h2>
 <style> .table1 tr:nth-child(even) {background-color: #d9e2f3;}</style>
@@ -741,7 +742,15 @@ otherwise it will be rejected</li>
             if($international_rates){
                 $international_rate_boxes = '';
                 $international_rate_status = InternationalUserRate::where('user_id', $id)->first();
-                if($international_rate_status){
+                $international_economic_rate_status = InternationalEconomyRateStatus::where([['user_id', $id],['status',2]])->first();
+                if($international_economic_rate_status)
+                {
+                    $intl_box = '';
+
+                    $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
+                    <tr><td><strong>International Rate(s)</strong></td></tr></thead></table>';
+                }
+                else if($international_rate_status){
 
                     $intl_box = '';
 

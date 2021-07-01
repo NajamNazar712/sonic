@@ -1197,10 +1197,6 @@ class AdminInternationalRatesController extends Controller
         if($rate_status->exists())
         {
             $rate_status = $rate_status->first();
-            if($rate_status->status == 2 && $view == null)
-            {
-                return redirect()->back()->with('error','Rates Already Added & Approved');
-            }
             foreach ($zones as $zone)
             {
                 $zone_rates = InternationalEconomyRate::where([['user_id',$user->id],['zone_id',$zone->id]]);
