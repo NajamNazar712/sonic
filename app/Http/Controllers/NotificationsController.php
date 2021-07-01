@@ -7741,7 +7741,7 @@ class NotificationsController extends Controller
             
                                     $serial = 1;
                                     
-                                    $hubs = array();
+                                    // $hubs = array();
                                     foreach($rider_pickups as $rider_pickup){
                                         if($hub->id == $rider_pickup->hub_id){
                         
@@ -7753,8 +7753,8 @@ class NotificationsController extends Controller
                                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->origin_hub . '</td>';
                                             $html .= '</tr>';
         
+                                            $hub_id = $rider_pickup->hub_id;
                                         }
-                                        // array_push($hubs, $rider_pickup->hub_id);
                                         
                                     }
                                     $html .= '</tbody></table> <br>';
@@ -7765,7 +7765,7 @@ class NotificationsController extends Controller
     
                                     $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
                                     ->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)
-                                    ->where('admin_hubs.hub_id', $hub->id);
+                                    ->whereIn('admin_hubs.hub_id', $hub_id);
                                     // $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
                                     if ($admins->exists()) {
                                         $to = array_merge($to, $admins->pluck('email')->toArray());
