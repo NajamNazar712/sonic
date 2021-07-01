@@ -90,6 +90,13 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="form-group">
+                                        <select name="charges_mode" id="charges_mode" class="select2 form-control" data-rule-required="true" data-msg-required="Charges Mode is required">
+                                            @foreach($charges_modes as $charges_mode)
+                                                <option value="{{$charges_mode->id}}">{{$charges_mode->charges_mode}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 {{--                                    <div class="form-group">--}}
 {{--                                        <input name="payment_transaction_id" class="form-control number" id="payment_transaction_id" placeholder="Payment Transaction ID" value=""  data-rule-required="true" data-msg-required="Payment Transaction ID is required">--}}
 {{--                                    </div>--}}
@@ -476,6 +483,12 @@
             $('#payment_mode').select2({
                 width:'100%',
                 placeholder:"Select Payment Mode*",
+                allowClear:true
+            });
+
+            $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Charges Mode*",
                 allowClear:true
             });
 

@@ -48,7 +48,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $multi_piece = $user->multipiece_status;
         $cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->select('name','id')->get();
         $products = Product::orderBy('product_name')->get();
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [2, 3, 5])->get();
         $check = NonServiceArea::pluck('name')->toArray();
         if(session('account_type') == 1){
             $charges_modes = ChargesModes::where('id' , 4)->get();
@@ -274,7 +274,7 @@ class ShipperInternationalShipmentBookController extends Controller
         $cities = City::where('status', 1)->where('hub', 0)->where('business_category_id', 2)->whereNotNull('zone_id')->groupBy('id')->orderBy('name')->pluck('name');
         $products = Product::all();
 
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [2, 3, 5])->get();
         if(session('account_type') == 1){
             $charges_modes = ChargesModes::where('id' , 4)->get();
         }

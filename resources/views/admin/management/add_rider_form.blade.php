@@ -7,7 +7,7 @@
 <form action="{{route('admin.management.riders.add')}}" method="post" class="mt-1" id="addRiderForm" novalidate="novalidate">
     {{csrf_field()}}
     <div class="row justify-content-center">
-        <div class="col-3">
+        <div class="col text-center">
             <label class="font-medium-2 font-weight-bold block">Special Rider</label>
             <div class="form-group">
                 <label for="all_shippers_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
@@ -15,6 +15,16 @@
                 <label for="special_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
             </div>
         </div>
+        @if($type == 1)
+            <div class="col text-center">
+                <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
+                <div class="form-group">
+                    <label for="ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                    <input type="checkbox" name="ccd_rider_checkbox" id="ccd_rider_checkbox" class="switchery ccd_rider_checkbox" data-size="sm" data-switchery="true">
+                    <label for="ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                </div>
+            </div>
+        @endif
     </div>
     
 
@@ -147,6 +157,9 @@
 
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
+
+        var ccd_elem = document.querySelector('.ccd_rider_checkbox');
+        var ccd_switchery = new Switchery(ccd_elem);
 
         $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a city',

@@ -15,7 +15,7 @@
                     <div class="form-group">
                         <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
                     </div>
-
+                    <input type="hidden" name="default_status_id" id="default_status_id" value="0">
                     <div class="form-group ml-1">
                         <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                     </div>
@@ -130,7 +130,7 @@
                     $('#international_shipment_form button.add').prop('disabled', true);
 
                     var tracking_number = $(form).find('input.tracking_number').val();
-
+                    var default_status_id = $('#default_status_id').val();
                     form.reset();
 
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
@@ -140,6 +140,7 @@
                             method: 'POST',
                             data: {
                                 'tracking_number': tracking_number,
+                                'default_status_id': default_status_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         })
@@ -160,7 +161,9 @@
                                         table.order([0, 'desc']).draw();
 
                                         shipment_ids.push(data.details.id);
-
+                                        if($('#default_status_id').val() == 0){
+                                            $('#default_status_id').val(data.details.status_id);
+                                        }
                                         $('#international_shipment_form button.add').prop('disabled', false);
 
                                         $('#update_shipment_form_submit').prop('disabled', false);
@@ -179,7 +182,7 @@
                     else {
                         $('#international_shipment_form button.add').prop('disabled', false);
                         scan_sound(2);
-                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.error('Shipment has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                     return false;
@@ -241,6 +244,7 @@
                 table.row( $(this).parents('tr') ).remove().draw();
                 if(shipment_ids.length == 0){
                     $('#update_shipment_form button[type="submit"]').attr('disabled', 'disabled');
+                    $('#default_status_id').val(0);
                 }
             });
 
