@@ -1674,6 +1674,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('mark_as_received_all', 'Admins\AdminFinanceController@invoices_mark_as_received_all')->name('mark_as_received_all');
             Route::get('received', 'Admins\AdminFinanceController@received_invoices_index')->name('received_index');
             Route::get('received_list', 'Admins\AdminFinanceController@received_invoices_list')->name('received_list');
+            //Route::get('download/{id}', 'Admins\AdminFinanceController@email_print_invoice')->name('download');
         });
 
         Route::prefix('invoice_for_reimbursement')->name('invoice_for_reimbursement.')->group(function () {
@@ -2360,6 +2361,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('crm_case_nature_types')->name('crm_case_nature_types.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@crm_case_nature_types_index')->name('index');
             Route::post('list', 'Admins\GlobalSettingsController@crm_case_nature_types_list')->name('list');
+            Route::post('status', 'Admins\GlobalSettingsController@crm_case_nature_types_status')->name('status');
             Route::post('store', 'Admins\GlobalSettingsController@crm_case_nature_types_store')->name('store');
         });
 
@@ -2909,6 +2911,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminNsaAccountShipmentController@return_index')->name('index');
             Route::post('shipment_info', 'Admins\AdminNsaAccountShipmentController@return_shipment_info')->name('shipment_info');
             Route::post('store', 'Admins\AdminNsaAccountShipmentController@return_submit')->name('submit');
+            Route::get('bulk_return', 'Admins\AdminNsaAccountShipmentController@bulk_return_index')->name('bulk_return');
+            Route::post('bulk_return/submit', 'Admins\AdminNsaAccountShipmentController@bulk_return_submit')->name('bulk_return_submit');
         });
 
         Route::prefix('call')->name('call.')->group(function () {
