@@ -296,7 +296,7 @@
                     url: '{{ route('admin.delivery.note.request_list') }}',
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {
                         orderable: false,

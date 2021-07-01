@@ -6689,7 +6689,7 @@ class DeliveryController extends Controller
                }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) {
+                if ((session('role_id') == 1 || count(array_intersect([533], session('permissions'))) !== 0) && $result->status == 1 ) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
