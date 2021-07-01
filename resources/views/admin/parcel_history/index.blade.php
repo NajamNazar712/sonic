@@ -29,8 +29,9 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking Number</th>
-                            <th class="border-primary border-darken-1">User Mode</th>
+                            <th class="border-primary border-darken-1">User Type</th>
                             <th class="border-primary border-darken-1">User</th>
+                            <th class="border-primary border-darken-1">City</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Amount</th>
                             <th class="border-primary border-darken-1">Date</th>
@@ -78,7 +79,7 @@
                                     <div class="form-group">
                                         <select name="select_rider" id="select_rider" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                             @foreach($riders as $rider)
-                                                <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                                <option value="{{$rider->id}}">{{$rider->name}} ({{$rider->city->name}})</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -240,8 +241,9 @@
                             head = [];
                             head.push('S.No');
                             head.push('Tracking Number');
-                            head.push('User Mode');
+                            head.push('User Type');
                             head.push('User');
+                            head.push('City');
                             head.push('Remarks');
                             head.push('Amount');
                             head.push('Date');
@@ -254,6 +256,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.user_mode);
                                 row.push(values.user);
+                                row.push(values.city);
                                 row.push(values.remarks);
                                 row.push(values.amount);
                                 row.push(values.date);
@@ -297,12 +300,13 @@
                     }
                 },
                 rowId: 'id',
-                order: [[0, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle tracking_number'},
                     { data:'user_mode' ,name: 'open_parcel_histories.user_mode', class: 'align-middle user_mode'},
                     { data:'user' ,name: 'user', class: 'align-middle user'},
+                    { data:'city' ,name: 'c.name', class: 'align-middle city'},
                     { data:'remarks' ,name: 'open_parcel_histories.remarks', class: 'align-middle remarks'},
                     { data:'amount' ,name: 'open_parcel_histories.amount', class: 'align-middle amount'},
                     { data:'date' ,name: 'open_parcel_histories.date', class: 'align-middle date'},

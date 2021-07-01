@@ -152,9 +152,9 @@ class AdminCrmSettingsController extends Controller
     public function escalation_launched_add_index(){
         $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         return view('admin.settings.CRM.escalation.launched.add')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
 
@@ -166,18 +166,15 @@ class AdminCrmSettingsController extends Controller
         else if($case_nature_id == 2){
             $case_nature_type_id = $request->input('case_nature_request');
         }
-        else if($case_nature_id == 3){
+        else if($case_nature_id == 4){
             $case_nature_type_id = $request->input('case_nature_claim');
         }
         $shipment_statuses = $request->shipment_statuses;
         $tat = $request->input('tat');
         $mark_as = $request->input('mark_as_select');
-        if($mark_as == 1){
-            $comment = $request->input('auto_comment');
-        }
-        else{
-            $comment = NULL;
-        }
+            
+        $comment = $request->input('auto_comment');
+        
         $launched_escalation = new CrmEscalation();
         $launched_escalation->crm_request_status = 1;
         $launched_escalation->case_nature = $case_nature_id;
@@ -206,9 +203,9 @@ class AdminCrmSettingsController extends Controller
         }
         $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         return view('admin.settings.CRM.escalation.launched.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'escalation' => $escalation, 'statuses' => $statuses]);
     }
 
@@ -315,9 +312,9 @@ class AdminCrmSettingsController extends Controller
     public function escalation_in_process_add_index(){
         $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         return view('admin.settings.CRM.escalation.in_process.add')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
 
@@ -365,9 +362,9 @@ class AdminCrmSettingsController extends Controller
         }
         $shipment_statuses = ShipmentStatus::select('id','name')->where('id', '!=', 1)->get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         return view('admin.settings.CRM.escalation.in_process.edit')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'escalation' => $escalation, 'statuses' => $statuses]);
     }
 
@@ -525,9 +522,9 @@ class AdminCrmSettingsController extends Controller
 
         $levels = CrmEscalationLevel::get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         return view('admin.settings.CRM.escalation.tagging.add')->with(['shipment_statuses' => $shipment_statuses, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'levels' => $levels, 'admin_roles' => $admin_roles]);
     }
 
@@ -643,9 +640,9 @@ class AdminCrmSettingsController extends Controller
 
         $levels = CrmEscalationLevel::get();
         $case_nature = CrmRequestCaseNature::where('id', '!=', 3)->get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $selected_admin_roles = array();
         $selected_tat = array();
         $selected_roles = array();

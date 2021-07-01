@@ -86,8 +86,8 @@ class RegisterController extends Controller
         $segments = Segment::all();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
-
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments, 'lead' => $lead]);
+        $invoicing_cycle = InvoicingCycle::all();
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -176,7 +176,8 @@ class RegisterController extends Controller
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
                 'g-recaptcha-response' => 'required|captcha',
-                'segments' => 'required'
+                'segments' => 'required',
+                'cycle_of_invoicing' => 'required'
             ]);
         }
 
@@ -470,6 +471,7 @@ class RegisterController extends Controller
 
             }else{
                 $generation_date = $data['generation_date'];
+                $invoicing_cycle = $data['cycle_of_invoicing'];
 
                 UserBankInfo::create([
                     'user_id'=>$newUser->id,
@@ -479,7 +481,7 @@ class RegisterController extends Controller
                     'account_title'=>$data['account_title'][$rowId],
                     'iban'=> strtoupper($data['iban_no'][$rowId]),
                     'city_id'=> $data['bank_city'][$rowId],
-                    'invoicing_cycle_id' => 1,
+                    'invoicing_cycle_id' => $invoicing_cycle,
                     'generation_date' => $generation_date,
                     'billing_person_name' => $data['billing_person_name'],
                     'billing_person_phone' => $data['billing_person_phone'],
