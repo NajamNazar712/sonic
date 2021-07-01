@@ -7691,15 +7691,7 @@ class NotificationsController extends Controller
                     
                     $yesterday = Carbon::yesterday();
                     $today = Carbon::today();
-                    // $rider_pickups = V2RiderPickup::join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
-                    // ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
-                    // ->join('riders as r', 'pn.rider_id', 'r.id')
-                    // ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
-                    // ->join('cities as oc', 'usi.city_id', 'oc.id')
-                    // ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
-                    // ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub', 'h.id as hub_id')
-                    // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
-
+                    
                     $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
                     ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
                     ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
@@ -7710,22 +7702,6 @@ class NotificationsController extends Controller
                     ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'c.name as origin_hub', 'c.hub_id as hub_id')
                     ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
 
-                    // ->select('v2_rider_pickups.id', 'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', $pickup_not_picked, $pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks', 'v2_rider_pickups.audio_path');
-                // if (session('role_id') != 1) {
-                //     $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
-                // }
-
-                    // $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
-                    // ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
-                    // ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
-                    // ->join('riders as r', 'pn.rider_id', 'r.id')
-                    // ->join('users as u', 'pr.shipper_id', 'u.id')
-                    // ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
-                    // ->join('cities as oc', 'usi.city_id', 'oc.id')
-                    // ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
-                    // ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub', 'h.id as hub_id')
-                    // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
-                    
                             if ($rider_pickups->exists()) {
                                 $rider_pickups = $rider_pickups->get();
                                 $hubss = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
@@ -7764,7 +7740,6 @@ class NotificationsController extends Controller
                                     if (strpos($body_updated, '[preview]') !== FALSE) {
                                         $body_updated = str_replace('[preview]', $html, $body_updated);
                                     }
-                                    $to = null;
                                     $to = array();
                                     if($hub_id != null){
                                         $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
