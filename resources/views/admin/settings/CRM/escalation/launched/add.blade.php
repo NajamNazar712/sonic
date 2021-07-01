@@ -114,7 +114,7 @@
                                     <div class="row justify-content-center">
                                         <div class="col-6">
                                             <fieldset class="form-group">
-                                                <textarea class="form-control" name="auto_comment" id="auto_comment" rows="5" placeholder="Enter Auto Comment Here..." data-rule-required="true" data-msg-required="Auto Comment is required" disabled="disabled"></textarea>
+                                                <textarea class="form-control" name="auto_comment" id="auto_comment" rows="5" placeholder="Enter Auto Comment Here..." data-rule-required="true" data-msg-required="Auto Comment is required"></textarea>
                                             </fieldset>
                                         </div>
                                     </div>
@@ -229,11 +229,8 @@
                 dropdownParent:$('#settings_form')
             }).bind('change', function () {
                 var id = parseInt($(this).val());
-                if(id === 1){
-                    $('#auto_comment').attr('disabled', false);
-                }else{
-                    $('#auto_comment').attr('disabled', true);
-                }
+
+                
             });
 
             var checked;

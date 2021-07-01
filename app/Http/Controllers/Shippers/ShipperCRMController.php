@@ -37,7 +37,7 @@ class ShipperCRMController extends Controller
 
     public function index(){
         $case_nature = CrmRequestCaseNature::all(['id', 'name']);
-        $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->where('status_id',1)->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::where('id', '!=', 3)->select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();

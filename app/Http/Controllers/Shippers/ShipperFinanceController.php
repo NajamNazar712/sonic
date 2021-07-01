@@ -929,7 +929,9 @@ class ShipperFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->whereIn('is.id', [1,3])->where('u.id',session('user_id'));
+            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+            ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->whereIn('is.id', [1,3])->where('u.id',session('user_id'))->where('ubi.default_bank',1);
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function ($invoice) {
