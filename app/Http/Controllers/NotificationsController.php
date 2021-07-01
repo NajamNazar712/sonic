@@ -6125,18 +6125,17 @@ class NotificationsController extends Controller
                     $total_shipments = 0;
                     $after_cutoff_time = 0;
                     $pickup_requests = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
-                        
-                        ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
-                        ->join('v2_pickup_request_shipments as vs', 'vs.id', '=', 'v2_pickup_requests.id')
-                        ->join('user_shipping_infos AS usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
-                        ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-                        ->join('v2_pickup_request_attempts as vpra', 'vpra.pickup_request_id', '=', 'v2_pickup_requests.id')
-                        ->join('v2_pickup_request_not_pick_reasons as npr', 'npr.id', '=', 'vpra.reason_id')
-                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id', 'oc.name as origin', 'u.name as shipper_name', 'npr.name as reason','vs.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time' )
-                        ->where('v2_pickup_requests.status_id', 3)
-                        ->whereNotNull('vpra.reason_id')
-                        ->wherebetween('v2_pickup_requests.created_at', [$date_from, $date_to])
-                        ->get();
+                    ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
+                    ->join('v2_pickup_request_shipments as vs', 'vs.id', '=', 'v2_pickup_requests.id')
+                    ->join('user_shipping_infos AS usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
+                    ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                    ->join('v2_pickup_request_attempts as vpra', 'vpra.pickup_request_id', '=', 'v2_pickup_requests.id')
+                    ->join('v2_pickup_request_not_pick_reasons as npr', 'npr.id', '=', 'vpra.reason_id')
+                    ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id as user_id', 'oc.name as origin', 'u.name as shipper_name', 'npr.name as reason','vs.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time')
+                    ->where('v2_pickup_requests.status_id', 3)
+                    ->whereNotNull('vpra.reason_id')
+                    ->wherebetween('v2_pickup_requests.created_at', [$date_from, $date_to])
+                    ->get();
 
                     $to = array();
                     if (count($pickup_requests) > 0) {
@@ -6149,16 +6148,14 @@ class NotificationsController extends Controller
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booking Date</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Not Picked</th>';
                         $html .= '</tr></thead><tbody>';
 
                         foreach ($pickup_requests as $pickup) {
-                            // $shipment_count  = V2PickupRequestShipment::where('pickup_request_id',$pickup->id)->groupBy('pickup_request_id')->get();
-                            // if(count($shipment_count) > 0){
-                            //         $total_shipments;
-
-                            // }
-                            $after_cutoff_time = $pickup->after_cut_off_time_sum;
+                            
+                            
+                            $after_cutoff_time += $pickup->after_cut_off_time;
                             $to = array();
                             $to[] = $pickup->saleperson_email;
                             $html .= '<tr>';
@@ -6166,16 +6163,13 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->id . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->origin . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . V2PickupRequestShipment::where('pickup_request_id',$pickup->id)->count() . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
                             $html .= '</tr>';
                         }
                         $html .= '<tr>';
                         $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Numbers</td>';
-                        $html .= '<td colspan="4" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . count($pickup_requests) . '</td>';
-                        $html .= '</tr>';
-                        $html .= '<tr>';
-                        $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shipements</td>';
-                        $html .= '<td colspan="4" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . $total_shipments . '</td>';
+                        $html .= '<td colspan="5" style="padding:5px; border: 1px solid black; font-weight:bold; border-collapse: collapse; text-align: center;">' . count($pickup_requests) . '</td>';
                         $html .= '</tr>';
                         $html .= '<tr>';
                         $html .= '<td  style="padding:5px; border: 1px solid black; border-collapse: collapse;">After CutOff Time</td>';
