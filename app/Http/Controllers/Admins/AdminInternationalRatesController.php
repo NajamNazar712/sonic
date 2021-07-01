@@ -1263,7 +1263,13 @@ class AdminInternationalRatesController extends Controller
             }
         }
 
-        return back()->with(['success'=>'Rates Updated Successfully']);
+        $user = User::find($id);
+        if($user->status == 3){
+            return redirect()->route('admin.accounts.active')->with('success', 'Rates added successfully!');
+        }
+        else{
+            return redirect()->route('admin.accounts.pending')->with('success', 'Rates added successfully!');
+        }
     }
 
     public function addEconomyRatesApprove($id,Request $request)
@@ -1279,7 +1285,13 @@ class AdminInternationalRatesController extends Controller
                 $rate->updated_by = Auth::id();
                 $rate->updated_on =  now()->format("Y-m-d H:i:s");
                 $rate->update();
-                return back()->with(['success'=>"Rates Approved Successfully"]);
+                $user = User::find($id);
+                if($user->status == 3){
+                    return redirect()->route('admin.accounts.active')->with('success', 'Rates Approved successfully!');
+                }
+                else{
+                    return redirect()->route('admin.accounts.pending')->with('success', 'Rates Approved successfully!');
+                }
             }
             return back()->with(['error'=>"Rates Not Found"]);
         }
@@ -1294,7 +1306,13 @@ class AdminInternationalRatesController extends Controller
                 $rate->updated_by = Auth::id();
                 $rate->updated_on =  now()->format("Y-m-d H:i:s");
                 $rate->update();
-                return back()->with(['success'=>"Rates Rejected Successfully"]);
+                $user = User::find($id);
+                if($user->status == 3){
+                    return redirect()->route('admin.accounts.active')->with('success', 'Rates Rejected successfully!');
+                }
+                else{
+                    return redirect()->route('admin.accounts.pending')->with('success', 'Rates Rejected successfully!');
+                }
             }
             return back()->with(['error'=>"Rates Not Found"]);
         }

@@ -680,30 +680,33 @@ class ShipmentChargesController extends Controller
 
             $result['chargeable_weight'] = (CEIL(($economic_rate->kg_range * (intval($weight / $economic_rate->kg_range) + 1)) * 2) / 2);
 
-//            $previous = TRUE;
-//
-//            while ($previous) {
-//                $weight_charge = InternationalStandardDhlRate::where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
-//
-//                if ($weight_charge->exists()) {
-//                    $weight_charge = $weight_charge->first();
-//
-//                    if ($weight_charge->weight_addition == 0) {
-//                        $charges += $weight_charge[$zone_id];
-//
-//                        $previous = FALSE;
-//                    }
-//                    else {
-//                        $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
-//
-//                        $charges += ($weight_charge[$zone_id] * $multiplier);
-//
-//                    }
-//                }
-//                else {
-//                    $previous = FALSE;
-//                }
-//            }
+            $previous = TRUE;
+
+            while ($previous) {
+                $weight_charge = InternationalEconomyRate::where('id', '<', $economic_rate->id)
+                    ->where('zone_id',$economic_rate->zone_id)
+                    ->where('user_id',$economic_rate->user_id)
+                    ->orderBy('id', 'desc');
+
+                if ($weight_charge->exists()) {
+                    $weight_charge = $weight_charge->first();
+
+                    if ($weight_charge->weight_addition == 0) {
+                        $charges += $weight_charge->flat_charges;
+
+                        $previous = FALSE;
+                    }
+                    else {
+                        $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->kg_range) + 1;
+
+                        $charges += ($weight_charge->flat_charges * $multiplier);
+
+                    }
+                }
+                else {
+                    $previous = FALSE;
+                }
+            }
 
 
             $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
