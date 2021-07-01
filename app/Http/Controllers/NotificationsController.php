@@ -7764,6 +7764,7 @@ class NotificationsController extends Controller
                                     if (strpos($body_updated, '[preview]') !== FALSE) {
                                         $body_updated = str_replace('[preview]', $html, $body_updated);
                                     }
+                                    $to = null;
                                     $to = array();
                                     if($hub_id != null){
                                         $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
