@@ -6728,17 +6728,24 @@ class DeliveryController extends Controller
 
     public function request_submit(Request $request){
 
-        $note = new DeliveryNoteRequests();
-        $note->rider_id = $request->rider_id;
-        $note->delivery_note_id = $request->dncc;
-        $note->amount = $request->amount;
-        $note->reason = $request->reason;
-        $note->requested_at = Carbon::now();
-        $note->requested_by = Auth::id();
-        $note->status = 1;
-        $note->save();
+        if(DeliveryNoteRequests::where('rider_id',$request->rider_id)->where('status',1)->exists()){
+            return redirect()->route('admin.delivery.note.request_index')->with(['error' => 'Request Already Present']);
+        }
+        else{
+            $note = new DeliveryNoteRequests();
+            $note->rider_id = $request->rider_id;
+            $note->delivery_note_id = $request->dncc;
+            $note->amount = $request->amount;
+            $note->reason = $request->reason;
+            $note->requested_at = Carbon::now();
+            $note->requested_by = Auth::id();
+            $note->status = 1;
+            $note->save();
 
-        return redirect()->route('admin.delivery.note.request_index')->with(['success' => 'Request Added']);
+            return redirect()->route('admin.delivery.note.request_index')->with(['success' => 'Request Added']);
+        }
+
+
     }
 
     public function request_approve(Request $request){
