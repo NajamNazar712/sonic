@@ -6129,9 +6129,13 @@ class NotificationsController extends Controller
                     ->join('v2_pickup_request_shipments as vs', 'vs.id', '=', 'v2_pickup_requests.id')
                     ->join('user_shipping_infos AS usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
                     ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-                    ->join('v2_pickup_request_attempts as vpra', 'vpra.pickup_request_id', '=', 'v2_pickup_requests.id')
+                    ->join('v2_pickup_request_attempts as vpra', function ($join) {
+                        $join->on('vpra.pickup_request_id', '=', 'v2_pickup_requests.id')
+                            ->where('vpra.created_at','=',
+                                DB::raw('(select max(created_at) from v2_pickup_request_attempts where v2_pickup_request_attempts.pickup_request_id = v2_pickup_requests.id AND v2_pickup_request_attempts.reason_id is not Null )'));
+                    })
                     ->join('v2_pickup_request_not_pick_reasons as npr', 'npr.id', '=', 'vpra.reason_id')
-                    ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id as user_id', 'oc.name as origin', 'u.name as shipper_name', 'npr.name as reason','vs.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time as after_cut_off_time')
+                    ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id as user_id', 'oc.name as origin', 'u.name as shipper_name', 'npr.name as reason','vs.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time as after_cut_off_time','vpra.created_at')
                     ->where('v2_pickup_requests.status_id', 3)
                     ->whereNotNull('vpra.reason_id')
                     ->wherebetween('v2_pickup_requests.created_at', [$date_from, $date_to])
@@ -6144,7 +6148,7 @@ class NotificationsController extends Controller
 
                         $html = '<table style="width:100%;">';
                         $html .= '<thead><tr>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Requested Date</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Booking Date</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin</th>
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
