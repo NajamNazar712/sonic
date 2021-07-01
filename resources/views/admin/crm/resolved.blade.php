@@ -41,6 +41,8 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
+                                    <th class="border-primary border-darken-1">Arrival Date</th>
+                                    <th class="border-primary border-darken-1">COD Amount</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
@@ -136,6 +138,8 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Shipment Status');
+                            head.push('Arrival Date');
+                            head.push('COD Amount');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -165,6 +169,8 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.status);
+                                row.push(values.arrival);
+                                row.push(values.cod_amount);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.descr);
@@ -432,6 +438,8 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},

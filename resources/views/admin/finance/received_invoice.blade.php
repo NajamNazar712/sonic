@@ -23,6 +23,7 @@
                         <th class="border-primary border-darken-1">Total GST</th>
                         <th class="border-primary border-darken-1">Total Invoice Amount</th>
                         <th class="border-primary border-darken-1">Generation Date</th>
+                        <th class="border-primary border-darken-1">Invoicing Cycle</th>
                         <th class="border-primary border-darken-1">Invoicing Date</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Due Date</th>
@@ -169,6 +170,7 @@
                             head.push('Total GST');
                             head.push('Total Invoice Amount');
                             head.push('Generation Date');
+                            head.push('Invoicing Cycle');
                             head.push('Invoicing Date');
                             head.push('Aging');
                             head.push('Due Date');
@@ -191,6 +193,7 @@
                                 row.push(values.total_gst);
                                 row.push(values.total_invoice_amount);
                                 row.push(values.created_at);
+                                row.push(values.invoicing_cycle);
                                 row.push(values.invoicing_date);
                                 row.push(values.aging);
                                 row.push(values.due_date);
@@ -232,7 +235,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.finance.invoices.received_list') }}',
                 rowId: 'id',
-                order: [[12, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'invoice_number_button', name: 'invoices.invoice_number', class: 'align-middle text-center invoice_number'},
@@ -242,6 +245,7 @@
                     {data:'total_gst', name: 'invoices.total_gst', class: 'align-middle text-center total_gst'},
                     {data:'total_invoice_amount', name: 'invoices.total_invoice_amount', class: 'align-middle text-center total_invoice_amount'},
                     {data:'created_at', name: 'invoices.created_at', class: 'align-middle text-center generation_date'},
+                    {data:'invoicing_cycle', name: 'ic.name', class: 'align-middle text-center invoicing_cycle'},
                     {data:'invoicing_date', name: 'invoices.invoicing_date', class: 'align-middle text-center invoicing_date'},
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
                     {data:'due_date', name: 'invoices.due_date', class: 'align-middle text-center due_date'},

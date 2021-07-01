@@ -71,7 +71,7 @@
                                 </p>
                                 <div class="card-body">
                                     @include('admin.inc.messages')
-                                    <form class="form-horizontal" method="POST" action="{{ route('admin.login.submit') }}">
+                                    <form class="form-horizontal" method="POST" action="{{ route('admin.login.submit') }}" autocomplete="off">
                                     {{ csrf_field()  }}
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
