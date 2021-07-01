@@ -6751,7 +6751,7 @@ class DeliveryController extends Controller
             $note->approved_by = Auth::id();
             $note->save();
 
-            return response()->json(['status' => 1,'success' => 'Status Updated']);
+            return response()->json(['status' => 1,'success' => 'Request Approved']);
         }
         else{
             return response()->json(['status' => 0,'error'=> 'Status already approved']);
