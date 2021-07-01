@@ -378,7 +378,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.select-checkbox')) {
+                        if ($(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.action')) {
@@ -512,6 +512,8 @@
                         var tracking = $.trim($("#add_shipment_form #tracking_number").val());
 
                         if (tracking) {
+                            $("#add_shipment_form #tracking_number").attr('disabled', true);
+
                             $.ajax({
 
                                 url:'{!! route('admin.delivery.note.shipment.info') !!}',
@@ -538,23 +540,29 @@
                                             if(value.status == 0){
                                                     toastr.success(value.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                                      table.draw();
+                                                $("#add_shipment_form #tracking_number").attr('disabled', false);
                                             }
                                             else{
                                                 toastr.error(value.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                $("#add_shipment_form #tracking_number").attr('disabled', false);
                                             }
                                         }
                                     )
 
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    $("#add_shipment_form #tracking_number").attr('disabled', false);
                                 }
                                 $('#tracking_number').val('');
+
                             });
+
                         }
                         else{
                             var error ='Not Found';
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
+
             // });
         }
 
