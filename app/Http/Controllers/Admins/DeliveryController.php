@@ -295,10 +295,7 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-        $rider = Rider::find($request->rider_id);
-        $ccd_rider = $rider->ccd;
-        return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
-        /*$datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+        $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])
             ->whereDate('created_at', '>', $datetime);
         if ($delivery_note->exists()) {
@@ -307,7 +304,7 @@ class DeliveryController extends Controller
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
             return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
-        }*/
+        }
     }
 
 	public function note_consolidation_check(Request $request){
