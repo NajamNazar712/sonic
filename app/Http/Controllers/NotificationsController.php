@@ -7691,15 +7691,27 @@ class NotificationsController extends Controller
                     
                     $yesterday = Carbon::yesterday();
                     $today = Carbon::today();
-                    $rider_pickups = V2RiderPickup::join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+                    // $rider_pickups = V2RiderPickup::join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+                    // ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+                    // ->join('riders as r', 'pn.rider_id', 'r.id')
+                    // ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+                    // ->join('cities as oc', 'usi.city_id', 'oc.id')
+                    // ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
+                    // ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub', 'h.id as hub_id')
+                    // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
+
+
+                    $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+                    ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
                     ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
                     ->join('riders as r', 'pn.rider_id', 'r.id')
+                    ->join('users as u', 'pr.shipper_id', 'u.id')
                     ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
                     ->join('cities as oc', 'usi.city_id', 'oc.id')
                     ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
                     ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub', 'h.id as hub_id')
                     ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
-
+            
                             if ($rider_pickups->exists()) {
                                 
                                 $html = '<table style="width:100%;">';
