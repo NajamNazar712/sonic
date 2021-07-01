@@ -682,12 +682,15 @@ class ShipmentChargesController extends Controller
 
             $previous = TRUE;
 
+            $rate_id = $economic_rate->id;
             while ($previous) {
-                $weight_charge = InternationalEconomyRate::where('id', '<', $economic_rate->id)
+                $weight_charge = InternationalEconomyRate::where('id', '<', $rate_id)
                     ->where('zone_id',$economic_rate->zone_id)
                     ->where('user_id',$economic_rate->user_id)
                     ->orderBy('id', 'desc');
 
+                $rate_id = $weight_charge->id;
+                
                 if ($weight_charge->exists()) {
                     $weight_charge = $weight_charge->first();
 

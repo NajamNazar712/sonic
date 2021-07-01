@@ -24,7 +24,7 @@
                                 $count = 0;
                             @endphp
                             @foreach($zones as $zone)
-                            <div class="card-header border-success">
+                            <div class="card-header border-success @if(!$loop->first) mt-1 @endif">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">{{$zone->name}}</h3>
