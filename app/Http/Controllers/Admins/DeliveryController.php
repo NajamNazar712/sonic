@@ -6670,7 +6670,7 @@ class DeliveryController extends Controller
     }
 
     public function request_index(){
-       $riders = Rider::where('status',1)->select('id','name')->get();
+       $riders = Rider::where('status',1)->whereIn('city_id',session('hubs'))->select('id','name')->get();
         return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
     public function request_list(){
@@ -6719,7 +6719,7 @@ class DeliveryController extends Controller
 
     public function delivery_note_info(Request $request){
        $rider = $request->id;
-       $delivery_note = DeliveryNote::where('rider_id',$rider)->latest()->first();
+       $delivery_note = DeliveryNote::where('rider_id',$rider)->where('dncc_status',0)->latest()->first();
        if($delivery_note){
            return response()->json(['status' => 1,'note' => $delivery_note]);
        }

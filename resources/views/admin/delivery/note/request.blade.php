@@ -53,13 +53,13 @@
                         @csrf
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                <div class="form-group">
+                                <fieldset class="form-group">
                                     <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                         @foreach($riders as $rider)
                                             <option value="{{$rider->id}}">{{$rider->name}}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                </fieldset>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <div class="form-group">
@@ -169,8 +169,9 @@
 
         $(document).ready(function() {
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Rider Name',
+                placeholder:'Search Rider',
+                width:'100%',
+                allowClear:true
             }).bind('change', function () {
                 var rider_id = this.value;
                 $.ajax({
