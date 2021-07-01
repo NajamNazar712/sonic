@@ -85,9 +85,9 @@ class ShipperAPIController extends Controller
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
                 if ($shipper->blacklist) {
-                    return response()->json(['status' => 1, 'message' => 'Your Shipper\'s Account is Blacklisted, Contact Admin']);
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted, Contact Admin']);
                 } else if ($shipper->status != 3) {
-                    return response()->json(['status' => 1, 'message' => 'Your Shipper\'s Account is Not Activated Yet, Contact Admin']);
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Not Activated Yet, Contact Admin']);
                 } else if ($shipper->phone_number_verified == 0) {
                     return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified, Contact Admin']);
                 }

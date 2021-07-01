@@ -3429,9 +3429,8 @@ class APIController extends Controller
             $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
             if ($employee_device_token->exists()) {
                 $employee_device_token->delete();
-                return response()->json(['status' => 0, 'message' => 'Device Token Deleted']);
             }
-            return response()->json(['status' => 1, 'message' => 'Not found']);
+            return response()->json(['status' => 0, 'message' => 'Device Token Deleted']);
         }
     }
 }
