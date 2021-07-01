@@ -171,7 +171,7 @@
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Rider',
                 width:'100%',
-                allowClear:true
+                dropdownParent: $("#request_form")
             }).bind('change', function () {
                 var rider_id = this.value;
                 $.ajax({
@@ -185,7 +185,7 @@
                 }).done(function (data) {
 
                     if (data.status == 1) {
-                      $('#dncc').val(data.note.id);
+                      $('#dncc').val(data.note.received_cod_amount);
                       $('#amount').val(data.note.total_cod_amount);
 
                     } else {
