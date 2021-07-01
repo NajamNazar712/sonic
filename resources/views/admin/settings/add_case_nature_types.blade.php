@@ -23,6 +23,8 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Type</th>
                                     <th class="border-primary border-darken-1">Nature</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -171,6 +173,7 @@
                             head.push('S.No');
                             head.push('Type');
                             head.push('Nature');
+                            head.push('Status');
                             // head.push('Created At');
                             // head.push('Created By');
                             $.each(result.data, function(index, values) {
@@ -179,6 +182,7 @@
                                 row.push(index + 1);
                                 row.push(values.case_nature_type);
                                 row.push(values.case_nature);
+                                row.push(values.status);
                                 // row.push(values.created_at);
                                 // row.push(values.created_by);
 
@@ -227,11 +231,16 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                 },
+				scrollX: false, scrollY: true,
+                rowId: 'id',
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'case_nature_type', name: 'crm_request_case_nature_types.type', class: 'align-middle case_nature_type'},
                     {data: 'case_nature', name: 'crcs.name', class: 'align-middle case_nature'},
+					{data:'status', name: 'crm_request_case_nature_types.status_id', class: 'align-middle text-center status'},
+					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+
                     // {data: 'created_at', name: 'crm_tat_holidays.created_at', class: 'align-middle created_at'},
                     // {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
 
@@ -246,14 +255,21 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number')|| $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }
+                        else if ($(header).is('.status')) {
+                            $(status_select).appendTo($(search))
+                            .on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -265,9 +281,53 @@
                             }
                         }
                     });
+
+                    $('#status_select').prepend('<option value="" selected></option>').select2({
+                        data: [{id: 1, name: "Enable", text: "Enable"},{id: 0, name: "Disable", text: "Disable"}],
+                        placeholder: 'Select Status',
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.settings.crm_case_nature_types.status') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id,
+                        'status': 1
+                    }
+                }).done(function(data){
+                    if(data.status){
+                        table.draw(true);
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.disable', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route('admin.settings.crm_case_nature_types.status') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id,
+                        'status': 0
+                    }
+                }).done(function(data){
+                    if(data.status){
+                        table.draw(true);
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                });
+            });  
 
             $('#add_type_button').on('click', function () {
                 var case_nature = $('#case_nature_select').val();
@@ -308,6 +368,7 @@
                 }
             });
 
+            
             $('#AddCaseNatureTypes').on('hide.bs.modal', function (e) {
                 $('#case_nature_select').val('').trigger('change');
                 $('#new_case_nature_type').val('');

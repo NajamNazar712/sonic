@@ -6053,7 +6053,8 @@ class AdminReportsController extends Controller
                 }
             });
         if($tracking = $request->get('search_tracking_no')){
-            $datatable->where('s.tracking_number', '=', $tracking);
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('s.tracking_number', $tracking_numbers);
         }
         if($rnumber = $request->get('search_request_number')){
             $rnumber = explode(',',$rnumber);
@@ -6738,7 +6739,10 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks')
+            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
+            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department')
             ->where('delivery_note_shipments.fake_status', 1);
 
 
@@ -8246,7 +8250,7 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.cnic_image as cnic_image', 'rider_deliveries.house_image as house_image', 'rider_deliveries.delivered_status','rider_deliveries.audio_path')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.cnic_image as cnic_image', 'rider_deliveries.ccd_image as ccd_image', 'rider_deliveries.house_image as house_image', 'rider_deliveries.delivered_status','rider_deliveries.audio_path')
             ->where('delivery_note_shipments.update_type', 1)
             ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
@@ -8308,6 +8312,23 @@ class AdminReportsController extends Controller
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return '-';
+                }
+
+            })
+            ->addColumn('ccd_image', function ($shipments) {
+                $image = '';
+                if ($shipments->ccd_image != null) {
+                    $exists = Storage::disk('public')->exists($shipments->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 

@@ -7996,7 +7996,7 @@ class AdminDashboardController extends Controller
 
         }else{
             $generation_date = null;
-            if($request->invoicing_cycle_id == 2){
+            if($request->invoicing_cycle_id == 2 || $request->invoicing_cycle_id == 4 ){
                 $generation_date = null;
             }else{
                 $generation_date = $request->generation_date;
