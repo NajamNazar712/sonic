@@ -73,7 +73,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\AdminHub;
-
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
@@ -6128,12 +6128,11 @@ class NotificationsController extends Controller
                         
                         ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
                         ->join('v2_pickup_request_shipments as vs', 'vs.id', '=', 'v2_pickup_requests.id')
-                        ->join('shipments as ship', 'ship.id', '=', 'vs.shipment_id')
-                        ->join('user_shipping_infos AS usi', 'ship.pickup_address_id', '=', 'usi.id')
+                        ->join('user_shipping_infos AS usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
                         ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
                         ->join('v2_pickup_request_attempts as vpra', 'vpra.pickup_request_id', '=', 'v2_pickup_requests.id')
                         ->join('v2_pickup_request_not_pick_reasons as npr', 'npr.id', '=', 'vpra.reason_id')
-                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id', 'oc.name as origin', 'u.name as shipper_name', 'npr.name as reason','ship.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time' , DB::raw('sum(v2_pickup_requests.after_cut_off_time) as after_cut_off_time_sum'), DB::raw('count(vs.shipment_id) as shipment_count'))
+                        ->select('v2_pickup_requests.id as id', 'v2_pickup_requests.created_at as requested_date', 'u.id', 'oc.name as origin', 'u.name as shipper_name', 'npr.name as reason','vs.created_at as booking_date' ,'v2_pickup_requests.after_cut_off_time' )
                         ->where('v2_pickup_requests.status_id', 3)
                         ->whereNotNull('vpra.reason_id')
                         ->wherebetween('v2_pickup_requests.created_at', [$date_from, $date_to])
@@ -6154,14 +6153,18 @@ class NotificationsController extends Controller
                         $html .= '</tr></thead><tbody>';
 
                         foreach ($pickup_requests as $pickup) {
-                            $total_shipments = $pickup->shipment_count;
+                            // $shipment_count  = V2PickupRequestShipment::where('pickup_request_id',$pickup->id)->groupBy('pickup_request_id')->get();
+                            // if(count($shipment_count) > 0){
+                            //         $total_shipments;
+
+                            // }
                             $after_cutoff_time = $pickup->after_cut_off_time_sum;
                             $to = array();
                             $to[] = $pickup->saleperson_email;
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->requested_date . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->shipper_name . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->booking_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->id . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->origin . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->reason . '</td>';
                             $html .= '</tr>';
