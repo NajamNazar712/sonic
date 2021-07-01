@@ -48,6 +48,7 @@ use App\Http\Models\Warehouse\Warehouse;
 use Validator;
 use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\FTLController;
 
 
 class AdminWalkInBookShipmentController extends Controller

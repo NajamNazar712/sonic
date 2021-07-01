@@ -56,6 +56,7 @@
                                         <th class="border-primary border-darken-1">Screen Name</th>
                                         <th class="border-primary border-darken-1">Action Performed</th>
                                         <th class="border-primary border-darken-1">Action Performed Time</th>
+                                        <th class="border-primary border-darken-1">IP Address</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -142,6 +143,7 @@
                             head.push('Screen Name');
                             head.push('Action Performed');
                             head.push('Action Performed Time');
+                            head.push('IP Address');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -150,6 +152,7 @@
                                 row.push(values.screen_name);
                                 row.push(values.action);
                                 row.push(values.created_at);
+                                row.push(values.ip_address);
                                 body.push(row);
 
                             });
@@ -200,6 +203,7 @@
                     {data: 'screen_name', name: 'ata.screen_name', class: 'align-middle screen'},
                     {data: 'action', name: 'ata.action', class: 'align-middle action'},
                     {data: 'created_at', name: 'activity_trail_logs.created_at', class: 'align-middle created_at'},
+                    {data: 'ip_address', name: 'activity_trail_logs.ip_address', class: 'align-middle ip_address'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

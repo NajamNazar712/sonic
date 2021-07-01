@@ -207,8 +207,8 @@ class FTLController extends Controller
                     return back()->with(['error' => 'Invalid FTL Request']);
                 }
 
+                $ftl->additional_cost()->delete();
                 if ($request->has('other_cost') && $request->has('other_cost_type')) {
-                    $ftl->additional_cost()->delete();
                     $other_cost_count = count($request->other_cost);
                     for ($i = 0; $i < $other_cost_count; $i++) {
                         $cost = new FtlRequestAdditionalCost();
