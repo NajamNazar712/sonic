@@ -68,11 +68,13 @@
                                 <div class="col">
                                     <label for="bank_info" class="font-weight-bold mr-2">Bank Name</label>
 
-                                    <select name="bank_info" class="select2" id="bank_info" data-rule-required="true" data-msg-required="Bank Name is required">
-                                        @foreach($banks as $bank)
-                                            <option value="{{ $bank->id }}">{{ $bank->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="form-group">
+                                        <select name="bank_info" class="select2" id="bank_info" data-rule-required="true" data-msg-required="Bank Name is required">
+                                            @foreach($banks as $bank)
+                                                <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
                                 </div>
                                 <div class="col mt-1">
