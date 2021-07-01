@@ -76,7 +76,9 @@ use App\Http\Models\InvoiceShipment;
 use App\Http\Models\InvoiceStatus;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\InvoiceForReimbursement;
-
+use SnappyImage;
+use SnappyPDF;
+/*use Barryvdh\Snappy\Facades\SnappyPdf;*/
 use Auth;
 use DB;
 
@@ -2679,9 +2681,14 @@ class AdminFinanceController extends Controller
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
 
             if($retail_shipment->shipping_mode == 3) {
-                $charges = 0;
+                if($shipment->charges_mode_id == 2){
+                    $charges = $retail_shipment->total_charges;
+                }
+                else{
+                    $charges = 0;
+                }
                 $gst = 0;
-                $payable = $amount;
+                $payable = $amount - $charges;
 
 //            $account_type_id = $retail_shipment->shipper->account_type_id;
 
@@ -4747,7 +4754,7 @@ class AdminFinanceController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Payment Details</title>
+                    <title>Payment Details / Sales Tax Invoice</title>
 
                     <style>
                       @page {
@@ -4802,11 +4809,11 @@ class AdminFinanceController extends Controller
                           <tbody>
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
-                              <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
+                              <td class="text-center align-middle color primary"><strong>Payment Details / Sales Tax Invoice</strong></td>
                               <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Payment ID</strong></td>
+                              <td class="color secondary"><strong>Payment / Invoice ID</strong></td>
                               <td>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT). '</td>
                               <td rowspan="11" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
@@ -4836,6 +4843,14 @@ class AdminFinanceController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Reference Number</strong></td>
                               <td>' . $done_payment->reference_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>NTN</strong></td>
+                              <td>' . $shipper->ntn_no . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>STRN</strong></td>
+                              <td>' . $shipper->strn_no . '</td>
                             </tr>
         ';
 
@@ -5330,11 +5345,45 @@ class AdminFinanceController extends Controller
 
             if($user_banking_information->exists()){
                 $user_banking_information = $user_banking_information->first();
-                if ($user_banking_information->generation_date == $current_date->day) {
+               /* if ($user_banking_information->generation_date == $current_date->day) {
                     $generate = TRUE;
 
                     $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
+                }*/
+                if ($user_banking_information->invoicing_cycle_id == 1) {
+                    if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
+                        $generate = TRUE;
+
+                        $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
+                    }
                 }
+                else if ($user_banking_information->invoicing_cycle_id == 2) {
+                    if ($current_date->day == 14 || $current_date->day == 28) {
+                        $generate = TRUE;
+
+                        if ($current_date->day == 14) {
+                            $billing_period_from_date = Carbon::now()->subMonth()->day(28)->startOfDay()->toDateString();
+                        }
+                        else {
+                            $billing_period_from_date = Carbon::now()->day(14)->startOfDay()->toDateString();
+                        }
+                    }
+                }
+                else if ($user_banking_information->invoicing_cycle_id == 3) {
+                    if ($user_banking_information->generation_date == $current_date->day) {
+                        $generate = TRUE;
+
+                        $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
+                    }
+                }
+                else if ($user_banking_information->invoicing_cycle_id == 4) {
+                 /*   if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {*/    //need to be update
+                        $generate = TRUE;
+
+                        $billing_period_from_date = Carbon::now()->subDays(1)->startOfDay()->toDateString();
+                    //}
+                }
+
 
                 if ($generate) {
                     $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
@@ -9350,7 +9399,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('receiving_date', function($invoice) {
                 if ($invoice->receiving_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->receiving_date)->format('Y-m-d');
                 }
                 else {
                     return '';
@@ -9358,7 +9407,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('deposit_date', function($invoice) {
                 if ($invoice->deposit_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->deposit_date)->format('Y-m-d');
                 }
                 else {
                     return '';
@@ -9755,6 +9804,16 @@ class AdminFinanceController extends Controller
         // header('Cache-Control: max-age=0');
 
         // $writer->save('php://output');
+    }
+
+    static public function email_print_invoice($id,$bool)
+    {
+        $html = self::generate_invoice_print($id,$bool);
+        $filename = 'invoice_'. $id;
+        $path = public_path() . '/' . 'reports/'. $filename . '.pdf';
+        $pdf = SnappyPDF::loadHTML($html)->save($path);
+        $link = url('/') . '/' . 'reports/invoice_'.$id.'.pdf';
+        return $link;
     }
 
 }
