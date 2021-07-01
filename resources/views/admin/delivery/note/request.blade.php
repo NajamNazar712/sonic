@@ -168,12 +168,16 @@
     <script>
 
         $(document).ready(function() {
+
             $('#rider_id').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Rider',
                 width:'100%',
                 dropdownParent: $("#request_form")
             }).bind('change', function () {
                 var rider_id = this.value;
+                if(rider_id == null || rider_id == ''){
+                    return false;
+                }
                 $.ajax({
                     url: '{!! route('admin.delivery.note.request.info') !!}',
                     method: 'POST',
@@ -185,6 +189,7 @@
                 }).done(function (data) {
 
                     if (data.status == 1) {
+
                       $('#dncc').val(data.note.received_cod_amount);
                       $('#amount').val(data.note.total_cod_amount);
 
@@ -374,8 +379,16 @@
                     });
                 }
             });
+            $('#request_modal').on('hide.bs.modal', function (e) {
+                $('#request_modal #rider_id').val('').trigger('change');
+                $('#request_modal #amount').val('');
+                $('#request_modal #reason').val('');
+                $('#request_modal #dncc').val('');
+            });
+
 
         });
+        
 
         $("#request_form").validate({
 

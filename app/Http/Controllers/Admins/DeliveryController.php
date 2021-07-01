@@ -6661,7 +6661,13 @@ class DeliveryController extends Controller
     }
 
     public function request_index(){
-       $riders = Rider::where('status',1)->whereIn('city_id',session('hubs'))->select('id','name')->get();
+        if(session('role_id') != 1){
+
+            $riders = Rider::where('status',1)->whereIn('city_id',session('hubs'))->where('blacklist',0)->select('id','name')->get();
+        }
+        else{
+            $riders = Rider::where('status',1)->where('blacklist',0)->select('id','name')->get();
+        }
         return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
     public function request_list(){
