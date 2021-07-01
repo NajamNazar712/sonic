@@ -122,9 +122,10 @@ class DeliveryController extends Controller
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+            ->join('shipments_journey as ras', function ($join) {
                 $join->on('ras.shipment_id', '=', 'shipments.id')
-                    ->where('ras.status', '=' , 1);
+                    ->where('ras.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
             ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
@@ -295,18 +296,16 @@ class DeliveryController extends Controller
 
     public function check_rider_dncc_status(Request $request)
     {
-         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-         $delivery_note =  DeliveryNote::where([['rider_id',$request->rider_id],['dncc_status',0]])
-             ->whereDate('created_at','>',$datetime);
-         if($delivery_note->exists())
-         {
-            return response()->json(['status'=> 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
-         }
-         else{
+        $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
+        $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])
+            ->whereDate('created_at', '>', $datetime);
+        if ($delivery_note->exists()) {
+            return response()->json(['status' => 0, 'error' => "Rider can not be selected because previous delivery note is not been completed"]);
+        } else {
             $rider = Rider::find($request->rider_id);
             $ccd_rider = $rider->ccd;
-            return response()->json(['status'=> 1, 'ccd_rider' => $ccd_rider]);
-         }
+            return response()->json(['status' => 1, 'ccd_rider' => $ccd_rider]);
+        }
     }
 
 	public function note_consolidation_check(Request $request){
@@ -745,6 +744,9 @@ class DeliveryController extends Controller
                 }
             }
             if ($note) {
+                $otp_pin = rand(1000, 9999);
+                $note->otp = $otp_pin;
+                $note->save();
                 if (!$order) {  //Default
                     sort($valid_shipments); //sort_valid_shipments;
                 }
@@ -827,6 +829,7 @@ class DeliveryController extends Controller
                         }
                     }
                 }
+                NotificationsController::send(137,$rider->id, $note->id);
                 NotificationsController::send(40, $note->id);
             }
 
@@ -1113,9 +1116,9 @@ class DeliveryController extends Controller
                     $parcel = Shipment::where('id', $request->shipment_id)->first();
                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $request->shipment_id])->delete();
                     $delivery = $delivery->first();
-                    $count = $delivery->shipments_count;
+                    $count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note)->count();
                     $cod = $delivery->total_cod_amount;
-                    $count -= 1;
+
                     if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                         $cod = $cod - $parcel->amount;
                     }
@@ -1565,7 +1568,14 @@ class DeliveryController extends Controller
             })
             ->leftjoin('shipment_status as rss', 'rss.id', '=', 'sj.shipper_status_id')
             ->leftjoin('shipment_status_reason as rssr', 'rssr.id', '=', 'sj.status_reason_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.id as shipper_id', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id','sjl.received_or_refused_by'])
+
+            ->leftJoin('rider_deliveries as rds', function ($join) {
+                $join->on('rds.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('rds.id', '=',
+                        DB::raw('(select max(id) from rider_deliveries where rider_deliveries.delivery_note_id = delivery_notes.id and rider_deliveries.shipment_id = shipments.id)'));
+            })
+
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount', 'users.id as shipper_id', 'users.name as shipper', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'shipments.booking_type_id', 'usi.poc','shipments.shipper_status_id','crm.id as complaint', 'shipments.packaging_material_charges', 'shipments.packaging_material_request','dns.ordering','consolidations.consolidation_id', 'sj.shipper_status_id as rider_status_id', 'sj.status_reason_id as rider_status_reason_id', 'rss.name as rider_status', 'rssr.name as rider_reason', 'shipments.nsa_osa_status as nsa_osa_status', 'sjl.shipper_status_id as latest_rider_status_id','sjl.received_or_refused_by', 'rds.ccd_image as ccd_image'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -1756,6 +1766,22 @@ class DeliveryController extends Controller
                 $reason = '<input class="form-control form-control-sm" name="remarks[' . $deliveries->shId . ']" placeholder="Enter Remarks" value="'. $rem .'">';
                 return $reason;
             })
+            ->addColumn('ccd_image', function ($deliveries) {
+                $image = '';
+                if ($deliveries->ccd_image != null) {
+                    $exists = Storage::disk('public')->exists($deliveries->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($deliveries->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($deliveries->ccd_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    return $image;
+                } else {
+                    return '-';
+                }
+
+            })
             ->addColumn('action', function ($deliveries) {
                 return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
@@ -1772,9 +1798,9 @@ class DeliveryController extends Controller
         $status_id = $request->status;
         $shipment_id = $request->shipment_id;
         if(Shipment::where('id', $shipment_id)->where('nsa_osa_status', 1)->exists()){
-            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6,12, 34])->orderBy('name')->get();
         }else{
-            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6])->orderBy('name')->get();
         }
 
         if (!$statuses->isEmpty()) {
@@ -1789,7 +1815,7 @@ class DeliveryController extends Controller
     {
         $status_id = $request->status;
 
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+        $statuses = ShipmentStatus::find($status_id)->reasons()->whereNotIn('id',[4,6])->select('id', 'name')->orderBy('name')->get();
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
@@ -2442,7 +2468,7 @@ class DeliveryController extends Controller
             ->leftjoin('consignee_shipment_locations as csl', 'csl.shipment_id', '=', 'shipments.id')
             ->leftjoin('consignee_locations as pcls', 'pcls.id', '=', 'csl.previous_location_id')
             ->leftjoin('consignee_locations as ccls', 'ccls.id', '=', 'csl.current_location_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.tracking_number as tracking_number_link','shipments.consignee_phone_number_1', 'shipments.id as shId', 'shipments.open_box as open_box', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification', 'dns.fake_status as fake_status','sj.created_at as arrival', 'usi.poc','rrb.received_or_refused_by', 'rrb.status_reason_id as reason_id','dns.ordering', 'rss.name as rider_status', 'rssr.name as rider_reason', 'rds.actual_location_latitude as actual_location_latitude', 'rds.actual_location_longitude as actual_location_longitude', 'csl.previous_location_id as previous_location_id', 'csl.current_location_id as current_location_id', 'pcls.lat as plat', 'pcls.long as plong', 'ccls.lat as clat', 'ccls.long as clong', 'rds.ccd_image as ccd_image'])
             ->where('delivery_notes.id', $id)
             ->orderBy('dns.ordering','asc','dns.shipment_id','asc');
 
@@ -2664,6 +2690,22 @@ class DeliveryController extends Controller
                 else{
                     return '-';
                 }
+            })
+            ->addColumn('ccd_image', function ($deliveries) {
+                $image = '';
+                if ($deliveries->ccd_image != null) {
+                    $exists = Storage::disk('public')->exists($deliveries->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($deliveries->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($deliveries->ccd_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    return $image;
+                } else {
+                    return '-';
+                }
+
             })
             ->make(true);
     }
@@ -3907,6 +3949,10 @@ class DeliveryController extends Controller
                     return $dropdown;
                 }
                 return '';
+            })
+            ->addColumn('ccd_image', function ($deliveries) {
+                $image = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm ccd_slip_list"><i class="la la-image"></i> View Receipts</button></div>';
+                return $image;
             });
         if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -5175,6 +5221,36 @@ class DeliveryController extends Controller
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
         }
     }
+    public function cash_collection_shipments_ccd_slip(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $rider_deliveries = RiderDelivery::join('shipments as s', 's.id', '=', 'rider_deliveries.shipment_id')
+            ->where('delivery_note_id', $delivery_note_id)
+            ->where('delivered_status', 1)
+            ->select('rider_deliveries.id as id','s.tracking_number as tracking_number', 'rider_deliveries.ccd_image as ccd_image')->get();
+        if(count($rider_deliveries) > 0){
+            $sorted_array = array();
+            $now = Carbon::now();
+            foreach ($rider_deliveries as $rider_delivery) {
+                $sorted_array[$rider_delivery->id]['tracking_number'] = $rider_delivery->tracking_number;
+                if ($rider_delivery->ccd_image != null) {
+                    $image = '';
+                    $exists = Storage::disk('public')->exists($rider_delivery->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($rider_delivery->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($rider_delivery->ccd_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+                    $sorted_array[$rider_delivery->id]['ccd_image'] = $image;
+                } else {
+                    $sorted_array[$rider_delivery->id]['ccd_image'] = '-';
+                }
+            }
+            return ['status' => 0, 'ccd_slips' => $sorted_array];
+        }else{
+            return ['status' => 1, 'error' => 'No CCD slips found!'];
+        }
+    }
     public function completed_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
@@ -6280,6 +6356,12 @@ class DeliveryController extends Controller
                     if($ccd_flag == false || ($ccd_flag == true && $rider->ccd == 1)){
                         $delivery_note->rider_id = $rider_id;
                         $delivery_note->save();
+                        if ($delivery_note->otp == null) {
+                            $otp_pin = rand(1000, 9999);
+                            $delivery_note->otp = $otp_pin;
+                            $delivery_note->save();
+                        }
+                        NotificationsController::send(137, $rider_id, $delivery_note_id);
                         return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
                     }
                     else{
@@ -6360,7 +6442,7 @@ class DeliveryController extends Controller
                           $parcel = Shipment::where('id',$shipment_id)->first();
                           DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note, 'shipment_id' => $shipment_id])->delete();
                           $delivery = $delivery->first();
-                          $count = $delivery->shipments_count - 1;
+                          $count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note)->count();
                           $cod = $delivery->total_cod_amount;
 
                           if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
@@ -6389,19 +6471,22 @@ class DeliveryController extends Controller
     public function add_shipments_in_recieve_deliveries(Request $request){
 
         $shipment_id = $request->shipment_id;
-        $tracking_numbers = $request->tracking_number;
+
         $delivery_note_id = $request->delivery_note_id;
         $shipment = Shipment::find($shipment_id);
         $serial = '';
         if($shipment){
             $delivery_note = DeliveryNote::find($delivery_note_id);
                 if($delivery_note){
+                    $rider = $delivery_note->rider;
+                    if($shipment->payment_mode_id == 5 && $rider->ccd == 0){
+                        return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
+                    }
+                    $total_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->count();
 
-                    $total_shipments = $delivery_note->shipments_count;
-                    $total_shipments++;
                     $cod_amount = $delivery_note->total_cod_amount;
                     $total_cod_amount = $cod_amount + $shipment->amount;
-                    $delivery_note->shipments_count = $total_shipments;
+                    $delivery_note->shipments_count = $total_shipments + 1;
                     $delivery_note->total_cod_amount = $total_cod_amount;
                     $delivery_note->save();
 
