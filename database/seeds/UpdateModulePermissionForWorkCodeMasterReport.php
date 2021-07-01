@@ -12,7 +12,7 @@ class UpdateModulePermissionForWorkCodeMasterReport extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 527, 'name' => 'Work Code Master Report - View', 'module_id' => 9),
+            array('id' => 532, 'name' => 'Work Code Master Report - View', 'module_id' => 9),
         ));
     }
 }
