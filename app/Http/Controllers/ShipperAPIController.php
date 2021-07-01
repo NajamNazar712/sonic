@@ -84,11 +84,12 @@ class ShipperAPIController extends Controller
             $shipper = User::where('email', $request->email_address);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
-                if($shipper->status == 4){
-                    return response()->json(['status' => 1, 'message' => 'Your account is disabled']);
-                }
-                elseif ($shipper->blacklist == 1){
-                    return response()->json(['status' => 1, 'message' => 'Your account is blocked']);
+                if ($shipper->blacklist) {
+                    return response()->json(['status' => 1, 'message' => 'Your Shipper\'s Account is Blacklisted, Contact Admin']);
+                } else if ($shipper->status != 3) {
+                    return response()->json(['status' => 1, 'message' => 'Your Shipper\'s Account is Not Activated Yet, Contact Admin']);
+                } else if ($shipper->phone_number_verified == 0) {
+                    return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified, Contact Admin']);
                 }
                 if (Hash::check($request->input('password'), $shipper->password)) {
                     $information = array();
