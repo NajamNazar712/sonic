@@ -67,10 +67,10 @@ class LastMileDebriefingController extends Controller
                 $agent_call_monitoring = AgentCallMonitoring::where([
                     ['shipment_id', '=', $delivery_note_shipment->shipment_id],
                     ['delivery_note_id', '=', $request->delivery_note_id],
-                ])->get()->first();
+                ])->update(['agent_id' => $request->agent_id]);
               
-                                $agent_call_monitoring->agent_id= $request->agent_id;
-                                $agent_call_monitoring->save();
+                                // $agent_call_monitoring->agent_id= $request->agent_id;
+                                // $agent_call_monitoring->save();
             }
         }
             return redirect()->back()->with('success', 'Agent Assign successfully.');
