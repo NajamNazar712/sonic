@@ -1514,9 +1514,49 @@ class GlobalSettingsController extends Controller
     public function crm_case_nature_types_list(Request $request)
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
-            ->select('crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type');
+            ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status');
+            
+            $datatable = Datatables::of($case_nature_types)   
+            ->editColumn('status', function($case_nature_types) {
+                if($case_nature_types->status==1){
+                    return 'Enable';
+                }else{
+                    return 'Disable';
 
-        return Datatables::of($case_nature_types)->make(true);
+                }
+            })
+            ->addColumn('action', function ($data) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                    if ($data->status == 0) {
+                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    } else {
+                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }
+                    $dropdown .= '
+                    </div>
+                  </div>
+          ';
+                    return $dropdown;
+                
+            });
+            return $datatable->make(true);
+    }
+
+    public function crm_case_nature_types_status(Request $request){
+        $crm_case_nature_type = CrmRequestCaseNatureType::find($request->id);
+        if ($request->status == 1) {
+                $crm_case_nature_type->status_id = 1;
+                $crm_case_nature_type->save();
+                return response()->json(['status' => 1, 'success' => 'Case Nature Type Enabled Successfully']);
+        } elseif ($request->status == 0) {
+            $crm_case_nature_type->status_id = 0;
+            $crm_case_nature_type->save();
+            return response()->json(['status' => 1, 'success' => 'Case Nature Type Disabled Successfully']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid Request']);
+        }
     }
 
     public function crm_case_nature_types_store(Request $request)

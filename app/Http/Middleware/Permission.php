@@ -280,6 +280,8 @@ class Permission
             'delivery.completed.retail.index' => 424,
             'delivery.signature.index' => 441,
             'delivery.signature.list' => 441,
+            'delivery.note.request_index' => 531,
+            'delivery.note.request_list' => 531,
 
             'ftl.request.index' => 511,
             'ftl.request.list' => 511,
@@ -899,6 +901,7 @@ class Permission
             'telenor.return.submit' => 400,
             'telenor.call.index' => 402,
             'telenor.call.list' => 402,
+            'telenor.return.bulk_return' => 525,
 
 
             'leads.index' => 416,
@@ -976,6 +979,8 @@ class Permission
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,
             
+            'reports.work_code_master.index' => 532,
+            'reports.work_code_master.list' => 532,
            
         ],
 
@@ -1030,6 +1035,8 @@ class Permission
             'finance.payments.export_to_excel' => 5,
             'finance.payments.reconcile_through_receiving_sheet.index' => 5,
             'finance.payments.reconcile_through_receiving_sheet.list' => 5,
+            'finance.invoice.index' => 14,
+            'finance.invoice.list' => 14,
 
             'dispute.index' => 6,
             'dispute.list' => 6,
