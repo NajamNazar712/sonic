@@ -53,6 +53,7 @@
                         @csrf
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                            <label><strong>Rider</strong></label>
                                 <fieldset class="form-group">
                                     <select name="rider_id" id="rider_id" class="form-control select2" data-rule-required="true" data-msg-required="Rider is required">
                                         @foreach($riders as $rider)
@@ -63,13 +64,15 @@
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <div class="form-group">
-                                    <input type="text" name="dncc" id="dncc" class="form-control" placeholder="Pending DNCC" readonly>
+                                    <label><strong>Pending DNCC</strong></label>
+                                    <input type="text" name="dncc" id="dncc" class="form-control" {{--placeholder="Pending DNCC"--}} readonly>
                                 </div>
                             </div>
 
                             <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                 <div class="form-group">
-                                    <input type="text" name="amount" id="amount" class="form-control"  placeholder="Amount" readonly>
+                                    <label><strong>COD Amount</strong></label>
+                                    <input type="text" name="amount" id="amount" class="form-control"  {{--placeholder="Amount"--}} readonly>
                                 </div>
                             </div>
                         </div>
@@ -189,15 +192,23 @@
                 }).done(function (data) {
 
                     if (data.status == 1) {
-
-                      $('#dncc').val(data.note.received_cod_amount);
+                        var value ='';
+                        if(data.note.received_cod_amount == null){
+                            value = 0;  
+                        }
+                      else{
+                         value = data.note.received_cod_amount
+                      }
+                      $('#dncc').val(value);
                       $('#amount').val(data.note.total_cod_amount);
+                      $('#form_btn').attr('disabled' , false);
 
                     } else {
                         toastr.error(data.error, 'Error!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
+                        $('#form_btn').attr('disabled' , true);
                     }
 
                 });
