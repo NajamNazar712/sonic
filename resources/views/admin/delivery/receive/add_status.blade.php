@@ -67,6 +67,7 @@
                             <th class="border-primary border-darken-1">Service Type</th>
 							<th class="border-primary border-darken-1">Consolidation</th>
                             <th class="border-primary border-darken-1">Consolidated IDs</th>
+                            <th class="border-primary border-darken-1">CCD Slip</th>
                             <th class="border-primary border-darken-1">Clear</th>
                         </tr>
                         </thead>
@@ -737,7 +738,9 @@
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
 					{data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation'},
-                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
+                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id'},
+                    {data:'ccd_image',name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
+                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

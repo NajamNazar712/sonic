@@ -169,245 +169,283 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
-    <script type="text/javascript">
-        $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
-            width: '100%',
-            placeholder: 'Search Status',
-            allowClear:true
-        }).bind('change', function() {
-            table.draw();
-        });
-        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            if ( this.context.length ) {
-                body = [];
-                var params = table.ajax.params();
-                params.start = 0;
-                params.length = -1;
-                params.excel = true;
-                var jsonResult = $.ajax({
-                    url: '{{ route('admin.human_resource.erf.list') }}',
-                    data: params,
-                    success: function (result) {
-                        head = [];
+    <script>
 
-                        head.push('S.No');
-                        head.push('ERF ID');
-                        head.push('Department');
-                        head.push('Designation');
-                        head.push('Hub');
-                        head.push('City');
-                        head.push('Line Manager');
-                        head.push('Status');
+        $(document).ready(function() {
+            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Search Status',
+                allowClear: true
+            }).bind('change', function () {
+                table.draw();
+            });
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.human_resource.erf.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
 
-                        $.each(result.data, function(index, values) {
-                            row = [];
+                            head.push('S.No');
+                            head.push('ERF ID');
+                            head.push('Department');
+                            head.push('Designation');
+                            head.push('Hub');
+                            head.push('City');
+                            head.push('Line Manager');
+                            head.push('Status');
 
-                            row.push(index + 1);
-                            row.push(values.erf_id);
-                            row.push(values.department);
-                            row.push(values.designation);
-                            row.push(values.hub);
-                            row.push(values.city);
-                            row.push(values.admin);
-                            row.push(values.status);
-                            body.push(row);
-                        });
-                    },
-                    async: false
-                });
+                            $.each(result.data, function (index, values) {
+                                row = [];
 
-                return {body: body, header: head};
-            }
-        } );
+                                row.push(index + 1);
+                                row.push(values.erf_id);
+                                row.push(values.department);
+                                row.push(values.designation);
+                                row.push(values.hub);
+                                row.push(values.city);
+                                row.push(values.admin);
+                                row.push(values.status);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
 
-        var route = '<?php echo route('admin.human_resource.erf.add'); ?>';
-        var table = $('#datatable').DataTable({
-            dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            buttons: [
-                @if(session('role_id') == 1 ||  in_array(522, session('permissions')))
-                {
-                    title: 'Add ERF',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Add ERF',
-                    action: function (e) {
-                        window.location = route;
-
-                    }
-                },
-                @endif
-                
-                {
-                    extend: 'excel',
-                    title: 'ERF List',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
-                'reset'
-            ],
-            scrollX: false, scrollY: '500px',
-            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-            pageLength: 50,
-            pagingType: 'full_numbers',
-            processing: true,
-            language: {
-                processing: data_table_loader
-            },
-            serverSide: true,
-            ajax:{
-                url: '{{ route('admin.human_resource.erf.list') }}',
-                data: function (d) {
-                    d.search_status = $('#search_status').val();
+                    return {body: body, header: head};
                 }
-            },
-            rowId: 'shId',
-            order: [[1, 'desc']],
-            columns: [
-                {
-                    orderable: false,
-                    searchable: false,
-                    name: 'serial_number',
-                    class: 'align-middle serial_number',
-                    targets: 0,
-                    render: function (data, type, row) {
-                        return '';
+            });
+
+            var route = '<?php echo route('admin.human_resource.erf.add'); ?>';
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                        @if(session('role_id') == 1 ||  in_array(522, session('permissions')))
+                    {
+                        title: 'Add ERF',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-plus"></i> Add ERF',
+                        action: function (e) {
+                            window.location = route;
+
+                        }
+                    },
+                        @endif
+
+                    {
+                        extend: 'excel',
+                        title: 'ERF List',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                    'reset'
+                ],
+                scrollX: false, scrollY: '500px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('admin.human_resource.erf.list') }}',
+                    data: function (d) {
+                        d.search_status = $('#search_status').val();
                     }
                 },
-
-                {data: 'erf_id', name: 'erf_id', class: 'align-middle erf_id'},
-                {data: 'department', name: 'dp.name', class: 'align-middle department'},
-                {data: 'designation', name: 'd.name', class: 'align-middle designation'},
-                {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                {data: 'city', name: 'c.name', class: 'align-middle city'},
-                {data: 'admin', name: 'a.name', class: 'align-middle admin'},
-                {data: 'status', name: 's.name', class: 'align-middle status'},
-                {data: 'action', name: 'action', class: 'align-middle action',orderable:false,sortable:false },
-
-
-            ],
-            rowCallback: function(row, data, index) {
-                var info = table.page.info();
-                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
-            },
-            initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
-                    '</select>';
-                var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
-                this.api().columns().every(function(column_id) {
-                    var column = this;
-                    var header = column.header();
-
-
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
-                        $(td).appendTo($(search));
-                    }
-                    else {
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
-
-                        if (column.search()) {
-                            current.val(column.search());
+                rowId: 'shId',
+                order: [[1, 'desc']],
+                columns: [
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
+                        render: function (data, type, row) {
+                            return '';
                         }
-                    }
-                });
-                
-                this.api().table().columns.adjust();
-            }
-        });
-        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
-            var erf_id = table.row($(this).parents('tr')).data().erf_id;
+                    },
 
-            if ($(this).hasClass('admin_approve')) {
-                $('#erf_id').val(erf_id);
-                $('#file_modal').modal('show');
-            }
-        });
+                    {data: 'erf_id', name: 'erf_id', class: 'align-middle erf_id'},
+                    {data: 'department', name: 'dp.name', class: 'align-middle department'},
+                    {data: 'designation', name: 'd.name', class: 'align-middle designation'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'city', name: 'c.name', class: 'align-middle city'},
+                    {data: 'admin', name: 'a.name', class: 'align-middle admin'},
+                    {data: 'status', name: 's.name', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, sortable: false},
 
 
-        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+                ],
+                rowCallback: function (row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-            var erf_id = table.row($(this).parents('tr')).data().erf_id;
+                },
+                initComplete: function () {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-            if ($(this).hasClass('approve_request')) {
-                $.ajax({
-                    url: '{!! route('admin.human_resource.erf.approve') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': erf_id,
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
+                        '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    this.api().columns().every(function (column_id) {
+                        var column = this;
+                        var header = column.header();
 
-                    }
-                }).done(function (data) {
 
-                    if (data.status == 1) {
-                        table.draw();
-                        toastr.success(data.success, 'Success!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                            $(td).appendTo($(search));
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+
+                    this.api().table().columns.adjust();
+                }
+            });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+                if ($(this).hasClass('admin_approve')) {
+                    $('#erf_id').val(erf_id);
+                    $('#file_modal').modal('show');
+                }
+            });
+
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+                if ($(this).hasClass('approve_request')) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.erf.approve') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': erf_id,
+
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 1) {
+                            table.draw();
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    });
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
+
+                var erf_id = table.row($(this).parents('tr')).data().erf_id;
+
+                if ($(this).hasClass('view_document')) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.erf.documents') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': erf_id,
+
+                        }
+                    }).done(function (data) {
+
+                        if (data.status == 1) {
+
+                            var url = '{{ Storage::url('employee_requisition/') }}';
+                            var html = '';
+                            html += '<table class="table table-sm datatable text-center">';
+                            html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th><th><strong>Document</strong></th></tr></thead>';
+                            html += '<tbody>';
+                            $.each(data.documents, function (index, value) {
+
+                                var ind = index + 1;
+                                html += '<tr class=""><td>' + ind + '</td>';
+                                html += '<td>' + value.admin + '</td>';
+                                html += '<td><a class="white" href=" ' + url + value.id + '/' + value.file + '" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>';
+
+                            });
+                            html += '</tbody></table>';
+
+                            html += '<div class="form-group mt-4 text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="btn btn-primary  document_view">View Request</button></div>';
+
+                            $('#documents_modal .modal-body').html(html);
+                            $('#documents_modal').modal('show');
+                        } else {
+
+                            var html = '';
+                            html += '<div class="form-group  text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="document_view btn btn-primary">View Request</button></div>';
+
+                            $('#documents_modal .modal-body').html(html);
+                            $('#documents_modal').modal('show');
+                        }
+
+                    });
+                }
+            });
+
+            $('body').on('click','.document_view',function () {
+                var id = $('.er_id').val();
+                if (id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.erf.print') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id,
+                        }
+                    })
+                        .done(function (data) {
+                            var tab = window.open('', '_blank');
+
+                            if (!tab) {
+                                swal({
+                                    title: 'Popup Blocker Enabled!',
+                                    text: 'Please add this site to your exception list.',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            } else {
+                                tab.document.write(data);
+                                tab.document.close();
+                                tab.focus();
+                            }
                         });
-                    } else {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
+                }
 
-                });
-            }
+            });
+
         });
-
-        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
-
-            var erf_id = table.row($(this).parents('tr')).data().erf_id;
-
-            if ($(this).hasClass('view_document')) {
-                $.ajax({
-                    url: '{!! route('admin.human_resource.erf.documents') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': erf_id,
-
-                    }
-                }).done(function (data) {
-
-                    if (data.status == 1) {
-                        var url = '{{ Storage::url('employee_requisition/') }}';
-                        var html = '';
-                        html += '<table class="table table-sm datatable text-center">';
-                        html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th><th><strong>Document</strong></th></tr></thead>';
-                        html += '<tbody>';
-                        $.each(data.documents, function (index, value) {
-                            
-                            var ind = index + 1;
-                            html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.admin + '</td>';
-                            html += '<td><a class="white" href=" '+ url + value.id + '/' + value.file +'" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>';
-
-                        });
-                        html += '</tbody></table>';
-
-                        $('#documents_modal .modal-body').html(html);
-                        $('#documents_modal').modal('show');
-                    } else {
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-
-                });
-            }
-        });
-        
-
 
         $("#file_upload").validate({
 

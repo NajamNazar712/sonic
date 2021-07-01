@@ -215,7 +215,7 @@
                                         <td><b>Invoicing Cycle</b></td>
                                         <td>{{$user_bank_default->invoicing->name}}</td>
                                     </tr>
-                                    @if($user_bank_default->invoicing_cycle_id != 2)
+                                    @if($user_bank_default->invoicing_cycle_id != 2 || $user_bank_default->invoicing_cycle_id != 4)
                                         <tr>
                                             <td><b>Generation Date</b></td>
                                             <td>{{$user_bank_default->generation_date}}</td>
@@ -612,7 +612,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="form-actions right">
+                    <div class="form-actions center">
                         <button id="cancel-button-bank" type="button" class="btn btn-warning mr-1">
                             Cancel
                         </button>
@@ -764,36 +764,41 @@
             var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
             var cycle = '{!! $user_bank_default->invoicing_cycle_id !!}';
             cycle = parseInt(cycle);
-            $('#invoicing_cycle').select2({
-                width: '100%',
-            }).bind('change', function() {
+            $('#invoicing_cycle').val(cycle);
 
-                $('#generation_div').removeClass('d-none');
-                $('#generation_date').removeClass('d-none');
-                $('#generation_date').addClass('required');
-                $('#generation_date').empty().trigger('change');
-                $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
 
-            });
-            $('#invoicing_cycle').val(cycle).trigger('change');
             // $('#generation_date').select2({
             //     width: '100%',
             // });
-            function generation(id) {
+            function generation(id,bool) {
 
-                var gdate = parseInt('{!! $user_bank_default->generation_date !!}');
-                html = '<div class="form-group row"><div class="form-group col-md-9"><label>Generation Date</label><span class="danger">*</span><select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required"><option value=""></option></select></div></div>';
-                $('#generation_div').html(html);
+                 if(id == 1 || id == 3) {
+                     var gdate = parseInt('{!! $user_bank_default->generation_date !!}');
+                     html = '<div class="form-group row"><div class="form-group col-md-9"><label>Generation Date</label><span class="danger">*</span><select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Generation Date is required" class="select2 form-control required"><option value=""></option></select></div></div>';
+                     $('#generation_div').html(html);
 
-                    $('#generation_div').removeClass('d-none');
-                    $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
-                        data:monthly,
-                        width:'100%',
-                        placeholder:'Select Date',
-                    });
+                     $('#generation_div').removeClass('d-none');
 
-                $('#generation_date').val(gdate).trigger('change');
+                     if(id == 3) {
+                         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
+                             data: monthly,
+                             width: '100%',
+                             placeholder: 'Select Date',
+                         });
+                     }
+                     else if(id == 1){
+                         $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
+                             data: weekly,
+                             width: '100%',
+                             placeholder: 'Select Date',
+                         });
+                     }
+                     if(bool == 2){
+                         $('#generation_date').val(gdate).trigger('change');
+                     }
+                 }
             }
+
 
             $('#edit-1').click(function () {
                 $("#profile-form").show();
@@ -802,8 +807,41 @@
             $('#edit-2').click(function () {
                 $("#bank-form").show();
                 $("#tabs").hide();
-                generation(cycle);
+                generation(cycle,2);
             });
+
+         
+            $('#invoicing_cycle').select2({
+                width: '100%',
+            }).bind('change', function () {
+
+                if (this.value == 1) {
+
+                    var weekly = [1, 2, 3, 4, 5, 6, 7];
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').removeClass('d-none');
+                    $('#generation_date').addClass('required');
+                    $('#generation_date').empty().trigger('change');
+                    generation(this.value,1);
+                    $('#generation_date').select2({data: weekly, placeholder: 'Select Date'});
+                } else if (this.value == 3) {
+
+                    var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+                    $('#generation_div').removeClass('d-none');
+                    $('#generation_date').removeClass('d-none');
+                    $('#generation_date').addClass('required');
+                    $('#generation_date').empty().trigger('change');
+                    generation(this.value,1);
+                    $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
+                } else if (this.value == 2 || this.value == 4) {
+                    $('#generation_div').addClass('d-none');
+                    $('#generation_date').addClass('d-none');
+                    $('#generation_date').removeClass('required');
+                    generation(this.value,1);
+                }
+            });
+            
+
             $('#segment_id').prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Segment",
                 width:'100%',

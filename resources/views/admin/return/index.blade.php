@@ -1549,11 +1549,11 @@
                                     html += '<tr>';
                                     html += '<td>' + details.blacklist.total_shipments + '</td>';
                                     html += '<td>' + details.blacklist.delivered + '</td>';
-                                    html += '<td>' + details.blacklist.delivered_ratio + '</td>';
+                                    html += '<td>' + details.blacklist.delivered_ratio + ' %</td>';
                                     html += '<td>' + details.blacklist.undelivered + '</td>';
-                                    html += '<td>' + details.blacklist.undelivered_ratio + ' kg</td>';
+                                    html += '<td>' + details.blacklist.undelivered_ratio + ' %</td>';
                                     html += '<td>' + details.blacklist.return + '</td>';
-                                    html += '<td>Rs. ' + details.blacklist.return_ratio + '</td>';
+                                    html += '<td>Rs. ' + details.blacklist.return_ratio + ' %</td>';
                                     html += '</tr>';
                                     html += '</tbody>';
                                     html += '</table>';

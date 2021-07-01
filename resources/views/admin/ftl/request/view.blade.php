@@ -504,7 +504,13 @@
                 },
             });
 
-
+            $(window).keydown(function(event){
+                if(event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+            
             $("#update_ftl_request_form #add_other_cost").on('click',function (){
                 var other_cost = $('#update_ftl_request_form #other_cost').val();
                 var other_cost_type = $('#update_ftl_request_form #other_cost_type').val();
