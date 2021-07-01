@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
+use Vectorface\Whip\Whip;
 
 class ActivityTrailController extends Controller
 {
@@ -27,6 +28,14 @@ class ActivityTrailController extends Controller
         $log->admin_id = $admin_id;
         $log->action_id = $action_id;
         $log->emailed = $dont_send_email;
+
+        $whip = new Whip();
+        $client_address = $whip->getValidIpAddress();
+
+        if ($client_address != '') {
+            $log->ip_address = $client_address;
+        }
+
         $log->save();
     }
 
@@ -40,16 +49,16 @@ class ActivityTrailController extends Controller
         $data = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
             ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
             ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
-            ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at');
+            ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address');
 
         if($request->get('search_from') && $request->get('search_to'))
         {
             $data->whereBetween('activity_trail_logs.created_at', [$request->get('search_from'), $request->get('search_to')]);
         }
 
-        $head_department_id = Auth::user()->role->department_id;
-        if(session('role_id') != 1)
+        if(!in_array(session('role_id'), [1, 58]))
         {
+            $head_department_id = Auth::user()->role->department_id;
             $data->where('ar.department_id',$head_department_id);
         }
 

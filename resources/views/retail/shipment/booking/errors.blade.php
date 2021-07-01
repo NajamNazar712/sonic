@@ -119,6 +119,11 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                             @endif
+                                            @if(isset($errors[$no]['charges_mode_id']))
+                                                <td>{!! Form::select('form[' . $no . '][charges_mode_id]',$charges_modes ,null,['class' => 'form-control is-invalid charges_mode_id select2','id'=>'charges_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['charges_mode_id']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][charges_mode_id]', $ro['charges_mode_id'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
+                                            @endif
                                             @if(isset($errors[$no]['shipper_cell_number']))
                                                 <td>{!! Form::text('form[' . $no . '][shipper_cell_number]', $ro['shipper_cell_number'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['shipper_cell_number']}}</font></td>
                                             @else
@@ -254,6 +259,10 @@
             $('.payment_mode_id').select2({
                 width: '100%',
                 placeholder: 'Payment Mode'
+            });
+            $('.charges_mode_id').select2({
+                width: '100%',
+                placeholder: 'Charges Mode'
             });
             $('.trax_box_id').select2({
                 width: '100%',

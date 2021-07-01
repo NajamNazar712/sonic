@@ -657,8 +657,10 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
                 }
 
-                if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                if (!in_array($user_id, [7762, 4758])) {
+                  if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+                      return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                  }
                 }
             }
 
@@ -1022,7 +1024,7 @@ class APIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
             }
             if($msg_string == null && $blacklist_message != null){
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_user' => $blacklist_message]);
+                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_consignee' => $blacklist_message]);
             }
             if ($msg_string != null && $blacklist_message != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
@@ -2420,7 +2422,7 @@ class APIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
             }
             if($msg_string == null && $blacklist_message != null){
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_user' => $blacklist_message]);
+                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_consignee' => $blacklist_message]);
             }
             if ($msg_string != null && $blacklist_message != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
