@@ -370,31 +370,33 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->save();
 
+        $shipment = Shipment::find($shipment_id);
+        if($shipment->charges_mode_id != 2){
+            $date = Carbon::today()->toDateString();
+            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
+            if($cash_deposit->exists()){
+                $cash_deposit = $cash_deposit->first();
+                $total_shipments = $cash_deposit->total_cn + 1;
+                $total_cash = $cash_deposit->total_cash + $total_charges;
+                $cash_deposit->total_cn = $total_shipments;
+                $cash_deposit->total_cash = $total_cash;
+                $cash_deposit->save();
+            }
+            else{
+                $cash_deposit = new RetailCashDeposit();
+                $cash_deposit->category = Auth::user()->category;
+                $cash_deposit->retail_user_id = Auth::id();
+                $cash_deposit->total_cn = 1;
+                $cash_deposit->total_cash = $total_charges;
+                $cash_deposit->save();
+            }
 
-        $date = Carbon::today()->toDateString();
-        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
-        if($cash_deposit->exists()){
-            $cash_deposit = $cash_deposit->first();
-            $total_shipments = $cash_deposit->total_cn + 1;
-            $total_cash = $cash_deposit->total_cash + $total_charges;
-            $cash_deposit->total_cn = $total_shipments;
-            $cash_deposit->total_cash = $total_cash;
-            $cash_deposit->save();
+            $cash_deposit_shipment = new RetailCashDepositShipment();
+            $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+            $cash_deposit_shipment->shipment_id = $shipment_id;
+            $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
+            $cash_deposit_shipment->save();
         }
-        else{
-            $cash_deposit = new RetailCashDeposit();
-            $cash_deposit->category = Auth::user()->category;
-            $cash_deposit->retail_user_id = Auth::id();
-            $cash_deposit->total_cn = 1;
-            $cash_deposit->total_cash = $total_charges;
-            $cash_deposit->save();
-        }
-
-        $cash_deposit_shipment = new RetailCashDepositShipment();
-        $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
-        $cash_deposit_shipment->shipment_id = $shipment_id;
-        $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
-        $cash_deposit_shipment->save();
 
 
         AdminPickupsController::generate($shipment_id);
@@ -1595,7 +1597,7 @@ class RetailShipmentBookController extends Controller
             'height' => ['nullable', 'numeric', 'between:0.1,100000'],
             'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_payment_modes', 'id')->where('id', 1)],
-            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_mode', 'id')->whereIn('id', [1, 2])],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->whereIn('id', [1, 2])],
             'shipper_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'shipper_name' => ['required', 'between:1,100'],
             'shipper_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
