@@ -7697,7 +7697,7 @@ class NotificationsController extends Controller
                     ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
                     ->join('cities as oc', 'usi.city_id', 'oc.id')
                     ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
-                    ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub')
+                    ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub', 'h.id as hub_id')
                     ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
 
                             if ($rider_pickups->exists()) {
@@ -7713,8 +7713,12 @@ class NotificationsController extends Controller
         
                                 $serial = 1;
                                 $rider_pickups = $rider_pickups->get();
+                                $hubs = array();
 
+                                        
                                 foreach($rider_pickups as $rider_pickup){
+
+                                    array_push($hubs, $rider_pickup->hub_id);
                         
                                     $html .= '<tr>';
                                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial++ . '</td>';
@@ -7731,7 +7735,10 @@ class NotificationsController extends Controller
                                 }
                                 $to = array();
 
-                                $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
+                                $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
+                                ->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)
+                                ->whereIn('admin_hubs.hub_id', $hubs);
+                                // $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
                                 if ($admins->exists()) {
                                     $to = array_merge($to, $admins->pluck('email')->toArray());
                                 }
