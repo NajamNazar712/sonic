@@ -798,7 +798,7 @@ class AdminNsaAccountShipmentController extends Controller
     public function bulk_return_submit(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
-            'returned_by' => 'Returned By',
+            'received_by' => 'Received/Refused By',
         ];
 
         $messages = [
@@ -807,9 +807,9 @@ class AdminNsaAccountShipmentController extends Controller
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
-            'returned_by' => [],
+            'received_by' => [],
         ];
-        $fields = [0 => 'tracking_number', 1 => 'returned_by'];
+        $fields = [0 => 'tracking_number', 1 => 'received_by'];
 
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -865,7 +865,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
                     if (empty($errors['Row #' . $row_id])) {
-                        if (!empty(trim($row['tracking_number'])) || !empty(trim($row['returned_by']))) {
+                        if (!empty(trim($row['tracking_number'])) || !empty(trim($row['received_by']))) {
                             if (empty($tracking_ids)) {
 
                                 $tracking_ids[] = $row['tracking_number'];
@@ -902,7 +902,7 @@ class AdminNsaAccountShipmentController extends Controller
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
-                        $returned_by = trim($row['returned_by']);
+                        $received_by = trim($row['received_by']);
                         $shipment_details = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $shipment_ids[] = $shipment_id;
@@ -965,7 +965,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $serial++;
                                 }
                                 foreach ($valid_shipments as $index => $shipment) {
-                                    $returned_by = '';
+                                    $received_by = '';
 
                                     $shipment_data = Shipment::find($shipment);
                                     $shipment_data->shipper_status_id = 20;
@@ -974,13 +974,13 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     foreach ($rows as $key => $row) {
                                         if ($row['tracking_number'] == $shipment_data->tracking_number) {
-                                            $returned_by = $row['returned_by'];
+                                            $received_by = $row['received_by'];
                                         }
                                     }
 
                                     ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$returned_by);
-                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$returned_by);
+                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$received_by);
+                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$received_by);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                                 }
 
