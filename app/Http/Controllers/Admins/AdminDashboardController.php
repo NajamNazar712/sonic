@@ -7505,7 +7505,7 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
                         }
                     } else {
-                        if(InternationalEconomyRateStatus::where('user_id', $result->id)->first()->status != 2 && (session('role_id') == 1 || in_array(528, session('permissions')))) {
+                        if((session('role_id') == 1 || in_array(528, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
                         }
 
@@ -7839,7 +7839,7 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
                     }
                 } else {
-                    if(InternationalEconomyRateStatus::where('user_id', $result->id)->first()->status != 2 && (session('role_id') == 1 || in_array(528, session('permissions')))) {
+                    if((session('role_id') == 1 || in_array(528, session('permissions')))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
                     }
 
