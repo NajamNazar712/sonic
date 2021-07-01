@@ -7742,6 +7742,7 @@ class NotificationsController extends Controller
                                     $serial = 1;
                                     
                                     // $hubs = array();
+                                    $hub_id = null;
                                     foreach($rider_pickups as $rider_pickup){
                                         if($hub->id == $rider_pickup->hub_id){
                         
@@ -7762,7 +7763,7 @@ class NotificationsController extends Controller
                                         $body = str_replace('[preview]', $html, $body);
                                     }
                                     $to = array();
-                                    if($hub_id){
+                                    if($hub_id != null){
                                         $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
                                         ->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)
                                         ->whereIn('admin_hubs.hub_id', $hub_id);
