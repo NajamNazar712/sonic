@@ -6665,8 +6665,7 @@ class DeliveryController extends Controller
         return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
     public function request_list(){
-        $request = DeliveryNoteRequests::join('delivery_notes as dn', 'dn.id', '=', 'delivery_note_requests.delivery_note_id')
-            ->join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
+        $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')
             ->select(['delivery_note_requests.id as id','r.name as rider', 'delivery_note_requests.delivery_note_id as delivery_note','delivery_note_requests.amount as amount','delivery_note_requests.reason as reason','delivery_note_requests.requested_at as requested_at','delivery_note_requests.approved_at as approved_at','a.name as requested_by','ad.name as approved_by','delivery_note_requests.status as status']);

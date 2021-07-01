@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
 
-@section('title', 'Delivery Note Request')
+@section('title', 'DN ByPass Request')
 
 @section('content')
-    <h1>Delivery Note Request</h1>
+    <h1>DN ByPass Request</h1>
 
     <section>
         <div class="row">
@@ -261,7 +261,7 @@
 
                     {
                         extend: 'excel',
-                        title: 'Delivery Note List',
+                        title: 'DN ByPass Request',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },

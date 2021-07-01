@@ -438,7 +438,7 @@
                                         <li><a class="menu-item" href="{{route('admin.delivery.fake_status.log.index')}}">Log Fake Status</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(531, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.delivery.note.request_index')}}">Delivery Note Request</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.delivery.note.request_index')}}">DN ByPass Request</a></li>
                                     @endif
                                 </ul>
                             </li>
