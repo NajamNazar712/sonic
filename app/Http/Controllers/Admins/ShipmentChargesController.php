@@ -579,7 +579,7 @@ class ShipmentChargesController extends Controller
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                 if($exchange_rate->exists()){
                     $exchange_rate = $exchange_rate->first();
-                    $exchange_rate_charges = (float)$exchange_rate->text;;
+                    $exchange_rate_charges = (float)$exchange_rate->text;
                 }
 
 
