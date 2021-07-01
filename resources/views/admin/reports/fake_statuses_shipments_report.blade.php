@@ -89,6 +89,8 @@
                         <th class="border-primary border-darken-1">Fake Status Date/Time</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Raised By</th>
+                        <th class="border-primary border-darken-1">Department</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -238,6 +240,9 @@
                             head.push('Fake Reason Date/Time');
                             head.push('Rider Name');
                             head.push('Remarks');
+                            head.push('Raised By');
+                            head.push('Department');
+                            
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -249,6 +254,8 @@
                                 row.push(values.updated_at);
                                 row.push(values.rider_name);
                                 row.push(values.remarks);
+                                row.push(values.raised_by);
+                                row.push(values.department);
 
                                 body.push(row);
                             });
@@ -303,6 +310,8 @@
                     {data: 'updated_at', name: 'delivery_note_shipments.fake_status_updated_at', class: 'align-middle text-center updated_at'},
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'remarks', name: 'delivery_note_shipments.remarks', class: 'align-middle remarks'},
+                    {data: 'raised_by', name: 'admin.name', class: 'align-middle raised_by'},
+                    {data: 'department', name: 'ad.name', class: 'align-middle department'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

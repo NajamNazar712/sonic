@@ -1078,8 +1078,12 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
-           
-            ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+            if ($user_type != 2) {
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+            }
+            else {
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, Auth::id());
+            }
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
@@ -2966,6 +2970,24 @@ class ShipperShipmentBookController extends Controller
                         $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                     }
                 }
+                elseif ($service_type_id == 6 ) {
+                $product_type_id = $request->input('product_type');
+
+                if ($request->filled('item_description')) {
+                    $item_description = $request->input('item_description');
+                }
+                else {
+                    $item_description = NULL;
+                }
+
+                $item_quantity = $request->input('item_quantity');
+
+                $type = 0;
+                $price = 0;
+                $insurance = FALSE;
+
+                $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+            }
 
                 NotificationsController::send(2, $shipment_id);
 
@@ -3473,6 +3495,7 @@ class ShipperShipmentBookController extends Controller
 
 
         if ($shipper_shipping_modes->exists()) {
+         
             $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
 
             $city_shipping_modes = CityDelivery::where('city_id', $request->consignee_city_id)->where('booking_type_id', $request->service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
@@ -4367,7 +4390,7 @@ class ShipperShipmentBookController extends Controller
 
             $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
 
-            $shipment = Shipment::where('user_id', session('user_id'))->where('consignee_phone_number_1', $consignee_phone_number);
+            $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('consignee_phone_number_1', $consignee_phone_number);
 
             if ($shipment->exists()) {
                 $shipment = $shipment->latest('id')->first();
@@ -4499,7 +4522,7 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [2, 3, 5])->get();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
@@ -4686,7 +4709,7 @@ class ShipperShipmentBookController extends Controller
                 $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'replacement_item_product_type_id', 18 => 'replacement_item_description', 19 => 'replacement_item_quantity', 20 => 'item_product_type_id_1', 21 => 'item_description_1', 22 => 'item_quantity_1', 23 => 'item_insurance_1', 24 => 'item_price_1', 25 => 'item_product_type_id_2', 26 => 'item_description_2', 27 => 'item_quantity_2', 28 => 'item_insurance_2', 29 => 'item_price_2', 30 => 'item_product_type_id_3', 31 => 'item_description_3', 32 => 'item_quantity_3', 33 => 'item_insurance_3', 34 => 'item_price_3', 35 => 'item_product_type_id_4', 36 => 'item_description_4', 37 => 'item_quantity_4', 38 => 'item_insurance_4', 39 => 'item_price_4', 40 => 'item_product_type_id_5', 41 => 'item_description_5', 42 => 'item_quantity_5', 43 => 'item_insurance_5', 44 => 'item_price_5', 45 => 'special_instructions', 46 => 'estimated_weight', 47 => 'shipping_mode_id', 48 => 'same_day_timing_id', 49 => 'try_and_buy_charges', 50 => 'amount', 51 => 'payment_mode_id', 52 => 'charges_mode_id', 53 => 'pieces_quantity', 54 => 'shipper_reference_number_1', 55 => 'shipper_reference_number_2', 56 => 'shipper_reference_number_3', 57 => 'shipper_reference_number_4', 58 => 'shipper_reference_number_5'];
 
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
-                    $query->whereNotIn('id', [4]);
+                    $query->whereNotIn('id', [4,6]);
                 })];
                 $service_type_check_id = null;
             }
