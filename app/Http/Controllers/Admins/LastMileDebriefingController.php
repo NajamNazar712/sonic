@@ -204,16 +204,62 @@ class LastMileDebriefingController extends Controller
 
         $datatables = Datatables::of($data)
             ->addColumn('assigned_calls_excel', function($calls) {
-               return AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                }
+                else {
+                    $time = '00:00:00';
+                }
+                $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+
+                
+               return AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
+               ->where('created_at','<=',$time)->count();
             })
             ->addColumn('completed_calls_excel', function($calls) {
-                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->count();
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                }
+                else {
+                    $time = '00:00:00';
+                }
+                $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
             })
             ->addColumn('pending_calls_excel', function($calls) {
-                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->count();
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                }
+                else {
+                    $time = '00:00:00';
+                }
+                $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
             })
             ->addColumn('assigned_calls', function($calls) {
-                $count = AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                }
+                else {
+                    $time = '00:00:00';
+                }
+                $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                $count = AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
                 if($count != 0)
                 {
                     $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="warning">100%</h4>';
@@ -225,8 +271,20 @@ class LastMileDebriefingController extends Controller
                 }
             })
             ->addColumn('completed_calls', function($calls) {
-                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
-                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->count();
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                }
+                else {
+                    $time = '00:00:00';
+                }
+                $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
+                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
                 if($count != 0)
                 {
                     $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="success">'. round(($count / $total_count) * 100, 2) .'%</h4>';
@@ -237,8 +295,20 @@ class LastMileDebriefingController extends Controller
                 }
             })
             ->addColumn('pending_calls', function($calls) {
-                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->count();
-                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->count();
+                $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $time = $settings->text;
+                }
+                else {
+                    $time = '00:00:00';
+                }
+                $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
+                $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time)->count();
                 if($count != 0)
                 {
                     $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $count . '</button></div><h4 class="danger">'. round(($count / $total_count) * 100, 2) .'%</h4>';
