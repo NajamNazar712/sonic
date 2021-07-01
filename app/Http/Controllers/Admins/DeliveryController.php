@@ -122,9 +122,10 @@ class DeliveryController extends Controller
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftjoin('return_assigned_shipments as ras', function ($join) {
+            ->join('shipments_journey as ras', function ($join) {
                 $join->on('ras.shipment_id', '=', 'shipments.id')
-                    ->where('ras.status', '=' , 1);
+                    ->where('ras.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
             ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
@@ -4335,7 +4336,7 @@ class DeliveryController extends Controller
 
                 $details_button = '<button onclick="window.open(\'' . $route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
                 $retail_details_button = '<button onclick="window.open(\'' . $retail_route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
-                $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
+                // $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
 
 
@@ -4352,17 +4353,6 @@ class DeliveryController extends Controller
                     $dropdown .= $retail_details_button;
                 }
 
-
-                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
-                    if(session('department_id') == 6) {
-                        if($result->adjusted == 0){
-                            $dropdown .= $adjustment_add_button;
-                        }
-                    }
-                    else{
-                        $dropdown .= $adjustment_add_button;
-                    }
-                }
 
                 if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
                     $dropdown .= $upload_deposit_slip_button;
@@ -6302,6 +6292,7 @@ class DeliveryController extends Controller
             $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id)->latest('delivery_note_id')->first();
             if($delivery_note_shipment){
                 $delivery_note_shipment->fake_status = 1;
+                $delivery_note_shipment->admin_id = Auth::id();
                 $delivery_note_shipment->remarks = $request->remarks;
                 $delivery_note_shipment->fake_status_updated_at = Carbon::now();
                 $delivery_note_shipment->save();
