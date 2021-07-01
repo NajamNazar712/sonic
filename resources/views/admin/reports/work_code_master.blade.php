@@ -25,7 +25,7 @@
                     </div>--}}
                     <div class="col-4 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                            <select name="search_shipper" id="search_shipper" class="form-control" required data-rule-required="true" data-msg-required="This field is required">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
@@ -42,7 +42,20 @@
 
                     <div class="col-4 mb-1">
                         <fieldset class="form-group">
-                            <input name="status_marked_by" id="status_marked_by" class="form-control status_marked_by" required data-rule-required="true" data-msg-required="This field is required"  placeholder="Search Status Marked By">
+                            <select name="search_rider" id="search_rider" class="form-control" required data-rule-required="true" data-msg-required="This field is required">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4 mb-1">
+                        <fieldset class="form-group">
+                            <select name="search_admin" id="search_admin" class="form-control" required data-rule-required="true" data-msg-required="This field is required">
+                                @foreach($admins as $admin)
+                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-4 mb-1">
@@ -202,9 +215,19 @@
                 },
             });
 
-            $('#search_shipper').select2({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select Shipper",
+                allowClear:true,
+            });
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Status Marked By Rider",
+                allowClear:true,
+            });
+            $('#search_admin').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Status Marked By Admin",
                 allowClear:true,
             });
            
@@ -214,16 +237,15 @@
                 allowClear:true,
             });
 
-            var from_max = '{{ Carbon\Carbon::now() }}';
-            var to_max = '{{ Carbon\Carbon::now() }}';
-            var from_min = '{{ Carbon\Carbon::today()->subMonths(1)->toDateString() }}';
-            var to_min = '{{ Carbon\Carbon::today()->subMonths(1)->toDateString() }}';
 
+
+
+            var today = '{{ Carbon\Carbon::today() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                min: new Date(from_min),
-                max: from_max,
+                // min: new Date(thirtydays),
+                max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -234,14 +256,17 @@
                 },
                 onSet: function(context) {
                     var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
                     to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                min: new Date(to_min),
-                max: to_max,
+                max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -251,10 +276,12 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
+                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+
+
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -328,6 +355,9 @@
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.tracking_number = $('#tracking_number').val();
                         d.status_marked = $('#status_marked').val();
+                        d.search_rider = $('#search_rider').val();
+                        d.search_admin = $('#search_admin').val();
+
                         
                         
                     }
