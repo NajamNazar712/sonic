@@ -163,11 +163,8 @@
 
     <script>
         $(document).ready(function() {
-            @if($escalation->mark_as == 1)
-                $('#auto_comment').attr('disabled', false);
-            @else
-                $('#auto_comment').attr('disabled', true);
-            @endif
+            $('#auto_comment').attr('disabled', false);
+            
             $('#settings_form .shipment_statuses').each(function() {
                 var checkbox = $(this);
                 var label = checkbox.next();
@@ -221,13 +218,8 @@
                 dropdownParent:$('#settings_form')
             }).bind('change', function () {
                 var id = parseInt($(this).val());
-                if(id === 1){
                     $('#auto_comment').val(comment_text);
                     $('#auto_comment').attr('disabled', false);
-                }else{
-                    $('#auto_comment').val('');
-                    $('#auto_comment').attr('disabled', true);
-                }
             });
 
             var checked;

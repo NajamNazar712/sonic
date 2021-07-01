@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\ShipmentsAirWaybillJourney;
 
+use Vectorface\Whip\Whip;
+
 class ShipmentsAirWaybillJourneyController extends Controller
 {
     static public function add($shipment_id, $user_type, $user_id) {
@@ -15,6 +17,13 @@ class ShipmentsAirWaybillJourneyController extends Controller
 		$shipment_air_waybill_journey->shipment_id = $shipment_id;
 		$shipment_air_waybill_journey->user_type = $user_type;
 		$shipment_air_waybill_journey->user_id = $user_id;
+
+		$whip = new Whip();
+        $client_address = $whip->getValidIpAddress();
+
+        if ($client_address != '') {
+            $shipment_air_waybill_journey->ip_address = $client_address;
+        }
 
 		$shipment_air_waybill_journey->save();
     }

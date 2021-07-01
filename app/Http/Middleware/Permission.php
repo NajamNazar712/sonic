@@ -1028,6 +1028,8 @@ class Permission
             'finance.payments.export_to_excel' => 5,
             'finance.payments.reconcile_through_receiving_sheet.index' => 5,
             'finance.payments.reconcile_through_receiving_sheet.list' => 5,
+            'finance.invoice.index' => 14,
+            'finance.invoice.list' => 14,
 
             'dispute.index' => 6,
             'dispute.list' => 6,
