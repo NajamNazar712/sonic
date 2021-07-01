@@ -18,6 +18,7 @@ use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\BanksList;
 use App\Http\Models\BusinessCategory;
+use App\Http\Models\ChargesMode;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Product;
@@ -153,9 +154,10 @@ class RetailShipmentBookController extends Controller
         $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
+        $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
+        return view('retail.shipment.booking.index')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities,'international_cities'=>$international_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes]);
     }
 
     public function store(Request $request){
@@ -216,12 +218,19 @@ class RetailShipmentBookController extends Controller
         $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
         $gst = $gst * $total_charges_without_gst;
         $total_charges = $total_charges_without_gst + $gst;
+        $charges_mode_id = $request->input('charges_mode');
         if($shipping_mode_check == 3){
             $amount = str_replace(',', '', $request->input('cod'));
             $r_amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $amount + $total_charges;
+            }
         }
         else{
             $amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $total_charges;
+            }
             $r_amount = 0;
         }
         $payment_mode_id = 1;
@@ -229,8 +238,6 @@ class RetailShipmentBookController extends Controller
 
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category');
-
-        $charges_mode_id = 1;
 
         if ($request->volumetric_weight == "on") {
             $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
@@ -363,31 +370,33 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->retail_user_id = Auth::id();
         $retail_shipment->save();
 
+        $shipment = Shipment::find($shipment_id);
+        if($shipment->charges_mode_id != 2){
+            $date = Carbon::today()->toDateString();
+            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
+            if($cash_deposit->exists()){
+                $cash_deposit = $cash_deposit->first();
+                $total_shipments = $cash_deposit->total_cn + 1;
+                $total_cash = $cash_deposit->total_cash + $total_charges;
+                $cash_deposit->total_cn = $total_shipments;
+                $cash_deposit->total_cash = $total_cash;
+                $cash_deposit->save();
+            }
+            else{
+                $cash_deposit = new RetailCashDeposit();
+                $cash_deposit->category = Auth::user()->category;
+                $cash_deposit->retail_user_id = Auth::id();
+                $cash_deposit->total_cn = 1;
+                $cash_deposit->total_cash = $total_charges;
+                $cash_deposit->save();
+            }
 
-        $date = Carbon::today()->toDateString();
-        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', Auth::user()->category)->where('retail_user_id', Auth::id());
-        if($cash_deposit->exists()){
-            $cash_deposit = $cash_deposit->first();
-            $total_shipments = $cash_deposit->total_cn + 1;
-            $total_cash = $cash_deposit->total_cash + $total_charges;
-            $cash_deposit->total_cn = $total_shipments;
-            $cash_deposit->total_cash = $total_cash;
-            $cash_deposit->save();
+            $cash_deposit_shipment = new RetailCashDepositShipment();
+            $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+            $cash_deposit_shipment->shipment_id = $shipment_id;
+            $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
+            $cash_deposit_shipment->save();
         }
-        else{
-            $cash_deposit = new RetailCashDeposit();
-            $cash_deposit->category = Auth::user()->category;
-            $cash_deposit->retail_user_id = Auth::id();
-            $cash_deposit->total_cn = 1;
-            $cash_deposit->total_cash = $total_charges;
-            $cash_deposit->save();
-        }
-
-        $cash_deposit_shipment = new RetailCashDepositShipment();
-        $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
-        $cash_deposit_shipment->shipment_id = $shipment_id;
-        $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode;
-        $cash_deposit_shipment->save();
 
 
         AdminPickupsController::generate($shipment_id);
@@ -952,7 +961,7 @@ class RetailShipmentBookController extends Controller
                           </tr>
                           <tr>
                     ';
-                    }  elseif ($shipment->booking_type_id != 4) {
+                    }  elseif ($shipment->charges_mode_id != 2) {
                         $table_end .= '
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->retail->payment_mode->name . '</strong></td>
@@ -994,12 +1003,6 @@ class RetailShipmentBookController extends Controller
                         </tbody>
                     </table>
                 ';
-
-                    if ($shipment->booking_type_id != 4 && $shipment->charges_mode_id == 2 && $shipment->shipper_status_id == 1) {
-                        $table_end .= '
-                        <div class="void position-absolute m-auto text-center font-weight-bold">Void Air Waybill after Arrival</div>
-                    ';
-                    }
 
                     $table_end .= '
                       </div>
@@ -1520,9 +1523,10 @@ class RetailShipmentBookController extends Controller
         $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', 1)->get();
+        $charges_modes = ChargesMode::whereIn('id', [1, 2])->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return view('retail.shipment.booking.excel')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'international_cities' => $international_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks]);
+        return view('retail.shipment.booking.excel')->with(['products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'international_cities' => $international_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'charges_modes' => $charges_modes]);
     }
     public function excel_store(Request $request) {
         $retail_user_id = Auth::id();
@@ -1543,6 +1547,7 @@ class RetailShipmentBookController extends Controller
             'height' => 'Height (cm)',
             'pieces' => 'Pieces',
             'payment_mode_id' => 'Payment Mode ID',
+            'charges_mode_id' => 'Charges Mode ID',
             'shipper_cell_number' => 'Shipper Cell Number',
             'shipper_name' => 'Shipper Name',
             'shipper_cnic' => 'Shipper CNIC',
@@ -1592,6 +1597,7 @@ class RetailShipmentBookController extends Controller
             'height' => ['nullable', 'numeric', 'between:0.1,100000'],
             'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_payment_modes', 'id')->where('id', 1)],
+            'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->whereIn('id', [1, 2])],
             'shipper_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
             'shipper_name' => ['required', 'between:1,100'],
             'shipper_cnic' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
@@ -1617,8 +1623,8 @@ class RetailShipmentBookController extends Controller
         }
 
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'shipper_cell_number', 12 => 'shipper_name', 13 => 'shipper_cnic', 14 => 'shipper_address', 15 => 'consignee_cell_number', 16 => 'consignee_name', 17 => 'consignee_cnic', 18 => 'consignee_address', 19 => 'order_id', 20 => 'trax_box_id', 21 => 'weight_charges', 22 => 'fuel_surcharge', 23 => 'iban_number', 24 => 'account_number', 25 => 'bank_id'];
-            if (count($spreadsheet[0]) != 26){
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 => 'trax_box_id', 22 => 'weight_charges', 23 => 'fuel_surcharge', 24 => 'iban_number', 25 => 'account_number', 26 => 'bank_id'];
+            if (count($spreadsheet[0]) != 27){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
@@ -1745,6 +1751,7 @@ class RetailShipmentBookController extends Controller
 //                $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
                 $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.name')->get();
                 $payment_modes = RetailPaymentMode::where('id', 1)->pluck('name', 'id');
+                $charges_modes = ChargesMode::whereIn('id', [1, 2])->pluck('charges_mode', 'id');
                 $trax_boxes = RetailTraxBox::pluck('name', 'id');
                 $banks = BanksList::pluck('name', 'id');
                 $domestic_city_name = array();
@@ -1756,7 +1763,7 @@ class RetailShipmentBookController extends Controller
                     $domestic_overland_city_name[$domestic_overland_city->name] = $domestic_overland_city->name;
                 }
 
-                return view('retail.shipment.booking.errors')->with(['data' => $rows, 'errors' => $errors, 'domestic_cities' => $domestic_city_name, 'domestic_overland_cities' => $domestic_overland_city_name, 'business_categories' => $business_categories, 'trax_boxes' => $trax_boxes, 'products' => $products, 'shipping_modes' => $shipping_modes, 'banks' => $banks, 'payment_modes' => $payment_modes]);
+                return view('retail.shipment.booking.errors')->with(['data' => $rows, 'errors' => $errors, 'domestic_cities' => $domestic_city_name, 'domestic_overland_cities' => $domestic_overland_city_name, 'business_categories' => $business_categories, 'trax_boxes' => $trax_boxes, 'products' => $products, 'shipping_modes' => $shipping_modes, 'banks' => $banks, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
             }
         }
         else {
