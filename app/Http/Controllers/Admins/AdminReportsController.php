@@ -8703,7 +8703,8 @@ class AdminReportsController extends Controller
             ->join('users as su', 'sh.user_id', '=', 'su.id')
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
-            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id']);
+            ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
+            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id']);
             
         $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
@@ -8713,7 +8714,11 @@ class AdminReportsController extends Controller
             
             ->editColumn('status_marked_by', function ($shipments) {
                 if($shipments->admin_id == null){
-                    return $shipments->shipper_status_marked_by;
+                    if($shipments->ssjj_user_id == null){
+                        return $shipments->rider_status_marked_by;
+                    }else{
+                        return $shipments->shipper_status_marked_by;
+                    }
                 }else{
                     return $shipments->status_marked_by;
                 }
