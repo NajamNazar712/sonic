@@ -6053,7 +6053,8 @@ class AdminReportsController extends Controller
                 }
             });
         if($tracking = $request->get('search_tracking_no')){
-            $datatable->where('s.tracking_number', '=', $tracking);
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('s.tracking_number', $tracking_numbers);
         }
         if($rnumber = $request->get('search_request_number')){
             $rnumber = explode(',',$rnumber);
@@ -6738,7 +6739,10 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks')
+            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
+            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department')
             ->where('delivery_note_shipments.fake_status', 1);
 
 

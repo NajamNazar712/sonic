@@ -71,6 +71,7 @@
                                     <th class="border-primary border-darken-1">Contact Person</th>
 {{--                                    <th class="border-primary border-darken-1">Booking Type</th>--}}
                                     <th class="border-primary border-darken-1">Vendor</th>
+                                    <th class="border-primary border-darken-1">Brand Name</th>
                                     <th class="border-primary border-darken-1">Contact No(s).</th>
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">City</th>
@@ -202,9 +203,7 @@
         .btn-min-width {
             min-width: 5.5rem;
         }
-        .reverse_pickup_row{
-            background-color: #bfefe2;
-        }
+        
 @foreach($legends as $legend)
     @if($legend->id == 1)
         .new_pickup{
@@ -233,6 +232,10 @@
     @elseif($legend->id == 7)
         .after_cut_off_time{
             background-color: '{{$legend->color}}';
+        }
+    @elseif($legend->id == 8)
+        .reverse_pickup_row{
+            background-color: {{$legend->color}};
         }
     @endif
 @endforeach
@@ -274,6 +277,7 @@
                         head.push('Shipper');
                         head.push('Contact Person');
                         head.push('Vendor');
+                        head.push('Brand Name');
                         head.push('Contact No(s).');
                         head.push('Address');
                         head.push('City');
@@ -303,6 +307,7 @@
                             row.push(values.shipper);
                             row.push(values.contact_person);
                             row.push(values.vendor_name);
+                            row.push(values.brand_name);
                             row.push(values.contact_number);
                             row.push(values.address);
                             row.push(values.city);
@@ -467,6 +472,7 @@
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                 // {data: 'type', name: 'booking_types.booking_type', class: 'align-middle type'},
                 {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
+                {data: 'brand_name', name: 'usi.pickup_brand_name', class: 'align-middle brand_name', orderable: false, searchable: false},
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                 {data: 'city', name: 'ci.name', class: 'align-middle city'},
@@ -502,7 +508,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks')) {
+                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))

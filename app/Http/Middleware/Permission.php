@@ -280,6 +280,8 @@ class Permission
             'delivery.completed.retail.index' => 424,
             'delivery.signature.index' => 441,
             'delivery.signature.list' => 441,
+            'delivery.note.request_index' => 531,
+            'delivery.note.request_list' => 531,
 
             'ftl.request.index' => 511,
             'ftl.request.list' => 511,
@@ -899,6 +901,7 @@ class Permission
             'telenor.return.submit' => 400,
             'telenor.call.index' => 402,
             'telenor.call.list' => 402,
+            'telenor.return.bulk_return' => 525,
 
 
             'leads.index' => 416,

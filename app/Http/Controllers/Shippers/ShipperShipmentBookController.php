@@ -1078,8 +1078,12 @@ class ShipperShipmentBookController extends Controller
         foreach($ids as $id) {
             $shipment = Shipment::find($id);
 
-           
-            ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+            if ($user_type != 2) {
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, $user_id);
+            }
+            else {
+                ShipmentsAirWaybillJourneyController::add($id, $user_type, Auth::id());
+            }
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
                 if ($shipment->booking_type_id == 3 && $user_type != 3) {
@@ -4386,7 +4390,7 @@ class ShipperShipmentBookController extends Controller
 
             $consignee_phone_number = '0' . substr_replace($consignee_phone_number, '-', 3, 0);
 
-            $shipment = Shipment::where('user_id', session('user_id'))->where('consignee_phone_number_1', $consignee_phone_number);
+            $shipment = Shipment::where('user_id', session('user_id'))->where('shipper_status_id', '!=', 17)->where('consignee_phone_number_1', $consignee_phone_number);
 
             if ($shipment->exists()) {
                 $shipment = $shipment->latest('id')->first();

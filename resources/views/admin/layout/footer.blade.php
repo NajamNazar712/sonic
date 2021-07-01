@@ -60,11 +60,12 @@
         @if(Session::has('first_login') && session('first_login') != 1)
             $('#FirstLoginPasswordChangeModal').modal('show');
 
-            $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
-            $('#cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
+            $('#first_peye').on('mousedown',function(){$('input[name="current_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="current_password"]').attr('type','password')});
+            $('#first_npeye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
+            $('#first_cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
 
         $( "#password-form" ).validate({
-            errorClass:"danger",
+            errorClass:"danger",Del
             normalizer: function(value) {
                 return $.trim(value);
             },
@@ -72,24 +73,30 @@
                 error.addClass('w-100').appendTo(element.parent('.form-group'));
             },
             submitHandler: function(form) {
+                var current_password = $('#current_password').val();
                 var new_password = $('#new_password').val();
                 var confirm_password = $('#confirm_password').val();
-                if(new_password === confirm_password){
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Password is being updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
+                if (current_password !== new_password) {
+                    if(new_password === confirm_password){
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Password is being updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                    else{
+                        var error = "The password and confirmation password do not match";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
                 }
                 else{
-                    var error = "The password and confirmation password do not match";
+                    var error = "The current and new password cannot be same";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
-
             }
         });
         @endif
