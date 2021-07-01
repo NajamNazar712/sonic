@@ -144,7 +144,7 @@ class ShipperAPIController extends Controller
                     $shipment_info['pickup_address'] = $shipment->pickup_address->pickup_address;
                     $shipment_info['weight'] = ($shipment->actual_weight) ? $shipment->actual_weight : $shipment->estimated_weight;
 
-                    if(!in_array($shipment->shipper_status_id,[14, 8, 20])){
+                    if ($shipment->shipper_status_id != 14) {
                         $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
                         if ($shipper_subscription->count() < 5) {
                             $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
