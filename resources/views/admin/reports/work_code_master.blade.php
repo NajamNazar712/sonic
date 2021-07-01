@@ -241,6 +241,7 @@
 
 
             var today = '{{ Carbon\Carbon::today() }}';
+            var next_month = '{{ Carbon\Carbon::today()->addMonths(1) }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -266,7 +267,7 @@
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max : new Date(today),
+                max : new Date(next_month),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
