@@ -254,15 +254,29 @@ class LastMileDebriefingController extends Controller
 
     public function caller_agent_view()
     {
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time = $settings->text;
+        }
+        else {
+            $time = '00:00:00';
+        }
+        $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+
+
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
-            ->where('completed',0)->where('skip',0);
+            ->where('completed',0)->where('skip',0)->where('created_at','>=',Carbon::today())
+            ->where('created_at','<=',$time);
         if($calls->exists())
         {
             $data = $calls->first();
         }
         else{
             $calls = AgentCallMonitoring::where('agent_id',Auth::id())
-                ->where('completed',0)->where('skip',1);
+                ->where('completed',0)->where('skip',1)->where('created_at','>=',Carbon::today())
+                ->where('created_at','<=',$time);
 
             if($calls->exists()) {
                 $data = $calls->first();
@@ -275,9 +289,12 @@ class LastMileDebriefingController extends Controller
         $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
         $shipment = Shipment::find($data->shipment_id);
         $delivery_note = DeliveryNote::find($data->delivery_note_id);
-        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())->count();
-        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('completed',1)->count();
-        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('completed',0)->count();
+        $total_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
+        ->where('created_at','<=',$time)->count();
+        $completed_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
+        ->where('created_at','<=',$time)->where('completed',1)->count();
+        $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
+        ->where('created_at','<=',$time)->where('completed',0)->count();
         return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data]);
     }
 
