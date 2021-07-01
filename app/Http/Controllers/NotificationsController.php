@@ -7730,6 +7730,8 @@ class NotificationsController extends Controller
                                 $rider_pickups = $rider_pickups->get();
                                 $hubss = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
                                 foreach ($hubss as $hub) {
+
+                                    $body_updated = $body;
                                     $html = '<table style="width:100%;">';
                                     $html .= '<thead><tr>
                                                    <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
@@ -7759,8 +7761,8 @@ class NotificationsController extends Controller
                                         
                                     }
                                     $html .= '</tbody></table> <br>';
-                                    if (strpos($body, '[preview]') !== FALSE) {
-                                        $body = str_replace('[preview]', $html, $body);
+                                    if (strpos($body_updated, '[preview]') !== FALSE) {
+                                        $body_updated = str_replace('[preview]', $html, $body_updated);
                                     }
                                     $to = array();
                                     if($hub_id != null){
@@ -7772,7 +7774,7 @@ class NotificationsController extends Controller
                                             $to = array_merge($to, $admins->pluck('email')->toArray());
                                         }
         
-                                        self::email($subject, $body, $to);
+                                        self::email($subject, $body_updated, $to);
                                     }
                                     
     
