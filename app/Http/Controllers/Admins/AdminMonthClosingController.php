@@ -7,6 +7,8 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\BagShipment;
 use App\Http\Models\Admin\MonthClosing;
 use App\Http\Models\Admin\MonthClosingResponsible;
 use App\Http\Models\Admin\MonthClosingStatus;
@@ -428,22 +430,22 @@ class AdminMonthClosingController extends Controller
                                     AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
                                 }
                                 if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
-                                    $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
-                                    if ($cargo_consignment_shipment->exists()) {
-                                        $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
+                                    $bag_shipment = BagShipment::where('shipment_id', $shipment_details->id);
+                                    if ($bag_shipment->exists()) {
+                                        $bag_shipment = $bag_shipment->max('bag_id');
 
-                                        $cargo = CargoConsignment::find($cargo_consignment_shipment);
-                                        $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
-                                        if (in_array($cargo->status_id, [1, 2])) {
-                                            $shipments_count = $cargo->shipments;
-                                            $shipment_weight = $cargo->shipment_weight;
+                                        $bag = Bag::find($bag_shipment);
+                                        $bag->shipment()->where('shipment_id', $shipment_details->id)->delete();
+                                        if (in_array($bag->status_id, [2, 3, 5, 6])) {
+                                            $shipments_count = $bag->shipments;
+                                            $shipment_weight = $bag->shipment_weight;
                                             $shipments_count = $shipments_count - 1;
-                                            $cargo->shipments = $shipments_count;
-                                            $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                            if ($shipments_count == 0) {
-                                                $cargo->status_id = 5;
-                                            }
-                                            $cargo->save();
+                                            $bag->shipments = $shipments_count;
+                                            $bag->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+//                                            if ($shipments_count == 0) {
+//                                                $bag->status_id = 5;
+//                                            }
+                                            $bag->save();
 //                                            $shipment_details->shipper_status_id = 51;
 //                                            $shipment_details->consignee_status_id = 51;
 //                                            $shipment_details->save();
@@ -451,26 +453,27 @@ class AdminMonthClosingController extends Controller
                                             $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
 
 //                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
-                                        } else if ($cargo->status_id == 4) {
-                                            $shipments_count = $cargo->shipments;
-                                            $shipments_received_count = $cargo->received_shipments;
-                                            $shipment_weight = $cargo->shipment_weight;
-                                            $shipments_count = $shipments_count - 1;
-                                            $cargo->shipments = $shipments_count;
-                                            $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                            if ($shipments_count == 0) {
-                                                $cargo->status_id = 5;
-                                            } else if ($shipments_count == $shipments_received_count) {
-                                                $cargo->status_id = 3;
-                                            }
-                                            $cargo->save();
-//                                            $shipment_details->shipper_status_id = 51;
-//                                            $shipment_details->consignee_status_id = 51;
-//                                            $shipment_details->save();
-//                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
-
                                         }
+//                                        else if ($cargo->status_id == 4) {
+//                                            $shipments_count = $cargo->shipments;
+//                                            $shipments_received_count = $cargo->received_shipments;
+//                                            $shipment_weight = $cargo->shipment_weight;
+//                                            $shipments_count = $shipments_count - 1;
+//                                            $cargo->shipments = $shipments_count;
+//                                            $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+//                                            if ($shipments_count == 0) {
+//                                                $cargo->status_id = 5;
+//                                            } else if ($shipments_count == $shipments_received_count) {
+//                                                $cargo->status_id = 3;
+//                                            }
+//                                            $cargo->save();
+////                                            $shipment_details->shipper_status_id = 51;
+////                                            $shipment_details->consignee_status_id = 51;
+////                                            $shipment_details->save();
+////                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
+//                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
+//
+//                                        }
                                     }
 
                                 }

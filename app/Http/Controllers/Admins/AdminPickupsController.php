@@ -197,8 +197,9 @@ class AdminPickupsController extends Controller
                               $retail_pickup_note_shipment->retail_pickup_note_id = $retail_pickup_note->id;
                               $retail_pickup_note_shipment->shipment_id = $shipment_id;
                               $retail_pickup_note_shipment->save();
-
-                              $retail_pickup_note->amount = $retail_pickup_note->amount + $retail_shipment->total_charges;
+                              if($shipment->charges_mode_id != 2){
+                                  $retail_pickup_note->amount = $retail_pickup_note->amount + $retail_shipment->total_charges;
+                              }
                               $retail_pickup_note->shipments = $retail_pickup_note->shipments + 1;
 
                               $retail_pickup_note->save();
@@ -213,7 +214,12 @@ class AdminPickupsController extends Controller
                         $retail_pickup_note_create->admin_id = ($retail_shipment->admin_id) ? $retail_shipment->admin_id : null;
                         $retail_pickup_note_create->pickup_request_id = $pickup_request_id;
                         $retail_pickup_note_create->shipments = 1;
-                        $retail_pickup_note_create->amount = $retail_shipment->total_charges;
+                        if($shipment->charges_mode_id != 2) {
+                            $retail_pickup_note_create->amount = $retail_shipment->total_charges;
+                        }
+                        else{
+                            $retail_pickup_note_create->amount = 0;
+                        }
                         $retail_pickup_note_create->status = 1;
                         $retail_pickup_note_create->save();
 

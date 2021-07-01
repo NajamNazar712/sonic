@@ -15,14 +15,16 @@
                 <label for="special_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
             </div>
         </div>
-        <div class="col text-center">
-            <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
-            <div class="form-group">
-                <label for="ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
-                <input type="checkbox" name="ccd_rider_checkbox" id="ccd_rider_checkbox" class="switchery ccd_rider_checkbox" data-size="sm" data-switchery="true">
-                <label for="ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+        @if($type == 1)
+            <div class="col text-center">
+                <label class="font-medium-2 font-weight-bold block">Credit Card on Delivery-CCD</label>
+                <div class="form-group">
+                    <label for="ccd_rider_checkbox" class="font-medium-2 text-bold-600 mr-1">No</label>
+                    <input type="checkbox" name="ccd_rider_checkbox" id="ccd_rider_checkbox" class="switchery ccd_rider_checkbox" data-size="sm" data-switchery="true">
+                    <label for="ccd_rider_checkbox" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                </div>
             </div>
-        </div>
+        @endif
     </div>
     
 
