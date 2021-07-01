@@ -7725,51 +7725,59 @@ class NotificationsController extends Controller
                     // ->join('cities as h' ,'oc.hub_id', '=' , 'h.id')
                     // ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'h.name as origin_hub', 'h.id as hub_id')
                     // ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
-            
+                    
                             if ($rider_pickups->exists()) {
-                                
-                                $html = '<table style="width:100%;">';
-                                $html .= '<thead><tr>
-                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
-                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>
-                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>
-                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
-                                               <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin Hub</th>';
-                                $html .= '</tr></thead><tbody>';
-        
-                                $serial = 1;
-                                $rider_pickups = $rider_pickups->get();
-                                $hubs = array();
-
-                                        
-                                foreach($rider_pickups as $rider_pickup){
-
-                                    array_push($hubs, $rider_pickup->hub_id);
+                                $hubss = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name');
+                                foreach ($hubss as $hub) {
+                                    $html = '<table style="width:100%;">';
+                                    $html .= '<thead><tr>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin Hub</th>';
+                                    $html .= '</tr></thead><tbody>';
+            
+                                    $serial = 1;
+                                    $rider_pickups = $rider_pickups->get();
+                                    $hubs = array();
+                                    foreach($rider_pickups as $rider_pickup){
+                                        if($hub->id == $rider_pickup->hub_id){
                         
-                                    $html .= '<tr>';
-                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial++ . '</td>';
-                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider . '</td>';
-                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider_id . '</td>';
-                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->shipments . '</td>';
-                                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->origin_hub . '</td>';
-                                    $html .= '</tr>';
-                                    
+                                            $html .= '<tr>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial++ . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider_id . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->shipments . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->origin_hub . '</td>';
+                                            $html .= '</tr>';
+        
+                                        }
+                                        // array_push($hubs, $rider_pickup->hub_id);
+                                        
+                                    }
+                                    $html .= '</tbody></table> <br>';
+                                    if (strpos($body, '[preview]') !== FALSE) {
+                                        $body = str_replace('[preview]', $html, $body);
+                                    }
+                                    $to = array();
+    
+                                    $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
+                                    ->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)
+                                    ->where('admin_hubs.hub_id', $hub->id);
+                                    // $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
+                                    if ($admins->exists()) {
+                                        $to = array_merge($to, $admins->pluck('email')->toArray());
+                                    }
+    
+                                    self::email($subject, $body, $to);
+    
                                 }
-                                $html .= '</tbody></table> <br>';
-                                if (strpos($body, '[preview]') !== FALSE) {
-                                    $body = str_replace('[preview]', $html, $body);
-                                }
-                                $to = array();
-
-                                $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
-                                ->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)
-                                ->whereIn('admin_hubs.hub_id', $hubs);
-                                // $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
-                                if ($admins->exists()) {
-                                    $to = array_merge($to, $admins->pluck('email')->toArray());
-                                }
-
-                                self::email($subject, $body, $to);
+                                
+                               
+                                        
+                                
+                               
                             }
 
                     
