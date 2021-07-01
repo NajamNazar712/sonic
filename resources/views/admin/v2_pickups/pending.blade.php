@@ -210,31 +210,35 @@
 @foreach($legends as $legend)
     @if($legend->id == 1)
         .new_pickup{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
         }
     @elseif($legend->id == 2)
         .vendor_row{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
         }
     @elseif($legend->id == 3)
         .try_and_buy{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
         }
     @elseif($legend->id == 4)
         .first_attempt{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
         }
     @elseif($legend->id == 5)
         .second_attempt{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
         }
     @elseif($legend->id == 6)
         .multiple_attempt{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
         }
     @elseif($legend->id == 7)
         .after_cut_off_time{
-            background-color: '{{$legend->color}}';
+            background-color: {{$legend->color}};
+        }
+    @elseif($legend->id == 8)
+        .reverse_pickup_row{
+            background-color: {{$legend->color}};
         }
     @endif
 @endforeach
