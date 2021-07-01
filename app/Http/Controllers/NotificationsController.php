@@ -23,6 +23,7 @@ use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
+use App\Http\Models\DeliveryNoteOtpSms;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
@@ -47,6 +48,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
+use App\Jobs\ProcessDeliveryNoteOtpSms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -93,6 +95,17 @@ class NotificationsController extends Controller
       $sms->save();
 
       dispatch(new ProcessSMS($sms));
+    }
+
+    static private function delivery_note_otp_sms($body, $to) {
+      $sms = new DeliveryNoteOtpSms();
+
+      $sms->to = str_replace('-', '', $to);
+      $sms->body = $body;
+
+      $sms->save();
+
+      dispatch(new ProcessDeliveryNoteOtpSms($sms));
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL) {
@@ -2424,6 +2437,7 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc, $bcc);
 
                 } else if ($id == 27) {
+
                     $shipper_fields = ['account_id' => 'id', 'company_name' => 'name'];
 
                     $invoice_fields = ['invoice_number' => 'invoice_number', 'billing_period_from_date' => 'billing_period_from_date', 'billing_period_to_date' => 'billing_period_to_date', 'due_date' => 'due_date'];
@@ -2485,14 +2499,15 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[invoice]') !== FALSE) {
-                        $invoice = AdminFinanceController::generate_invoice_print($reference_1_id, TRUE);
 
-                        $body = str_replace('[invoice]', preg_replace('/\r|\n/', '', $invoice), $body);
+                        $invoice = AdminFinanceController::email_print_invoice($reference_1_id, TRUE);
+                        $link = '<a href="' . $invoice . '" download="invoice" target="_blank" >Invoice</a>';
+                        $body = str_replace('[invoice]', $link, $body);
                     }
 
                     $cc = array();
 
-
+                    $cc[] = 'sarosh.tariq@trax.pk';
                     $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
                     // $sales_person_admin = Admin::find($sales_person->admin_id);
                     
@@ -7391,30 +7406,35 @@ class NotificationsController extends Controller
                     $data = $reference_1_id;
                     $erf = EmployeeRequisition::find($data['id']);
                     $erf_id = str_pad($erf->id,6,0,STR_PAD_LEFT);
-                    $admin = Admin::where('email',$data['email'])->first();
-                    if($admin){
-                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+                    $admin_emails = explode(',', $data['email']);
 
-                        if (strpos($body, '[link]') !== FALSE) {
-                            $body = str_replace('[link]', $link, $body);
+                    foreach($admin_emails as $email){
+                        $admin = Admin::where('email',$email)->first();
+                        if($admin){
+                            $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
+                            if (strpos($subject, '[erf_id]') !== FALSE) {
+                                $subject = str_replace('[erf_id]', $erf_id, $subject);
+                            }
+
+                            if (strpos($body, '[erf_id]') !== FALSE) {
+                                $body = str_replace('[erf_id]', $erf_id, $body);
+                            }
+                            if (strpos($body, '[admin]') !== FALSE) {
+                                $body = str_replace('[admin]', $admin->name, $body);
+                            }
+                            if (strpos($body, '[date]') !== FALSE) {
+                                $body = str_replace('[date]', $erf->created_at, $body);
+                            }
+
+                            $to = $email;
+                            self::email($subject, $body, $to);
                         }
 
-                        if (strpos($subject, '[erf_id]') !== FALSE) {
-                            $subject = str_replace('[erf_id]', $erf_id, $subject);
-                        }
-
-                        if (strpos($body, '[erf_id]') !== FALSE) {
-                            $body = str_replace('[erf_id]', $erf_id, $body);
-                        }
-                        if (strpos($body, '[admin]') !== FALSE) {
-                            $body = str_replace('[admin]', $admin->name, $body);
-                        }
-                        if (strpos($body, '[date]') !== FALSE) {
-                            $body = str_replace('[date]', $erf->created_at, $body);
-                        }
-
-                        $to = $admin->email;
-                        self::email($subject, $body, $to);
                     }
                 }
 				else if($id == 136) {
@@ -7666,6 +7686,104 @@ class NotificationsController extends Controller
 
                     self::sms($body, $to);
                 }
+                else if($id == 137) {
+                    $rider_id = $reference_1_id;
+                    $delivery_note_id = $reference_2_id;
+
+                    $rider = Rider::find($rider_id);
+                    $delivery_note = DeliveryNote::find($delivery_note_id);
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+
+                    if (strpos($body, '[delivery_note]') !== FALSE) {
+                        $body = str_replace('[delivery_note]', $delivery_note->id, $body);
+                    }
+
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $delivery_note->otp, $body);
+                    }
+
+                    $to = $rider->phone;
+                    self::delivery_note_otp_sms($body, $to);
+                } else if ($id == 139) {
+                    
+                    $yesterday = Carbon::yesterday();
+                    $today = Carbon::today();
+                    
+                    $rider_pickups = V2RiderPickup::leftjoin('v2_pickup_request_not_pick_reasons as pnpr', 'v2_rider_pickups.pickup_not_pick_reason_id', 'pnpr.id')
+                    ->join('v2_pickup_notes as pn', 'v2_rider_pickups.pickup_note_id', 'pn.id')
+                    ->join('v2_pickup_requests as pr', 'v2_rider_pickups.pickup_request_id', 'pr.id')
+                    ->join('riders as r', 'pn.rider_id', 'r.id')
+                    ->join('users as u', 'pr.shipper_id', 'u.id')
+                    ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
+                    ->join('cities as c', 'usi.city_id', 'c.id')
+                    ->select('v2_rider_pickups.id',  'r.name as rider',  'r.id as rider_id', 'v2_rider_pickups.shipments as shipments', 'c.name as origin_hub', 'c.hub_id as hub_id')
+                    ->whereBetween('v2_rider_pickups.created_at', [$yesterday, $today]);
+
+                            if ($rider_pickups->exists()) {
+                                $rider_pickups = $rider_pickups->get();
+                                $hubss = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
+                                foreach ($hubss as $hub) {
+
+                                    $body_updated = $body;
+                                    $html = '<table style="width:100%;">';
+                                    $html .= '<thead><tr>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipments</th>
+                                                   <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Origin Hub</th>';
+                                    $html .= '</tr></thead><tbody>';
+            
+                                    $serial = 1;
+                                    
+                                    // $hubs = array();
+                                    $hub_id = null;
+                                    foreach($rider_pickups as $rider_pickup){
+                                        if($hub->id == $rider_pickup->hub_id){
+                        
+                                            $html .= '<tr>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial++ . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->rider_id . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->shipments . '</td>';
+                                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $rider_pickup->origin_hub . '</td>';
+                                            $html .= '</tr>';
+        
+                                            $hub_id = $rider_pickup->hub_id;
+                                        }
+                                        
+                                    }
+                                    $html .= '</tbody></table> <br>';
+                                    if (strpos($body_updated, '[preview]') !== FALSE) {
+                                        $body_updated = str_replace('[preview]', $html, $body_updated);
+                                    }
+                                    $to = array();
+                                    if($hub_id != null){
+                                        $admins = Admin::join('admin_hubs', 'admin_hubs.admin_id', '=', 'admins.id')
+                                        ->whereIn('admins.role_id', [8, 9])->where('admins.status', 1)
+                                        ->where('admin_hubs.hub_id', $hub_id);
+                                        // $admins = Admin::whereIn('admins.role_id', [8, 9])->where('admins.status', 1);
+                                        if ($admins->exists()) {
+                                            $to = array_merge($to, $admins->pluck('email')->toArray());
+                                        }
+        
+                                        self::email($subject, $body_updated, $to);
+                                    }
+                                    
+    
+                                }
+                                
+                               
+                                        
+                                
+                               
+                            }
+
+                    
+                }
             }
         }
     }
@@ -7729,8 +7847,7 @@ class NotificationsController extends Controller
 
     static public function trax_otp_verification($phone_number, $pin)
     {
-        $body = "Dear Consignee,
- Your OTP for Trax is: [pin]";
+        $body = 'Dear Consignee,'.PHP_EOL.'Your OTP for Trax is: [pin]';
         if (strpos($body, '[pin]') !== FALSE) {
             $body = str_replace('[pin]', $pin, $body);
         }
