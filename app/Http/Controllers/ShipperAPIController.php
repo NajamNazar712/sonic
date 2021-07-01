@@ -188,7 +188,7 @@ class ShipperAPIController extends Controller
             $subscription_list = $subscription_list->get();
             return response()->json(['status' => 0, 'information' => $subscription_list]);
         }
-        return response()->json(['status' => 1, 'message' => "No data found"]);
+        return response()->json(['status' => 1, 'message' => "No Subscription Shipment Found"]);
     }
 
     public function shipper_subscription_delete(Request $request)
