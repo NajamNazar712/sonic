@@ -42,7 +42,7 @@
 
                                     @endphp
                                     <div class="col-md-6">
-                                        <a href="javascript:void(0);" class="pull-right" id="z{{$zone->id}}_main_switch"><input name="z{{$zone->id}}_main_switch" type="checkbox" value="{{$zone->id}}" {{$checked}} @if($view != null) disabled @endif  class="switchery z{{$zone->id}}-main-switch" data-size="sm" /></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="z{{$zone->id}}_main_switch"><input name="z{{$zone->id}}_main_switch" type="checkbox" value="{{$zone->id}}" {{$checked}} @if($view != null) disabled @endif  class="switchery z{{$zone->id}}-main-switch zone_main_switch" data-size="sm" /></a>
                                     </div>
                                 </div>
                             </div>
@@ -387,6 +387,29 @@
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
+                submitHandler: function(form) {
+                    if($(".zone_main_switch:checked").length < 1)
+                    {
+                        swal({
+                            title: 'No Rates Selected!',
+                            text: 'At least rates for one zone is required..',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        return ;
+                    }
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Rates are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
             });
 
             @if($rate_status != null && $rate_status->status == 1 && (session('role_id') == 1 || in_array(529, session('permissions'))))
