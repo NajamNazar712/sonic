@@ -76,7 +76,8 @@
                         <div class="row justify-content-center">
 
                             <div class="form-group">
-                                <textarea id="reason" cols="100" name="reason" rows="5" placeholder="Reason*" data-rule-required="true" data-msg-required="Reason is required"></textarea>
+                          
+                                <textarea type="text" rows="5" class="form-control" cols="90" id="reason" name="reason" placeholder="Enter Reason" data-rule-required="true" data-msg-required="Reason is required"></textarea>
                             </div>
 
                         </div>
@@ -223,12 +224,14 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.erf_id);
-                                row.push(values.department);
-                                row.push(values.designation);
-                                row.push(values.hub);
-                                row.push(values.city);
-                                row.push(values.admin);
+                                row.push(values.rider);
+                                row.push(values.delivery_note);
+                                row.push(values.amount);
+                                row.push(values.reason);
+                                row.push(values.requested_at);
+                                row.push(values.requested_by);
+                                row.push(values.approved_at);
+                                row.push(values.approved_by);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -276,7 +279,7 @@
                     url: '{{ route('admin.delivery.note.request_list') }}',
                 },
                 rowId: 'shId',
-                order: [[1, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {
                         orderable: false,
