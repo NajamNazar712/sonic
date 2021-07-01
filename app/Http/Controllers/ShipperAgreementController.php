@@ -386,7 +386,11 @@ otherwise it will be rejected</li>
 
             $international_rates = FALSE;
             $rate_status = FALSE;
-            if(InternationalUserRate::where('user_id', $id)->exists()){
+            if(InternationalEconomyRateStatus::where([['user_id', $id],['status',2]])->exists())
+            {
+                $international_rates = TRUE;
+            }
+            else if(InternationalUserRate::where('user_id', $id)->exists()){
                 $international_rates = TRUE;
             }
 
@@ -749,6 +753,17 @@ otherwise it will be rejected</li>
 
                     $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
                     <tr><td><strong>International Rate(s)</strong></td></tr></thead></table>';
+                    $zone_rates = InternationalEconomyRate::where('user_id', $id)->get()->groupBy('zone_id');
+                    foreach ($zone_rates as $zone_id => $rates)
+                    {
+                        $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
+                    <tr><td><strong>Weight Charges ('.Zone::find($zone_id)->name.')</strong></td></tr></thead></table>';
+                        foreach ($rates as $rate)
+                        {
+
+                        }
+                    }
+
                 }
                 else if($international_rate_status){
 
