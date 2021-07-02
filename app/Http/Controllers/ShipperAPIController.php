@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Validator;
@@ -82,9 +84,17 @@ class ShipperAPIController extends Controller
             $shipper = User::where('email', $request->email_address);
             if ($shipper->exists()) {
                 $shipper = $shipper->first();
+                if ($shipper->blacklist) {
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Blacklisted, Contact Admin']);
+                } else if ($shipper->status != 3) {
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Not Activated Yet, Contact Admin']);
+                } else if ($shipper->phone_number_verified == 0) {
+                    return response()->json(['status' => 1, 'message' => 'Your Account phone number is not verified, Contact Admin']);
+                }
                 if (Hash::check($request->input('password'), $shipper->password)) {
                     $information = array();
                     $information['name'] = $shipper->name;
+                    $information['shipper_id'] = $shipper->id;
                     $information['phone_number'] = $shipper->phone;
                     if ($shipper->api_token) {
                         $information['api_token'] = $shipper->api_token;
@@ -133,14 +143,19 @@ class ShipperAPIController extends Controller
                     $shipment_info['amount'] = $shipment->amount;
                     $shipment_info['order_id'] = $shipment->order_id;
                     $shipment_info['pickup_address'] = $shipment->pickup_address->pickup_address;
-                    $shipment_info['weight'] = $shipment->actual_weight;
+                    $shipment_info['weight'] = ($shipment->actual_weight) ? $shipment->actual_weight : $shipment->estimated_weight;
 
-                    $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id',$request->shipper_id);
-                    if($shipper_subscription->count() < 5){
-                        $shipper_subscription_obj = new ShipperShipmentsSubscription();
-                        $shipper_subscription_obj->shipper_id = $request->shipper_id;
-                        $shipper_subscription_obj->shipment_id = $shipment->id;
-                        $shipper_subscription_obj->save();
+                    if ($shipment->shipper_status_id != 14) {
+                        $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
+                        if ($shipper_subscription->count() < 5) {
+                            $shipment_exists = $shipper_subscription->where('shipment_id', $shipment->id);
+                            if (!$shipment_exists->exists()) {
+                                $shipper_subscription_obj = new ShipperShipmentsSubscription();
+                                $shipper_subscription_obj->shipper_id = $request->shipper_id;
+                                $shipper_subscription_obj->shipment_id = $shipment->id;
+                                $shipper_subscription_obj->save();
+                            }
+                        }
                     }
                     $consignee_shipments_journey = ShipmentsJourney::join('shipment_status as ss', 'shipments_journey.shipper_status_id', '=', 'ss.id')
                         ->where('shipments_journey.shipment_id', $shipment->id)
@@ -155,7 +170,7 @@ class ShipperAPIController extends Controller
                     }
 
                 } else {
-                    return response()->json(['status' => 1, 'message' => "Shipment doesn't belongs to you"]);
+                    return response()->json(['status' => 1, 'message' => "Following Tracking Number don't belong to you : ".$request->tracking_no]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Shipment not found"]);
@@ -174,7 +189,7 @@ class ShipperAPIController extends Controller
             $subscription_list = $subscription_list->get();
             return response()->json(['status' => 0, 'information' => $subscription_list]);
         }
-        return response()->json(['status' => 1, 'message' => "No data found"]);
+        return response()->json(['status' => 1, 'message' => "No Subscription Shipment Found"]);
     }
 
     public function shipper_subscription_delete(Request $request)
@@ -193,7 +208,24 @@ class ShipperAPIController extends Controller
             $shipper_id = $request->shipper_id;
             ShipperShipmentsSubscription::where('shipper_id', $shipper_id)
                 ->where('shipment_id',$request->shipment_id)->delete();
-            return response()->json(['status' => 0, 'message' => 'Subscription Remove Successfully']);
+            return response()->json(['status' => 0, 'msg' => 'Subscription Remove Successfully']);
         }
+    }
+
+    public function notification_history(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $from_date = Carbon::now()->subDays(30)->format('Y-m-d 00:00:00');
+        $to_date = Carbon::now()->format('Y-m-d 23:59:59');
+
+        $notifiction_history = EmployeeNotificationHistory::where('employee_id', $shipper_id)
+            ->where('employee_type_id', 3)
+            ->whereBetween('created_at', [$from_date, $to_date])
+            ->orderBy('created_at', 'desc');
+        if ($notifiction_history->exists()) {
+            $notifiction_history = $notifiction_history->get();
+            return response()->json(['status' => 0, 'data' => $notifiction_history]);
+        }
+        return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
     }
 }

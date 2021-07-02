@@ -18,6 +18,8 @@ Route::name('api.')->group(function () {
 	Route::post('user_login', 'APIController@bolt_login')->name('user_login');
 	Route::post('forget_pin', 'APIController@bolt_forget_pin')->name('forget_pin');
 	Route::post('reset_pin', 'APIController@bolt_reset_pin')->name('reset_pin');
+	Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
+	Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');
@@ -253,6 +255,7 @@ Route::name('api.')->group(function () {
                 Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
             });
             Route::post('update_address', 'ConsigneeAPIController@address_change_request')->name('update_address');
+            Route::get('notification_history', 'ConsigneeAPIController@notification_history')->name('notification_history');
         });
 
     });
@@ -266,6 +269,7 @@ Route::name('api.')->group(function () {
                 Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });
+            Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
         });
 
     });

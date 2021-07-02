@@ -182,7 +182,7 @@ class UserManagementController extends Controller
     }
 
     public function user_add_index() {
-        if (session('role_id') != 1) {
+        if (!in_array(session('role_id'), [1, 58])) {
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
@@ -276,7 +276,7 @@ class UserManagementController extends Controller
     }
 
     public function user_update_index($id) {
-        if (session('role_id') != 1) {
+        if (!in_array(session('role_id'), [1, 58])) {
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{

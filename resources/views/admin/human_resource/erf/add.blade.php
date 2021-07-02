@@ -557,11 +557,11 @@
         });
 
 
-        $('#erf_form').on('keypress',function (e) {
+       /* $('#erf_form').on('keypress',function (e) {
             if(e.keyCode == 13) {
                 e.preventDefault();
             }
-        });
+        });*/
 
     </script>
 @endsection
