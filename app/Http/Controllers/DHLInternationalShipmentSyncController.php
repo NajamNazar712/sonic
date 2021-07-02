@@ -130,7 +130,7 @@ class DHLInternationalShipmentSyncController extends Controller
 //                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
                                         }
-                                        else if(in_array($shipper_status_id, [9])){
+                                        else if(in_array($shipper_status_id, [8, 9])){
                                             (new self)->shipment_delivered($shipment->id);
                                         }
                                         $intl_shipment->sync = 0;
@@ -147,7 +147,6 @@ class DHLInternationalShipmentSyncController extends Controller
                                             else if($index == 2){
                                                 $shipment_status = 8;
                                                 $shipment_reason = 8;
-
                                             }
                                             else{
                                                 $shipment_status = 8;
@@ -186,7 +185,7 @@ class DHLInternationalShipmentSyncController extends Controller
 //                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_returned($shipment->id);
                                         }
-                                        else if(in_array($shipper_status_id, [9])){
+                                        else if(in_array($shipper_status_id, [8, 9])){
                                             (new self)->shipment_returned($shipment->id);
                                         }
                                         $intl_shipment->sync = 0;

@@ -543,11 +543,11 @@ class ShipperReportsController extends Controller
     public function delivery_and_return_index() {
         $link = '';
 
-        if (session('user_id') == 405) {
-            $link = 'https://app.powerbi.com/view?r=eyJrIjoiZGZiMDgyMTktZjBmZC00NzcwLTkyMzEtYmI3ZGNjYWYxYmQxIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+        if (session('user_id') == 7762) {
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiY2U4ZmNhNzUtYjlhNy00NDQ0LWE0OGUtYzJhYTBhNjEzZjNjIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
         else if (in_array(session('user_id'), [167, 1159, 2035])) {
-            $link = 'https://app.powerbi.com/view?r=eyJrIjoiNmFkZTFhYjUtMWUyNi00OWQwLWI3ZTktMTcxMzQzNGJiOWQ5IiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
+            $link = 'https://app.powerbi.com/view?r=eyJrIjoiMDZhOTcxMDctMzhiOS00NzcxLWE1M2EtYzQwOTFlMGI2MDJjIiwidCI6IjkwYzY4NjAzLTEzNTgtNGViYi04OWEwLTRmMmFlMzlmMzJjMiIsImMiOjl9';
         }
 
         return view('client.reports.delivery_and_return_report')->with(['link' => $link]);

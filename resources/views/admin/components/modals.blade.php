@@ -419,7 +419,7 @@
 <!--Shipment Charges Modal -->
 <!--Password Change Modal -->
 @if(Session::has('first_login') && session('first_login') != 1)
-    <div class="modal fade text-left" id="FirstLoginPasswordChangeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FirstLoginPasswordChangeModal"
+    <div class="modal fade text-left" id="FirstLoginPasswordChangeModal" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="FirstLoginPasswordChangeModal"
          aria-hidden="true">
         <div class="modal-dialog modal-m" role="document">
             <div class="modal-content">
@@ -437,11 +437,22 @@
                         <div class="form-body">
                             <p>You have to change your password to make your sonic account more secure.</p>
                             <div class="form-group col">
+                                <label for="password">Current Password:<span class="danger">*</span>
+                                </label>
+                                <div class="form-group position-relative">
+                                    <input type="password" class="form-control required" id="current_password" placeholder="Minimum 6 Character" value="" name="current_password" data-rule-minlength="6" data-msg-minlength="Current Password needs to be at-least 6 Characters">
+                                    <div class="form-control-position" id="first_peye">
+                                        <i class="la la-eye success"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col">
                                 <label for="password">Enter Password:<span class="danger">*</span>
                                 </label>
                                 <div class="form-group position-relative">
                                     <input type="password" class="form-control required" id="new_password" placeholder="Minimum 6 Character" value="" name="password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 Characters">
-                                    <div class="form-control-position" id="peye">
+                                    <div class="form-control-position" id="first_npeye">
                                         <i class="la la-eye success"></i>
                                     </div>
                                 </div>
@@ -451,7 +462,7 @@
                                 </label>
                                 <div class="form-group position-relative">
                                     <input type="password" class="form-control required" id="confirm_password" placeholder="Minimum 6 Character" value="" name="confirm_password">
-                                    <div class="form-control-position" id="cpeye">
+                                    <div class="form-control-position" id="first_cpeye">
                                         <i class="la la-eye success"></i>
                                     </div>
                                 </div>
