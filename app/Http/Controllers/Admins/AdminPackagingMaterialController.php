@@ -657,6 +657,19 @@ class AdminPackagingMaterialController extends Controller
                 if(count($invalid_product_ids) > 0){
                     return response()->json(['status' => 0, 'error'=> $invalid_products. ' does\'nt exists in requested hub!']);
                 }
+                $flag = true;
+                foreach ($request_details->items as $item){
+                    $product_barcodes = WmsProductBarcode::join('wms_store_requests as wsr', 'wsr.id', '=', 'wms_product_barcodes.store_request_id')->where('wms_product_barcodes.product_id', $item->wms_product_id)->where('wsr.warehouse_pickup_address_id', $trax_address->id)->whereNull('wms_product_barcodes.shipment_id')->where('wms_product_barcodes.status', 3)->count();
+                    if($product_barcodes < $item->quantity){
+                        $wms_current_stock = WmsCurrentStock::where('product_id', $item->wms_product_id)->where('warehouse_pickup_address_id', $trax_address->id)->first();
+                        $wms_current_stock->stock = $product_barcodes;
+                        $wms_current_stock->save();
+                        $flag = false;
+                    }
+                }
+                if($flag == false){
+                    return response()->json(['status' => 0, 'error' => 'Selected Product(s) quantity exceed!']);
+                }
 
                 $shipper_details = User::where('id', $user_id)->select('name', 'poc', 'phone', 'email')->first();
                 $shipment_consignee_name = "Packaging Material to $shipper_details->name";

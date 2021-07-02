@@ -171,7 +171,7 @@
                 <form id="email_form" class="form-horizontal" method="POST" novalidate="novalidate">
                     <div class="modal-body mx-3">
                         <div class="form-group">
-                            <input type="email" class="form-control" id="email" name="email" data-rule-pattern="/^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/" data-msg-pattern="Invalid email"   data-rule-required="true" data-msg-required="Email is required" placeholder="Enter Email">
+                            <input type="text" class="form-control" id="email" name="email" data-rule-required="true" data-msg-required="Email is required" placeholder="Enter Email">
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-center">
@@ -190,6 +190,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 @endsection
 
 @section('js')
@@ -200,6 +201,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script>
@@ -440,7 +442,35 @@
 
             });
 
+            var select = $('#email').selectize({
+                placeholder: 'Email(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+               /* onType: function (str) {
+                    var regex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
 
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },*/
+                create: function (input) {
+                    var regex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+
+                    if (!regex.test(input)) {
+                       return false;
+                    }
+                        return {
+                            value: input,
+                            text: input
+                        }
+
+                }
+            });
 
 
 
@@ -511,18 +541,27 @@
             submitHandler: function(form) {
                 $('#EmailModal').modal('show');
                 if($('#email').val() !== '' && $('#email').val() !== null ){
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your request is being processed!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
                     form.submit();
+
                 }
                 
             }
         });
 
 
-        $('#erf_form').on('keypress',function (e) {
+       /* $('#erf_form').on('keypress',function (e) {
             if(e.keyCode == 13) {
                 e.preventDefault();
             }
-        });
+        });*/
 
     </script>
 @endsection
