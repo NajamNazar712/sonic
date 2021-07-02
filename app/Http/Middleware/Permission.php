@@ -890,9 +890,6 @@ class Permission
 
             'international.shipment_status.index' => 508,
 
-            'international.rates.economy.store' => 528,
-            'international.rates.economy.approve' => 529,
-
             'telenor.arrival.index' => 421,
             'telenor.arrival.submit' => 421,
             'telenor.delivery.index' => 399,

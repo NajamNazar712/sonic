@@ -165,11 +165,13 @@
                             <div class="text-center mt-2">
                                 <div class="form-group">
                                     @if($rate_status != null && $rate_status->status == 1 && (session('role_id') == 1 || in_array(529, session('permissions'))))
-                                        <button type="button" class="btn btn-outline-success round btn-min-width mr-1 mb-1 " id="approve_btn">Approve</button>
+                                        <input type="hidden" id="approve_input" name="Approve" value="0">
+                                        <button type="submit" id="approveRatesSubmit" class="btn btn-outline-success round btn-min-width mr-1 mb-1 ">Approve</button>
                                     @endif
 
-                                    <button id="addRatesSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Submit</button>
-                                        @if($rate_status != null && $rate_status->status == 1 && (session('role_id') == 1 || in_array(529, session('permissions'))))
+                                    <input type="hidden" id="add_input" name="Add" value="0">
+                                    <button id="addRatesSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1" >Submit</button>
+                                    @if($rate_status != null && $rate_status->status == 1 && (session('role_id') == 1 || in_array(529, session('permissions'))))
                                         <button type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1 " id="reject_btn">Reject</button>
                                     @endif
                                 </div>
@@ -197,7 +199,6 @@
                 </div>
                 <form action="{{route('admin.international.rates.economy.approve',$shipper->id)}}" method="post" id="approve_reject_form" novalidate="novalidate">
                     @csrf
-                    <input type="hidden" id="status" name="status" value="">
                 <div class="modal-body">
                     <textarea id="reject_reason" name="reject_reason" data-rule-required="true" data-msg-required="Rejection Reason is required" class="form-control"></textarea>
                 </div>
@@ -382,6 +383,12 @@
                 count++;
             });
             @endif
+
+            $("#addRatesSubmit").on('click',function (){
+                $("#approve_input").val(0);
+                $("#add_input").val(1);
+            });
+
             $( "#ratesAdditionForm" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
@@ -399,23 +406,8 @@
                         });
                         return ;
                     }
-
                     swal({
-                        title: 'Please Wait!',
-                        text: 'Rates are being updated!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    form.submit();
-                }
-            });
-
-            @if($rate_status != null && $rate_status->status == 1 && (session('role_id') == 1 || in_array(529, session('permissions'))))
-                $("#approve_btn").on('click',function (){
-                    swal({
-                        text: 'Are you sure, you want to approve these rates?',
+                        text: 'Are you sure, you want to update these rates?',
                         icon: 'info',
                         buttons: {
                             cancel: {
@@ -436,14 +428,28 @@
                         dangerMode: true
                     }).then(function(confirm) {
                         if (confirm) {
-                            $("#approve_reject_form #status").val("Approve");
-                            $("#approve_reject_form").submit();
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Rates are being updated!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
                         }
                     });
+
+                }
+            });
+
+            @if($rate_status != null && $rate_status->status == 1 && (session('role_id') == 1 || in_array(529, session('permissions'))))
+                $("#approveRatesSubmit").on('click',function (){
+                    $("#approve_input").val(1);
+                    $("#add_input").val(0);
                 });
 
                 $("#reject_btn").on('click',function (){
-                    $("#approve_reject_form #status").val("Reject");
                     $("#RejectRatesModal").modal('show');
                 });
 

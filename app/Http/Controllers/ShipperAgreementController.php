@@ -748,7 +748,7 @@ otherwise it will be rejected</li>
             if($international_rates){
                 $international_rate_boxes = '';
                 $international_rate_status = InternationalUserRate::where('user_id', $id)->first();
-                $international_economic_rate_status = InternationalEconomyRateStatus::where([['user_id', $id],['status',2]])->first();
+                $international_economic_rate_status = (InternationalEconomyRate::where('user_id', $id)->count() > 0);
                 if($international_economic_rate_status)
                 {
                     $intl_box = '';

@@ -727,22 +727,19 @@ class ShipmentChargesController extends Controller
         else{
             $dhl_check = true;
 
-            $international_economy_rate_status = InternationalEconomyRateStatus::where('user_id',$shipment->user_id)->where('status',2);
-            if($international_economy_rate_status->exists())
-            {
-                $zone_id = $shipment->consignee_city->zone_id;
-                $international_economy_rate = InternationalEconomyRate::where('user_id',$shipment->user_id)
-                    ->where('zone_id',$zone_id)
-                    ->where('range_up', '<=', $shipment->actual_weight)
-                    ->where('range_down', '>=', $shipment->actual_weight);
+            $zone_id = $shipment->consignee_city->zone_id;
+            $international_economy_rate = InternationalEconomyRate::where('user_id',$shipment->user_id)
+                ->where('zone_id',$zone_id)
+                ->where('range_up', '<=', $shipment->actual_weight)
+                ->where('range_down', '>=', $shipment->actual_weight);
 
-                if($international_economy_rate->exists())
-                {
-                    $international_economy_rate = $international_economy_rate->first();
-                    $result = self::calculate_international_economic_weight($shipment->actual_weight,$international_economy_rate);
-                    $dhl_check = false;
-                }
+            if($international_economy_rate->exists())
+            {
+                $international_economy_rate = $international_economy_rate->first();
+                $result = self::calculate_international_economic_weight($shipment->actual_weight,$international_economy_rate);
+                $dhl_check = false;
             }
+
 
             if($dhl_check) {
                 $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
