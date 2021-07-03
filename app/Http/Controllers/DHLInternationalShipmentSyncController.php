@@ -233,7 +233,7 @@ class DHLInternationalShipmentSyncController extends Controller
         ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 14, 14, NULL, NULL, NULL, $this->admin_id);
 
-        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->where('sync', 0);
+        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->where('sync', 1);
         if($international_shipment->exists()){
             $international_shipment = $international_shipment->first();
             $international_shipment->sync = 0;
@@ -258,7 +258,7 @@ class DHLInternationalShipmentSyncController extends Controller
         ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, $this->admin_id);
 
-        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->where('sync', 0);
+        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->where('sync', 1);
         if($international_shipment->exists()){
             $international_shipment = $international_shipment->first();
             $international_shipment->sync = 0;
