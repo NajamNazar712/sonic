@@ -528,7 +528,7 @@ class DeliveryController extends Controller
                                 else{
                                     $crm_request['phone_one_change'] = null;
                                 }
-                                if($shipment->payment_mode_id == 5){
+                                if($shipment->payment_mode_id == 2){
                                     $ccd_shipment = 1;
                                 }
                                 else{
@@ -616,7 +616,7 @@ class DeliveryController extends Controller
                             else{
                                 $crm_request['phone_one_change'] = null;
                             }
-                            if($shipment->payment_mode_id == 5){
+                            if($shipment->payment_mode_id == 2){
                                 $ccd_shipment = 1;
                             }
                             else{
@@ -1069,7 +1069,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                if($deliveries->payment_mode_id != 5){
+                if($deliveries->payment_mode_id != 2){
                     return "<a href='javascript:void(0);' class='deliverynoterow'><button type='button' class='btn btn-sm btn-danger'>Remove</button></a>";
                 }
             })
@@ -1292,7 +1292,7 @@ class DeliveryController extends Controller
                     $user_details = $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '');
                 }
                 $ccd_icon = '';
-                if($shipment->payment_mode_id == 5){
+                if($shipment->payment_mode_id == 2){
                     $tracking_number = '<b>' . $shipment->tracking_number . ' </b><br/><span><i class="la la-credit-card"></i>(Credit Card on Delivery-CCD)</span>';
                 }
                 else{
@@ -6350,7 +6350,7 @@ class DeliveryController extends Controller
                     $ccd_flag = false;
                     foreach($delivery_note->delivery_note_shipments as $delivery_note_shipment){
                         $shipment = $delivery_note_shipment->shipment;
-                        if($shipment->payment_mode_id == 5){
+                        if($shipment->payment_mode_id == 2){
                             $ccd_flag = true;
                         }
                     }
@@ -6480,7 +6480,7 @@ class DeliveryController extends Controller
             $delivery_note = DeliveryNote::find($delivery_note_id);
                 if($delivery_note){
                     $rider = $delivery_note->rider;
-                    if($shipment->payment_mode_id == 5 && $rider->ccd == 0){
+                    if($shipment->payment_mode_id == 2 && $rider->ccd == 0){
                         return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
                     }
                     $total_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->count();

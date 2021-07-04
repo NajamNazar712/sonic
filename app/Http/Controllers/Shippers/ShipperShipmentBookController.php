@@ -328,7 +328,7 @@ class ShipperShipmentBookController extends Controller
         }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
@@ -1887,7 +1887,7 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
@@ -2065,7 +2065,7 @@ class ShipperShipmentBookController extends Controller
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [2, 3]);
+                $query->whereNotIn('id', [3]);
             })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
@@ -2510,7 +2510,7 @@ class ShipperShipmentBookController extends Controller
                         $shipping_mode_same_day_timings = NULL;
                     }
 
-                    $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
+                    $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                     $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
                     $city_name = array();
                     foreach ($cities as $city) {
@@ -2633,7 +2633,7 @@ class ShipperShipmentBookController extends Controller
         }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [3])->get();
@@ -3466,7 +3466,7 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
 
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
@@ -3705,7 +3705,7 @@ class ShipperShipmentBookController extends Controller
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [2, 3]);
+                $query->whereNotIn('id', [3]);
             })],
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
@@ -4205,7 +4205,7 @@ class ShipperShipmentBookController extends Controller
                     $shipping_mode_same_day_timings = NULL;
                 }
 
-                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode','id');
+                $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode','id');
                 $city_name = array();
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
@@ -4522,7 +4522,7 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3, 5])->get();
+        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
@@ -4685,7 +4685,7 @@ class ShipperShipmentBookController extends Controller
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [2, 3]);
+                $query->whereNotIn('id', [3]);
             })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
@@ -5094,7 +5094,7 @@ class ShipperShipmentBookController extends Controller
                     $shipping_mode_same_day_timings = NULL;
                 }
 
-                $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode', 'id');
+                $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                 $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
                 $city_name = array();
                 foreach ($cities as $city) {

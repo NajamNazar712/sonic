@@ -399,7 +399,7 @@ class APIController extends Controller
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [2, 3]);
+                    $query->whereNotIn('id', [3]);
                 })],
                 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                     $query->whereIn('id', [4]);
@@ -458,7 +458,7 @@ class APIController extends Controller
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                    $query->whereNotIn('id', [2, 3]);
+                    $query->whereNotIn('id', [3]);
                 })],
                 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                     $query->whereIn('id', [3]);
