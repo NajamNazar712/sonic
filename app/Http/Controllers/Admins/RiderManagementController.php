@@ -139,13 +139,13 @@ class RiderManagementController extends Controller
             ->make(true);
     }
 
-    public function addRiderView(){
+    public function addRiderView($type){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $route_types = RouteType::all();
         $operation_riders = OperationRidersCategory::all();
         
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders]);
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -232,14 +232,14 @@ class RiderManagementController extends Controller
 
         return response()->json(['route' => $route]);
     }
-    public function editRiderView($id){
+    public function editRiderView($id, $type){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
         $operation_rider_ids =  OperationRidersCategory::all();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids]);
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -548,14 +548,16 @@ class RiderManagementController extends Controller
         return view('admin.management.riders.blacklisted')->with(['categories'=>$category]);
     }
     public function blacklist_list(Request $request){
+
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
+            ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('cities.name as city','c.name as hub','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
             ->where('riders.blacklist', 1);
 
         if (session('role_id') != 1) {

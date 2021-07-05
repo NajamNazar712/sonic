@@ -50,9 +50,9 @@ class OrderManagementController extends Controller
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
         $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $business_categories = BusinessCategory::all();
         return view('admin.order_management.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories]);
@@ -469,9 +469,9 @@ class OrderManagementController extends Controller
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
         $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         return view('admin.self_collection.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }

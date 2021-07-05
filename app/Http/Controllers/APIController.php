@@ -399,7 +399,7 @@ class APIController extends Controller
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                    $query->whereNotIn('id', [2, 3]);
+                    $query->whereNotIn('id', [3]);
                 })],
                 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                     $query->whereIn('id', [4]);
@@ -458,7 +458,7 @@ class APIController extends Controller
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
                 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                    $query->whereNotIn('id', [2, 3]);
+                    $query->whereNotIn('id', [3]);
                 })],
                 'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                     $query->whereIn('id', [3]);
@@ -657,8 +657,10 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
                 }
 
-                if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
-                    return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                if (!in_array($user_id, [7762, 4758])) {
+                  if (!CityDelivery::where('city_id', $delivery_city->id)->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+                      return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $delivery_city->id . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
+                  }
                 }
             }
 
@@ -1022,7 +1024,7 @@ class APIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
             }
             if($msg_string == null && $blacklist_message != null){
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_user' => $blacklist_message]);
+                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_consignee' => $blacklist_message]);
             }
             if ($msg_string != null && $blacklist_message != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
@@ -2005,17 +2007,15 @@ class APIController extends Controller
             }
 
             foreach ($shipment->shipment_journey as $journey) {
-                if ($journey->consignee_status_id != NULL) {
-                    if ($journey->verification) {
-                        $journey_details = array();
+                if ($journey->verification) {
+                    $journey_details = array();
 
-                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                        $journey_details['status'] = $journey->shipment_status_consignee->name;
+                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                    $journey_details['status'] = $journey->shipment_status_consignee->name;
 
-                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
-                        $details['tracking_history'][] = $journey_details;
-                    }
+                    $details['tracking_history'][] = $journey_details;
                 }
             }
 
@@ -2420,7 +2420,7 @@ class APIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'non_service_area' => $msg_string . ' In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.']);
             }
             if($msg_string == null && $blacklist_message != null){
-                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_user' => $blacklist_message]);
+                return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number, 'blacklisted_consignee' => $blacklist_message]);
             }
             if ($msg_string != null && $blacklist_message != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
@@ -3377,6 +3377,58 @@ class APIController extends Controller
             } else {
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
             }
+        }
+    }
+
+    public function store_device_token(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer'],
+            'type_id' => ['required', 'integer'],
+            'device_token' => ['required']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
+
+            if ($employee_device_token->exists()) {
+                $employee_device_token = $employee_device_token->first();
+            } else {
+                $employee_device_token = new EmployeeDeviceToken();
+                $employee_device_token->employee_id = $request->employee_id;
+                $employee_device_token->employee_type_id = $request->type_id;
+            }
+            $employee_device_token->device_token = $request->device_token;
+            $employee_device_token->save();
+            return response()->json(['status' => 0, 'message' => 'Device Token Store']);
+        }
+    }
+
+    public function delete_device_token(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required', 'integer'],
+            'type_id' => ['required', 'integer'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee_device_token = EmployeeDeviceToken::where('employee_id', $request->employee_id)->where('employee_type_id', $request->type_id);
+            if ($employee_device_token->exists()) {
+                $employee_device_token->delete();
+            }
+            return response()->json(['status' => 0, 'message' => 'Device Token Deleted']);
         }
     }
 }

@@ -6053,7 +6053,8 @@ class AdminReportsController extends Controller
                 }
             });
         if($tracking = $request->get('search_tracking_no')){
-            $datatable->where('s.tracking_number', '=', $tracking);
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('s.tracking_number', $tracking_numbers);
         }
         if($rnumber = $request->get('search_request_number')){
             $rnumber = explode(',',$rnumber);
@@ -6738,7 +6739,10 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks')
+            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
+            ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
+            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department')
             ->where('delivery_note_shipments.fake_status', 1);
 
 
@@ -8246,7 +8250,7 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.cnic_image as cnic_image', 'rider_deliveries.house_image as house_image', 'rider_deliveries.delivered_status','rider_deliveries.audio_path')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status','ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by','rider_deliveries.picture_path', 'rider_deliveries.cnic_image as cnic_image', 'rider_deliveries.ccd_image as ccd_image', 'rider_deliveries.house_image as house_image', 'rider_deliveries.delivered_status','rider_deliveries.audio_path')
             ->where('delivery_note_shipments.update_type', 1)
             ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
 
@@ -8308,6 +8312,23 @@ class AdminReportsController extends Controller
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->house_image)) . '"><i class="la la-image"></i> View</button></div>';
                     } else {
                         $img = Storage::disk('s3')->temporaryUrl($shipments->house_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return '-';
+                }
+
+            })
+            ->addColumn('ccd_image', function ($shipments) {
+                $image = '';
+                if ($shipments->ccd_image != null) {
+                    $exists = Storage::disk('public')->exists($shipments->ccd_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->ccd_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 
@@ -8811,6 +8832,77 @@ class AdminReportsController extends Controller
         if($zone = $request->get('search_zone')){
             $datatable->where('z.id', '=', $zone);
         }
+        return $datatable->make(true);
+    }
+
+    
+    public function work_code_master_index()
+    {
+        $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
+        $riders = DB::connection('reports')->table('riders')->where('status',1)->select('id','name')->get();
+        $admins = DB::connection('reports')->table('admins')->where('status',1)->select('id','name')->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->where('status',1)->select('id','name')->get();
+        
+        return view('admin.reports.work_code_master')->with(['shippers'=>$shippers, 'statuses' => $statuses, 'riders' => $riders, 'admins' => $admins]);
+
+    }
+
+    public function work_code_master_list(Request $request){
+        
+        $shipments = DB::connection('reports')->table('shipments_journey')->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
+            ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
+            ->join('users as su', 'sh.user_id', '=', 'su.id')
+            ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
+            ->leftjoin('users as u', 'shipments_journey.user_id', '=', 'u.id')
+            ->leftjoin('riders as r', 'shipments_journey.rider_id', '=', 'r.id')
+            ->select(['sh.tracking_number','sh.tracking_number as tracking_number_link','r.id','r.name as rider_status_marked_by','u.name as shipper_status_marked_by','su.name as shipper','sh.user_id','ss.name as status_marked','shipments_journey.created_at as status_marking_date','ad.name as status_marked_by','ad.id as admin_id','shipments_journey.id as shId', 'ss.id as status_id', 'shipments_journey.user_id', 'shipments_journey.user_id as ssjj_user_id', 'shipments_journey.admin_id', 'shipments_journey.rider_id']);
+            
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            
+            
+            ->editColumn('status_marked_by', function ($shipments) {
+                if($shipments->admin_id == null){
+                    if($shipments->ssjj_user_id == null){
+                        return $shipments->rider_status_marked_by;
+                    }else{
+                        return $shipments->shipper_status_marked_by;
+                    }
+                }else{
+                    return $shipments->status_marked_by;
+                }
+            })->filterColumn('ss.id', function($query, $keyword) {
+                    $query->where('ss.id','=',$keyword);
+                  
+            });
+            
+       
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatable->whereBetween('shipments_journey.created_at', [$from,$to]);
+        }
+        if ($shipper_id = $request->get('search_shipper')) {
+            $datatable->where('sh.user_id', $shipper_id);
+        }
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatable->whereIn('sh.tracking_number', explode(',', $tracking_number));
+        }
+        if ($status_marked = $request->get('status_marked')) {
+            $datatable->where('ss.id', $status_marked);
+        }
+        if ($rider_id = $request->get('search_rider')) {
+            $datatable->where('shipments_journey.rider_id', $rider_id);
+        }
+        if ($admins_id = $request->get('search_admin')) {
+            $datatable->where('shipments_journey.admin_id', $admins_id);
+        }
+        
+        
+        
 
         return $datatable->make(true);
     }

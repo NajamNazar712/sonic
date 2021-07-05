@@ -29,6 +29,8 @@ use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Shipment;
 
 use App\Http\Models\RateStatus;
@@ -577,7 +579,7 @@ class ShipmentChargesController extends Controller
                 $exchange_rate = GlobalSettings::where('type', 'international_exchange_rate');
                 if($exchange_rate->exists()){
                     $exchange_rate = $exchange_rate->first();
-                    $exchange_rate_charges = (float)$exchange_rate->text;;
+                    $exchange_rate_charges = (float)$exchange_rate->text;
                 }
 
 
@@ -649,67 +651,151 @@ class ShipmentChargesController extends Controller
 
         }
     }
+
+    static public function calculate_international_economic_weight($weight,$economic_rate)
+    {
+        if ($economic_rate->weight_addition == 0) {
+            $charges = $economic_rate->flat_charges;
+
+            $result = array();
+
+            $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+
+
+
+            if ($weight > 1) {
+                $result['chargeable_weight'] = (CEIL($weight * 2) / 2);
+            }
+            else {
+                $result['chargeable_weight'] = $weight;
+            }
+
+            return $result;
+        }
+        else {
+            $multiplier = (intval($weight - $economic_rate->range_up) / $economic_rate->kg_range) + 1;
+            $charges = ($economic_rate->flat_charges * $multiplier);
+
+            $result = array();
+
+            $result['chargeable_weight'] = (CEIL(($economic_rate->kg_range * (intval($weight / $economic_rate->kg_range) + 1)) * 2) / 2);
+
+            $previous = TRUE;
+
+            $rate_id = $economic_rate->id;
+            while ($previous) {
+                $weight_charge = InternationalEconomyRate::where('id', '<', $rate_id)
+                    ->where('zone_id',$economic_rate->zone_id)
+                    ->where('user_id',$economic_rate->user_id)
+                    ->orderBy('id', 'desc');
+
+
+                if ($weight_charge->exists()) {
+                    $weight_charge = $weight_charge->first();
+                    $rate_id = $weight_charge->id;
+
+                    if ($weight_charge->weight_addition == 0) {
+                        $charges += $weight_charge->flat_charges;
+
+                        $previous = FALSE;
+                    }
+                    else {
+                        $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->kg_range) + 1;
+
+                        $charges += ($weight_charge->flat_charges * $multiplier);
+
+                    }
+                }
+                else {
+                    $previous = FALSE;
+                }
+            }
+
+
+            $result['weight_charges'] = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+
+
+            return $result;
+        }
+    }
+
     static public function weight($id) {
         $shipment = Shipment::find($id);
         if($shipment->business_category_id == 1){
             $result = self::calculate_weight($shipment->user->account_type_id, $shipment->user_id, $shipment->shipping_mode_id, $shipment->same_day_timing_id, $shipment->walk_in_delivery_type_id, $shipment->actual_weight, $shipment->pickup_address->city_id, $shipment->pickup_address->city->zone_id, $shipment->consignee_city_id, $shipment->booking_type_id, $shipment->amount);
         }
         else{
-            $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
-            if($international_rate->exists()){
-                $international_rate = $international_rate->first();
-                $zone_id = $shipment->consignee_city->zone_id;
+            $dhl_check = true;
 
-                $margin = 0;
-                $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
-                if($international_zone){
-                    $international_zone_id = $international_zone->zone_name;
-                    switch($international_zone_id){
-                        case 1:
-                            $margin = $international_rate->margin_1;
-                            break;
-                        case 2:
-                            $margin = $international_rate->margin_2;
-                            break;
-                        case 3:
-                            $margin = $international_rate->margin_3;
-                            break;
-                        case 4:
-                            $margin = $international_rate->margin_4;
-                            break;
-                        case 5:
-                            $margin = $international_rate->margin_5;
-                            break;
-                        case 6:
-                            $margin = $international_rate->margin_6;
-                            break;
-                        case 7:
-                            $margin = $international_rate->margin_7;
-                            break;
-                        case 8:
-                            $margin = $international_rate->margin_8;
-                            break;
-                        case 9:
-                            $margin = $international_rate->margin_9;
-                            break;
-                        case 10:
-                            $margin = $international_rate->margin_10;
-                            break;
-                        case 11:
-                            $margin = $international_rate->margin_11;
-                            break;
-                        default:
-                            $margin = 0;
-                            break;
+            $zone_id = $shipment->consignee_city->zone_id;
+            $international_economy_rate = InternationalEconomyRate::where('user_id',$shipment->user_id)
+                ->where('zone_id',$zone_id)
+                ->where('range_up', '<=', $shipment->actual_weight)
+                ->where('range_down', '>=', $shipment->actual_weight);
+
+            if($international_economy_rate->exists())
+            {
+                $international_economy_rate = $international_economy_rate->first();
+                $result = self::calculate_international_economic_weight($shipment->actual_weight,$international_economy_rate);
+                $dhl_check = false;
+            }
+
+
+            if($dhl_check) {
+                $international_rate = InternationalUserRate::where('user_id', $shipment->user_id);
+                if ($international_rate->exists()) {
+                    $international_rate = $international_rate->first();
+                    $zone_id = $shipment->consignee_city->zone_id;
+
+                    $margin = 0;
+                    $international_zone = InternationalDhlZone::where('zone_id', $zone_id)->first();
+                    if ($international_zone) {
+                        $international_zone_id = $international_zone->zone_name;
+                        switch ($international_zone_id) {
+                            case 1:
+                                $margin = $international_rate->margin_1;
+                                break;
+                            case 2:
+                                $margin = $international_rate->margin_2;
+                                break;
+                            case 3:
+                                $margin = $international_rate->margin_3;
+                                break;
+                            case 4:
+                                $margin = $international_rate->margin_4;
+                                break;
+                            case 5:
+                                $margin = $international_rate->margin_5;
+                                break;
+                            case 6:
+                                $margin = $international_rate->margin_6;
+                                break;
+                            case 7:
+                                $margin = $international_rate->margin_7;
+                                break;
+                            case 8:
+                                $margin = $international_rate->margin_8;
+                                break;
+                            case 9:
+                                $margin = $international_rate->margin_9;
+                                break;
+                            case 10:
+                                $margin = $international_rate->margin_10;
+                                break;
+                            case 11:
+                                $margin = $international_rate->margin_11;
+                                break;
+                            default:
+                                $margin = 0;
+                                break;
+                        }
+                        $result = self::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
+                    } else {
+                        $result = false;
                     }
-                    $result = self::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
-                }
-                else{
+                } else {
                     $result = false;
                 }
-            }
-            else{
-                $result = false;
             }
         }
 

@@ -31,7 +31,11 @@ use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\PendingInternationalUserRate;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\Rates\InternationalEconomyRateHistory;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1166,4 +1170,231 @@ class AdminInternationalRatesController extends Controller
 
     }
 
+    public function addEconomyRatesView($id,$view = null)
+    {
+        // Checking For Permission
+        if($view != null && $view == "view" && session('role_id') != 1 && !in_array(530, session('permissions')))
+        {
+            return redirect()->route('admin.access_denied');
+        }
+        else if($view == null && session('role_id') != 1 && count(array_intersect([529, 528], session('permissions'))) === 0)
+        {
+            return redirect()->route('admin.access_denied');
+        }
+        else if($view != null && $view != "view")
+        {
+            abort(404);
+        }
+
+        // Getting User And Checking If It Exists
+        $user = User::find($id);
+        if(!$user) {
+            return redirect()->back()->with('error','User not found!');
+        }
+
+        // Checking If Screen is View Then Do Rate Exists
+        if($view != null && $view == "view" && InternationalEconomyRate::where('user_id',$user->id)->doesntExist())
+        {
+            return redirect()->back()->with('error','Rates not found!');
+        }
+
+
+        $zones = Zone::where('business_category_id',2)->get();
+        $data = array();
+
+        // Getting Data For View Screen
+        if($view != null && $view == "view")
+        {
+            foreach ($zones as $zone)
+            {
+                $zone_rates = InternationalEconomyRate::where([['user_id',$user->id],['zone_id',$zone->id]]);
+                if($zone_rates->exists())
+                {
+                    $data[$zone->id] = $zone_rates->get();
+                }
+            }
+        }
+        else if($view == null){
+            // Getting Data New History Is Present
+            if(InternationalEconomyRateHistory::where([['user_id',$user->id],['status',0]])->exists())
+            {
+                foreach ($zones as $zone)
+                {
+                    $zone_rates = InternationalEconomyRateHistory::where([['user_id',$user->id],['zone_id',$zone->id],['status',0]]);
+                    if($zone_rates->exists())
+                    {
+                        $data[$zone->id] = $zone_rates->get();
+                    }
+                }
+            } // Getting Data If New History Is Not Present
+            else{
+                foreach ($zones as $zone)
+                {
+                    $zone_rates = InternationalEconomyRate::where([['user_id',$user->id],['zone_id',$zone->id]]);
+                    if($zone_rates->exists())
+                    {
+                        $data[$zone->id] = $zone_rates->get();
+                    }
+                }
+            }
+
+        }
+
+        // Getting Status of Rate
+        $rate_status = InternationalEconomyRateStatus::where('user_id',$user->id);
+        if($rate_status->exists())
+        {
+            $rate_status = $rate_status->first();
+        }
+        else{
+            $rate_status = null;
+        }
+
+        return view('admin.accounts.economy_rates')->with(['shipper' => $user,'zones'=>$zones,'data'=>$data,'rate_status'=>$rate_status,'view'=>$view]);
+    }
+
+    public function addEconomyRatesStore($id,Request $request)
+    {
+        if($request->get('Add') == 1 && (session('role_id') == 1 || in_array(528, session('permissions')))) {
+            $rateStatus = InternationalEconomyRateStatus::where('user_id', $id);
+            if ($rateStatus->exists()) {
+                $rateStatus = $rateStatus->first();
+            } else {
+                $rateStatus = new InternationalEconomyRateStatus();
+                $rateStatus->user_id = $id;
+            }
+            $rateStatus->status = 1;
+            $rateStatus->updated_by = Auth::id();
+            $rateStatus->updated_on = now()->format("Y-m-d H:i:s");
+            $rateStatus->save();
+            self::EditEconomyRate($id, $request, 0);
+
+            $user = User::find($id);
+            if (in_array($user->status, [3, 4]) && $user->blacklist == 0) {
+                return redirect()->route('admin.accounts.active')->with('success', 'Rates added successfully!');
+            } else {
+                return redirect()->route('admin.accounts.pending')->with('success', 'Rates added successfully!');
+            }
+        }
+        else if($request->get('Approve') == 1 && (session('role_id') == 1 || in_array(529, session('permissions')))){
+            $rate = InternationalEconomyRateStatus::where('user_id',$id);
+            if($rate->exists())
+            {
+                $rate = $rate->first();
+                $rate->status = 2;
+                $rate->reject_reason = null;
+                $rate->updated_by = Auth::id();
+                $rate->updated_on =  now()->format("Y-m-d H:i:s");
+                $rate->update();
+                self::EditEconomyRate($id,$request,1);
+                self::ApproveEconomyRate($id,$request);
+
+                $user = User::find($id);
+                if(in_array($user->status,[3,4]) && $user->blacklist == 0){
+                    return redirect()->route('admin.accounts.active')->with('success', 'Rates Approved successfully!');
+                }
+                else{
+                    return redirect()->route('admin.accounts.pending')->with('success', 'Rates Approved successfully!');
+                }
+            }
+            return back()->with(['error'=>"Rates Not Found"]);
+        }
+        else{
+            return back()->with(['error'=>"Invalid Request"]);
+        }
+    }
+
+    // Reject Rates Function
+    public function addEconomyRatesApprove($id,Request $request)
+    {
+       $rate = InternationalEconomyRateStatus::where('user_id',$id);
+            if($rate->exists())
+            {
+                $rate = $rate->first();
+                $rate->status = 3;
+                $rate->reject_reason = $request->reject_reason;
+                $rate->updated_by = Auth::id();
+                $rate->updated_on =  now()->format("Y-m-d H:i:s");
+                $rate->update();
+                $user = User::find($id);
+                if(in_array($user->status,[3,4]) && $user->blacklist == 0){
+                    return redirect()->route('admin.accounts.active')->with('success', 'Rates Rejected successfully!');
+                }
+                else{
+                    return redirect()->route('admin.accounts.pending')->with('success', 'Rates Rejected successfully!');
+                }
+            }
+            return back()->with(['error'=>"Rates Not Found"]);
+
+    }
+
+    public static function EditEconomyRate($id,$request,$status)
+    {
+        $rates = InternationalEconomyRateHistory::where([['user_id',$id],['status',0]]);
+        if($rates->exists())
+        {
+            $rates->delete();
+        }
+        $zones = Zone::where('business_category_id',2)->get();
+        foreach ($zones as $zone)
+        {
+            if($request->has('z'.$zone->id.'_main_switch'))
+            {
+                $range_up = $request->input('z'.$zone->id.'_range_up');
+                $range_down = $request->input('z'.$zone->id.'_range_down');
+                $wa = $request->input('z'.$zone->id.'_wa_switch');
+                $spkg = $request->input('z'.$zone->id.'_wa_spkg');
+                $flat_charges = $request->input('z'.$zone->id.'_flat_charges');
+
+                foreach ($range_up as $key => $value)
+                {
+                    $rate = new InternationalEconomyRateHistory();
+                    $rate->user_id = $id;
+                    $rate->zone_id = $zone->id;
+                    $rate->range_up = $range_up[$key];
+                    $rate->range_down = $range_down[$key];
+                    $rate->weight_addition = isset($wa[$key]) ? 1 : 0;
+                    $rate->kg_range = $spkg[$key] ?? 0.50;
+                    $rate->flat_charges = $flat_charges[$key];
+                    $rate->status = $status;
+                    $rate->save();
+                }
+            }
+        }
+    }
+
+    public static function ApproveEconomyRate($id,$request)
+    {
+        $rates = InternationalEconomyRate::where('user_id',$id);
+        if($rates->exists())
+        {
+            $rates->delete();
+        }
+
+        $zones = Zone::where('business_category_id',2)->get();
+        foreach ($zones as $zone)
+        {
+            if($request->has('z'.$zone->id.'_main_switch'))
+            {
+                $range_up = $request->input('z'.$zone->id.'_range_up');
+                $range_down = $request->input('z'.$zone->id.'_range_down');
+                $wa = $request->input('z'.$zone->id.'_wa_switch');
+                $spkg = $request->input('z'.$zone->id.'_wa_spkg');
+                $flat_charges = $request->input('z'.$zone->id.'_flat_charges');
+
+                foreach ($range_up as $key => $value)
+                {
+                    $rate = new InternationalEconomyRate();
+                    $rate->user_id = $id;
+                    $rate->zone_id = $zone->id;
+                    $rate->range_up = $range_up[$key];
+                    $rate->range_down = $range_down[$key];
+                    $rate->weight_addition = isset($wa[$key]) ? 1 : 0;
+                    $rate->kg_range = $spkg[$key] ?? 0.50;
+                    $rate->flat_charges = $flat_charges[$key];
+                    $rate->save();
+                }
+            }
+        }
+    }
 }

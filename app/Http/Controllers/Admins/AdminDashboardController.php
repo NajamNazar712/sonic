@@ -42,6 +42,8 @@ use App\Http\Models\RateRemark;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Rates\HistoryCorporateRateStatus;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\Rates\PendingCorporateRateStatus;
 use App\Http\Models\Reference;
@@ -1647,6 +1649,7 @@ class AdminDashboardController extends Controller
     }
 
 
+
     /**
      * @return \Illuminate\Http\JsonResponse
      * @throws \Throwable
@@ -1686,7 +1689,7 @@ class AdminDashboardController extends Controller
     public function addRatesView($id){
         $user = User::find($id);
         if(!RateStatus::where('user_id', $user->id)->exists()) {
-            $sale_person = SalePersonTag::where('user_id',$id)->first();
+            $sale_person = SalePersonTag::where('user_id', $id)->first();
             $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
             $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
             $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
@@ -1697,9 +1700,9 @@ class AdminDashboardController extends Controller
             $packaging_sizes = array();
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
-            if(count($packaging_material_types) > 0){
+            if (count($packaging_material_types) > 0) {
 
-                foreach($packaging_material_types as $type){
+                foreach ($packaging_material_types as $type) {
                     $packaging_sizes[$type->id] = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
                 }
             }
@@ -1710,35 +1713,32 @@ class AdminDashboardController extends Controller
             $ol = null;
             $det = null;
             $same_day = null;
-            foreach($minimum_chargeable_weights as $minimum_chargeable_weight){
-                if($minimum_chargeable_weight->shipping_mode_id == 1){
+            foreach ($minimum_chargeable_weights as $minimum_chargeable_weight) {
+                if ($minimum_chargeable_weight->shipping_mode_id == 1) {
                     $on = $minimum_chargeable_weight->weight;
-                }
-                elseif($minimum_chargeable_weight->shipping_mode_id == 2){
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 2) {
                     $ol = $minimum_chargeable_weight->weight;
-                }
-                elseif($minimum_chargeable_weight->shipping_mode_id == 3){
+                } elseif ($minimum_chargeable_weight->shipping_mode_id == 3) {
                     $det = $minimum_chargeable_weight->weight;
-                }
-                else{
+                } else {
                     $same_day = $minimum_chargeable_weight->weight;
                 }
             }
             $commission_percentage = '';
             $settings = GlobalSettings::where('type', 'commission_percentage');
-            if($settings->exists()){
+            if ($settings->exists()) {
                 $settings = $settings->first();
                 $commission_percentage = $settings->text;
             }
-            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission','sales_status']);
-            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name','ar.department_id'])->where('admins.status', 1)->get();
+            $sales_tiers = SalesTier::where('status', 1)->get(['id', 'tier_name', 'tier_type', 'commission', 'sales_status']);
+            $admin_users = Admin::leftjoin('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name', 'ar.department_id'])->where('admins.status', 1)->get();
             $users = array();
             $sales = array();
             $all_users = array();
-            foreach ($admin_users as $u){
-                if($u->department_id != 7){
+            foreach ($admin_users as $u) {
+                if ($u->department_id != 7) {
                     $users[] = array('id' => $u->id, 'text' => $u->name);
-                }else{
+                } else {
                     $sales[] = array('id' => $u->id, 'text' => $u->name);
                 }
             }
@@ -1747,7 +1747,6 @@ class AdminDashboardController extends Controller
             $all_users['results'][1]['text'] = 'Admins';
             $all_users['results'][1]['children'] = $users;
             $all_users['pagination']['more'] = true;
-
             return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
         }
         return redirect()->back()->with('error','User rates not found!');
@@ -7501,6 +7500,24 @@ class AdminDashboardController extends Controller
                         }
                     }
 
+                    if (InternationalEconomyRateStatus::where('user_id', $result->id)->doesntExist()) {
+                        if(session('role_id') == 1 || in_array(528, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
+                        }
+                    } else {
+                        if((session('role_id') == 1 || in_array(528, session('permissions')))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
+                        }
+                    }
+
+                    if(InternationalEconomyRate::where('user_id',$result->id)->count() > 0)
+                    {
+                        if(session('role_id') == 1 || in_array(530, session('permissions'))) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
+                        }
+                    }
+
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -7818,8 +7835,23 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                         }
                     }
+                }
 
+                if (InternationalEconomyRateStatus::where('user_id', $result->id)->doesntExist()) {
+                    if(session('role_id') == 1 || in_array(528, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Add Economy Rates</div></button>';
+                    }
+                } else {
+                    if((session('role_id') == 1 || in_array(528, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
+                    }
+                }
 
+                if(InternationalEconomyRate::where('user_id',$result->id)->count() > 0)
+                {
+                    if(session('role_id') == 1 || in_array(530, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
+                    }
                 }
 
                 $dropdown .= '
@@ -7996,7 +8028,7 @@ class AdminDashboardController extends Controller
 
         }else{
             $generation_date = null;
-            if($request->invoicing_cycle_id == 2){
+            if($request->invoicing_cycle_id == 2 || $request->invoicing_cycle_id == 4 ){
                 $generation_date = null;
             }else{
                 $generation_date = $request->generation_date;

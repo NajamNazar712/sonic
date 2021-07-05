@@ -331,10 +331,10 @@
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                    blockPagePermanently();
+                    // blockPagePermanently();
                     swal({
                         text: 'Are you sure you want to add lead?',
-                        icon: 'info',
+                        icon: 'warning',
                         buttons: {
                             cancel: {
                                 text: 'No',
@@ -351,6 +351,7 @@
                         },
                         closeOnClickOutside: false,
                         closeOnEsc: false,
+                        dangerMode: true
                     }).then(function(confirm) {
                         if(confirm) {
                             swal({
@@ -366,7 +367,7 @@
                         }
                         else {
                             $(form).find('button[type=submit]').prop('disabled', false);
-                            UnblockPagePermanently();
+                            // UnblockPagePermanently();
                         }
                     });
                 }
@@ -492,10 +493,10 @@
                 submitHandler: function(form) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                    blockPagePermanently();
+                    // blockPagePermanently();
                     swal({
                         text: 'Are you sure you want to assign users?',
-                        icon: 'info',
+                        icon: 'warning',
                         buttons: {
                             cancel: {
                                 text: 'No',
@@ -512,6 +513,7 @@
                         },
                         closeOnClickOutside: false,
                         closeOnEsc: false,
+                        dangerMode: true
                     }).then(function(confirm) {
                         if(confirm) {
                             swal({
@@ -527,7 +529,7 @@
                         }
                         else {
                             $(form).find('button[type=submit]').prop('disabled', false);
-                            UnblockPagePermanently();
+                            // UnblockPagePermanently();
                         }
                     });
                 }

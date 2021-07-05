@@ -48,10 +48,10 @@ class AdminTrackingController extends Controller
 
     public function index(Request $request) {
         $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
 
         return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
@@ -579,9 +579,10 @@ class AdminTrackingController extends Controller
     }
 
     public function cx_quick_tracking_index(){
+        return redirect()->route('admin.access_denied');
         $case_nature = CrmRequestCaseNature::get();
-        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->get();
-        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         if (session('department_id') == 7 && session('role_id') != 4) {
             $shippers = User::whereIn('id', session('tagged_shippers'))->select('id', 'name')->get();
@@ -589,7 +590,7 @@ class AdminTrackingController extends Controller
         else {
             $shippers = User::select('id', 'name')->get();
         }
-        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
         $shipment_statuses = ShipmentStatus::select('id','name')->get();
         return view('admin.tracking.cx_quick_tracking')->with(['shipment_statuses'=>$shipment_statuses, 'shippers' => $shippers, 'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
@@ -734,7 +735,7 @@ class AdminTrackingController extends Controller
                         $details['ccd'] = 1;
                     }
                     else{
-                        $details['ccd'] = 9;
+                        $details['ccd'] = 0;
                     }
 
                     $shipper = $shipment->user;

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\Http\Models\PaymentMode;
 
 class UpdatePaymentModeForCCDTableSeeder extends Seeder
 {
@@ -11,8 +12,8 @@ class UpdatePaymentModeForCCDTableSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('payment_modes')->insert(array(
-            array('id' => 5, 'mode' => 'Credit Card on Delivery-CCD')
-        ));
+        $payment_mode = PaymentMode::find(2);
+        $payment_mode->mode = 'Credit Card on Delivery-CCD';
+        $payment_mode->save();
     }
 }

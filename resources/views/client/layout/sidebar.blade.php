@@ -92,7 +92,9 @@
                         <li><a href="{{ route('cod.finance.payments.index') }}">Payments</a></li>
                         <li><a href="{{ route('cod.finance.payments.reconcile_through_receiving_sheet.index') }}">Payments Reconcile through Receiving Sheet</a></li>
                         <li><a href="{{ route('cod.ledger') }}">General Ledger</a></li>
-
+                        @if((session('account_type') == 2 && session('user_type') == 1) || (session('user_type') == 2 && in_array(14, session('permissions'))))
+                            <li><a href="{{ route('cod.finance.invoice.index') }}">Invoice</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -111,7 +113,7 @@
 
                         <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment Report</a></li>
 
-                        @if (in_array(session('user_id'), [405, 167, 1159, 2035]))
+                        @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
                         @endif
                     </ul>

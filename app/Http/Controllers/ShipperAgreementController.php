@@ -35,11 +35,14 @@ use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Rates\InternationalEconomyRate;
+use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\WeightCharge;
+use App\Http\Models\Zone;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Illuminate\Http\Request;
 
@@ -151,7 +154,7 @@ class ShipperAgreementController extends Controller
         $sales_person_name = '';
         $sales_person = $shipper->sales_person()->where('status', 0)->first();
         if($sales_person){
-            $sales_person_name = Admin::find($sales_person->admin_id)->name;
+            $sales_person_name = Admin::find($sales_person->admin_id)->name ?? "";
         }
         $claim_policy = '<h2 class="text-center mt-4">Claim Policy</h2>
 <style> .table1 tr:nth-child(even) {background-color: #d9e2f3;}</style>
@@ -385,7 +388,11 @@ otherwise it will be rejected</li>
 
             $international_rates = FALSE;
             $rate_status = FALSE;
-            if(InternationalUserRate::where('user_id', $id)->exists()){
+            if(InternationalEconomyRateStatus::where([['user_id', $id],['status',2]])->exists())
+            {
+                $international_rates = TRUE;
+            }
+            else if(InternationalUserRate::where('user_id', $id)->exists()){
                 $international_rates = TRUE;
             }
 
@@ -741,6 +748,36 @@ otherwise it will be rejected</li>
             if($international_rates){
                 $international_rate_boxes = '';
                 $international_rate_status = InternationalUserRate::where('user_id', $id)->first();
+                $international_economic_rate_status = (InternationalEconomyRate::where('user_id', $id)->count() > 0);
+                if($international_economic_rate_status)
+                {
+                    $intl_box = '';
+
+                    $intl_box .= '<div class="row"><div class="col-12 border"> <table class="table color secondary table-sm table-bordered mb-0 mt-0"><thead class="color secondary text-center">
+                    <tr><td><strong>International Economy Rate(s)</strong></td></tr></thead></table>';
+                    $zone_rates = InternationalEconomyRate::where('user_id', $id)->get()->groupBy('zone_id');
+                    foreach ($zone_rates as $zone_id => $rates)
+                    {
+                        $intl_box .= '<table class="table table-sm table-bordered mb-0 mt-0"><thead><tr class="color secondary"><td colspan="4"><strong>Weight Charges ('.Zone::find($zone_id)->name.')</strong></td></tr>
+                    <tr><th>Range Up</th><th>Range Down</th><th>Weight Addition</th><th>Flat Charges</th></tr></thead><tbody>';
+                        foreach ($rates as $rate)
+                        {
+                            $weight_addition = 0.00;
+                            if($rate->weight_addition == 1)
+                            {
+                                $weight_addition = $rate->kg_range;
+                            }
+                            $intl_box .= '<tr><td>'.$rate->range_up.'</td><td>'.$rate->range_down.'</td><td>'.$weight_addition.'</td><td>'.$rate->flat_charges.'</td></tr>';
+                        }
+                        $intl_box .= '</tbody></table>';
+                    }
+
+                    $intl_box .= '</div></div>';
+
+                    $html .= $intl_box;
+
+                }
+
                 if($international_rate_status){
 
                     $intl_box = '';
