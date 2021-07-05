@@ -7138,7 +7138,7 @@ class RiderAPIController extends Controller
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
                     $deliveries['shipper'] = $shipper_name;
-                    $deliveries['ccd'] = ($payment_mode == 5) ? 1 : 0;
+                    $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();
