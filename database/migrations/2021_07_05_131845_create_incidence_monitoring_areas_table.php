@@ -15,6 +15,7 @@ class CreateIncidenceMonitoringAreasTable extends Migration
     {
         Schema::create('incidence_monitoring_areas', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('area');
             $table->timestamps();
         });
     }

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIncidenceMonitoringNCLevelsTable extends Migration
+class CreateIncidenceMonitoringImagesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class CreateIncidenceMonitoringNCLevelsTable extends Migration
      */
     public function up()
     {
-        Schema::create('incidence_monitoring_n_c_levels', function (Blueprint $table) {
+        Schema::create('incidence_monitoring_images', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('nc_level');
+            $table->integer('incidence_monitoring_id')->index();
+            $table->integer('added_by')->index();
+            $table->string('image');
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ class CreateIncidenceMonitoringNCLevelsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('incidence_monitoring_n_c_levels');
+        Schema::dropIfExists('incidence_monitoring_images');
     }
 }

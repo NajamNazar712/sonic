@@ -15,6 +15,9 @@ class CreateIncidenceMonitoringStatusHistoriesTable extends Migration
     {
         Schema::create('incidence_monitoring_status_histories', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('incidence_monitoring_id');
+            $table->integer('status_id')->index();
+            $table->integer('admin_id')->index();
             $table->timestamps();
         });
     }

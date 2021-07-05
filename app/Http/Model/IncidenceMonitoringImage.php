@@ -4,14 +4,12 @@ namespace App\Http\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
-class IncidenceMonitoringComment extends Model
+class IncidenceMonitoringImage extends Model
 {
     public function admin() {
-        return $this->belongsTo('App\Http\Models\Admin\Admin','comment_by_id','id');
+        return $this->belongsTo('App\Http\Models\Admin\Admin','added_by','id');
     }
-
     public function incidence_monitoring() {
         return $this->belongsTo('App\Http\Model\IncidenceMonitoring');
     }
-    
 }

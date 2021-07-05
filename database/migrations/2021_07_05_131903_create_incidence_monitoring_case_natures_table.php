@@ -15,6 +15,7 @@ class CreateIncidenceMonitoringCaseNaturesTable extends Migration
     {
         Schema::create('incidence_monitoring_case_natures', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('case_nature');
             $table->timestamps();
         });
     }
