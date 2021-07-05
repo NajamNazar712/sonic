@@ -2007,17 +2007,15 @@ class APIController extends Controller
             }
 
             foreach ($shipment->shipment_journey as $journey) {
-                if ($journey->consignee_status_id != NULL) {
-                    if ($journey->verification) {
-                        $journey_details = array();
+                if ($journey->verification) {
+                    $journey_details = array();
 
-                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                        $journey_details['status'] = $journey->shipment_status_consignee->name;
+                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                    $journey_details['status'] = $journey->shipment_status_consignee->name;
 
-                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
-                        $details['tracking_history'][] = $journey_details;
-                    }
+                    $details['tracking_history'][] = $journey_details;
                 }
             }
 
