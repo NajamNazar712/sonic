@@ -83,7 +83,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    
+
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_agent" id="search_agent" class="form-control select2">
@@ -134,9 +134,13 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                            <input type="text" name="from_date"
+                                   class="form-control bg-primary border-primary white rounded-right"
+                                   id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
+
                     </div>
+
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -144,13 +148,19 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To">
+                            <input type="text" name="to_date"
+                                   class="form-control bg-primary border-primary white rounded-right"
+                                   id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
 
                     <div class="col-2">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                        <button type="button" id="search_filter_btn"
+                                class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
+                            Search
+                        </button>
                     </div>
+                    
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>

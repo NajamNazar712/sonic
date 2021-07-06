@@ -2179,6 +2179,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('operation_service_level')->name('operation_service_level.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@operation_service_level_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@operation_service_level_list')->name('list');
+        });
         Route::prefix('work_code_master')->name('work_code_master.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@work_code_master_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@work_code_master_list')->name('list');
