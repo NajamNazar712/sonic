@@ -2201,9 +2201,7 @@ class ShipperShipmentBookController extends Controller
                 $query->whereIn('id', [4]);
             })],
             'pieces_quantity' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
-            'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
-                $query->where('user_id', $user_id);
-            })->where('hidden', 0)],
+
 
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
