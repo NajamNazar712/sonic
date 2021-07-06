@@ -172,10 +172,8 @@ class ProcessShipmentBookingDB implements ShouldQueue
 
         $return_address_id = NULL;
         if($service_type_id == 1 || $service_type_id == 2){
-            if($service_type_id == 1 || $service_type_id == 2){
-                if (isset($this->booking['return_address_id'])) {
-                    $return_address_id = $this->booking['return_address_id'];
-                }
+            if (isset($this->booking['return_address_id'])) {
+                $return_address_id = $this->booking['return_address_id'];
             }
         }
         $business_category_id = $this->booking['business_category_id'];
