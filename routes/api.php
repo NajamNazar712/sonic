@@ -248,6 +248,7 @@ Route::name('api.')->group(function () {
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
         Route::post('shipment_history', 'ConsigneeAPIController@shipment_history')->name('shipment_history');
+        Route::post('update_pin', 'ConsigneeAPIController@update_pin')->name('update_pin');
         Route::middleware('ConsigneeAPIToken')->group(function () {
             Route::post('update_profile', 'ConsigneeAPIController@update_profile')->name('update_profile');
             Route::prefix('shipments')->name('shipments.')->group(function () {
