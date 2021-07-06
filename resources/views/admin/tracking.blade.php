@@ -574,7 +574,6 @@
                             $.each(data.shipments, function (index, details) {
                                 var id = details.shipment_id;
                                 var shipment_type = details.shipment_type;
-                                // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';
                                 var ccd_icon = '';
@@ -643,7 +642,7 @@
                                         shipment += '<td colspan="3">' + details.shipper.email + '</td>';
                                     }
                                     else {
-                                        shipment += '<td colspan="3"></td>'
+                                        shipment += '<td colspan="3"></td>';
                                     }
                                     shipment += '<td><strong>Sales Person</strong></td>';
 
@@ -754,7 +753,7 @@
                                     shipment += '<td colspan="3">' + details.consignee.email + '</td>';
                                 }
                                 else {
-                                    shipment += '<td colspan="3"></td>'
+                                    shipment += '<td colspan="3"></td>';
                                 }
                                 shipment += '</tr>';
                                 shipment += '<tr>';
@@ -766,12 +765,13 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
+                                
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Order Information</u></h4>';
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
-
+                                
                                 $.each(details.order_information.items, function (index, item) {
                                     shipment += '<tr>';
                                     shipment += '<td><strong>Product Type</strong></td>';
@@ -780,21 +780,39 @@
                                     shipment += '<td>' + ((item.description) ? item.description : '-') + '</td>';
                                     shipment += '<td><strong>Quantity</strong></td>';
                                     shipment += '<td>' + item.quantity + '</td>';
+                                    shipment += '<td><strong>Order ID</strong></td>';
+                                    shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
                                     shipment += '</tr>';
                                 });
-
+                                // mywork
+                                var weight = '';
+                                var height = '';
+                                var length = '';
+                                var breadth = '';
+                                if(details.order_information.height != null){
+                                    weight += '<td ><strong>Weight </strong><small>(Volumetric)</small></td>'+'<td></td>';
+                                    height += '<td ><strong>Height</strong></td>'+'<td>'+details.order_information.height+'cm</td>';
+                                    length += '<td ><strong>Length</strong></td>'+'<td>'+details.order_information.length+'cm</td>';
+                                    breadth += '<td><strong>Breadth</strong></td>'+'<td>'+details.order_information.breadth+'cm</td>';
+                                    
+                                }
+                                else
+                                {
+                                    weight += '<td ><strong>Weight </strong><small>(Dense)</small></td>';
+                                    weight +='<td>' + details.order_information.weight + ' kg</td>';
+                                }
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Weight</strong></td>';
-                                shipment += '<td>' + details.order_information.weight + ' kg</td>';
+                                shipment += weight;
                                 shipment += '<td><strong>Service Type</strong></td>';
                                 shipment += '<td>' + details.order_information.booking_type + '</td>';
                                 shipment += '<td><strong>Collection Amount</strong></td>';
                                 shipment += '<td>Rs. ' + details.order_information.amount + '</td>';
+                                shipment += '<td><strong>Piece(s)</strong></td>';
+                                shipment += '<td>'+ details.order_information.pieces +'</td>';
                                 shipment += '</tr>';
 
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Order ID</strong></td>';
-                                shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
+                                shipment +=length;
                                 shipment += '<td><strong>Shipping Mode</strong></td>';
                                 shipment += '<td>' + details.order_information.shipping_mode + '</td>';
                                 shipment += '<td><strong>Instructions</strong></td>';
@@ -810,15 +828,18 @@
 
                                 shipment += '</tr>';
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Piece(s)</strong></td>';
-                                shipment += '<td>'+ details.order_information.pieces +'</td>';
+                                shipment +=breadth;
                                 shipment += '<td><strong>Business Category</strong></td>';
                                 shipment += '<td>'+ details.order_information.business_category +'</td>';
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment +=height;
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
+
 
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Tracking History</u></h4>';
