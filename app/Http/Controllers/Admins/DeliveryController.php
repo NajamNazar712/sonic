@@ -6688,7 +6688,7 @@ class DeliveryController extends Controller
         }
         return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
-    public function request_list(){
+    public function request_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),270);
