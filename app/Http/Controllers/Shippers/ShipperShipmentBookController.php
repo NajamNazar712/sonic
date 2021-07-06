@@ -2104,8 +2104,7 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => 'Shipper Reference Number 3',
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
-            'open_shipment' => 'Open Shipment',
-            'return_address_id' => 'Return Address ID'
+            'open_shipment' => 'Open Shipment'
         ];
 
         $messages = [
@@ -2344,11 +2343,11 @@ class ShipperShipmentBookController extends Controller
                 }
                 $rows[$key]['open_shipment'] = $row['open_shipment'];
 
-                if(!isset($row['return_address_id']) || $row['return_address_id'] == null){
+                /*if(!isset($row['return_address_id']) || $row['return_address_id'] == null){
                     $row['return_address_id'] = NULL;
                 }
 
-                $rows[$key]['return_address_id'] = $row['return_address_id'];
+                $rows[$key]['return_address_id'] = $row['return_address_id'];*/
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -2400,7 +2399,7 @@ class ShipperShipmentBookController extends Controller
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address ID #' . $row['pickup_address_id'] . ' is disabled';
                         }
 
-                        if($row['service_type_id'] == 1 || $row['service_type_id'] == 2){
+                        /*if($row['service_type_id'] == 1 || $row['service_type_id'] == 2){
                             if($row['return_address_id'] != NULL){
                                 $user_return_info = UserShippingInfo::find($row['return_address_id']);
 
@@ -2408,7 +2407,7 @@ class ShipperShipmentBookController extends Controller
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
                                 }
                             }
-                        }
+                        }*/
 
                         if (!$user_shipping_info->city->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
