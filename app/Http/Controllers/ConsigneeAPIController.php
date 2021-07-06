@@ -511,7 +511,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
                 $consignee_info->pin = bcrypt($request->pin);
