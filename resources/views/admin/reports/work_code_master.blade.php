@@ -288,16 +288,17 @@
                 if ( this.context.length ) {
                     body = [];
                     var params = table.ajax.params();
+
                     if(params !== undefined){
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                }
-                else{
-                    params = {
-                        'excel':true,
+                        params.start = 0;
+                        params.length = -1;
+                        params.excel = true;
                     }
-                }
+                    else{
+                        params = {
+                            'excel':false,
+                        }
+                    }
                     
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.work_code_master.list') }}',
@@ -327,7 +328,7 @@
                         },
                         async: false
                     });
-                    UnblockPagePermanently();
+
 
                     return {body: body, header: head};
                 }
@@ -342,7 +343,7 @@
                     {
                         extend: 'excel',
                         title: 'Work Code Master Report',
-                        className: 'btn btn-primary',
+                        className: 'btn btn-primary excel',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -365,8 +366,6 @@
                         d.status_marked = $('#status_marked').val();
                         d.search_rider = $('#search_rider').val();
                         d.search_admin = $('#search_admin').val();
-
-                        
                         
                     }
                 },
@@ -386,7 +385,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    
+
                     this.api().table().columns.adjust();
                 }
             });

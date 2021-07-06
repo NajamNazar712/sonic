@@ -28,7 +28,7 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
 
     public function __construct(DeliveryNoteOtpSms $sms)
     {
-        $this->queue = 'delivery_note_otp_sms';
+        $this->queue = 'sms_otp';
         $this->sms = $sms;
     }
 
