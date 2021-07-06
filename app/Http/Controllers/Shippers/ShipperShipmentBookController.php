@@ -3769,8 +3769,7 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => 'Shipper Reference Number 3',
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
-            'open_shipment' => 'Open Shipment',
-            'return_address_id' => 'Return Address ID'
+            'open_shipment' => 'Open Shipment'
 
         ];
 
@@ -3868,9 +3867,9 @@ class ShipperShipmentBookController extends Controller
                 $query->whereNotIn('id', [3]);
             })],
 
-            'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
+            /*'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
-            })->where('hidden', 0)],
+            })->where('hidden', 0)],*/
 
             'shipper_reference_number_1' => ['nullable', 'between:0,190'],
             'shipper_reference_number_2' => ['nullable', 'between:0,190'],

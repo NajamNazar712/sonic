@@ -790,13 +790,14 @@ class APIController extends Controller
                         }
                     }
                 }
-                $return_address_id = NULL;
-                if($service_type_id == 1 || $service_type_id == 2){
-                    if($request->filled('return_address_id')){
-                        $return_address_id = $request->input('return_address_id');
-                    }
-                }
 
+            }
+
+            $return_address_id = NULL;
+            if($service_type_id == 1 || $service_type_id == 2){
+                if($request->filled('return_address_id')){
+                    $return_address_id = $request->input('return_address_id');
+                }
             }
 
             if ($request->filled('order_id')) {
