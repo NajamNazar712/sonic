@@ -15,33 +15,23 @@
                         @elseif(($report->status_id == 3))
                             (Close)
                         @endif
-                        <div class="text-right mb-1">
-                            @if(($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(185, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="tag"><span
-                                            class="d-none d-lg-block" style="color: white">Tag</span></button>
-                            @endif
-                            @if(($crm_details['status_id'] == 2) && (session('role_id') == 1 || $crm_details->agent['id'] == Auth::id() || in_array(309, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="un_tag"><span
-                                            class="d-none d-lg-block" style="color: white">Un Tag</span></button>
-                            @endif
-                            @if((session('role_id') == 1 || in_array(213, session('permissions'))))
-                                <button type="button" class="btn btn-primary width-10-per" id="edit_request"><span
-                                            class="d-none d-lg-block" style="color: white">Edit Request</span></button>
-                            @endif
-                            @if(($crm_details['status_id'] == 2))
-                                @if((session('role_id') == 1 || in_array(352, session('permissions'))))
-                                    <button type="button" class="btn @if($escalation_status_flag == true) btn-danger @else btn-primary @endif width-10-per" id="halt_start_escalation" value="@if($escalation_status_flag == true) 0 @else 1 @endif"><span
-                                                class="d-none d-lg-block" style="color: white">@if($escalation_status_flag == true) Halt Escalation @else Start Escalation @endif</span></button>
-                                @endif
-                                @if((session('role_id') == 1 || in_array(353, session('permissions'))))
-                                    @if($escalation_log_flag == true)
-                                        <button type="button" class="btn btn-primary width-10-per" id="escalate"><span
-                                                    class="d-none d-lg-block" style="color: white">Escalate</span></button>
-                                    @endif
-                                @endif
-                            @endif
-
-
+                        <div class="card-content collapse">
+                            <div class="card-body p-1">
+                                <h4 class=" info">Legend</h4>
+                                <table class="table mb-0">
+                                    <tbody>
+                                        <tr style="color:#fff;" class="btn-purple">
+                                            <td class="align-middle">NOCR</td>
+                                        </tr>
+                                        <tr style="color:#fff;" class="btn-primary">
+                                            <td class="align-middle">Sales</td>
+                                        </tr>
+                                        <tr style="color:#fff;" class="btn-dark">
+                                            <td class="align-middle">Finance</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </h1>
                     <div class="card">
@@ -55,208 +45,65 @@
                                             <tr>
                                                 <th scope="row">Station</th>
                                                 <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->shipment->tracking_number}}</h5>
+                                                        <h5 class="mb-0">{{$report->station->name}}</h5>
                                                 </td>
                                             </tr>
-                                            @endif
-                                            @if(!empty($shipment_status))
+                                            
                                             <tr>
-                                                <th scope="row">Shipment Status</th>
+                                                <th scope="row">Monitoring Area</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$shipment_status}}</h5>
+                                                    <h5 class="mb-0">{{$report->monitoring_area->area}}</h5>
                                                 </td>
                                             </tr>
-                                            @endif
-                                            @if(!empty($shipment_status_date))
                                             <tr>
-                                                <th scope="row">Shipment Status Updated At</th>
+                                                <th scope="row">Time Slot</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$shipment_status_date}}</h5>
-                                                </td>
-                                            </tr>
-                                            @endif
-                                            @if(!empty($shipper))
-                                            <tr>
-                                                <th scope="row">Shipper Name</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{$shipper}}</h5>
-                                                </td>
-                                            </tr>
-                                            @endif
-                                            <tr>
-                                                <th scope="row">Case Nature</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{$crm_details->nature->name}}</h5>
-                                                </td>
-                                            </tr>
-                                            @if(!empty($crm_details->case_nature_type_id))
-                                            <tr>
-                                                <th scope="row">Case Nature Type</th>
-                                                <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
-                                                </td>
-                                            </tr>
-                                            @endif
-                                            <tr>
-                                                <th scope="row">Channel</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{$crm_details->channel->channel}}</h5>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">Status</th>
-                                                <td class="name" id="status">
-                                                    <h5 class="mb-0">{{$crm_details->request_status->name}}</h5>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">Launched By</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{$launched_by}}</h5>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">Launched Date</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{$crm_details->created_at}}</h5>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">Agent</th>
-                                                <td class="name">
-                                                    @if($agent != null)
-                                                        <h5 class="mb-0">{{$agent}}</h5>
-                                                    @else
-                                                        <h5 class="mb-0">-</h5>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                            @if($crm_details['status_id'] == 2 || $crm_details['status_id'] == 3)
-                                                <tr>
-                                                    <th scope="row">Tagged To</th>
-                                                    <td class="name">
-                                                        @if($tagged_name != null)
-                                                            <h5 class="mb-0">{{$tagged_name}}</h5>
-                                                        @else
-                                                            <h5 class="mb-0">-</h5>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @endif
-                                                <tr>
-                                                    <th scope="row">Arrival Date</th>
-                                                    <td class="name">
-                                                        @if($arrival_date != '')
-                                                            <h5 class="mb-0">{{$arrival_date}}</h5>
-                                                        @else
-                                                            <h5 class="mb-0">-</h5>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-
-                                            <tr>
-                                                <th scope="row">Description</th>
-                                                <td class="name">
-                                                    <h5 class="mb-0">{{strip_tags($crm_details->description)}}</h5>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th scope="row">Insurance</th>
-                                                <td class="name">
-                                                        <h5 class="mb-0">{{$insurance}}</h5>
+                                                    <h5 class="mb-0">{{$report->time_from}} - {{$report->time_to}}</h5>
                                                 </td>
                                             </tr>
                                            <tr>
-                                                <th scope="row">Special Request </th>
+                                                <th scope="row">Case Nature</th>
                                                 <td class="name">
-                                                    @foreach($approvers as $admin)
-                                                        <h5 class="mb-0">{{$admin}}</h5>
-                                                    @endforeach
+                                                    <h5 class="mb-0">{{$report->case_nature->case_nature}}</h5>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Observations</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">{{$report->obeservation}}</h5>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">NC Level</th>
+                                                <td class="name">
+                                                        <h5 class="mb-0">{{$report->nc_level->nc_level}}</h5>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Tagged To</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">
+                                                        @foreach ($report->tagged_persons as $tagged_person)
+                                                            {{$tagged_person->admin->name}}
+                                                        @endforeach
+                                                    </h5>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Tagging Date</th>
+                                                <td class="name" id="status">
+                                                    <h5 class="mb-0">{{$report->tagging_date}}</h5>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row">Clips Link</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0">{{$report->clip_link}}</h5>
                                                 </td>
                                             </tr>
                                             </tbody>
                                         </table>
-                                        <div class="row justify-content-center">
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs'))))))
-                                                <div class="text-center">
-                                                    <form id="valid_form" method="post"
-                                                          action="{{route('admin.crm.valid')}}">
-                                                        @csrf
-                                                        <input type="hidden" id="req_id" name="req_id"
-                                                               value="{{$crm_details->id}}">
-                                                        <input type="hidden" id="prev_status" name="prev_status"
-                                                               value="{{$crm_details->status_id}}">
-                                                        @if($crm_details['status_id'] != 3)
-                                                            @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 5)
-                                                                <button id="valid" type="submit"
-                                                                        class="btn btn-success mr-1">
-                                                    <span class="d-none d-lg-block">
-                                                        Valid
-                                                    </span>
-                                                                </button>
-                                                            @elseif($crm_details['status_id'] == 2)
-                                                                @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
-                                                                    <button id="valid" type="submit"
-                                                                            class="btn btn-success mr-1">
-                                                        <span class="d-none d-lg-block">
-                                                        Resolve
-                                                        </span>
-                                                                    </button>
-                                                                @endif
-                                                            @elseif($crm_details['status_id'] == 4 && (in_array(186, session('permissions')) || session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id()))
-                                                                <button id="valid" type="submit"
-                                                                        class="btn btn-success mr-1">
-                                                    <span class="d-none d-lg-block">
-                                                    Re-Open
-                                                    </span>
-                                                                </button>
-                                                            @endif
-                                                        @endif
-                                                    </form>
-                                                </div>
-                                            @endif
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')))
-                                                <div class="text-center">
-                                                    <form id="invalid_form" method="post"
-                                                          action="{{route('admin.crm.invalid')}}">
-                                                        @csrf
-                                                        <input type="hidden" id="req_id" name="req_id"
-                                                               value="{{$crm_details->id}}">
-                                                        <input type="hidden" id="prev_status" name="prev_status"
-                                                               value="{{$crm_details->status_id}}">
-                                                        @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 2 ||$crm_details['status_id'] == 5)
-                                                            <input type="hidden" id="close" name="close"
-                                                               value="0">
-                                                        @else
-                                                            <input type="hidden" id="close" name="close"
-                                                                   value="1">
-                                                        @endif
-                                                        @if($crm_details['status_id'] != 4)
-                                                            @if($crm_details['status_id'] == 3)
-                                                                <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
-                                                                    <span class="d-none d-lg-block">
-                                                                        Close
-                                                                    </span>
-                                                                </button>
-                                                            @endif
-                                                            <button id="invalid" type="submit" class="btn btn-danger">
-                                                                <span class="d-none d-lg-block">
-                                                                    @if($crm_details['status_id'] == 1 ||$crm_details['status_id'] == 2 ||$crm_details['status_id'] == 3 || $crm_details['status_id'] == 5)
-                                                                        Invalid
-                                                                    @else
-                                                                        Close
-                                                                    @endif
-                                                                </span>
-                                                            </button>
-                                                        @endif
-                                                    </form>
-                                                </div>
-                                            @endif
-                                            @if (session('role_id') == 1 || in_array(523, session('permissions')))
-                                                <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
-                                            @endif
-
-                                        </div>
+                                        
                                     </div>
                                     <div class="col-7">
                                         <div class="content-body chat-application">
@@ -508,37 +355,9 @@
                                     </div>
                                 </div>
 
-                                @if(count($crm_agent_history) > 0)
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h3>Agent History</h3>
-                                            <div class="table-responsive">
-                                                <table class="table mb-0">
-                                                    <thead>
-                                                    <tr class="border-bottom-active border-custom-color">
-                                                        <th>S No.</th>
-                                                        <th>Agent Name</th>
-                                                        <th>Agent Assigned Date</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach($crm_agent_history as $index => $history)
-                                                        @php $index++; @endphp
-                                                        <tr class="border-bottom-success border-custom-color">
-                                                            <td>{{$index}}</td>
-                                                            <td>{{$history->agent->name}}</td>
-                                                            <td>{{$history->created_at}}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
+                                
 
-                                @if(count($crm_status_history) > 0)
+                                @if(count($report->status_history) > 0)
                                     <hr>
                                     <div class="row">
                                         <div class="col-12">
@@ -555,100 +374,14 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
-                                                    @foreach($crm_status_history as $index => $status_history)
+                                                    @foreach($report->status_history as $status_history)
                                                         @php $index++; @endphp
                                                         <tr class="border-bottom-success border-custom-color">
                                                             <td>{{$index}}</td>
                                                             <td>{{$status_history->status->name}}</td>
-                                                            @if($status_history->agent_id != null)
-                                                                <td>{{$status_history->agent->name}}</td>
-                                                            @else
-                                                                @if($status_history->status_id == 5)
-                                                                    <td>{{$shipper}} (Shipper)</td>
-                                                                @else
-                                                                    <td>-</td>
-                                                                @endif
-                                                            @endif
+                                                            <td>{{$status_history->admin->name}}</td>
                                                             <td>{{$status_history->created_at}}</td>
-                                                            <td>{{str_pad($status_history->crm_request_id, 6, '0', STR_PAD_LEFT)}}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if(count($crm_tagging_history) > 0)
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h3>Tagging History</h3>
-                                            <div class="table-responsive">
-                                                <table class="table mb-0">
-                                                    <thead>
-                                                    <tr class="border-bottom-active border-custom-color">
-                                                        <th>S No.</th>
-                                                        <th>Name</th>
-                                                        <th>Tagged Type</th>
-                                                        <th>Tagged Date</th>
-                                                        <th>Tagged By</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach($crm_tagging_history as $index => $tagging_history)
-                                                        @php $index++; @endphp
-                                                        <tr class="border-bottom-success border-custom-color">
-                                                            <td>{{$index}}</td>
-                                                            @if($tagging_history->crm_request_tagging_type_id == 1)
-                                                                <td>{{$tagging_history->department->name}}</td>
-                                                                <td>{{$tagging_history->tagging->name}}</td>
-                                                            @elseif($tagging_history->crm_request_tagging_type_id == 2)
-                                                                <td>{{$tagging_history->user->name}}</td>
-                                                                <td>{{$tagging_history->tagging->name}}</td>
-                                                            @else
-                                                                <td>-</td>
-                                                                <td>Un Tagged</td>
-                                                            @endif
-                                                            <td>{{$tagging_history->created_at}}</td>
-                                                            <td>{{$tagging_history->agent->name}}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
-
-                                @if(count($crm_escalation_tagging_history) > 0)
-                                    <hr>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <h3>Escalation Taging</h3>
-                                            <div class="table-responsive">
-                                                <table class="table mb-0">
-                                                    <thead>
-                                                    <tr class="border-bottom-active border-custom-color">
-                                                        <th>S No.</th>
-                                                        <th>Role | Department</th>
-                                                        <th>Hub</th>
-                                                        <th>Tagged Date</th>
-                                                    </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach($crm_escalation_tagging_history as $index => $escalation_tagging_history)
-                                                        @php $index++; @endphp
-                                                        <tr class="border-bottom-success border-custom-color">
-                                                            <td>{{$index}}</td>
-                                                            <td>{{$escalation_tagging_history->role->name}} | {{$escalation_tagging_history->role->department->name}}</td>
-                                                            @if($escalation_tagging_history->hub != NULL)
-                                                                <td>{{$escalation_tagging_history->hub->name}}</td>
-                                                            @else
-                                                                <td>-</td>
-                                                            @endif
-                                                            <td>{{$escalation_tagging_history->created_at}}</td>
+                                                            <td>{{str_pad($report->id, 6, '0', STR_PAD_LEFT)}}</td>
                                                         </tr>
                                                     @endforeach
                                                     </tbody>

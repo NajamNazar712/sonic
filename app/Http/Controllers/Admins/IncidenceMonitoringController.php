@@ -136,6 +136,11 @@ class IncidenceMonitoringController extends Controller
 
     public function view_report($id){
         $report = IncidenceMonitoring::find($id);
+        if($report){
+            
+            return view('admin.incidence_monitoring.view_report',compact('report'));
+        }
+
         if($crm_request){
             $shipment_status = null;
             $shipment_status_date = null;

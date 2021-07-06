@@ -35,4 +35,8 @@ class IncidenceMonitoring extends Model
         return $this->hasMany('App\Http\Model\IncidenceMonitoringTaggedPerson');
     }
 
+    public function status_history() {
+        return $this->hasMany('App\Http\Model\IncidenceMonitoringStatusHistory');
+    }
+
 }
