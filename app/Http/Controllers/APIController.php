@@ -3228,6 +3228,51 @@ class APIController extends Controller
         }
     }
 
+    private function shipment_google_status_name($id) {
+      if (in_array($id, [1])) {
+        return 'TICKET_CREATED';
+      }
+      elseif (in_array($id, [2, 53, 61, 63])) {
+        return 'PACKAGE_RECEIVED';
+      }
+      elseif (in_array($id, [3])) {
+        return 'IN_TRANSIT';
+      }
+      elseif (in_array($id, [4])) {
+        return 'RECEIVED_DELIVERY_LOCATION';
+      }
+      elseif (in_array($id, [5])) {
+        return 'OUT_FOR_DELIVERY';
+      }
+      elseif (in_array($id, [17, 19])) {
+        return 'CANCELLED';
+      }
+      elseif (in_array($id, [8, 10])) {
+        return 'DELIVERY_FAILED';
+      }
+      elseif (in_array($id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+        return 'DELIVERED';
+      }
+      elseif (in_array($id, [15])) {
+        return 'AVAILABLE_FOR_PICKUP';
+      }
+      elseif (in_array($id, [1, 11, 49, 56])) {
+        return 'DELAYED';
+      }
+      elseif (in_array($id, [6, 7, 9, 12, 13, 52, 54, 55, 58, 59, 62])) {
+        return 'ON_HOLD';
+      }
+      elseif (in_array($id, [20, 21, 22, 23, 24, 44, 47, 48, 57, 60, 50])) {
+        return 'RETURNING_TO_SENDER';
+      }
+      elseif (in_array($id, [25, 18, 51])) {
+        return 'DELIVERED_TO_SENDER';
+      }
+      else {
+        return 'ERROR';
+      }
+    }
+
     public function shipment_google_track(Request $request) {
       $authorization = $request->header('Authorization');
 
@@ -3246,7 +3291,7 @@ class APIController extends Controller
           if ($validate->fails()) {
             $current_status = array();
 
-            $current_status['Status'] = 'Unknown';
+            $current_status['Status'] = 'ERROR';
             $current_status['Date'] = Carbon::now();
             $current_status['Error'] = 'Missing Tracking Number';
 
@@ -3264,7 +3309,7 @@ class APIController extends Controller
             if ($validate->fails()) {
               $current_status = array();
 
-              $current_status['Status'] = 'Unknown';
+              $current_status['Status'] = 'ERROR';
               $current_status['Date'] = Carbon::now();
               $current_status['Error'] = 'Invalid Tracking Number';
 
@@ -3316,7 +3361,7 @@ class APIController extends Controller
                   foreach ($shipments_journey as $shipment_journey) {
                     $transit_event = array();
 
-                    $transit_event['Status'] = $shipment_journey->shipment_status_shipper->name;
+                    $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
                     $transit_event['Date'] = $shipment_journey->created_at;
 
                     $transit_events[] = $transit_event;
@@ -3338,16 +3383,16 @@ class APIController extends Controller
 
                   $shipment_journey = $shipments_journey->last();
 
-                  $current_status['Status'] = $shipment_journey->shipment_status_shipper->name;
+                  $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
                   $current_status['Date'] = $shipment_journey->created_at;
                 }
                 else {
-                  $current_status['Status'] = $shipment->status_shipper->name;
+                  $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                   $current_status['Date'] = $shipment->updated_at;
 
                   $transit_event = array();
 
-                  $transit_event['Status'] = $shipment->status_shipper->name;
+                  $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                   $transit_event['Date'] = $shipment->updated_at;
 
                   $transit_events[] = $transit_event;
@@ -3361,7 +3406,7 @@ class APIController extends Controller
               else {
                 $current_status = array();
 
-                $current_status['Status'] = 'Unknown';
+                $current_status['Status'] = 'ERROR';
                 $current_status['Date'] = Carbon::now();
                 $current_status['Error'] = 'Invalid Tracking Number';
 
@@ -3373,7 +3418,7 @@ class APIController extends Controller
         else {
           $current_status = array();
 
-          $current_status['Status'] = 'Unknown';
+          $current_status['Status'] = 'ERROR';
           $current_status['Date'] = Carbon::now();
           $current_status['Error'] = 'Invalid Authorization';
 
@@ -3383,7 +3428,7 @@ class APIController extends Controller
       else {
         $current_status = array();
 
-        $current_status['Status'] = 'Unknown';
+        $current_status['Status'] = 'ERROR';
         $current_status['Date'] = Carbon::now();
         $current_status['Error'] = 'Missing Authorization';
 
