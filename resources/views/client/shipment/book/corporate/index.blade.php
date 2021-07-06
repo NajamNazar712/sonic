@@ -91,6 +91,8 @@
                                             </div>
                                         </div>
 
+
+
                                         @if($air_waybill != null)
                                             <div id="info_display" class="form-group text-center p-1 border border-light rounded">
                                                 <label class="d-block">Show Information on Air Waybill</label>
@@ -1003,6 +1005,8 @@
 
                 shipping_mode_same_day(pickup_city, consignee_city);
             });
+
+
 
             $("#consignee_info").select2({
                 width:'100%',
