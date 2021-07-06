@@ -8405,7 +8405,17 @@ class AdminReportsController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','shipments.estimated_weight','shipments.actual_weight','shipments.length','shipments.breadth','shipments.height'])
+            ->leftJoin('shipments_journey as bkg_date', function ($join) {
+                $join->on('bkg_date.shipment_id', '=', 'shipments.id')
+                    ->where('bkg_date.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)'));
+            })
+            ->leftJoin('shipments_journey as arv_date', function ($join) {
+                $join->on('arv_date.shipment_id', '=', 'shipments.id')
+                    ->where('arv_date.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination', 'bkg_date.created_at as booking_date','arv_date.created_at as arrival_date' ,'sm.mode as shipping_mode','shipments.estimated_weight','shipments.actual_weight','shipments.length','shipments.breadth','shipments.height'])
             ->whereNotNull('shipments.actual_weight');
 
         if (session('role_id') != 1) {
