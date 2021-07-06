@@ -13,6 +13,7 @@
                     {{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
                     <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
                     <button type="button" class="btn btn-prselected_service_type_nameimary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
+                    <button type="button" id="distribution_shipment_btn" class="btn mt-1 d-none mr-2 ml-auto mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right">Distribution Shipment</button>
                 </h1>
 
                 <div class="card">
@@ -492,7 +493,7 @@
 
     <script>
 
-
+        let distribution_shipment = 0;
         $(document).ready(function() {
             $('#open_shipment').checkboxpicker();
 
@@ -773,9 +774,11 @@
             $('#select_service_type').modal('show');
             @else
                 service_type = '{{ Session::get('service_type_id') }}';
-
+                distribution_shipment = 0;
+            $('#distribution_shipment_btn').addClass('d-none');
             if(service_type == 1){
                 $('#pieces_quantity').removeClass('d-none');
+                $('#distribution_shipment_btn').removeClass('d-none');
             }
             if (service_type == 2) {
                 $('#replacement').removeClass('d-none');
@@ -814,8 +817,9 @@
 
                 if (service_type !== '' && service_type !== undefined && service_type !== null) {
                     $('#select_service_type form #service_type-error').addClass('d-none');
-
+                    $('#distribution_shipment_btn').addClass('d-none');
                     if (service_type == 1) {
+                        $('#distribution_shipment_btn').removeClass('d-none');
                         $('#shipping_header_div').removeClass('col col_6');
                         $('#order_information_header_div').removeClass('col col_6');
                         $('#consignee_header_div').removeClass('col col_6');
@@ -1037,6 +1041,29 @@
                 templateSelection: formatRepoSelection
 
             });
+
+
+            $("#distribution_shipment_btn").on('click',function (){
+                if(service_type != 1)
+                {
+                    $('#distribution_shipment_btn').addClass('d-none');
+                    return;
+                }
+
+                if(distribution_shipment == 0)
+                {
+                    $('#self_collection_div').addClass('d-none');
+                    $('#regular').addClass('d-none');
+                    distribution_shipment = 1;
+
+                }
+                else{
+                    $('#self_collection_div').removeClass('d-none');
+                    $('#regular').removeClass('d-none');
+                    distribution_shipment = 0;
+                }
+            });
+
             function formatRepo (repo) {
                 if (repo.loading) return repo.text;
                 var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
