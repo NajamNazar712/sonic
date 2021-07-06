@@ -209,6 +209,8 @@ class FTLController extends Controller
                     return back()->with(['error' => 'Invalid FTL Request']);
                 }
 
+                $cost_types = FtlCostTypes::pluck('name')->toArray();
+              
                 $ftl->additional_cost()->delete();
                 if ($request->has('other_cost') && $request->has('other_cost_type')) {
                     $other_cost_count = count($request->other_cost);
@@ -218,6 +220,12 @@ class FTLController extends Controller
                         $cost->amount = $request->other_cost[$i];
                         $cost->cost_type = $request->other_cost_type[$i];
                         $cost->save();
+
+                        if(!in_array($request->other_cost_type[$i],$cost_types )){
+                            FtlCostTypes::create([
+                                'name' => $request->other_cost_type[$i],
+                            ]);
+                        }
                     }
                 }
                 $ftl->vendor_id = $request->vendor;

@@ -134,7 +134,7 @@
                                                          {{--   <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">--}}
                                                             <select class="form-control select2" id="cost_type" name="cost_type" data-rule-required="true" data-msg-required="Cost Type is required">
                                                                 @foreach($cost_types as $cost_type)
-                                                                    <option value="{{$cost_type->id}}">{{$cost_type->name}}</option>
+                                                                    <option value="{{$cost_type->name}}">{{$cost_type->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -461,11 +461,11 @@
             }).bind('change', function() {
                 if ($(this).val() === 'New') {
                     $('.cost_div').removeClass('d-none');
-                    $('#cost_name').attr("required",true);
+
                 }
                 else{
                     $('.cost_div').addClass('d-none');
-                    $('#cost_name').attr("required",false);
+
                 }
             });
 
@@ -537,8 +537,9 @@
             
             $("#update_ftl_request_form #add_other_cost").on('click',function (){
                 var other_cost = $('#update_ftl_request_form #other_cost').val();
-                var other_cost_type = $('#update_ftl_request_form #other_cost_type').val();
+                var other_cost_type = $('#update_ftl_request_form #cost_type').val();
                 var other_cost_name = $('#update_ftl_request_form #cost_name').val();
+                console.log(other_cost_name);
                 if(other_cost == '')
                 {
                     toastr.error('Other Cost Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -549,13 +550,15 @@
                     toastr.error('Other Cost Type Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return;
                 }
-                console.log(other_cost_type);
                 if(other_cost_name == '' && other_cost_type == "New")
                 {
                     toastr.error('Other Cost Name is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return;
                 }
-                add_cost(other_cost,other_cost_type,cost_name);
+                if(other_cost_type == "New" && other_cost_name != ''){
+                   other_cost_type =  other_cost_name;
+                }
+                add_cost(other_cost,other_cost_type,other_cost_name);
                 calc_total_cost();
 
             });
