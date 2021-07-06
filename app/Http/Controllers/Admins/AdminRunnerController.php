@@ -374,6 +374,7 @@ class AdminRunnerController extends Controller
 
     public function vehicle_in_transit(){
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(),253);
         $route_managements = RouteManagement::where('status',1)->get();
         // $route_managements = DB::table('route_managements')->where('status',1)->get();
         $fleets = Fleet::where('status',1)->get();
@@ -382,6 +383,10 @@ class AdminRunnerController extends Controller
     }
 
     public function vehicle_in_transit_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),254);
+        }
         $master_cargo = MasterCargo::leftjoin('cities as or', 'master_cargoes.origin_hub_id', '=', 'or.id')
         ->leftjoin('cities as des','master_cargoes.destination_hub_id','=','des.id')
         ->leftjoin('route_managements as rm','master_cargoes.route_management_id','=','rm.id')

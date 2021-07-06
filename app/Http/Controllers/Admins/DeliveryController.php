@@ -1809,19 +1809,19 @@ class DeliveryController extends Controller
         $status_id = $request->status;
         $shipment_id = $request->shipment_id;
         if(Shipment::where('id', $shipment_id)->where('nsa_osa_status', 1)->exists()){
-            if(ShipmentsJourney::where('shipment_id',$shipment_id)->where('shipper_status_id',$status_id)->where('status_reason_id',4)->orWhere('status_reason_id',6)->exists()){
-                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6,12,34])->orderBy('name')->get();
+            if(ShipmentsJourney::where('shipment_id',$shipment_id)->where('shipper_status_id',5)->count() > 1){
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
             }
             else{
-                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6,12,34])->orderBy('name')->get();
             }
         }
         else{
-            if(ShipmentsJourney::where('shipment_id',$shipment_id)->where('shipper_status_id',$status_id)->where('status_reason_id',4)->orWhere('status_reason_id',6)->exists()){
-                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6])->orderBy('name')->get();
+            if(ShipmentsJourney::where('shipment_id',$shipment_id)->where('shipper_status_id',5)->count() > 1){
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
             }
             else{
-                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6])->orderBy('name')->get();
             }
         }
 
@@ -1837,7 +1837,7 @@ class DeliveryController extends Controller
     {
         $status_id = $request->status;
 
-        $statuses = ShipmentStatus::find($status_id)->reasons()->whereNotIn('id',[4,6])->select('id', 'name')->orderBy('name')->get();
+        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
@@ -1899,6 +1899,10 @@ class DeliveryController extends Controller
                     $shipment_details = Shipment::find($shipment);
 
                     if ($shipment_details->booking_type_id == 5 && $selected_status == 12) {
+                        continue;
+                    }
+
+                    if(ShipmentsJourney::where('shipment_id',$shipment)->where('shipper_status_id',5)->count() == 0){
                         continue;
                     }
 
@@ -6674,6 +6678,7 @@ class DeliveryController extends Controller
     }
 
     public function request_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),269);
         if(session('role_id') != 1){
 
             $riders = Rider::where('status',1)->whereIn('city_id',session('hubs'))->where('blacklist',0)->select('id','name')->get();
@@ -6683,7 +6688,11 @@ class DeliveryController extends Controller
         }
         return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
-    public function request_list(){
+    public function request_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),270);
+        }
         $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')

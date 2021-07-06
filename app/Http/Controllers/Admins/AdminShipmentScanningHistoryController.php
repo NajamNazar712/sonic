@@ -12,6 +12,8 @@ use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminShipmentScanningHistoryController extends Controller
 {
@@ -22,6 +24,7 @@ class AdminShipmentScanningHistoryController extends Controller
     }
 
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),250);
         return view('admin.scanning_history.index');
     }
     public function details(Request $request){

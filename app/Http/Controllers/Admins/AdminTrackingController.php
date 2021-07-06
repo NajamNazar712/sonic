@@ -39,6 +39,7 @@ use Auth;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use DB;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminTrackingController extends Controller
 {
@@ -47,6 +48,7 @@ class AdminTrackingController extends Controller
     }
 
     public function index(Request $request) {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),271);
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
@@ -580,6 +582,7 @@ class AdminTrackingController extends Controller
 
     public function cx_quick_tracking_index(){
         return redirect()->route('admin.access_denied');
+        ActivityTrailController::createActivityTrailLog(Auth::id(),272);
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
@@ -731,7 +734,7 @@ class AdminTrackingController extends Controller
                     $details['tracking_number'] = $tracking_number;
 
                     $details['open_box'] = $shipment->open_box;
-                    if($shipment->payment_mode_id == 5){
+                    if($shipment->payment_mode_id == 2){
                         $details['ccd'] = 1;
                     }
                     else{
