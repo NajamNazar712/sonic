@@ -791,4 +791,233 @@ class AdminNsaAccountShipmentController extends Controller
             }
         }
     }
+
+    public function bulk_return_index(){
+        return view('admin.telenor.bulk_return');
+    }
+    public function bulk_return_submit(Request $request){
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'received_by' => 'Received/Refused By',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+            'received_by' => [],
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'received_by'];
+
+        if ($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Returned By'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+
+                        break;
+                    }
+                }
+
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $tracking_ids = array();
+                $tracking_id_row = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                    if (empty($errors['Row #' . $row_id])) {
+                        if (!empty(trim($row['tracking_number'])) || !empty(trim($row['received_by']))) {
+                            if (empty($tracking_ids)) {
+
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            } else {
+                                if (in_array($row['tracking_number'], $tracking_ids)) {
+                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                                } else {
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                }
+                            }
+                        }
+
+                        $settings = GlobalSettings::where('type', 'nsa_accounts');
+                        $nsa_accounts = array();
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+                        }
+                        if (count($nsa_accounts) > 0) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
+                                $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
+                            }
+                        } else {
+                            $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
+                        }
+                    }
+                }
+                if (empty($errors)) {
+                    $tracking_numbers = array();
+                    $shipment_ids = array();
+
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $tracking = trim($row['tracking_number']);
+                        $received_by = trim($row['received_by']);
+                        $shipment_details = Shipment::where('tracking_number', $tracking)->first();
+                        $shipment_id = $shipment_details->id;
+                        $shipment_ids[] = $shipment_id;
+
+
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
+                    }
+
+                    $nsa_shipments = Shipment::whereIn('id', $shipment_ids);
+
+                    if ($nsa_shipments->exists()) {
+                        $nsa_shipments = $nsa_shipments->get();
+                        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+                        $rider_id = $settings->setting_value;
+                        $valid_shipments = array();
+                        $shipments_count = 0;
+                        $total_cod_amount = 0;
+                        foreach ($nsa_shipments as $nsa_shipment) {
+                            if (!in_array($nsa_shipment->id, $valid_shipments)) {
+                                if ($nsa_shipment) {
+                                    $valid_shipments[] = $nsa_shipment->id;
+                                    $shipments_count++;
+
+                                    if ($nsa_shipment->booking_type_id != 4 || ($nsa_shipment->booking_type_id == 4 && $nsa_shipment->charges_mode_id == 2)) {
+                                        $total_cod_amount += $nsa_shipment->amount;
+                                    }
+                                }
+                            }
+                        }
+
+                        $order = false;
+                        if ($shipments_count != 0) {
+                            $note = DeliveryNote::create([
+                                'hub_id' => 202,
+                                'rider_id' => $rider_id,
+                                'route_id' => 2,
+                                'shipments_count' => $shipments_count,
+                                'admin_id' => 50,
+                                'total_cod_amount' => $total_cod_amount,
+                                'password' => NULL,
+                                'last_updated_at' => Carbon::now(),
+                                'special_rider' => 0,
+                                'order' => $order
+                            ]);
+                            
+
+                            if ($note) {
+                                if (!$order) {  //Default
+                                    sort($valid_shipments); //sort_valid_shipments;
+                                }
+                                $serial = 1;
+                                foreach ($valid_shipments as $index => $shipment) {
+                                    DeliveryNoteShipment::create([
+                                        'delivery_note_id' => $note->id,
+                                        'shipment_id' => $shipment,
+                                        'notification' => 0,
+                                        'rider_information' => 0,
+                                        'ordering' => $serial
+                                    ]);
+                                    $serial++;
+                                }
+                                foreach ($valid_shipments as $index => $shipment) {
+                                    $received_by = '';
+
+                                    $shipment_data = Shipment::find($shipment);
+                                    $shipment_data->shipper_status_id = 20;
+                                    $shipment_data->consignee_status_id = 20;
+                                    $shipment_data->save();
+
+                                    foreach ($rows as $key => $row) {
+                                        if ($row['tracking_number'] == $shipment_data->tracking_number) {
+                                            $received_by = $row['received_by'];
+                                        }
+                                    }
+
+                                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    ShipmentsJourneyController::add($shipment, 12, 12, 34, NULL, NULL, 50, $note->id, NULL, 0,$received_by);
+                                    ShipmentsJourneyController::add($shipment, 20, 20, 34, NULL, NULL, 50, $note->id, NULL, 1,$received_by);
+                                    DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
+                                }
+
+                                DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
+                            }
+
+                            $note = ReturnNote::create(['hub_id' => 202, 'rider_id' => 274, 'route_id' => 2, 'shipments_count' => $shipments_count, 'admin_id' => 50]);
+                            if ($note) {
+                                foreach ($valid_shipments as $shipment_id) {
+                                    $shipment = Shipment::where('id', $shipment_id);
+
+                                    $shipment = $shipment->first();
+                                    ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
+                                    $shipment->shipper_status_id = 25;
+                                    $shipment->consignee_status_id = 25;
+                                    $shipment->save();
+                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                    ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, 50, $note->id, $rider_id);
+                                }
+                            }
+                        }
+                    }
+                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                        return $row . ': ' . $tracking_number;
+                    }, array_keys($tracking_numbers), $tracking_numbers));
+
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as returned with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+            } else {
+                return redirect()->back()->with('error', 'No Shipments in File');
+            }
+        }
+    }
 }

@@ -27,6 +27,7 @@
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Target Cash</th>
                         <th class="border-primary border-darken-1">Pending Cash Collection</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -55,6 +56,48 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" role="dialog" aria-labelledby="AssignAgentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Assign Agent</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="assign_agent_form" class="form-horizontal" action="{{ route('admin.debriefing.supervisor.assign_agents') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" name="delivery_note_id" id="delivery_note_id_input">
+                        <div class="row justify-content-center">
+                            <div class="col-6 form-group">
+                                <label for="hub_id">Hub</label>
+
+                                <select class="form-control hub_id" name="hub_id" id="hub_id" data-rule-required="true" data-msg-required="Hub is required">
+                                    @foreach($hubs as $hub)
+                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-6 form-group d-none" id="agend_input">
+                                <label for="end_point_id">Agents</label>
+                                <select class="form-control" name="agent_id" id="agent_id" data-rule-required="true" data-msg-required="Agent is required">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="AssignAgentBtn" type="submit" class="btn btn-info">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -120,6 +163,44 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            
+            $('#agent_id').prepend('<option value="" selected="selected"></option>').select2({
+				placeholder: 'Select Agent *',
+				width: '100%',
+			});
+
+            $('#hub_id').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Select Hub *'
+			}).bind('change', function(asd) {
+				
+                
+                console.log($(this).val());
+                $.ajax({
+                        url: '{!! route('admin.debriefing.supervisor.agents') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub_id': $(this).val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+
+                            if(data.status){
+                                $('#agend_input').removeClass('d-none');
+                                $.each(data.agents, function (index, agent) {
+                                    $('#agent_id').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
+                                });
+                            }else{
+                                $('#agend_input').addClass('d-none');
+
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            
+                });
+				
+			});
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -203,6 +284,8 @@
                     { data:'pending_shipments_link' ,name: 'pending_shipments_link', class: 'align-middle pending_shipments_link',orderable: false, searchable: false},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     { data:'pending_cash_collection' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle pending_cash_collection'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -355,7 +438,16 @@
                     });
 
             });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
+                var id = parseInt($(this).parents('tr').attr('id'));
+                
+                $('#delivery_note_id_input').val(id);
+
+                $('#AssignAgentModal').modal('show');
+                
+               
+            });
             
 
             $('body').on('click','.printdeliverynote',function () {
@@ -391,6 +483,8 @@
                         }
                     });
             }
+
+           
         });
     </script>
 @endsection

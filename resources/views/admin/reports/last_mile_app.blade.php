@@ -249,6 +249,7 @@
                             <th class="border-primary border-darken-1">POD</th>
                             <th class="border-primary border-darken-1">CNIC</th>
                             <th class="border-primary border-darken-1">House</th>
+                            <th class="border-primary border-darken-1">CCD Slip</th>
                             <th class="border-primary border-darken-1">Audio</th>
                         </tr>
                         </thead>
@@ -703,6 +704,7 @@
                             { data:'pod' ,name: 'pod', class: 'align-middle pod',orderable: false, searchable: false},
                             { data:'cnic_image' ,name: 'cnic_image', class: 'align-middle cnic_image',orderable: false, searchable: false},
                             { data:'house_image' ,name: 'house_image', class: 'align-middle house_image',orderable: false, searchable: false},
+                            { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                             { data:'audio_path' ,name: 'rider_deliveries.audio_path', class: 'align-middle audio_path',orderable: false, searchable: false},
 
                         ],
@@ -810,6 +812,16 @@
             });
 
             $('body').on('click','#app_shipments_datatable tbody tr td.house_image button',function () {
+                var link = $(this).attr('data-link');
+
+                var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
+
+                $('#picture_modal .modal-body').html(image);
+
+                $('#picture_modal').modal('show');
+            });
+
+            $('body').on('click','#app_shipments_datatable tbody tr td.ccd_image button',function () {
                 var link = $(this).attr('data-link');
 
                 var image = '<img src="' + link + '" style="width: 100%; max-width: 200px;" />';
