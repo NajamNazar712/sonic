@@ -1624,7 +1624,12 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                         ';
                         }  elseif ($shipment->booking_type_id != 4) {
-                            $credit_icon = '<i class="la la-credit-card"></i>';
+                            if($shipment->payment_mode_id == 2) {
+                                $credit_icon = '<i class="la la-credit-card"></i>';
+                            }
+                            else{
+                                $credit_icon = '';
+                            }
                             $table_end .= '
                                 <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
                                 <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . ' ' . $credit_icon . '</strong></td>
