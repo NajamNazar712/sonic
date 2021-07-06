@@ -467,10 +467,6 @@
                     $('.cost_div').addClass('d-none');
                     $('#cost_name').attr("required",false);
                 }
-                if(this.val() == "New" && $('#cost_name').val() == ''){
-                    toastr.error('New Cost Name is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    return;
-                }
             });
 
 
@@ -542,6 +538,7 @@
             $("#update_ftl_request_form #add_other_cost").on('click',function (){
                 var other_cost = $('#update_ftl_request_form #other_cost').val();
                 var other_cost_type = $('#update_ftl_request_form #other_cost_type').val();
+                var other_cost_name = $('#update_ftl_request_form #cost_name').val();
                 if(other_cost == '')
                 {
                     toastr.error('Other Cost Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -552,7 +549,13 @@
                     toastr.error('Other Cost Type Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return;
                 }
-                add_cost(other_cost,other_cost_type);
+                console.log(other_cost_type);
+                if(other_cost_name == '' && other_cost_type == "New")
+                {
+                    toastr.error('Other Cost Name is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
+                }
+                add_cost(other_cost,other_cost_type,cost_name);
                 calc_total_cost();
 
             });
@@ -582,7 +585,7 @@
 
             calc_gst();
 
-            function add_cost(other_cost,other_cost_type)
+            function add_cost(other_cost,other_cost_type,cost_name)
             {
                 var html = "<tr>" +
                     "<td>" + other_cost + "<input type='hidden' name='other_cost[]' value='"+other_cost+"' class='to_calc_total_cost'> </td>" +
@@ -593,6 +596,7 @@
                 $("#update_ftl_request_form #cost_table tbody").append(html);
                 $('#update_ftl_request_form #other_cost').val('');
                 $('#update_ftl_request_form #other_cost_type').val('');
+                $('#update_ftl_request_form #cost_name').val('');
             }
 
             function calc_total_cost()
