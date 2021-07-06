@@ -289,16 +289,9 @@
                     body = [];
                     var params = table.ajax.params();
 
-                    if(params !== undefined){
-                        params.start = 0;
-                        params.length = -1;
-                        params.excel = true;
-                    }
-                    else{
-                        params = {
-                            'excel':false,
-                        }
-                    }
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
                     
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.work_code_master.list') }}',
@@ -344,6 +337,7 @@
                         extend: 'excel',
                         title: 'Work Code Master Report',
                         className: 'btn btn-primary excel',
+                        enabled:false,
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -396,7 +390,8 @@
                 table.column('ad.name:name').search($('#status_marked_by').val(), false, false, true);
                }else{
                 table.column('ad.name:name').search('', false, false, true);
-               } 
+               }
+               table.button('.excel').enable();
                table.draw();
             });
 
