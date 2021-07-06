@@ -423,8 +423,7 @@ class ConsigneeAPIController extends Controller
                     $consignee_info->name = $request->name;
                 }
                 if ($request->has('phone_number') && $request->phone_number_updated == 1) {
-                    $consignee_info->phone_number_2 = $consignee_info->phone_number_1;
-                    $consignee_info->phone_number_1 = $request->phone_number;
+                    $consignee_info->phone_number_2 = $request->phone_number;
                 }
                 if ($request->has('pin')) {
                     $consignee_info->pin = bcrypt($request->pin);
