@@ -2667,6 +2667,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
         });
 
+        Route::prefix('shipment_status_eta')->name('shipment_status_eta.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipment_status_eta_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@shipment_status_eta_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@shipment_status_eta_store')->name('store');
+            Route::post('edit', 'Admins\GlobalSettingsController@shipment_status_eta_edit')->name('edit');
+        });
+
     });
 
 
