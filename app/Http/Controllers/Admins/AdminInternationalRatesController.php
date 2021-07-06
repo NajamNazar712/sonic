@@ -41,6 +41,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminInternationalRatesController extends Controller
 {
@@ -1205,6 +1206,7 @@ class AdminInternationalRatesController extends Controller
         // Getting Data For View Screen
         if($view != null && $view == "view")
         {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),265);
             foreach ($zones as $zone)
             {
                 $zone_rates = InternationalEconomyRate::where([['user_id',$user->id],['zone_id',$zone->id]]);
@@ -1215,6 +1217,7 @@ class AdminInternationalRatesController extends Controller
             }
         }
         else if($view == null){
+            ActivityTrailController::createActivityTrailLog(Auth::id(),264);
             // Getting Data New History Is Present
             if(InternationalEconomyRateHistory::where([['user_id',$user->id],['status',0]])->exists())
             {

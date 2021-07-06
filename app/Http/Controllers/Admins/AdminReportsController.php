@@ -8610,6 +8610,7 @@ class AdminReportsController extends Controller
     }
 
     public function shipper_insurance_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),255);
         $shipper_name = User::select('id','name')->get();
         $today = Carbon::now()->endOfDay();
         $threedays = Carbon::now()->subDays(3)->startOfDay();
@@ -8618,6 +8619,10 @@ class AdminReportsController extends Controller
 
     public function shipper_insurance_list(Request $request){
 
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),256);
+        }
         $shipments = Shipment::join('users as u','shipments.user_id','=','u.id')
             ->join('shipment_items as si','si.shipment_id','=','shipments.id')
             ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number as tracking_number','u.name as shipper','shipments.insurance_charges','shipments.created_at','si.insurance','si.price as price',DB::raw('sum(si.price) as total_insurance'))
@@ -8693,6 +8698,7 @@ class AdminReportsController extends Controller
 
     public function work_code_master_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),267);
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
         $riders = DB::connection('reports')->table('riders')->where('status',1)->select('id','name')->get();
         $admins = DB::connection('reports')->table('admins')->where('status',1)->select('id','name')->get();
@@ -8703,7 +8709,11 @@ class AdminReportsController extends Controller
     }
 
     public function work_code_master_list(Request $request){
-        
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),268);
+        }
         $shipments = DB::connection('reports')->table('shipments_journey')->leftjoin('admins as ad', 'shipments_journey.admin_id', '=', 'ad.id')
             ->join('shipments as sh', 'shipments_journey.shipment_id', '=', 'sh.id')
             ->join('users as su', 'sh.user_id', '=', 'su.id')
