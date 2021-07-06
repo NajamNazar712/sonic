@@ -14,7 +14,7 @@ class UpdateFtlCostTypesTable extends Seeder
 
         DB::table('ftl_cost_types')->insert(array(
             array('id' => 1, 'name' => 'Detention'),
-            array('id' => 2, 'name' => 'Extra Fuel')
+            array('id' => 2, 'name' => 'Extra Fuel'),
         ));
     }
 }

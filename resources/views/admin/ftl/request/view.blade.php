@@ -127,11 +127,19 @@
                                                             </div>
                                                     </div>
                                                     <div class="row mb-2">
-                                                        <div class="col-4">
+                                                        <div class="col-3">
                                                             <input type="text" class="form-control" id="other_cost" placeholder="Other Cost">
                                                         </div>
-                                                        <div class="col-6">
-                                                            <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">
+                                                        <div class="col-3">
+                                                         {{--   <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">--}}
+                                                            <select class="form-control select2" id="cost_type" name="cost_type" data-rule-required="true" data-msg-required="Cost Type is required">
+                                                                @foreach($cost_types as $cost_type)
+                                                                    <option value="{{$cost_type->id}}">{{$cost_type->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-3 d-none cost_div">
+                                                            <input type="text" class="form-control" id="cost_name" placeholder="Cost Name">
                                                         </div>
                                                         <div class="col-2">
                                                             <button type="button" id="add_other_cost" class="btn btn-info"><i class="fa fa-plus-circle"></i>Add</button>
@@ -446,6 +454,26 @@
                 }
 
             });
+
+            $('#cost_type').prepend('<option value="" selected="selected"></option>').append('<option value="New">New</option>').select2({
+                width: '100%',
+                placeholder: 'Cost Type*',
+            }).bind('change', function() {
+                if ($(this).val() === 'New') {
+                    $('.cost_div').removeClass('d-none');
+                    $('#cost_name').attr("required",true);
+                }
+                else{
+                    $('.cost_div').addClass('d-none');
+                    $('#cost_name').attr("required",false);
+                }
+                if(this.val() == "New" && $('#cost_name').val() == ''){
+                    toastr.error('New Cost Name is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
+                }
+            });
+
+
 
             $('#edit_shipper_form #sale_person').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Sale Person',

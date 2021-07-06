@@ -6,6 +6,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\VehicleType;
 use App\Http\Models\City;
+use App\Http\Models\FtlCostTypes;
 use App\Http\Models\TransportModeVendor;
 use App\Http\Models\Admin\FtlComment;
 use App\Http\Models\Admin\FtlRequest;
@@ -179,8 +180,9 @@ class FTLController extends Controller
             ->where('ftl_comments.ftl_request_id',$ftl->id)
             ->select(['ftl_comments.id as id','ftl_comments.comment as comment','ftl_comments.comment_by as comment_by','ftl_comments.comment_by_id as commenter_id','ftl_comments.created_at as created_at','a.name as commenter'])
             ->get();
+        $cost_types = FtlCostTypes::all();
 
-       return view('admin.ftl.request.view',compact('ftl','ftl_status_history','shippers','sale_persons','vendors','ftl_costs','comments'));
+       return view('admin.ftl.request.view',compact('ftl','ftl_status_history','shippers','sale_persons','vendors','ftl_costs','comments','cost_types'));
     }
 
      public function ftl_request_update_shipper($id,Request $request)
