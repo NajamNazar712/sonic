@@ -48,7 +48,7 @@
                     <h4 class="modal-title white">Add Report</h4>
 
                 </div>
-                <form id="ftl_request_form" method="post" action="{{route('admin.incidence_monitoring.add')}}" class="justify-content-center" novalidate="novalidate">
+                <form id="add_report_form" method="post" action="{{route('admin.incidence_monitoring.add')}}" class="justify-content-center" novalidate="novalidate">
                     <div class="modal-body text-center">
                         @csrf
                         <div class="form-group">
@@ -194,21 +194,6 @@
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#addReportModal')
-            }).bind('change', function() {
-                var id = parseInt($(this).val());
-                if(id === 0)
-                {
-                    $("#ftl_request_form #shipper_name").removeClass('d-none');
-                }
-                else {
-                    $("#ftl_request_form #shipper_name").addClass('d-none');
-                    var sale_person = $(this).find(':selected').attr('data-sale_person');
-                    if (sale_person != undefined) {
-                        $('#ftl_request_form #sale_person').val(sale_person).trigger('change');
-                    } else {
-                        $('#ftl_request_form #sale_person').val("").trigger('change');
-                    }
-                }
             });
 
             $('#monitoring_area').prepend('<option value="" selected="selected"></option>').select2({
@@ -229,42 +214,8 @@
                 allowClear:true,
             });
 
-            $('#ftl_request_form #vehicle').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Vehicle',
-                width:'100%',
-                allowClear:true,
-            });
 
-            $('#ftl_request_form #weight').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 2,
-                'min': 0.1,
-                'max': 100000
-            });
-
-            $('#ftl_request_form #quantity').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-            });
-
-            $('#ftl_request_form #date').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    // $('#mark_as_received input.deposit_date').valid();
-                }
-            });
-
-            $('#ftl_request_form').validate({
+            $('#add_report_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
@@ -326,14 +277,11 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    @if(session('role_id') == 1 || in_array(512,session('permissions')))
+                    @if(session('role_id') == 1 || in_array(536,session('permissions')))
                     {
                         text: 'Add Report',
                         className: 'btn btn-primary',
                         action: function (e, dt, node, config) {
-                            $("#ftl_request_form").get(0).reset();
-                            $("#ftl_request_form").validate().resetForm();;
-                            $("#ftl_request_form .select2").val("").trigger('change');
                             $('#addReportModal').modal('show');
                         }
                     },
@@ -363,17 +311,17 @@
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
-                    {data: 'req_id', name: 'ftl_requests.id', class: 'align-middle req_id'},
-                    {data: 'origin', name: 'origin.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'destination.name', class: 'align-middle destination'},
-                    {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'weight', name: 'ftl_requests.weight', class: 'align-middle weight'},
-                    {data: 'vehicle', name: 'vt.name', class: 'align-middle vehicle'},
-                    {data: 'quantity', name: 'ftl_requests.quantity', class: 'align-middle quantity'},
-                    {data: 'date', name: 'ftl_requests.date', class: 'align-middle date'},
-                    {data: 'updated_on', name: 'ftl_requests.updated_on', class: 'align-middle updated_on'},
-                    {data: 'updated_by', name: 'updated_by.name', class: 'align-middle updated_by'},
-                    {data: 'status', name: 'status.status', class: 'align-middle status'},
+                    {data: 'station_name', name: 'station.id', class: 'align-middle station_name'},
+                    {data: 'incidence_monitorings_id_padded', name: 'incidence_monitorings.id', class: 'align-middle incidence_monitorings_id_padded'},
+                    {data: 'area_name', name: 'area.area', class: 'align-middle area_name'},
+                    {data: 'time_slot', name: 'time_slot', class: 'align-middle time_slot', orderable: false, searchable: false},
+                    {data: 'case_nature_type', name: 'case_nature.case_nature', class: 'align-middle case_nature_type'},
+                    {data: 'obeservation', name: 'incidence_monitorings.obeservation', class: 'align-middle observation'},
+                    {data: 'nc_level_name', name: 'nc_level.nc_level', class: 'align-middle nc_level_name'},
+                    {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to', orderable: false, searchable: false},
+                    {data: 'tagging_date', name: 'incidence_monitorings.tagging_date', class: 'align-middle tagging_date'},
+                    {data: 'status_name', name: 'status.status', class: 'align-middle status_name'},
+                    {data: 'clip_link', name: 'incidence_monitorings.clip_link', class: 'align-middle clip_link'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -413,13 +361,6 @@
                     });
                     
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data: status_select_data,
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
 
                     this.api().table().columns.adjust();
                 }
