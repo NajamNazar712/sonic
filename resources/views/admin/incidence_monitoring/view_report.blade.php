@@ -52,7 +52,7 @@
                                             <tr>
                                                 <th scope="row">Monitoring Area</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$report->monitoring_area->area}}</h5>
+                                                    <h5 class="mb-0">{{$report->incidence_monitoring_area->area}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -64,7 +64,7 @@
                                            <tr>
                                                 <th scope="row">Case Nature</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$report->case_nature->case_nature}}</h5>
+                                                    <h5 class="mb-0">{{$report->incidence_monitoring_case_nature->case_nature}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -76,7 +76,7 @@
                                             <tr>
                                                 <th scope="row">NC Level</th>
                                                 <td class="name">
-                                                        <h5 class="mb-0">{{$report->nc_level->nc_level}}</h5>
+                                                        <h5 class="mb-0">{{$report->incidence_monitoring_n_c_level->nc_level}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -399,230 +399,6 @@
         </div>
 
     </section>
-    <section>
-        <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog"
-             aria-labelledby="tagModal"
-             aria-hidden="true">
-            <div class="modal-dialog modal-md" role="document">
-                <div class="modal-content ">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Tag</h4>
-                    </div>
-                    <div class="modal-body text-center">
-                        <form id="tag_submit_form" method="post">
-                            @method('POST')
-                            @csrf
-                            <div class="row justify-content-center">
-                                <div class="col-11">
-                                    <fieldset class="form-group">
-                                        <input type="hidden" id="crm_request_id" value="{{$crm_details->id}}">
-                                        <input type="hidden" id="prev_status" name="prev_status"
-                                               value="{{$crm_details->status_id}}">
-                                        <select name="tag_type" id="tag_type" class="form-control select2">
-                                            @foreach($types as $type)
-                                                <option value="{{$type->id}}"> {{$type->name}} </option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                            </div>
-                            <div class="row justify-content-center">
-                                <div class="col-8">
-                                    <fieldset class="form-group">
-                                        <div class="d-none" id="admin_tag_div">
-                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
-                                                @foreach($admins as $admin)
-                                                    <option value="{{$admin->id}}"> {{$admin->name}} </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="d-none" id="department_tag_div">
-                                            <div class="">
-                                                <select name="tag_department" id="tag_department"
-                                                        class="form-control  select2">
-                                                    @foreach($departments as $department)
-                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="mt-1">
-                                                <select name="tag_hub" id="tag_hub"
-                                                        class="form-control select2">
-                                                    @foreach($hubs as $hub)
-                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </fieldset>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
-                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade text-left" id="editRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRequestModal"
-             aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header bg-primary white">
-                        <h4 class="modal-title white">Edit Request</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <form id="edit_request_form" method="post" enctype="multipart/form-data">
-                            @csrf
-                            <input type="text" name="request_id" id="request_id" class="hidden" value="{{$crm_details->id}}">
-                            <div class="container">
-                                <div class="row justify-content-center">
-                                    <div class="col-4">
-                                        <fieldset class="form-group">
-                                            <input type="text" name="tracking_number" class="form-control tracking_number"
-                                                   placeholder="Tracking Number*" data-tags-input-name="tracking_number"
-                                                   data-rule-required="true" data-msg-required="Tracking Number is required">
-                                            <input type="hidden" name="tracking_number" id="tracking_number" value="">
-                                        </fieldset>
-                                    </div>
-                                </div>
-                                <div class="row justify-content-center">
-                                    <div class="col-6">
-                                        <fieldset class="form-group">
-                                            <select name="case_nature_select" id="case_nature_select" class="form-control select2">
-                                                @foreach($case_nature as $nature)
-                                                    <option value="{{$nature->id}}">{{$nature->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                </div>
-                                <div class="complaints d-none" id="request_complaints">
-                                    <div class="row justify-content-center">
-                                        <div class="col-6">
-                                            <fieldset class="form-group">
-                                                <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
-                                                    @foreach($case_nature_complaints as $complaints)
-                                                        @if($crm_details->case_nature_type_id != $complaints->id)
-                                                            <option value="{{$complaints->id}}">{{$complaints->type}}</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </fieldset>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="service d-none" id="request_service">
-                                    <div class="row justify-content-center">
-                                        <div class="col-6">
-                                            <fieldset class="form-group">
-                                                <select name="case_nature_request" id="case_nature_requests" class="form-control select2">
-                                                    @foreach($case_nature_service_requests as $service)
-                                                        @if($crm_details->case_nature_type_id != $service->id)
-                                                            <option value="{{$service->id}}">{{$service->type}}</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </fieldset>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-none" id="description_div">
-                                    <div class="row justify-content-center">
-                                        <div class="col-8">
-                                            <fieldset class="form-group">
-                                                <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
-                                            </fieldset>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="claims d-none" id="request_claims">
-                                    <input type="hidden" name="case_nature_id" id="case_nature_id">
-                                    <input type="hidden" name="complaint_id" id="complaint_id">
-                                    <input type="hidden" name="channel_id" id="channel_id">
-                                    <div class="row justify-content-center">
-                                        <div class="col-8">
-                                            <fieldset class="form-group">
-                                                <select name="case_nature_claim" id="case_nature_claim" class="form-control select2">
-                                                    @foreach($case_nature_type_claims as $claim)
-                                                        <option value="{{$claim->id}}">{{$claim->type}}</option>
-                                                    @endforeach
-                                                </select>
-                                            </fieldset>
-                                        </div>
-                                        <div class="col-8">
-                                            <fieldset class="form-group">
-                                                <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
-                                            </fieldset>
-                                        </div>
-                                        <div class="col-8 text-left">
-                                            <fieldset class="form-group">
-                                                <label for="product_picture"><b>Product Picture:</b></label>
-                                                <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                            </fieldset>
-                                        </div>
-                                        <div class="col-8 text-left">
-                                            <fieldset class="form-group">
-                                                <label for="invoice_picture"><b>Invoice Picture:</b></label>
-                                                <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
-                                            </fieldset>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row justify-content-center">
-                                    <div class="col-3">
-                                        <button id="editRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @if($escalation_log_flag == true)
-            <div class="modal fade text-left" id="escalateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="escalateModal" aria-hidden="true">
-                <div class="modal-dialog modal-md" role="document">
-                    <div class="modal-content ">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Escalate</h4>
-                        </div>
-                        <div class="modal-body text-center">
-                            <form id="escalate_submit_form" method="post">
-                                @method('POST')
-                                @csrf
-                                <div class="row justify-content-center">
-                                    <div class="col-11">
-                                        <fieldset class="form-group">
-                                            <input type="hidden" id="escalate_crm_request_id" value="{{$crm_details->id}}">
-                                            <input type="hidden" id="escalation_tagging_id" name="escalation_tagging_id"
-                                                   value="{{$escalation_tagging_id}}">
-                                            <select name="crm_escalation_level" id="crm_escalation_level" class="form-control select2">
-                                                @foreach($crm_escalation_levels as $crm_escalation_level)
-                                                    <option value="{{$crm_escalation_level->id}}"> {{$crm_escalation_level->name}} </option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-success width-25-per" id="escalateSubmit">Escalate</button>
-                            <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
-    </section>
-
 
     <div class="modal fade text-left" id="image_upload_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="image_upload_modal"
          aria-hidden="true">
@@ -679,76 +455,6 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="special_request_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="special_request_modal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Special Request</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body  text-center">
-                    <form action="{{route('admin.crm.request.special_request_appvove')}}" method="post">
-                        @csrf
-                        <input type="hidden" name="request_id" value="{{$crm_details->id}}">
-
-                        <table class="table table-bordered">
-                            <thead>
-                            <tr>
-                                <th scope="col"></th>
-                                <th scope="col">Admin</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="32" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Waqas Ahmed Dar</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="372" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Mursaleen Rafiq</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="661" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Waqas Sheikh</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="custom-control custom-checkbox">
-                                        <input class="form-check-input" type="checkbox" value="169" name="admin[]">
-                                    </div>
-                                </td>
-                                <td>Sohaib Jawaid</td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="row justify-content-center mt-2 ml-2">
-                            <div class="col-4">
-                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Submit</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-    </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -860,48 +566,7 @@
                 'max': 1000000.00
             });
 
-            {{--$('#valid').on('click', function (e) {--}}
-            {{--e.preventDefault();--}}
-            {{--$.ajax({--}}
-            {{--url: '{!! route('admin.crm.valid') !!}',--}}
-            {{--method: 'POST',--}}
-            {{--data: {--}}
-            {{--'_token': '{{ csrf_token() }}',--}}
-            {{--'id': $('#req_id').val(),--}}
-            {{--'prev_status' : $('#prev_status').val()--}}
-            {{--}--}}
-            {{--})--}}
-            {{--.done(function(data) {--}}
-            {{--if (data.status == 0) {--}}
-            {{--toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-
-            {{--}--}}
-            {{--else {--}}
-            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--});--}}
-            {{--});--}}
-
-            {{--$('#invalid').on('click', function (e) {--}}
-            {{--e.preventDefault();--}}
-            {{--$.ajax({--}}
-            {{--url: '{!! route('admin.crm.invalid') !!}',--}}
-            {{--method: 'POST',--}}
-            {{--data: {--}}
-            {{--'_token': '{{ csrf_token() }}',--}}
-            {{--'id': $('#req_id').val(),--}}
-            {{--'prev_status' : $('#prev_status').val()--}}
-            {{--}--}}
-            {{--})--}}
-            {{--.done(function(data) {--}}
-            {{--if (data.status == 0) {--}}
-            {{--toastr.success(data.success, 'Marked!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--else {--}}
-            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--}--}}
-            {{--});--}}
-            {{--});--}}
+         
             $('.tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,

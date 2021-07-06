@@ -11,24 +11,24 @@ class IncidenceMonitoring extends Model
         return $this->belongsTo('App\Http\Models\City','station_id', 'id');
     }
 
-    public function monitoring_area() {
-        return $this->belongsTo('App\Http\Models\IncidenceMonitoringArea');
+    public function incidence_monitoring_area() {
+        return $this->belongsTo('App\Http\Model\IncidenceMonitoringArea');
     }
 
-    public function case_nature() {
-        return $this->belongsTo('App\Http\Models\IncidenceMonitoringCaseNature');
+    public function incidence_monitoring_case_nature() {
+        return $this->belongsTo('App\Http\Model\IncidenceMonitoringCaseNature');
     }
 
-    public function nc_level() {
-        return $this->belongsTo('App\Http\Models\IncidenceMonitoringNCLevel');
+    public function incidence_monitoring_n_c_level() {
+        return $this->belongsTo('App\Http\Model\IncidenceMonitoringNCLevel');
     }
 
     public function status() {
-        return $this->belongsTo('App\Http\Models\IncidenceMonitoringStatus', 'status_id', 'id');
+        return $this->belongsTo('App\Http\Model\IncidenceMonitoringStatus', 'status_id', 'id');
     }
 
     public function admin() {
-        return $this->belongsTo('App\Http\Models\Admin');
+        return $this->belongsTo('App\Http\Models\Admin\Admin');
     }
 
     public function tagged_persons() {
