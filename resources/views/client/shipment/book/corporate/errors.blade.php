@@ -447,11 +447,7 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
-                                            {{--@if(isset($errors[$no]['return_address_address_id']))
-                                                <td>{!! Form::text('form[' . $no . '][return_address_address_id]',$ro['return_address_address_id'], ['class' => 'form-control is-invalid','style'=>'width:80px']) !!}<font color="red">{{$errors[$no]['return_address_address_id']}}</font></td>
-                                            @else
-                                                <td>{!! Form::text('form[' . $no . '][return_address_address_id]', $ro['return_address_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
-                                            @endif--}}
+
                                                 <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
                                     @endforeach
