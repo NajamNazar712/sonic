@@ -1809,9 +1809,20 @@ class DeliveryController extends Controller
         $status_id = $request->status;
         $shipment_id = $request->shipment_id;
         if(Shipment::where('id', $shipment_id)->where('nsa_osa_status', 1)->exists()){
-            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6,12, 34])->orderBy('name')->get();
-        }else{
-            $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6])->orderBy('name')->get();
+            if(ShipmentsJourney::where('shipment_id',$shipment_id)->where('shipper_status_id',$status_id)->where('status_reason_id',4)->orWhere('status_reason_id',6)->exists()){
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6,12,34])->orderBy('name')->get();
+            }
+            else{
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
+            }
+        }
+        else{
+            if(ShipmentsJourney::where('shipment_id',$shipment_id)->where('shipper_status_id',$status_id)->where('status_reason_id',4)->orWhere('status_reason_id',6)->exists()){
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4,6])->orderBy('name')->get();
+            }
+            else{
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+            }
         }
 
         if (!$statuses->isEmpty()) {

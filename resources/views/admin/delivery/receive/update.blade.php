@@ -362,7 +362,7 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(data.payment_mode_id != 5){
+                    if(data.payment_mode_id != 2){
                         $('td:eq(0)', row).addClass('select-checkbox');
                     }
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
