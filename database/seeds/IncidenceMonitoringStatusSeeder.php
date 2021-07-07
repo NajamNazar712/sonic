@@ -1,4 +1,4 @@
-<?php
+IncidenceMonitoringCaseNature<?php
 
 use Illuminate\Database\Seeder;
 

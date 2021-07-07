@@ -15,29 +15,45 @@
                         @elseif(($report->status_id == 3))
                             (Close)
                         @endif
-                        <div class="card-content collapse">
-                            <div class="card-body p-1">
-                                <h4 class=" info">Legend</h4>
-                                <table class="table mb-0">
-                                    <tbody>
-                                        <tr style="color:#fff;" class="btn-purple">
-                                            <td class="align-middle">NOCR</td>
-                                        </tr>
-                                        <tr style="color:#fff;" class="btn-primary">
-                                            <td class="align-middle">Sales</td>
-                                        </tr>
-                                        <tr style="color:#fff;" class="btn-dark">
-                                            <td class="align-middle">Finance</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                       
                     </h1>
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
                                 @include('admin.inc.messages')
+                                <div class="row justify-content-end">
+                                    <div class="col-3">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="heading-elements">
+                                                    <ul class="list-inline mb-0">
+                                                        <li class="primary border-primary round"><a data-action="collapse">Legend <i class="ft-minus"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-content collapse">
+                                                <div class="card-body p-1">
+                                                    <h4 class=" info">Legend</h4>
+                                                    <table class="table mb-0">
+                                                        <tbody>
+                                                            <tr style="color:#fff;" class="btn-purple">
+                                                                <td class="align-middle">Regional Manger</td>
+                                                            </tr>
+                                                            <tr style="color:#fff;" class="btn-dark">
+                                                                <td class="align-middle">Zonal Manager</td>
+                                                            </tr>
+                                                            <tr style="color:#fff;" class="btn-primary">
+                                                                <td class="align-middle">Operations</td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    
+                                </div>
                                 <div class="row mb-2">
                                     <div class="col-5">
                                         <table class="table table-bordered table-lg">
@@ -52,7 +68,7 @@
                                             <tr>
                                                 <th scope="row">Monitoring Area</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$report->incidence_monitoring_area->area}}</h5>
+                                                    <h5 class="mb-0">{{$report->monitoring_area->name}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -64,19 +80,19 @@
                                            <tr>
                                                 <th scope="row">Case Nature</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$report->incidence_monitoring_case_nature->case_nature}}</h5>
+                                                    <h5 class="mb-0">{{$report->case_nature->name}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">Observations</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$report->obeservation}}</h5>
+                                                    <h5 class="mb-0">{{$report->observation}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <th scope="row">NC Level</th>
                                                 <td class="name">
-                                                        <h5 class="mb-0">{{$report->incidence_monitoring_n_c_level->nc_level}}</h5>
+                                                        <h5 class="mb-0">{{$report->nc_level->name}}</h5>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -103,53 +119,80 @@
                                             </tr>
                                             </tbody>
                                         </table>
-                                        
+                                        <div class="row justify-content-center">
+                                            {{-- @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))) --}}
+                                                <div class="text-center">
+                                                    <form id="valid_form" method="post"
+                                                          action="{{route('admin.crm.valid')}}">
+                                                        @csrf
+                                                        <input type="hidden" id="req_id" name="req_id"
+                                                               value="{{$report->id}}">
+                                                        <input type="hidden" id="status" name="status"
+                                                               value="{{$report->status_id}}">
+                                                        @if($report->status_id == 1)
+                                                                <button id="under_action" type="submit"
+                                                                        class="btn btn-warning mr-1">
+                                                                    <span class="d-none d-lg-block">
+                                                                        Under Action
+                                                                    </span>
+                                                                </button>
+
+                                                                <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
+                                                                    <span class="d-none d-lg-block">
+                                                                        Close
+                                                                    </span>
+                                                                </button>
+                                                            @elseif($report->status_id == 2)
+                                                            <button id="open" type="submit"
+                                                                        class="btn btn-success mr-1">
+                                                                    <span class="d-none d-lg-block">
+                                                                        Open
+                                                                    </span>
+                                                                </button>
+                                                            <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
+                                                                <span class="d-none d-lg-block">
+                                                                    Close
+                                                                </span>
+                                                            </button>
+                                                                
+                                                            @elseif($report->status_id != 3)
+                                                               
+                                                            <button id="open" type="submit"
+                                                            class="btn btn-success mr-1">
+                                                                <span class="d-none d-lg-block">
+                                                                    Open
+                                                                </span>
+                                                            </button>
+                                                            <button id="under_action" name="resolved_close" type="submit" class="btn btn-warning mr-3">
+                                                                <span class="d-none d-lg-block">
+                                                                    Close
+                                                                </span>
+                                                            </button>
+                                                            @endif
+                                                    </form>
+                                                </div>
+                                            {{-- @endif --}}
+                                        </div>
                                     </div>
+
                                     <div class="col-7">
                                         <div class="content-body chat-application">
                                             <section
                                                     class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible">
                                                 <div class="chats">
-                                                    @if(!empty($comments))
+                                                    @if(count($report->comments) > 0)
 
-                                                        @foreach($comments as $comment)
-                                                            @if($comment->comment_by == 0)
+                                                        @foreach($report->comments as $comment)
                                                                 <div id="chat_{{$comment->id}}"
-                                                                     class="chat admin {{($comment->comment_type == 1)? 'internal':'' }} {{($comment->comment_type == 2)? 'rider':'' }} ">
+                                                                     class="chat {{($comment->comment_by == 1) ? 'regional_manger' : '' }} {{($comment->comment_by == 0) ? 'zonal_manager' : '' }} ">
 
                                                                     <div class="chat-avatar">
                                                                         <div class="badge block badge-admin">
-                                                                            <i class="la la-user font-medium-2"></i>{{$comment->admin->name}}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="chat-body">
-                                                                        <div class="chat-content text-left">
-                                                                            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
-                                                                                <button type="button" class="border-0" id="edit_comment_{{$comment->id}}" value="{{$comment->id}}"><i class="ft-edit"></i></button>
-                                                                            @endif
-                                                                            <p>{!! $comment->comment !!}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                                <div id="updated_by_div_{{$comment->id}}">
-                                                                                    @if($comment->comment_updated_by != null && $comment->comment_updated_at != null)
-                                                                                        <small>Updated by: {{$comment->updated_by_admin->name}} ({{$comment->comment_updated_at}})</small>
-                                                                                    @endif
-                                                                                </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                </div>
-
-                                                            @elseif($comment->comment_by == 1)
-                                                                <div class="chat chat-left shipper">
-
-                                                                    <div class="chat-avatar">
-                                                                        <div class="badge block badge-info">
                                                                             <i class="la la-user font-medium-2"></i>
-                                                                            @if($shipper != null)
-                                                                                {{$shipper}}
+                                                                            @if($comment->comment_by_id == Auth::id())
+                                                                                YOU
                                                                             @else
-                                                                                Shipper
+                                                                                {{$comment->commenter->name}}
                                                                             @endif
                                                                         </div>
                                                                     </div>
@@ -157,202 +200,52 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
                                                                             <p>{!! $comment->comment !!}</p>
-                                                                            <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
+                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <div id="updated_by_div_{{$comment->id}}">
+                                                                            </div>
                                                                         </div>
                                                                     </div>
+
                                                                 </div>
-                                                            @else
-                                                                @if($comment->comment_type == 2)
-                                                                    <div id="chat_{{$comment->id}}"
-                                                                         class="chat admin rider">
-
-                                                                        <div class="chat-avatar">
-                                                                            <div class="badge block badge-admin">
-                                                                                <i class="la la-user font-medium-2"></i>{{$comment->rider->name}}
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="chat-body">
-                                                                            <div class="chat-content text-left">
-                                                                                <p>{!! $comment->comment !!}</p>
-                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                            </div>
-                                                                        </div>
-
-                                                                    </div>
-                                                                    @else
-                                                                    <div class="chat chat-left substitute-user">
-
-                                                                        <div class="chat-avatar">
-                                                                            <div class="badge block badge-substitute-user">
-                                                                                <i class="la la-user font-medium-2"></i>
-                                                                                @if($shipper != null)
-                                                                                    {{$shipper}}
-                                                                                @else
-                                                                                    Shipper
-                                                                                @endif
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div class="chat-body">
-                                                                            <div class="chat-content text-left">
-                                                                                <p>{!! $comment->comment !!}</p>
-                                                                                <small>{{str_replace("after", "ago", \Carbon\Carbon::now()->diffForHumans($comment->created_at))}} ({{$comment->created_at}})</small>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    @endif
-
-
-                                                            @endif
                                                         @endforeach
                                                     @endif
 
                                                 </div>
                                             </section>
 
-                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || ($sale_person && $sale_person->admin_id == Auth::id()) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
+
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
                                                                 class="form-group position-relative has-icon-left col-10 m-0">
-                                                            <input type="hidden" id="last_comment_id"
-                                                                   value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
-                                                            {{--<input type="text" class="form-control" id="chat_input"--}}
-                                                                   {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-2">
                                                             <fieldset
                                                                     class="form-group has-icon-left m-0 mb-1">
-                                                                <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-purple chat_send" to="1"><i
+                                                                <button  type="button" id="chat_send"
+                                                                        class="btn btn-block btn-outline-success" ><i
                                                                             class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Internal</span>
-                                                                </button>
-                                                            </fieldset>
-                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
-                                                                <fieldset
-                                                                        class="form-group position-relative has-icon-left mb-1">
-                                                                    <button id="chat_send" type="button"
-                                                                            class="btn btn-block btn-outline-primary chat_send" to="0">
-                                                                        <i class="la la-paper-plane-o d-lg-none"></i>
-                                                                        <span class="">Shipper</span>
-                                                                    </button>
-                                                                </fieldset>
-                                                            @endif
-                                                            <fieldset
-                                                                    class="form-group has-icon-left">
-                                                                <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
-                                                                            class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Rider</span>
-                                                                </button>
-                                                            </fieldset>
-
-                                                        </div>
-                                                    </form>
-                                                </section>
-                                            <div class="row justify-content-center mt-1">
-                                                <div class="col-2">
-                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>
-                                                </div>
-                                                <div class="col-2">
-                                                    <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
-                                                </div>
-                                                <div class="col-3">
-                                                    <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
-                                                </div>
-                                                <div class="row">
-                                                @if ($crm_details->damage_product_picture != null && $crm_details->product_packaging_picture != null && $crm_details->actual_product_picture != null)
-                                                <div class="col-3 mr-2">
-                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.damage_product_image', ['id' => $crm_details->id])}}" target="_blank">View Damage Product</a></button>
-                                                </div>
-                                            </div>
-                                                <div class="row justify-content-center mt-1">
-                                                <div class="col-4 mr-2">
-                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>
-                                                </div>
-                                                <div class="col-4 ml-4">
-                                                    <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image', ['id' => $crm_details->id])}}" target="_blank">View Actual Product</a></button>
-                                                </div>
-                                                    @endif
-                                                </div>
-                                                    <div class="row">
-                                                    @if ($crm_details->missing_product_picture != null && $crm_details->product_packaging_picture_for_content_short != null && $crm_details->actual_product_picture_for_content_short != null)
-                                                    <div class="col-3 mr-2">
-                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.missing_product_image', ['id' => $crm_details->id])}}" target="_blank">View Missing Product</a></button>
-                                                    </div>
-                                                            <div class="col-3 mr-1">
-                                                                <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.actual_product_image_for_content_short', ['id' => $crm_details->id])}}" target="_blank">View Actual Product</a></button>
-                                                            </div>
-                                                    <div class="col-3">
-                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_packaging_image_for_content_short', ['id' => $crm_details->id])}}" target="_blank">View Product Packaging</a></button>
-                                                    </div>
-                                                    @endif
-                                                        </div>
-                                                </div>
-                                            @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))
-                                                <section class="chat-app-form">
-                                                    <form class="chat-app-input row" id="chat_form">
-                                                        <fieldset
-                                                                class="form-group position-relative has-icon-left col-10 m-0">
-                                                            <input type="hidden" id="last_comment_id"
-                                                                   value="{{$last_comment_id}}">
-                                                            <div class="form-control-position">
-                                                                <i class="la la-chevron-right"></i>
-                                                            </div>
-                                                            {{--<input type="text" class="form-control" id="chat_input"--}}
-                                                                   {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
-                                                        </fieldset>
-                                                        <div class="display-inline-block col-2">
-                                                            <fieldset
-                                                                    class="form-group position-relative has-icon-left m-0 mb-1">
-                                                                <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-purple chat_send" to="1"><i
-                                                                            class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Internal</span>
-                                                                </button>
-                                                            </fieldset>
-                                                            @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)))
-                                                            <fieldset
-                                                                    class="form-group position-relative has-icon-left m-0">
-                                                                <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-outline-primary chat_send" to="0">
-                                                                    <i class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Shipper</span>
-                                                                </button>
-                                                            </fieldset>
-                                                            @endif
-                                                            <fieldset
-                                                                    class="form-group has-icon-left">
-                                                                <button id="chat_send" type="button"
-                                                                        class="btn btn-block btn-outline-dark chat_send" to="2"><i
-                                                                            class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="">Rider</span>
+                                                                    <span class="">Send</span>
                                                                 </button>
                                                             </fieldset>
                                                         </div>
                                                     </form>
                                                 </section>
                                                 <div class="row justify-content-center mt-1">
-                                                    <div class="col-2">
-                                                        <button class="btn btn-primary"><a class="white" href="{{route('admin.crm.claim.product_image', ['id' => $crm_details->id])}}" target="_blank">View Product</a></button>
+                                                    
+                                                    <div class="col-4">
+                                                        <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
                                                     </div>
-                                                    <div class="col-2">
-                                                        <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
-                                                    </div>
+                                                    
                                                 </div>
-                                            @endif
-
                                         </div>
 
                                     </div>
+
                                 </div>
 
                                 
@@ -374,11 +267,12 @@
                                                     </tr>
                                                     </thead>
                                                     <tbody>
+                                                        @php $index=0;   @endphp
                                                     @foreach($report->status_history as $status_history)
                                                         @php $index++; @endphp
                                                         <tr class="border-bottom-success border-custom-color">
                                                             <td>{{$index}}</td>
-                                                            <td>{{$status_history->status->name}}</td>
+                                                            <td>{{$status_history->status->status}}</td>
                                                             <td>{{$status_history->admin->name}}</td>
                                                             <td>{{$status_history->created_at}}</td>
                                                             <td>{{str_pad($report->id, 6, '0', STR_PAD_LEFT)}}</td>
@@ -405,11 +299,11 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">CRM Image Upload</h4>
+                    <h4 class="modal-title white">Image Upload</h4>
 
                 </div>
                 <div class="modal-body  text-center">
-                    <table class="table table-bordered" id="crm_image_view_table" style="z-index: 3;">
+                    <table class="table table-bordered" id="image_view_table" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
 
@@ -424,9 +318,9 @@
                     </table>
 
 
-                    <form id="crm_upload_form" class="form" action="{{route('admin.crm.request.image_submit')}}" method="post" enctype="multipart/form-data">
+                    <form id="image_upload_form" class="form" action="{{route('admin.incidence_monitoring.image_submit')}}" method="post" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="image_crm_request_id" id="image_crm_request_id"/>
+                        <input type="hidden" name="image_request_id" id="image_request_id"/>
                         <input type="hidden" name="selected_ids" id="selected_ids"/>
                         <table class="table table-bordered datatable" id="image_upload_table" style="z-index: 3;">
                             <thead>
@@ -445,7 +339,7 @@
                                 <button id="" type="button" class="btn btn-danger btn-block" data-dismiss="modal">Close</button>
                             </div>
                             <div class="col-3">
-                                <button id="CRMImageSubmitButton" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>
+                                <button id="ImageSubmitButton" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>
                             </div>
 
                         </div>
@@ -525,21 +419,24 @@
             vertical-align: middle !important;
         }
 
-        .chat-application .chats .admin.internal .chat-content {
+        .chat-application .chats .regional_manger .chat-content {
             color: #ffffff;
             background-color: #ab45d7;
         }
 
-        .chat-application .chats .admin.internal .chat-body .chat-content:before {
+        .chat-application .chats .regional_manger .chat-body .chat-content:before {
             border-left-color: #ab45d7;
         }
-        .chat-application .chats .admin.rider .chat-content {
+        .chat-application .chats .zonal_manager .chat-content {
             color: #ffffff;
             background-color: #18374A;
         }
 
-        .chat-application .chats .admin.rider .chat-body .chat-content:before {
+        .chat-application .chats .zonal_manager .chat-body .chat-content:before {
             border-left-color: #18374A;
+        }
+        #image_upload_btn{
+            padding-right: 12px; 
         }
     </style>
 @endsection
@@ -556,264 +453,45 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#claim_product_cost').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 2,
-                'min': 0.00,
-                'max': 1000000.00
-            });
-
-         
-            $('.tracking_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                dropdownParent:$('#edit_request_form')
-            });
-            $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Case Nature",
-                allowClear:true,
-                dropdownParent:$('#edit_request_form')
-            }).bind('change', function () {
-                var id = parseInt($(this).val());
-                if(id === 1){
-                    $('#request_service').addClass('d-none');
-                    $('#request_complaints').removeClass('d-none');
-                    $('#description_div').removeClass('d-none');
-                    $('#request_feedback').addClass('d-none');
-                    $('#editRequest').removeClass('d-none');
-                    $('#request_claims').addClass('d-none');
-                }else if(id === 2){
-                    $('#request_complaints').addClass('d-none');
-                    $('#request_service').removeClass('d-none');
-                    $('#description_div').removeClass('d-none');
-                    $('#request_feedback').addClass('d-none');
-                    $('#editRequest').removeClass('d-none');
-                    $('#request_claims').addClass('d-none');
-                } else if(id === 4){
-                    $('#request_complaints').addClass('d-none');
-                    $('#request_service').addClass('d-none');
-                    $('#request_feedback').addClass('d-none');
-                    $('#request_claims').removeClass('d-none');
-                    $('#description_div').addClass('d-none');
-                    $('#editRequest').removeClass('d-none');
-                }else{
-                    $('#request_complaints').addClass('d-none');
-                    $('#request_service').addClass('d-none');
-                    $('#description_div').addClass('d-none');
-                    $('#editRequest').addClass('d-none');
-                }
-            });$('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Complaint Type",
-                allowClear:true,
-                dropdownParent:$('#edit_request_form')
-            });
-            $('#case_nature_claim').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Claim Type",
-                allowClear:true,
-                dropdownParent:$('#edit_request_form')
-            });
-            $('#case_nature_requests').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select Request Type",
-                allowClear:true,
-                dropdownParent:$('#edit_request_form')
-            });
-            $('#edit_request').on('click', function(){
-                @if (isset($crm_details->shipment->tracking_number))
-                    var tracking_no = @json($crm_details->shipment->tracking_number);
-                    $('.tracking_number').val(tracking_no);
-                    $('.tracking_number').attr('disabled', true);
-                @endif
-
-                $('#editRequestModal').modal('show');
-            });
-            $("#tag_admin").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select User",
-                width: '100%',
-                dropdownParent: $('#tagModal')
-            });
-
-            $("#tag_department").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Department",
-                width: '100%',
-                dropdownParent: $('#tagModal')
-            });
-
-            $("#tag_hub").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Hub",
-                width: '100%',
-                dropdownParent: $('#tagModal')
-            });
-
-            $("#tag_type").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Type",
-                width: '100%',
-                dropdownParent: $('#tagModal')
-            }).bind('change', function () {
-                var id = parseInt($(this).val());
-                if (id === 1) {
-                    $('#admin_tag_div').addClass('d-none');
-                    $('#department_tag_div').removeClass('d-none');
-                } else if (id === 2) {
-                    $('#department_tag_div').addClass('d-none');
-                    $('#admin_tag_div').removeClass('d-none');
-                } else {
-                    $('#admin_tag_div').addClass('d-none');
-                    $('#department_tag_div').addClass('d-none');
-                }
-            });
-            $('#tag').on('click', function (e) {
-                e.preventDefault();
-                $('#tagModal').modal('show');
-            });
-            $('#un_tag').on('click', function (e) {
-                e.preventDefault();
-                swal({
-                    text: 'Are you sure, you want to un tag this Request?',
-                    icon: 'info',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if(confirm){
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Request is being un tagged.',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        $.ajax({
-                            url: '{!! route('admin.crm.in_process.un_tag') !!}',
-                            method: 'POST',
-                            data: {
-                                'multiple': 0,
-                                'crm_request_id': $('#crm_request_id').val(),
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function (data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                    setTimeout(function () {
-                                        window.location.reload();
-                                    }, 2000);
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                            });
-                    }
-                });
-            });
-            $('#tagModal').on('hide.bs.modal', function (e) {
-                $('#tag_type').val('').trigger('change');
-                $('#admin_tag_div').addClass('d-none');
-                $('#department_tag_div').addClass('d-none');
-            });
-            $('#tag_adminSubmit').on('click', function () {
-                var type = parseInt($('#tag_type').val());
-                var tag_hub = null;
-                if (type === 1) {
-                    var tag = parseInt($('#tag_department').val());
-                    tag_hub = parseInt($('#tag_hub').val());
-                    if(!tag_hub){
-                        tag_hub = null;
-                    }
-                }
-                else if (type === 2) {
-                    var tag = parseInt($('#tag_admin').val());
-                }
-                if (tag) {
-                    $('#tag_adminSubmit').attr('disabled', true);
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Request is being tagged.',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    $.ajax({
-                        url: '{!! route('admin.crm.tag') !!}',
-                        method: 'POST',
-                        data: {
-                            'tagged_id': tag,
-                            'tagged_hub': tag_hub,
-                            'crm_request_id': $('#crm_request_id').val(),
-                            'prev_status': $('#prev_status').val(),
-                            'crm_request_tagging_type_id': type,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-                        .done(function (data) {
-                            if (data.status == 0) {
-                                $('#tagModal').modal('hide');
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                                setTimeout(function () {
-                                    window.location.reload();
-                                }, 2000);
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            swal.close();
-                            $('#tag_adminSubmit').attr('disabled', false);
-                        });
-                }
-                else {
-                    if (type === 1) {
-                        var error = "Department Not Selected!";
-                    }
-                    else if (type === 2) {
-                        var error = "User Not Selected!";
-                    }
-                    else {
-                        error = "Type Not Selected!";
-                    }
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-            });
-
+           
             $('#chat_form').on('submit', function (e) {
                 e.preventDefault();
             });
+
+            $('#chat_send').on('click',function (){
+                var flag = true;
+                var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
+                $('#chat_input').val('');
+                var request_id = '{{$report->id}}';
+
+                if (comment == '') {
+                    flag = false;
+                    toastr.error("Please Enter Comment first!", 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                if (flag) {
+                    $.ajax({
+                        url: '{!! route('admin.incidence_monitoring.comment.add') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'comment': comment,
+                            'request_id': request_id,
+                        }
+                    }).done(function (data) {
+                        if (data.status == 1) {
+                            get_latest_comment(request_id);
+                            updateScroll();
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            });
+
             $('body').on('change', '#chat_form input', function () {
                 $(this).val($(this).val().trim());
             });
@@ -883,136 +561,60 @@
                 });
             });
             }
-            $('.chat_send').on('click', function () {
-                var flag = true;
-                var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
-                $('#chat_input').val('');
-                var request_id = '{{$crm_details->id}}';
-                var internal_switch = parseInt($(this).attr('to'));
-                var internal_class = '';
-
-                if (internal_switch == 1) {
-                    internal_class = 'internal';
-                }else if(internal_switch === 2){
-                    internal_class = 'rider';
-                } else {
-                    internal_class = '';
-                }
-                if (comment == '') {
-                    flag = false;
-                    toastr.error("Please Enter Comment first!", 'Error!', {
-                        positionClass: 'toast-top-center',
-                        containerId: 'toast-top-center'
-                    });
-                }
-                if (flag) {
+            
+         
+            function get_latest_comment(request_id) {
                     $.ajax({
-                        url: '{!! route('admin.crm.comment.add') !!}',
+                        url: '{!! route('admin.incidence_monitoring.comment.get') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'comment': comment,
-                            'request_id': request_id,
-                            'internal_switch': internal_switch
-                        }
-                    }).done(function (data) {
-                        if (data.status) {
-
-                            // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            var user = '{{Auth::user()->name}}';
-                            // if($('div.chat:last-child').hasClass('admin')) {
-                            //     var html = '<div class="chat-content"><p>' + comment + '</p></div>';
-                            //     $('div.chat:last-child').find('.chat-body').append(html);
-                            // }else{
-                            if (internal_switch == 1) {
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                            }else if(internal_switch == 2){
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                            } else {
-                                var last_comment = data.last_comment_id;
-
-                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left">';
-                                @if(session('role_id') == 1 || in_array(310, session('permissions')))
-                                    html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';
-                                @endif
-                                html += '<p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small><div id="updated_by_div_' + last_comment + '"></div></div></div>';
-                            }
-                            $('section.chat-app-window .chats').append(html);
-
-                            // }
-
-                            $('#last_comment_id').val(data.last_comment_id);
-                            last_comment_edit(last_comment, comment);
-
-                            updateScroll();
-                        }
-                    });
-                }
-            });
-            @if($crm_details->status_id != 4)
-            setInterval(function () {
-                var last_comment_id = parseInt($('#last_comment_id').val());
-                var request_id = '{{$crm_details->id}}';
-                get_latest_comment(last_comment_id, request_id);
-            }, 10000);
-
-            @endif
-            function get_latest_comment(comment_id, request_id) {
-                if (comment_id) {
-                    $.ajax({
-                        url: '{!! route('admin.crm.comment.get') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'comment_id': comment_id,
                             'request_id': request_id
                         }
                     }).done(function (data) {
-                        if (data.status) {
-                            var user = data.comment.comment_by;
-                            var name = data.name;
-                            if (user == 0) {
-                                if (data.comment.comment_type == 0) {
-
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                } else if(data.comment.comment_type == 1) {
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                }else{
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                        if (data.status == 1) {
+                            html = "";
+                            console.log(data.comments);
+                            $(data.comments).each(function (i,comment){
+                                let type = '';
+                                let commenter = '';
+                               
+                                if(comment.comment_by == 0)
+                                {
+                                    type = "zonal_manager";
                                 }
-                                $('section.chat-app-window .chats').append(html);
-
-                            } else if (user == 1) {
-                                if ($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now  ({{Carbon\Carbon::now()}})</small></div>';
-                                    $('div.chat:last-child').find('.chat-body').append(html);
-                                } else {
-                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                    $('section.chat-app-window .chats').append(html);
+                                else if(comment.comment_by == 1)
+                                {
+                                    type = "regional_manger";
                                 }
-                            } else {
-                                if(data.comment.comment_type == 0){
-                                    if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                        var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
-                                        $('div.chat:last-child').find('.chat-body').append(html);
-                                    } else {
-                                        var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-                                        $('section.chat-app-window .chats').append(html);
-                                    }
-                                }else{
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
-
-                                    $('section.chat-app-window .chats').append(html);
+                                else{
+                                    type = "";
                                 }
-
-
-                            }
-                            $('#last_comment_id').val(data.comment.id);
+                                if(comment.commenter_id == {{Auth::id()}})
+                                    commenter = "YOU";
+                                else {
+                                    commenter = comment.commenter;
+                                }
+                                html += `<div id="chat_${comment.id}" class="chat ${type} ">
+                                                <div class="chat-avatar">
+                                                     <div class="badge block badge-admin">
+                                                        <i class="la la-user font-medium-2"></i>${commenter}
+                                                     </div>
+                                                </div>
+                                                <div class="chat-body">
+                                                    <div class="chat-content text-left">
+                                                        <p>${comment.comment}</p>
+                                                        <small>${comment.created_at}</small>
+                                                    </div>
+                                                </div>
+                                          </div>`;
+                            });
+                            $('section.chat-app-window .chats').html(html);
                             updateScroll();
                         }
                     });
-                }
             }
+            
 
             function updateScroll() {
                 const container = document.querySelector('.chat-app-window');
@@ -1021,416 +623,25 @@
             }
 
             updateScroll();
-            $( "#edit_request_form" ).bind('submit', function (e) {
-                e.preventDefault();
-                var case_nature_id = parseInt($('#case_nature_select').val());
-                var tracking_number = $('.tracking_number').val();
-                var nature_flag = true;
-                if(case_nature_id === 1 || case_nature_id === 2){
-                    if(case_nature_id === 1) {
-                        var case_nature_complaint_id = $('#case_nature_complaints').val();
-                        var description = $('#description').val();
-                        if (!case_nature_complaint_id) {
-                            nature_flag = false;
-                            var error = "Please select Complaint type!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        if (!description) {
-                            nature_flag = false;
-                            var error = "Please Enter Description!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        if(!tracking_number){
-                            nature_flag = false;
-                            var error = "Tracking Number Required!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    }
-                    else if(case_nature_id === 2){
-                        var case_nature_complaint_id = $('#case_nature_requests').val();
-                        var description = $('#description').val();
-                        if(!case_nature_complaint_id){
-                            nature_flag = false;
-                            var error = "Please select Request type!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if (!description) {
-                            nature_flag = false;
-                            var error = "Please Enter Description!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        if(!tracking_number){
-                            nature_flag = false;
-                            var error = "Tracking Number Required!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    }
-                    if(nature_flag){
-                        $('#editRequest').attr('disabled',true);
-                        $.ajax({
-                            url: '{!! route('admin.crm.request.edit') !!}',
-                            method: 'POST',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'tracking_number': $('.tracking_number').val(),
-                                'request_id': $('#request_id').val(),
-                                'case_nature_id' : case_nature_id,
-                                'complaint_id' : case_nature_complaint_id,
-                                'description' : description
-                            }
-                        })
-                            .done(function(data) {
-                                if(data.status == 0){
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                    setTimeout(function(){
-                                        window.location.reload(1);
-                                    }, 1500);
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-
-                                $('#editRequestModal').modal('hide');
-                                $('#editRequest').attr('disabled',false);
-                            });
-                    }
-                }
-                    else if(case_nature_id === 4){
-                        var nature_flag = true;
-                        var case_nature_claim_id = $('#case_nature_claim').val();
-                        var product_cost = $('#claim_product_cost').val();
-                        var check_product_picture = $('#product_picture').val();
-                        var check_invoice_picture = $('#invoice_picture').val();
-                        $('#tracking_number').val(tracking_number);
-                        // $('#case_nature_id').val(case_nature_id);
-                        // $('#complaint_id').val(case_nature_claim_id);
-                        var formData = new FormData($('#edit_request_form')[0]);
-                        if(!case_nature_claim_id){
-                            nature_flag = false;
-                            var error = "Please select Claim type!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if(!check_product_picture){
-                            nature_flag = false;
-                            var error = "Please attach Product Picture!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if(!product_cost){
-                            nature_flag = false;
-                            var error = "Please enter Product Cost!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if(!check_invoice_picture){
-                            nature_flag = false;
-                            var error = "Please attach Invoice Picture!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                        if(!tracking_number){
-                            nature_flag = false;
-                            var error = "Tracking Number Required!";
-                            toastr.error(error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                        if(nature_flag){
-                            $('#editRequestModal').attr('disabled',true);
-                            $.ajax({
-                                url: '{!! route('admin.crm.request.edit') !!}',
-                                method: 'POST',
-                                enctype: 'multipart/form-data',
-                                data: formData,
-                                dataType: 'json',
-                                processData: false,
-                                contentType: false,
-                            })
-                                .done(function(data) {
-                                    if(data.status == 0){
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                        setTimeout(function(){
-                                            window.location.reload(1);
-                                        }, 1500);
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                    $('#editRequestModal').modal('hide');
-                                    $('#editRequest').attr('disabled',false);
-                                });
-                        }
-
-                    }
-            });
-            $('#editRequestModal').on('hide.bs.modal', function (e) {
-                $('#edit_request_form')[0].reset();
-                $('#case_nature_complaints').val('').trigger('change');
-                $('#case_nature_select').val('').trigger('change');
-                $('#case_nature_requests').val('').trigger('change');
-                $('.tracking_number').val('');
-                $('#request_complaints').addClass('d-none');
-                $('#request_service').addClass('d-none');
-                $('#description_div').addClass('d-none');
-                $('#request_claims').addClass('d-none');
-                $('#case_nature_claim').val('').trigger('change');
-                $('#claim_channel').val('').trigger('change');
-                $('#claim_product_cost').val('');
-            });
-
-            $("#crm_escalation_level").prepend('<option value="" selected></option>').select2({
-                placeholder: "Select Escalation",
-                width: '100%',
-                dropdownParent: $('#escalateModal')
-            });
-            $('#halt_start_escalation').on('click', function (e) {
-                e.preventDefault();
-                var request_id = @json($crm_details->id);
-                var status = $(this).val();
-                if(status == 0){
-                    var status_text = 'Halt';
-                }
-                else{
-                    var status_text = 'Start';
-                }
-                swal({
-                    text: 'Are you sure, you want to '+status_text+' Escalation of this Request?',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.crm.escalation_status') !!}',
-                            method: 'POST',
-                            data: {
-                                'crm_request_id': request_id,
-                                'status': status,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                    setTimeout(function(){
-                                        window.location.reload(1);
-                                    }, 1500);
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                    }
-                });
-            });
-            $('#escalate').on('click', function (e) {
-                e.preventDefault();
-                $('#escalateModal').modal('show');
-            });
-            $('#escalateSubmit').on('click', function (e) {
-                e.preventDefault();
-                var crm_request_id = $('#escalate_crm_request_id').val();
-                var escalation_tagging_id = $('#escalation_tagging_id').val();
-                var selected_escalation = $('#crm_escalation_level').val();
-                var flag = true;
-                if(selected_escalation == null || selected_escalation == ''){
-                    var error = "Please select Escalation";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    flag = false
-                }
-                if(flag == true){
-                    swal({
-                        text: 'Are you sure, you want to Escalate this Request?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm){
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Escalation is in process!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                            $.ajax({
-                                url: '{!! route('admin.crm.escalate') !!}',
-                                method: 'POST',
-                                data: {
-                                    'crm_request_id': crm_request_id,
-                                    'escalation_tagging_id': escalation_tagging_id,
-                                    'selected_escalation': selected_escalation,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                                .done(function(data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                        setTimeout(function(){
-                                            window.location.reload(1);
-                                        }, 1500);
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                });
-                        }
-                    });
-                }
-            });
 
 
-            $('#valid_form').on('submit', function (e) {
-                blockPagePermanently();
-            });
-            $('#invalid_form').on('submit', function (e) {
-                blockPagePermanently();
-            })
-
-            @foreach($comments as $comment)
-            @if($comment->comment_by == 0)
-            @if($comment->comment_type == 0 && (session('role_id') == 1 || in_array(310, session('permissions'))))
-            $('#edit_comment_{{$comment->id}}').on('click', function (e) {
-                var comment_id = $(this).attr("value");
-                e.preventDefault();
-                var cmt = @json($comment->comment);
-                var text_edit  = "Are you sure, you want to edit this comment as Internal? \n \t "+cmt;
-                swal({
-                    text: text_edit,
-                    icon: 'info',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if(confirm){
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Comment is being updated.',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        $.ajax({
-                            url: '{!! route('admin.crm.comment.edit') !!}',
-                            method: 'POST',
-                            data: {
-                                'comment_id': comment_id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function (data) {
-                                if (data.status == 0) {
-                                    $('#edit_comment_{{$comment->id}}').remove();
-                                    $('#chat_{{$comment->id}}').addClass('internal');
-                                    $('#updated_by_div_{{$comment->id}}').append('<small>Updated by: ' + data.updated_by + ' (' + data.updated_at + ')</small>');
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
-                                    });
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                            });
-                    }
-                });
-            });
-            @endif
-            @endif
-            @endforeach
-
-            var images_count = {{ $crm_images_count }};
+            var images_count = {{ $images_count }};
             var rows_count = 0;
             var selected_rows = [];
             $('#image_upload_btn').on('click', function () {
                 $('#image_upload_btn').attr('disabled', true);
-                var crm_request_id = $('#crm_request_id').val();
-                if(crm_request_id){
-                    $('#image_crm_request_id').val(crm_request_id);
+                var request_id = '{{$report->id}}';
+                if(request_id){
+                    $('#image_request_id').val(request_id);
                     $.ajax({
-                        url: '{!! route('admin.crm.request.image_details') !!}',
+                        url: '{!! route('admin.incidence_monitoring.image_details') !!}',
                         method: 'POST',
                         data: {
-                            'crm_request_id': crm_request_id,
+                            'request_id': request_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
-
+                        console.log(data);
                         if(data.status == 0){
                             var image_html = '';
                             $.each(data.images, function (index, image) {
@@ -1440,12 +651,12 @@
                                 remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
                                 image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
                             });
-                            $('#crm_image_view_table tbody').append(image_html);
+                            $('#image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
                         }else if(data.status == 2){
                             var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
 
-                            $('#crm_image_view_table tbody').append(image_html);
+                            $('#image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -1468,7 +679,7 @@
 
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
-            var crm_image_table;
+            var image_table;
             function add_row() {
                 var tr_id = $('#image_upload_table tbody tr').attr('id');
                 if (typeof tr_id !== typeof undefined && tr_id !== false) {
@@ -1482,19 +693,19 @@
 
                 rows_count++;
 
-                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                var image = '<input class="form-control form-control-sm" type="file" name="image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                 }
-                crm_image_table.row.add([0, crm_image,remove]).node().id = rows_count;
-                crm_image_table.draw(true);
-                $('#CRMImageSubmitButton').attr('disabled', false);
+                image_table.row.add([0, image,remove]).node().id = rows_count;
+                image_table.draw(true);
+                $('#ImageSubmitButton').attr('disabled', false);
                 selected_rows.push(rows_count);
             }
-            crm_image_table = $('#image_upload_table').DataTable({
+            image_table = $('#image_upload_table').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Add Row',
@@ -1515,7 +726,7 @@
                 ],
 
                 rowCallback: function(row, data, index) {
-                    var info = crm_image_table.page.info();
+                    var info = image_table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
@@ -1525,9 +736,9 @@
                     // this.api().table().columns.adjust();
                 }
             });
-            $('#crm_image_view_table').on('click','a.remove_row', function () {
+            $('#image_view_table').on('click','a.remove_row', function () {
                 var row_id = $(this).parents('tr').attr('id');
-                var crm_request_id = $('#image_crm_request_id').val();
+                var request_id = $('#image_request_id').val();
                 var current = $(this);
                 if(row_id){
                     swal({
@@ -1557,8 +768,8 @@
                                 url: '{!! route('admin.crm.request.image_delete') !!}',
                                 method: 'POST',
                                 data: {
-                                    'crm_image_id': row_id,
-                                    'crm_request_id':crm_request_id,
+                                    'image_id': row_id,
+                                    'request_id':request_id,
                                     '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function (data) {
@@ -1582,9 +793,9 @@
                 if (index !== -1) {
                     selected_rows.splice(index, 1);
                 }
-                crm_image_table.row( $(this).parents('tr') ).remove().draw();
+                image_table.row( $(this).parents('tr') ).remove().draw();
             });
-            $('#crm_upload_form').validate({
+            $('#image_upload_form').validate({
 
                 errorClass: 'danger',
                 successClass: 'success',
@@ -1609,21 +820,14 @@
                 }
             });
             $('#image_upload_modal').on('hidden.bs.modal', function () {
-                $('#image_crm_request_id').val('');
-                crm_image_table.clear();
-                crm_image_table.draw();
+                $('#image_request_id').val('');
+                image_table.clear();
+                image_table.draw();
                 selected_rows = [];
                 rows_count = 0;
-                $('#crm_image_view_table tbody').html('');
+                $('#image_view_table tbody').html('');
             });
-
-            $('#special_request').on('click',function () {
-              $('#special_request_modal').modal('show');
-            });
-
-            $('#special_request_modal').on('hide.bs.modal', function (e) {
-                $('.form-check-input').prop('checked', false);
-            });
+            
 
         });
 

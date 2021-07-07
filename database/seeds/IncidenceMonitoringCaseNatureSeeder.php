@@ -14,17 +14,17 @@ class IncidenceMonitoringCaseNatureSeeder extends Seeder
         DB::table('incidence_monitoring_case_natures')->truncate();
 
         DB::table('incidence_monitoring_case_natures')->insert(array(
-            array('id' => 1, 'case_nature' => 'Improper Handling'),
-            array('id' => 2, 'case_nature' => 'Improper Loading'),
-            array('id' => 3, 'case_nature' => 'Improper Unloading'),
-            array('id' => 4, 'case_nature' => 'Throwing'),
-            array('id' => 5, 'case_nature' => 'Walking Over Shipments'),
-            array('id' => 6, 'case_nature' => 'Weight Not Measured Properly'),
-            array('id' => 7, 'case_nature' => 'Opening The Parcel'),
-            array('id' => 8, 'case_nature' => 'Handling Equipment Not Used'),
-            array('id' => 9, 'case_nature' => 'Vehicles Door Not Closed'),
-            array('id' => 10, 'case_nature' => 'Heat or Fire Usage Near Shipments'),
-            array('id' => 11, 'case_nature' => 'Overloading')
+            array('id' => 1, 'name' => 'Improper Handling'),
+            array('id' => 2, 'name' => 'Improper Loading'),
+            array('id' => 3, 'name' => 'Improper Unloading'),
+            array('id' => 4, 'name' => 'Throwing'),
+            array('id' => 5, 'name' => 'Walking Over Shipments'),
+            array('id' => 6, 'name' => 'Weight Not Measured Properly'),
+            array('id' => 7, 'name' => 'Opening The Parcel'),
+            array('id' => 8, 'name' => 'Handling Equipment Not Used'),
+            array('id' => 9, 'name' => 'Vehicles Door Not Closed'),
+            array('id' => 10, 'name' => 'Heat or Fire Usage Near Shipments'),
+            array('id' => 11, 'name' => 'Overloading')
         ));
     }
 }

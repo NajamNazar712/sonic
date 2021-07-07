@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Model;
+namespace App\Http\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +11,6 @@ class IncidenceMonitoringTaggedPerson extends Model
     }
 
     public function incidence_monitoring() {
-        return $this->hasMany('App\Http\Model\IncidenceMonitoring');
+        return $this->hasMany('App\Http\Models\Admin\IncidenceMonitoring');
     }
 }

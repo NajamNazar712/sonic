@@ -14,8 +14,8 @@ class IncidenceMonitoringNCLevelSeeder extends Seeder
         DB::table('incidence_monitoring_n_c_levels')->truncate();
 
         DB::table('incidence_monitoring_n_c_levels')->insert(array(
-            array('id' => 1, 'nc_level' => 'Major'),
-            array('id' => 2, 'nc_level' => 'Minor')
+            array('id' => 1, 'name' => 'Major'),
+            array('id' => 2, 'name' => 'Minor')
         ));
     }
 }

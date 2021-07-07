@@ -61,7 +61,7 @@
                         <div class="form-group">
                             <select class="form-control" name="monitoring_area_id" id="monitoring_area" data-rule-required="true" data-msg-required="Monitoring Area is required">
                                 @foreach($monitoring_areas as $monitoring_area)
-                                    <option value="{{$monitoring_area->id}}">{{$monitoring_area->area}}</option>
+                                    <option value="{{$monitoring_area->id}}">{{$monitoring_area->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -90,7 +90,7 @@
                         <div class="form-group">
                             <select class="form-control" name="case_nature_id" id="case_nature" data-rule-required="true" data-msg-required="Case Nature is required">
                                 @foreach($case_natures as $case_nature)
-                                    <option value="{{$case_nature->id}}">{{$case_nature->case_nature}}</option>
+                                    <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -102,7 +102,7 @@
                         <div class="form-group">
                             <select class="form-control" name="nc_level_id" id="nc_level" data-rule-required="true" data-msg-required="NC Level is required">
                                 @foreach($nc_levels as $nc_level)
-                                    <option value="{{$nc_level->id}}">{{$nc_level->nc_level}}</option>
+                                    <option value="{{$nc_level->id}}">{{$nc_level->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -288,7 +288,7 @@
                     @endif
                     {
                         extend: 'excel',
-                        title: 'FTL Requests',
+                        title: 'Incidence Monitoring',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -316,7 +316,7 @@
                     {data: 'area_name', name: 'area.area', class: 'align-middle area_name'},
                     {data: 'time_slot', name: 'time_slot', class: 'align-middle time_slot', orderable: false, searchable: false},
                     {data: 'case_nature_type', name: 'case_nature.case_nature', class: 'align-middle case_nature_type'},
-                    {data: 'obeservation', name: 'incidence_monitorings.obeservation', class: 'align-middle observation'},
+                    {data: 'observation', name: 'incidence_monitorings.observation', class: 'align-middle observation'},
                     {data: 'nc_level_name', name: 'nc_level.nc_level', class: 'align-middle nc_level_name'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to', orderable: false, searchable: false},
                     {data: 'tagging_date', name: 'incidence_monitorings.tagging_date', class: 'align-middle tagging_date'},

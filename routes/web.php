@@ -3071,6 +3071,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');
             Route::post('/get_managers','Admins\IncidenceMonitoringController@get_managers')->name('get_managers');
             Route::get('/view/{id}','Admins\IncidenceMonitoringController@view_report')->name('view_report');
+            Route::prefix('comment')->name('comment.')->group(function (){
+                Route::post('/add','Admins\IncidenceMonitoringController@add_comment')->name('add');
+                Route::post('/get','Admins\IncidenceMonitoringController@get_comments')->name('get');
+            });
+            Route::post('/image_details','Admins\IncidenceMonitoringController@image_details')->name('image_details');
+            Route::post('/image_submit','Admins\IncidenceMonitoringController@image_submit')->name('image_submit');
+            
             
     });
 

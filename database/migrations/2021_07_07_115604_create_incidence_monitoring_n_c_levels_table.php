@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIncidenceMonitoringCaseNaturesTable extends Migration
+class CreateIncidenceMonitoringNCLevelsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateIncidenceMonitoringCaseNaturesTable extends Migration
      */
     public function up()
     {
-        Schema::create('incidence_monitoring_case_natures', function (Blueprint $table) {
+        Schema::create('incidence_monitoring_n_c_levels', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('case_nature');
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ class CreateIncidenceMonitoringCaseNaturesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('incidence_monitoring_case_natures');
+        Schema::dropIfExists('incidence_monitoring_n_c_levels');
     }
 }
