@@ -3367,7 +3367,7 @@ class APIController extends Controller
                     $transit_events[] = $transit_event;
 
                     if ($pickup) {
-                      if ($shipment_journey->shipper_status_id == 2) {
+                      if (!isset($output['PickupDate']) && in_array($shipment_journey->shipper_status_id, [2, 53, 61, 63])) {
                         $pickup_date = $shipment_journey->created_at;
 
                         $output['PickupDate'] = $pickup_date;
