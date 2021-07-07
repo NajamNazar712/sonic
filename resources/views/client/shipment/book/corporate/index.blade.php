@@ -220,6 +220,58 @@
                                             </div>
                                         </div>
 
+                                        <div id="distribution_product" class="d-none">
+                                            <div class="repeater mb-1">
+                                                <div data-repeater-list="distribution">
+                                                    <div class="product mb-1" data-repeater-item>
+                                                        <div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
+                                                            <h4 class="m-1 white">Product #<span>1</span></h4>
+                                                            <button data-repeater-delete type="button" class="btn btn-icon btn-danger btn-sm mr-1"><i class="ft-x"></i></button>
+                                                        </div>
+
+                                                        <div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
+                                                            <div class="form-group">
+                                                                <select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product Type is required">
+                                                                    @foreach($products as $product)
+                                                                        @if($user['product_id'] == $product->id)
+                                                                            <option value="{{ $product->id }}" selected>{{ $product->product_name }}</option>
+                                                                        @else
+                                                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="form-group">
+                                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters"></textarea>
+                                                            </div>
+
+                                                            <div class="form-group input-group">
+                                                                <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required">
+                                                            </div>
+
+                                                            <div class="form-group input-group">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text">Rs</span>
+                                                                </div>
+
+                                                                <input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
+                                                            </div>
+
+                                                            <div class="form-group text-center p-1 border border-light rounded">
+                                                                <label class="d-block">Insurance</label>
+                                                                <input type="checkbox" name="insurance" class="switch hidden insurance">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group text-right">
+                                                    <button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div id="replacement" class="mb-1 d-none">
                                             <h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Replacement</h4>
 
@@ -461,6 +513,27 @@
                     </div>
                 </div>
 
+                <div class="modal fade" id="distributionProductModal" role="dialog" aria-labelledby="distributionProductModal" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" role="document">
+                        <div class="modal-content">
+                            <form class="form-horizontal" id="distribution_product_form">
+                                {{ csrf_field() }}
+
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="select_service_type_title">Add Products</h4>
+                                </div>
+                                <div class="modal-body">
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary mx-auto">Add</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>
@@ -475,6 +548,25 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+
+    <style>
+        /*Select2 ReadOnly Start*/
+        select[readonly].select2-hidden-accessible + .select2-container {
+            pointer-events: none;
+            touch-action: none;
+        }
+
+        select[readonly].select2-hidden-accessible + .select2-container .select2-selection {
+            background: #eee;
+            box-shadow: none;
+        }
+
+        select[readonly].select2-hidden-accessible + .select2-container .select2-selection__arrow, select[readonly].select2-hidden-accessible + .select2-container .select2-selection__clear {
+            display: none;
+        }
+
+        /*Select2 ReadOnly End*/
+    </style>
 @endsection
 
 @section('js')
@@ -774,8 +866,6 @@
             $('#select_service_type').modal('show');
             @else
                 service_type = '{{ Session::get('service_type_id') }}';
-                distribution_shipment = 0;
-            $('#distribution_shipment_btn').addClass('d-none');
             if(service_type == 1){
                 $('#pieces_quantity').removeClass('d-none');
                 $('#distribution_shipment_btn').removeClass('d-none');
@@ -818,6 +908,11 @@
                 if (service_type !== '' && service_type !== undefined && service_type !== null) {
                     $('#select_service_type form #service_type-error').addClass('d-none');
                     $('#distribution_shipment_btn').addClass('d-none');
+                    $('#distribution_shipment_btn').removeClass('btn-success');
+                    $('#distribution_product').addClass('d-none');
+                    $('#payment_info #amount').attr('readonly',false);
+                    $('#payment_info #payment_mode').attr('readonly',false);
+
                     if (service_type == 1) {
                         $('#distribution_shipment_btn').removeClass('d-none');
                         $('#shipping_header_div').removeClass('col col_6');
@@ -1052,14 +1147,25 @@
 
                 if(distribution_shipment == 0)
                 {
+                    $('#distribution_shipment_btn').addClass('btn-success');
                     $('#self_collection_div').addClass('d-none');
                     $('#regular').addClass('d-none');
+                    $("#distribution_product").removeClass('d-none');
+                    $('#selected_service_type_name').append(" (Distribution)");
+                    $('#payment_info #amount').attr('readonly',true);
+                    $('#payment_info #payment_mode').attr('readonly',true);
+                    $('#payment_info #payment_mode').val(1).trigger('change');
                     distribution_shipment = 1;
 
                 }
                 else{
+                    $('#distribution_shipment_btn').removeClass('btn-success');
                     $('#self_collection_div').removeClass('d-none');
                     $('#regular').removeClass('d-none');
+                    $("#distribution_product").addClass('d-none');
+                    $('#selected_service_type_name').html($("#selected_service_type_name").html().replace(" (Distribution)",""));
+                    $('#payment_info #amount').attr('readonly',false);
+                    $('#payment_info #payment_mode').attr('readonly',false);
                     distribution_shipment = 0;
                 }
             });
