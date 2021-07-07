@@ -383,15 +383,16 @@ class ReturnController extends Controller
 
     public static function check_tat($last_status_date,$tat_value)
     {
-        $status_date = Carbon::parse($last_status_date);
-        $temp_tat_date = Carbon::parse($last_status_date)->addDays($tat_value);
+        $temp_status_date = Carbon::parse($last_status_date)->format("Y-m-d 00:00:00");
+        $status_date = Carbon::parse($temp_status_date);
+        $temp_tat_date = Carbon::parse($temp_status_date)->addDays($tat_value);
         $sundays = $status_date->diffInDaysFiltered(function(Carbon $date) {
             if($date->format('D') == "Sun")
             {
                 return $date;
             }
         }, $temp_tat_date->addDay());
-        $tat_date = Carbon::parse($last_status_date)->addDays($tat_value+$sundays);
+        $tat_date = Carbon::parse($temp_status_date)->addDays($tat_value+$sundays);
         $diff_days = now()->diffInDaysFiltered(function(Carbon $date) {
                 if($date->format('D') != "Sun")
                 {
@@ -404,6 +405,7 @@ class ReturnController extends Controller
 
         return $diff_days;
     }
+
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
 
@@ -898,6 +900,8 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
+            ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
@@ -921,7 +925,7 @@ class ReturnController extends Controller
                 $join->on('cb.id', '=', 'shipments_journey.admin_id')
                     ->where('shipments_journey.shipper_status_id', 20);
             })
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id')
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name')
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -962,6 +966,14 @@ class ReturnController extends Controller
                     else {
                         return 'Cargo';
                     }
+                }
+            })
+            ->addColumn('return_city', function ($shipment) {
+                if($shipment->return_city_name){
+                    return $shipment->return_city_name;
+                }
+                else{
+                    return $shipment->origin;
                 }
             })
             ->editColumn('amount', function($shipment){
@@ -1133,14 +1145,25 @@ class ReturnController extends Controller
             if($shipment->exists()) {
                 $shipment = $shipment->first();
                 ShipmentScanningJourneyController::add($shipment->id, 7, 1, Auth::id(), null,null);
-                $destination_id = $shipment->pickup_address->city_id;
+                if($shipment->return_address_id != NULL){
+                    $destination_id = $shipment->return_address->city_id;
+                }
+                else{
+                    $destination_id = $shipment->pickup_address->city_id;
+                }
                 $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
                 $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
                 if(session('role_id') == 1 || in_array($destination_id, session('hubs'))){
                     $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
                     if(!$request->has('hub_id')){
                         if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $return_note_statuses))) {
-                            $destination_city_id = $shipment->pickup_address->city_id;
+                            if($shipment->return_address_id != NULL){
+                                $destination_city_id = $shipment->return_address->city_id;
+                            }
+                            else{
+                                $destination_city_id = $shipment->pickup_address->city_id;
+                            }
+
                             $destination_city = City::find($destination_city_id);
                             if ($destination_city->id == $destination_city->hub_id) {
                                 $destination = $destination_city->name;
@@ -1218,7 +1241,13 @@ class ReturnController extends Controller
 
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
-                                $destination_city_id = $shipment->pickup_address->city_id;
+                                if($shipment->return_address_id != NULL){
+                                    $destination_city_id = $shipment->return_address->city_id;
+                                }
+                                else{
+                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                }
+
                                 $destination_city = City::find($destination_city_id);
                                 if ($destination_city->id == $destination_city->hub_id) {
                                     $destination = $destination_city->name;
@@ -1298,7 +1327,13 @@ class ReturnController extends Controller
                         if($request->has('hub_id') && ($destination_id == $request->hub_id)){
                             $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
                             if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
-                                $destination_city_id = $shipment->pickup_address->city_id;
+                                if($shipment->return_address_id != NULL){
+                                    $destination_city_id = $shipment->return_address->city_id;
+                                }
+                                else{
+                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                }
+
                                 $destination_city = City::find($destination_city_id);
                                 if ($destination_city->id == $destination_city->hub_id) {
                                     $destination = $destination_city->name;
@@ -1371,7 +1406,12 @@ class ReturnController extends Controller
 
                             } else
                                 if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
-                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                    if($shipment->return_address_id != NULL){
+                                        $destination_city_id = $shipment->return_address->city_id;
+                                    }
+                                    else{
+                                        $destination_city_id = $shipment->pickup_address->city_id;
+                                    }
                                     $destination_city = City::find($destination_city_id);
                                     if ($destination_city->id == $destination_city->hub_id) {
                                         $destination = $destination_city->name;
@@ -1805,6 +1845,8 @@ class ReturnController extends Controller
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
             ->join('shipments','shipments.id','=','dns.shipment_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
+            ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
             ->join('users','shipments.user_id','=','users.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -1820,7 +1862,7 @@ class ReturnController extends Controller
                     ->where('rrb.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges','crm.id as complaint', 'rrb.received_or_refused_by', 'rrb.remarks as remarks', 'rsi.pickup_address as return_address_location', 'rc.name as return_city_name'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -1868,6 +1910,24 @@ class ReturnController extends Controller
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
             })
+            ->addColumn('return_address', function ($deliveries) {
+                if($deliveries->return_address_location != NULL){
+                    return $deliveries->return_address_location;
+                }
+                else{
+                    return $deliveries->address;
+                }
+
+            })
+            ->addColumn('return_city', function ($deliveries) {
+                if($deliveries->return_city_name != NULL){
+                    return $deliveries->return_city_name;
+                }
+                else{
+                    return $deliveries->destination;
+                }
+            })
+
             ->addColumn('status', function ($deliveries) {
                 $delivered_array = array(25,31,38);
                 $return_array = array(23, 25);
@@ -2416,7 +2476,20 @@ class ReturnController extends Controller
                     }
                     if ($user_total_shipments[$filtered_shipments_user->user_id] > 0) {
                         $total_users++;
-                        $shipment_details_row_start_summary = '
+                        if($filtered_shipments_user->return_address_id != NULL){
+                            $shipment_details_row_start_summary = '
+                                  <tr>
+                                    <td>' . $total_users . '</td>
+                                    <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                    <td>' . $filtered_shipments_user->return_address->poc . '</td>
+                                    <td>' . $filtered_shipments_user->return_address->phone . '</td>
+                                    <td>' . $filtered_shipments_user->return_address->pickup_address . '</td>
+                                    <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                    <td></td>
+                        ';
+                        }
+                        else{
+                            $shipment_details_row_start_summary = '
                                   <tr>
                                     <td>' . $total_users . '</td>
                                     <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
@@ -2426,6 +2499,8 @@ class ReturnController extends Controller
                                     <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
                                     <td></td>
                         ';
+                        }
+
 
                         $shipment_details .= $shipment_details_row_start_summary;
                     }
@@ -2465,7 +2540,20 @@ class ReturnController extends Controller
                     }
                     if($user_total_shipments[$filtered_shipments_user->user_id] > 0){
                         $replacement_total_users++;
-                        $shipment_details_row_start_summary = '
+                        if($filtered_shipments_user->return_address_id != NULL){
+                            $shipment_details_row_start_summary = '
+                              <tr>
+                                <td>' . $replacement_total_users . '</td>
+                                <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
+                                <td>' . $filtered_shipments_user->return_address->poc . '</td>
+                                <td>' . $filtered_shipments_user->return_address->phone . '</td>
+                                <td>' . $filtered_shipments_user->return_address->pickup_address . '</td>
+                                <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
+                                <td></td>
+                    ';
+                        }
+                        else{
+                            $shipment_details_row_start_summary = '
                               <tr>
                                 <td>' . $replacement_total_users . '</td>
                                 <td>' . $filtered_shipments_user->user->name . ' | ' . $filtered_shipments_user->user->phone . (($filtered_shipments_user->user->phone2) ? (' / ' . $filtered_shipments_user->user->phone2) : '') . '</td>
@@ -2475,6 +2563,8 @@ class ReturnController extends Controller
                                 <td>' . $user_total_shipments[$filtered_shipments_user->user_id] . '</td>
                                 <td></td>
                     ';
+                        }
+
 
                         $shipment_details .= $shipment_details_row_start_summary;
                     }
@@ -2567,7 +2657,20 @@ class ReturnController extends Controller
                         if(CrmRequest::where('shipment_id',$shipment->id)->where('case_nature_id',1)->whereIn('status_id',[2, 3, 5])->exists()){
                             $class = 'complaint';
                         }
-                        $shipment_details_row_start = '
+                        if($shipment->return_address_id != NULL){
+                            $shipment_details_row_start = '
+                              <tr>
+                                <td>' . $total_shipments . '</td>
+                                <td class="'. $class .'">' . $shipment->tracking_number . '</td>
+                                <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->user->phone2) ? (' / ' . $shipment->user->phone2) : '') . '</td>
+                                <td>' . $shipment->return_address->poc . '</td>
+                                <td>' . $shipment->return_address->phone . '</td>
+                                <td>' . $shipment->return_address->pickup_address . '</td>
+                                <td>' . $shipment->items->where('bought', 0)->sum('quantity') . '</td>
+                    ';
+                        }
+                        else{
+                            $shipment_details_row_start = '
                               <tr>
                                 <td>' . $total_shipments . '</td>
                                 <td class="'. $class .'">' . $shipment->tracking_number . '</td>
@@ -2577,6 +2680,8 @@ class ReturnController extends Controller
                                 <td>' . $shipment->pickup_address->pickup_address . '</td>
                                 <td>' . $shipment->items->where('bought', 0)->sum('quantity') . '</td>
                     ';
+                        }
+
 
                         if ($shipment->booking_type_id != 4) {
                             $shipment_details_row_start .= '

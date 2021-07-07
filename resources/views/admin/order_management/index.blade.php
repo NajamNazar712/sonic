@@ -304,7 +304,7 @@
         </div>
     </div>
 
-    <!-- ////////////////////////////////////////////////////////////////////////////-->
+
 
 @endsection
 @section('css')
@@ -766,22 +766,22 @@
                                             'shipment_ids': selected_rows
                                         }
                                     })
-                                        .done(function(data) {
-                                            if (data.status == 0) {
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }
-                                            else {
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                            }
-                                            table.button('.shipper_recall').disable();
-                                            table.button('.print').disable();
+                                    .done(function(data) {
+                                        if (data.status == 0) {
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }
+                                        table.button('.shipper_recall').disable();
+                                        table.button('.print').disable();
 
-                                            selected_rows = [];
+                                        selected_rows = [];
 
-                                            table.rows().deselect();
+                                        table.rows().deselect();
 
-                                            table.draw('false');
-                                        });
+                                        table.draw('false');
+                                    });
                                 }
                             });
                         }
@@ -993,12 +993,7 @@
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
-
+                        obj.text = obj.name;
                         return obj;
                     });
 

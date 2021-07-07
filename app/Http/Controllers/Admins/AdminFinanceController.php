@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
@@ -76,7 +77,9 @@ use App\Http\Models\InvoiceShipment;
 use App\Http\Models\InvoiceStatus;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\InvoiceForReimbursement;
-
+use SnappyImage;
+use SnappyPDF;
+/*use Barryvdh\Snappy\Facades\SnappyPdf;*/
 use Auth;
 use DB;
 
@@ -90,7 +93,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use NumberToWords\NumberToWords;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\WalkinFtlInvoice;
 
 class AdminFinanceController extends Controller
@@ -238,7 +240,6 @@ class AdminFinanceController extends Controller
                 $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
                 $edit_deposit_button = '<button type="button" class="dropdown-item edit_deposit_slip"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Deposit Slip</div></button>';
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
-                $sdn_adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -254,9 +255,6 @@ class AdminFinanceController extends Controller
                     $dropdown .= $edit_deposit_button;
                 }
 
-                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
-                    $dropdown .= $sdn_adjustment_add_button;
-                }
 
 
                 $dropdown .= $export_to_excel_button;
@@ -2679,9 +2677,14 @@ class AdminFinanceController extends Controller
             $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
 
             if($retail_shipment->shipping_mode == 3) {
-                $charges = 0;
+                if($shipment->charges_mode_id == 2){
+                    $charges = $retail_shipment->total_charges;
+                }
+                else{
+                    $charges = 0;
+                }
                 $gst = 0;
-                $payable = $amount;
+                $payable = $amount - $charges;
 
 //            $account_type_id = $retail_shipment->shipper->account_type_id;
 
@@ -5338,11 +5341,45 @@ class AdminFinanceController extends Controller
 
             if($user_banking_information->exists()){
                 $user_banking_information = $user_banking_information->first();
-                if ($user_banking_information->generation_date == $current_date->day) {
+               /* if ($user_banking_information->generation_date == $current_date->day) {
                     $generate = TRUE;
 
                     $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
+                }*/
+                if ($user_banking_information->invoicing_cycle_id == 1) {
+                    if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {
+                        $generate = TRUE;
+
+                        $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
+                    }
                 }
+                else if ($user_banking_information->invoicing_cycle_id == 2) {
+                    if ($current_date->day == 14 || $current_date->day == 28) {
+                        $generate = TRUE;
+
+                        if ($current_date->day == 14) {
+                            $billing_period_from_date = Carbon::now()->subMonth()->day(28)->startOfDay()->toDateString();
+                        }
+                        else {
+                            $billing_period_from_date = Carbon::now()->day(14)->startOfDay()->toDateString();
+                        }
+                    }
+                }
+                else if ($user_banking_information->invoicing_cycle_id == 3) {
+                    if ($user_banking_information->generation_date == $current_date->day) {
+                        $generate = TRUE;
+
+                        $billing_period_from_date = Carbon::now()->subDay()->day($user_banking_information->generation_date)->startOfDay()->toDateString();
+                    }
+                }
+                else if ($user_banking_information->invoicing_cycle_id == 4) {
+                 /*   if ($user_banking_information->generation_date == $current_date->dayOfWeekIso) {*/    //need to be update
+                        $generate = TRUE;
+
+                        $billing_period_from_date = Carbon::now()->subDays(1)->startOfDay()->toDateString();
+                    //}
+                }
+
 
                 if ($generate) {
                     $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<', $current_date_string)->whereHas('shipment', function ($query) use ($user_id) {
@@ -5418,12 +5455,12 @@ class AdminFinanceController extends Controller
 
                         $invoice->save();
 
-                        if( $invoice->total_invoice_amount < 50000){
-                            $users = User::find($user_id);
-                            $users->blacklist = 1;
-                            $users->blacklist_reason = '<strong> Auto Blacklisted - </strong>'. "Invoice Amount was less than PKR 50,000";
-                            $users->save();
-                        }
+//                        if( $invoice->total_invoice_amount < 50000){
+//                            $users = User::find($user_id);
+//                            $users->blacklist = 1;
+//                            $users->blacklist_reason = '<strong> Auto Blacklisted - </strong>'. "Invoice Amount was less than PKR 50,000";
+//                            $users->save();
+//                        }
 
                         NotificationsController::send(27, $invoice_id);
                     }
@@ -6357,7 +6394,9 @@ class AdminFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->whereIn('is.id',[1,2]);
+            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+            ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->whereIn('is.id',[1,2])->where('ubi.default_bank',1);
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
@@ -6474,7 +6513,9 @@ class AdminFinanceController extends Controller
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
-            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date')->where('is.id',3);
+            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+            ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
+            ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->where('is.id',3)->where('ubi.default_bank',1);
 
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
@@ -9316,12 +9357,17 @@ class AdminFinanceController extends Controller
 
     public function ftl_invoice_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),261);
         $company_banks = BanksList::where('affiliate', 1)->get();
         return view('admin.finance.ftl_invoices')->with(['company_banks' => $company_banks]);
     }
 
     public function ftl_invoice_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),262);
+        }
         $invoices = WalkinFtlInvoice::join('ftl_requests as ftlr', 'walkin_ftl_invoices.ftl_request_id', '=', 'ftlr.id')
             ->join('cities as origin', 'ftlr.origin_id', '=', 'origin.id')
             ->join('cities as destination', 'ftlr.destination_id', '=', 'destination.id')
@@ -9763,6 +9809,16 @@ class AdminFinanceController extends Controller
         // header('Cache-Control: max-age=0');
 
         // $writer->save('php://output');
+    }
+
+    static public function email_print_invoice($id,$bool)
+    {
+        $html = self::generate_invoice_print($id,$bool);
+        $filename = 'invoice_'. $id;
+        $path = public_path() . '/' . 'reports/'. $filename . '.pdf';
+        $pdf = SnappyPDF::loadHTML($html)->save($path);
+        $link = url('/') . '/' . 'reports/invoice_'.$id.'.pdf';
+        return $link;
     }
 
 }

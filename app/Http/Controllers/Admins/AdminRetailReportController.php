@@ -20,7 +20,7 @@ class AdminRetailReportController extends Controller
     }
 
     public function sales_index(){
-//        ActivityTrailController::createActivityTrailLog(Auth::id(),149);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),239);
 
         $retail_centers = DB::connection('reports')->table('retail_trax_centers')->where('status', 1)->select('id','name')->get();
         $retail_franchises = DB::connection('reports')->table('retail_franchises')->where('status', 1)->select('id','name')->get();
@@ -35,10 +35,10 @@ class AdminRetailReportController extends Controller
         return view('admin.reports.retail.sales')->with(['retail_centers' => $retail_centers, 'retail_franchises' => $retail_franchises ,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
     }
     public function sales_list(Request $request){
-        /*if($request->get('excel') && $request->get('excel') == true)
+        if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),150);
-        }*/
+            ActivityTrailController::createActivityTrailLog(Auth::id(),240);
+        }
 
         $from = $request->get('search_date_from');
         $from = Carbon::parse($from)->setTimeFromTimeString('05:59:59');

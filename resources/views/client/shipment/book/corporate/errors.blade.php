@@ -96,6 +96,8 @@
                                         <th>Shipper Reference 4</th>
                                         <th>Shipper Reference 5</th>
                                         <th>Open Shipment</th>
+{{--                                        <th>Return Address ID</th>--}}
+
 
                                         <th></th>
                                     </tr>
@@ -445,6 +447,7 @@
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                             @endif
+
                                                 <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>
                                     @endforeach

@@ -130,11 +130,9 @@ class DHLInternationalShipmentSyncController extends Controller
 //                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_delivered($shipment->id);
                                         }
-                                        else if(in_array($shipper_status_id, [9])){
+                                        else if(in_array($shipper_status_id, [8, 9])){
                                             (new self)->shipment_delivered($shipment->id);
                                         }
-                                        $intl_shipment->sync = 0;
-                                        $intl_shipment->save();
 
                                     }
                                     else if(in_array($international_shipment_description, $undelivered_status)){
@@ -147,7 +145,6 @@ class DHLInternationalShipmentSyncController extends Controller
                                             else if($index == 2){
                                                 $shipment_status = 8;
                                                 $shipment_reason = 8;
-
                                             }
                                             else{
                                                 $shipment_status = 8;
@@ -186,11 +183,9 @@ class DHLInternationalShipmentSyncController extends Controller
 //                                            (new self)->shipment_arrived($shipment->id);
                                             (new self)->shipment_returned($shipment->id);
                                         }
-                                        else if(in_array($shipper_status_id, [9])){
+                                        else if(in_array($shipper_status_id, [8, 9])){
                                             (new self)->shipment_returned($shipment->id);
                                         }
-                                        $intl_shipment->sync = 0;
-                                        $intl_shipment->save();
 
                                     }
 
@@ -237,6 +232,13 @@ class DHLInternationalShipmentSyncController extends Controller
         $shipment->save();
         ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 14, 14, NULL, NULL, NULL, $this->admin_id);
+
+        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->where('sync', 1);
+        if($international_shipment->exists()){
+            $international_shipment = $international_shipment->first();
+            $international_shipment->sync = 0;
+            $international_shipment->save();
+        }
     }
     public function shipment_undelivered($shipment_id, $shipment_status, $shipment_reason){
         $shipment = Shipment::find($shipment_id);
@@ -255,6 +257,13 @@ class DHLInternationalShipmentSyncController extends Controller
         ShipmentsJourneyController::add($shipment_id, 12, 12, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, $this->admin_id);
+
+        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->where('sync', 1);
+        if($international_shipment->exists()){
+            $international_shipment = $international_shipment->first();
+            $international_shipment->sync = 0;
+            $international_shipment->save();
+        }
     }
 
 

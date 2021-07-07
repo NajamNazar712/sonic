@@ -293,7 +293,10 @@
 											</tr>
 										@endif
 										</tbody>
+
 									</table>
+
+
 
 									<table class="table table-bordered">
 										<thead>

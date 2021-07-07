@@ -577,12 +577,16 @@
                                 // console.log(details.crm_requests);
                                 var shipment = '';
                                 var open_box_iocn = '';
+                                var ccd_icon = '';
                                 if(details.open_box){
                                     open_box_iocn = '<span><i class="fas fa-box-open"></i></span>';
                                 }
+                                if(details.ccd){
+                                    ccd_icon = '<span><i class="fas fa-credit-card"></i> (Credit Card on Delivery-CCD)</span>';
+                                }
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'</div>';
+                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if ('complain' in details) {

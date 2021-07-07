@@ -18,6 +18,8 @@ Route::name('api.')->group(function () {
 	Route::post('user_login', 'APIController@bolt_login')->name('user_login');
 	Route::post('forget_pin', 'APIController@bolt_forget_pin')->name('forget_pin');
 	Route::post('reset_pin', 'APIController@bolt_reset_pin')->name('reset_pin');
+	Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
+	Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
 
 	Route::middleware('APIToken')->group(function() {
 		Route::post('verify', 'APIController@verify')->name('verify');
@@ -137,6 +139,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivered_v2', 'Rider\RiderAPIController@shipment_delivered_v2')->name('delivered_v2');
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('delivered_v3', 'Rider\RiderAPIController@shipment_delivered_v3')->name('delivered_v3');
+                Route::post('delivered_v4', 'Rider\RiderAPIController@shipment_delivered_v4')->name('delivered_v4');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -161,6 +164,7 @@ Route::name('api.')->group(function () {
                 Route::post('action_log', 'Rider\RiderAPIController@return_action_log')->name('action_log');
                 Route::post('undelivered_v2', 'Rider\RiderAPIController@return_shipment_undelivered_v2')->name('undelivered_v2');
                 Route::post('undelivered_v3', 'Rider\RiderAPIController@return_shipment_undelivered_v3')->name('undelivered_v3');
+                Route::post('undelivered_v4', 'Rider\RiderAPIController@return_shipment_undelivered_v4')->name('undelivered_v4');
                 Route::get('summary_v2', 'Rider\RiderAPIController@return_summary_multiple_v2')->name('summary_v2');
             });
 
@@ -251,6 +255,21 @@ Route::name('api.')->group(function () {
                 Route::get('previous', 'ConsigneeAPIController@previous_shipments')->name('previous');
             });
             Route::post('update_address', 'ConsigneeAPIController@address_change_request')->name('update_address');
+            Route::get('notification_history', 'ConsigneeAPIController@notification_history')->name('notification_history');
+        });
+
+    });
+
+    Route::prefix('shipper')->name('shipper.')->group(function () {
+        Route::post('login', 'ShipperAPIController@login')->name('login');
+        Route::middleware('ShipperAPIToken')->group(function () {
+            Route::post('shipment_history', 'ShipperAPIController@shipment_history')->name('shipment_history');
+
+            Route::prefix('subscription')->name('subscription.')->group(function () {
+                Route::get('list', 'ShipperAPIController@shipper_subscription_list')->name('list');
+                Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
+            });
+            Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
         });
 
     });

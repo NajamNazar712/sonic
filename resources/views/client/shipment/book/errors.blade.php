@@ -95,6 +95,9 @@
                                 <th>Shipper Reference 4</th>
                                 <th>Shipper Reference 5</th>
                                 <th>Open Shipment</th>
+                                @if($service_type_check_id == 1 || $service_type_check_id == 2)
+{{--                                <th>Return Address ID</th>--}}
+                                @endif
                                 <th></th>
                             </tr>
                             </thead>
@@ -435,6 +438,7 @@
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][open_shipment]', $ro['open_shipment'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
+
 
                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
 

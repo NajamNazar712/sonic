@@ -62,6 +62,7 @@
                                                     <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                                     <input type="hidden" name="form[{{$no}}][service_type_id]" value="{{$ro['service_type_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][pickup_address_id]" value="{{$ro['pickup_address_id']}}">
+
                                                     <input type="hidden" name="form[{{$no}}][information_display]" value="{{$ro['information_display']}}">
                                                     <td><input type="text" name="form[{{$no}}][consignee_city_name]" class="form-control text" value="{{$ro['consignee_city_name']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][consignee_name]" class="form-control text" value="{{$ro['consignee_name']}}" readonly="readonly"></td>
@@ -69,7 +70,9 @@
                                                     <td><font color="red">{{$blacklist_errors[$key+2]['msg']}}</font><input type="text" name="form[{{$no}}][consignee_phone_number_1]" class="form-control phone" value="{{$ro['consignee_phone_number_1']}}" readonly="readonly"><span class="danger">High Return Ratio for Consignee</span></td>
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
-                                                    <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @if($service_type_check_id == 1 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][open_shipment]" value="{{$ro['open_shipment']}}">
                                                     <td><input type="text" name="form[{{$no}}][order_id]" class="form-control text" value="{{$ro['order_id']}}" readonly="readonly"></td>
                                                     <td><input type="text" name="form[{{$no}}][order_date]" class="form-control text" value="{{$ro['order_date']}}" readonly="readonly"></td>
@@ -140,7 +143,9 @@
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_1]" value="{{$ro['consignee_phone_number_1']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_phone_number_2]" value="{{$ro['consignee_phone_number_2']}}">
                                                     <input type="hidden" name="form[{{$no}}][consignee_email_address]" value="{{$ro['consignee_email_address']}}">
-                                                    <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @if($service_type_check_id == 1 || $service_type_check_id == null)
+                                                        <input type="hidden" name="form[{{$no}}][self_collection]" value="{{$ro['self_collection']}}">
+                                                    @endif
                                                     <input type="hidden" name="form[{{$no}}][open_shipment]" value="{{$ro['open_shipment']}}">
                                                     <input type="hidden" name="form[{{$no}}][order_id]" value="{{$ro['order_id']}}">
                                                     <input type="hidden" name="form[{{$no}}][order_date]" value="{{$ro['order_date']}}">

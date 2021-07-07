@@ -90,6 +90,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderIncentiveCalculate',
         'App\Console\Commands\DHLTrackingSync',
         'App\Console\Commands\StatusBookedEmailKhaddi',
+        'App\Console\Commands\RiderWisePickupEmail',
         
     ];
 
@@ -299,6 +300,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
 
         $schedule->command('email:shipmentbookedkhaddi')->hourly()->runInBackground();
+
+        $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
+
 
     }
     /**

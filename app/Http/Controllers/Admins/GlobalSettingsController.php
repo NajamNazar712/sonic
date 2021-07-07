@@ -1514,9 +1514,54 @@ class GlobalSettingsController extends Controller
     public function crm_case_nature_types_list(Request $request)
     {
         $case_nature_types = CrmRequestCaseNatureType::leftjoin('crm_request_case_nature as crcs', 'crcs.id', '=', 'crm_request_case_nature_types.nature_id')
-            ->select('crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type');
+            ->select('crm_request_case_nature_types.id','crcs.name as case_nature', 'crm_request_case_nature_types.type as case_nature_type', 'crm_request_case_nature_types.status_id as status');
+            
+            $datatable = Datatables::of($case_nature_types)   
+            ->editColumn('status', function($case_nature_types) {
+                if($case_nature_types->status==1){
+                    return 'Enable';
+                }else{
+                    return 'Disable';
 
-        return Datatables::of($case_nature_types)->make(true);
+                }
+            })
+            ->addColumn('action', function ($data) {
+                if (session('role_id') == 1 || in_array(537, session('permissions'))) {
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                    if ($data->status == 0) {
+                        $dropdown .= '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    } else {
+                        $dropdown .= '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                    }
+                    $dropdown .= '
+                    </div>
+                  </div>
+          ';
+                }else{
+                    $dropdown = '';
+
+          }
+                    return $dropdown;
+                
+            });
+            return $datatable->make(true);
+    }
+
+    public function crm_case_nature_types_status(Request $request){
+        $crm_case_nature_type = CrmRequestCaseNatureType::find($request->id);
+        if ($request->status == 1) {
+                $crm_case_nature_type->status_id = 1;
+                $crm_case_nature_type->save();
+                return response()->json(['status' => 1, 'success' => 'Case Nature Type Enabled Successfully']);
+        } elseif ($request->status == 0) {
+            $crm_case_nature_type->status_id = 0;
+            $crm_case_nature_type->save();
+            return response()->json(['status' => 1, 'success' => 'Case Nature Type Disabled Successfully']);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid Request']);
+        }
     }
 
     public function crm_case_nature_types_store(Request $request)
@@ -3118,12 +3163,17 @@ class GlobalSettingsController extends Controller
 
     public function runner_report_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),251);
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.runner.index')->with('cities', $cities);
     }
 
     public function runner_report_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),252);
+        }
         $runner_report = Runner::join('admins as a', 'a.id', '=', 'runners.created_by')
             ->select('runners.id as id', 'runners.name as runner', 'runners.created_at', 'a.name as created_by', 'runners.status as status');
         $datatable = Datatables::of($runner_report)
@@ -3779,6 +3829,7 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),244);
         $rider_categories = RiderCategory::whereIn('id', [1, 2])->select('id', 'name')->get();
         $shipment_payment_types = RidersShipmentPaymentType::select('id', 'name')->get();
         $weight_ranges = RidersShipmentWeightRange::select('id', 'name')->get();
@@ -3787,6 +3838,10 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),245);
+        }
         $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'riders_incentive_settings.rider_category_id')
             ->join('riders_shipment_payment_types as rspt', 'rspt.id', '=', 'riders_incentive_settings.rider_shipment_payment_type_id')
             ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
@@ -3906,6 +3961,7 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_cron_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),241);
         $value = null;
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time')->first();
         if ($settings) {
@@ -3933,6 +3989,7 @@ class GlobalSettingsController extends Controller
 
     public function rcp_tat_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),238);
         $tat_options = RcpTatOption::all();
         return view('admin.settings.rcp_tat_view')->with(['tat_options' => $tat_options]);
     }
@@ -3975,12 +4032,17 @@ class GlobalSettingsController extends Controller
 
     public function fleet_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),246);
         $vehicles = VehicleType::all();
         return view('admin.settings.fleet_index')->with('vehicles', $vehicles);
     }
 
-    public function fleet_list()
+    public function fleet_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),247);
+        }
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
             ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
@@ -4117,6 +4179,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function route_management_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),248);
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.route_management_index')->with('cities', $cities);
     
@@ -4149,9 +4212,12 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Route Updated successfully!');
     }
-    public function route_management_list()
+    public function route_management_list(Request $request)
     {
-        
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),249);
+        }
         $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
         ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
         ->select('route_managements.id','route_managements.created_at','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
@@ -4269,5 +4335,38 @@ class GlobalSettingsController extends Controller
             }
             return response()->json(['status' => 1, 'success' => 'Status Successfully Updated!']);
         }
+    }
+
+    public function debriefing_time_setting_index(){
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time = $settings->text;
+        }
+        else {
+            $time = '00:00';
+        }
+
+        return view('admin.settings.debriefing_time_setting_index')->with(['time' => $time]);
+
+    }
+
+    public function debriefing_time_setting_update(Request $request){
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $settings->text = $request->debriefing_time;
+        }
+        else {
+            $settings = new GlobalSettings();
+            $settings->text = $request->debriefing_time;
+            $settings->type = 'debriefing_time_setting';
+            $settings->setting_value = 0;
+        }
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }

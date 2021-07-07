@@ -21,7 +21,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
-                                <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Phone No</th>
@@ -401,7 +401,7 @@
             });
 
             $("#addRider").on("show.bs.modal", function(e) {
-                $.get( "/admin/management/riders/add", function( data ) {
+                $.get( "/admin/management/riders/add/2", function( data ) {
                     $("#addRiderDiv").html(data);
                     var html = '<input name="rider_type" value="2" type="hidden">';
                     $('#addRiderForm').append(html);
@@ -411,7 +411,7 @@
 
                 var id = $(e.relatedTarget).data('target-id');
 
-                $.get( "/admin/management/riders/"+id+"/edit", function( data ) {
+                $.get( "/admin/management/riders/"+id+"/edit/2", function( data ) {
                     $("#editRiderDiv").html(data);
                     var html = '<input name="rider_type" value="2" type="hidden">';
                     $('#editRiderForm').append(html);
