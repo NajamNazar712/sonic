@@ -18,8 +18,11 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentReason;
 use App\http\Models\ShipmentShipperReference;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -3429,6 +3432,67 @@ class APIController extends Controller
                 $employee_device_token->delete();
             }
             return response()->json(['status' => 0, 'message' => 'Device Token Deleted']);
+        }
+    }
+
+    public function shipment_status_eta(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })]
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+            if (!$shipment_journey) {
+                return response()->json(['status' => 1, 'message' => 'No data found!']);
+            }
+
+            $current_status_id = $shipment_journey->shipper_status_id;
+            $current_status_time = $shipment_journey->created_at;
+            $current_reason_id = $shipment_journey->status_reason_id;
+
+            $details = array();
+
+            $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
+            if($duration->exists()){
+                $duration = $duration->first();
+                $estimated_eta = $duration->eta;
+
+                $actual_eta = Carbon::now()->diffInDays($current_status_time);
+
+                $difference_eta = $estimated_eta - $actual_eta;
+
+                $details['tracking_number'] = $tracking_number;
+                $details['status'] = ShipmentStatus::find($current_status_id)->name;
+                $details['eta'] = $difference_eta;
+
+                if($difference_eta == 0 && $current_reason_id != NULL){
+                    $details['reason'] = ShipmentReason::find($current_reason_id)->name;
+                }
+
+            }
+
+            if (!empty($details)) {
+                return response()->json(['status' => 0, 'message' => 'ETA of Shipment #' . $tracking_number, 'details' => $details]);
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'No data found!']);
+            }
         }
     }
 }
