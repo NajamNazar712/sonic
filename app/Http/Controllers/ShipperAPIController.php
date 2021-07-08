@@ -138,8 +138,11 @@ class ShipperAPIController extends Controller
                 $shipment = $shipment->first();
                 if ($request->shipper_id == $shipment->pickup_address->user->id) {
                     $shipment_info['tracking_no'] = $shipment->tracking_number;
-                    $shipment_info['origin'] = $shipment->consignee_city->name;
-                    $shipment_info['destination'] = $shipment->pickup_address->city->name;
+                    $shipment_info['shipment_id'] = $shipment->shipment_id;
+                    $shipment_info['status_id'] = $shipment->shipper_status_id;
+                    $shipment_info['status'] = $shipment->status_shipper->name;
+                    $shipment_info['origin'] = $shipment->pickup_address->city->name;
+                    $shipment_info['destination'] = $shipment->consignee_city->name;
                     $shipment_info['shipper'] = $shipment->pickup_address->user->name;
                     $shipment_info['amount'] = $shipment->amount;
                     $shipment_info['order_id'] = $shipment->order_id;
