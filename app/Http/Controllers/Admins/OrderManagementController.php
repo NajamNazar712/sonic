@@ -28,6 +28,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
+use App\Http\Models\PaymentMode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +56,8 @@ class OrderManagementController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $business_categories = BusinessCategory::all();
-        return view('admin.order_management.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories]);
+        $payment_modes = PaymentMode::all();
+        return view('admin.order_management.index')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories, 'payment_modes' => $payment_modes]);
     }
     public function orders_list(Request $request)
     {
@@ -66,6 +68,7 @@ class OrderManagementController extends Controller
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->join('payment_modes as pm', 'sm.id', '=', 'shipments.payment_mode_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
@@ -74,7 +77,7 @@ class OrderManagementController extends Controller
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'bc.name as business_category']);
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.shipper_status_id', 'sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc','usi.vendor as vendor','shipments_journey.shipper_status_id as status_id', 'bc.name as business_category', 'pm.mode as payment_mode']);
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
