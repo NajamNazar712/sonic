@@ -12,7 +12,7 @@ class UpdateModulePermissionForDnBypassAddRequestPermission extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 538, 'name' => 'DN ByPass Request - Add Request', 'module_id' => 6),
+            array('id' => 538, 'name' => 'Delivery Note Request - Add Request', 'module_id' => 6),
         ));
     }
 }
