@@ -21,6 +21,7 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\DistributionProduct;
 use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
@@ -2632,6 +2633,7 @@ class ShipperShipmentBookController extends Controller
             $consignee_cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         }
         $products = Product::orderBy('product_name')->get();
+        $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
@@ -2647,7 +2649,7 @@ class ShipperShipmentBookController extends Controller
         }
         $approve_ftl_requests = FtlRequest::where('shipper_id',session('user_id'))->where('status_id',3)->get();
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities,'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests]);
     }
 
     public function corporate_store(Request $request) {

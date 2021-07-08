@@ -231,23 +231,19 @@
 
                                                         <div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
                                                             <div class="form-group">
-                                                                <select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product Type is required">
-                                                                    @foreach($products as $product)
-                                                                        @if($user['product_id'] == $product->id)
-                                                                            <option value="{{ $product->id }}" selected>{{ $product->product_name }}</option>
-                                                                        @else
-                                                                            <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                                                        @endif
+                                                                <select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product is required">
+                                                                    @foreach($distribution_products as $product)
+                                                                       <option value="{{ $product->id }}" selected>{{ $product->name }}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
 
-                                                            <div class="form-group">
-                                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="1000" data-msg-maxlength="Item Description can be maximum 1000 characters"></textarea>
+                                                            <div class="form-group input-group">
+                                                                <input type="text" name="item_quantity" class="form-control text-center quantity item" placeholder="Enter Items/SKU's*" data-rule-required="true" data-msg-required="Item/SKU's is required">
                                                             </div>
 
                                                             <div class="form-group input-group">
-                                                                <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required">
+                                                                <input type="text" name="units" class="form-control text-center quantity unit" placeholder="Enter Units Per Item*" data-rule-required="true" data-msg-required="Unit per item is required">
                                                             </div>
 
                                                             <div class="form-group input-group">
@@ -255,7 +251,7 @@
                                                                     <span class="input-group-text">Rs</span>
                                                                 </div>
 
-                                                                <input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
+                                                                <input type="text" name="total_price" class="form-control rounded-right price" placeholder="Total Amount*" data-rule-required="true" data-msg-required="Total amount is required">
                                                             </div>
 
                                                             <div class="form-group text-center p-1 border border-light rounded">
@@ -269,6 +265,14 @@
                                                 <div class="form-group text-right">
                                                     <button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
                                                 </div>
+                                            </div>
+
+                                            <div class="form-group item_label_div">
+                                                <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_item">Total Item(s): <span>0</span></p>
+                                            </div>
+
+                                            <div class="form-group unit_label_div">
+                                                <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_unit">Total Unit(s): <span>0</span></p>
                                             </div>
                                         </div>
 
@@ -513,27 +517,6 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="distributionProductModal" role="dialog" aria-labelledby="distributionProductModal" aria-hidden="true">
-                    <div class="modal-dialog modal-xl" role="document">
-                        <div class="modal-content">
-                            <form class="form-horizontal" id="distribution_product_form">
-                                {{ csrf_field() }}
-
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="select_service_type_title">Add Products</h4>
-                                </div>
-                                <div class="modal-body">
-
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary mx-auto">Add</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-
             </div>
         </div>
     </div>
@@ -696,6 +679,52 @@
                         total_price += parseInt(this.value.replace(',', ''));
 
                         $('#try_and_buy #total_price span').html(total_price.toLocaleString());
+                    }
+                });
+            }
+
+            function distribution_product_numbering() {
+                setTimeout(function () {
+                    $('#distribution_product .repeater div .product').each(function(index) {
+                        $(this).children('div').children('h4').children('span').html((index + 1));
+                    });
+                }, 500);
+            }
+
+            function distribution_total_item() {
+                var total_item = 0;
+
+                $('#distribution_product .repeater div .product .item').each(function(index) {
+                    if (this.value != '') {
+                        total_item += parseInt(this.value);
+
+                        $('#distribution_product #total_item span').html(total_item);
+                    }
+                });
+
+                distribution_total_unit();
+            }
+
+            function distribution_total_unit() {
+                var total_unit = 0;
+
+                $('#distribution_product .repeater div .product .unit').each(function(index) {
+                    if (this.value != '' && $(this).closest(".form-group").prev('.form-group').find('.item').val() != '') {
+                        total_unit +=  parseInt($(this).closest(".form-group").prev('.form-group').find('.item').val()) * parseInt(this.value);
+
+                        $('#distribution_product #total_unit span').html(total_unit);
+                    }
+                });
+            }
+
+            function distribution_total_price() {
+                var total_price = 0;
+
+                $('#distribution_product .repeater div .product .price').each(function(index) {
+                    if (this.value != '') {
+                        total_price += parseInt(this.value.replace(',', ''));
+
+                        $('#payment_info #amount').val(total_price);
                     }
                 });
             }
@@ -1285,6 +1314,8 @@
             });
             $('#try_and_buy .insurance').checkboxpicker();
 
+            $('#distribution_product .insurance').checkboxpicker();
+
             // $('#package_type').checkboxpicker();
             var current_date = '{{$date}}';
             $('#replacement_product_type').select2({
@@ -1300,6 +1331,14 @@
             }).bind('change', function() {
                 $(this).valid();
             });
+
+            $('#distribution_product .select2').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Product*'
+            }).bind('change', function() {
+                $(this).valid();
+            });
+
             var repeater_limit = 5;
             var repeater_count = 1;
             $('#try_and_buy .repeater').repeater({
@@ -1399,6 +1438,110 @@
                             $(this).slideUp(delete_element);
 
                             try_and_buy_product_numbering();
+                        }
+                    });
+                }
+            });
+
+            $('#distribution_product .repeater').repeater({
+                isFirstItemUndeletable: true,
+                show: function() {
+                    $(this).find('.select2-container--default').remove();
+
+                    $(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
+                        width: '100%',
+                        placeholder: 'Select Product*'
+                    }).bind('change', function() {
+                        $(this).valid();
+                    });
+
+                    $(this).slideDown();
+
+                    $('html, body').animate({
+                        scrollTop: ($(this).offset().top - $('.header-navbar').height())
+                    }, 1000);
+
+                    $(this).find('.item').TouchSpin({
+                        min: 1,
+                        max: 10000,
+                        buttondown_class: 'btn btn-primary rounded-left',
+                        buttonup_class: 'btn btn-primary rounded-right',
+                        buttondown_txt: '<i class="ft-minus"></i>',
+                        buttonup_txt: '<i class="ft-plus"></i>'
+                    }).bind('input change', function() {
+                        if ($(this).hasClass('danger')) {
+                            $(this).valid();
+                        }
+
+                        distribution_total_item();
+                    });
+
+                    $(this).find('.unit').TouchSpin({
+                        min: 1,
+                        max: 10000,
+                        buttondown_class: 'btn btn-primary rounded-left',
+                        buttonup_class: 'btn btn-primary rounded-right',
+                        buttondown_txt: '<i class="ft-minus"></i>',
+                        buttonup_txt: '<i class="ft-plus"></i>'
+                    }).bind('input change', function() {
+                        if ($(this).hasClass('danger')) {
+                            $(this).valid();
+                        }
+
+                        distribution_total_unit();
+                    });
+
+                    $('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
+
+                    $(this).find('.price').inputmask({
+                        'alias': 'integer',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'groupSeparator': ',',
+                        'autoGroup': true,
+                        'min': 1,
+                        'max': 100000
+                    }).bind('input change', function() {
+                        distribution_total_price();
+                    });
+
+                    var insurance = $(this).find('.insurance');
+
+                    insurance.parent('.form-group').children('.btn-group').remove();
+
+                    insurance.checkboxpicker();
+
+                    distribution_product_numbering();
+                },
+                hide: function(delete_element) {
+                    var id = $(this).children('div').children('h4').children('span').html();
+
+                    swal({
+                        title: 'Are you sure?',
+                        text: 'You want to delete Product #' + id + '?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'Close',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Delete',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $(this).slideUp(delete_element);
+
+                            distribution_product_numbering();
                         }
                     });
                 }
