@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class IncidenceMonitoringStatusHistory extends Model
 {
+    protected $guarded = [];
+    
     public function admin() {
         return $this->belongsTo('App\Http\Models\Admin\Admin');
     }

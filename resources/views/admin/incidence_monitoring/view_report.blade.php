@@ -99,8 +99,16 @@
                                                 <th scope="row">Tagged To</th>
                                                 <td class="name">
                                                     <h5 class="mb-0">
+                                                        @php
+                                                            $i=1;
+                                                        @endphp
                                                         @foreach ($report->tagged_persons as $tagged_person)
-                                                            {{$tagged_person->admin->name}}
+                                                            @php ++$i; @endphp
+                                                            @if ($i<=count($report->tagged_persons))
+                                                                {{$tagged_person->admin->name}},     
+                                                            @else
+                                                                {{$tagged_person->admin->name}}
+                                                            @endif
                                                         @endforeach
                                                     </h5>
                                                 </td>
@@ -114,7 +122,10 @@
                                             <tr>
                                                 <th scope="row">Clips Link</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0">{{$report->clip_link}}</h5>
+                                                    
+                                                    <h5 class="mb-0">
+                                                        <a class="btn btn-md  align-middle" href="{{$report->clip_link}}" target="_blank">{{$report->clip_link}}</a>
+                                                        </h5>
                                                 </td>
                                             </tr>
                                             </tbody>
@@ -122,13 +133,12 @@
                                         <div class="row justify-content-center">
                                             {{-- @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))) --}}
                                                 <div class="text-center">
-                                                    <form id="valid_form" method="post"
-                                                          action="{{route('admin.crm.valid')}}">
+                                                    <form id="status_update_form" method="post"
+                                                          action="{{route('admin.incidence_monitoring.update_status')}}">
                                                         @csrf
                                                         <input type="hidden" id="req_id" name="req_id"
                                                                value="{{$report->id}}">
-                                                        <input type="hidden" id="status" name="status"
-                                                               value="{{$report->status_id}}">
+                                                        <input type="hidden" id="req_status" name="req_status">
                                                         @if($report->status_id == 1)
                                                                 <button id="under_action" type="submit"
                                                                         class="btn btn-warning mr-1">
@@ -142,20 +152,20 @@
                                                                         Close
                                                                     </span>
                                                                 </button>
-                                                            @elseif($report->status_id == 2)
+                                                        @elseif($report->status_id == 2)
                                                             <button id="open" type="submit"
                                                                         class="btn btn-success mr-1">
                                                                     <span class="d-none d-lg-block">
                                                                         Open
                                                                     </span>
                                                                 </button>
-                                                            <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
+                                                            <button id="close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
                                                                 <span class="d-none d-lg-block">
                                                                     Close
                                                                 </span>
                                                             </button>
                                                                 
-                                                            @elseif($report->status_id != 3)
+                                                        @elseif($report->status_id == 3)
                                                                
                                                             <button id="open" type="submit"
                                                             class="btn btn-success mr-1">
@@ -163,12 +173,13 @@
                                                                     Open
                                                                 </span>
                                                             </button>
-                                                            <button id="under_action" name="resolved_close" type="submit" class="btn btn-warning mr-3">
-                                                                <span class="d-none d-lg-block">
-                                                                    Close
-                                                                </span>
-                                                            </button>
-                                                            @endif
+                                                            <button id="under_action" type="submit"
+                                                                        class="btn btn-warning mr-1">
+                                                                    <span class="d-none d-lg-block">
+                                                                        Under Action
+                                                                    </span>
+                                                                </button>
+                                                        @endif
                                                     </form>
                                                 </div>
                                             {{-- @endif --}}
@@ -261,7 +272,7 @@
                                                     <tr class="border-bottom-active border-custom-color">
                                                         <th>S No.</th>
                                                         <th>Status Name</th>
-                                                        <th>Agent</th>
+                                                        <th>Marked By</th>
                                                         <th>Status Assigned Date</th>
                                                         <th>Request ID</th>
                                                     </tr>
@@ -310,6 +321,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Date Added</th>
                             <th class="border-primary border-darken-1">Image</th>
+                            <th class="border-primary border-darken-1">Added By</th>
                             <th class="border-primary border-darken-1"></th>
 
                         </tr>
@@ -454,6 +466,87 @@
     <script type="text/javascript">
         $(document).ready(function () {
            
+            $('#open').on('click', function (e) {
+                $('#req_status').val(1);  
+           
+                $('#status_update_form').validate({
+
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Status is being updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                    });
+                
+            });
+            $('#close').on('click', function (e) {
+                $('#req_status').val(3);  
+           
+                $('#status_update_form').validate({
+
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Status is being updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                    });
+                
+            });
+            $('#under_action').on('click', function (e) {
+                $('#req_status').val(2);  
+           
+                $('#status_update_form').validate({
+
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    submitHandler: function(form) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Status is being updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        form.submit();
+                    }
+                    });
+                
+            });
             $('#chat_form').on('submit', function (e) {
                 e.preventDefault();
             });
@@ -649,7 +742,7 @@
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                                 var remove = '';
                                 remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + image.added_by + '</td><td>' + remove + '</td></tr>';
                             });
                             $('#image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
@@ -712,6 +805,7 @@
                     className: 'btn btn-primary img_add_btn',
                     text: '<i class="la la-plus"></i> Add Row',
                     action:function (e) {
+                        console.log(images_count);
                         if(images_count < 2){
                             add_row();
                         }

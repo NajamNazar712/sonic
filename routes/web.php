@@ -3077,6 +3077,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
             Route::post('/image_details','Admins\IncidenceMonitoringController@image_details')->name('image_details');
             Route::post('/image_submit','Admins\IncidenceMonitoringController@image_submit')->name('image_submit');
+            Route::post('/update_status','Admins\IncidenceMonitoringController@update_status')->name('update_status');
             
             
     });

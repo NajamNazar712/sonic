@@ -13,7 +13,52 @@
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
+                            <div class="row mb-2 justify-content-center">
 
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_zone" id="search_zone" class="form-control select2">
+                                            @foreach($zones as $zone)
+                                                <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                 <div class="col-4">
+                                     <fieldset class="form-group">
+                                     <select name="search_hub" id="search_hub" class="form-control select2">
+                                         @foreach($hubs as $hub)
+                                             <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                         @endforeach
+                                     </select>
+                                     </fieldset>
+                                 </div>
+                                 
+                                 <div class="col-4 ">
+                                     <div class="form-group input-group">
+                                         <div class="input-group-prepend">
+                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                             <span class="la la-calendar-o"></span>
+                                         </span>
+                                         </div>
+                                         <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                                     </div>
+                                 </div>
+                                 <div class="col-4">
+                                     <div class="form-group input-group">
+                                         <div class="input-group-prepend">
+                                         <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                             <span class="la la-calendar-o"></span>
+                                         </span>
+                                         </div>
+                                         <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                                     </div>
+                                 </div>
+                                 
+                                 <div class="col-2">
+                                     <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                 </div>
+                             </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
@@ -69,7 +114,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                    <p>Time From:</p>
+                                    <p class="mt-1">Time From:</p>
                                 </span>
                             </div>
 
@@ -80,7 +125,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                    <p>Time To:</p>
+                                    <p class="mt-1">Time To:</p>
                                 </span>
                             </div>
 
@@ -153,17 +198,54 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+
+            
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Search Zone",
+                allowClear:true,
+            });
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Search Hub",
+                allowClear:true,
+            });
+            $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
             $('#tagged_to').select2({
                 width:'100%',
                 placeholder:"Select Shipper",
                 allowClear:true,
+                dropdownParent:$('#add_report_form')
             });
-            
-
-
             $('#station').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
-				placeholder: 'Select Station *'
+				placeholder: 'Select Station *',
+                dropdownParent:$('#add_report_form')
 			}).bind('change', function(asd) {
                 console.log(asd);
                 $.ajax({
@@ -188,33 +270,24 @@
                         });
 				
 			});
-
-            $('#station').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Station',
-                width:'100%',
-                allowClear:true,
-                dropdownParent:$('#addReportModal')
-            });
-
             $('#monitoring_area').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Monitoring Area',
                 width:'100%',
                 allowClear:true,
+                dropdownParent:$('#add_report_form')
             });
-
             $('#case_nature').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Case Nature',
                 width:'100%',
                 allowClear:true,
+                dropdownParent:$('#add_report_form')
             });
-
             $('#nc_level').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select NC Level',
                 width:'100%',
                 allowClear:true,
+                dropdownParent:$('#add_report_form')
             });
-
-
             $('#add_report_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -225,7 +298,6 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
             });
-
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -306,6 +378,12 @@
 
                 ajax: {
                     url: '{{ route('admin.incidence_monitoring.list') }}',
+                    data : function (d) {
+                        d.search_hub = $('#search_hub').val();
+                        d.search_zone = $('#search_zone').val();
+                        d.search_from = $('input[name="from_date_formatted"]').val();
+                        d.search_to = $('input[name="to_date_formatted"]').val();
+                    }
                 },
                 order: [[9, 'desc']],
                 rowId: 'id',
@@ -313,11 +391,11 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
                     {data: 'station_name', name: 'station.id', class: 'align-middle station_name'},
                     {data: 'incidence_monitorings_id_padded', name: 'incidence_monitorings.id', class: 'align-middle incidence_monitorings_id_padded'},
-                    {data: 'area_name', name: 'area.area', class: 'align-middle area_name'},
+                    {data: 'area_name', name: 'area.name', class: 'align-middle area_name'},
                     {data: 'time_slot', name: 'time_slot', class: 'align-middle time_slot', orderable: false, searchable: false},
-                    {data: 'case_nature_type', name: 'case_nature.case_nature', class: 'align-middle case_nature_type'},
+                    {data: 'case_nature_type', name: 'case_nature.name', class: 'align-middle case_nature_type'},
                     {data: 'observation', name: 'incidence_monitorings.observation', class: 'align-middle observation'},
-                    {data: 'nc_level_name', name: 'nc_level.nc_level', class: 'align-middle nc_level_name'},
+                    {data: 'nc_level_name', name: 'nc_level.name', class: 'align-middle nc_level_name'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to', orderable: false, searchable: false},
                     {data: 'tagging_date', name: 'incidence_monitorings.tagging_date', class: 'align-middle tagging_date'},
                     {data: 'status_name', name: 'status.status', class: 'align-middle status_name'},
@@ -341,7 +419,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.total_cost')) {
+                        if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.tagged_to') || $(header).is('.time_slot')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -359,11 +437,11 @@
                             }
                         }
                     });
-                    
-
-
                     this.api().table().columns.adjust();
                 }
+            });
+            $('#search_filter_btn').on('click',function () {
+               table.draw();
             });
 
         });

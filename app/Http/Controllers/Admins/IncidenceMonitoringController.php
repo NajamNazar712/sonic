@@ -16,6 +16,7 @@ use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\IncidenceMonitoringComment;
 use App\Http\Models\Admin\IncidenceMonitoringImage;
 use App\Http\Models\City;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use IncidenceMonitoringNCLevelSeeder;
@@ -42,8 +43,11 @@ class IncidenceMonitoringController extends Controller
         $monitoring_areas = IncidenceMonitoringArea::all();
         $case_natures = IncidenceMonitoringCaseNature::all();
         $nc_levels = IncidenceMonitoringNCLevel::all();
-        $stations = City::all();
-        return view('admin.incidence_monitoring.index', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations'));
+        $stations = City::where('status',1)->get();
+        $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $zones =  Zone::select('id', 'name')->get();
+       
+        return view('admin.incidence_monitoring.index', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','zones','hubs'));
     }
 
     public function get_managers(Request $request){
@@ -99,15 +103,21 @@ class IncidenceMonitoringController extends Controller
         ->join('incidence_monitoring_case_natures as case_nature','case_nature.id','=','incidence_monitorings.case_nature_id')
         ->join('incidence_monitoring_n_c_levels as nc_level','nc_level.id','=','incidence_monitorings.nc_level_id')
         ->join('incidence_monitoring_statuses as status','status.id','=','incidence_monitorings.status_id')
-        ->select(['incidence_monitorings.id','incidence_monitorings.time_from','incidence_monitorings.time_to','incidence_monitorings.observation','incidence_monitorings.tagging_date','incidence_monitorings.clip_link','station.name as station_name','area.name as area_name','case_nature.name as case_nature_type','nc_level.name as nc_level_name','admin.name as created_by','status.status as status_name']);
+        ->select(['incidence_monitorings.id','incidence_monitorings.time_from','incidence_monitorings.time_to','incidence_monitorings.observation','incidence_monitorings.tagging_date','incidence_monitorings.clip_link','station.name as station_name','area.name as area_name','case_nature.name as case_nature_type','nc_level.name as nc_level_name','admin.name as created_by','status.status as status_name','incidence_monitorings.created_at', 'station.zone_id', 'station.hub_id']);
         
 
         $datatables = Datatables::of($data)
         ->addColumn('tagged_to', function($report) {
             $tagged_users = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id', $report->id)->get();
             $msg = '';
+            $i=1;
             foreach ($tagged_users as $tagged_user) {
-                $msg.= $tagged_user->admin->name.'  ';
+                ++$i;
+                if($i<=count($tagged_users)){
+                    $msg.= $tagged_user->admin->name.',  ';
+                }else{
+                    $msg.= $tagged_user->admin->name.'  ';
+                }
             }
            return $msg;
         })
@@ -117,6 +127,10 @@ class IncidenceMonitoringController extends Controller
         ->addColumn('time_slot', function($report) {
             $time_slot = $report->time_from.' - '.$report->time_to;
             return $time_slot;
+        })
+        ->editColumn('clip_link', function($report){
+            $link = '<a class="btn btn-md  align-middle" href="'.$report->clip_link.'" target="_blank">'.$report->clip_link.'</a>';
+            return $link;
         })
         ->addColumn('action', function($data) {
             $dropdown = '';
@@ -132,7 +146,17 @@ class IncidenceMonitoringController extends Controller
             }
             return $dropdown;
         });
-       
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables->whereBetween('incidence_monitorings.created_at', [$from,$to]);
+        }
+        if ($zone = $request->get('search_zone')) {
+            $datatables->where('station.zone_id', '=', $zone);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatables->where('station.hub_id', '=', $hub);
+        }
         return $datatables->make(true);
     }
 
@@ -201,7 +225,7 @@ class IncidenceMonitoringController extends Controller
                     $images = $images->get();
                     foreach ($images as $image) {
                         $img_url = asset('uploads/incidence_monitoring_report_images/'.$image->image);
-                        $details[] = array('id' => $image->id,'date' => Carbon::parse($image->created_at)->toDateTimeString(),'image'=> $img_url);
+                        $details[] = array('id' => $image->id,'date' => Carbon::parse($image->created_at)->toDateTimeString(),'image'=> $img_url, 'added_by' => $image->admin->name);
                     }
                     return response()->json(['status' => 0, 'images' => $details]);
                 }
@@ -247,5 +271,18 @@ class IncidenceMonitoringController extends Controller
         return redirect()->back()->with(['status' => 0, 'error' => 'Incidence Monitoring Report Not found!']);
      }
 
+     public function update_status(Request $request){
+        $incidence_monitoring = IncidenceMonitoring::find($request->req_id);
+        $incidence_monitoring->status_id = $request->req_status;
+        $incidence_monitoring->save();
+        IncidenceMonitoringStatusHistory::create([
+            'incidence_monitoring_id' => $request->req_id,
+            'status_id' => $request->req_status,
+            'admin_id' => Auth::user()->id,
+        ]);
+
+        return redirect()->back()->with(['status' => 1, 'success' => 'Incidence Monitoring Status Updated.']);
+
+     }
     
 }
