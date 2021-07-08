@@ -6,6 +6,7 @@ use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmComments;
@@ -63,7 +64,7 @@ class RetailCRMController extends Controller
                         return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
                     }
                     else{
-                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment->id, $shipment->user_id, NULL ,$description);
+                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment->id, $shipment->user_id, NULL ,$description);
                         if($request->has('key_account')){
                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                         }
@@ -95,10 +96,10 @@ class RetailCRMController extends Controller
                                 if($is_shipment->case_nature_id != $nature_id){
                                     if ($nature_id == 4) {
                                         if($complaint_id == 26){
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description);
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL , $description);
                                         }
                                         else{
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                         }
                                         if($request->has('key_account')){
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
@@ -112,14 +113,14 @@ class RetailCRMController extends Controller
                                                 $cannot_change = true;
                                             }
                                             else{
-                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                                 if($request->has('key_account')){
                                                     $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                                 }
                                             }
                                         }
                                         else{
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                             if($request->has('key_account')){
                                                 $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                             }
@@ -133,7 +134,7 @@ class RetailCRMController extends Controller
                             }
                             else{
                                 if ($nature_id == 4) {
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL , $description, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
@@ -146,14 +147,14 @@ class RetailCRMController extends Controller
                                             $cannot_change = true;
                                         }
                                         else{
-                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                            $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                             if($request->has('key_account')){
                                                 $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                             }
                                         }
                                     }
                                     else{
-                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                         if($request->has('key_account')){
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                         }
@@ -184,7 +185,7 @@ class RetailCRMController extends Controller
                                         $cannot_change = true;
                                     }
                                     else{
-                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                        $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                         if($request->has('key_account')){
                                             $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                         }
@@ -193,7 +194,7 @@ class RetailCRMController extends Controller
                                     }
                                 }
                                 else{
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
@@ -213,7 +214,7 @@ class RetailCRMController extends Controller
                                     $cannot_change = true;
                                 }
                                 else{
-                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                    $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                     if($request->has('key_account')){
                                         $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                     }
@@ -222,7 +223,7 @@ class RetailCRMController extends Controller
                                 }
                             }
                             else{
-                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 0, $shipment_id, $shipment->user_id, NULL ,$description);
+                                $crm_request_padded_id = CRMController::add($nature_id, $complaint_id, $channel_id, 1, Auth::id(), 3, $shipment_id, $shipment->user_id, NULL ,$description);
                                 if($request->has('key_account')){
                                     $this->key_account_crm_summary_shipments($shipment->id, $crm_request_padded_id, Auth::id(), $channel_id, $complaint_id);
                                 }
@@ -278,13 +279,13 @@ class RetailCRMController extends Controller
                 if($shipment) {
                     $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
                     if (!$is_shipment) {
-                        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                        CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 3, $shipment_id, session('user_id'), NULL, $description);
                     } else {
                         $present_shipments[] = $shipment->tracking_number;
                         $flag = true;
                     }
                 }else{
-                    CRMController::add($nature_id, null, $channel_id, 1, Auth::id(), 0, $shipment_id, session('user_id'), NULL, $description);
+                    CRMController::add($nature_id, null, $channel_id, 1, Auth::id(), 3, $shipment_id, session('user_id'), NULL, $description);
                 }
             }
         }
@@ -296,7 +297,7 @@ class RetailCRMController extends Controller
                 return ['status' => 0, 'error' => 'Description Not Entered!'];
             }
 
-            CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 0, NULL, NULL, NULL, $description);
+            CRMController::add($nature_id, NULL, $channel_id, 1, Auth::id(), 3, NULL, NULL, NULL, $description);
         }
         return ['status' => 1, 'success' => 'Feedback successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
 
@@ -381,7 +382,10 @@ class RetailCRMController extends Controller
                 $launched_by = User::find($crm_request->launched_by_id)->name;
             }else if($crm_request->launched_by == 2){
                 $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
+            }else if($crm_request->launched_by == 3){
+                $launched_by = RetailUser::find($crm_request->launched_by_id)->name;
             }
+
             $crm_tagging = array();
             $crm_tagging_details = CrmRequestTagging::where('crm_request_id', $id)->first();
             if($crm_tagging_details){
