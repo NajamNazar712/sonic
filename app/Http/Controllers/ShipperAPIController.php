@@ -154,8 +154,6 @@ class ShipperAPIController extends Controller
                     $shipment_info['latitude'] = null;
                     $shipment_info['longitude'] = null;
                     $shipment_info['runner_id'] = null;
-                    $shipment_info['origin'] = null;
-                    $shipment_info['destination'] = null;
                     $pickup_address = $shipment->pickup_address;
                     if (in_array($shipment->shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11])) {
                         $shipment_info['track'] = 1;
