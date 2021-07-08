@@ -75,7 +75,7 @@ class RetailTrackingController extends Controller
                                 }
                             }
                         }
-                        ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
+                        ShipmentScanningJourneyController::add($shipment->id, 18, 4, Auth::id(), null,null);
 
                         if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
                             $details = array();
