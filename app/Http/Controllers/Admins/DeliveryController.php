@@ -6678,6 +6678,7 @@ class DeliveryController extends Controller
     }
 
     public function request_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),269);
         if(session('role_id') != 1){
 
             $riders = Rider::where('status',1)->whereIn('city_id',session('hubs'))->where('blacklist',0)->select('id','name')->get();
@@ -6687,7 +6688,11 @@ class DeliveryController extends Controller
         }
         return view('admin.delivery.note.request')->with(['riders' => $riders]);
     }
-    public function request_list(){
+    public function request_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),270);
+        }
         $request = DeliveryNoteRequests::join('riders as r', 'r.id', '=', 'delivery_note_requests.rider_id')
             ->join('admins as a', 'a.id', '=', 'delivery_note_requests.requested_by')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_note_requests.approved_by')

@@ -19,6 +19,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class FTLController extends Controller
 {
@@ -39,6 +40,7 @@ class FTLController extends Controller
 
     public function ftl_request_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),259);
         $shippers = User::leftjoin('sale_person_tags as spt',function ($join){
                 $join->on('spt.user_id','users.id')
                     ->where('spt.status',0);
@@ -61,6 +63,11 @@ class FTLController extends Controller
 
     public function ftl_request_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),260);
+        }
+
         $data = FtlRequest::leftjoin('ftl_request_statuses as status','status.id','ftl_requests.status_id')
             ->leftjoin('cities as origin','origin.id','ftl_requests.origin_id')
             ->leftjoin('cities as destination','destination.id','ftl_requests.destination_id')
