@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\City;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
@@ -144,6 +145,39 @@ class ShipperAPIController extends Controller
                     $shipment_info['order_id'] = $shipment->order_id;
                     $shipment_info['pickup_address'] = $shipment->pickup_address->pickup_address;
                     $shipment_info['weight'] = ($shipment->actual_weight) ? $shipment->actual_weight : $shipment->estimated_weight;
+                    $shipment_info['in_route'] = $shipment->delivery_in_route;
+                    $shipment_info['address'] = $shipment->consignee_address;
+                    $shipment_info['track'] = 0;
+                    $shipment_info['latitude'] = null;
+                    $shipment_info['longitude'] = null;
+                    $shipment_info['runner_id'] = null;
+                    $shipment_info['origin'] = null;
+                    $shipment_info['destination'] = null;
+                    $pickup_address = $shipment->pickup_address;
+                    if (in_array($shipment->shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11])) {
+                        $shipment_info['track'] = 1;
+                        if ($shipment->shipper_status_id == 5) {
+                            $shipment_info['latitude'] = $shipment->consignee_latitude;
+                            $shipment_info['longitude'] = $shipment->consignee_longitude;
+                        } elseif ($shipment->shipper_status_id == 3) {
+                            $shipment_info['origin'] = $pickup_address->city->name;
+                            $shipment_info['destination'] = $shipment->consignee_city->name;
+                        } else {
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)
+                                ->where('shipper_status_id', $shipment->shipper_status_id)
+                                ->orderBy('id', 'DESC');
+                            if ($shipment_journey->exists()) {
+                                $shipment_journey = $shipment_journey->first();
+                                $city = City::where('id', $shipment_journey->city_id);
+                                if ($city->exists()) {
+                                    $city = $city->first();
+                                    $shipment_info['latitude'] = $city->location_latitude;
+                                    $shipment_info['longitude'] = $city->location_longitude;
+                                }
+                            }
+                        }
+
+                    }
 
                     if ($shipment->shipper_status_id != 14) {
                         $shipper_subscription = ShipperShipmentsSubscription::where('shipper_id', $request->shipper_id);
@@ -170,7 +204,7 @@ class ShipperAPIController extends Controller
                     }
 
                 } else {
-                    return response()->json(['status' => 1, 'message' => "Following Tracking Number don't belong to you : ".$request->tracking_no]);
+                    return response()->json(['status' => 1, 'message' => "Following Tracking Number don't belong to you : " . $request->tracking_no]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Shipment not found"]);
