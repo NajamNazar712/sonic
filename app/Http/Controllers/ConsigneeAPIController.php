@@ -169,7 +169,8 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'))
+                ->orwhere('phone_number_2',$request->input('phone_number'));
             if ($consignee_info->exists()) {
                 return response()->json(['status' => 1, 'message' => 'Account Already registered']);
             } else {
@@ -202,7 +203,8 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0))
+                ->orwhere('phone_number_2', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_user->exists()) {
                 $consignee_user = $consignee_user->first();
                     if (Hash::check($request->input('pin'), $consignee_user->pin)) {
@@ -423,8 +425,7 @@ class ConsigneeAPIController extends Controller
                     $consignee_info->name = $request->name;
                 }
                 if ($request->has('phone_number') && $request->phone_number_updated == 1) {
-                    $consignee_info->phone_number_2 = $consignee_info->phone_number_1;
-                    $consignee_info->phone_number_1 = $request->phone_number;
+                    $consignee_info->phone_number_2 = $request->phone_number;
                 }
                 if ($request->has('pin')) {
                     $consignee_info->pin = bcrypt($request->pin);
@@ -477,7 +478,6 @@ class ConsigneeAPIController extends Controller
             }
             return response()->json(['status' => 0, 'message' => 'Request For Address Change Has Been Submitted']);
         }
-        return response()->json(['status' => 0, 'message' => 'Failed To Submit']);
     }
 
     public function notification_history(Request $request)
@@ -511,7 +511,8 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'))
+                ->orwhere('phone_number_2',$request->input('phone_number'));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
                 $consignee_info->pin = bcrypt($request->pin);
