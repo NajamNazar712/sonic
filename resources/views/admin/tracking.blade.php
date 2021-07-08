@@ -790,7 +790,7 @@
                                 var length = '';
                                 var breadth = '';
                                 if(details.order_information.height != null){
-                                    weight += '<td ><strong>Weight </strong><small>(Volumetric)</small></td>'+'<td></td>';
+                                    weight += '<td ><strong>Weight </strong><small>(Volumetric)</small></td>' + details.order_information.weight +'<td></td>';
                                     height += '<td ><strong>Height</strong></td>'+'<td>'+details.order_information.height+'cm</td>';
                                     length += '<td ><strong>Length</strong></td>'+'<td>'+details.order_information.length+'cm</td>';
                                     breadth += '<td><strong>Breadth</strong></td>'+'<td>'+details.order_information.breadth+'cm</td>';
