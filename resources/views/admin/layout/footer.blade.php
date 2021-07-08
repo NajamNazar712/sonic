@@ -121,8 +121,6 @@
         }
 
         function locationSuccess(position) {
-          console.log(position);
-
           $.ajax({
               url: '{{ route('admin.save_coordinates') }}',
               method: 'POST',
