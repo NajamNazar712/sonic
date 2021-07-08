@@ -151,6 +151,11 @@ class ShipperShipmentBookController extends Controller
         $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->amount = $amount;
+
+        if ($payment_mode_id == 2 && $user_id != 4758) {
+            $payment_mode_id = 1;
+        }
+
         $shipment->payment_mode_id = $payment_mode_id;
         $shipment->charges_mode_id = $charges_mode_id;
         $shipment->shipper_status_id = 1;
