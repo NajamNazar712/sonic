@@ -241,6 +241,9 @@
         .yellowClass{
             background-color: yellow;
         }
+        .cyanClass{
+            background-color: cyan;
+        }
 
     </style>
 @endsection
@@ -315,6 +318,8 @@
                             $(row).addClass('redClass');
                         }else if(status === 54){
                             $(row).addClass('yellowClass');
+                        }else if(status === 55){
+                            $(row).addClass('cyanClass');
                         }
                     },
                     initComplete: function() {
@@ -414,11 +419,12 @@
                                 scan_sound(2);
                             }else{
                                 $('#single_div').removeClass('d-none');
-                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass') || $('#status_card').hasClass('yellowClass')){
+                                if($('#status_card').hasClass('greenClass') || $('#status_card').hasClass('redClass') || $('#status_card').hasClass('goldClass') || $('#status_card').hasClass('yellowClass') || $('#status_card').hasClass('cyanClass') ){
                                     $('#status_card').removeClass('greenClass');
                                     $('#status_card').removeClass('redClass');
                                     $('#status_card').removeClass('goldClass');
                                     $('#status_card').removeClass('yellowClass');
+                                    $('#status_card').removeClass('cyanClass');
                                 }
 
                                 scan_sound(1);
@@ -449,6 +455,9 @@
                                     $('#status_card').addClass('redClass');
                                 }else if(data.details.status_id == 54){
                                     $('#status_card').addClass('yellowClass');
+                                }
+                                else if(data.details.status_id == 55){
+                                    $('#status_card').addClass('cyanClass');
                                 }
 
                                 // var rowNo = table.rows().count();

@@ -30,9 +30,14 @@
                                     @endforeach
                                 </select>
                             </div>
-
                             <div class="form-group">
-                                <input type="text" name="consignee_name" class="form-control" value="{{$shipment['consignee_name']}}" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters">
+                                <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
+                                    <option value="1" selected>Different Consignee</option>
+                                    <option value="2">Same Consignee</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="consignee_name" id="consignee_name" class="form-control" value="{{$shipment['consignee_name']}}" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters">
                             </div>
 
                             <div class="form-group">
@@ -48,7 +53,7 @@
                             </div>
 
                             <div class="form-group">
-                                <input type="email" name="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
+                                <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
                             </div>
                         </div>
                         <div class="col col_custom">
@@ -58,7 +63,7 @@
                                     <span class="input-group-text">Rs</span>
                                 </div>
 
-                                <input type="text" name="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
+                                <input type="text" name="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" id="amount">
                             </div>
                         </div>
                     </div>
@@ -105,6 +110,30 @@
             $('#consignee_city').select2({
                 width: '100%',
                 placeholder: 'City*'
+            });
+            $('#consignee').select2({
+                width: '100%',
+                placeholder: 'Consignee*'
+            }).bind('change', function () {
+              if(this.value == 2){
+
+                  var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'new_consignee_city' , value : $('#consignee_city').val() });
+                  $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
+                  $('#consignee_city').addClass('disabled')  //disable class
+                      .prop({'name' : consignee_city  , disabled : true}); //change name and disbale
+                  $( "#consignee_name" ).prop('readonly', true);
+                  $( "#consignee_email" ).prop('readonly', true);
+                  $( "#amount" ).prop('readonly', true);
+              }
+              else{
+                  $( "#consignee_name" ).prop('readonly', false);
+                  $( "#consignee_email" ).prop('readonly', false);
+                  $( "#amount" ).prop('readonly', false);
+                  $('#intercept_form').find('input[type="hidden"]').remove(); // remove the hidden fields if any
+                /*  $('#consignee_city').removeClass('disabled')  //remove disable class
+                      .prop({name : consignee_city , disabled : false});*/ //restore the name and enable
+                  $( "#consignee_city" ).removeAttr('disabled');
+              }
             });
 
             $('.amount').inputmask({
