@@ -65,7 +65,7 @@
             $('#first_cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
 
         $( "#password-form" ).validate({
-            errorClass:"danger",Del
+            errorClass:"danger",
             normalizer: function(value) {
                 return $.trim(value);
             },
