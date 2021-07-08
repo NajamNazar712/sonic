@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
@@ -92,7 +93,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use NumberToWords\NumberToWords;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\WalkinFtlInvoice;
 
 class AdminFinanceController extends Controller
@@ -9357,12 +9357,17 @@ class AdminFinanceController extends Controller
 
     public function ftl_invoice_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),261);
         $company_banks = BanksList::where('affiliate', 1)->get();
         return view('admin.finance.ftl_invoices')->with(['company_banks' => $company_banks]);
     }
 
     public function ftl_invoice_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),262);
+        }
         $invoices = WalkinFtlInvoice::join('ftl_requests as ftlr', 'walkin_ftl_invoices.ftl_request_id', '=', 'ftlr.id')
             ->join('cities as origin', 'ftlr.origin_id', '=', 'origin.id')
             ->join('cities as destination', 'ftlr.destination_id', '=', 'destination.id')
