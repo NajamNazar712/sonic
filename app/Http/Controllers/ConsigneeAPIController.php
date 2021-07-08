@@ -291,9 +291,9 @@ class ConsigneeAPIController extends Controller
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
                 }
-                elseif ($consignee_shipment->shipper_status_id == 3){
+                elseif ($consignee_shipment->status_id == 3){
 
-                    $origin_city = City::where('id', $pickup_address->id);
+                    $origin_city = City::where('id', $pickup_address->city_id);
                     if($origin_city->exists()){
                         $origin_city = $origin_city->first();
                         $datum['origin'] = $origin_city->name;
