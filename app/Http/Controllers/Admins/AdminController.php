@@ -14,4 +14,13 @@ class AdminController extends Controller
     public function access_denied() {
         return view('admin.access_denied');
     }
+
+    public function save_coordinates(Request $request) {
+    	// $admin_id = Auth::id();
+
+    	// $latitude = $request->latitude;
+    	// $longitude = $request->longitude;
+
+    	var_dump($request->all());
+    }
 }
