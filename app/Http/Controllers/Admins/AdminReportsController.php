@@ -8436,7 +8436,7 @@ class AdminReportsController extends Controller
                     return 'Volumetric';
                 }
                 else{
-                    return 'Dimensional';
+                    return 'Dense';
                 }
             });
         if ($search_shipping_mode = $request->get('search_shipping_mode')) {
