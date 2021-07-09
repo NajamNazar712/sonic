@@ -13,6 +13,12 @@
                 <div class="text-center mb-2">
                     <h4><b>Tracking Number: {{$shipment->tracking_number}}</b></h4>
                 </div>
+                <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
+                    <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
+                        <option value="1" selected>Different Consignee</option>
+                        <option value="2">Same Consignee</option>
+                    </select>
+                </div>
                 <form id="intercept_form" class="form-horizontal" method="post" action="{{route('admin.intercept.update')}}">
                 @csrf
                     <input type="hidden" name="shipment_id" value="{{$shipment['id']}}">
@@ -28,12 +34,6 @@
                                             <option value="{{ $city->id }}">{{ $city->name }}</option>
                                         @endif
                                     @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
-                                    <option value="1" selected>Different Consignee</option>
-                                    <option value="2">Same Consignee</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -117,10 +117,10 @@
             }).bind('change', function () {
               if(this.value == 2){
 
-                  var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'new_consignee_city' , value : $('#consignee_city').val() });
+                  var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                   $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
                   $('#consignee_city').addClass('disabled')  //disable class
-                      .prop({'name' : consignee_city  , disabled : true}); //change name and disbale
+                      .prop({'name' : 'new_consignee_city'  , disabled : true}); //change name and disbale
                   $( "#consignee_name" ).prop('readonly', true);
                   $( "#consignee_email" ).prop('readonly', true);
                   $( "#amount" ).prop('readonly', true);
@@ -129,10 +129,9 @@
                   $( "#consignee_name" ).prop('readonly', false);
                   $( "#consignee_email" ).prop('readonly', false);
                   $( "#amount" ).prop('readonly', false);
-                  $('#intercept_form').find('input[type="hidden"]').remove(); // remove the hidden fields if any
-                /*  $('#consignee_city').removeClass('disabled')  //remove disable class
-                      .prop({name : consignee_city , disabled : false});*/ //restore the name and enable
-                  $( "#consignee_city" ).removeAttr('disabled');
+                  $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
+                  $('#consignee_city').removeClass('disabled')  //remove disable class
+                      .prop({name : 'consignee_city' , disabled : false}); //restore the name and enable
               }
             });
 
