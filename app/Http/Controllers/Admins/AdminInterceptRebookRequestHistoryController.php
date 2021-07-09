@@ -105,7 +105,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
     }
 
     public function intercept_re_book_update(Request $request)
-    {
+    {  
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);

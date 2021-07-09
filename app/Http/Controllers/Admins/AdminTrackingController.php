@@ -419,9 +419,10 @@ class AdminTrackingController extends Controller
                     $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
                         ->leftjoin('admins as a', 'a.id', '=', 'crsh.agent_id')
                         ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+                        ->leftjoin('retail_users as ru', 'ru.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
-                        ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by')
+                        ->select('crm_requests.id as id', 'crs.name as status', 'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user', 'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by', 'ru.name as created_by_retail_user')
                         ->where('crm_requests.shipment_id', $shipment->id);
 
                     if($crm_requests->exists()){
@@ -439,6 +440,9 @@ class AdminTrackingController extends Controller
                                 }
                                 else if($crm_request->launched_added_by == 1){
                                     $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
+                                }
+                                else if($crm_request->launched_added_by == 3){
+                                    $crm_request_journey['created_by'] = $crm_request->created_by_retail_user . ' (Retail User)';
                                 }
                                 else{
                                     $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
@@ -1232,11 +1236,12 @@ class AdminTrackingController extends Controller
                     $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
                         ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
                         ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+                        ->leftjoin('retail_users as ru', 'ru.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
                         ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
                         ->select('crm_requests.id as id', 'crs.name as status', 'a.id as admin_id',
                         'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user',
-                         'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by','crm_requests.launched_by_id')
+                         'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by','crm_requests.launched_by_id', 'ru.name as created_by_retail_user')
                         ->where('crm_requests.shipment_id', $shipment->id);
 
                     if($crm_requests->exists()){
@@ -1254,6 +1259,9 @@ class AdminTrackingController extends Controller
                                 }
                                 else if($crm_request->launched_added_by == 1){
                                     $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
+                                }
+                                else if($crm_request->launched_added_by == 3){
+                                    $crm_request_journey['created_by'] = $crm_request->created_by_retail_user . ' (Retail User)';
                                 }
                                 else{
                                     $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';

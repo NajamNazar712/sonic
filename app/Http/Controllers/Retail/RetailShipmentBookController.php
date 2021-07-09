@@ -21,6 +21,7 @@ use App\Http\Models\BusinessCategory;
 use App\Http\Models\ChargesMode;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
@@ -252,6 +253,13 @@ class RetailShipmentBookController extends Controller
         }
 
         $shipment_id = $this->book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+        if($request->input('business_category') == 2) {
+            $international_shipment_booking = new InternationalShipment();
+            $international_shipment_booking->shipment_id = $shipment_id;
+            $international_shipment_booking->postal_code = 00000;
+            $international_shipment_booking->save();
+        }
 
         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 

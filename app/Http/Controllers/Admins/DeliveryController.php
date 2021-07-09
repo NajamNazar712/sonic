@@ -299,7 +299,9 @@ class DeliveryController extends Controller
     {
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])->where('status','!=',4)
-            ->whereDate('created_at', '>', $datetime);
+            ->whereDate('created_at', '>', $datetime)
+            ->whereDate('created_at','!=', Carbon::today());
+        
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id',$request->rider_id)->where('status',2)->where('completed',0)->latest()->first();
             if($delivery_note_request){
@@ -4187,6 +4189,8 @@ class DeliveryController extends Controller
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
             })
+           
+                     
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
@@ -4312,6 +4316,10 @@ class DeliveryController extends Controller
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
+            ->editColumn('adjustment_date', function ($deliveries) {
+                $date = str_replace('00:00:00', '', $deliveries->adjustment_date);
+                return $date;
+            })
             ->addColumn('difference_amount', function($sdn){
                 $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
                 $difference_amount = 0;
@@ -4362,7 +4370,7 @@ class DeliveryController extends Controller
 
                 $details_button = '<button onclick="window.open(\'' . $route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
                 $retail_details_button = '<button onclick="window.open(\'' . $retail_route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
-                // $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
+                $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
 
 
@@ -4378,7 +4386,16 @@ class DeliveryController extends Controller
                 else{
                     $dropdown .= $retail_details_button;
                 }
-
+                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
+                    if(session('department_id') == 6) {
+                        if($result->adjusted == 0){
+                            $dropdown .= $adjustment_add_button;
+                        }
+                    }
+                    else{
+                        $dropdown .= $adjustment_add_button;
+                    }
+                }
 
                 if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
                     $dropdown .= $upload_deposit_slip_button;

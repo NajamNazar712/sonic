@@ -15,6 +15,7 @@ use App\http\Models\Admin\KeyAccountDailyShipmentCrm;
 use App\http\Models\Admin\KeyAccountDailySummaryCrm;
 use App\http\Models\Admin\KeyAccountPendingCrm;
 use App\http\Models\Admin\KeyAccountPendingSummaryCrm;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
@@ -452,6 +453,8 @@ class AdminCRMController extends Controller
                 $launched_by = User::find($crm_request->launched_by_id)->name;
             }else if($crm_request->launched_by == 2){
                 $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
+            }else if($crm_request->launched_by == 3){
+                $launched_by = RetailUser::find($crm_request->launched_by_id)->name;
             }
             $crm_tagging = array();
             $crm_tagging_details = CrmRequestTagging::where('crm_request_id', $id)->first();
