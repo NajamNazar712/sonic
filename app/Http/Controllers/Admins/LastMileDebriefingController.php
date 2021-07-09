@@ -41,6 +41,7 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_view()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 233);
         $hubs = City::where('hub', 1)->get();
 
         return view('admin.debriefing.supervisor')->with(['hubs' => $hubs]);
@@ -78,6 +79,9 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_list(Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 234);
+        }
         $settings = GlobalSettings::where('type', 'debriefing_time_setting');
 
         if ($settings->exists()) {
@@ -178,12 +182,15 @@ class LastMileDebriefingController extends Controller
 
     public function agents_call_monitoring_view()
     {
-        
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 235);
         return view('admin.debriefing.agent_call_monitoring');
     }
 
-    public function agents_call_monitoring_list ()
+    public function agents_call_monitoring_list (Request $request)
     {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 236);
+        }
         $settings = GlobalSettings::where('type', 'debriefing_time_setting');
 
         if ($settings->exists()) {
@@ -324,6 +331,7 @@ class LastMileDebriefingController extends Controller
 
     public function caller_agent_view()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 237);
         $settings = GlobalSettings::where('type', 'debriefing_time_setting');
 
         if ($settings->exists()) {

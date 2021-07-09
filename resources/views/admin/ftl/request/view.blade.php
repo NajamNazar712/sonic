@@ -127,11 +127,19 @@
                                                             </div>
                                                     </div>
                                                     <div class="row mb-2">
-                                                        <div class="col-4">
+                                                        <div class="col-3">
                                                             <input type="text" class="form-control" id="other_cost" placeholder="Other Cost">
                                                         </div>
-                                                        <div class="col-6">
-                                                            <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">
+                                                        <div class="col-3">
+                                                         {{--   <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">--}}
+                                                            <select class="form-control select2" id="cost_type" name="cost_type" data-rule-required="true" data-msg-required="Cost Type is required">
+                                                                @foreach($cost_types as $cost_type)
+                                                                    <option value="{{$cost_type->name}}">{{$cost_type->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-3 d-none cost_div">
+                                                            <input type="text" class="form-control" id="cost_name" placeholder="Cost Name">
                                                         </div>
                                                         <div class="col-2">
                                                             <button type="button" id="add_other_cost" class="btn btn-info"><i class="fa fa-plus-circle"></i>Add</button>
@@ -447,6 +455,22 @@
 
             });
 
+            $('#cost_type').prepend('<option value="" selected="selected"></option>').append('<option value="New">New</option>').select2({
+                width: '100%',
+                placeholder: 'Cost Type*',
+            }).bind('change', function() {
+                if ($(this).val() === 'New') {
+                    $('.cost_div').removeClass('d-none');
+
+                }
+                else{
+                    $('.cost_div').addClass('d-none');
+
+                }
+            });
+
+
+
             $('#edit_shipper_form #sale_person').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Sale Person',
                 width: '100%',
@@ -513,7 +537,9 @@
             
             $("#update_ftl_request_form #add_other_cost").on('click',function (){
                 var other_cost = $('#update_ftl_request_form #other_cost').val();
-                var other_cost_type = $('#update_ftl_request_form #other_cost_type').val();
+                var other_cost_type = $('#update_ftl_request_form #cost_type').val();
+                var other_cost_name = $('#update_ftl_request_form #cost_name').val();
+                console.log(other_cost_name);
                 if(other_cost == '')
                 {
                     toastr.error('Other Cost Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -524,7 +550,15 @@
                     toastr.error('Other Cost Type Can not be empty', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return;
                 }
-                add_cost(other_cost,other_cost_type);
+                if(other_cost_name == '' && other_cost_type == "New")
+                {
+                    toastr.error('Other Cost Name is required', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return;
+                }
+                if(other_cost_type == "New" && other_cost_name != ''){
+                   other_cost_type =  other_cost_name;
+                }
+                add_cost(other_cost,other_cost_type,other_cost_name);
                 calc_total_cost();
 
             });
@@ -554,7 +588,7 @@
 
             calc_gst();
 
-            function add_cost(other_cost,other_cost_type)
+            function add_cost(other_cost,other_cost_type,cost_name)
             {
                 var html = "<tr>" +
                     "<td>" + other_cost + "<input type='hidden' name='other_cost[]' value='"+other_cost+"' class='to_calc_total_cost'> </td>" +
@@ -565,6 +599,7 @@
                 $("#update_ftl_request_form #cost_table tbody").append(html);
                 $('#update_ftl_request_form #other_cost').val('');
                 $('#update_ftl_request_form #other_cost_type').val('');
+                $('#update_ftl_request_form #cost_name').val('');
             }
 
             function calc_total_cost()

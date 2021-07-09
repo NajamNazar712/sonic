@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Auth;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminNsaAccountShipmentController extends Controller
 {
@@ -793,6 +794,7 @@ class AdminNsaAccountShipmentController extends Controller
     }
 
     public function bulk_return_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),266);
         return view('admin.telenor.bulk_return');
     }
     public function bulk_return_submit(Request $request){

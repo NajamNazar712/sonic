@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\GlobalSettings;
@@ -42,7 +43,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use Auth;
 
 class AdminHumanResourseController extends Controller
@@ -2201,6 +2201,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function rider_incentive_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),242);
         $cities = DB::table('cities')->select('id','name')->get();
         $hubs = DB::table('cities')->where('hub',1)->select('id','name')->get();
         $zones = DB::table('zones')->where('status',1)->select('id','name')->get();
@@ -2209,6 +2210,9 @@ class AdminHumanResourseController extends Controller
     }
 
     public function rider_incentive_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 243);
+        }
         $incentives = RidersIncentive::join('riders', 'riders.id', '=', 'riders_incentives.rider_id')
             ->join('cities', 'cities.id', '=', 'riders.city_id')
             ->join('rider_categories as rc', 'rc.id', '=', 'riders.rider_category_id')

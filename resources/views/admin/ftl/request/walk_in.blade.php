@@ -59,7 +59,7 @@
 
                                             <div class="form-group">
                                                 <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
-                                                    @foreach($cities as $city)
+                                                    @foreach($walk_in_cities as $city)
                                                         <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
                                                     @endforeach
                                                 </select>
@@ -330,7 +330,7 @@
                     var pickup_city_id = $('#new_pickup_city').val();
                 }
 
-                //consignee_city_id = $('#consignee_city').val();
+                consignee_city_id = $('#consignee_city').val();
             }
 
 
@@ -403,7 +403,7 @@
                 shipping_modes();
 
                 var pickup_city = $(this).val();
-               /* var consignee_city = $('#consignee_city').val();*/
+              var consignee_city = $('#consignee_city').val();
 
             });
 
