@@ -57,6 +57,8 @@
                                         <th class="border-primary border-darken-1">Action Performed</th>
                                         <th class="border-primary border-darken-1">Action Performed Time</th>
                                         <th class="border-primary border-darken-1">IP Address</th>
+                                        <th class="border-primary border-darken-1">Latitude</th>
+                                        <th class="border-primary border-darken-1">Longitude</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -144,6 +146,8 @@
                             head.push('Action Performed');
                             head.push('Action Performed Time');
                             head.push('IP Address');
+                            head.push('Latitude');
+                            head.push('Longitude');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
@@ -153,6 +157,8 @@
                                 row.push(values.action);
                                 row.push(values.created_at);
                                 row.push(values.ip_address);
+                                row.push(values.latitude);
+                                row.push(values.longitude);
                                 body.push(row);
 
                             });
@@ -204,6 +210,8 @@
                     {data: 'action', name: 'ata.action', class: 'align-middle action'},
                     {data: 'created_at', name: 'activity_trail_logs.created_at', class: 'align-middle created_at'},
                     {data: 'ip_address', name: 'activity_trail_logs.ip_address', class: 'align-middle ip_address'},
+                    {data: 'latitude', name: 'activity_trail_logs.latitude', class: 'align-middle latitude'},
+                    {data: 'longitude', name: 'activity_trail_logs.longitude', class: 'align-middle longitude'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

@@ -433,6 +433,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
 
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
+    Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
