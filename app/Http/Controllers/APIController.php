@@ -3477,7 +3477,9 @@ class APIController extends Controller
                 $actual_eta = Carbon::now()->diffInDays($current_status_time);
 
                 $difference_eta = $estimated_eta - $actual_eta;
-
+                if($difference_eta < 0){
+                    $difference_eta = 0;
+                }
                 $details['tracking_number'] = $tracking_number;
                 $details['status'] = ShipmentStatus::find($current_status_id)->name;
                 $details['ETA'] = $difference_eta . ' days';
