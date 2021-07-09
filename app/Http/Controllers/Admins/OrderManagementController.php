@@ -68,7 +68,7 @@ class OrderManagementController extends Controller
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
-            ->join('payment_modes as pm', 'sm.id', '=', 'shipments.payment_mode_id')
+            ->join('payment_modes as pm', 'pm.id', '=', 'shipments.payment_mode_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
