@@ -240,6 +240,7 @@ class AdminFinanceController extends Controller
                 $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
                 $edit_deposit_button = '<button type="button" class="dropdown-item edit_deposit_slip"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Deposit Slip</div></button>';
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+                $sdn_adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -253,6 +254,9 @@ class AdminFinanceController extends Controller
                 $delivery_note_shipments = DeliveryNoteStationDepositNote::leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_note_station_deposit_notes.delivery_note_id')->where('delivery_note_station_deposit_notes.station_deposit_note_id', $station_deposit_note->id)->where('dns.status', '!=',  7)->get();
                 if(count($delivery_note_shipments) > 0){
                     $dropdown .= $edit_deposit_button;
+                }
+                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
+                    $dropdown .= $sdn_adjustment_add_button;
                 }
 
 
