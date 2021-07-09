@@ -76,6 +76,11 @@ class AdminShipmentScanningHistoryController extends Controller
                             $details[$index]['scanned_by'] = $scanned_by;
                             $details[$index]['city'] = $city;
                             $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
+
+                            $details[$index]['ip_address'] = $scanning_history->ip_address;
+
+                            $details[$index]['latitude'] = $scanning_history->latitude;
+                            $details[$index]['longitude'] = $scanning_history->longitude;
                         }
                         $data['tracking_number'] = $shipment->tracking_number;
                         $data['history'] = $details;

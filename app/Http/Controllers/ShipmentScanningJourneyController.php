@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Models\ShipmentScanningJourney;
 use Illuminate\Http\Request;
 use Vectorface\Whip\Whip;
+use Session;
 
 class ShipmentScanningJourneyController extends Controller
 {
@@ -23,6 +24,11 @@ class ShipmentScanningJourneyController extends Controller
 
         if ($client_address != '') {
             $add_scanning_history->ip_address = $client_address;
+        }
+
+        if (Session::has('latitude') && Session::has('longitude')) {
+            $add_scanning_history->latitude = session('latitude');
+            $add_scanning_history->longitude = session('longitude');
         }
 
         $add_scanning_history->save();
