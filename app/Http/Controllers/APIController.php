@@ -21,6 +21,7 @@ use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentReason;
 use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use Illuminate\Support\Facades\Hash;
@@ -3479,10 +3480,15 @@ class APIController extends Controller
 
                 $details['tracking_number'] = $tracking_number;
                 $details['status'] = ShipmentStatus::find($current_status_id)->name;
-                $details['eta'] = $difference_eta;
+                $details['ETA'] = $difference_eta . ' days';
 
-                if($difference_eta == 0 && $current_reason_id != NULL){
-                    $details['reason'] = ShipmentReason::find($current_reason_id)->name;
+                if($difference_eta == 0){
+                    if($current_reason_id != NULL){
+                        $details['reason'] = ShipmentStatusReason::find($current_reason_id)->name . '. Please call us at 021-111-118-729 for queries and updates.';
+                    }
+                    else{
+                        $details['reason'] = '';
+                    }
                 }
 
             }
