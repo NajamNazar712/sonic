@@ -4187,6 +4187,8 @@ class DeliveryController extends Controller
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
             })
+           
+                     
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
@@ -4311,6 +4313,10 @@ class DeliveryController extends Controller
             })
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('adjustment_date', function ($deliveries) {
+                $date = str_replace('00:00:00', '', $deliveries->adjustment_date);
+                return $date;
             })
             ->addColumn('difference_amount', function($sdn){
                 $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
