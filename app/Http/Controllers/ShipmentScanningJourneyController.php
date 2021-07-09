@@ -9,6 +9,7 @@ use Session;
 
 class ShipmentScanningJourneyController extends Controller
 {
+    //User Types 4 -> Retail User
     static public function add($shipment_id, $screen_location_id, $user_type, $admin_id = NULL, $user_id = NULL, $substitute_user_id = NULL) {
         $add_scanning_history = new ShipmentScanningJourney();
         $add_scanning_history->shipment_id = $shipment_id;
