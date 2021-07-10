@@ -378,15 +378,15 @@ class AdminMasterCargoController extends Controller
                     $hub_id = $city_details->hub_id;
                 }
                 else {
-                    if(in_array($shipment->shipper_status_id, [20])){
-                        if($shipment->return_address_id != null){
+                    if ($shipment->shipper_status_id == 20) {
+                        if ($shipment->return_address_id != NULL) {
                             $hub_id = $shipment->return_address->city->hub_id;
                         }
-                        else{
+                        else {
                             $hub_id = $shipment->consignee_city->hub_id;
                         }
                     }
-                    else{
+                    else {
                         $hub_id = $shipment->consignee_city->hub_id;
                     }
 
@@ -405,13 +405,7 @@ class AdminMasterCargoController extends Controller
                 }
 
                 if ($allowed) {
-                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
-                        if($shipment->return_address_id != NULL){
-                            if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id == $hub_id)){
-                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
-                            }
-                        }
-
+                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20 && $shipment->return_address_id != NULL && $shipment->pickup_address->city->hub_id != $hub_id)) {
                         if ($request->bag_type != 0) {
                             if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                 $hub_id = $shipment->consignee_city->hub_id;
