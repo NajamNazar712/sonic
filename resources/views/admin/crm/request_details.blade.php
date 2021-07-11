@@ -379,7 +379,7 @@
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
-                                                                class="form-group position-relative has-icon-left col-10 m-0">
+                                                                class="form-group position-relative has-icon-left col-9 m-0">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
@@ -389,18 +389,22 @@
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
                                                         </fieldset>
-                                                        <div class="display-inline-block col-2">
+                                                        <div class="display-inline-block col-3">
                                                             <fieldset
-                                                                    class="form-group has-icon-left m-0 mb-1">
+                                                                    class="form-group has-icon-left m-0 mb-1 ml-2">
                                                                 <button id="chat_send" type="button"
                                                                         class="btn btn-block btn-purple chat_send" to="1"><i
                                                                             class="la la-paper-plane-o d-lg-none"></i>
                                                                     <span class="">Internal</span>
                                                                 </button>
                                                             </fieldset>
-                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
+                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))                         @if($crm_details->case_nature_id == 4 && session('role_id') == 1)
+                                                                    <div class="form-group mt-1" style="float: left;">
+                                                                        <input type="checkbox" id="email_check" name="email_check">
+                                                                    </div>
+                                                                @endif
                                                                 <fieldset
-                                                                        class="form-group position-relative has-icon-left mb-1">
+                                                                        class="form-group position-relative has-icon-left mb-1 ml-2">
                                                                     <button id="chat_send" type="button"
                                                                             class="btn btn-block btn-outline-primary chat_send" to="0">
                                                                         <i class="la la-paper-plane-o d-lg-none"></i>
@@ -409,7 +413,7 @@
                                                                 </fieldset>
                                                             @endif
                                                             <fieldset
-                                                                    class="form-group has-icon-left">
+                                                                    class="form-group has-icon-left ml-2">
                                                                 <button id="chat_send" type="button"
                                                                         class="btn btn-block btn-outline-dark chat_send" to="2"><i
                                                                             class="la la-paper-plane-o d-lg-none"></i>
@@ -463,7 +467,7 @@
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
-                                                                class="form-group position-relative has-icon-left col-10 m-0">
+                                                                class="form-group position-relative has-icon-left col-9 m-0">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
@@ -473,7 +477,7 @@
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-150" placeholder="Type your message"></textarea>
                                                         </fieldset>
-                                                        <div class="display-inline-block col-2">
+                                                        <div class="display-inline-block col-3">
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0 mb-1">
                                                                 <button id="chat_send" type="button"
@@ -483,6 +487,11 @@
                                                                 </button>
                                                             </fieldset>
                                                             @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)))
+                                                                @if($crm_details->case_nature_id == 4 && session('role_id') == 1)
+                                                                    <div class="form-group mt-1" style="float: left;">
+                                                                        <input type="checkbox" id="email_check" name="email_check">
+                                                                    </div>
+                                                                @endif
                                                             <fieldset
                                                                     class="form-group position-relative has-icon-left m-0">
                                                                 <button id="chat_send" type="button"
@@ -1502,6 +1511,14 @@
                 var request_id = '{{$crm_details->id}}';
                 var internal_switch = parseInt($(this).attr('to'));
                 var internal_class = '';
+                var email_check = '';
+                if($('#email_check').is(":checked")){
+                    email_check = true;
+                }
+                else{
+                    email_check = false;
+                }
+                console.log(email_check);
 
                 if (internal_switch == 1) {
                     internal_class = 'internal';
@@ -1525,7 +1542,8 @@
                             '_token': '{{ csrf_token() }}',
                             'comment': comment,
                             'request_id': request_id,
-                            'internal_switch': internal_switch
+                            'internal_switch': internal_switch,
+                            'email_check': email_check
                         }
                     }).done(function (data) {
                         if (data.status) {

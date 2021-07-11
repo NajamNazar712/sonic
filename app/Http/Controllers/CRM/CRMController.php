@@ -151,7 +151,7 @@ class CRMController extends Controller
                 else{
                     $default_agent_id = 306;
                 }
-                CRMCommentController::add($id, $default_agent_id,$comment_by,$comment_type, $comment);
+                CRMCommentController::add($id, $default_agent_id,$comment_by,$comment_type, $comment,0);
             }
         }
 
@@ -167,7 +167,7 @@ class CRMController extends Controller
             } else {
                 $default_agent_id = 306;
             }
-            CRMCommentController::add($id, $default_agent_id, $comment_by, $comment_type, $comment);
+            CRMCommentController::add($id, $default_agent_id, $comment_by, $comment_type, $comment,0);
         }
         return $crm_request->id;
     }

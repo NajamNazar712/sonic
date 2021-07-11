@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 
 class CRMCommentController extends Controller
 {
-    static public function add($crm_request_id, $comment_by_id, $comment_by, $comment_type = 0, $comments){
+    static public function add($crm_request_id, $comment_by_id, $comment_by, $comment_type = 0, $comments,$shipper_email){
         $comment = new CrmComments();
         $comment->crm_request_id = $crm_request_id;
         $comment->comment_by_id = $comment_by_id;
@@ -26,7 +26,9 @@ class CRMCommentController extends Controller
                 if($shipper_id == NULL){
                     $shipper_id = $crm_request->shipment->user_id;
                 }
-                NotificationsController::send(136,$shipper_id,$comment->id);
+                if($shipper_email == 1){
+                    NotificationsController::send(136,$shipper_id,$comment->id);
+                }
             }
 
         }

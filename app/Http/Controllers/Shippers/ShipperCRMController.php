@@ -491,7 +491,7 @@ class ShipperCRMController extends Controller
         if(session('user_type') == 2){
             $comment_by = 2;
         }
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,0, $comment,0);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
 

@@ -35,7 +35,7 @@ class CRMAutomationController extends Controller
                         $setting = GlobalSettings::where('type', 'crm_delay_in_delivery_message');
                         if($setting->exists()){
                             $setting = $setting->first();
-                            CRMCommentController::add($row->crm_request_id,306,0,0, $setting->text);
+                            CRMCommentController::add($row->crm_request_id,306,0,0, $setting->text,0);
                         }
                         $row->delete();
                     }
