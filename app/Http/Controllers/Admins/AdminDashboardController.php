@@ -1405,6 +1405,7 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountsList(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),275);
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
         $sale_tier_types = Admin::where('admins.status',1)->where('role_id','!=',1)->get();
         return view('admin.accounts.block_accounts_list')->with(['sale_name'=>$salesperson,'sale_tier_types' => $sale_tier_types]);
@@ -7865,6 +7866,11 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountListAjax(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),276);
+        }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
@@ -9186,9 +9192,16 @@ class AdminDashboardController extends Controller
     }
 
     public function merged_accounts_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),277);
         return view('admin.accounts.sister_accounts.merged_accounts.index');
     }
     public function merged_accounts_list(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),278);
+        }
+
         $merged_accounts = MergedAccountHead::leftjoin('admins as ac', 'ac.id', '=', 'merged_account_heads.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'merged_account_heads.updated_by')
             ->select('merged_account_heads.id as id', 'merged_account_heads.name as name', 'merged_account_heads.created_at as created_at', 'merged_account_heads.updated_at as updated_at', 'ac.name as created_by', 'au.name as updated_by', DB::raw('(select count(id) from merged_sister_accounts where merged_sister_accounts.merged_head_id = merged_account_heads.id) as accounts'));
@@ -10064,11 +10077,16 @@ class AdminDashboardController extends Controller
         // dd(Carbon::parse('-24 hours'));
         // dd(Carbon::today('-12 hours'));
         // dd(Carbon::today('+12 hours'));
+        ActivityTrailController::createActivityTrailLog(Auth::id(),279);
        return view('admin.accounts.today_active_accounts_list');
 
     }
 
     public function todayActiveAccountListAjax(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),280);
+        }
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('account_types as at','at.id','=','users.account_type_id')
             ->leftjoin('sale_person_tags as spt', function ($join) {
