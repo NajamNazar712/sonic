@@ -398,7 +398,7 @@
                                                                     <span class="">Internal</span>
                                                                 </button>
                                                             </fieldset>
-                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))                         @if($crm_details->case_nature_id == 4 && session('role_id') == 1)
+                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))                           @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(538, session('permissions'))))
                                                                     <div class="form-group mt-1" style="float: left;">
                                                                         <input type="checkbox" id="email_check" name="email_check">
                                                                     </div>
@@ -487,7 +487,7 @@
                                                                 </button>
                                                             </fieldset>
                                                             @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)))
-                                                                @if($crm_details->case_nature_id == 4 && session('role_id') == 1)
+                                                                @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(538, session('permissions'))))
                                                                     <div class="form-group mt-1" style="float: left;">
                                                                         <input type="checkbox" id="email_check" name="email_check">
                                                                     </div>
@@ -1518,7 +1518,7 @@
                 else{
                     email_check = false;
                 }
-                console.log(email_check);
+
 
                 if (internal_switch == 1) {
                     internal_class = 'internal';

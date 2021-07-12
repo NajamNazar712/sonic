@@ -516,7 +516,7 @@ class AdminCRMController extends Controller
     }
 
     public function add_comment(Request $request){
-        //dd($request->email_check);
+
         $comment = $request->comment;
         $request_id = $request->request_id;
         $comment_by = 0;
