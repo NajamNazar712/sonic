@@ -238,7 +238,7 @@
             });
             $('#tagged_to').select2({
                 width:'100%',
-                placeholder:"Select Shipper",
+                placeholder:"Tag Person*",
                 allowClear:true,
                 dropdownParent:$('#add_report_form')
             });

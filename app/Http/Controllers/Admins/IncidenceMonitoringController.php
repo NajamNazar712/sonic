@@ -54,7 +54,7 @@ class IncidenceMonitoringController extends Controller
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
         if(count($admin_ids) > 0){
 
-            $agents = Admin::whereIn('id', $admin_ids)->where('status',1)->get();
+            $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9])->where('status',1)->get();
            
             return response()->json(['status' => 1, 'agents' => $agents]);
         }
@@ -133,8 +133,9 @@ class IncidenceMonitoringController extends Controller
             return $link;
         })
         ->addColumn('action', function($data) {
+            $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$data->id)->pluck('admin_id')->toArray();
             $dropdown = '';
-            if (session('role_id') == 1 || in_array(536, session('permissions'))){
+            if (session('role_id') == 1 || in_array(Auth::user()->role_id,[3,10]) || in_array(Auth::user()->id,$tagged_user) || in_array(536, session('permissions'))){
                 $dropdown .= '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -174,15 +175,17 @@ class IncidenceMonitoringController extends Controller
     }
 
     public function add_comment(Request $request){
-        if(Auth::user()->role_id == 8)
+        $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$request->request_id)->pluck('admin_id')->toArray();
+            
+        if(Auth::user()->role_id == 8 && in_array(Auth::user()->id,$tagged_user))
         {
             $comment_by = 1;
         }
-        elseif(Auth::user()->role_id == 9)
+        elseif(Auth::user()->role_id == 9 && in_array(Auth::user()->id,$tagged_user))
         {
             $comment_by = 0;
         }
-        elseif(in_array(Auth::user()->role_id,$this->operation_role_ids))
+        elseif(in_array(Auth::user()->role_id,[3,10]))
         {
             $comment_by = 2;
         }
@@ -241,7 +244,7 @@ class IncidenceMonitoringController extends Controller
         if(count($image_ids) == 0){
             return redirect()->back()->with('error', 'No images selected!');
         }
-        $report = IncidenceMonitoring::find($id);
+        $report = IncidenceMonitoring::find($request_id);
         if($report){
             $report_images = $report->images->count();
             if($report_images == 2){

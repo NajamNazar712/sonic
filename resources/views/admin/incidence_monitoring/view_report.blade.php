@@ -322,7 +322,6 @@
                             <th class="border-primary border-darken-1">Date Added</th>
                             <th class="border-primary border-darken-1">Image</th>
                             <th class="border-primary border-darken-1">Added By</th>
-                            <th class="border-primary border-darken-1"></th>
 
                         </tr>
                         </thead>
@@ -740,9 +739,7 @@
                             $.each(data.images, function (index, image) {
                                 index++;
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                                var remove = '';
-                                remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + image.added_by + '</td><td>' + remove + '</td></tr>';
+                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + image.added_by + '</td></tr>';
                             });
                             $('#image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
@@ -778,10 +775,10 @@
                 if (typeof tr_id !== typeof undefined && tr_id !== false) {
                     var new_img_rows = $('#image_upload_table tbody tr').length;
                     new_img_rows = images_count + new_img_rows;
-                    if(new_img_rows >= 2){
-                        $('#image_upload_table .img_add_btn').attr('disabled', true);
-                        return false;
-                    }
+                    // if(new_img_rows >= 2){
+                    //     $('#image_upload_table .img_add_btn').attr('disabled', true);
+                    //     return false;
+                    // }
                 }
 
                 rows_count++;
@@ -806,9 +803,9 @@
                     text: '<i class="la la-plus"></i> Add Row',
                     action:function (e) {
                         console.log(images_count);
-                        if(images_count < 2){
+                        // if(images_count < 2){
                             add_row();
-                        }
+                        // }
                     }
                 }],
                 ordering:false,
