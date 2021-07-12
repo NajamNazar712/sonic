@@ -6639,6 +6639,7 @@ class DeliveryController extends Controller
             $class = '';
         }
 
+        ShipmentScanningJourneyController::add($shipment->id,21,1,Auth::id(),null.null);
         return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>date('Y-m-d H:i:s',strtotime($journey->created_at)),'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name, 'class' => $class]]);
     }
 

@@ -2811,6 +2811,7 @@ class AdminMasterCargoController extends Controller
                                 $details['tracking_number'] = $shipment->tracking_number;
                                 $details['pieces_count'] = $shipment->pieces;
                                 $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                ShipmentScanningJourneyController::add($shipment->id,20,1,Auth::id(),null,null);
                                 return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                             }
                         }
@@ -2826,7 +2827,7 @@ class AdminMasterCargoController extends Controller
                         $details['shipping_mode'] = $shipment->shipping_mode->mode;
                         $details['amount'] = number_format($shipment->amount);
                         $details['service_type'] = $shipment->booking_type->booking_type;
-
+                        ShipmentScanningJourneyController::add($shipment->id,20,1,Auth::id(),null,null);
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                     }
                     else {
