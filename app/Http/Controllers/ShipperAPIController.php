@@ -360,6 +360,25 @@ class ShipperAPIController extends Controller
                     return ['status' => 0, 'error' => 'No Pickup Request selected!'];
                 }
             }
+        } elseif ($nature_id == 3) {
+            if ($shipment_id != null) {
+                if ($description == null) {
+                    return response()->json(['status' => 0, 'message' => 'Description Not Entered!']);
+                }
+                $shipment = Shipment::find($shipment_id);
+                if ($shipment) {
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+                    if (!$is_shipment) {
+                        CRMController::add($nature_id, NULL, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
+                        return response()->json(['status' => 0, 'message' => 'Feedback successfully added']);
+                    } else {
+                        $tracking_no = $shipment->tracking_number;
+                        return response()->json(['status' => 1, 'message' => 'Feedback already entered for the following Shipment! ' . $tracking_no]);
+                    }
+                }
+                return response()->json(['status' => 1, 'message' => 'Shipment not exists']);
+            }
+            return response()->json(['status' => 1, 'message' => 'Shipment not provided']);
         } else {
             if (!empty($shipment_id)) {
                 $shipment = Shipment::find($shipment_id);
