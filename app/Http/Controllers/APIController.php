@@ -3274,14 +3274,27 @@ class APIController extends Controller
     }
 
     public function shipment_google_track(Request $request) {
-      $authorization = $request->header('Authorization');
+      if(strstr(strtolower($_SERVER['HTTP_USER_AGENT']), 'google')) {
+        $rules = [
+          'TrackingNumber' => ['required']
+        ];
 
-      if($authorization) {
-        $password = 'Google ' . (round(time() / 60) * 60);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
-        if (password_verify($password, $authorization)) {
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+          $current_status = array();
+
+          $current_status['Status'] = 'ERROR';
+          $current_status['Date'] = Carbon::now();
+          $current_status['Error'] = 'Missing Tracking Number';
+
+          return response()->json(['CurrentStatus' => $current_status]);
+        }
+        else {
           $rules = [
-            'TrackingNumber' => ['required']
+            'TrackingNumber' => ['integer', 'digits_between:10,20']
           ];
 
           $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3293,136 +3306,108 @@ class APIController extends Controller
 
             $current_status['Status'] = 'ERROR';
             $current_status['Date'] = Carbon::now();
-            $current_status['Error'] = 'Missing Tracking Number';
+            $current_status['Error'] = 'Invalid Tracking Number';
 
-            return response()->json(['CurrentStatus' => $current_status]);
+            return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $request->TrackingNumber]);
           }
           else {
-            $rules = [
-              'TrackingNumber' => ['integer', 'digits_between:10,20']
-            ];
+            $tracking_number = $request->TrackingNumber;
 
-            $validate = Validator::make($request->all(), $rules, $this->messages);
+            $shipment = Shipment::where('tracking_number', $tracking_number);
 
-            $validate->setAttributeNames($this->names);
+            if ($shipment->exists()) {
+              $output = array();
 
-            if ($validate->fails()) {
+              $output['TrackingNumber'] = $tracking_number;
+
+              $tracking_url = 'https://sonic.pk/tracking?tracking_number=' . $tracking_number;
+
+              $output['TrackingURL'] = $tracking_url;
+
+              $support_phone_numbers = ['+9221111118729'];
+
+              $output['SupportPhoneNumbers'] = $support_phone_numbers;
+
+              $shipment = $shipment->first();
+
+              $created_date = $shipment->created_at;
+
+              $output['CreateDate'] = $created_date;
+
+              $current_status = array();
+              $transit_events = array();
+
+              $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1);
+
+              if ($shipments_journey->exists()) {
+                $shipments_journey = $shipments_journey->get();
+
+                $pickup = FALSE;
+                $delivered = FALSE;
+
+                if (!in_array($shipment->shipper_status_id, [1, 17])) {
+                  $pickup = TRUE;
+
+                  if (in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+                    $delivered = TRUE;
+                  }
+                }
+
+                foreach ($shipments_journey as $shipment_journey) {
+                  $transit_event = array();
+
+                  $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
+                  $transit_event['Date'] = $shipment_journey->created_at;
+
+                  $transit_events[] = $transit_event;
+
+                  if ($pickup) {
+                    if (!isset($output['PickupDate']) && in_array($shipment_journey->shipper_status_id, [2, 53, 61, 63])) {
+                      $pickup_date = $shipment_journey->created_at;
+
+                      $output['PickupDate'] = $pickup_date;
+                    }
+
+                    if ($delivered && in_array($shipment_journey->shipper_status_id, [14, 30, 36, 37])) {
+                      $delivered_date = $shipment_journey->created_at;
+
+                      $output['DeliveredDate'] = $delivered_date;
+                    }
+                  }
+                }
+
+                $shipment_journey = $shipments_journey->last();
+
+                $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
+                $current_status['Date'] = $shipment_journey->created_at;
+              }
+              else {
+                $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
+                $current_status['Date'] = $shipment->updated_at;
+
+                $transit_event = array();
+
+                $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
+                $transit_event['Date'] = $shipment->updated_at;
+
+                $transit_events[] = $transit_event;
+              }
+
+              $output['CurrentStatus'] = $current_status;
+              $output['TransitEvents'] = $transit_events;
+
+              return response()->json($output);
+            }
+            else {
               $current_status = array();
 
               $current_status['Status'] = 'ERROR';
               $current_status['Date'] = Carbon::now();
               $current_status['Error'] = 'Invalid Tracking Number';
 
-              return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $request->TrackingNumber]);
-            }
-            else {
-              $tracking_number = $request->TrackingNumber;
-
-              $shipment = Shipment::where('tracking_number', $tracking_number);
-
-              if ($shipment->exists()) {
-                $output = array();
-
-                $output['TrackingNumber'] = $tracking_number;
-
-                $tracking_url = 'https://sonic.pk/tracking?tracking_number=' . $tracking_number;
-
-                $output['TrackingURL'] = $tracking_url;
-
-                $support_phone_numbers = ['+9221111118729'];
-
-                $output['SupportPhoneNumbers'] = $support_phone_numbers;
-
-                $shipment = $shipment->first();
-
-                $created_date = $shipment->created_at;
-
-                $output['CreateDate'] = $created_date;
-
-                $current_status = array();
-                $transit_events = array();
-
-                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1);
-
-                if ($shipments_journey->exists()) {
-                  $shipments_journey = $shipments_journey->get();
-
-                  $pickup = FALSE;
-                  $delivered = FALSE;
-
-                  if (!in_array($shipment->shipper_status_id, [1, 17])) {
-                    $pickup = TRUE;
-
-                    if (in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
-                      $delivered = TRUE;
-                    }
-                  }
-
-                  foreach ($shipments_journey as $shipment_journey) {
-                    $transit_event = array();
-
-                    $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
-                    $transit_event['Date'] = $shipment_journey->created_at;
-
-                    $transit_events[] = $transit_event;
-
-                    if ($pickup) {
-                      if (!isset($output['PickupDate']) && in_array($shipment_journey->shipper_status_id, [2, 53, 61, 63])) {
-                        $pickup_date = $shipment_journey->created_at;
-
-                        $output['PickupDate'] = $pickup_date;
-                      }
-
-                      if ($delivered && in_array($shipment_journey->shipper_status_id, [14, 30, 36, 37])) {
-                        $delivered_date = $shipment_journey->created_at;
-
-                        $output['DeliveredDate'] = $delivered_date;
-                      }
-                    }
-                  }
-
-                  $shipment_journey = $shipments_journey->last();
-
-                  $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
-                  $current_status['Date'] = $shipment_journey->created_at;
-                }
-                else {
-                  $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
-                  $current_status['Date'] = $shipment->updated_at;
-
-                  $transit_event = array();
-
-                  $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
-                  $transit_event['Date'] = $shipment->updated_at;
-
-                  $transit_events[] = $transit_event;
-                }
-
-                $output['CurrentStatus'] = $current_status;
-                $output['TransitEvents'] = $transit_events;
-
-                return response()->json($output);
-              }
-              else {
-                $current_status = array();
-
-                $current_status['Status'] = 'ERROR';
-                $current_status['Date'] = Carbon::now();
-                $current_status['Error'] = 'Invalid Tracking Number';
-
-                return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $tracking_number]);
-              }
+              return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $tracking_number]);
             }
           }
-        }
-        else {
-          $current_status = array();
-
-          $current_status['Status'] = 'ERROR';
-          $current_status['Date'] = Carbon::now();
-          $current_status['Error'] = 'Invalid Authorization';
-
-          return response()->json(['CurrentStatus' => $current_status]);
         }
       }
       else {
@@ -3430,7 +3415,7 @@ class APIController extends Controller
 
         $current_status['Status'] = 'ERROR';
         $current_status['Date'] = Carbon::now();
-        $current_status['Error'] = 'Missing Authorization';
+        $current_status['Error'] = 'Unauthorized Host';
 
         return response()->json(['CurrentStatus' => $current_status]);
       }

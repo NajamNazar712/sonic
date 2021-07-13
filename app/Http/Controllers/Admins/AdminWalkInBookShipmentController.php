@@ -1048,12 +1048,17 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),289);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $charges_mode = ChargesModes::select('id','charges_mode')->get();
         return view('admin.shipment.history.walk_in_history')->with(['shipment_status' => $shipment_status, 'charges_mode' => $charges_mode]);
     }
 
     public function history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),290);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

@@ -46,12 +46,17 @@ class ActivityTrailController extends Controller
     }
 
     public function activity_trail_index ()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),332);
         return view('admin.activity_trail.index');
     }
 
     public function activity_trail_list (Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),333);
+        }
+
         $data = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
             ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
             ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')

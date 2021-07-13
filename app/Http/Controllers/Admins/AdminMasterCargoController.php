@@ -54,6 +54,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function pending_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),297);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $shipping_mode = ShippingMode::all();
@@ -61,6 +62,11 @@ class AdminMasterCargoController extends Controller
     }
 
     public function pending_list(Request $request) {
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),298);
+        }
         $today = Carbon::today();
         $on_hold_shipments = ShipmentOnHold::whereDate('dispatch_date', '>', $today)->where('status', 1)->pluck('shipment_id')->toArray();
         $shipments = Shipment::join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
@@ -378,15 +384,15 @@ class AdminMasterCargoController extends Controller
                     $hub_id = $city_details->hub_id;
                 }
                 else {
-                    if(in_array($shipment->shipper_status_id, [20])){
-                        if($shipment->return_address_id != null){
+                    if ($shipment->shipper_status_id == 20) {
+                        if ($shipment->return_address_id != NULL) {
                             $hub_id = $shipment->return_address->city->hub_id;
                         }
-                        else{
+                        else {
                             $hub_id = $shipment->consignee_city->hub_id;
                         }
                     }
-                    else{
+                    else {
                         $hub_id = $shipment->consignee_city->hub_id;
                     }
 
@@ -405,13 +411,7 @@ class AdminMasterCargoController extends Controller
                 }
 
                 if ($allowed) {
-                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
-                        if($shipment->return_address_id != NULL){
-                            if(($shipment->shipper_status_id == 20) && ($shipment->pickup_address->city->hub_id == $hub_id)){
-                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
-                            }
-                        }
-
+                    if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20 && $shipment->return_address_id != NULL && $shipment->pickup_address->city->hub_id != $hub_id)) {
                         if ($request->bag_type != 0) {
                             if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
                                 $hub_id = $shipment->consignee_city->hub_id;
@@ -1340,6 +1340,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_pending_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),299);
         $shipping_mode = ShippingMode::all();
         $transport_vendor = TransportModeVendor::all();
         $transport_mode = TransportMode::all();
@@ -1348,6 +1349,10 @@ class AdminMasterCargoController extends Controller
     }
 
     public function master_cargo_pending_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),300);
+        }
         $bags = Bag::join('cities as oh', 'bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'bags.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
