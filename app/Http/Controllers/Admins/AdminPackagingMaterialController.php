@@ -69,7 +69,8 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function packaging_index()
-    {     ActivityTrailController::createActivityTrailLog(Auth::id(),281);
+    {
+
         $packaging_material_status = PackagingMaterialRequestStatus::all();
         $warehouses = Warehouse::where('status', 1)->get();
         $packaging_type = PackagingMaterialTypes::with('sizes')->where('status', 1)->get();
@@ -78,10 +79,7 @@ class AdminPackagingMaterialController extends Controller
 
     public function packaging_list(Request $request)
     {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),282);
-        }
+
         $stock_requests = WarehouseStockRequest::leftjoin('warehouses as rw', 'rw.id', 'warehouse_stock_requests.requested_by')
             ->leftjoin('warehouses as sw', 'sw.id', 'warehouse_stock_requests.send_by')
             ->leftjoin('cities as rb', 'rb.id', '=', 'rw.hub_id')
@@ -309,7 +307,7 @@ class AdminPackagingMaterialController extends Controller
     }
     
     public function request_index(Request $request){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),281);
         $admin_id = Auth::id();
         $tagged_shippers = array();
         $all_shippers = array();
@@ -339,6 +337,10 @@ class AdminPackagingMaterialController extends Controller
     }
 
     public function request_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),282);
+        }
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')

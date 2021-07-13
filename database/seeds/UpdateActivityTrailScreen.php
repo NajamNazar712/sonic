@@ -133,6 +133,8 @@ class UpdateActivityTrailScreen extends Seeder
             array('id' => 391,'screen_name' => 'Designation', 'action'=> 'Excel Download'),
             array('id' => 392, 'screen_name' => 'Department', 'action'=> 'View'),
             array('id' => 393,'screen_name' => 'Department', 'action'=> 'Excel Download'),
+            array('id' => 394, 'screen_name' => 'Same Day Delivery', 'action'=> 'View'),
+            array('id' => 395,'screen_name' => 'Same Day Delivery', 'action'=> 'Excel Download'),
             
         ));
     }

@@ -23,7 +23,7 @@ class SamedayController extends Controller
         $this->middleware('Permission');
     }
     public function sameday_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),306);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),394);
         $timings = ShippingModeSameDayTiming::all();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $products = Product::select('id','product_name')->get();
@@ -32,7 +32,7 @@ class SamedayController extends Controller
     public function sameday_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),307);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),395);
         }
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
