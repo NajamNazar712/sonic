@@ -15,6 +15,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -278,5 +279,142 @@ class ShipperAPIController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
         return response()->json(['status' => 0, 'case_nature' => $case_nature, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims]);
+    }
+
+    public function add_request_submit(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $nature_id = $request->case_nature_id;
+        $complaint_id = $request->complaint_id;
+        $shipment_id = $request->shipment_id;
+        $receiving_sheet_id = $request->receiving_sheet_id;
+        $description = $request->description;
+        $channel_id = 7;
+        $launched_by = 1;
+        if (!$request->case_nature_id) {
+            return response()->json(['status' => 1, 'message' => 'Case nature not selected!']);
+        }
+        $present_shipments = array();
+        $flag = false;
+        $cannot_change = false;
+
+        if ($request->has('payment_request')) {
+            if ($request->payment_request == 1) {
+                $payment_id = $request->payment_id;
+                $payment_id_padded = str_pad($request->payment_id, 6, 0, STR_PAD_LEFT);
+                if (!empty($payment_id)) {
+                    $payment = DonePayment::find($payment_id);
+                    $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
+                    $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id);
+                    if ($is_shipment->exists()) {
+                        return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
+                    } else {
+                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
+                    }
+                    return ['status' => 1, 'success' => 'Request(s) successfully added'];
+                } else {
+                    return ['status' => 0, 'error' => 'No Payment selected!'];
+                }
+            }
+        } elseif ($request->has('pickup_request')) {
+            if ($request->pickup_request == 1) {
+                $pickup_request_ids = $request->pickup_request_ids;
+                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                    $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+                } else {
+                    if ($complaint_id == 26) {
+                        $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
+                    }
+                }
+                if (!empty($pickup_request_ids)) {
+                    foreach ($pickup_request_ids as $pickup_request_id) {
+                        $pickup_request_shipment = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->first();
+                        $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
+                        $shipment_id = $shipment->id;
+                        $is_shipment = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->first();
+                        if ($is_shipment) {
+                            if ($is_shipment->case_nature_id != $nature_id) {
+                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                                } else {
+
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
+                            } else {
+
+                                $present_shipments[] = $shipment->tracking_number;
+                                $flag = true;
+                            }
+                        } else {
+                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                            } else {
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            }
+                        }
+                    }
+                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
+                } else {
+                    return ['status' => 0, 'error' => 'No Pickup Request selected!'];
+                }
+            }
+        } else {
+            if (!empty($shipment_id)) {
+                $shipment = Shipment::find($shipment_id);
+                if ($shipment) {
+                    $is_shipment = CrmRequest::where('shipment_id', $shipment_id)->where('case_nature_id', $nature_id)->first();
+                    if ($is_shipment) {
+                        if ($is_shipment->case_nature_id != $nature_id) {
+                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                                CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                            } else {
+                                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                    if (in_array($complaint_id, [11, 12, 13])) {
+                                        $tracking_no = $shipment->tracking_number;
+                                        return response()->json(['status' => 1, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
+                                    } else {
+                                        CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
+                                    }
+                                } else {
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
+                                }
+                            }
+                        } else {
+                            $tracking_no = $shipment->tracking_number;
+                            return response()->json(['status' => 1, 'message' => 'Request/Complaint already lodged for the following Shipment! ' . $tracking_no]);
+                        }
+                    } else {
+
+                        if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
+                            if ($nature_id == 4) {
+                                if ($complaint_id == 21 || $complaint_id == 22) {
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_claim_product_cost, $request->file('missing_product_picture'), $request->file('product_packaging_picture_content_short'), $request->file('actual_product_picture_content_short'), $request->claim_content_product_cost);
+                                } else {
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), null, null, null, null, null, null, null, null);
+                                }
+                            } else {
+                                CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
+                            }
+                        } else {
+                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1) {
+                                if (in_array($complaint_id, [11, 12, 13])) {
+                                    $tracking_no = $shipment->tracking_number;
+                                    return response()->json(['status' => 1, 'message' => 'Request for Change cannot be opened for the following Shipment at the Current Status! ' . $tracking_no]);
+                                } else {
+                                    CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
+                                }
+                            } else {
+                                CRMController::add($nature_id, $complaint_id, $channel_id, 1, $shipper_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
+                            }
+                        }
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Request(s) successfully added']);
+            } else {
+                return ['status' => 1, 'message' => 'No shipments provided'];
+            }
+        }
     }
 }
