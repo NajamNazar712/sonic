@@ -23,6 +23,7 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
 use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\http\Models\ShipmentOrderDate;
@@ -264,6 +265,19 @@ class ShipperShipmentBookController extends Controller
         $shipment_item->price = $price;
         $shipment_item->insurance = $insurance;
         $shipment_item->type = $type;
+
+        $shipment_item->save();
+    }
+
+    static public function add_distribution_item($shipment_id, $product_type_id, $item_quantity,$units_per_item, $price, $insurance) {
+        $shipment_item = new ShipmentDistributionProduct();
+
+        $shipment_item->shipment_id = $shipment_id;
+        $shipment_item->product_type_id = $product_type_id;
+        $shipment_item->items = $item_quantity;
+        $shipment_item->units_per_item = $units_per_item;
+        $shipment_item->price = $price;
+        $shipment_item->insurance = $insurance;
 
         $shipment_item->save();
     }
@@ -2820,7 +2834,7 @@ class ShipperShipmentBookController extends Controller
 
                 $pieces_quantity = 1;
                 if($service_type_id == 1){
-                    $pieces_quantity = $request->pieces_quantity;
+                    $pieces_quantity = $request->pieces_quantity ?? NULL;
                 }
                 $business_category_id = 1;
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment);
@@ -2877,7 +2891,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $shipper_reference->save();
                 }
-                if ($service_type_id == 1 || $service_type_id == 5) {
+                if ($service_type_id == 5) {
                     $product_type_id = $request->input('product_type');
 
                     if ($request->filled('item_description')) {
@@ -2903,6 +2917,64 @@ class ShipperShipmentBookController extends Controller
                     $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                     if($service_type_id == 1 && $pieces_quantity > 1){
                         $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+                    }
+                }
+                else if($service_type_id == 1) {
+                    if($user_id == 10354 && $request->distribution_product_flag == 1)
+                    {
+                        foreach ($request->input('distribution') as $distribution) {
+                            $product_type_id = $distribution['product_type'];
+
+                            if($product_type_id == 0)
+                            {
+                                $distribution_product_new = new DistributionProduct();
+                                $distribution_product_new->name = $distribution['product_type_new'];
+                                $distribution_product_new->save();
+
+                                $product_type_id = $distribution_product_new->id;
+                            }
+
+                            $item_quantity = $distribution['item_quantity'];
+                            $units_per_item = $distribution['units'];
+                            $price = str_replace(',', '', $distribution['total_price']);
+
+                            if (isset($distribution['insurance']) && !empty($distribution['insurance'])) {
+                                $insurance = TRUE;
+                            }
+                            else {
+                                $insurance = FALSE;
+                            }
+
+                            $this->add_distribution_item($shipment_id, $product_type_id, $item_quantity,$units_per_item, $price, $insurance);
+                        }
+                    }
+                    else{
+                        $product_type_id = $request->input('product_type');
+
+                        if ($request->filled('item_description')) {
+                            $item_description = $request->input('item_description');
+                        }
+                        else {
+                            $item_description = NULL;
+                        }
+
+                        $item_quantity = $request->input('item_quantity');
+
+                        if ($request->filled('insurance')) {
+                            $price = str_replace(',', '', $request->input('item_price'));
+                            $insurance = TRUE;
+                        }
+                        else {
+                            $price = NULL;
+                            $insurance = FALSE;
+                        }
+
+                        $type = 0;
+
+                        $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                        if($service_type_id == 1 && $pieces_quantity > 1){
+                            $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+                        }
                     }
                 }
                 else if ($service_type_id == 2) {
