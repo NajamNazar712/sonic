@@ -294,73 +294,8 @@ class ShipperAPIController extends Controller
         if (!$request->case_nature_id) {
             return response()->json(['status' => 1, 'message' => 'Case nature not selected!']);
         }
-        $present_shipments = array();
-        $flag = false;
-        $cannot_change = false;
-
-        if ($request->has('payment_request')) {
-            if ($request->payment_request == 1) {
-                $payment_id = $request->payment_id;
-                $payment_id_padded = str_pad($request->payment_id, 6, 0, STR_PAD_LEFT);
-                if (!empty($payment_id)) {
-                    $payment = DonePayment::find($payment_id);
-                    $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment->id)->first();
-                    $shipment = Shipment::where('id', $payment_shipment->shipment_id)->first();
-                    $is_shipment = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id);
-                    if ($is_shipment->exists()) {
-                        return ['status' => 0, 'error' => 'Request/Complaint already lodged for the Payment ID: ' . $payment_id_padded];
-                    } else {
-                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment->id, session('user_id'), NULL, $description);
-                    }
-                    return ['status' => 1, 'success' => 'Request(s) successfully added'];
-                } else {
-                    return ['status' => 0, 'error' => 'No Payment selected!'];
-                }
-            }
-        } elseif ($request->has('pickup_request')) {
-            if ($request->pickup_request == 1) {
-                $pickup_request_ids = $request->pickup_request_ids;
-                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                    $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
-                } else {
-                    if ($complaint_id == 26) {
-                        $pickup_request_ids = explode(',', $request->input('pickup_request_ids'));
-                    }
-                }
-                if (!empty($pickup_request_ids)) {
-                    foreach ($pickup_request_ids as $pickup_request_id) {
-                        $pickup_request_shipment = V2PickupRequestShipment::where('pickup_request_id', $pickup_request_id)->first();
-                        $shipment = Shipment::where('id', $pickup_request_shipment->shipment_id)->first();
-                        $shipment_id = $shipment->id;
-                        $is_shipment = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', $nature_id)->first();
-                        if ($is_shipment) {
-                            if ($is_shipment->case_nature_id != $nature_id) {
-                                if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
-                                } else {
-
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
-                                }
-                            } else {
-
-                                $present_shipments[] = $shipment->tracking_number;
-                                $flag = true;
-                            }
-                        } else {
-                            if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, NULL, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
-                            } else {
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
-                            }
-                        }
-                    }
-                    return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments];
-                } else {
-                    return ['status' => 0, 'error' => 'No Pickup Request selected!'];
-                }
-            }
-        } elseif ($nature_id == 3) {
+        //feedback
+        if ($nature_id == 3) {
             if ($shipment_id != null) {
                 if ($description == null) {
                     return response()->json(['status' => 0, 'message' => 'Description Not Entered!']);
@@ -379,7 +314,9 @@ class ShipperAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Shipment not exists']);
             }
             return response()->json(['status' => 1, 'message' => 'Shipment not provided']);
-        } else {
+        }
+        //Other Requests
+        else {
             if (!empty($shipment_id)) {
                 $shipment = Shipment::find($shipment_id);
                 if ($shipment) {
@@ -435,5 +372,18 @@ class ShipperAPIController extends Controller
                 return ['status' => 1, 'message' => 'No shipments provided'];
             }
         }
+    }
+
+    public function lost_claim(Request $request){
+        $shipment = Shipment::find($request->shipment_id);
+        if($shipment){
+            $receiving_sheet_id = null;
+            if($shipment->receiving_sheet_shipment){
+                $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+                return response()->json(['status' => 0,'receiving_sheet_id' => $receiving_sheet_id]);
+            }
+            return response()->json(['status' => 0,'receiving_sheet_id' => $receiving_sheet_id, 'error_message'=>'Receiving Sheet does not exists']);
+        }
+        return response()->json(['status' => 1,'message'=>'No Shipments Found']);
     }
 }

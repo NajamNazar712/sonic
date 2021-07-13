@@ -276,6 +276,7 @@ Route::name('api.')->group(function () {
             Route::prefix('add_request')->name('add_request.')->group(function () {
                 Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
                 Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
+                Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
             });
         });
 
