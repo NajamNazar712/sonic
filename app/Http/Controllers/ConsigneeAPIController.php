@@ -169,8 +169,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'))
-                ->orwhere('phone_number_2',$request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1', $request->input('phone_number'));
             if ($consignee_info->exists()) {
                 return response()->json(['status' => 1, 'message' => 'Account Already registered']);
             } else {
@@ -203,8 +202,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0))
-                ->orwhere('phone_number_2', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $consignee_user = ConsigneeUser::where('phone_number_1', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($consignee_user->exists()) {
                 $consignee_user = $consignee_user->first();
                     if (Hash::check($request->input('pin'), $consignee_user->pin)) {
@@ -511,8 +509,7 @@ class ConsigneeAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'))
-                ->orwhere('phone_number_2',$request->input('phone_number'));
+            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'));
             if ($consignee_info->exists()) {
                 $consignee_info = $consignee_info->first();
                 $consignee_info->pin = bcrypt($request->pin);
