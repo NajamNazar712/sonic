@@ -126,7 +126,8 @@
                     jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                         if ( this.context.length ) {
                             body = [];
-
+                            var params = table.ajax.params();
+                                params.excel = true;
                             var jsonResult = $.ajax({
                                 url: '{{ route('admin.shipment.consolidation.history.list') }}',
                                 success: function (result) {

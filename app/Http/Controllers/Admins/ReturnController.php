@@ -1139,7 +1139,7 @@ class ReturnController extends Controller
             $different_city_statuses_2 = array(22, 24, 27, 29, 33, 35, 42, 44, 45, 46, 47, 48, 60);
             $different_city_statuses = array(22, 24, 27, 29, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48, 60);
-            $return_note_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+            $return_note_statuses = array(20, 22, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
             $status = '';
             if($shipment->exists()) {
@@ -1639,10 +1639,16 @@ class ReturnController extends Controller
     }
 
     public function return_receive_deliveries_view(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),308);
         return view('admin.return.receive');
     }
 
     public function return_receive_deliveries_list(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),309);
+        }
         $deliveries = ReturnNote::
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
@@ -3050,6 +3056,7 @@ class ReturnController extends Controller
     }
 
     public function cx_sales_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),310);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -3057,6 +3064,10 @@ class ReturnController extends Controller
     }
 
     public function cx_sales_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),311);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

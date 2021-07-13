@@ -18,10 +18,16 @@ class AdminTaggedAccountsController extends Controller
     }
 
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),287);
         return view('admin.tagged_accounts.index');
     }
 
     public function list(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),288);
+        }
        $accounts = SalesCommissionUser::leftjoin('sales_commissions as sc','sc.id','=','sales_commission_users.sales_commission_id')
            ->join('users as u','u.id','=','sc.shipper_id')
            ->join('cities as c', 'u.city_id', '=', 'c.id')

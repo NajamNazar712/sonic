@@ -385,10 +385,15 @@ class AdminShipmentPieceController extends Controller
 
     }
     public function hold_resolved_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),295);
         $request_status = ShipmentPiecesRequestStatus::all();
         return view('admin.shipment_pieces.resolved_index')->with(['request_status' => $request_status]);
     }
     public function hold_resolved_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),296);
+        }
         $shipments = ShipmentPiecesRequest::join('shipments', 'shipments.id', '=', 'shipment_pieces_requests.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

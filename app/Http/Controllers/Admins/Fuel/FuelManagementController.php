@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Fuel;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\Fuel\CardHolderType;
 use App\Http\Models\Admin\Fuel\FleetVehicle;
@@ -34,7 +35,7 @@ class FuelManagementController extends Controller
     }
 
     public function fuel_index()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),364);
         $fuel_types = FuelType::all();
         $fuel_deduction_types = FuelDeductionType::all();
         $card_holder_types = CardHolderType::all();
@@ -48,6 +49,11 @@ class FuelManagementController extends Controller
 
     public function fuel_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),365);
+    }
+
         $requests = FuelCardRequest::where('removed',0)
             ->leftjoin('fuel_types as ft','fuel_card_requests.fuel_type_id','=','ft.id')
             ->leftjoin('fuel_deduction_types as fdt','fuel_card_requests.fuel_deduction_type_id','=','fdt.id')

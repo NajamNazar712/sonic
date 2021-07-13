@@ -50,6 +50,7 @@ class AdminParcelHistoryController extends Controller
         $this->middleware('Permission');
     }
     public function index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),330);
         $riders = Rider::get();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
             ->select('a.id as id', 'a.name as name')
@@ -57,7 +58,12 @@ class AdminParcelHistoryController extends Controller
         return view('admin.parcel_history.index')->with(['riders' => $riders, 'admins' => $admins]);
     }
 
-    public function list(){
+    public function list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),331);
+        }
         $open_parcel_history = OpenParcelHistory::leftjoin('shipments as s', 's.id', '=', 'open_parcel_histories.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'open_parcel_histories.user_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')

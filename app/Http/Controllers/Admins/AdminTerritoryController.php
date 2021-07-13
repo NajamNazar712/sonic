@@ -19,11 +19,17 @@ class AdminTerritoryController extends Controller
     }
 
     public function index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),352);
         $cities = City::select('id','name')->where('status',1)->where('business_category_id',1)->get();
         return view('admin.management.territory.index')->with(['cities' => $cities]);
     }
 
-    public function list(){
+    public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),353);
+        }
+
         $territory = Territory::leftjoin('cities as c','c.id','=','territories.city_id')
             ->leftjoin('admins as a','a.id','=','territories.created_by')
             ->leftjoin('admins as ad','ad.id','=','territories.updated_by')
@@ -93,11 +99,16 @@ class AdminTerritoryController extends Controller
     }
 
     public function area_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),354);
         $territories = Territory::select('id','name')->get();
         
         return view('admin.management.territory.area.index')->with(['territories' => $territories]);
     }
-    public function area_list(){
+    public function area_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),355);
+        }
          $areas = AreaTerritory::join('territories as t','t.id','=','area_territories.territory_id')
              ->leftjoin('admins as a','a.id','=','area_territories.created_by')
              ->leftjoin('admins as ad','ad.id','=','area_territories.updated_by')

@@ -926,6 +926,7 @@ class AdminCRMController extends Controller
         return $datatables->make(true);
     }
     public function in_process_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),312);
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
@@ -943,6 +944,10 @@ class AdminCRMController extends Controller
     }
 
     public function in_process_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),313);
+        }
         $in_process_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -1357,6 +1362,7 @@ class AdminCRMController extends Controller
     }
 
     public function resolved_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),314);
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
@@ -1367,6 +1373,10 @@ class AdminCRMController extends Controller
     }
 
     public function resolved_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),315);
+        }
         $resolved_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -1647,6 +1657,7 @@ class AdminCRMController extends Controller
         return $datatables->make(true);
     }
     public function closed_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),316);
         $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
@@ -1655,6 +1666,10 @@ class AdminCRMController extends Controller
     }
 
     public function closed_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),317);
+        }
         $count = CrmRequest::where('crm_requests.status_id', 4)->count();
 
         $closed_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')

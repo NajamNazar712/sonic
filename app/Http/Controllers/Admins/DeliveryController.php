@@ -4699,7 +4699,7 @@ class DeliveryController extends Controller
     }
 
     public function misroute_index()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),322);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -4707,7 +4707,10 @@ class DeliveryController extends Controller
     }
 
     public function misroute_list(Request $request)
+    {     if($request->get('excel') && $request->get('excel') == true)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),323);
+    }
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -5315,10 +5318,15 @@ class DeliveryController extends Controller
     }
 
     public function history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         return view('admin.delivery.history.index');
     }
 
     public function history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),304);
+        }
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -5444,6 +5452,7 @@ class DeliveryController extends Controller
     }
 
     public function signature_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),305);
         return view('admin.delivery.signature.index');
     }
 
@@ -5718,7 +5727,7 @@ class DeliveryController extends Controller
         }
     }
     public function intercept_request_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),324);
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
 //        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
@@ -5727,7 +5736,10 @@ class DeliveryController extends Controller
 
     public function intercept_request_list(Request $request)
     {
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),325);
+        }
         $shipments = Shipment::leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('intercept_re_book_requests as irbr', 'irbr.shipment_id', '=', 'shipments.id')
             ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -5939,9 +5951,14 @@ class DeliveryController extends Controller
     }
 
     public function fake_status_remove_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),301);
         return view('admin.delivery.fake_status.index');
     }
     public function fake_status_remove_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),302);
+        }
         $fake_status = DeliveryNoteShipment::leftjoin('delivery_notes as dn', 'dn.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
             ->leftjoin('shipments_journey as sj', function($join) {
@@ -5992,10 +6009,15 @@ class DeliveryController extends Controller
     }
 
     public function replacement_not_collected_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),326);
         return view('admin.delivery.replacement.not_collected');
     }
 
     public function replacement_not_collected_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),327);
+        }
         $shipment = Shipment::leftjoin('cities as dc', 'dc.id', '=', 'shipments.consignee_city_id')
             ->leftjoin('shipments_journey as sj', function($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -6223,10 +6245,15 @@ class DeliveryController extends Controller
     }
 
     public function replacement_to_regular_logs_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),328);
         return view('admin.delivery.replacement.replacement_to_regular_logs');
     }
 
     public function replacement_to_regular_logs_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),329);
+        }
         $replacement_to_regular_logs = ReplacementToRegularLog::leftjoin('shipments as s', 's.id', '=', 'replacement_to_regular_logs.shipment_id')
             ->leftjoin('products as p', 'p.id', '=', 'replacement_to_regular_logs.product_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'replacement_to_regular_logs.updated_by')

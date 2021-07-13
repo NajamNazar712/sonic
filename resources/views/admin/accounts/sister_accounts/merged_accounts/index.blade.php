@@ -142,7 +142,10 @@
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
-
+                    var params = table.ajax.params();
+                    if(params !== undefined){
+                        params.excel = true;
+                    }
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.accounts.merged_account.list') }}',
                         success: function (result) {

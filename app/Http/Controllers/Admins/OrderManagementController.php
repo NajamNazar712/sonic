@@ -465,7 +465,7 @@ class OrderManagementController extends Controller
     }
 
     public function self_collection_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),318);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $shipping_mode = ShippingMode::all();
@@ -480,6 +480,10 @@ class OrderManagementController extends Controller
     }
     public function self_Collection_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),319);
+        }
         $shipments = Shipment::join('self_collection_shipments as scs', 'scs.shipment_id', '=', 'shipments.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
