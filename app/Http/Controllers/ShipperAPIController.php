@@ -377,7 +377,7 @@ class ShipperAPIController extends Controller
     public function lost_claim(Request $request){
         $shipment = Shipment::find($request->shipment_id);
         if($shipment){
-            $receiving_sheet_id = null;
+            $receiving_sheet_id = -1;
             if($shipment->receiving_sheet_shipment){
                 $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
                 return response()->json(['status' => 0,'receiving_sheet_id' => $receiving_sheet_id]);
