@@ -13,7 +13,9 @@
                     {{--                    @php(dd($min_chargeable_weight[0]['id']))--}}
                     <span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
                     <button type="button" class="btn btn-prselected_service_type_nameimary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
+                    @if(session('user_id') == 10354)
                     <button type="button" id="distribution_shipment_btn" class="btn mt-1 d-none mr-2 ml-auto mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right">Distribution Shipment</button>
+                    @endif
                 </h1>
 
                 <div class="card">
@@ -220,7 +222,9 @@
                                             </div>
                                         </div>
 
+                                        @if(session('user_id') == 10354)
                                         <div id="distribution_product" class="d-none">
+                                            <input type="hidden" name="distribution_product_flag" id="distribution_product_flag" value="0">
                                             <div class="repeater mb-1">
                                                 <div data-repeater-list="distribution">
                                                     <div class="product mb-1" data-repeater-item>
@@ -236,14 +240,16 @@
                                                                        <option value="{{ $product->id }}" selected>{{ $product->name }}</option>
                                                                     @endforeach
                                                                 </select>
+
+                                                                <input type="text" class="form-control mt-2 production_type_new d-none" name="product_type_new" placeholder="Enter Product Name" >
                                                             </div>
 
                                                             <div class="form-group input-group">
-                                                                <input type="text" name="item_quantity" class="form-control text-center quantity item" placeholder="Enter Items/SKU's*" data-rule-required="true" data-msg-required="Item/SKU's is required">
+                                                                <input type="text" name="item_quantity" class="form-control text-center item" placeholder="Enter Items/SKU's*" data-rule-required="true" data-msg-required="Item/SKU's is required">
                                                             </div>
 
                                                             <div class="form-group input-group">
-                                                                <input type="text" name="units" class="form-control text-center quantity unit" placeholder="Enter Units Per Item*" data-rule-required="true" data-msg-required="Unit per item is required">
+                                                                <input type="text" name="units" class="form-control text-center unit" placeholder="Enter Units Per Item*" data-rule-required="true" data-msg-required="Unit per item is required">
                                                             </div>
 
                                                             <div class="form-group input-group">
@@ -275,6 +281,7 @@
                                                 <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_unit">Total Unit(s): <span>0</span></p>
                                             </div>
                                         </div>
+                                        @endif
 
                                         <div id="replacement" class="mb-1 d-none">
                                             <h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Replacement</h4>
@@ -568,7 +575,6 @@
 
     <script>
 
-        let distribution_shipment = 0;
         $(document).ready(function() {
             $('#open_shipment').checkboxpicker();
 
@@ -679,52 +685,6 @@
                         total_price += parseInt(this.value.replace(',', ''));
 
                         $('#try_and_buy #total_price span').html(total_price.toLocaleString());
-                    }
-                });
-            }
-
-            function distribution_product_numbering() {
-                setTimeout(function () {
-                    $('#distribution_product .repeater div .product').each(function(index) {
-                        $(this).children('div').children('h4').children('span').html((index + 1));
-                    });
-                }, 500);
-            }
-
-            function distribution_total_item() {
-                var total_item = 0;
-
-                $('#distribution_product .repeater div .product .item').each(function(index) {
-                    if (this.value != '') {
-                        total_item += parseInt(this.value);
-
-                        $('#distribution_product #total_item span').html(total_item);
-                    }
-                });
-
-                distribution_total_unit();
-            }
-
-            function distribution_total_unit() {
-                var total_unit = 0;
-
-                $('#distribution_product .repeater div .product .unit').each(function(index) {
-                    if (this.value != '' && $(this).closest(".form-group").prev('.form-group').find('.item').val() != '') {
-                        total_unit +=  parseInt($(this).closest(".form-group").prev('.form-group').find('.item').val()) * parseInt(this.value);
-
-                        $('#distribution_product #total_unit span').html(total_unit);
-                    }
-                });
-            }
-
-            function distribution_total_price() {
-                var total_price = 0;
-
-                $('#distribution_product .repeater div .product .price').each(function(index) {
-                    if (this.value != '') {
-                        total_price += parseInt(this.value.replace(',', ''));
-
-                        $('#payment_info #amount').val(total_price);
                     }
                 });
             }
@@ -897,7 +857,9 @@
                 service_type = '{{ Session::get('service_type_id') }}';
             if(service_type == 1){
                 $('#pieces_quantity').removeClass('d-none');
+                @if(session('user_id') == 10354)
                 $('#distribution_shipment_btn').removeClass('d-none');
+                @endif
             }
             if (service_type == 2) {
                 $('#replacement').removeClass('d-none');
@@ -936,11 +898,14 @@
 
                 if (service_type !== '' && service_type !== undefined && service_type !== null) {
                     $('#select_service_type form #service_type-error').addClass('d-none');
+                    @if(session('user_id') == 10354)
                     $('#distribution_shipment_btn').addClass('d-none');
                     $('#distribution_shipment_btn').removeClass('btn-success');
                     $('#distribution_product').addClass('d-none');
+                    $('#distribution_product_flag').val(0);
                     $('#payment_info #amount').attr('readonly',false);
                     $('#payment_info #payment_mode').attr('readonly',false);
+                    @endif
 
                     if (service_type == 1) {
                         $('#distribution_shipment_btn').removeClass('d-none');
@@ -1166,39 +1131,6 @@
 
             });
 
-
-            $("#distribution_shipment_btn").on('click',function (){
-                if(service_type != 1)
-                {
-                    $('#distribution_shipment_btn').addClass('d-none');
-                    return;
-                }
-
-                if(distribution_shipment == 0)
-                {
-                    $('#distribution_shipment_btn').addClass('btn-success');
-                    $('#self_collection_div').addClass('d-none');
-                    $('#regular').addClass('d-none');
-                    $("#distribution_product").removeClass('d-none');
-                    $('#selected_service_type_name').append(" (Distribution)");
-                    $('#payment_info #amount').attr('readonly',true);
-                    $('#payment_info #payment_mode').attr('readonly',true);
-                    $('#payment_info #payment_mode').val(1).trigger('change');
-                    distribution_shipment = 1;
-
-                }
-                else{
-                    $('#distribution_shipment_btn').removeClass('btn-success');
-                    $('#self_collection_div').removeClass('d-none');
-                    $('#regular').removeClass('d-none');
-                    $("#distribution_product").addClass('d-none');
-                    $('#selected_service_type_name').html($("#selected_service_type_name").html().replace(" (Distribution)",""));
-                    $('#payment_info #amount').attr('readonly',false);
-                    $('#payment_info #payment_mode').attr('readonly',false);
-                    distribution_shipment = 0;
-                }
-            });
-
             function formatRepo (repo) {
                 if (repo.loading) return repo.text;
                 var markup = "<option value='" + repo.id + "'>"+ repo.full_name +"</option>";
@@ -1314,8 +1246,6 @@
             });
             $('#try_and_buy .insurance').checkboxpicker();
 
-            $('#distribution_product .insurance').checkboxpicker();
-
             // $('#package_type').checkboxpicker();
             var current_date = '{{$date}}';
             $('#replacement_product_type').select2({
@@ -1328,13 +1258,6 @@
             $('#try_and_buy .select2').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Product Type*'
-            }).bind('change', function() {
-                $(this).valid();
-            });
-
-            $('#distribution_product .select2').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Product*'
             }).bind('change', function() {
                 $(this).valid();
             });
@@ -1443,16 +1366,162 @@
                 }
             });
 
+            @if(session('user_id') == 10354)
+
+            function distribution_product_numbering() {
+                setTimeout(function () {
+                    $('#distribution_product .repeater div .product').each(function(index) {
+                        $(this).children('div').children('h4').children('span').html((index + 1));
+                    });
+                }, 500);
+            }
+
+            function distribution_total_item() {
+                var total_item = 0;
+
+                $('#distribution_product .repeater div .product .item').each(function(index) {
+                    if (this.value != '') {
+                        total_item += parseInt(this.value);
+
+                        $('#distribution_product #total_item span').html(total_item);
+                    }
+                });
+
+                distribution_total_unit();
+            }
+
+            function distribution_total_unit() {
+                var total_unit = 0;
+
+                $('#distribution_product .repeater div .product .unit').each(function(index) {
+                    if (this.value != '' && $(this).closest(".form-group").prev('.form-group').find('.item').val() != '') {
+                        total_unit +=  parseInt($(this).closest(".form-group").prev('.form-group').find('.item').val()) * parseInt(this.value);
+
+                        $('#distribution_product #total_unit span').html(total_unit);
+                    }
+                });
+            }
+
+            function distribution_total_price() {
+                var total_price = 0;
+
+                $('#distribution_product .repeater div .product .price').each(function(index) {
+                    if (this.value != '') {
+                        total_price += parseInt(this.value.replace(',', ''));
+
+                        $('#payment_info #amount').val(total_price);
+                    }
+                });
+            }
+
+            $("#distribution_shipment_btn").on('click',function (){
+                if(service_type != 1)
+                {
+                    $('#distribution_shipment_btn').addClass('d-none');
+                    return;
+                }
+                let distribution_shipment = parseInt($("#distribution_product_flag").val());
+                if(distribution_shipment == 0)
+                {
+                    $('#distribution_shipment_btn').addClass('btn-success');
+                    $('#self_collection_div').addClass('d-none');
+                    $('#regular').addClass('d-none');
+                    $("#distribution_product").removeClass('d-none');
+                    $('#selected_service_type_name').append(" (Distribution)");
+                    $('#payment_info #amount').attr('readonly',true);
+                    $('#payment_info #payment_mode').attr('readonly',true);
+                    $('#payment_info #payment_mode').val(1).trigger('change');
+                    $("#distribution_product_flag").val(1);
+
+                }
+                else{
+                    $('#distribution_shipment_btn').removeClass('btn-success');
+                    $('#self_collection_div').removeClass('d-none');
+                    $('#regular').removeClass('d-none');
+                    $("#distribution_product").addClass('d-none');
+                    $('#selected_service_type_name').html($("#selected_service_type_name").html().replace(" (Distribution)",""));
+                    $('#payment_info #amount').attr('readonly',false);
+                    $('#payment_info #payment_mode').attr('readonly',false);
+                    $("#distribution_product_flag").val(0);
+                }
+            });
+
             $('#distribution_product .repeater').repeater({
                 isFirstItemUndeletable: true,
-                show: function() {
-                    $(this).find('.select2-container--default').remove();
+                ready: function(){
+                    $("#distribution_product .repeater").find('.item').TouchSpin({
+                        min: 1,
+                        max: 10000,
+                        buttondown_class: 'btn btn-primary rounded-left',
+                        buttonup_class: 'btn btn-primary rounded-right',
+                        buttondown_txt: '<i class="ft-minus"></i>',
+                        buttonup_txt: '<i class="ft-plus"></i>'
+                    }).bind('input change', function() {
+                        if ($(this).hasClass('danger')) {
+                            $(this).valid();
+                        }
 
-                    $(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
+                        distribution_total_item();
+                    });
+
+                    $("#distribution_product .repeater").find('.unit').TouchSpin({
+                        min: 1,
+                        max: 10000,
+                        buttondown_class: 'btn btn-primary rounded-left',
+                        buttonup_class: 'btn btn-primary rounded-right',
+                        buttondown_txt: '<i class="ft-minus"></i>',
+                        buttonup_txt: '<i class="ft-plus"></i>'
+                    }).bind('input change', function() {
+                        if ($(this).hasClass('danger')) {
+                            $(this).valid();
+                        }
+
+                        distribution_total_unit();
+                    });
+
+                    $("#distribution_product .repeater").find('.price').inputmask({
+                        'alias': 'integer',
+                        'allowMinus': false,
+                        'allowPlus': false,
+                        'groupSeparator': ',',
+                        'autoGroup': true,
+                        'min': 1,
+                        'max': 100000
+                    }).bind('input change', function() {
+                        distribution_total_price();
+                    });
+
+                    $('#distribution_product .select2').prepend('<option value="" selected="selected"></option><option value="0">New Product</option>').select2({
                         width: '100%',
                         placeholder: 'Select Product*'
                     }).bind('change', function() {
                         $(this).valid();
+                        if($(this).val() == 0)
+                        {
+                            $(this).siblings('.production_type_new').removeClass('d-none');
+                        }
+                        else{
+                            $(this).siblings('.production_type_new').addClass('d-none');
+                        }
+                    });
+
+                    $('#distribution_product .insurance').checkboxpicker();
+                },
+                show: function() {
+                    $(this).find('.select2-container--default').remove();
+
+                    $(this).find('.select2').prepend('<option value="" selected="selected"></option><option value="0">New Product</option>').select2({
+                        width: '100%',
+                        placeholder: 'Select Product*'
+                    }).bind('change', function() {
+                        $(this).valid();
+                        if($(this).val() == 0)
+                        {
+                            $(this).siblings('.production_type_new').removeClass('d-none');
+                        }
+                        else{
+                            $(this).siblings('.production_type_new').addClass('d-none');
+                        }
                     });
 
                     $(this).slideDown();
@@ -1546,7 +1615,7 @@
                     });
                 }
             });
-
+            @endif
             $('#amount, #consignee_city, #pickup_address').change(function(){
                 $('#span').remove();
                 $('#booking_form .submission').attr('disabled', true);
