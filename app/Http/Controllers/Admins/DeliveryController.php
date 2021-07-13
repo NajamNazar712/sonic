@@ -5846,6 +5846,12 @@ class DeliveryController extends Controller
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
+
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                    if($return_assign_shipment){
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+                    }
                     $print[] = $shipment_id;
                 }
             }
