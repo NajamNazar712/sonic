@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\City;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestChannel;
+use App\Http\Models\DonePayment;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
@@ -10,6 +17,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Validator;
 
@@ -262,5 +270,13 @@ class ShipperAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
         return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+    }
+
+    public function add_request_index(Request $request){
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        return response()->json(['status' => 0, 'case_nature' => $case_nature, 'complaints' => $case_nature_type_complaints, 'service_requests' => $case_nature_type_service_requests, 'claims' => $case_nature_type_claims]);
     }
 }

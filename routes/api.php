@@ -272,6 +272,10 @@ Route::name('api.')->group(function () {
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });
             Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
+
+            Route::prefix('add_request')->name('add_request.')->group(function () {
+                Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
+            });
         });
 
     });
