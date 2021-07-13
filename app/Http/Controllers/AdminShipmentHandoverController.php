@@ -61,6 +61,7 @@ class AdminShipmentHandoverController extends Controller
             $details['phone_number'] = $shipment->user->phone;
             $details['pickup_date'] = $shipment->pickup_date;
             $details['special_instructions'] = $shipment->special_instructions;
+            ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 
         } else {
@@ -83,7 +84,7 @@ class AdminShipmentHandoverController extends Controller
             $details['phone_number'] = $shipment->user->phone;
             $details['pickup_date'] = $shipment->pickup_date;
             $details['special_instructions'] = $shipment->special_instructions;
-
+            ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {

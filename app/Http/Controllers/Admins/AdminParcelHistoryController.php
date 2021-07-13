@@ -101,6 +101,7 @@ class AdminParcelHistoryController extends Controller
         $shipment = Shipment::where('tracking_number', $tracking_number);
         if($shipment->exists()){
             $shipment = $shipment->first();
+            ShipmentScanningJourneyController::add($shipment->id,25,1,Auth::id(),null,null);
             return response()->json(['status' => 1, 'shipment_id' => $shipment->id]);
         }
         else{
