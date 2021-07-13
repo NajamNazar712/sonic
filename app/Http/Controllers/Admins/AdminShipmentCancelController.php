@@ -101,6 +101,7 @@ class AdminShipmentCancelController extends Controller
     }
 
     public function index(Request $request) {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),291);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $cities = City::select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
@@ -111,6 +112,10 @@ class AdminShipmentCancelController extends Controller
     }
 
     public function list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),292);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
         ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

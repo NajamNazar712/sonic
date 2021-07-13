@@ -8115,10 +8115,17 @@ class AdminDashboardController extends Controller
 //        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
+        ActivityTrailController::createActivityTrailLog(Auth::id(),348);
+
         $business_categories = BusinessCategory::all();
         return view('admin.management.city_management')->with(['business_categories' => $business_categories]);
     }
-    public function cityListAjax(){
+    public function cityListAjax(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),349);
+        }
+
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
             ->leftjoin('city_histories as ch',function($join){
                 $join->on('ch.city_id', '=', 'cities.id')

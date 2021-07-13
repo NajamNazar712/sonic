@@ -10,6 +10,7 @@ use App\Http\Models\ShippingModeSameDayTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
@@ -22,12 +23,18 @@ class SamedayController extends Controller
         $this->middleware('Permission');
     }
     public function sameday_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),306);
         $timings = ShippingModeSameDayTiming::all();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $products = Product::select('id','product_name')->get();
         return view('admin.sameday.index')->with(['shipment_status'=>$shipment_status,'products'=>$products,'timings'=>$timings]);
     }
     public function sameday_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),307);
+        }
+
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
