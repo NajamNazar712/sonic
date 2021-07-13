@@ -1028,7 +1028,6 @@
                         $('#ftl_collection_type_div').removeClass('d-none');
                         $('#replacement').addClass('d-none');
                         $('#pieces_quantity').addClass('d-none');
-                        $('.repeater ').addClass('d-none');
                         $('.quantity_label_div ').addClass('d-none');
                         $('.product_label_div ').addClass('d-none');
                         $('#delivery_type_div ').removeClass('d-none');
