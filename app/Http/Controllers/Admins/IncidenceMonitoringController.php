@@ -132,6 +132,15 @@ class IncidenceMonitoringController extends Controller
             $link = '<a class="btn btn-md  align-middle" href="'.$report->clip_link.'" target="_blank">'.$report->clip_link.'</a>';
             return $link;
         })
+        ->addColumn('report_link', function ($report) {
+            $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$report->id)->pluck('admin_id')->toArray();
+           
+            if (session('role_id') == 1 || in_array(Auth::user()->role_id,[3,10]) || in_array(Auth::user()->id,$tagged_user) || in_array(536, session('permissions'))){
+               return '<u><a href=' . route('admin.incidence_monitoring.view_report', ['id' => $report->id]) . '  target="_blank">' . str_pad($report->id, 6, '0', STR_PAD_LEFT). '</a></u>';
+            }else{
+                return str_pad($report->id, 6, '0', STR_PAD_LEFT);
+            }
+        })
         ->addColumn('action', function($data) {
             $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$data->id)->pluck('admin_id')->toArray();
             $dropdown = '';
@@ -140,10 +149,13 @@ class IncidenceMonitoringController extends Controller
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
-                    <button onclick="window.open(\'' . route('admin.incidence_monitoring.view_report', ['id' => $data->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                <button onclick="window.open(\'' . route('admin.incidence_monitoring.view_report', ['id' => $data->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                <button type="button" class="dropdown-item edit" data-target-id=' . $data->id . ' rel="edit_incidence_report"  data-toggle="modal" data-target="#editIncidenceReport"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
                     </div>
               </div>
             ';
+
+
             }
             return $dropdown;
         });
@@ -288,4 +300,40 @@ class IncidenceMonitoringController extends Controller
 
      }
     
+
+     public function edit($id){
+        $incidence_monitoring = IncidenceMonitoring::find($id);
+        $monitoring_areas = IncidenceMonitoringArea::all();
+        $case_natures = IncidenceMonitoringCaseNature::all();
+        $nc_levels = IncidenceMonitoringNCLevel::all();
+        $stations = City::where('status',1)->get();
+        $incidence_monitoring_tagged_persons = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$id)->pluck('admin_id')->toArray();
+        $all_persons = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$id)->get();
+        return view('admin.incidence_monitoring.edit', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','incidence_monitoring','incidence_monitoring_tagged_persons','all_persons'));
+     }
+
+     public function update($id,Request $request){
+        $incidence_monitoring = IncidenceMonitoring::find($id);
+
+        $incidence_monitoring->station_id = $request->station_id;
+        $incidence_monitoring->area_id = $request->monitoring_area_id;
+        $incidence_monitoring->time_from = $request->time_from;
+        $incidence_monitoring->time_to = $request->time_to;
+        $incidence_monitoring->case_nature_id = $request->case_nature_id;
+        $incidence_monitoring->observation = $request->observations;
+        $incidence_monitoring->nc_level_id = $request->nc_level_id;
+        $incidence_monitoring->tagging_date = Carbon::now();
+        $incidence_monitoring->clip_link = $request->clip_link;
+        $incidence_monitoring->admin_id = Auth::user()->id;
+        $incidence_monitoring->save();
+        IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$id)->delete();
+       
+        foreach ($request->tagged_to_edit as $value) {
+            $incidence_monitoring_tagged_person = new IncidenceMonitoringTaggedPerson();
+            $incidence_monitoring_tagged_person->incidence_monitoring_id = $incidence_monitoring->id;
+            $incidence_monitoring_tagged_person->admin_id = $value;
+            $incidence_monitoring_tagged_person->save();
+        }
+        return redirect()->back()->with('success', 'Report Updated successfully.');
+     }
 }

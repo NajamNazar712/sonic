@@ -125,7 +125,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                    <p class="mt-1">Time To:</p>
+                                    <p class="mt-1 mr-1">Time To:</p>
                                 </span>
                             </div>
 
@@ -259,7 +259,9 @@
                     })
                         .done(function (data) {
                             console.log(data);
+
                             if(data.status){
+                                $('#tagged_to').html('');
                                 $.each(data.agents, function (index, agent) {
                                     $('#tagged_to').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
                                 });
@@ -325,18 +327,17 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.req_id);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.tracking_number);
-                                row.push(values.weight);
-                                row.push(values.vehicle);
-                                row.push(values.quantity);
-                                row.push(values.date);
-                                row.push(values.updated_on);
-                                row.push(values.updated_by);
-                                row.push(values.status);
-                                row.push(values.vendor);
+                                row.push(values.station_name);
+                                row.push(values.incidence_monitorings_id_padded);
+                                row.push(values.area_name);
+                                row.push(values.time_slot);
+                                row.push(values.case_nature_type);
+                                row.push(values.observation);
+                                row.push(values.nc_level_name);
+                                row.push(values.tagged_to);
+                                row.push(values.tagging_date);
+                                row.push(values.status_name);
+                                row.push(values.clip_link);
                                 body.push(row);
                             });
                         },
@@ -390,7 +391,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) { return ''; }},
                     {data: 'station_name', name: 'station.id', class: 'align-middle station_name'},
-                    {data: 'incidence_monitorings_id_padded', name: 'incidence_monitorings.id', class: 'align-middle incidence_monitorings_id_padded'},
+                    {data: 'report_link', name: 'incidence_monitorings.id', class: 'align-middle incidence_monitorings_id_padded'},
                     {data: 'area_name', name: 'area.name', class: 'align-middle area_name'},
                     {data: 'time_slot', name: 'time_slot', class: 'align-middle time_slot', orderable: false, searchable: false},
                     {data: 'case_nature_type', name: 'case_nature.name', class: 'align-middle case_nature_type'},
@@ -443,6 +444,18 @@
             $('#search_filter_btn').on('click',function () {
                table.draw();
             });
+
+            $("#editIncidenceReport").on("show.bs.modal", function(e) {
+            var $invoker = $(e.relatedTarget);
+            var action = $invoker.attr('rel');
+            var id = $(e.relatedTarget).data('target-id');
+            
+            if(action == 'edit_incidence_report'){
+                $.get( "/admin/incidence_monitoring/"+id+"/edit/form", function( data ) {
+                    $("#editIncidenceReportDiv").html(data);
+                });
+            }
+        });
 
         });
     </script>

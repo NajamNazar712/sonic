@@ -147,18 +147,7 @@
                                                                     </span>
                                                                 </button>
 
-                                                                <button id="resolved_close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
-                                                                    <span class="d-none d-lg-block">
-                                                                        Close
-                                                                    </span>
-                                                                </button>
                                                         @elseif($report->status_id == 2)
-                                                            <button id="open" type="submit"
-                                                                        class="btn btn-success mr-1">
-                                                                    <span class="d-none d-lg-block">
-                                                                        Open
-                                                                    </span>
-                                                                </button>
                                                             <button id="close" name="resolved_close" type="submit" class="btn btn-danger mr-3">
                                                                 <span class="d-none d-lg-block">
                                                                     Close
@@ -170,15 +159,9 @@
                                                             <button id="open" type="submit"
                                                             class="btn btn-success mr-1">
                                                                 <span class="d-none d-lg-block">
-                                                                    Open
+                                                                    Reopen
                                                                 </span>
                                                             </button>
-                                                            <button id="under_action" type="submit"
-                                                                        class="btn btn-warning mr-1">
-                                                                    <span class="d-none d-lg-block">
-                                                                        Under Action
-                                                                    </span>
-                                                                </button>
                                                         @endif
                                                     </form>
                                                 </div>
