@@ -129,9 +129,9 @@
                         </div>
                         <div class="modal-body  text-center">
                             <div class="row justify-content-center">
-                                <div class="form-group form-inline">
+<!--                                <div class="form-group form-inline">
                                     <p>We have sent a six-digit verification code on mobile,<br>Please verify by entering it below</p>
-                                </div>
+                                </div>-->
                                 <div class="form-group form-inline">
                                     <input type="text" class="form-control otp" autofocus id="otp_input" placeholder="Enter Verification Code">
                                 </div>
