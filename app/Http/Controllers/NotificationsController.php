@@ -49,6 +49,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
 use App\Jobs\ProcessDeliveryNoteOtpSms;
+use App\Jobs\ProcessOTPSMS;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -86,7 +87,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class NotificationsController extends Controller
 {
-    static private function sms($body, $to) {
+    static private function sms($body, $to, $otp = NULL) {
       $sms = new SMS();
 
       $sms->to = str_replace('-', '', $to);
@@ -94,7 +95,12 @@ class NotificationsController extends Controller
 
       $sms->save();
 
-      dispatch(new ProcessSMS($sms));
+      if($otp == 1){
+          dispatch(new ProcessOTPSMS($sms));
+      }
+      else{
+          dispatch(new ProcessSMS($sms));
+      }
     }
 
     static private function delivery_note_otp_sms($body, $to) {
@@ -7376,7 +7382,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[code]', $otp, $body);
                     }
                     $to = $retail_user->phone_no;
-                    self::sms($body,$to);
+                    self::sms($body,$to, 1);
                 }
 				else if($id == 130) {
                     $now = Carbon::now();
@@ -7707,7 +7713,20 @@ class NotificationsController extends Controller
 
                     $to = $rider->phone;
                     self::delivery_note_otp_sms($body, $to);
-                } else if ($id == 139) {
+                }
+				else if($id == 138){
+                    $admin = $reference_1_id;
+                    $otp = $reference_2_id;
+                    if (strpos($body, '[name]') !== FALSE) {
+                        $body = str_replace('[name]', $admin->name, $body);
+                    }
+                    if (strpos($body, '[code]') !== FALSE) {
+                        $body = str_replace('[code]', $otp, $body);
+                    }
+                    $to = $admin->phone_number;
+                    self::sms($body,$to,1);
+                }
+				else if ($id == 139) {
                     
                     $yesterday = Carbon::yesterday();
                     $today = Carbon::today();
