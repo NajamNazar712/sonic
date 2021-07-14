@@ -136,9 +136,8 @@ class IncidenceMonitoringController extends Controller
             return $link;
         })
         ->addColumn('report_link', function ($report) {
-            $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$report->id)->pluck('admin_id')->toArray();
            
-            if (session('role_id') == 1 || in_array(Auth::user()->role_id,[3,10]) || in_array(Auth::user()->id,$tagged_user) || in_array(536, session('permissions'))){
+            if (session('role_id') == 1  || in_array(539, session('permissions'))){
                return '<u><a href=' . route('admin.incidence_monitoring.view_report', ['id' => $report->id]) . '  target="_blank">' . str_pad($report->id, 6, '0', STR_PAD_LEFT). '</a></u>';
             }else{
                 return str_pad($report->id, 6, '0', STR_PAD_LEFT);
@@ -150,7 +149,7 @@ class IncidenceMonitoringController extends Controller
         ->addColumn('action', function($data) {
             $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$data->id)->pluck('admin_id')->toArray();
             $dropdown = '';
-            if (session('role_id') == 1 || in_array(Auth::user()->role_id,[3,10]) || in_array(Auth::user()->id,$tagged_user) || count(array_intersect([536,539], session('permissions')))){
+            if (session('role_id') == 1 || (in_array(536, session('permissions')) && in_array(539, session('permissions')))){
                 $dropdown .= '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
