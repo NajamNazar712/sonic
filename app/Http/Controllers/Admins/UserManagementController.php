@@ -475,7 +475,7 @@ class UserManagementController extends Controller
         $admins = Admin::select('admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
             ->whereNotNull('admins.otp');
-        if(session('role_id') != 1 || session('role_id') != 58){
+        if(!in_array(session('role_id'), [1, 58])) {
             $admins = $admins->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
         }
         $datatable = Datatables::of($admins);
