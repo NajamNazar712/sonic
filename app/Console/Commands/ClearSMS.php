@@ -49,9 +49,9 @@ class ClearSMS extends Command
 
         $datetime = Carbon::now()->subHours(1);
 
-        SMS::where('status', 1)->('otp', 0)->where('created_at', '<', $datetime)->update(['status' => 2]);
+        SMS::where('status', 1)->where('otp', 0)->where('created_at', '<', $datetime)->update(['status' => 2]);
 
-        $smses = SMS::where('status', 1)->('otp', 0);
+        $smses = SMS::where('status', 1)->where('otp', 0);
 
         if ($smses->exists()) {
             $smses = $smses->get();
