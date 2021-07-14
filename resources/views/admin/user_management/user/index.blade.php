@@ -460,8 +460,6 @@
 					})
 							.done(function(data) {
 								if (data.status == 0) {
-									table.draw(false);
-
 									
 									$('#update_phone_form #phone').val(data.phone);
 									$('#update_phone_form #phone_admin_id').val(id);
