@@ -181,7 +181,7 @@
             'rightAlign': false,
             'mask': '999999'
         });
-        $('body').on('keypress change','#otp_input',function() {
+        $('body').on('keyup change','#otp_input',function() {
             if($(this).val().length == 6){
                 $('#otp_submit').attr('disabled', false);
             }
