@@ -434,6 +434,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/credentials', 'Auth\AdminLoginController@credentials')->name('login.credentials');
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
+    Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');

@@ -100,6 +100,53 @@
             }
         });
         @endif
+
+        function getLocation() {
+          swal({
+              text: 'Please Wait!',
+              icon: 'info',
+              buttons: false,
+              closeOnClickOutside: false,
+              closeOnEsc: false
+          });
+
+          setTimeout(function() {
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(locationSuccess, locationFail);
+            }
+            else {
+              locationFail();
+            }
+          }, 250);
+        }
+
+        function locationSuccess(position) {
+          $.ajax({
+              url: '{{ route('admin.save_coordinates') }}',
+              method: 'POST',
+              headers: {
+                  'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+              },
+              data: {
+                'longitude': position.coords.longitude,
+                'latitude': position.coords.latitude
+              }
+          });
+
+          $('#LocationDeniedModal').modal('hide');
+          swal.close();
+        }
+
+        function locationFail() {
+          swal.close();
+          $('#LocationDeniedModal').modal('show');
+        }
+
+        $('#LocationDeniedModal form button').bind('click', function() {
+            getLocation();
+        });
+
+        getLocation();
     });
 </script>
   @yield('js')

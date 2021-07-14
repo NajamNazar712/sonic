@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -561,6 +562,7 @@ class AdminNsaAccountShipmentController extends Controller
             $shipment = $shipment->select('shipments.id as id', 'shipments.tracking_number as tracking_number')->first();
             $data['id'] = $shipment->id;
             $data['tracking_number'] = $shipment->tracking_number;
+            ShipmentScanningJourneyController::add($shipment->id,24,1,Auth::id(),null,null);
             return response()->json(['status' => 1, 'success' => 'Shipment Added Successfully', 'details' => $data]);
         } else {
             return response()->json(['status' => 0, 'error' => 'Shipment can\'t be updated']);

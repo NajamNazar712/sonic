@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dashboard;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\BusinessProjectionAccount;
 use App\Http\Models\Admin\BusinessProjectionHub;
 use App\Http\Models\Admin\BusinessProjectionReason;
@@ -112,6 +113,7 @@ class BusinessProjectionRetentionController extends Controller
     }
 
     public function dashboard(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),285);
         $data = array();
         $date = Carbon::yesterday()->toDateString();
         $business_accounts = BusinessProjectionAccount::where('date', $date)->select(DB::raw('SUM(average_shipment) as average_shipments'), DB::raw('SUM(projected_shipment) as projected_shipments'), DB::raw('SUM(last_day_number) as last_day_numbers'), DB::raw('AVG(achieved) as achieved'));
@@ -152,6 +154,11 @@ class BusinessProjectionRetentionController extends Controller
         return view('admin.sales.dashboard.index')->with(['business_accounts_total' => $business_accounts, 'hubs_data' => $hubs_data, 'reasons_data' => $data, 'reasons' => $reasons]);
     }
     public function dashboard_list(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),286);
+        }
         $business = BusinessProjectionAccount::join('users as u', 'u.id', '=', 'business_projection_accounts.user_id')
             ->join('cities', 'cities.id', '=', 'business_projection_accounts.city_id')
             ->join('admins as sp', 'sp.id', '=', 'business_projection_accounts.sale_person_id')

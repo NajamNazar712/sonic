@@ -25,7 +25,7 @@ class AdminUserRequestController extends Controller
         $this->middleware('Permission');
     }
     public function user_requests_index(){
-        //dd(session('role_id'));
+        ActivityTrailController::createActivityTrailLog(Auth::id(),362);
         $hubs=City::select('id','name')->where('hub',1)->get();
         $departments = Admin::join('admin_roles as ar','ar.id','=','admins.role_id')
             ->join('admin_departments as ad','ad.id','=','ar.department_id')
@@ -34,6 +34,10 @@ class AdminUserRequestController extends Controller
         return view('admin.user_management.user_request.index')->with(['hubs'=>$hubs,'departments'=>$departments]);
     }
     public function user_requests_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),363);
+        }
         $users = AdminUserRequest::leftjoin('cities as c','c.id','=','admin_user_requests.default_hub_id')
             ->leftjoin('admin_departments as ad','ad.id','=','admin_user_requests.department')
             ->leftjoin('admins as a','a.id','=','admin_user_requests.request_added_by')

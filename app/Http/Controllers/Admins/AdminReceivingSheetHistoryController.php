@@ -23,13 +23,17 @@ class AdminReceivingSheetHistoryController extends Controller
         $this->middleware('Permission');
     }
     public function receiving_sheet_index()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),273);
         $shipper_name=User::select('id','name')->get();
         $origin=City::select('id','name')->where('pickup',1)->get();
         return view('admin.shipment.receiving_sheet.index')->with(['shipper_name'=>$shipper_name,'origin'=> $origin]);
     }
     public function receiving_sheet_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),274);
+        }
+
         $receiving_sheet = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities as c', 'usi.city_id', '=', 'c.id')
             ->join('users as u','u.id','=','receiving_sheets.user_id')

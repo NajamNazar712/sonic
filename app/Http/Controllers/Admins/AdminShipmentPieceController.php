@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
@@ -53,6 +54,7 @@ class AdminShipmentPieceController extends Controller
             $details['origin'] = $shipment->pickup_address->city->name;
             $details['destination'] = $shipment->consignee_city->name;
             $details['pieces'] = $shipment->pieces;
+            ShipmentScanningJourneyController::add($shipment->id,22,1,Auth::id(),null,null);
             return  response()->json(['status' => 0, 'details' => $details]);
         }else{
             return response()->json(['status' => 1, 'error' => 'Shipment not found!']);
@@ -383,10 +385,15 @@ class AdminShipmentPieceController extends Controller
 
     }
     public function hold_resolved_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),295);
         $request_status = ShipmentPiecesRequestStatus::all();
         return view('admin.shipment_pieces.resolved_index')->with(['request_status' => $request_status]);
     }
     public function hold_resolved_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),296);
+        }
         $shipments = ShipmentPiecesRequest::join('shipments', 'shipments.id', '=', 'shipment_pieces_requests.shipment_id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')

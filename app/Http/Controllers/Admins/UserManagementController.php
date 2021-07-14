@@ -31,12 +31,17 @@ class UserManagementController extends Controller
     }
 
     public function user_index() {
+      ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
         $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
       return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
     }
 
     public function user_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),359);
+        }
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
@@ -348,6 +353,7 @@ class UserManagementController extends Controller
     }
 
     public function role_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),374);
         $departments = AdminDepartment::all();
         return view('admin.user_management.role.index')->with(['departments'=>$departments]);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\Retail;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\GlobalSettings;
 use App\http\Models\Admin\Retail\RetailFranchise;
@@ -64,13 +65,18 @@ class RetailAdminUserManagementController extends Controller
     }
 
     public function franchise_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),377);
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         return view('admin.retail.franchise.index')->with(['hubs' => $hubs]);
     }
 
-    public function franchise_list()
+    public function franchise_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),378);
+        }
+
         $franchise = RetailFranchise::join('admins as a', 'a.id', '=', 'retail_franchises.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_franchises.default_hub')
             ->select('retail_franchises.id', 'retail_franchises.name', 'retail_franchises.phone_no', 'retail_franchises.email', 'retail_franchises.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_franchises.status', 'retail_franchises.code', 'retail_franchises.location_latitude', 'retail_franchises.location_longitude', 'retail_franchises.created_at', 'retail_franchises.updated_at');
@@ -213,13 +219,17 @@ class RetailAdminUserManagementController extends Controller
     }
 
     public function trax_center_index()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),379);
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->get();
         return view('admin.retail.trax_center.index')->with(['hubs' => $hubs]);
     }
 
-    public function trax_center_list()
+    public function trax_center_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),380);
+    }
         $trax_center = RetailTraxCenter::join('admins as a', 'a.id', '=', 'retail_trax_centers.updated_by')
             ->join('cities as c', 'c.id', '=', 'retail_trax_centers.default_hub')
             ->select('retail_trax_centers.id', 'retail_trax_centers.name', 'retail_trax_centers.phone_no', 'retail_trax_centers.email', 'retail_trax_centers.cnic', 'c.name as default_hub', 'c.id as default_hub_id', 'a.name as updated_by', 'retail_trax_centers.status', 'retail_trax_centers.code', 'retail_trax_centers.location_latitude', 'retail_trax_centers.location_longitude', 'retail_trax_centers.created_at', 'retail_trax_centers.updated_at');
@@ -359,7 +369,7 @@ class RetailAdminUserManagementController extends Controller
     }
 
     public function user_index()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),372);
         $trax_centers = RetailTraxCenter::where('status', 1)->get();
         $franchises = RetailFranchise::where('status', 1)->get();
         return view('admin.retail.users.index')->with(['trax_centers' => $trax_centers, 'franchises' => $franchises]);
@@ -371,8 +381,12 @@ class RetailAdminUserManagementController extends Controller
         return view('admin.retail.users.edit')->with(['retail_user' => $retail_user]);
     }
 
-    public function user_list()
+    public function user_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),373);
+        }
         $franchise = RetailUser::leftjoin('retail_franchises as rf', 'rf.id', '=', 'retail_users.category_id')
             ->leftjoin('retail_trax_centers as rtc', 'rtc.id', '=', 'retail_users.category_id')
             ->join('admins as ac', 'ac.id', '=', 'retail_users.created_by')

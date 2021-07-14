@@ -2437,7 +2437,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'rahat.ali@trax.pk', 'asad@trax.pk', 'uzair.anees@trax.pk', 'jahanzaib.qamar@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     $bcc = ['muhammad.waqas@trax.pk','anum.khan@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
@@ -3211,7 +3211,7 @@ class NotificationsController extends Controller
                                 $items = ShipmentItem::where('shipment_id', $shipment->id)->first();
                                 $shipment_details .= '<tr>';
                                 $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
-                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->description . '</td>';
+                                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($items->description) ? $items->description: '' ) . '</td>';
                                 $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
                                 $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $items->quantity . '</td>';
                                 $shipment_details .= '</tr>';

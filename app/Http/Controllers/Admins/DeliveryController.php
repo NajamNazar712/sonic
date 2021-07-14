@@ -299,7 +299,9 @@ class DeliveryController extends Controller
     {
         $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
         $delivery_note = DeliveryNote::where([['rider_id', $request->rider_id], ['dncc_status', 0]])->where('status','!=',4)
-            ->whereDate('created_at', '>', $datetime);
+            ->whereDate('created_at', '>', $datetime)
+            ->whereDate('created_at','!=', Carbon::today());
+        
         if ($delivery_note->exists()) {
             $delivery_note_request = DeliveryNoteRequests::where('rider_id',$request->rider_id)->where('status',2)->where('completed',0)->latest()->first();
             if($delivery_note_request){
@@ -4187,6 +4189,8 @@ class DeliveryController extends Controller
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
             })
+           
+                     
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
@@ -4312,6 +4316,10 @@ class DeliveryController extends Controller
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
+            ->editColumn('adjustment_date', function ($deliveries) {
+                $date = str_replace('00:00:00', '', $deliveries->adjustment_date);
+                return $date;
+            })
             ->addColumn('difference_amount', function($sdn){
                 $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
                 $difference_amount = 0;
@@ -4362,7 +4370,7 @@ class DeliveryController extends Controller
 
                 $details_button = '<button onclick="window.open(\'' . $route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
                 $retail_details_button = '<button onclick="window.open(\'' . $retail_route . '\')" type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1"> Details</div></div></button>';
-                // $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
+                $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
 
 
@@ -4378,7 +4386,16 @@ class DeliveryController extends Controller
                 else{
                     $dropdown .= $retail_details_button;
                 }
-
+                if (session('role_id') == 1 || in_array(251, session('permissions'))) {
+                    if(session('department_id') == 6) {
+                        if($result->adjusted == 0){
+                            $dropdown .= $adjustment_add_button;
+                        }
+                    }
+                    else{
+                        $dropdown .= $adjustment_add_button;
+                    }
+                }
 
                 if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
                     $dropdown .= $upload_deposit_slip_button;
@@ -4682,7 +4699,7 @@ class DeliveryController extends Controller
     }
 
     public function misroute_index()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),322);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -4690,7 +4707,10 @@ class DeliveryController extends Controller
     }
 
     public function misroute_list(Request $request)
+    {     if($request->get('excel') && $request->get('excel') == true)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),323);
+    }
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -5298,10 +5318,15 @@ class DeliveryController extends Controller
     }
 
     public function history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         return view('admin.delivery.history.index');
     }
 
     public function history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),304);
+        }
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -5427,6 +5452,7 @@ class DeliveryController extends Controller
     }
 
     public function signature_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),305);
         return view('admin.delivery.signature.index');
     }
 
@@ -5701,7 +5727,7 @@ class DeliveryController extends Controller
         }
     }
     public function intercept_request_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),324);
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
 //        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
@@ -5710,7 +5736,10 @@ class DeliveryController extends Controller
 
     public function intercept_request_list(Request $request)
     {
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),325);
+        }
         $shipments = Shipment::leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('intercept_re_book_requests as irbr', 'irbr.shipment_id', '=', 'shipments.id')
             ->leftjoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -5922,9 +5951,14 @@ class DeliveryController extends Controller
     }
 
     public function fake_status_remove_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),301);
         return view('admin.delivery.fake_status.index');
     }
     public function fake_status_remove_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),302);
+        }
         $fake_status = DeliveryNoteShipment::leftjoin('delivery_notes as dn', 'dn.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
             ->leftjoin('shipments_journey as sj', function($join) {
@@ -5975,10 +6009,15 @@ class DeliveryController extends Controller
     }
 
     public function replacement_not_collected_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),326);
         return view('admin.delivery.replacement.not_collected');
     }
 
     public function replacement_not_collected_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),327);
+        }
         $shipment = Shipment::leftjoin('cities as dc', 'dc.id', '=', 'shipments.consignee_city_id')
             ->leftjoin('shipments_journey as sj', function($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -6206,10 +6245,15 @@ class DeliveryController extends Controller
     }
 
     public function replacement_to_regular_logs_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),328);
         return view('admin.delivery.replacement.replacement_to_regular_logs');
     }
 
     public function replacement_to_regular_logs_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),329);
+        }
         $replacement_to_regular_logs = ReplacementToRegularLog::leftjoin('shipments as s', 's.id', '=', 'replacement_to_regular_logs.shipment_id')
             ->leftjoin('products as p', 'p.id', '=', 'replacement_to_regular_logs.product_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'replacement_to_regular_logs.updated_by')
@@ -6622,6 +6666,7 @@ class DeliveryController extends Controller
             $class = '';
         }
 
+        ShipmentScanningJourneyController::add($shipment->id,21,1,Auth::id(),null.null);
         return response()->json(['status'=>0,'details'=>['row_id'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'status'=>$journey->shipment_status_shipper->name,'reason'=>$journey->shipment_status_reason->name ?? null,'remarks'=>$journey->remarks,'status_date'=>date('Y-m-d H:i:s',strtotime($journey->created_at)),'origin'=>$shipment->pickup_address->city->name,'destination'=>$shipment->consignee_city->name,'amount'=>$shipment->amount,'shipper_name'=>$shipment->user->name, 'class' => $class]]);
     }
 

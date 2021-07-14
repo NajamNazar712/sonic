@@ -208,6 +208,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.settings.multiple_sale_tagging.list') }}',
                         method: 'POST',

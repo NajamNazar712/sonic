@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use Vectorface\Whip\Whip;
+use Session;
 
 class ActivityTrailController extends Controller
 {
@@ -36,20 +37,30 @@ class ActivityTrailController extends Controller
             $log->ip_address = $client_address;
         }
 
+        if (Session::has('latitude') && Session::has('longitude')) {
+            $log->latitude = session('latitude');
+            $log->longitude = session('longitude');
+        }
+
         $log->save();
     }
 
     public function activity_trail_index ()
-    {
+    {   ActivityTrailController::createActivityTrailLog(Auth::id(),332);
         return view('admin.activity_trail.index');
     }
 
     public function activity_trail_list (Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),333);
+        }
+
         $data = ActivityTrailLog::leftjoin('admins as a','a.id','=','activity_trail_logs.admin_id')
             ->leftjoin('admin_roles as ar','ar.id','=','a.role_id')
             ->leftjoin('activity_trail_actions as ata','ata.id','=','activity_trail_logs.action_id')
-            ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address');
+            ->select('a.name as name','a.designation as designation','ata.screen_name as screen_name','ata.action as action','activity_trail_logs.created_at as created_at', 'activity_trail_logs.ip_address', 'activity_trail_logs.latitude', 'activity_trail_logs.longitude');
 
         if($request->get('search_from') && $request->get('search_to'))
         {
