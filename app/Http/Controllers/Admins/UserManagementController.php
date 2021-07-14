@@ -49,7 +49,7 @@ class UserManagementController extends Controller
         ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation')
         ->where('ar.id', '!=', 1);
 
-        if(!in_array(session('role_id'), [1, 58])) {
+        if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
                 ->where(function ($sub_query) {
                     $sub_query->where('ad.id', session('department_id'));
@@ -480,7 +480,7 @@ class UserManagementController extends Controller
         $admins = Admin::select('admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
             ->where('admins.status', 1)
             ->whereNotNull('admins.otp');
-        if(!in_array(session('role_id'), [1, 58])) {
+        if(!in_array(session('role_id'), [1, 58, 61, 56, 71])) {
             $admins = $admins->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
         }
         $datatable = Datatables::of($admins);
