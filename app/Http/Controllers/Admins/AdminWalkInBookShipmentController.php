@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\controllers\Admins;
+namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\FtlRequest;
@@ -29,7 +29,6 @@ use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
-use App\Http\Models\OpenShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\PaymentMode;
@@ -49,7 +48,7 @@ use Validator;
 use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminWalkInBookShipmentController extends Controller
 {
