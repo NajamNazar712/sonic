@@ -93,7 +93,7 @@ class NotificationsController extends Controller
       $sms->to = str_replace('-', '', $to);
       $sms->body = $body;
 
-      if ($opt == 1) {
+      if ($otp == 1) {
         $sms->otp = 1;
       }
 
