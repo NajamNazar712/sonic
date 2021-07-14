@@ -985,6 +985,7 @@ class Permission
             'incidence_monitoring.index' => 535,
             'incidence_monitoring.list' => 535,
             'incidence_monitoring.add' => 536,
+            'incidence_monitoring.view_report' => 539,
            
         ],
 

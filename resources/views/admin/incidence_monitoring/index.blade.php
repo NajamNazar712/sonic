@@ -24,6 +24,16 @@
                                         </select>
                                     </fieldset>
                                 </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="admin_id" id="admin_ids" class="form-control select2">
+                                            @foreach($admins as $admin)
+                                                <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+
                                  <div class="col-4">
                                      <fieldset class="form-group">
                                      <select name="search_hub" id="search_hub" class="form-control select2">
@@ -242,6 +252,12 @@
                 allowClear:true,
                 dropdownParent:$('#add_report_form')
             });
+
+            $('#admin_ids').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Search Tag Persons",
+                allowClear:true,
+            });
             $('#station').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Select Station *',
@@ -337,7 +353,7 @@
                                 row.push(values.tagged_to);
                                 row.push(values.tagging_date);
                                 row.push(values.status_name);
-                                row.push(values.clip_link);
+                                row.push(values.excel_clip_link);
                                 body.push(row);
                             });
                         },
@@ -384,6 +400,8 @@
                         d.search_zone = $('#search_zone').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_admin = $('#admin_ids').val();
+
                     }
                 },
                 order: [[9, 'desc']],
@@ -395,11 +413,11 @@
                     {data: 'area_name', name: 'area.name', class: 'align-middle area_name'},
                     {data: 'time_slot', name: 'time_slot', class: 'align-middle time_slot', orderable: false, searchable: false},
                     {data: 'case_nature_type', name: 'case_nature.name', class: 'align-middle case_nature_type'},
-                    {data: 'observation', name: 'incidence_monitorings.observation', class: 'align-middle observation'},
-                    {data: 'nc_level_name', name: 'nc_level.name', class: 'align-middle nc_level_name'},
+                    {data: 'observation', name: 'incidence_monitorings.observation', class: 'align-middle observation', orderable: false, searchable: false},
+                    {data: 'nc_level_name', name: 'nc_level.id', class: 'align-middle nc_level_name'},
                     {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to', orderable: false, searchable: false},
                     {data: 'tagging_date', name: 'incidence_monitorings.tagging_date', class: 'align-middle tagging_date'},
-                    {data: 'status_name', name: 'status.status', class: 'align-middle status_name'},
+                    {data: 'status_name', name: 'status.id', class: 'align-middle status_name'},
                     {data: 'clip_link', name: 'incidence_monitorings.clip_link', class: 'align-middle clip_link'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -415,15 +433,21 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var nc_level_select = '<select name="nc_level_select" id="nc_level_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.tagged_to') || $(header).is('.time_slot')) {
+                        if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.tagged_to') || $(header).is('.time_slot')  || $(header).is('.observation')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
+                        }else if($(header).is('.status_name')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.nc_level_name')){
+                            $(nc_level_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -438,7 +462,38 @@
                             }
                         }
                     });
+
+                    var data = $.map({!! $status !!}, function (obj) {
+                        obj.text = obj.status;
+
+                        return obj;
+                    });
+
+                    $('#status_select').prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data1 = $.map({!! $nc_levels !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $('#nc_level_select').prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select NC Level",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
+
+
                 }
             });
             $('#search_filter_btn').on('click',function () {
@@ -455,6 +510,9 @@
                     $("#editIncidenceReportDiv").html(data);
                 });
             }
+        });
+        $('body').on('hidden.bs.modal','#addReportModal',function () {
+            window.location.reload()
         });
 
         });

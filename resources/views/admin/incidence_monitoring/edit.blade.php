@@ -127,7 +127,16 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+        var data_11 = $.map({!! $agents !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+
         $('#tagged_to_edit').select2({
+                data:data_11,
                 width:'100%',
                 placeholder:"Tag Person*",
                 allowClear:true,

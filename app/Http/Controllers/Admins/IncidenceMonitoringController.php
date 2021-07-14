@@ -15,6 +15,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\IncidenceMonitoringComment;
 use App\Http\Models\Admin\IncidenceMonitoringImage;
+use App\Http\Models\Admin\IncidenceMonitoringStatus;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
@@ -40,21 +41,23 @@ class IncidenceMonitoringController extends Controller
 
 
     public function index(){
+        $status = IncidenceMonitoringStatus::select('id', 'status')->get();
         $monitoring_areas = IncidenceMonitoringArea::all();
         $case_natures = IncidenceMonitoringCaseNature::all();
         $nc_levels = IncidenceMonitoringNCLevel::all();
         $stations = City::where('status',1)->get();
         $hubs = City::where('hub', 1)->where('status', 1)->get();
+        $admins = Admin::where('status', 1)->whereIn('role_id', [8,9,10,3])->get();
         $zones =  Zone::select('id', 'name')->get();
        
-        return view('admin.incidence_monitoring.index', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','zones','hubs'));
+        return view('admin.incidence_monitoring.index', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','zones','hubs','status','admins'));
     }
 
     public function get_managers(Request $request){
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
         if(count($admin_ids) > 0){
 
-            $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9])->where('status',1)->get();
+            $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9,10,3])->where('status',1)->get();
            
             return response()->json(['status' => 1, 'agents' => $agents]);
         }
@@ -141,10 +144,13 @@ class IncidenceMonitoringController extends Controller
                 return str_pad($report->id, 6, '0', STR_PAD_LEFT);
             }
         })
+        ->addColumn('excel_clip_link', function ($report) {
+            return $report->clip_link ;
+        })
         ->addColumn('action', function($data) {
             $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$data->id)->pluck('admin_id')->toArray();
             $dropdown = '';
-            if (session('role_id') == 1 || in_array(Auth::user()->role_id,[3,10]) || in_array(Auth::user()->id,$tagged_user) || in_array(536, session('permissions'))){
+            if (session('role_id') == 1 || in_array(Auth::user()->role_id,[3,10]) || in_array(Auth::user()->id,$tagged_user) || count(array_intersect([536,539], session('permissions')))){
                 $dropdown .= '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -156,6 +162,27 @@ class IncidenceMonitoringController extends Controller
             ';
 
 
+            }else{
+                if(in_array(536, session('permissions'))){
+                    $dropdown .= '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                      <button type="button" class="dropdown-item edit" data-target-id=' . $data->id . ' rel="edit_incidence_report"  data-toggle="modal" data-target="#editIncidenceReport"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                          </div>
+                    </div>
+                  ';
+                }elseif(in_array(539, session('permissions'))){
+                    $dropdown .= '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                      <button onclick="window.open(\'' . route('admin.incidence_monitoring.view_report', ['id' => $data->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                          </div>
+                    </div>
+                  ';
+      
+                }
             }
             return $dropdown;
         });
@@ -170,6 +197,11 @@ class IncidenceMonitoringController extends Controller
         if ($hub = $request->get('search_hub')) {
             $datatables->where('station.hub_id', '=', $hub);
         }
+        if ($tagged_admin = $request->get('search_admin')) {
+            $report_id = IncidenceMonitoringTaggedPerson::where('admin_id',$tagged_admin)->pluck('incidence_monitoring_id')->toArray();
+            $datatables->whereIn('incidence_monitorings.id', $report_id);
+        }
+        
         return $datatables->make(true);
     }
 
@@ -302,14 +334,19 @@ class IncidenceMonitoringController extends Controller
     
 
      public function edit($id){
+
         $incidence_monitoring = IncidenceMonitoring::find($id);
+        $admin_ids = AdminHub::where('hub_id',$incidence_monitoring->station_id)->pluck('admin_id')->toArray();
+        if(count($admin_ids) > 0){
+            $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9,10,3])->where('status',1)->get();
+        }
         $monitoring_areas = IncidenceMonitoringArea::all();
         $case_natures = IncidenceMonitoringCaseNature::all();
         $nc_levels = IncidenceMonitoringNCLevel::all();
         $stations = City::where('status',1)->get();
         $incidence_monitoring_tagged_persons = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$id)->pluck('admin_id')->toArray();
         $all_persons = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$id)->get();
-        return view('admin.incidence_monitoring.edit', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','incidence_monitoring','incidence_monitoring_tagged_persons','all_persons'));
+        return view('admin.incidence_monitoring.edit', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','incidence_monitoring','incidence_monitoring_tagged_persons','all_persons','agents'));
      }
 
      public function update($id,Request $request){
