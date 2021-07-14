@@ -1517,6 +1517,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@user_update_index')->name('index');
                 Route::post('', 'Admins\UserManagementController@user_update_store')->name('store');
             });
+
+            Route::post('user_info', 'Admins\UserManagementController@user_info')->name('user_info');
+            Route::post('phone_update', 'Admins\UserManagementController@user_phone_update')->name('phone_update');
+
         });
 
         Route::prefix('fuel_management')->name('fuel_management.')->group(function (){
