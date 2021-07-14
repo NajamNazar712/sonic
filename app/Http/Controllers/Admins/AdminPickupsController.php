@@ -232,7 +232,7 @@ class AdminPickupsController extends Controller
                   else{
                   }
               }
-        }
+    }
 
     static public function cancel($shipment_id) {
       $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1]);
