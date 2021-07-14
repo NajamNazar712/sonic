@@ -72,6 +72,7 @@ class UserManagementController extends Controller
                 $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
+                $phone_edit_button = '<button type="button" class="dropdown-item phone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Phone No. Update</div></button>';
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -89,6 +90,10 @@ class UserManagementController extends Controller
                     else {
                         $dropdown .= $enable_button;
                     }
+                }
+
+                if (session('role_id') == 1 || in_array(542, session('permissions'))) {
+                    $dropdown .= $phone_edit_button;
                 }
 
                 $dropdown .= '
@@ -480,6 +485,38 @@ class UserManagementController extends Controller
         }
         $datatable = Datatables::of($admins);
         return $datatable->make(true);
+    }
+
+
+    public function user_info(Request $request){
+        $admin_id = $request->admin_id;
+
+        if($admin_id){
+            $admin = Admin::find($admin_id);
+            if($admin){
+                return response()->json(['status' => 0, 'phone'=> $admin->phone_number]);
+
+            }
+            return response()->json(['status' => 1, 'error'=> 'User not found!']);
+
+        }
+        return response()->json(['status' => 1, 'error'=> 'User not found!']);
+    }
+    public function user_phone_update(Request $request){
+        $admin_id = $request->admin_id;
+        $phone = $request->phone;
+        if($admin_id){
+            $admin = Admin::find($admin_id);
+            if($admin){
+                $admin->phone_number = $phone;
+                $admin->save();
+                return redirect()->back()->with('success', 'Phone Number updated!');
+
+            }
+            return redirect()->back()->with('error', 'User not found!!');
+        }
+        return redirect()->back()->with('error', 'User not found!!');
+
     }
 
 }
