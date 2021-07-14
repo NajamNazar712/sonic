@@ -114,7 +114,7 @@
 						<div class="container">
 							<input type="hidden" name="admin_id" id="phone_admin_id"/>
 							<div class="form-group">
-								<input type="text" name="phone" id="phone" class="form-control">
+								<input type="text" name="phone" id="phone" class="form-control" data-rule-required="true" data-msg-required="Phone Number required">
 							</div>
 							<div class="row justify-content-center">
 								<div class="col-6">
@@ -460,7 +460,7 @@
 					})
 							.done(function(data) {
 								if (data.status == 0) {
-									
+
 									$('#update_phone_form #phone').val(data.phone);
 									$('#update_phone_form #phone_admin_id').val(id);
 								}
@@ -477,6 +477,15 @@
 			$('#PhoneUpdateModal').on('hidden.bs.modal', function (e) {
 				$('#update_phone_form #phone').val('');
 				$('#update_phone_form #phone_admin_id').val('');
+			});
+
+
+			$('#update_phone_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				}
 			});
 
             //bulk assigning of hub work start
