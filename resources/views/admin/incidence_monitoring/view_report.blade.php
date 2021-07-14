@@ -131,7 +131,7 @@
                                             </tbody>
                                         </table>
                                         <div class="row justify-content-center">
-                                            {{-- @if(session('role_id') == 1 || session('role_id') == 6 || $crm_details->agent['id'] == Auth::id() || in_array(184, session('permissions')) || (($tag_check['crm_request_tagging_type_id'] == 1 && $tag_check['tagged_id'] == $tag_permission) || ($tag_check['crm_request_tagging_type_id'] == 2 && $tag_check['tagged_id'] == Auth::id()) || $escalation_tagged_check == true || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))) --}}
+                                            @if(session('role_id') == 1 || in_array(541, session('permissions')) )
                                                 <div class="text-center">
                                                     <form id="status_update_form" method="post"
                                                           action="{{route('admin.incidence_monitoring.update_status')}}">
@@ -165,7 +165,7 @@
                                                         @endif
                                                     </form>
                                                 </div>
-                                            {{-- @endif --}}
+                                            @endif
                                         </div>
                                     </div>
 
@@ -230,11 +230,11 @@
                                                     </form>
                                                 </section>
                                                 <div class="row justify-content-center mt-1">
-                                                    
-                                                    <div class="col-4">
-                                                        <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
-                                                    </div>
-                                                    
+                                                    @if(session('role_id') == 1 || in_array(540, session('permissions')) )
+                                                        <div class="col-4">
+                                                            <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                         </div>
 

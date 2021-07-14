@@ -228,8 +228,10 @@ class IncidenceMonitoringController extends Controller
         {
             $comment_by = 0;
         }
-        elseif(in_array(Auth::user()->role_id,[3,10]))
+        elseif(in_array(Auth::user()->role_id,[3]))
         {
+            $comment_by = 2;
+        }elseif(Auth::user()->role_id == 10 && in_array(Auth::user()->id,$tagged_user)){
             $comment_by = 2;
         }
         else {
