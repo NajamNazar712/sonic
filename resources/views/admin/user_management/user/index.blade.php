@@ -462,7 +462,7 @@
 								if (data.status == 0) {
 									table.draw(false);
 
-									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									
 									$('#update_phone_form #phone').val(data.phone);
 									$('#update_phone_form #phone_admin_id').val(id);
 								}
