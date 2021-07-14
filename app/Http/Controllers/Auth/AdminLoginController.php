@@ -124,7 +124,7 @@ class AdminLoginController extends Controller
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
                 $admin = $admin->first();
-                if (($admin->otp == $request->otp) || ($request->otp == 111111)) {
+                if ($admin->otp == $request->otp) {
                     return response()->json(['status' => 1]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
