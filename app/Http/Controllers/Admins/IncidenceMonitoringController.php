@@ -48,7 +48,7 @@ class IncidenceMonitoringController extends Controller
         $stations = City::where('status',1)->get();
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $admins = Admin::where('status', 1)->whereIn('role_id', [8,9,10,3])->get();
-        $zones =  Zone::select('id', 'name')->get();
+        $zones =  Zone::where('business_category_id',1)->select('id', 'name')->get();
        
         return view('admin.incidence_monitoring.index', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','zones','hubs','status','admins'));
     }
