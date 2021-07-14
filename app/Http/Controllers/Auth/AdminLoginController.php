@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\MultipleSaleLead;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRoleModulePermission;
+use Illuminate\Support\Facades\Hash;
 
 class AdminLoginController extends Controller
 {
@@ -89,5 +93,48 @@ class AdminLoginController extends Controller
         }
         return redirect()->route('admin.login');
 
+    }
+    public function credentials(Request $request){
+        $admin = Admin::where('email', $request->email);
+        if ($admin->exists()) {
+            $admin = $admin->first();
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+        }
+        if (Hash::check($request->input('password'), $admin->password)) {
+            $environment = config('app.env');
+
+            if ($environment == 'production' || $environment == 'staging') {
+                $otp = mt_rand(100000, 999999);
+                $admin->otp = $otp;
+                $admin->last_login_attempt = Carbon::now();
+                $admin->save();
+                NotificationsController::send(138, $admin, $otp);
+            }
+
+            return response()->json(['status' => 1]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+        }
+    }
+
+    public function verify_otp(Request $request){
+        $environment = config('app.env');
+        if($environment == 'production' || $environment == 'staging') {
+            $admin = Admin::where('email', $request->email);
+            if ($admin->exists()) {
+                $admin = $admin->first();
+                if ($admin->otp == $request->otp) {
+                    return response()->json(['status' => 1]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Invalid Credentials']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1]);
+        }
     }
 }

@@ -431,7 +431,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
-
+    Route::post('/credentials', 'Auth\AdminLoginController@credentials')->name('login.credentials');
+    Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
 
@@ -3064,6 +3065,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+    });
+
+    Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
+        Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
+        Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
     });
 
 });
