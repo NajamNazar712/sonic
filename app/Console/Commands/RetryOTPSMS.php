@@ -6,25 +6,25 @@ use Illuminate\Console\Command;
 
 use App\Http\Models\SMS;
 
-use App\Jobs\ProcessSMS;
+use App\Jobs\ProcessOTPSMS;
 
 use Carbon\Carbon;
 
-class ClearSMS extends Command
+class RetryOTPSMS extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'sms:clear';
+    protected $signature = 'sms:retry_otp';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Clear SMS';
+    protected $description = 'Retry OTP SMS';
 
     /**
      * Create a new command instance.
@@ -43,21 +43,21 @@ class ClearSMS extends Command
      */
     public function handle()
     {
-        $datetime = Carbon::now()->subDays(30);
-
-        SMS::where('created_at', '<', $datetime)->delete();
-
         $datetime = Carbon::now()->subHours(1);
 
-        SMS::where('status', 1)->('otp', 0)->where('created_at', '<', $datetime)->update(['status' => 2]);
+        SMS::where('status', 1)->('otp', 1)->where('created_at', '<', $datetime)->update(['status' => 2]);
 
-        $smses = SMS::where('status', 1)->('otp', 0);
+        $smses = SMS::where('status', 1)->('otp', 1);
 
         if ($smses->exists()) {
             $smses = $smses->get();
 
             foreach ($smses as $sms) {
-                dispatch(new ProcessSMS($sms));
+                $sms->status = 0;
+
+                $sms->save();
+
+                dispatch(new ProcessOTPSMS($sms));
             }
         }
     }
