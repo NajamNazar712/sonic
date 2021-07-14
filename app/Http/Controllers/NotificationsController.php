@@ -113,8 +113,6 @@ class NotificationsController extends Controller
       $sms->to = str_replace('-', '', $to);
       $sms->body = $body;
 
-      $sms->otp = 1;
-
       $sms->save();
 
       dispatch(new ProcessDeliveryNoteOtpSms($sms));
