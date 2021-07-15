@@ -1147,12 +1147,24 @@
                     currentRow.find("td:eq(8)").text(booked_skus);
                     currentRow.find("td:eq(6)").text(total_units);
                     currentRow.find("td:eq(7)").find("input[type='text']").val(0);
-                    $('#DistributionUpdate').prop('disabled', false);
                 }
                 else if(total_delivered_units > total_units){
                     toastr.error('Quantity Exceeded!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     $('#DistributionUpdate').prop('disabled', true);
                 }
+
+                $('#distributiontable tbody tr').each(function (){
+                    validate_flag = true;
+                    if($(this).find("td:eq(5)").find("input[type='text']").val() > $(this).find("td:eq(2)").text())
+                    {
+                        validate_flag = false;
+                    }
+
+                    if(validate_flag)
+                    {
+                        $('#DistributionUpdate').prop('disabled', false);
+                    }
+                })
 
                 calculate_total();
             }
