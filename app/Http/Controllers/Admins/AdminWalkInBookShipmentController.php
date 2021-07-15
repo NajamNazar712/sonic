@@ -1428,7 +1428,7 @@ class AdminWalkInBookShipmentController extends Controller
         $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
         $cities = City::where('status',1)->where('business_category_id',1)->get();
         $walk_in_cities = City::join('walk_in_cities as wc','wc.city_id','=','cities.id')
-            ->join('city_deliveries as cd','cd.city_id','=','cities.id')->select('cities.name as city_name','cities.id as city_id')->where('wc.delivery', 1)->where('cd.booking_type_id',6)->groupBy('cities.id')->get();
+            ->join('city_deliveries as cd','cd.city_id','=','cities.id')->select('cities.name as city_name','cities.id as city_id')->where('wc.delivery', 1)->where('cities.status',1)->where('cd.booking_type_id',6)->groupBy('cities.id')->get();
         $consignee_cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
             ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.delivery', 1)->get();
         $products = Product::orderBy('product_name')->get();
