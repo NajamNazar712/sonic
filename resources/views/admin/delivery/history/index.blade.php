@@ -31,7 +31,7 @@
                         </div>
                     </div>
                     <div class="col-4">
-                        <fieldset class="form-group">
+                        <fieldset class="form-group input-group ml">
                             <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
                                 @foreach($operation_rider_category as $category)
                                     <option value="{{$category->id}}">{{$category->name}}</option>
