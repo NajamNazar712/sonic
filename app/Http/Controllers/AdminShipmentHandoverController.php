@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use Illuminate\Http\Request;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
@@ -60,6 +61,7 @@ class AdminShipmentHandoverController extends Controller
             $details['phone_number'] = $shipment->user->phone;
             $details['pickup_date'] = $shipment->pickup_date;
             $details['special_instructions'] = $shipment->special_instructions;
+            ShipmentScanningJourneyController::add($shipment->id,26,1,Auth::id(),NULL,NULL);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 
         } else {
@@ -82,7 +84,7 @@ class AdminShipmentHandoverController extends Controller
             $details['phone_number'] = $shipment->user->phone;
             $details['pickup_date'] = $shipment->pickup_date;
             $details['special_instructions'] = $shipment->special_instructions;
-
+            ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {
@@ -170,10 +172,15 @@ class AdminShipmentHandoverController extends Controller
 
 //list
     public function handover_list_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),383);
         return view('admin.handover.list');   
     }
 
     public function handover_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),384);
+        }
         $handover_list = Handover::leftjoin('cities as c','c.id','=','handovers.hub')
         ->leftjoin('admins as a', 'a.id', '=', 'handovers.created_by')
         ->leftjoin('admins as ad', 'ad.id', '=', 'handovers.received_by')
@@ -482,12 +489,16 @@ class AdminShipmentHandoverController extends Controller
 
 //Responsible
     public function responsibles_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),385);
         $hubs = City::select(['id','name'])->where('hub',1)->get();
         return view('admin.handover.responsibles')->with(['hubs'=>$hubs]);
     }
 
-    public function responsibles_list(){
-
+    public function responsibles_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),386);
+        }
         $responsibles_list = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')

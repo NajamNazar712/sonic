@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Models\ShipmentScanningJourney;
 use Illuminate\Http\Request;
 use Vectorface\Whip\Whip;
+use Session;
 
 class ShipmentScanningJourneyController extends Controller
 {
+    //User Types 4 -> Retail User
     static public function add($shipment_id, $screen_location_id, $user_type, $admin_id = NULL, $user_id = NULL, $substitute_user_id = NULL) {
         $add_scanning_history = new ShipmentScanningJourney();
         $add_scanning_history->shipment_id = $shipment_id;
@@ -22,6 +24,11 @@ class ShipmentScanningJourneyController extends Controller
 
         if ($client_address != '') {
             $add_scanning_history->ip_address = $client_address;
+        }
+
+        if (Session::has('latitude') && Session::has('longitude')) {
+            $add_scanning_history->latitude = session('latitude');
+            $add_scanning_history->longitude = session('longitude');
         }
 
         $add_scanning_history->save();

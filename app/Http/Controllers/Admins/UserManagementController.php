@@ -31,12 +31,17 @@ class UserManagementController extends Controller
     }
 
     public function user_index() {
+      ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
         $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
       return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
     }
 
     public function user_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),359);
+        }
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
@@ -44,7 +49,7 @@ class UserManagementController extends Controller
         ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation')
         ->where('ar.id', '!=', 1);
 
-        if(!in_array(session('role_id'), [1, 58])) {
+        if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
                 ->where(function ($sub_query) {
                     $sub_query->where('ad.id', session('department_id'));
@@ -62,11 +67,12 @@ class UserManagementController extends Controller
         })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
-            if (session('role_id') == 1 || count(array_intersect([83, 84], session('permissions'))) !== 0) {
+            if (session('role_id') == 1 || count(array_intersect([83, 84, 542], session('permissions'))) !== 0) {
                 $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
+                $phone_edit_button = '<button type="button" class="dropdown-item phone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Phone No. Update</div></button>';
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -84,6 +90,10 @@ class UserManagementController extends Controller
                     else {
                         $dropdown .= $enable_button;
                     }
+                }
+
+                if (session('role_id') == 1 || in_array(542, session('permissions'))) {
+                    $dropdown .= $phone_edit_button;
                 }
 
                 $dropdown .= '
@@ -348,6 +358,7 @@ class UserManagementController extends Controller
     }
 
     public function role_index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),374);
         $departments = AdminDepartment::all();
         return view('admin.user_management.role.index')->with(['departments'=>$departments]);
     }
@@ -461,7 +472,51 @@ class UserManagementController extends Controller
         return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been updated!']);
     }
 
+    public function admin_otp_index(){
+        return view('admin.otp.admin');
+    }
+
+    public function admin_otp_list(Request $request){
+        $admins = Admin::select('admins.id as id', 'admins.name as name', 'admins.otp as otp', 'admins.last_login_attempt')
+            ->where('admins.status', 1)
+            ->whereNotNull('admins.otp');
+        if(!in_array(session('role_id'), [1, 58, 61, 56, 71])) {
+            $admins = $admins->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->where('ar.department_id', session('department_id'));
+        }
+        $datatable = Datatables::of($admins);
+        return $datatable->make(true);
+    }
 
 
+    public function user_info(Request $request){
+        $admin_id = $request->admin_id;
+
+        if($admin_id){
+            $admin = Admin::find($admin_id);
+            if($admin){
+                return response()->json(['status' => 0, 'phone'=> $admin->phone_number]);
+
+            }
+            return response()->json(['status' => 1, 'error'=> 'User not found!']);
+
+        }
+        return response()->json(['status' => 1, 'error'=> 'User not found!']);
+    }
+    public function user_phone_update(Request $request){
+        $admin_id = $request->admin_id;
+        $phone = $request->phone;
+        if($admin_id){
+            $admin = Admin::find($admin_id);
+            if($admin){
+                $admin->phone_number = $phone;
+                $admin->save();
+                return redirect()->back()->with('success', 'Phone Number updated!');
+
+            }
+            return redirect()->back()->with('error', 'User not found!!');
+        }
+        return redirect()->back()->with('error', 'User not found!!');
+
+    }
 
 }

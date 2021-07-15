@@ -128,6 +128,9 @@ class Shipment extends Model
     public function shipment_detail() {
 		return $this->hasOne('App\Http\Models\ShipmentDetail');
 	}
+	public function return_address() {
+        return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo', 'return_address_id');
+    }
 	public function other_retail() {
         return $this->belongsTo('App\Http\Models\Admin\Retail\OtherRetailShipment', 'id', 'shipment_id');
     }

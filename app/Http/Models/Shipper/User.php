@@ -59,5 +59,7 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Http\Models\ShipperPackagingMaterailType','shipper_id','id');
     }
-    
+    public function return(){
+        return $this->hasMany('App\Http\Models\Shipper\UserReturnInfo');
+    }
 }

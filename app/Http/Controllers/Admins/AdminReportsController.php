@@ -8461,11 +8461,17 @@ class AdminReportsController extends Controller
     }
 
     public function in_transit_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),334);
         $bag_statuses = BagStatus::select('id','name')->whereNotIn('id',[1,4,9])->get();
         $modes = ShippingMode::select('id','mode')->get();
         return view('admin.reports.in_transit_report_bag_wise')->with(['bag_statuses' => $bag_statuses,'modes' => $modes]);
     }
     public function  in_transit_list(Request $request){
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),335);
+        }
         $bags = DB::connection('reports')->table('bags')
           ->join('master_cargo_bags as mcb',function($join){
               $join->on('mcb.bag_id','=','bags.id')
@@ -8478,7 +8484,7 @@ class AdminReportsController extends Controller
             ->join('cities as oc', 'bags.origin_hub_id', '=', 'oc.id')
             ->join('cities as dc', 'bags.destination_hub_id', '=', 'dc.id')
             ->join('bag_statuses as bs','bs.id','=','bags.status_id')
-            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','mc.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments','bags.short_received as short_received_shipments'])->whereNotIn('bags.status_id',[1,4,9]);
+            ->select(['bags.seal_number as bag_no','bags.type','oc.name as origin','dc.name as destination','sm.mode as shipping_mode','bags.shipments','bags.short_received','bags.shipments_weight','ad.name as transitted_by','a.name as received_by','mc.created_at as transitted_date','mc.received_at','bs.name as status','bs.id as status_id','bags.shipments as total_shipments','bags.short_received as short_received_shipments','mc.id as master_cargo_id'])->whereNotIn('bags.status_id',[1,4,9]);
 
        $datatable = Datatables::of($bags)
            ->editColumn('type', function($bags){
@@ -8488,6 +8494,9 @@ class AdminReportsController extends Controller
                else{
                    return 'Return';
                }
+           })
+           ->addColumn('id_padded_link', function ($bag) {
+               return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($bag->master_cargo_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
            })
            ->addColumn('aging', function($bags){
                if($bags->received_at != null){
@@ -8573,10 +8582,15 @@ class AdminReportsController extends Controller
     }
 
     public function master_cargo_short_received_shipments_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),336);
         return view('admin.reports.master_cargo_short_received_shipments_reports');
     }
 
     public function master_cargo_short_received_shipments_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),337);
+        }
         $cargo_consignments_short_received_shipments = DB::connection('reports')->table('bags')->leftjoin('bag_shipments as bs', 'bs.bag_id', '=', 'bags.id')
             ->join('master_cargo_bags as mcb',function($join){
                 $join->on('mcb.bag_id','=','bags.id')

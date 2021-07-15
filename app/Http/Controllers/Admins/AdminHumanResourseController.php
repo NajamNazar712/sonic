@@ -55,7 +55,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function download_docs()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),387);
         return view('admin.human_resource.download_docs');
     }
     public function allusers()
@@ -1978,11 +1978,16 @@ class AdminHumanResourseController extends Controller
         return back()->with(['success'=>'Employee Attachments Updated Successfully']);
     }
     public function reporting_location_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),388);
         $cities = City::where('status', 1)->where('business_category_id', 1)->get();
         return view('admin.human_resource.reporting_location')->with(['cities' => $cities]);
     }
 
     public function reporting_location_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),389);
+        }
         $location = ReportingLocation::join('cities as c', 'reporting_locations.city_id', '=', 'c.id')
             ->select(['reporting_locations.id as id', 'reporting_locations.name as location_name', 'c.name as city', 'c.id as city_id', 'reporting_locations.lat', 'reporting_locations.long', 'reporting_locations.status', 'reporting_locations.address', 'reporting_locations.radius']);
 
@@ -2071,10 +2076,15 @@ class AdminHumanResourseController extends Controller
         return redirect()->back()->with('success', 'Location Updated Successfully!');
     }
     public function designation_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),390);
         return view('admin.human_resource.designation');
     }
 
     public function designation_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),391);
+        }
         $designations = EmployeeDesignation::select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description']);
 
         return Datatables::of($designations)
@@ -2150,10 +2160,16 @@ class AdminHumanResourseController extends Controller
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
     }
     public function department_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),392);
         return view('admin.human_resource.department');
     }
 
     public function department_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),393);
+        }
         $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description'])
         ->where('id', '!=', 1);
 

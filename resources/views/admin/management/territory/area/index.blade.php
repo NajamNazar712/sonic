@@ -208,6 +208,7 @@
                     if(params !== undefined){
                         params.start = 0;
                         params.length = -1;
+                        params.excel = true;
                     }
 
                     var jsonResult = $.ajax({

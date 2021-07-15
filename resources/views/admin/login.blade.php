@@ -32,6 +32,8 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.0">
 </head>
@@ -71,7 +73,7 @@
                                 </p>
                                 <div class="card-body">
                                     @include('admin.inc.messages')
-                                    <form class="form-horizontal" method="POST" action="{{ route('admin.login.submit') }}" autocomplete="off">
+                                    <form class="form-horizontal" id="admin_login_form" method="POST" action="{{ route('admin.login.submit') }}" autocomplete="off">
                                     {{ csrf_field()  }}
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
@@ -101,7 +103,7 @@
                                             </div>
                                             <div class="col-md-6 col-12 float-sm-left text-center text-sm-right"><a href="{{ route('admin.password.request') }}" class="card-link">Forgot Password?</a></div>
                                         </div>
-                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Login</button>
+                                        <button type="button" class="btn btn-outline-info btn-block" id="login_button"><i class="ft-unlock"></i> Login</button>
                                     </form>
                                 </div>
 
@@ -110,6 +112,38 @@
                     </div>
                 </div>
             </section>
+            <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="OtpModal"
+                 aria-hidden="true" style="top:30%;">
+                <div class="modal-dialog modal-md" role="document">
+                    <div class="modal-content col">
+                        <div class="modal-header text-center">
+                            <div class="row align-items-center">
+                                <div class="col sonic_logo align-middle text-left">
+                                    <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                                </div>
+
+                                <div class="col trax_logo align-middle text-right">
+                                    <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-body  text-center">
+                            <div class="row justify-content-center">
+<!--                                <div class="form-group form-inline">
+                                    <p>We have sent a six-digit verification code on mobile,<br>Please verify by entering it below</p>
+                                </div>-->
+                                <div class="form-group form-inline">
+                                    <input type="text" class="form-control otp" autofocus id="otp_input" placeholder="Enter Verification Code">
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -128,6 +162,154 @@
 <!-- END MODERN JS-->
 <!-- BEGIN PAGE LEVEL JS-->
 <script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}" ></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 <!-- END PAGE LEVEL JS-->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var email = null;
+        var password = null;
+
+
+        $('#otp_input').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'mask': '999999'
+        });
+        $('body').on('keyup change','#otp_input',function() {
+            if($(this).val().length === 6){
+                $('#otp_submit').attr('disabled', false);
+            }
+            else{
+                $('#otp_submit').attr('disabled', true);
+            }
+        });
+        $('#otp_submit').on('click', function () {
+            var otp = $('#otp_input').val();
+
+            if(otp.length == 6){
+                $.ajax({
+                    url: '{!! route('admin.login.verify_otp') !!}',
+                    type: 'POST',
+                    data: {
+                        'email': email,
+                        'otp': otp,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 0){
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $('#otp_input').val('');
+                        $('#otp_submit').attr('disabled', true);
+                    }else{
+                        $('#PasswordModal').modal('hide');
+                        $('#admin_login_form').submit();
+                    }
+                });
+            }
+        });
+        $('#email').on('change', function () {
+            var email_check = $('#email').valid();
+            if(!email_check){
+                $('#email-error').addClass('danger');
+            }
+        });
+        $('#email').on('change', function () {
+            var password_check = $('#password').valid();
+            if(!password_check){
+                $('#password-error').addClass('danger');
+            }
+        });
+        $('#otp_input').keypress(function (event) {
+            if(event.keyCode == 13){
+                var otp = $('#otp_input').val();
+
+                if(otp.length == 6){
+                    $.ajax({
+                        url: '{!! route('admin.login.verify_otp') !!}',
+                        type: 'POST',
+                        data: {
+                            'email': email,
+                            'otp': otp,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 0){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            $('#otp_input').val('');
+                            $('#otp_submit').attr('disabled', true);
+                        }else{
+                            $('#OtpModal').modal('hide');
+                            $('#admin_login_form').submit();
+                        }
+                    });
+                }
+            }
+
+        });
+        $('#login_button').on('click', function () {
+            var email_check = $('#email').valid();
+            var password_check = $('#password').valid();
+            if(email_check && password_check){
+                email = $('#email').val();
+                password = $('#password').val();
+                $.ajax({
+                    url: '{!! route('admin.login.credentials') !!}',
+                    method: 'POST',
+                    data: {
+                        'email': email,
+                        'password': password,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        $('#OtpModal').modal('show');
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            }
+            else{
+                $('#email-error').addClass('danger');
+                $('#password-error').addClass('danger');
+            }
+        });
+
+        $('#admin_login_form input').keypress(function () {
+            if(event.keyCode == 13){
+                var email_check = $('#email').valid();
+                var password_check = $('#password').valid();
+                if(email_check && password_check){
+                    email = $('#email').val();
+                    password = $('#password').val();
+                    $.ajax({
+                        url: '{!! route('admin.login.credentials') !!}',
+                        method: 'POST',
+                        data: {
+                            'email': email,
+                            'password': password,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status === 1){
+                            $('#OtpModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+                else{
+                    $('#email-error').addClass('danger');
+                    $('#password-error').addClass('danger');
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>

@@ -28,11 +28,17 @@ class DisputeController extends Controller
         $this->middleware('Permission');
     }
     public function dispute_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),320);
         $cities = City::where('status',1)->get();
         $dispute_types = DisputeType::all();
         return view('admin.dispute.index')->with(['cities'=>$cities,'dispute_types'=>$dispute_types]);
     }
     public function dispute_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),321);
+        }
+
         $dispute = Dispute::join('cities','cities.id','=','disputes.city_id')
             ->join('dispute_types as dt','dt.id','=','disputes.dispute_type_id')
             ->leftjoin('admins as ad',function ($join){

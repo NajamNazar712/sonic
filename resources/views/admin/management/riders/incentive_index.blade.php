@@ -21,7 +21,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID.</th>
                                     <th class="border-primary border-darken-1">City</th>
-                                <th class="border-primary border-darken-1">Zone</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Phone No</th>

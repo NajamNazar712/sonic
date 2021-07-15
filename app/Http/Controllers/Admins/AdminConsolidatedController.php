@@ -9,6 +9,7 @@ use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
@@ -22,13 +23,18 @@ class AdminConsolidatedController extends Controller
     }
 
     public function consolidation_history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),293);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
         return view('admin.shipment.consolidated.history')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products]);
     }
 
-    public function consolidation_history_list(){
+    public function consolidation_history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),294);
+        }
         $consolidation_shipments = ConsolidationShipments::leftjoin('shipments as s', 's.id', '=', 'consolidation_shipments.shipment_id')
             ->leftjoin('consolidations as c', 'c.id', '=', 'consolidation_shipments.consolidation_id')
             ->leftjoin('shipments as cs', 'cs.id', '=', 'c.default_shipment_id')
