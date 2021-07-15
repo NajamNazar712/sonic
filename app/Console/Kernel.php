@@ -91,9 +91,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\DHLTrackingSync',
         'App\Console\Commands\StatusBookedEmailKhaddi',
         'App\Console\Commands\RiderWisePickupEmail',
-        // 'App\Console\Command\InactiveRiderOnRoute',
-
-        
+        'App\Console\Commands\InactiveRiderReport',        
     ];
 
     /**
@@ -305,6 +303,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:shipmentbookedkhaddi')->hourly()->runInBackground();
 
         $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
+        $schedule->command('email:inactiveriderreport')->dailyAt('08:00')->runInBackground();
 
 
     }
