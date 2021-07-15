@@ -835,6 +835,10 @@
                     @if (session('role_id') == 1 || in_array(471, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.activity_trail.index') }}">Activity Trail</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(527, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.admin_otp.index') }}">Admin OTP</a></li>
+                    @endif
                 </ul>
             </li>
 

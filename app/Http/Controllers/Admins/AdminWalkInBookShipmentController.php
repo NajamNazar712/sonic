@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\controllers\Admins;
+namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\FtlRequest;
@@ -29,7 +29,6 @@ use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
-use App\Http\Models\OpenShipment;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\PaymentMode;
@@ -49,7 +48,7 @@ use Validator;
 use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
-
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminWalkInBookShipmentController extends Controller
 {
@@ -1048,12 +1047,17 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),289);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $charges_mode = ChargesModes::select('id','charges_mode')->get();
         return view('admin.shipment.history.walk_in_history')->with(['shipment_status' => $shipment_status, 'charges_mode' => $charges_mode]);
     }
 
     public function history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),290);
+        }
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

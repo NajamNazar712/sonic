@@ -105,7 +105,7 @@ class V2RiderTrackingController extends Controller
                 ->select('riders.id','riders.name as name','logs.latitude as latitude','logs.longitude as longitude','logs.updated_at as created_at')
                 ->get();
             $date = new \DateTime();
-            $date->modify('-15 minutes');
+            $date->modify('-1 day');
             $formatted_date = $date->format('Y-m-d H:i:s');
             $total_riders = $data->count();
             $total_active_riders = $data->where('created_at','>=',$formatted_date)->count();

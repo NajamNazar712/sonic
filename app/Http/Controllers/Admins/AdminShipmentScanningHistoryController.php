@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentScanningJourney;
@@ -51,13 +52,19 @@ class AdminShipmentScanningHistoryController extends Controller
                                 $scanned_by = $user->name;
                                 $city='-';
 
-
                             }
                             elseif($scanning_history->user_type == 3){
                                 $account_type = 'Substitute Shipper';
                                 $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
                                 $scanned_by = $sub_user->name;
                                 $city='-';
+                            }
+                            else if($scanning_history->user_type == 4){
+                                $account_type = 'Retail User';
+                                $retail_admin = RetailUser::find($scanning_history->admin_id);
+                                $c = City::find($retail_admin->city_id);
+                                ($c)?$city=$c['name']:$city='-';
+                                $scanned_by = $retail_admin->name;
                             }
                             else{
                                 $account_type = '-';
@@ -69,6 +76,11 @@ class AdminShipmentScanningHistoryController extends Controller
                             $details[$index]['scanned_by'] = $scanned_by;
                             $details[$index]['city'] = $city;
                             $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
+
+                            $details[$index]['ip_address'] = $scanning_history->ip_address;
+
+                            $details[$index]['latitude'] = $scanning_history->latitude;
+                            $details[$index]['longitude'] = $scanning_history->longitude;
                         }
                         $data['tracking_number'] = $shipment->tracking_number;
                         $data['history'] = $details;

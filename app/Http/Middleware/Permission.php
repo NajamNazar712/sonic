@@ -984,6 +984,9 @@ class Permission
 			'finance.ftl_invoice.index' => 509,           
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,
+
+			'admin_otp.index' => 527,
+            'admin_otp.list' => 527,
             
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,

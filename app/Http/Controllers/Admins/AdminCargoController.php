@@ -2946,15 +2946,19 @@ class AdminCargoController extends Controller
     }
 
     public function mapping_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),344);
         $junctions = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
         $cities = City::where('business_category_id', 1)->get();
         $admins = Admin::where('status', 1)->select(['id', 'name'])->get();
         return view('admin.cargo.mapping')->with(['cities' => $cities, 'junctions' => $junctions, 'admins' => $admins]);
     }
 
-    public function mapping_list()
+    public function mapping_list(Request $request)
+    {    if($request->get('excel') && $request->get('excel') == true)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),345);
+    }
+
         $mapping =  JunctionMapping::join('cities as oc','oc.id', '=', 'junction_mappings.origin_id')
             ->join('cities as dc','dc.id', '=', 'junction_mappings.destination_id')
             ->join('cities as jc1','jc1.id', '=', 'junction_mappings.junction_1')

@@ -157,10 +157,10 @@
 
         var elem = document.querySelector('.special_rider_checkbox');
         var switchery = new Switchery(elem);
-
+        @if($type == 1)
         var ccd_elem = document.querySelector('.ccd_rider_checkbox');
         var ccd_switchery = new Switchery(ccd_elem);
-
+        @endif
         $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a city',
             dropdownParent: $("#addRiderForm")

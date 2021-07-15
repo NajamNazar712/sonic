@@ -92,7 +92,9 @@ class LastMileDebriefingController extends Controller
             $time = '00:00:00';
         }
         $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-        
+        if(Carbon::now() > $time){
+            $time = $time->addDays(1);
+        }
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
@@ -201,7 +203,9 @@ class LastMileDebriefingController extends Controller
             $time = '00:00:00';
         }
         $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-
+        if(Carbon::now() > $time){
+            $time = $time->addDays(1);
+        }
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
@@ -221,7 +225,9 @@ class LastMileDebriefingController extends Controller
                     $time = '00:00:00';
                 }
                 $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-
+                if(Carbon::now() > $time){
+                    $time = $time->addDays(1);
+                }
                 
                return AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
                ->where('created_at','<=',$time)->count();
@@ -237,6 +243,9 @@ class LastMileDebriefingController extends Controller
                     $time = '00:00:00';
                 }
                 $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                if(Carbon::now() > $time){
+                    $time = $time->addDays(1);
+                }
                 return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->where('created_at','>=',Carbon::today())
                 ->where('created_at','<=',$time)->count();
             })
@@ -251,6 +260,9 @@ class LastMileDebriefingController extends Controller
                     $time = '00:00:00';
                 }
                 $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                if(Carbon::now() > $time){
+                    $time = $time->addDays(1);
+                }
                 return AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->where('created_at','>=',Carbon::today())
                 ->where('created_at','<=',$time)->count();
             })
@@ -265,6 +277,9 @@ class LastMileDebriefingController extends Controller
                     $time = '00:00:00';
                 }
                 $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                if(Carbon::now() > $time){
+                    $time = $time->addDays(1);
+                }
                 $count = AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
                 ->where('created_at','<=',$time)->count();
                 if($count != 0)
@@ -288,6 +303,9 @@ class LastMileDebriefingController extends Controller
                     $time = '00:00:00';
                 }
                 $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                if(Carbon::now() > $time){
+                    $time = $time->addDays(1);
+                }
                 $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
                 ->where('created_at','<=',$time)->count();
                 $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',1]])->where('created_at','>=',Carbon::today())
@@ -312,6 +330,9 @@ class LastMileDebriefingController extends Controller
                     $time = '00:00:00';
                 }
                 $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                if(Carbon::now() > $time){
+                    $time = $time->addDays(1);
+                }
                 $total_count =  AgentCallMonitoring::where('agent_id',$calls->agent_id)->where('created_at','>=',Carbon::today())
                 ->where('created_at','<=',$time)->count();
                 $count =  AgentCallMonitoring::where([['agent_id',$calls->agent_id],['completed',0]])->where('created_at','>=',Carbon::today())
@@ -342,7 +363,9 @@ class LastMileDebriefingController extends Controller
             $time = '00:00:00';
         }
         $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
-
+        if(Carbon::now() > $time){
+            $time = $time->addDays(1);
+        }
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
             ->where('completed',0)->where('skip',0)->where('created_at','>=',Carbon::today())

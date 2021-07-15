@@ -94,6 +94,8 @@
 										</div>
 
 
+
+
 										@if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Show Information on Air Waybill</label>
@@ -890,6 +892,7 @@
 						$('#amount').prop('disabled', false);
 						$('#pieces_quantity').removeClass('d-none');
 						$('#self_collection_div').removeClass('d-none');
+
 					}
 					else if (service_type == 2) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -910,6 +913,7 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
+
 					}
 					else if (service_type == 3) {
 						$('#shipping_header_div').removeClass('col col_6');
@@ -930,6 +934,7 @@
 						$('#try_and_buy_charges_div').removeClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
+
 					}
 					else if (service_type == 5) {
 						$('#shipping_header_div').removeClass('col col_custom');
@@ -951,6 +956,7 @@
 						$('#try_and_buy_charges_div').addClass('d-none');
 						$('#pieces_quantity').addClass('d-none');
 						$('#self_collection_div').addClass('d-none');
+
 
 					}
 					if(service_type == 5){
@@ -1016,6 +1022,9 @@
 
 				shipping_mode_same_day(pickup_city, consignee_city);
 			});
+
+
+
 
 			$("#consignee_info").select2({
 				width:'100%',

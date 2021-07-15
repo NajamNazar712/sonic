@@ -183,6 +183,7 @@ Route::name('api.')->group(function () {
             });
 
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
+            Route::post('rider_incentives_v2', 'Rider\RiderAPIController@rider_incentive_v2')->name('rider_incentives_v2');
 
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('retail_data', 'Rider\RiderAPIController@retail_index')->name('retail_data');
@@ -252,6 +253,7 @@ Route::name('api.')->group(function () {
         Route::post('consignee_signup', 'ConsigneeAPIController@consignee_signup')->name('consignee_signup');
         Route::post('login', 'ConsigneeAPIController@login')->name('login');
         Route::post('shipment_history', 'ConsigneeAPIController@shipment_history')->name('shipment_history');
+        Route::post('update_pin', 'ConsigneeAPIController@update_pin')->name('update_pin');
         Route::middleware('ConsigneeAPIToken')->group(function () {
             Route::post('update_profile', 'ConsigneeAPIController@update_profile')->name('update_profile');
             Route::prefix('shipments')->name('shipments.')->group(function () {
@@ -274,6 +276,12 @@ Route::name('api.')->group(function () {
                 Route::post('delete', 'ShipperAPIController@shipper_subscription_delete')->name('delete');
             });
             Route::get('notification_history', 'ShipperAPIController@notification_history')->name('notification_history');
+
+            Route::prefix('add_request')->name('add_request.')->group(function () {
+                Route::get('index', 'ShipperAPIController@add_request_index')->name('index');
+                Route::post('submit', 'ShipperAPIController@add_request_submit')->name('submit');
+                Route::post('lost_claim', 'ShipperAPIController@lost_claim')->name('lost_claim');
+            });
         });
 
     });

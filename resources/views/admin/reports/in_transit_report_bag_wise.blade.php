@@ -16,6 +16,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Bag No.</th>
+                        <th class="border-primary border-darken-1">Master Cargo No.</th>
                         <th class="border-primary border-darken-1">Bag Type</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -135,7 +136,34 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.master_cargo.in_transit.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -144,6 +172,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.master_cargo.bag.in_transit.list') }}',
                         data: params,
@@ -152,6 +181,7 @@
 
                             head.push('S. No');
                             head.push('Bag No.');
+                            head.push('Master Cargo.');
                             head.push('Bag Type');
                             head.push('Origin');
                             head.push('Destination');
@@ -171,6 +201,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.bag_no);
+                                row.push(values.master_cargo_id);
                                 row.push(values.type);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -221,10 +252,11 @@
                     url: '{{ route('admin.reports.master_cargo.bag.in_transit.list') }}',
                 },
                 rowId: 'bag_no',
-                order: [[9, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'bag_no', name: 'bags.seal_number', class: 'align-middle bag_no'},
+                    {data: 'id_padded_link', name: 'mc.id', class: 'align-middle master_cargo_number'},
                     {data: 'type', name: 'type', class: 'align-middle type'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -351,6 +383,10 @@
 
             });
 
+            $('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
+                var cargo_id = parseInt(table.row($(this).parents('tr')).data().master_cargo_id);
+                print(cargo_id);
+            });
         });
 
     </script>

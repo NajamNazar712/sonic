@@ -31,7 +31,7 @@ class AdminCommissionController extends Controller
     }
 
     public function index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),370);
         $tier_type = TierType::all(['id','name']);
         $commission_percentage = GlobalSettings::where('type',"commission_percentage")->first();
         $commission_percentage = $commission_percentage->text;
@@ -40,6 +40,10 @@ class AdminCommissionController extends Controller
     }
 
     public function tier_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),371);
+        }
         $salesTier = SalesTier::join('admins as a', 'a.id', '=', 'sales_tiers.added_by')
             ->leftjoin('admins as u', 'u.id', '=', 'sales_tiers.updated_by')
             ->join('tier_types as tt', 'tt.id', '=', 'sales_tiers.tier_type')

@@ -545,11 +545,15 @@ class RiderManagementController extends Controller
     }
 
     public function blacklist_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),350);
         $category = RiderCategory::all();
         return view('admin.management.riders.blacklisted')->with(['categories'=>$category]);
     }
     public function blacklist_list(Request $request){
-
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),351);
+        }
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
@@ -618,9 +622,15 @@ class RiderManagementController extends Controller
             ->make(true);
     }
     public function sms_history_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),375);
         return view('admin.management.riders.sms_history');
     }
     public function sms_history_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),376);
+        }
+
         $sms = SmsHistory::join('admins', 'admins.id', '=', 'sms_histories.sender_id')
             ->select('sms_histories.id', 'sms_histories.body', 'sms_histories.created_at', 'admins.name as send_by', DB::raw('(SELECT COUNT(sr.id) FROM sms_history_riders AS sr  where sr.sms_history_id = sms_histories.id) AS riders') );
         return Datatables::of($sms)

@@ -96,6 +96,37 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade text-left" id="PhoneUpdateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="PhoneUpdateModal"
+		 aria-hidden="true">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header bg-primary white">
+					<h4 class="modal-title white">Phone Update</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+					<form id="update_phone_form" action="{{route('admin.user_management.users.phone_update')}}" method="post">
+						@method('POST')
+						@csrf
+						<div class="container">
+							<input type="hidden" name="admin_id" id="phone_admin_id"/>
+							<div class="form-group">
+								<input type="text" name="phone" id="phone" class="form-control" data-rule-required="true" data-msg-required="Phone Number required">
+							</div>
+							<div class="row justify-content-center">
+								<div class="col-6">
+									<button type="submit" class="btn btn-primary btn-block">Update Phone</button>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 @endsection
 
 @section('css')
@@ -109,6 +140,7 @@
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 	<script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
 	<script type="text/javascript">
 		$(document).ready(function() {
@@ -122,12 +154,17 @@
 				placeholder:"Search Roles",
 				allowClear:true,
 			});
+			$('#update_phone_form #phone').inputmask({
+				'mask': '9999-9999999',
+				'clearIncomplete': true
+			});
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
 					var params = table.ajax.params();
 					params.start = 0;
 					params.length = -1;
+					params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.user_management.users.list') }}',
 						data: params,
@@ -408,6 +445,47 @@
 						});
 					}
 				@endif
+
+
+				@if (session('role_id') == 1 || in_array(542, session('permissions')))
+				if ($(this).hasClass('phone')) {
+
+					$.ajax({
+						url: '{!! route('admin.user_management.users.user_info') !!}',
+						method: 'POST',
+						data: {
+							'admin_id': id,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+							.done(function(data) {
+								if (data.status == 0) {
+
+									$('#update_phone_form #phone').val(data.phone);
+									$('#update_phone_form #phone_admin_id').val(id);
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
+							});
+					$('#PhoneUpdateModal').modal('show');
+				}
+				@endif
+
+			});
+
+			$('#PhoneUpdateModal').on('hidden.bs.modal', function (e) {
+				$('#update_phone_form #phone').val('');
+				$('#update_phone_form #phone_admin_id').val('');
+			});
+
+
+			$('#update_phone_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				}
 			});
 
             //bulk assigning of hub work start

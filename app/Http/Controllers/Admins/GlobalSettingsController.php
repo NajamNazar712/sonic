@@ -1528,6 +1528,7 @@ class GlobalSettingsController extends Controller
                 }
             })
             ->addColumn('action', function ($data) {
+                if (session('role_id') == 1 || in_array(537, session('permissions'))) {
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">';
@@ -1540,6 +1541,10 @@ class GlobalSettingsController extends Controller
                     </div>
                   </div>
           ';
+                }else{
+                    $dropdown = '';
+
+          }
                     return $dropdown;
                 
             });
@@ -1641,7 +1646,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function multiple_sale_tagging_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),360);
         $lead_admins = MultipleSaleLead::select('admin_id')->pluck('admin_id')->toArray();
         $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 7)
@@ -1655,6 +1660,10 @@ class GlobalSettingsController extends Controller
 
     public function multiple_sale_tagging_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),361);
+        }
         $multiple_sale_tagging = MultipleSaleLead::leftjoin('admins as a', 'a.id', '=', 'multiple_sale_leads.admin_id')
             ->leftjoin('admins as ua', 'ua.id', '=', 'multiple_sale_leads.updated_by')
             ->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
@@ -1919,6 +1928,7 @@ class GlobalSettingsController extends Controller
 
     public function overnight_overland_cargo_report_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),368);
         $overnight_rad_tat = GlobalSettings::where('type', 'rad_tat_overnight')->first();
         $overland_rad_tat = GlobalSettings::where('type', 'rad_tat_overland')->first();
         return view('admin.settings.overnight_overland_cargo_report.index')->with(['overnight' => $overnight_rad_tat, 'overland' => $overland_rad_tat]);
@@ -1926,6 +1936,11 @@ class GlobalSettingsController extends Controller
 
     public function overnight_overland_cargo_report_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),369);
+        }
+
         $setting = City::leftjoin('admins as a', 'a.id', '=', 'cities.cut_off_time_updated_by')
             ->select('cities.id as origin_id', 'cities.name as origin', 'cities.cut_off_time as cut_off_time', 'cities.cut_off_time_updated_at as updated_at', 'a.name as updated_by')
             ->where('cities.hub', 1);
@@ -2031,11 +2046,16 @@ class GlobalSettingsController extends Controller
 
     public function projection_reason_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),340);
         return view('admin.settings.sales.reasons');
     }
 
     public function projection_reason_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),341);
+        }
         $reasons = BusinessProjectionReason::all(['id', 'name']);
         return Datatables::of($reasons)->make(true);
     }
@@ -2059,7 +2079,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function projection_shipments_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),342);
         $shippers = User::where('status', '>', 1)->select('id', 'name');
 
         if (session('department_id') == 7) {
@@ -2101,6 +2121,10 @@ class GlobalSettingsController extends Controller
 
     public function projection_shipments_list(Request $request)
     {
+    if($request->get('excel') && $request->get('excel') == true)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),343);
+    }
         $shipments = BusinessProjectionShipment::join('users as u', 'u.id', '=', 'business_projection_shipments.user_id')->select('u.name as shipper', 'business_projection_shipments.shipment');
         if (session('department_id') == 7) {
             if (session('role_id') != 4) {
@@ -2847,12 +2871,16 @@ class GlobalSettingsController extends Controller
     }
 
     public function holidays_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),366);
         return view('admin.settings.holidays');
     }
 
-    public function holidays_list()
+    public function holidays_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),367);
+    }
         $holidays = Holiday::leftjoin('admins as a', 'a.id', '=', 'holidays.created_by')
             ->select('holidays.reason as reason', 'holidays.holiday as holiday', 'holidays.created_at as created_at', 'a.name as created_by');
 
@@ -3051,7 +3079,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function restrict_parcels_attempt_index()
-    {
+{        ActivityTrailController::createActivityTrailLog(Auth::id(),356);
         $already_restricted_shippers = RestrictParcelsAttempt::pluck('shipper_id')->toArray();
         $shippers = User::where('status', 3)->whereNotIn('id', $already_restricted_shippers)->get();
         return view('admin.settings.retrun_parcels_after_attempts')->with('shippers', $shippers);
@@ -3059,6 +3087,10 @@ class GlobalSettingsController extends Controller
 
     public function restrict_parcels_attempt_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),357);
+        }
         $restricted_parcels_attempt = RestrictParcelsAttempt::join('users as u', 'u.id', '=', 'restrict_parcels_attempts.shipper_id')
             ->join('admins as a', 'a.id', '=', 'restrict_parcels_attempts.updated_by')
             ->select('restrict_parcels_attempts.id', 'u.name as shipper', 'restrict_parcels_attempts.attempt_days', 'restrict_parcels_attempts.status', 'restrict_parcels_attempts.created_at', 'restrict_parcels_attempts.updated_at', 'a.name as updated_by');
@@ -3640,12 +3672,16 @@ class GlobalSettingsController extends Controller
     }
 
     public function international_rates_upload_index()
-    {
+    {    ActivityTrailController::createActivityTrailLog(Auth::id(),381);
         return view('admin.settings.international.excel_upload');
     }
 
     public function international_standard_dhl_rates_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),382);
+    }
         $rates_list = InternationalStandardDhlRate::select('id', 'range_up', 'range_down', 'zone_1', 'zone_2', 'zone_3', 'zone_4', 'zone_5', 'zone_6', 'zone_7', 'zone_8', 'zone_9', 'zone_10', 'zone_11');
 
         return Datatables::of($rates_list)->make(true);

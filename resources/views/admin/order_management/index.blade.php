@@ -77,6 +77,7 @@
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -929,6 +930,7 @@
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
+                    {data: 'payment_mode', name: 'pm.mode', class: 'align-middle payment_mode'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -952,6 +954,7 @@
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
                     var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
+                    var payment_mode = '<select name="payment_mode" id="payment_mode" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -977,6 +980,12 @@
                                 } ).wrap(td);
                         }else if($(header).is('.payment_status')){
                             $(payment_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true);
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.payment_mode')){
+                            $(payment_mode).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true);
                                 } ).wrap(td);
@@ -1044,6 +1053,22 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    var data6 = $.map({!! $payment_modes !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.mode;
+
+                        return obj;
+                    });
+
+                    $("#payment_mode").prepend('<option value="" selected></option>').select2({
+                        data: data6,
+                        placeholder: "Select Payment Mode",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
                 }
             });

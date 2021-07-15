@@ -26,11 +26,16 @@ class AdminZonalManagementController extends Controller
     }
 
     public function index() {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),346);
         $business_categories = BusinessCategory::all();
         return view('admin.management.zonal.index')->with(['business_categories' => $business_categories]);
     }
 
     public function list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),347);
+        }
         $zones = Zone::leftjoin('business_categories as bc', 'bc.id', '=', 'zones.business_category_id')
             ->select('zones.id', 'zones.created_at', 'zones.updated_at', 'zones.name', 'zones.gst', 'zones.status', 'zones.business_category_id', 'bc.name as business_category');
 

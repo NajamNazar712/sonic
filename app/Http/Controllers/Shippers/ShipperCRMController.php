@@ -6,6 +6,7 @@ use App\Http\Controllers\CRM\CRMCommentController;
 use App\Http\Controllers\CRM\CRMController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
@@ -164,6 +165,8 @@ class ShipperCRMController extends Controller
                 $launched_by = User::find($crm_request->launched_by_id)->name;
             }else if($crm_request->launched_by == 2){
                 $launched_by = SubstituteUser::find($crm_request->launched_by_id)->name;
+            }else if($crm_request->launched_by == 3){
+                $launched_by = RetailUser::find($crm_request->launched_by_id)->name;
             }
             if($crm_request){
                 $settings = GlobalSettings::where('type', 'crm_reopen_count')->first();

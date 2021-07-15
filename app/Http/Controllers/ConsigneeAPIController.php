@@ -289,9 +289,9 @@ class ConsigneeAPIController extends Controller
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
                 }
-                elseif ($consignee_shipment->shipper_status_id == 3){
+                elseif ($consignee_shipment->status_id == 3){
 
-                    $origin_city = City::where('id', $pickup_address->id);
+                    $origin_city = City::where('id', $pickup_address->city_id);
                     if($origin_city->exists()){
                         $origin_city = $origin_city->first();
                         $datum['origin'] = $origin_city->name;
@@ -476,7 +476,6 @@ class ConsigneeAPIController extends Controller
             }
             return response()->json(['status' => 0, 'message' => 'Request For Address Change Has Been Submitted']);
         }
-        return response()->json(['status' => 0, 'message' => 'Failed To Submit']);
     }
 
     public function notification_history(Request $request)
@@ -494,5 +493,31 @@ class ConsigneeAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
         return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+    }
+
+    public function update_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $consignee_info = ConsigneeUser::where('phone_number_1',$request->input('phone_number'));
+            if ($consignee_info->exists()) {
+                $consignee_info = $consignee_info->first();
+                $consignee_info->pin = bcrypt($request->pin);
+                $consignee_info->save();
+                return response()->json(['status' => 0, 'Update_pin_message' => 'PIN Updated Successfully']);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Consignee Not Found']);
+            }
+        }
     }
 }
