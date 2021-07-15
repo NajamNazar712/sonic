@@ -1090,7 +1090,7 @@
                                         distribution_ids.push(value.pid);
                                         total_units = value.items * value.units_per_item;
                                         var total_delivered_units = "<input type='text' value='0' class='form-control text-center total_delivered_units' name='total_delivered_units["+value.pid+"]' id='total_delivered_units["+value.pid+"]' form='distribution_form'>";
-                                        var amount = "<input type='text' readonly value= '"+ value.price +"'  class='form-control text-center amount'  name='amount["+value.pid+"]' id='amount["+value.pid+"]'  > <input type='hidden' value= "+ value.price +"  form='distribution_form'>";
+                                        var amount = "<input type='text' readonly value= '0'  class='form-control text-center amount'  name='amount["+value.pid+"]' id='amount["+value.pid+"]'  > <input type='hidden' value= "+ value.price +"  form='distribution_form'>";
                                         var total_delivered_skus = "<input type='text' value= '0' class='form-control text-center total_delivered_skus' name='total_delivered_skus["+value.pid+"]' id='total_delivered_skus["+value.pid+"]' readonly form='distribution_form'>";
 
 
