@@ -585,7 +585,6 @@ class AdminTrackingController extends Controller
     }
 
     public function cx_quick_tracking_index(){
-        return redirect()->route('admin.access_denied');
         ActivityTrailController::createActivityTrailLog(Auth::id(),272);
         $case_nature = CrmRequestCaseNature::get();
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
