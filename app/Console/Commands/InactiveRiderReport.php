@@ -18,7 +18,7 @@ class InactiveRiderReport extends Command
      *
      * @var string
      */
-    protected $description = 'Inactive Rider For Three or More Report';
+    protected $description = 'Inactive Rider For Two Days or More Report';
 
     /**
      * Create a new command instance.

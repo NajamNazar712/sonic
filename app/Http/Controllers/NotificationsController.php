@@ -7829,6 +7829,7 @@ class NotificationsController extends Controller
 
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
+                    $subject = 'Inactive Rider For Two Days or More Report';
                     $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk'];
                     self::email($subject, $body_updated, $to);
                 }
