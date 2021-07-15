@@ -6789,7 +6789,7 @@ class DeliveryController extends Controller
             $product = array();
             $parcels = ShipmentDistributionProduct::where('shipment_id', $shipment)->get();
             foreach ($parcels as $parcel) {
-                $product[] = ['pid' => $parcel->id, 'type' => $parcel->product->name,'items' => $parcel->items ,'units_per_item' => $parcel->units_per_item,'total_delivered_units' =>$parcel->total_delivered_units,'price' => $parcel->price];
+                $product[] = ['pid' => $parcel->id, 'type' => $parcel->item->name,'items' => $parcel->items ,'units_per_item' => $parcel->units_per_item,'total_delivered_units' =>$parcel->total_delivered_units,'price' => $parcel->price];
 //
             }
            
