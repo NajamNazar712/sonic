@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
@@ -92,7 +93,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use NumberToWords\NumberToWords;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\WalkinFtlInvoice;
 
 class AdminFinanceController extends Controller
@@ -4232,7 +4232,7 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at');
+            ->select('done_payments.user_id as user_id','done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at');
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
@@ -4248,6 +4248,9 @@ class AdminFinanceController extends Controller
         $datatables = Datatables::of($done_payments)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('user_id_padded', function ($done_payment) {
+                return str_pad($done_payment->user_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('done_payments.id', function ($query, $keyword) {
                 return $query->where('done_payments.id', '=', $keyword);
@@ -9357,12 +9360,17 @@ class AdminFinanceController extends Controller
 
     public function ftl_invoice_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),261);
         $company_banks = BanksList::where('affiliate', 1)->get();
         return view('admin.finance.ftl_invoices')->with(['company_banks' => $company_banks]);
     }
 
     public function ftl_invoice_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),262);
+        }
         $invoices = WalkinFtlInvoice::join('ftl_requests as ftlr', 'walkin_ftl_invoices.ftl_request_id', '=', 'ftlr.id')
             ->join('cities as origin', 'ftlr.origin_id', '=', 'origin.id')
             ->join('cities as destination', 'ftlr.destination_id', '=', 'destination.id')

@@ -77,9 +77,11 @@ use App\Http\Models\Rider\RiderTickerImage;
 use App\http\Models\Runner;
 use App\http\Models\RunnerJunction;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use Carbon\Carbon;
@@ -3158,12 +3160,17 @@ class GlobalSettingsController extends Controller
 
     public function runner_report_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),251);
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.runner.index')->with('cities', $cities);
     }
 
     public function runner_report_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),252);
+        }
         $runner_report = Runner::join('admins as a', 'a.id', '=', 'runners.created_by')
             ->select('runners.id as id', 'runners.name as runner', 'runners.created_at', 'a.name as created_by', 'runners.status as status');
         $datatable = Datatables::of($runner_report)
@@ -3819,6 +3826,7 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),244);
         $rider_categories = RiderCategory::whereIn('id', [1, 2])->select('id', 'name')->get();
         $shipment_payment_types = RidersShipmentPaymentType::select('id', 'name')->get();
         $weight_ranges = RidersShipmentWeightRange::select('id', 'name')->get();
@@ -3827,6 +3835,10 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),245);
+        }
         $types = RidersIncentiveSetting::join('rider_categories as rc', 'rc.id', '=', 'riders_incentive_settings.rider_category_id')
             ->join('riders_shipment_payment_types as rspt', 'rspt.id', '=', 'riders_incentive_settings.rider_shipment_payment_type_id')
             ->join('riders_shipment_weight_ranges as rswr', 'rswr.id', '=', 'riders_incentive_settings.rider_shipment_weight_range_id')
@@ -3946,6 +3958,7 @@ class GlobalSettingsController extends Controller
 
     public function rider_incentive_cron_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),241);
         $value = null;
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time')->first();
         if ($settings) {
@@ -3973,6 +3986,7 @@ class GlobalSettingsController extends Controller
 
     public function rcp_tat_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),238);
         $tat_options = RcpTatOption::all();
         return view('admin.settings.rcp_tat_view')->with(['tat_options' => $tat_options]);
     }
@@ -4015,12 +4029,17 @@ class GlobalSettingsController extends Controller
 
     public function fleet_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),246);
         $vehicles = VehicleType::all();
         return view('admin.settings.fleet_index')->with('vehicles', $vehicles);
     }
 
-    public function fleet_list()
+    public function fleet_list(Request $request)
     {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),247);
+        }
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
             ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
@@ -4157,6 +4176,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function route_management_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),248);
         $cities = City::where('status', 1)->where('hub', 1)->get();
         return view('admin.settings.route_management_index')->with('cities', $cities);
     
@@ -4189,9 +4209,12 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with('success', 'Route Updated successfully!');
     }
-    public function route_management_list()
+    public function route_management_list(Request $request)
     {
-        
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),249);
+        }
         $route_management = RouteManagement::leftjoin('cities as stp','route_managements.starting_point_id','stp.id')
         ->leftjoin('cities as endp','route_managements.end_point_id','endp.id')
         ->select('route_managements.id','route_managements.created_at','route_managements.route_code','route_managements.status', 'route_managements.route_title', 'stp.id as starting_id', 'stp.name as starting_name', 'stp.hub_location_latitude as starting_lat', 'stp.hub_location_longitude as starting_long', 'endp.id as end_id', 'endp.name as end_name', 'endp.hub_location_latitude as end_lat', 'endp.hub_location_longitude as end_long')
@@ -4342,5 +4365,75 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function shipment_status_eta_index()
+    {
+        $shipment_status = ShipmentStatus::whereNotIn('id', [1, 17])->where('status', 1)->select(['id', 'name'])->get();
+
+        return view('admin.settings.telenor.shipment_status_eta')->with(['shipment_status' => $shipment_status]);
+    }
+
+    public function shipment_status_eta_list(Request $request)
+    {
+        $shipment_status = TelenorShipmentStatusEstimatedTime::join('shipment_status as ss', 'ss.id', '=', 'telenor_shipment_status_estimated_times.shipper_status_id')
+            ->select('telenor_shipment_status_estimated_times.id', 'telenor_shipment_status_estimated_times.shipper_status_id','ss.name as status_name', 'telenor_shipment_status_estimated_times.eta as eta', 'telenor_shipment_status_estimated_times.updated_at');
+
+        $datatable = Datatables::of($shipment_status)
+            ->addColumn('action', function ($data) {
+                $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                $dropdown .= '<button type="button" class="dropdown-item edit" data-eta="'. $data->eta .'" data-status="' . $data->shipper_status_id .'"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $dropdown .= '
+                    </div>
+                  </div>
+          ';
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+    }
+
+    public function shipment_status_eta_store(Request $request){
+        $status_id = $request->shipment_status_id;
+        $eta = $request->eta;
+
+        if($status_id && $eta){
+            $setting = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $status_id);
+            if($setting->exists()){
+                return response()->json(['status' => 0, 'error' => 'Setting already exists!']);
+            }
+
+            $setting = new TelenorShipmentStatusEstimatedTime();
+            $setting->shipper_status_id = $status_id;
+            $setting->eta = $eta;
+            $setting->save();
+
+            return response()->json(['status' => 1, 'success' => 'Setting Updated Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Some Data missing!']);
+        }
+    }
+
+    public function shipment_status_eta_edit(Request $request){
+        $eta = $request->eta;
+        $id = $request->id;
+        if($eta && $id){
+            $setting = TelenorShipmentStatusEstimatedTime::where('id', $id);
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->eta = $eta;
+                $setting->save();
+
+                return response()->json(['status' => 1, 'success' => 'Setting Updated Successfully!']);
+            }
+            return response()->json(['status' => 0, 'error' => 'Setting does not exists!']);
+
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Some Data missing!']);
+        }
     }
 }

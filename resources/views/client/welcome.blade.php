@@ -72,6 +72,7 @@
                                 <tr class="bg-primary white">
                                     <th class="border-primary border-darken-1"><b>Courier Name</b></th>
                                     <th class="border-primary border-darken-1"><b>Courier Phone</b></th>
+                                    <th class="border-primary border-darken-1"><b>City</b></th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -79,6 +80,7 @@
                                     <tr>
                                         <td><h4>{{$rider->name}}</h4></td>
                                         <td><h4>{{$rider->phone}}</h4></td>
+                                        <td><h4>{{$rider->city}}</h4></td>
                                     </tr>
                                 @endforeach
                                 </tbody>

@@ -349,7 +349,7 @@
                 rowId: 'shId',
                 order: [[1, 'desc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
@@ -362,7 +362,7 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(data.payment_mode_id != 5){
+                    if(data.payment_mode_id != 2){
                         $('td:eq(0)', row).addClass('select-checkbox');
                     }
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);

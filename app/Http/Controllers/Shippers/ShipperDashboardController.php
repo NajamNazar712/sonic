@@ -140,7 +140,9 @@ class ShipperDashboardController extends Controller
             $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
             $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
 
-            $riders = Rider::whereIn('route_id', $routes)->select('phone', 'name')->get();
+            $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
+            ->wherein('riders.route_id',$routes)
+            ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
 
 
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);

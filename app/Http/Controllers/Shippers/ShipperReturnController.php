@@ -305,12 +305,6 @@ class ShipperReturnController extends Controller
                     ShipmentChargesController::return($request->shipment_id);
 
                     AdminFinanceController::add_payment($request->shipment_id, 1);
-//                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-//                    if($return_assign_shipment->exists()){
-//                        $return_assign_shipment = $return_assign_shipment->latest()->first();
-//                        $return_assign_shipment->status = 0;
-//                        $return_assign_shipment->save();
-//                    }
 
                 }
                 else {
@@ -321,6 +315,14 @@ class ShipperReturnController extends Controller
 
 //                NotificationsController::send(15, 0, $request->shipment_id);
 //                NotificationsController::send(16, 0, $request->shipment_id);
+                }
+
+                
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                if($return_assign_shipment->exists()){
+                    $return_assign_shipment = $return_assign_shipment->latest()->first();
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
@@ -362,6 +364,12 @@ class ShipperReturnController extends Controller
 
                     }
 
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                   if($return_assign_shipment){
+                       $return_assign_shipment->status = 0;
+                       $return_assign_shipment->save();
+                   }
+
                 }
 
             }
@@ -401,6 +409,11 @@ class ShipperReturnController extends Controller
                         $last_reason_id = NULL;
                     }
                     ShipmentsJourneyController::add($shipment, 52, 52, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                   if($return_assign_shipment){
+                       $return_assign_shipment->status = 0;
+                       $return_assign_shipment->save();
+                   }
                     if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)){
                         NotificationsController::send(33, $shipment);
                     }
@@ -438,6 +451,13 @@ class ShipperReturnController extends Controller
                         $last_reason_id = NULL;
                     }
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
+                    
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                   if($return_assign_shipment){
+                       $return_assign_shipment->status = 0;
+                       $return_assign_shipment->save();
+                   }
+                   
                     if($journey){
                         NotificationsController::send(33, $request->shipment_id);
                     }
