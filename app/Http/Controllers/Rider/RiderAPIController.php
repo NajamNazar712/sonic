@@ -51,7 +51,6 @@ use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
-use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderTickerImage;
@@ -8122,7 +8121,7 @@ class RiderAPIController extends Controller
 
         }
     }
-
+``
     public function shipment_delivered_v4(Request $request)
     {
         $message = '';
@@ -8365,13 +8364,11 @@ class RiderAPIController extends Controller
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
 
-        $rider_incentives = RidersIncentive::where('rider_id', $rider_id)
-            ->whereBetween('date', [$from_date, $to_date])
-            ->select('pickup_shipments as pickup_shipments, pickup_incentive as pickup_incentive, delivery_shipments as delivery_shipments, delivery_incentive as delivery_incentive');
+        $rider_incentives = DB::table('riders_incentives')
+            ->select(DB::raw('sum(pickup_shipments) as pickup_shipments,sum(pickup_incentive) as pickup_incentive,sum(delivery_shipments) as delivery_shipments,sum(delivery_incentive) as delivery_incentive, sum(pickup_shipments) + sum(delivery_shipments) as total_shipments, sum(pickup_incentive) + sum(delivery_incentive) as total_incentives group by date'))
+            ->where('rider_id', $rider_id);
 
-        return response()->json(["status" => 0, "incentives" => $rider_incentives->get()]);
-
-        if ($to_date != null && $to_date != $from_date) {
+        if ($to_date != null) {
             $rider_incentives = $rider_incentives->whereBetween('date', [$from_date, $to_date]);
         } else {
             $rider_incentives = $rider_incentives->whereDate('date', $from_date);
