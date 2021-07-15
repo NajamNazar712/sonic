@@ -241,6 +241,58 @@
         </div>
     </div>
     <!--Non Service Modal -->
+    <!--Distribution Modal -->
+    <div class="modal fade text-left" id="DistributionModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DistributionModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Distribution</h4>
+                  
+                </div>
+                <div class="modal-body  text-center">
+
+                    <form id="distribution_form" action="{{route('admin.delivery.receive.distribution.submit')}}" method="post">
+                        <table class="table table-bordered datatable" id="distributiontable" style="z-index: 3;">
+                            <thead>
+                            @csrf
+                            @method('PUT')
+                            <tr role="row" class="bg-primary white">
+
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Product Type</th>
+                                <th class="border-primary border-darken-1">Booked Items/SKUs</th>
+                                <th class="border-primary border-darken-1">Booked units per item</th>
+                                <th class="border-primary border-darken-1">Total units</th>
+                                <th class="border-primary border-darken-1">Total Delivered Units</th>
+                                <th class="border-primary border-darken-1">Total Return Units</th>
+                                <th class="border-primary border-darken-1">Total Delivered Items/SKUs</th>
+                                <th class="border-primary border-darken-1">Total Return Items/SKUs</th>
+                                <th class="border-primary border-darken-1">Total Amount</th>
+
+                            </tr>
+                            </thead>
+                        </table>
+                       {{-- <div class="row justify-content-center mb-2">
+                            <div class="col">
+                                <h4><U>Total Collection Amount:</U> Rs: <span id="cod"></span></h4>
+                            </div>
+                        </div>--}}
+                        <input type="hidden" name="distribution_id_list" id="distribution_id_list">
+                        <input type="hidden" name="delivery_note_distribution" id="delivery_note_distribution">
+                        <input type="hidden" name="distribution_shipment_id" id="distribution_shipment_id">
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="DistributionUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Distribution Modal -->
 @endsection
 
 @section('css')
@@ -757,6 +809,7 @@
 
             //on page load ajax
             var trybuy_ids = [];
+            var distribution_ids = [];
             var shipment_id_list = [];
             var shipments_count = $('#shipments_count').val();
             function checkShipmentStatuses(){
@@ -981,13 +1034,232 @@
                             });
 
 
-                        } else if (data.status == 0) {
+                        }
+                        else if (data.status == 4) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+
+                            $('#DistributionModal').modal('show');
+                            // checkShipmentStatuses();
+
+                            $('#distributiontable').append("<tfoot><tr><th colspan='2'>Total:</th><th id='total_booked_items' class='align-middle pl-2'></th><th id='total_booked_units_per_item' class='align-middle pl-2'></th><th id='total_unit' class='align-middle pl-2'></th><th id='total_delivered_units' class='align-middle pl-2'></th><th id='total_return_unit' class='align-middle pl-2'></th><th id='total_delivered_skus' class='align-middle pl-2'></th><th id='total_return_skus' class='align-middle pl-2'></th><th id='amount_total' class='align-middle pl-2'></th></tr></tfoot>");
+                            distribution = $('#distributiontable').DataTable({
+                                dom: 'ltipr',
+                                paging:false,
+
+                                columns: [
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'product_type', class: 'align-middle product_type'},
+                                    {name: 'total_sku', class: 'align-middle total_sku'},
+                                    {name: 'units_per_item', class: 'align-middle units_per_item'},
+                                    {name: 'total_unit', class: 'align-middle total_unit'},
+                                    {name: 'total_delivered_unit', class: 'align-middle total_delivered_unit'},
+                                    {name: 'total_return_unit', class: 'align-middle total_return_unit'},
+                                    {name: 'total_delivered_skus', class: 'align-middle total_delivered_skus'},
+                                    {name: 'total_return_skus', class: 'align-middle total_return_skus'},
+                                    {name: 'total_amount', class: 'align-middle total_amount'},
+
+                                ],
+                                rowCallback: function(row, data, index) {
+                                    var info = distribution.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                }
+                            });
+
+                            //distribution shipment id for modal
+                            $('#distribution_shipment_id').val(data.distribution);
+                            $('#delivery_note_distribution').val(delivery_note);
+                            $.ajax({
+                                url:'{!! route('admin.delivery.receive.distribution') !!}',
+                                type:'POST',
+                                dataType:'json',
+                                data: {
+                                    'delivery_note_id': delivery_note,
+                                    'distribution':data.distribution,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if(data.status == 0){
+                                    var rowNo = distribution.rows().count();
+                                    var total_units = '';
+                                    $.each(data.data,function (key,value){
+                                        distribution_ids.push(value.pid);
+                                        total_units = value.items * value.units_per_item;
+                                        var total_delivered_units = "<input type='text' value='0' class='form-control text-center total_delivered_units' data-rule-required='true' data-msg-required='Delivered Units is required' name='total_delivered_units["+value.pid+"]' id='total_delivered_units["+value.pid+"]' form='distribution_form'>";
+                                        var amount = "<input type='text' readonly value= '0'  class='form-control text-center amount'  name='amount["+value.pid+"]' id='amount["+value.pid+"]'  > <input type='hidden' value= "+ value.price +"  form='distribution_form'>";
+                                        var total_delivered_skus = "<input type='text' value= '0' class='form-control text-center total_delivered_skus' name='total_delivered_skus["+value.pid+"]' id='total_delivered_skus["+value.pid+"]' readonly form='distribution_form'>";
+
+
+                                        distribution.row.add([rowNo+1,value.type,value.items,value.units_per_item,total_units,total_delivered_units,total_units,total_delivered_skus,value.items,amount]).node().id = value.pid;
+                                        distribution.draw(false);
+                                    });
+                                    calculate_total();
+                                }
+                                else if (data.status == 1) {
+                                    $('#DistributionModal').modal('hide');
+                                }
+
+                                $("#distribution_form .total_delivered_units").inputmask({
+                                    'alias': 'integer',
+                                    'allowMinus': false,
+                                    'allowPlus': false,
+                                    'min': 0,
+                                });
+                            });
+
+                        }
+                        else if (data.status == 0) {
 
                         }
                     }
                     shipments_count = shipments_count-1;
                 });
             }
+
+            $('#distributiontable').on('change', ".total_delivered_units", update_distribution);
+
+            function update_distribution() {
+
+                var total_delivered_units = parseInt($(this).val());
+                var currentRow = $(this).closest("tr");
+                var total_units = currentRow.find("td:eq(4)").text();
+                var booked_skus = currentRow.find("td:eq(2)").text();
+                var booked_units_per_item = currentRow.find("td:eq(3)").text();
+                var return_units = total_units - total_delivered_units;
+
+                var total_amount =  currentRow.find("td:eq(9)").find("input[type='hidden']").val();
+
+                if(total_delivered_units > 0 && total_delivered_units <= total_units){
+                    currentRow.find("td:eq(6)").text(return_units);
+                    var new_amount = Math.round((total_amount/total_units) * total_delivered_units);
+                    currentRow.find("td:eq(9)").find("input[type='text']").val(new_amount);
+                    var sku = Math.floor(total_delivered_units/booked_units_per_item);
+                    currentRow.find("td:eq(7)").find("input").val(sku);
+                    var return_sku = booked_skus - (Math.floor(total_delivered_units/booked_units_per_item));
+                    currentRow.find("td:eq(8)").text(return_sku);
+                }
+             else if(total_delivered_units == 0){
+                    currentRow.find("td:eq(9)").find("input[type='text']").val(0);
+                    currentRow.find("td:eq(8)").text(booked_skus);
+                    currentRow.find("td:eq(6)").text(total_units);
+                    currentRow.find("td:eq(7)").find("input[type='text']").val(0);
+                }
+                else if(total_delivered_units > total_units){
+                    toastr.error('Quantity Exceeded!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    $('#DistributionUpdate').prop('disabled', true);
+                }
+
+                validate_flag = true;
+                $('#distributiontable tbody tr').each(function (){
+                    if(parseInt($(this).find("td:eq(5)").find("input[type='text']").val()) > parseInt($(this).find("td:eq(4)").text()))
+                    {
+                        validate_flag = false;
+                    }
+                });
+                if(validate_flag)
+                {
+                    $('#DistributionUpdate').prop('disabled', false);
+                }
+
+                calculate_total();
+            }
+
+            function calculate_total(){
+                var total_booked_items = 0;
+                var total_booked_units_per_item = 0;
+                var total_units = 0;
+                var total_delivered_units = 0;
+                var total_return_units = 0;
+                var total_delivered_skus = 0;
+                var total_return_skus = 0;
+                var amount_total = 0;
+
+                $('#total_booked_items').html('');
+                $('#total_booked_units_per_item').html('');
+                $('#total_unit').html('');
+                $('#total_delivered_units').html('');
+                $('#total_return_unit').html('');
+                $('#total_delivered_skus').html('');
+                $('#total_return_skus').html('');
+                $('#amount_total').html('');
+
+
+                $(".total_sku").each(function() {
+
+                    var value = $(this).text();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_booked_items += parseFloat(value);
+                    }
+                });
+                $('#total_booked_items').html(total_booked_items);
+
+                $(".units_per_item").each(function() {
+
+                    var value = $(this).text();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_booked_units_per_item += parseFloat(value);
+                    }
+                });
+                $('#total_booked_units_per_item').html(total_booked_units_per_item);
+                
+                $(".total_unit").each(function() {
+
+                    var value = $(this).text();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_units += parseFloat(value);
+                    }
+                });
+                $('#total_unit').html(total_units);
+
+                $(".total_delivered_units").each(function() {
+
+                    var value = $(this).val();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_delivered_units += parseFloat(value);
+                    }
+                });
+                $('#total_delivered_units').html(total_delivered_units);
+
+                $(".total_return_unit").each(function() {
+
+                    var value = $(this).text();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_return_units += parseFloat(value);
+                    }
+                });
+                $('#total_return_unit').html(total_return_units);
+
+                $(".total_delivered_skus").each(function() {
+
+                    var value = $(this).val();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_delivered_skus += parseFloat(value);
+                    }
+                });
+                $('#total_delivered_skus').html(total_delivered_skus);
+                
+                $(".total_return_skus").each(function() {
+
+                    var value = $(this).text();
+                    if(!isNaN(value) && value.length != 0) {
+                        total_return_skus += parseFloat(value);
+                    }
+                });
+                $('#total_return_skus').html(total_return_skus);
+
+                $(".amount").each(function() {
+                    var value = $(this).val();
+                    if(!isNaN(value) && value.length != 0) {
+                        amount_total += parseFloat(value);
+                    }
+                });
+                $('#amount_total').html(amount_total);
+            }
+
             checkShipmentStatuses();
 
             $('#items_scan_form input.item_number').inputmask({
@@ -1046,6 +1318,18 @@
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();
+            });
+            $( "#distribution_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('td'));
+                },
+                submitHandler: function(form) {
+                    $('#distribution_id_list').val(distribution_ids);
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    form.submit();
+
+                }
             });
             $( "#replacement_form" ).validate({
                 errorClass:"danger",
@@ -1109,6 +1393,57 @@
                     }
                 });
             });
+
+            $('#trybuy_form').bind('submit',function (e) {
+                // blockPagePermanently();
+                var this_form = this;
+                e.preventDefault();
+                var total = $('#cod').text();
+                total = parseInt(total);
+                var deliverynote_id = $('#delivery_note').val();
+                $('#trybuy_cod').val(total);
+                $('#trybuy_id_list').val(trybuy_ids);
+                var checkbox_count = $('.bought:checked').length;
+                var uncheckbox_count = $('input:checkbox.bought').length;
+                $('#item_checked').val(checkbox_count);
+                $('#item_unchecked').val(uncheckbox_count);
+                $('#delivery_note_trybuy').val(deliverynote_id);
+                // if(checkbox_count > 0){
+                // UnblockPagePermanently();
+
+                // }else{
+                //     UnblockPagePermanently();
+                //     var error = "Select at-least one item!";
+                //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                // }
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to update Try & Buy Delivery!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        this_form.submit();
+                    }
+                });
+            });
+
 
             $('#nsatable').on('change', 'td.remarks input', function () {
                 $(this).val($(this).val().trim());
