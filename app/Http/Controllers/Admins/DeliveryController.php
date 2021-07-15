@@ -54,6 +54,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -2276,6 +2277,20 @@ class DeliveryController extends Controller
                 }
             }
 
+            $regular_shipment = DeliveryNoteShipment::where(['delivery_note_id' => $note_id, 'status' => 6])->get();
+            if($regular_shipment){
+                $distribution_id = null;
+                foreach ($regular_shipment as $regular) {
+                    $regular_data = Shipment::where('id', $regular->shipment_id)->where('user_id',10354)->where('booking_type_id',1);
+                    if($regular_data->exists()){
+                        $regular_data = $regular_data->first();
+                        if(ShipmentDistributionProduct::where('shipment_id',$regular_data->id)->exists()){
+                            $distribution_id = $regular_data->id;
+                        }
+                    }
+                }
+            }
+
             if (!empty($replacement_ids)) {
                 return ['status' => 2, 'success' => 'Shipment is replacement!', 'booking_type' => 2, 'replacement' => $replacement_ids];
             }
@@ -2283,6 +2298,8 @@ class DeliveryController extends Controller
                 return ['status' => 9, 'success' => 'Shipment is Non Service Area!', 'non_service_area_shipments' => $non_service_area_shipments];
             }elseif ($trybuy_id != null) {
                 return ['status' => 3, 'success' => 'Shipment is try and buy!', 'booking_type' => 3, 'try' => $trybuy_id];
+            }elseif ($distribution_id != null) {
+                return ['status' => 6, 'success' => 'Shipment is distribution!', 'booking_type' => 1, 'distribution' => $distribution_id];
             }
         } else {
             return ['status' => 0, 'error' => 'No shipments updated!'];
@@ -6764,4 +6781,53 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0,'error'=> 'Status already approved']);
         }
     }
+
+    public function receive_delivery_get_distribution(Request $request)
+    {
+        $shipment = $request->distribution;
+        if (isset($shipment)) {
+            $product = array();
+            $parcels = ShipmentDistributionProduct::where('shipment_id', $shipment)->get();
+            foreach ($parcels as $parcel) {
+                $product[] = ['pid' => $parcel->id, 'type' => $parcel->product->name,'items' => $parcel->items ,'units_per_item' => $parcel->units_per_item,'total_delivered_units' =>$parcel->total_delivered_units,'price' => $parcel->price];
+//
+            }
+           
+            return ['status' => 0, 'data' => $product];
+        } else {
+            return ['status' => 1, 'error' => 'No Shipment found'];
+        }
+    }
+
+    public function receive_delivery_distribution_submit(Request $request)
+    {
+        $shipment_id = $request->distribution_shipment_id;
+        $note_id = $request->delivery_note_distribution;
+        if (!empty($request->total_delivered_units)) {
+            $total_cod = 0;
+            foreach ($request->total_delivered_units as $id => $value) {
+
+                $shipment_item = ShipmentDistributionProduct::find($id);
+                $shipment_item->total_delivered_units = $value;
+                $shipment_item->total_delivered_skus =  $request->get('total_delivered_skus')[$id];
+                $shipment_item->received_amount =  $request->get('amount')[$id];
+                $shipment_item->save();
+                $total_cod +=  $shipment_item->received_amount;
+            }
+
+            Shipment::where('id', $shipment_id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+          /*  ShipmentsJourneyController::add($shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(), $request->delivery_note_trybuy, NULL, 0);*/
+
+            //ShipmentChargesController::cash_handling($request->trybuy_shipment_id);
+            //DeliveryNoteShipment::where(['shipment_id' => $shipment_id, 'delivery_note_id' =>$note_id])->update(['status' => 5]);
+
+            $delivery_note_data = DeliveryNote::find($note_id);
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->save();
+            return redirect()->back()->with('success', 'Distribution shipment updated');
+        }
+
+    }
+
 }
