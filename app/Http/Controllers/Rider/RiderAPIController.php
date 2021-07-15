@@ -8385,6 +8385,12 @@ class RiderAPIController extends Controller
             }
             $total_shipments = $pickup_shipments + $delivery_shipments;
             $total_incentives = $pickup_incentive + $delivery_incentive;
+            $pickup_shipments = strval($pickup_shipments);
+            $pickup_incentive = strval($pickup_incentive);
+            $delivery_shipments = strval($delivery_shipments);
+            $delivery_incentive = strval($delivery_incentive);
+            $total_shipments = strval($total_shipments);
+            $total_incentives = strval($total_incentives);
             $data = ['pickup_shipments'=>$pickup_shipments, 'pickup_incentive'=>$pickup_incentive, 'delivery_shipments'=>$delivery_shipments, 'delivery_incentive'=>$delivery_incentive,'total_shipments'=>$total_shipments,'total_incentives'=>$total_incentives];
             return response()->json(["status" => 0, "incentives" => $data]);
         } else {
