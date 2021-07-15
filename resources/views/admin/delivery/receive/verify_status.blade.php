@@ -1102,6 +1102,12 @@
                                 else if (data.status == 1) {
                                     $('#DistributionModal').modal('hide');
                                 }
+
+                                $("#distribution_form .total_delivered_units").inputmask({
+                                    'alias': 'integer',
+                                    'allowMinus': false,
+                                    'allowPlus': false
+                                });
                             });
 
                         }
