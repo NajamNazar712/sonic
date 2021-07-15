@@ -1035,7 +1035,7 @@
 
 
                         }
-                        else if (data.status == 6) {
+                        else if (data.status == 4) {
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
                                 containerId: 'toast-bottom-center'
@@ -1098,6 +1098,9 @@
                                         distribution.draw(false);
                                     });
                                     calculate_total();
+                                }
+                                else if (data.status == 1) {
+                                    $('#DistributionModal').modal('hide');
                                 }
                             });
 
@@ -1227,7 +1230,7 @@
                 });
                 $('#total_return_skus').html(total_return_skus);
 
-                $(".total_amount").each(function() {
+                $(".amount").each(function() {
                     var value = $(this).val();
                     if(!isNaN(value) && value.length != 0) {
                         amount_total += parseFloat(value);
