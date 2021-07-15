@@ -1948,6 +1948,80 @@ class ShipperShipmentBookController extends Controller
 
                         $shipment_details .= $distribution_performa_start;
                         $shipment_details .= $distribution_booking_performa;
+
+                        if($shipment->shipment_journey->first()->shipper_status_id == 6)
+                        {
+                            $shipment_details .= $distribution_performa_start;
+
+                            $distribution_delivery_performa = '<table class="table mt-2 table-sm table-bordered border twice">
+                        <tbody>
+                        <tr>
+                            <td colspan="2" class="color primary font-weight-bold">Products</td>
+                            <td class="color primary font-weight-bold">Booked Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Delivered Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Return Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Booked Units Per Item</td>
+                            <td class="color primary font-weight-bold">Booked Total Units</td>
+                            <td class="color primary font-weight-bold">Delivered Total Units</td>
+                            <td class="color primary font-weight-bold">Returned Total Units</td>
+                            <td class="color primary font-weight-bold">Total Amount</td>
+                        </tr>';
+
+
+                            $total_items = 0;
+                            $total_units_per_item = 0;
+                            $total_units = 0;
+                            $total_price = 0;
+                            $total_delivered_items = 0;
+                            $total_returned_items = 0;
+                            $total_delivered_units = 0;
+                            $total_returned_units = 0;
+                            foreach ($shipment->distribution_products as $product)
+                            {
+                                $total_items += $product->items;
+//                                $total_delivered_items = ;
+//                                $total_returned_items = ;
+                                $total_units_per_item += $product->units_per_item;
+                                $total_units += $product->items * $product->units_per_item;
+//                                $total_delivered_units += ;
+//                                $total_returned_units += ;
+//                                $total_price += $product->price;
+
+                                $distribution_delivery_performa .= '
+                                <tr>
+                                    <td colspan="2">'.$product->item->name.'</td>
+                                    <td>'.$product->items.'</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>'.$product->units_per_item.'</td>
+                                    <td>'.$product->items * $product->units_per_item.'</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            ';
+                            }
+
+                            $distribution_delivery_performa .= '
+                                <tr>
+                                    <td colspan="2" class="color primary font-weight-bold">Total</td>
+                                    <td>'.$total_items.'</td>
+                                    <td>'.$total_delivered_items.'</td>
+                                    <td>'.$total_returned_items.'</td>
+                                    <td>'.$total_units_per_item.'</td>
+                                    <td>'.$total_units.'</td>
+                                    <td>'.$total_delivered_units.'</td>
+                                    <td>'.$total_returned_units.'</td>
+                                    <td>'.$total_price.'</td>
+                                </tr>
+                                </tbody>
+                                </table>
+                                </div>
+                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
+
+                            $shipment_details .= $distribution_delivery_performa;
+                        }
                     }
                 }
             }
