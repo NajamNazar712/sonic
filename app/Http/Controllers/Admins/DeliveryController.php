@@ -5298,7 +5298,8 @@ class DeliveryController extends Controller
     }
 
     public function history_index(){
-        return view('admin.delivery.history.index');
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.delivery.history.index')->with(['status' => '1','operation_rider_category' => $operation_rider_category]);
     }
 
     public function history_list(Request $request){
@@ -5312,8 +5313,8 @@ class DeliveryController extends Controller
             ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
             ->leftjoin('rider_deliveries as rd','rd.delivery_note_id','=','delivery_notes.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id','rd.delivered_status as delivered_status','rd.picture_path as picture_path'])
-        ->groupBy('delivery_notes.id');
-
+            ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
+            ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }

@@ -3943,13 +3943,14 @@ class AdminReportsController extends Controller
         $call_verification_report = DB::connection('reports')->table('delivery_notes')->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('admins as ad','ad.id','=','delivery_notes.verified_by')
+            ->join('cities as c','c.hub_id','=', 'delivery_notes.hub_id')
             ->join('shipments_journey as sj', function($join){
                 $join->on('sj.shipment_id', '=', 'dns.shipment_id')
                     ->where('sj.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = dns.shipment_id and shipments_journey.reference_1_id = dns.delivery_note_id and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
-            ->select('sj.shipper_status_id as shipper_status_id','s.id as ship_id','s.tracking_number as tracking_no','s.tracking_number as tracking_number','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_verified_by','delivery_notes.status_verified_at as status_verified_at','dns.call_verification as call_verification_status')->where('delivery_notes.verified_by','!=',null);
+            ->select('c.name as hub_name','sj.shipper_status_id as shipper_status_id','s.id as ship_id','s.tracking_number as tracking_no','s.tracking_number as tracking_number','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_verified_by','delivery_notes.status_verified_at as status_verified_at','dns.call_verification as call_verification_status')->where('delivery_notes.verified_by','!=',null);
         $datatable = Datatables::of($call_verification_report)
             ->editcolumn('call_verification_status', function ($data){
                 if($data->call_verification_status==0){
@@ -4071,7 +4072,8 @@ class AdminReportsController extends Controller
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id','mode']);
-        return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes]);
+        $zones = DB::table('zones')->get();
+        return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs, 'shipping_modes' => $shipping_modes,'zones' => $zones]); 
     }
 
     public function fake_status_list(request $request){
@@ -4083,7 +4085,8 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
-            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::connection('reports')->raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
+            ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
+            ->select('z.name as zone_name','r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::connection('reports')->raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
             ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
 
 
