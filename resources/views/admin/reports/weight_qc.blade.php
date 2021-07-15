@@ -54,7 +54,7 @@
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
                             <select name="weighted_as" id="weighted_as" class="form-control select2">
-                                <option value="1">Dimensional</option>
+                                <option value="1">Dense</option>
                                 <option value="2">Volumetric</option>
                             </select>
                         </fieldset>
@@ -97,6 +97,8 @@
                             <th class="border-primary border-darken-1">Shipping Mode</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Booking Date</th>
+                            <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
                             <th class="border-primary border-darken-1">Arrival Weight (B)</th>
                             <th class="border-primary border-darken-1">Difference (A-B)</th>
@@ -251,6 +253,8 @@
                             head.push('Shipping Mode');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Booking Date');
+                            head.push('Arrival Date');
                             head.push('Weight Input by Shipper (A)');
                             head.push('Arrival Weight (B)');
                             head.push('Difference (A-B)');
@@ -266,6 +270,8 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.booking_date);
+                                row.push(values.arrival_date);
                                 row.push(values.estimated_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
@@ -313,7 +319,7 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[1, 'desc']],
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -321,6 +327,8 @@
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle text-center shipping_mode'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle text-center origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle text-center destination'},
+                    { data:'booking_date' ,name: 'bkg_date.created_at', class: 'align-middle text-center booking_date'},
+                    { data:'arrival_date' ,name: 'arv_date.created_at', class: 'align-middle text-center arrival_date'},
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},

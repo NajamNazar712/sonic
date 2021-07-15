@@ -2179,6 +2179,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('operation_service_level')->name('operation_service_level.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@operation_service_level_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@operation_service_level_list')->name('list');
+        });
         Route::prefix('work_code_master')->name('work_code_master.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@work_code_master_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@work_code_master_list')->name('list');
@@ -2665,6 +2669,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing_time_setting')->name('debriefing_time_setting.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_time_setting_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
+        });
+
+        Route::prefix('shipment_status_eta')->name('shipment_status_eta.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipment_status_eta_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@shipment_status_eta_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@shipment_status_eta_store')->name('store');
+            Route::post('edit', 'Admins\GlobalSettingsController@shipment_status_eta_edit')->name('edit');
         });
 
     });

@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminERFController extends Controller
 {
@@ -36,12 +37,17 @@ class AdminERFController extends Controller
     }
 
     public function index(){
-       
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),257);
         $erf_status = EmployeeRequisitionStatus::select('id','name')->get();
         return view('admin.human_resource.erf.index')->with(['erf_status' => $erf_status]);
     }
 
     public function list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),258);
+        }
         $erf = EmployeeRequisition::join('admins as a', 'a.id', '=', 'employee_requisitions.department_head_id')
             ->join('cities as c', 'c.id', '=', 'employee_requisitions.city_id')
             ->join('cities as h', 'h.id', '=', 'employee_requisitions.hub_id')
@@ -124,6 +130,8 @@ class AdminERFController extends Controller
     }
 
     public function add(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),263);
         $cities = City::where('status',1)->where('business_category_id',1)->select('id','name')->get();
         $hubs =  City::where('hub',1)->select('id','name')->get();
         if (session('role_id') == 1 || session('department_id') == 10) {

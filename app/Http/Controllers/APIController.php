@@ -18,8 +18,12 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentReason;
 use App\http\Models\ShipmentShipperReference;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Models\Admin\Admin;
@@ -2007,17 +2011,15 @@ class APIController extends Controller
             }
 
             foreach ($shipment->shipment_journey as $journey) {
-                if ($journey->consignee_status_id != NULL) {
-                    if ($journey->verification) {
-                        $journey_details = array();
+                if ($journey->verification) {
+                    $journey_details = array();
 
-                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                        $journey_details['status'] = $journey->shipment_status_consignee->name;
+                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                    $journey_details['status'] = $journey->shipment_status_consignee->name;
 
-                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
-                        $details['tracking_history'][] = $journey_details;
-                    }
+                    $details['tracking_history'][] = $journey_details;
                 }
             }
 
@@ -3431,6 +3433,74 @@ class APIController extends Controller
                 $employee_device_token->delete();
             }
             return response()->json(['status' => 0, 'message' => 'Device Token Deleted']);
+        }
+    }
+
+    public function shipment_status_eta(Request $request){
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+                $query->where('user_id', $user_id);
+            })]
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+            if (!$shipment_journey) {
+                return response()->json(['status' => 1, 'message' => 'No data found!']);
+            }
+
+            $current_status_id = $shipment_journey->shipper_status_id;
+            $current_status_time = $shipment_journey->created_at;
+            $current_reason_id = $shipment_journey->status_reason_id;
+
+            $details = array();
+
+            $duration = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $current_status_id);
+            if($duration->exists()){
+                $duration = $duration->first();
+                $estimated_eta = $duration->eta;
+
+                $actual_eta = Carbon::now()->diffInDays($current_status_time);
+
+                $difference_eta = $estimated_eta - $actual_eta;
+                if($difference_eta < 0){
+                    $difference_eta = 0;
+                }
+                $details['tracking_number'] = $tracking_number;
+                $details['status'] = ShipmentStatus::find($current_status_id)->name;
+                $details['ETA'] = $difference_eta . ' days';
+
+                if($difference_eta == 0){
+                    if($current_reason_id != NULL){
+                        $details['reason'] = ShipmentStatusReason::find($current_reason_id)->name . '. Please call us at 021-111-118-729 for queries and updates.';
+                    }
+                    else{
+                        $details['reason'] = '';
+                    }
+                }
+
+            }
+
+            if (!empty($details)) {
+                return response()->json(['status' => 0, 'message' => 'ETA of Shipment #' . $tracking_number, 'details' => $details]);
+            }
+            else {
+                return response()->json(['status' => 1, 'message' => 'No data found!']);
+            }
         }
     }
 }
