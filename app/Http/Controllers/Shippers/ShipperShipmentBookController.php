@@ -1949,7 +1949,7 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $distribution_performa_start;
                         $shipment_details .= $distribution_booking_performa;
 
-                        if($shipment->shipment_journey->first()->shipper_status_id == 6)
+                        if($shipment->shipment_journey->first()->shipper_status_id == 14)
                         {
                             $shipment_details .= $distribution_performa_start;
 
