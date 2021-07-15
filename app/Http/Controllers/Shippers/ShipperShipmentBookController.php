@@ -1979,25 +1979,25 @@ class ShipperShipmentBookController extends Controller
                             foreach ($shipment->distribution_products as $product)
                             {
                                 $total_items += $product->items;
-//                                $total_delivered_items = ;
-//                                $total_returned_items = ;
+                                $total_delivered_items = $product->total_delivered_skus;
+                                $total_returned_items = $product->items - $product->total_delivered_skus;
                                 $total_units_per_item += $product->units_per_item;
                                 $total_units += $product->items * $product->units_per_item;
-//                                $total_delivered_units += ;
-//                                $total_returned_units += ;
-//                                $total_price += $product->price;
+                                $total_delivered_units += $product->total_delivered_units;
+                                $total_returned_units += ($product->items * $product->units_per_item) - $product->total_delivered_units;
+                                $total_price += $product->received_amount;
 
                                 $distribution_delivery_performa .= '
                                 <tr>
                                     <td colspan="2">'.$product->item->name.'</td>
                                     <td>'.$product->items.'</td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>'.$product->total_delivered_skus.'</td>
+                                    <td>'.$product->items - $product->total_delivered_skus.'</td>
                                     <td>'.$product->units_per_item.'</td>
                                     <td>'.$product->items * $product->units_per_item.'</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>'.$product->total_delivered_units.'</td>
+                                    <td>'.($product->items * $product->units_per_item) - $product->total_delivered_units.'</td>
+                                    <td>'.$product->received_amount.'</td>
                                 </tr>
                             ';
                             }
