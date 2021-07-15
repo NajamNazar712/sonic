@@ -8365,6 +8365,7 @@ class RiderAPIController extends Controller
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
         $rider_incentives = RidersIncentive::where('rider_id', $rider_id);
+        var_dump($to_date);
         /*$rider_incentives = DB::table('riders_incentives')
             ->select(DB::raw('sum(pickup_shipments) as pickup_shipments,sum(pickup_incentive) as pickup_incentive,sum(delivery_shipments) as delivery_shipments,sum(delivery_incentive) as delivery_incentive, sum(pickup_shipments) + sum(delivery_shipments) as total_shipments, sum(pickup_incentive) + sum(delivery_incentive) as total_incentives group by date'))
             ->where('rider_id', $rider_id);*/
