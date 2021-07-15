@@ -1132,7 +1132,7 @@
 
                 var total_amount =  currentRow.find("td:eq(9)").find("input[type='hidden']").val();
 
-                if(total_delivered_units > 0 && total_delivered_units < total_units){
+                if(total_delivered_units > 0 && total_delivered_units <= total_units){
                     currentRow.find("td:eq(6)").text(return_units);
                     var new_amount = Math.round((total_amount/total_units) * total_delivered_units);
                     currentRow.find("td:eq(9)").find("input[type='text']").val(new_amount);
