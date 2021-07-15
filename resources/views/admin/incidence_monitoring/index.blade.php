@@ -279,7 +279,7 @@
                             if(data.status){
                                 $('#tagged_to').html('');
                                 $.each(data.agents, function (index, agent) {
-                                    $('#tagged_to').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
+                                    $('#tagged_to').append('<option value="'+agent.id+'" >'+agent.name+'('+agent.role_name+')</option>')
                                 });
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

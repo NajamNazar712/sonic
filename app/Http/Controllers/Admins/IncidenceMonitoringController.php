@@ -49,15 +49,21 @@ class IncidenceMonitoringController extends Controller
         $hubs = City::where('hub', 1)->where('status', 1)->get();
         $admins = Admin::where('status', 1)->whereIn('role_id', [8,9,10,3])->get();
         $zones =  Zone::where('business_category_id',1)->select('id', 'name')->get();
-       
+        ActivityTrailController::createActivityTrailLog(Auth::id(),394);
         return view('admin.incidence_monitoring.index', compact('monitoring_areas', 'case_natures', 'nc_levels', 'stations','zones','hubs','status','admins'));
     }
 
     public function get_managers(Request $request){
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
         if(count($admin_ids) > 0){
+            $agents = AdminRole::join('admins as ad','ad.role_id','=','admin_roles.id')
+            ->whereIn('ad.id', $admin_ids)
+            ->whereIn('ad.role_id',[8,9,10,3])
+            ->where('ad.status',1)
+            ->select(['ad.id as id','ad.name as name','admin_roles.name as role_name'])
+            ->get();
 
-            $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9,10,3])->where('status',1)->get();
+            // $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9,10,3])->where('status',1)->get();
            
             return response()->json(['status' => 1, 'agents' => $agents]);
         }
@@ -209,7 +215,7 @@ class IncidenceMonitoringController extends Controller
         $images_count = $report->images->count();
 
         if($report){
-            
+            ActivityTrailController::createActivityTrailLog(Auth::id(),395);
             return view('admin.incidence_monitoring.view_report',compact('report', 'images_count'));
         }else{
             return redirect()->back()->with('danger', 'Incidence Monitoring Report Not found!');
@@ -339,7 +345,13 @@ class IncidenceMonitoringController extends Controller
         $incidence_monitoring = IncidenceMonitoring::find($id);
         $admin_ids = AdminHub::where('hub_id',$incidence_monitoring->station_id)->pluck('admin_id')->toArray();
         if(count($admin_ids) > 0){
-            $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9,10,3])->where('status',1)->get();
+            $agents = AdminRole::join('admins as ad','ad.role_id','=','admin_roles.id')
+            ->whereIn('ad.id', $admin_ids)
+            ->whereIn('ad.role_id',[8,9,10,3])
+            ->where('ad.status',1)
+            ->select(['ad.id as id','ad.name as name','admin_roles.name as role_name'])
+            ->get();
+            // $agents = Admin::whereIn('id', $admin_ids)->whereIn('role_id',[8,9,10,3])->where('status',1)->get();
         }
         $monitoring_areas = IncidenceMonitoringArea::all();
         $case_natures = IncidenceMonitoringCaseNature::all();

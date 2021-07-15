@@ -60,7 +60,7 @@
 <div class="form-group">
     <select class="form-control select2" name="tagged_to_edit[]"  multiple="multiple" id="tagged_to_edit" data-rule-required="true" data-msg-required="Select Manager is required">
         @foreach($all_persons as $all_person)
-        <option value="{{$all_person->admin_id}}">{{$all_person->admin->name}}</option>
+        <option value="{{$all_person->admin_id}}">{{$all_person->admin->name}}({{$all_person->admin->role->name}})</option>
      @endforeach
     </select>
 </div>
@@ -129,7 +129,7 @@
     $(document).ready(function () {
 
         var data_11 = $.map({!! $agents !!}, function (obj) {
-                        obj.text = obj.name;
+                        obj.text = obj.name+'('+obj.role_name+')';
 
                         return obj;
                     });
@@ -144,7 +144,7 @@
             });
             var datra = @json($incidence_monitoring_tagged_persons);
             $('#tagged_to_edit').val(datra).trigger('change');
-
+            
            
 
             $('#station_edit').prepend('<option value="" selected="selected"></option>').select2({
@@ -223,7 +223,7 @@
                             if(data.status){
                                 $('#tagged_to_edit').html('');
                                 $.each(data.agents, function (index, agent) {
-                                    $('#tagged_to_edit').append('<option value="'+agent.id+'" >'+agent.name+'</option>')
+                                    $('#tagged_to_edit').append('<option value="'+agent.id+'" >'+agent.name+'('+agent.role_name+')</option>')
                                 });
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
