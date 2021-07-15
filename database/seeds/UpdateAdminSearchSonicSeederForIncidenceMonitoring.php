@@ -12,7 +12,7 @@ class UpdateAdminSearchSonicSeederForIncidenceMonitoring extends Seeder
     public function run()
     {
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality Assurance > Incidence Monitoring', 'url'=>'admin.retail.accounts.index', 'permission_id' => 535));
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality Assurance > Incidence Monitoring', 'url'=>'admin.incidence_monitoring.index', 'permission_id' => 535));
         
     }
 }
