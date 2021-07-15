@@ -846,11 +846,11 @@ class ReturnController extends Controller
                         $shipment_details->consignee_status_id = 13;
                         ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
-//                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
-//                        if($return_assign_shipment){
-//                            $return_assign_shipment->status = 0;
-//                            $return_assign_shipment->save();
-//                        }
+                       $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
+                       if($return_assign_shipment){
+                           $return_assign_shipment->status = 0;
+                           $return_assign_shipment->save();
+                       }
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
 
