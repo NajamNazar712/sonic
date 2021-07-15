@@ -1511,19 +1511,30 @@
                                 </ul>
                             </li>
                         @endif
-                            @if (session('role_id') == 1 || count(array_intersect([491, 494], session('permissions'))) !== 0)
-                                <li class=" nav-item"><a href="#"><span class="menu-title">HR</span></a>
-                                    <ul class="menu-content">
-                                        @if (session('role_id') == 1 || in_array(491, session('permissions')))
-                                            <li class=" nav-item"><a href="{{route('admin.settings.hr.rider_incentive.index')}}"><span class="menu-title">Rider Incentive</span></a> </li>
-                                        @endif
+                        @if (session('role_id') == 1 || count(array_intersect([491, 494], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">HR</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(491, session('permissions')))
+                                        <li class=" nav-item"><a href="{{route('admin.settings.hr.rider_incentive.index')}}"><span class="menu-title">Rider Incentive</span></a> </li>
+                                    @endif
 
-                                        @if (session('role_id') == 1 || in_array(494, session('permissions')))
-                                            <li class=" nav-item"><a href="{{route('admin.settings.hr.rider_incentive.cron.index')}}"><span class="menu-title">Rider Incentive Cron</span></a> </li>
-                                        @endif
-                                    </ul>
-                                </li>
-                            @endif
+                                    @if (session('role_id') == 1 || in_array(494, session('permissions')))
+                                        <li class=" nav-item"><a href="{{route('admin.settings.hr.rider_incentive.cron.index')}}"><span class="menu-title">Rider Incentive Cron</span></a> </li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
+
+                        @if (session('role_id') == 1 || count(array_intersect([534], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Telenor</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(534, session('permissions')))
+                                        <li class=" nav-item"><a href="{{route('admin.settings.shipment_status_eta.index')}}"><span class="menu-title">Shipment Status ETA</span></a> </li>
+                                    @endif
+
+                                </ul>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -1582,6 +1593,15 @@
                         @endif
                    
 
+                </ul>
+            </li>
+            @endif
+            @if (session('role_id') == 1 || count(array_intersect([535], session('permissions'))) !== 0)
+            <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Quality Assurance</span></a>
+                <ul class="menu-content">
+                    @if (session('role_id') == 1 || in_array(535, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.incidence_monitoring.index')}}">Incidence Monitoring</a></li>
+                    @endif
                 </ul>
             </li>
             @endif

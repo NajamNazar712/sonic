@@ -132,7 +132,7 @@
                                                         </div>
                                                         <div class="col-3">
                                                          {{--   <input type="text" id="other_cost_type" class="form-control" placeholder="Other Cost Type">--}}
-                                                            <select class="form-control select2" id="cost_type" name="cost_type" data-rule-required="true" data-msg-required="Cost Type is required">
+                                                            <select class="form-control select2" id="cost_type" name="cost_type">
                                                                 @foreach($cost_types as $cost_type)
                                                                     <option value="{{$cost_type->name}}">{{$cost_type->name}}</option>
                                                                 @endforeach
