@@ -8372,7 +8372,7 @@ class RiderAPIController extends Controller
             var_dump(1);
             $rider_incentives = $rider_incentives->whereBetween('date', [$from_date, $to_date]);
         } else {
-            var_dump(12;
+            var_dump(12);
             $rider_incentives = $rider_incentives->whereDate('date', $from_date);
         }
 
