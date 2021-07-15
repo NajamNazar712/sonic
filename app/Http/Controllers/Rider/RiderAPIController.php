@@ -8368,7 +8368,7 @@ class RiderAPIController extends Controller
             ->select(DB::raw('sum(pickup_shipments) as pickup_shipments,sum(pickup_incentive) as pickup_incentive,sum(delivery_shipments) as delivery_shipments,sum(delivery_incentive) as delivery_incentive, sum(pickup_shipments) + sum(delivery_shipments) as total_shipments, sum(pickup_incentive) + sum(delivery_incentive) as total_incentives'))
             ->where('rider_id', $rider_id);
 
-        if ($to_date != null) {
+        if ($to_date != null && $to_date != $from_date) {
             $rider_incentives = $rider_incentives->whereBetween('date', [$from_date, $to_date]);
         } else {
             $rider_incentives = $rider_incentives->whereDate('date', $from_date);
