@@ -1094,7 +1094,7 @@
                                         var total_delivered_skus = "<input type='text' value= '0' class='form-control text-center total_delivered_skus' name='total_delivered_skus["+value.pid+"]' id='total_delivered_skus["+value.pid+"]' readonly form='distribution_form'>";
 
 
-                                        distribution.row.add([rowNo+1,value.type,value.items,value.units_per_item,total_units,total_delivered_units,0,total_delivered_skus,0,amount]).node().id = value.pid;
+                                        distribution.row.add([rowNo+1,value.type,value.items,value.units_per_item,total_units,total_delivered_units,total_units,total_delivered_skus,value.items,amount]).node().id = value.pid;
                                         distribution.draw(false);
                                     });
                                     calculate_total();
