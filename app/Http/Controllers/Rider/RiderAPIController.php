@@ -8364,25 +8364,32 @@ class RiderAPIController extends Controller
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
-        $rider_incentives = RidersIncentive::where('rider_id', $rider_id)
-            ->whereBetween('date', [$from_date.' 00:00:00', $to_date.' 23:59:59'])
-            ->get();
-        return response()->json(["status" => 0, "incentives" => $rider_incentives]);
-        /*$rider_incentives = DB::table('riders_incentives')
-            ->select(DB::raw('sum(pickup_shipments) as pickup_shipments,sum(pickup_incentive) as pickup_incentive,sum(delivery_shipments) as delivery_shipments,sum(delivery_incentive) as delivery_incentive, sum(pickup_shipments) + sum(delivery_shipments) as total_shipments, sum(pickup_incentive) + sum(delivery_incentive) as total_incentives group by date'))
-            ->where('rider_id', $rider_id);*/
+        $rider_incentives = RidersIncentive::where('rider_id', $rider_id);
         if ($to_date) {
-            $rider_incentives = $rider_incentives->whereBetween('date', [$from_date, $to_date]);
+            $rider_incentives = $rider_incentives->whereBetween('date', [$from_date.' 00:00:00', $to_date.' 23:59:59']);
         } else {
             $rider_incentives = $rider_incentives->whereDate('date', $from_date);
         }
         if ($rider_incentives->exists()) {
             $rider_incentives = $rider_incentives->get();
-            return response()->json(["status" => 0, "incentives" => $rider_incentives]);
+            $pickup_shipments = 0;
+            $pickup_incentive = 0;
+            $delivery_shipments = 0;
+            $delivery_incentive = 0;
+            foreach($rider_incentives as $rider_incentive)
+            {
+                $pickup_shipments += $rider_incentive->pickup_shipments;
+                $pickup_incentive += $rider_incentive->pickup_incentive;
+                $delivery_shipments += $rider_incentive->delivery_shipments;
+                $delivery_incentive += $rider_incentive->delivery_incentive;
+            }
+            $total_shipments = $pickup_shipments + $delivery_shipments;
+            $total_incentives = $pickup_incentive + $delivery_incentive;
+            $data = ['pickup_shipments'=>$pickup_shipments, 'pickup_incentive'=>$pickup_incentive, 'delivery_shipments'=>$delivery_shipments, 'delivery_incentive'=>$delivery_incentive,'total_shipments'=>$total_shipments,'total_incentives'=>$total_incentives];
+            return response()->json(["status" => 0, "incentives" => $data]);
         } else {
             return response()->json(["status" => 1, "message" => "Incentives Not Found found!"]);
         }
-
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
