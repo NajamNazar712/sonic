@@ -7787,49 +7787,18 @@ class NotificationsController extends Controller
                 }
                 else if($id == 140){
                     $date = $reference_1_id;
-                    $deliveries = Rider::join('rider_deliveries', 'rider_deliveries.rider_id','=','riders.id')
-                        ->join('cities' , 'cities.id' , '=' , 'riders.city_id')
-                        ->select('riders.id as rider_id','riders.name as rider_name','cities.name as city_name','rider_deliveries.created_at as rider_delivery_created','riders.phone as phone_no','riders.cnic as cnic_no','rider_type_id as rider_type')
-                        ->whereDate( 'rider_deliveries.created_at','<=', $date)
-                        ->where('riders.status','==',1)
+                    $deliveries = Rider::join('cities' , 'cities.id' , '=' , 'riders.city_id')
+                          ->join('delivery_notes',function($join){
+                              $join->on('delivery_notes.rider_id','=','riders.id')
+                                  ->where('delivery_notes.created_at','=',DB::raw('(select max(created_at) from delivery_notes where delivery_notes .rider_id= riders.id)'));
+                          })
+                        ->select('riders.id as rider_id','riders.name as rider_name','cities.name as city_name','delivery_notes.created_at as rider_delivery_created','riders.phone as phone_no','riders.cnic as cnic_no','rider_type_id as rider_type')
+                        ->whereDate( 'delivery_notes.created_at','<=', $date)
+                        ->where('riders.status',1)
                         ->groupBy('rider_id')
                         ->get();
 
-
-                    $pickups = Rider::join('v2_pickup_requests', 'v2_pickup_requests.current_rider_id','=','riders.id')
-                        ->join('cities' , 'cities.id' , '=' , 'riders.city_id')
-                        ->select('riders.id as rider_id','riders.name as rider_name','cities.name as city_name','riders.phone as phone_no','riders.cnic as cnic_no','rider_type_id as rider_type')
-                        ->whereDate( 'v2_pickup_requests.created_at','<=', $date)
-                        ->groupBy('rider_id')
-//                        ->where('riders.status','==',1)
-                        ->get();
-                    $pickup_rider_report = V2RiderPickup::get();
-                    $html = '<h3>PickUp Rider(s) </h3>';
-                    $html .= '<table style="width:100%;">';
-                    $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
-                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
-                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">City</th>';
-                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
-                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
-                    $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Type</th>';
-                    $html .= '</tr></thead><tbody>';
-                    foreach ($pickups as $pickup){
-                        if($pickup->rider_type == 2)
-                            {$type = "Incentive";}
-                        else
-                            {$type = "Perminent";}
-                            $html .='<tr>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->rider_id.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->rider_name.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->city_name.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->phone_no.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->cnic_no.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$type.'</td></tr>';
-
-                    }
-                    $html .='</tbody></table>';
-
-                    $html .= '<h3>Delivery Rider(s) </h3>';
+                    $html = '<h3>Delivery Rider(s) </h3>';
                     $html .= '<table style="width:100%;">';
                     $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
@@ -7841,10 +7810,10 @@ class NotificationsController extends Controller
                     $a = 0;
 
                     foreach ($deliveries as $delivery){
-                        if($pickup->rider_type == 2)
+                        if($delivery->rider_type == 2)
                         {$type = "Incentive";}
                         else
-                        {$type = "Perminent";}
+                        {$type = "Permanent";}
                             $html .='<tr>';
                             $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delivery->rider_id.'</td>';
                             $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delivery->rider_name.'</td>';
