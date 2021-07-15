@@ -7791,17 +7791,18 @@ class NotificationsController extends Controller
                         ->join('cities' , 'cities.id' , '=' , 'riders.city_id')
                         ->select('riders.id as rider_id','riders.name as rider_name','cities.name as city_name','rider_deliveries.created_at as rider_delivery_created','riders.phone as phone_no','riders.cnic as cnic_no','rider_type_id as rider_type')
                         ->whereDate( 'rider_deliveries.created_at','<=', $date)
-                        ->where('riders.status','==',1)
+                        ->where('riders.status',1)
                         ->groupBy('rider_id')
                         ->get();
 
 
+
                     $pickups = Rider::join('v2_pickup_requests', 'v2_pickup_requests.current_rider_id','=','riders.id')
                         ->join('cities' , 'cities.id' , '=' , 'riders.city_id')
-                        ->select('riders.id as rider_id','riders.name as rider_name','cities.name as city_name','riders.phone as phone_no','riders.cnic as cnic_no','rider_type_id as rider_type')
+                        ->select('riders.id as rider_id','riders.name as rider_name','cities.name as city_name','riders.status as status','riders.phone as phone_no','riders.cnic as cnic_no','rider_type_id as rider_type')
                         ->whereDate( 'v2_pickup_requests.created_at','<=', $date)
+                        ->where('riders.status', 1)
                         ->groupBy('rider_id')
-//                        ->where('riders.status','==',1)
                         ->get();
                     $pickup_rider_report = V2RiderPickup::get();
                     $html = '<h3>PickUp Rider(s) </h3>';
@@ -7817,7 +7818,7 @@ class NotificationsController extends Controller
                         if($pickup->rider_type == 2)
                             {$type = "Incentive";}
                         else
-                            {$type = "Perminent";}
+                            {$type = "Permanent";}
                             $html .='<tr>';
                             $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->rider_id.'</td>';
                             $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$pickup->rider_name.'</td>';
@@ -7844,7 +7845,7 @@ class NotificationsController extends Controller
                         if($pickup->rider_type == 2)
                         {$type = "Incentive";}
                         else
-                        {$type = "Perminent";}
+                        {$type = "Permanent";}
                             $html .='<tr>';
                             $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delivery->rider_id.'</td>';
                             $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$delivery->rider_name.'</td>';
