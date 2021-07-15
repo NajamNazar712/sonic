@@ -1996,7 +1996,7 @@ class ShipperShipmentBookController extends Controller
                                     <td>'.$product->units_per_item.'</td>
                                     <td>'.($product->items * $product->units_per_item).'</td>
                                     <td>'.$product->total_delivered_units.'</td>
-                                    <td>'.($product->items * $product->units_per_item) - $product->total_delivered_units.'</td>
+                                    <td>'.(($product->items * $product->units_per_item) - $product->total_delivered_units).'</td>
                                     <td>'.$product->received_amount.'</td>
                                 </tr>
                             ';
