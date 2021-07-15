@@ -1865,8 +1865,8 @@ class ShipperShipmentBookController extends Controller
 
                         $distribution_performa_start .= '
                         <tr>
-                            <td colspan="3" class="color primary font-weight-bold">Shipper</td>
-                            <td colspan="2" class="color primary font-weight-bold">Consignee</td>
+                            <td colspan="3" class="color primary font-weight-bold text-center">Shipper</td>
+                            <td colspan="2" class="color primary font-weight-bold text-center">Consignee</td>
                         </tr>
                         ';
 
