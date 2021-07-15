@@ -241,7 +241,7 @@
                                                                     @endforeach
                                                                 </select>
 
-                                                                <input type="text" class="form-control mt-2 production_type_new d-none" name="product_type_new" placeholder="Enter Product Name" >
+                                                                <input type="text" class="form-control mt-2 production_type_new d-none" data-rule-required="true" data-msg-required="Product Name is Required" name="product_type_new" placeholder="Enter Product Name" >
                                                             </div>
 
                                                             <div class="form-group input-group">
