@@ -1120,6 +1120,7 @@
                 var total_delivered_units = parseInt($(this).val());
                 var currentRow = $(this).closest("tr");
                 var total_units = currentRow.find("td:eq(4)").text();
+                var booked_skus = currentRow.find("td:eq(2)").text();
                 var booked_units_per_item = currentRow.find("td:eq(3)").text();
                 var return_units = total_units - total_delivered_units;
                 currentRow.find("td:eq(6)").text(return_units);
@@ -1129,14 +1130,17 @@
                 if(total_delivered_units > 0 && total_delivered_units < total_units){
                     var new_amount = Math.round((total_amount/total_units) * total_delivered_units);
                     currentRow.find("td:eq(9)").find("input[type='text']").val(new_amount);
-                    var sku = Math.round(total_delivered_units/booked_units_per_item);
+                    var sku = Math.floor(total_delivered_units/booked_units_per_item);
                     currentRow.find("td:eq(7)").find("input").val(sku);
-                    var return_sku = (Math.floor(total_units/total_delivered_units)) - sku;
+                    var return_sku = booked_skus - (Math.floor(total_delivered_units/booked_units_per_item));
                     currentRow.find("td:eq(8)").text(return_sku);
                     $('#DistributionUpdate').prop('disabled', false);
                 }
              else if(total_delivered_units == 0){
                     currentRow.find("td:eq(9)").find("input[type='text']").val(total_amount);
+                    currentRow.find("td:eq(8)").text(booked_skus);
+                    currentRow.find("td:eq(6)").text(total_units);
+                    currentRow.find("td:eq(7)").find("input[type='text']").val(0);
                     $('#DistributionUpdate').prop('disabled', false);
                 }
                 else if(total_delivered_units > total_units){
