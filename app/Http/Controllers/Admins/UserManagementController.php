@@ -67,7 +67,7 @@ class UserManagementController extends Controller
         })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
-            if (session('role_id') == 1 || count(array_intersect([83, 84], session('permissions'))) !== 0) {
+            if (session('role_id') == 1 || count(array_intersect([83, 84,542], session('permissions'))) !== 0) {
                 $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                 $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
