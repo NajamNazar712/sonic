@@ -8365,7 +8365,7 @@ class RiderAPIController extends Controller
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
         $rider_incentives = RidersIncentive::where('rider_id', $rider_id)
-            ->whereBetween('date', [$from_date.'00:00:00', $to_date.'23:59:59'])
+            ->whereBetween('date', [$from_date.' 00:00:00', $to_date.' 23:59:59'])
             ->get();
         return response()->json(["status" => 0, "incentives" => $rider_incentives]);
         /*$rider_incentives = DB::table('riders_incentives')
