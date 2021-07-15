@@ -77,9 +77,11 @@ use App\Http\Models\Rider\RiderTickerImage;
 use App\http\Models\Runner;
 use App\http\Models\RunnerJunction;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use Carbon\Carbon;
@@ -4363,5 +4365,75 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function shipment_status_eta_index()
+    {
+        $shipment_status = ShipmentStatus::whereNotIn('id', [1, 17])->where('status', 1)->select(['id', 'name'])->get();
+
+        return view('admin.settings.telenor.shipment_status_eta')->with(['shipment_status' => $shipment_status]);
+    }
+
+    public function shipment_status_eta_list(Request $request)
+    {
+        $shipment_status = TelenorShipmentStatusEstimatedTime::join('shipment_status as ss', 'ss.id', '=', 'telenor_shipment_status_estimated_times.shipper_status_id')
+            ->select('telenor_shipment_status_estimated_times.id', 'telenor_shipment_status_estimated_times.shipper_status_id','ss.name as status_name', 'telenor_shipment_status_estimated_times.eta as eta', 'telenor_shipment_status_estimated_times.updated_at');
+
+        $datatable = Datatables::of($shipment_status)
+            ->addColumn('action', function ($data) {
+                $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">';
+                $dropdown .= '<button type="button" class="dropdown-item edit" data-eta="'. $data->eta .'" data-status="' . $data->shipper_status_id .'"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $dropdown .= '
+                    </div>
+                  </div>
+          ';
+                return $dropdown;
+
+            });
+        return $datatable->make(true);
+    }
+
+    public function shipment_status_eta_store(Request $request){
+        $status_id = $request->shipment_status_id;
+        $eta = $request->eta;
+
+        if($status_id && $eta){
+            $setting = TelenorShipmentStatusEstimatedTime::where('shipper_status_id', $status_id);
+            if($setting->exists()){
+                return response()->json(['status' => 0, 'error' => 'Setting already exists!']);
+            }
+
+            $setting = new TelenorShipmentStatusEstimatedTime();
+            $setting->shipper_status_id = $status_id;
+            $setting->eta = $eta;
+            $setting->save();
+
+            return response()->json(['status' => 1, 'success' => 'Setting Updated Successfully!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Some Data missing!']);
+        }
+    }
+
+    public function shipment_status_eta_edit(Request $request){
+        $eta = $request->eta;
+        $id = $request->id;
+        if($eta && $id){
+            $setting = TelenorShipmentStatusEstimatedTime::where('id', $id);
+            if($setting->exists()){
+                $setting = $setting->first();
+                $setting->eta = $eta;
+                $setting->save();
+
+                return response()->json(['status' => 1, 'success' => 'Setting Updated Successfully!']);
+            }
+            return response()->json(['status' => 0, 'error' => 'Setting does not exists!']);
+
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Some Data missing!']);
+        }
     }
 }

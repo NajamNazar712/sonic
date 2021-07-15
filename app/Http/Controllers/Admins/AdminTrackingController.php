@@ -847,6 +847,7 @@ class AdminTrackingController extends Controller
                         $details['order_information']['height'] = $shipment->height;
                         $details['order_information']['length'] = $shipment->length;
                         $details['order_information']['breadth'] = $shipment->breadth;
+                        $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                         
                     }
                     else{
