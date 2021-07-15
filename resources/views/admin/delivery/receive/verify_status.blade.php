@@ -1140,7 +1140,6 @@
                     currentRow.find("td:eq(7)").find("input").val(sku);
                     var return_sku = booked_skus - (Math.floor(total_delivered_units/booked_units_per_item));
                     currentRow.find("td:eq(8)").text(return_sku);
-                    $('#DistributionUpdate').prop('disabled', false);
                 }
              else if(total_delivered_units == 0){
                     currentRow.find("td:eq(9)").find("input[type='text']").val(total_amount);
@@ -1153,18 +1152,18 @@
                     $('#DistributionUpdate').prop('disabled', true);
                 }
 
+                validate_flag = true;
                 $('#distributiontable tbody tr').each(function (){
-                    validate_flag = true;
-                    if($(this).find("td:eq(5)").find("input[type='text']").val() > $(this).find("td:eq(2)").text())
+                    if($(this).find("td:eq(5)").find("input[type='text']").val() > $(this).find("td:eq(4)").text())
                     {
                         validate_flag = false;
                     }
+                });
 
-                    if(validate_flag)
-                    {
-                        $('#DistributionUpdate').prop('disabled', false);
-                    }
-                })
+                if(validate_flag)
+                {
+                    $('#DistributionUpdate').prop('disabled', false);
+                }
 
                 calculate_total();
             }

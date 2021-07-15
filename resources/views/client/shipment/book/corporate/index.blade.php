@@ -1734,6 +1734,7 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
+                    distribution_total_price();
                     return $.trim(value);
                 },
                 errorPlacement: function(error, element) {
@@ -1847,7 +1848,6 @@
                                                             closeOnEsc: false
                                                         });
 
-                                                        distribution_total_price();
                                                         form.submit();
                                                     }
                                                     else{
@@ -1863,7 +1863,6 @@
                                                     closeOnClickOutside: false,
                                                     closeOnEsc: false
                                                 });
-                                                distribution_total_price();
                                                 form.submit();
                                             }
                                         }
@@ -1907,7 +1906,6 @@
                                                     closeOnEsc: false
                                                 });
 
-                                                distribution_total_price();
                                                 form.submit();
                                             }
                                             else{
@@ -1924,7 +1922,6 @@
                                             closeOnEsc: false
                                         });
 
-                                        distribution_total_price();
                                         form.submit();
                                     }
                                 }
@@ -1995,7 +1992,6 @@
                                                         closeOnEsc: false
                                                     });
 
-                                                    distribution_total_price();
                                                     form.submit();
                                                 }
                                                 else{
@@ -2012,7 +2008,6 @@
                                                 closeOnEsc: false
                                             });
 
-                                            distribution_total_price();
                                             form.submit();
                                         }
                                     }
@@ -2053,7 +2048,6 @@
                                                 closeOnEsc: false
                                             });
 
-                                            distribution_total_price();
                                             form.submit();
                                         }
                                         else{
@@ -2069,7 +2063,6 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
                                     });
-                                    distribution_total_price();
                                     form.submit();
                                 }
                             }
