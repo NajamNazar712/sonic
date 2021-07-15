@@ -7797,8 +7797,9 @@ class NotificationsController extends Controller
                         ->where('riders.status',1)
                         ->groupBy('rider_id')
                         ->get();
+                    $html = '<p>Dear Concern,
+                            Please Find below the details of delivery riders (Active) whose delivery sheets were not created since past 2 or more days.</p>';
 
-                    $html = '<h3>Delivery Rider(s) </h3>';
                     $html .= '<table style="width:100%;">';
                     $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider ID</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Rider Name</th>';
