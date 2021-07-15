@@ -150,7 +150,7 @@ class CRMEscalationController extends Controller
                                         if(!$crm_comment->exists()){
                                             $comment_by = 0;
                                             $comment_type = 0;
-                                            CRMCommentController::add($crm_request->id, $agent_id,$comment_by,$comment_type, $comment);
+                                            CRMCommentController::add($crm_request->id, $agent_id,$comment_by,$comment_type, $comment,1);
                                         }
                                     }
                                 }

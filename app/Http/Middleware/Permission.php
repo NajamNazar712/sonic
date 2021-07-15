@@ -987,6 +987,11 @@ class Permission
             
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
+            
+            'incidence_monitoring.index' => 535,
+            'incidence_monitoring.list' => 535,
+            'incidence_monitoring.add' => 536,
+            'incidence_monitoring.view_report' => 539,
            
         ],
 
