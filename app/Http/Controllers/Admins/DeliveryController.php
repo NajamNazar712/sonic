@@ -2230,7 +2230,7 @@ class DeliveryController extends Controller
     }
 
     //ajax function
-    //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy
+    //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy  status 4 -> distribution
     public function receive_delivery_status_check(Request $request)
     {
         $note_id = $request->delivery_note_id;
@@ -2284,7 +2284,7 @@ class DeliveryController extends Controller
                     $regular_data = Shipment::where('id', $regular->shipment_id)->where('user_id',10354)->where('booking_type_id',1);
                     if($regular_data->exists()){
                         $regular_data = $regular_data->first();
-                        if(ShipmentDistributionProduct::where('shipment_id',$regular_data->id)->exists()){
+                        if(ShipmentDistributionProduct::where('shipment_id',$regular_data->id)->where('status',0)->exists()){
                             $distribution_id = $regular_data->id;
                         }
                     }
@@ -2299,7 +2299,7 @@ class DeliveryController extends Controller
             }elseif ($trybuy_id != null) {
                 return ['status' => 3, 'success' => 'Shipment is try and buy!', 'booking_type' => 3, 'try' => $trybuy_id];
             }elseif ($distribution_id != null) {
-                return ['status' => 6, 'success' => 'Shipment is distribution!', 'booking_type' => 1, 'distribution' => $distribution_id];
+                return ['status' => 4, 'success' => 'Shipment is distribution!', 'booking_type' => 1, 'distribution' => $distribution_id];
             }
         } else {
             return ['status' => 0, 'error' => 'No shipments updated!'];
@@ -6787,7 +6787,7 @@ class DeliveryController extends Controller
         $shipment = $request->distribution;
         if (isset($shipment)) {
             $product = array();
-            $parcels = ShipmentDistributionProduct::where('shipment_id', $shipment)->get();
+            $parcels = ShipmentDistributionProduct::where('shipment_id', $shipment)->where('status',0)->get();
             foreach ($parcels as $parcel) {
                 $product[] = ['pid' => $parcel->id, 'type' => $parcel->item->name,'items' => $parcel->items ,'units_per_item' => $parcel->units_per_item,'total_delivered_units' =>$parcel->total_delivered_units,'price' => $parcel->price];
 //
@@ -6811,6 +6811,7 @@ class DeliveryController extends Controller
                 $shipment_item->total_delivered_units = $value;
                 $shipment_item->total_delivered_skus =  $request->get('total_delivered_skus')[$id];
                 $shipment_item->received_amount =  $request->get('amount')[$id];
+                $shipment_item->status =  1;
                 $shipment_item->save();
                 $total_cod +=  $shipment_item->received_amount;
             }

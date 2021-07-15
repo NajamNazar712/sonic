@@ -17,6 +17,7 @@ class UpdateShipmentDistributionProducts extends Migration
             $table->integer('total_delivered_units')->after('units_per_item')->default(0);
             $table->integer('received_amount')->after('price')->default(0);
             $table->integer('total_delivered_skus')->after('received_amount')->default(0);
+            $table->integer('status')->index()->default(0);
 
         });
     }
@@ -32,6 +33,7 @@ class UpdateShipmentDistributionProducts extends Migration
             $table->dropColumn('total_delivered_units');
             $table->dropColumn('received_amount');
             $table->dropColumn('total_delivered_skus');
+            $table->dropColumn('status');
         });
     }
 }
