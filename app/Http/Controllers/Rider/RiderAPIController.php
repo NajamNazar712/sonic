@@ -51,6 +51,7 @@ use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderDeliveryActionLog;
+use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Rider\RiderTickerImage;
@@ -8364,10 +8365,10 @@ class RiderAPIController extends Controller
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
 
-        $rider_incentives = DB::table('riders_incentives')
-            ->select(DB::raw('sum(pickup_shipments) as pickup_shipments,sum(pickup_incentive) as pickup_incentive,sum(delivery_shipments) as delivery_shipments,sum(delivery_incentive) as delivery_incentive, sum(pickup_shipments) + sum(delivery_shipments) as total_shipments, sum(pickup_incentive) + sum(delivery_incentive) as total_incentives'))
-            ->where('rider_id', $rider_id)
-            ->whereBetween('date', [$from_date, $to_date]);
+        $rider_incentives = RidersIncentive::where('rider_id', $rider_id)
+            ->whereBetween('date', [$from_date, $to_date])
+            ->select('pickup_shipments as pickup_shipments, pickup_incentive as pickup_incentive, delivery_shipments as delivery_shipments, delivery_incentive as delivery_incentive');
+
         return response()->json(["status" => 0, "incentives" => $rider_incentives->get()]);
 
         if ($to_date != null && $to_date != $from_date) {
