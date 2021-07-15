@@ -3274,7 +3274,7 @@ class APIController extends Controller
     }
 
     public function shipment_google_track(Request $request) {
-      if(strstr(strtolower($_SERVER['HTTP_USER_AGENT']), 'google')) {
+      if (strstr(strtolower(gethostbyaddr($_SERVER['REMOTE_ADDR'])), 'google')) {
         $rules = [
           'TrackingNumber' => ['required']
         ];
