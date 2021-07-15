@@ -398,7 +398,8 @@
                                                                     <span class="">Internal</span>
                                                                 </button>
                                                             </fieldset>
-                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))                           @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(538, session('permissions'))))
+                                                            @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || in_array(201, session('permissions')))
+                                                                @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
                                                                     <div class="form-group mt-1" style="float: left;">
                                                                         <input type="checkbox" id="email_check" name="email_check">
                                                                     </div>
@@ -423,6 +424,9 @@
 
                                                         </div>
                                                     </form>
+                                                    @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
+                                                        <label><i>Please select checkbox next to Shipper button to send the comment via email to shipper.</i></label>
+                                                    @endif
                                                 </section>
                                             <div class="row justify-content-center mt-1">
                                                 <div class="col-2">
@@ -487,7 +491,7 @@
                                                                 </button>
                                                             </fieldset>
                                                             @if(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)))
-                                                                @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(538, session('permissions'))))
+                                                                @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
                                                                     <div class="form-group mt-1" style="float: left;">
                                                                         <input type="checkbox" id="email_check" name="email_check">
                                                                     </div>
@@ -510,6 +514,9 @@
                                                                 </button>
                                                             </fieldset>
                                                         </div>
+                                                        @if($crm_details->case_nature_id == 4 && (session('role_id') == 1 || in_array(543, session('permissions'))))
+                                                            <label><i>Please select checkbox next to Shipper button to send the comment via email to shipper.</i></label>
+                                                        @endif
                                                     </form>
                                                 </section>
                                                 <div class="row justify-content-center mt-1">

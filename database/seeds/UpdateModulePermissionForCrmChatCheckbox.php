@@ -12,7 +12,7 @@ class UpdateModulePermissionForCrmChatCheckbox extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 538, 'name' => 'Shipper Chat Checkbox', 'module_id' => 18),
+            array('id' => 543, 'name' => 'Shipper Chat Checkbox', 'module_id' => 18),
         ));
     }
 }
