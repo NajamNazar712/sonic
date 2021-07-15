@@ -57,6 +57,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Status Verified By</th>
                         <th class="border-primary border-darken-1">Status Verified At</th>
@@ -194,6 +195,7 @@
                             head.push('S. No.');
                             head.push('Tracking No.');
                             head.push('Delivery Note No.');
+                            head.push('Hub');
                             head.push('Status');
                             head.push('Status Verified By');
                             head.push('Status Verified At');
@@ -203,6 +205,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.delivery_note_id);
+                                row.push(values.hub_name);
                                 row.push(values.status);
                                 row.push(values.status_verified_by);
                                 row.push(values.status_verified_at);
@@ -249,6 +252,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_no' ,name: 's.tracking_number', class: 'align-middle text-center tracking_no'},
                     { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle delivery_note_id'},
+                    { data:'hub_name' ,name: 'hub_name', class: 'align-middle hub_name'},
                     { data:'status' ,name: 'ss.name', class: 'align-middle status'},
                     { data:'status_verified_by' ,name: 'ad.name', class: 'align-middle status_verified_by'},
                     { data:'status_verified_at' ,name: 'delivery_notes.updated_at', class: 'align-middle status_verified_at'},

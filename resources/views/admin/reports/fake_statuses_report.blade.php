@@ -31,6 +31,13 @@
                                 @endforeach
                             </select>
                         </div>
+                        {{-- <div class="form-group ml-1">
+                            <select name="zones" class="select2" id="zones">
+                                @foreach($zones as $zone)
+                                    <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                                @endforeach
+                            </select>
+                        </div> --}}
                         <div class="form-group ml-1">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $shipping_mode)
@@ -75,6 +82,7 @@
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Rider City</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Delivery Note Created At</th>
                         <th class="border-primary border-darken-1">Delivery Note Verified At</th>
                         <th class="border-primary border-darken-1">Total Shipments</th>
@@ -235,7 +243,12 @@
                 placeholder: 'Select Hub',
                 allowClear:true
             });
-
+            
+            $('#search_form #zones').prepend('<option value="" selected="selected"></option>').select2({
+                width: '200px',
+                placeholder: 'Select Zone',
+                allowClear:true
+            });
             var future_date = new Date();
             future_date.setDate(future_date.getDate()-7);
             $('#search_form #search_date_from').pickadate({
@@ -288,6 +301,7 @@
                             head.push('Rider Name');
                             head.push('Rider City');
                             head.push('Delivery Note No.');
+                            head.push('Zone');
                             head.push('Delivery Note Created At');
                             head.push('Delivery Note Verified At');
                             head.push('Total Shipments');
@@ -300,6 +314,7 @@
                                 row.push(values.rider_name);
                                 row.push(values.rider_city);
                                 row.push(values.delivery_note_id);
+                                row.push(values.zone_name);
                                 row.push(values.created_at);
                                 row.push(values.verified_at);
                                 row.push(values.total_shipments);
@@ -354,6 +369,7 @@
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'rider_city', name: 'c.name', class: 'align-middle rider_city'},
                     {data: 'delivery_note_id', name: 'delivery_notes.id', class: 'align-middle delivery_note_id'},
+                    {data: 'zone_name', name: 'zone_name', class: 'align-middle zone_name'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'verified_at', name: 'delivery_notes.status_verified_at', class: 'align-middle verified_at'},
                     {data: 'shipments_count_link', name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link', orderable: false, searchable: false},
