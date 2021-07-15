@@ -1034,6 +1034,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('nsa_shipments/submit','Admins\DeliveryController@nsa_shipments_submit')->name('nsa_shipments.submit');
             //Non Service Area Routes
 
+            Route::post('distribution','Admins\DeliveryController@receive_delivery_get_distribution')->name('distribution');
+            Route::put('distribution/submit','Admins\DeliveryController@receive_delivery_distribution_submit')->name('distribution.submit');
+
+
             Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
             Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
             Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
