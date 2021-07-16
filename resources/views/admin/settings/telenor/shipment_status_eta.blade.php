@@ -92,7 +92,7 @@
                             <div class="row justify-content-center">
                                 <div class="col-4">
                                     <fieldset class="form-group">
-                                        <select name="edit_shipment_status_select" id="edit_shipment_status_select" class="form-control select2">
+                                        <select name="edit_shipment_status_select" id="edit_shipment_status_select" class="form-control select2" disabled>
                                             @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                             @endforeach
@@ -279,7 +279,7 @@
                 var status_id = parseInt($(this).data('status'));
                 var eta = $(this).data('eta');
                 $('#setting_id').val(id);
-                $('#edit_shipment_status_select').val(id).trigger('change');
+                $('#edit_shipment_status_select').val(status_id).trigger('change');
                 $('#edit_eta').val(eta);
 
                 $('#EditShipmentStatusETA').modal('show');
