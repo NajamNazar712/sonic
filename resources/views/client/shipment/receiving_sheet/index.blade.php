@@ -816,9 +816,9 @@
 			$('#UpdateConsigneeInfoModal').on('hide.bs.modal', function (e) {
 				// console.log($('#update_consignee_info_form')[0]);
 				validator_consignee_info_form.resetForm();
-				//$('#shipping_mode').html('').select2('destroy');
-				$('#shipping_mode').empty();
-				$('#shipping_mode').addClass('d-none');
+				if ($('#shipping_mode').hasClass("select2-hidden-accessible")) {
+					$('#shipping_mode').html('').select2('destroy');
+				}
 				$('#update_consignee_info_form')[0].reset();
 				$('#update_consignee_info_shipment_id').val('');
 				$('#update_consignee_name').val('');
