@@ -716,7 +716,7 @@
 									});
 								}
 								else{
-									$('#shipping_mode').addClass('d-none');
+									$('#shipping_mode').addClass('d-none','select2');
 								}
 
 								html_row = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking_number +'</b></span></div>';
@@ -816,8 +816,9 @@
 			$('#UpdateConsigneeInfoModal').on('hide.bs.modal', function (e) {
 				// console.log($('#update_consignee_info_form')[0]);
 				validator_consignee_info_form.resetForm();
-				$('#shipping_mode').html('').select2('destroy');
-				//$('#shipping_mode').val('').trigger('change');
+				//$('#shipping_mode').html('').select2('destroy');
+				$('#shipping_mode').empty();
+				$('#shipping_mode').addClass('d-none');
 				$('#update_consignee_info_form')[0].reset();
 				$('#update_consignee_info_shipment_id').val('');
 				$('#update_consignee_name').val('');
