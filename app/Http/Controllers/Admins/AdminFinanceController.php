@@ -6662,7 +6662,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border">
                       <thead>
                         <tr>
-                            <th colspan="12" class="color primary text-center">Invoice Summary</th>
+                            <th colspan="11" class="color primary text-center">Invoice Summary</th>
                         </tr>
                         <tr>
                             <th class="color secondary">Origin</th>
@@ -6675,7 +6675,6 @@ class AdminFinanceController extends Controller
                             <th class="color secondary">Fuel Surcharge (PKR)</th>
                             <th class="color secondary">Intercept Charges (PKR)</th>
                             <th class="color secondary">OSA Charges (PKR)</th>
-                            <th class="color secondary">Packaging Charges (PKR)</th>
                             <th class="color secondary">Adjustment Charges (PKR)</th>
                         </tr>
                       </thead>
