@@ -7105,6 +7105,17 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function invoices_print_gst_wise(Request $request) {
+        $invoice = Invoice::find($request->id);
+
+        if ($invoice) {
+            return self::generate_invoice_print_gst_wise($invoice->id);
+        }
+        else {
+            return '';
+        }
+    }
+
     public function invoices_export_to_excel(Request $request) {
         $invoice = Invoice::find($request->id);
 
