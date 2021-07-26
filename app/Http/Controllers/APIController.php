@@ -3228,6 +3228,24 @@ class APIController extends Controller
         }
     }
 
+    private function shipment_google_location_name($id, $cities) {
+      if (in_array($id, [1, 2, 53, 61, 63, 17, 19, 25, 18, 51])) {
+        return $cities['origin']['city'];
+      }
+      elseif (in_array($id, [3])) {
+        return $cities['origin']['hub'];
+      }
+      elseif (in_array($id, [4, 15, 11, 49, 56, 6, 7, 9, 12, 13, 52, 54, 55, 58, 59, 62, 20, 21, 22, 23, 24, 44, 47, 48, 57, 60, 50])) {
+        return $cities['destination']['hub'];
+      }
+      elseif (in_array($id, [5, 8, 10, 14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+        return $cities['destination']['city'];
+      }
+      else {
+        return $cities['origin']['city'];
+      }
+    }
+
     private function shipment_google_status_name($id) {
       if (in_array($id, [1])) {
         return 'TICKET_CREATED';
@@ -3256,7 +3274,7 @@ class APIController extends Controller
       elseif (in_array($id, [15])) {
         return 'AVAILABLE_FOR_PICKUP';
       }
-      elseif (in_array($id, [1, 11, 49, 56])) {
+      elseif (in_array($id, [11, 49, 56])) {
         return 'DELAYED';
       }
       elseif (in_array($id, [6, 7, 9, 12, 13, 52, 54, 55, 58, 59, 62])) {
@@ -3330,6 +3348,16 @@ class APIController extends Controller
 
               $shipment = $shipment->first();
 
+              $cities = array();
+
+              $origin = $shipment->pickup_address->city;
+              $destination = $shipment->pickup_address->city;
+
+              $cities['origin']['city'] = $origin->name;
+              $cities['origin']['hub'] = $origin->hub_city->name;
+              $cities['destination']['city'] = $destination->name;
+              $cities['destination']['hub'] = $destination->hub_city->name;
+
               $created_date = Carbon::parse($shipment->created_at)->toIso8601String();
 
               $output['CreateDate'] = $created_date;
@@ -3358,6 +3386,7 @@ class APIController extends Controller
 
                   $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
                   $transit_event['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                  $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                   $transit_events[] = $transit_event;
 
@@ -3380,15 +3409,18 @@ class APIController extends Controller
 
                 $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
                 $current_status['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
               }
               else {
                 $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                 $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
+                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                 $transit_event = array();
 
                 $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
                 $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
+                $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                 $transit_events[] = $transit_event;
               }
