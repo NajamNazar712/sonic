@@ -6549,11 +6549,6 @@ class AdminFinanceController extends Controller
                 }
 
                 $total_weight_charges[$origin] += $shipment->weight_charges;
-
-                if ($shipment->packaging_material_request) {
-                    $total_packaging_material_charges[$gst] += $shipment->packaging_material_charges;
-                }
-
                 $total_insurance_charges[$origin] += $shipment->insurance_charges;
                 $total_fuel_surcharge[$origin] += $shipment->fuel_surcharge;
                 $total_intercept_charges[$origin] += $shipment->intercept_charges;
@@ -6563,7 +6558,15 @@ class AdminFinanceController extends Controller
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
 
-            $total_charges[$gst] += ($invoice_shipment->charges - $total_packaging_material_charges[$gst]);
+            if ($invoice_shipment->type != 2 && $shipment->packaging_material_request) {
+                $total_packaging_material_charges[$gst] += $shipment->packaging_material_charges;
+
+                $total_charges[$gst] += ($invoice_shipment->charges - $shipment->packaging_material_charges);
+            }
+            else {
+                $total_charges[$gst] += $invoice_shipment->charges;
+            }
+
             $total_gst[$gst] += $invoice_shipment->gst;
             $total_invoice_amount[$gst] += $invoice_shipment->invoice_amount;
         }
@@ -6767,7 +6770,7 @@ class AdminFinanceController extends Controller
                     <table class="table table-sm table-bordered border shipments_summary">
                       <thead>
                         <tr>
-                            <th class="color primary text-center" colspan="14">Shipment(s) Summary - ' . $origin . '</th>
+                            <th class="color primary text-center" colspan="15">Shipment(s) Summary - ' . $origin . '</th>
                         </tr>
                         <tr>
                           <th class="color secondary">S. No.</th>
@@ -6781,6 +6784,7 @@ class AdminFinanceController extends Controller
                           <th class="color secondary">Fuel Surcharge (PKR)</th>
                           <th class="color secondary">OSA Charges (PKR)</th>
                           <th class="color secondary">Adjustment Charges (PKR)</th>
+                          <th class="color secondary">Packaging Charges (PKR)</th>
                           <th class="color secondary">Total Charges (PKR)</th>
                           <th class="color secondary">GST (PKR)</th>
                           <th class="color secondary">Invoice Amount (PKR)</th>
