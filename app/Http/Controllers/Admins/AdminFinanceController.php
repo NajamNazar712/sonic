@@ -6563,7 +6563,7 @@ class AdminFinanceController extends Controller
                 $total_adjustment_charges[$origin] += $invoice_shipment->invoice_amount;
             }
 
-            $total_charges[$gst] += $invoice_shipment->charges;
+            $total_charges[$gst] += ($invoice_shipment->charges - $total_packaging_material_charges[$gst]);
             $total_gst[$gst] += $invoice_shipment->gst;
             $total_invoice_amount[$gst] += $invoice_shipment->invoice_amount;
         }
