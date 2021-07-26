@@ -1043,6 +1043,7 @@ class ShipperReceivingSheetController extends Controller
                         }
                     }
                 }
+
                 $shipment_info['tracking_number'] = $shipment->tracking_number;
                 $shipment_info['consignee_name'] = $shipment->consignee_name;
                 $shipment_info['consignee_address'] = $shipment->consignee_address;
