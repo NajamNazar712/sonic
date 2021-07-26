@@ -755,11 +755,62 @@ class RetailShipmentBookController extends Controller
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Date</strong></td>
                                 <td colspan="4" class="color border twice-bottom twice-right">' . $shipment->created_at . '</td>
+                            </tr>';
+
+                            $slip .= '
+                            <tr>
+                              <td rowspan="2" colspan="4" class="color primary border twice-top twice-bottom"></td>
+                              <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right"></td>';
+                    
+                      if ($shipment->charges_mode_id != 2) {
+                          $slip .= '
+                              <td colspan="2" class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
+                              <td colspan="2" class="border twice-top twice-bottom twice-left"><strong>' . $shipment->retail->payment_mode->name . '</strong></td>
+                      ';
+                      }
+  
+                      if ($shipment->booking_type_id != 5 && $shipment->booking_type_id != 3) {
+                          $slip .= '
+                                </tr>
+                                <tr>
+                                  <td colspan="2" class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
+                      ';
+                          $amount = $shipment->amount;
+  
+                          if ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 1) {
+                              $slip .= '
+                                  <td colspan="2" class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
+                          ';
+                          } else {
+                              $slip .= '
+                                  <td colspan="2" class="align-middle border twice-top twice-bottom twice-left"><strong>Rs '. $amount .'</strong></td>
+                          ';
+                          }
+                      }
+  
+                      $slip .= '
                             </tr>
                             </tbody>
                             </table>
                             </div>
                            ';
+
+                           
+
+
+                          
+
+
+
+
+
+
+
+
+
+
+
+
 
             $slip .= '
                   <div class="col m-1 row justify-content-center"><div class="col"><hr></div><div class=""><p>Shipper Copy</p></div><div class="col"><hr></div>
