@@ -106,6 +106,7 @@
     </div>
     <!--Shipments popup -->
     <!--CCD Slip popup-->
+
     <div class="modal fade text-left" id="ViewCCDSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewCCDSlip"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -135,6 +136,41 @@
                             <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="image_upload" data-backdrop="static" role="dialog" aria-labelledby="image_upload" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="excel_upload_modal_title">Upload Receipts</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="upload_image_form" class="form-horizontal" method="POST" action="{{route('admin.cash_collection.pending.cash_collection_upload_receipt')}}" novalidate="novalidate" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="receipt_image_input" id="receipt_image_input">
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="file" name="receipt_upload" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="form-group text-left">
+                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -600,7 +636,9 @@
             });
             $('body').on('click','.upload_receipts',function () {
                 var rowid = $(this).parents('tr').attr('id');
-                    // modal calling
+                    // modal calling -----------------
+               $('#receipt_image_input').val(rowid);
+                $('#image_upload').modal('show');
             });
 
             var select = $('#track_form .tracking_numbers').selectize({
@@ -792,7 +830,7 @@
 
             $('#datatable tbody').on('click','tr td.ccd_image button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                /*$('#ViewCCDSlip .modal-body').html('');*/
+                /*$('#ViewFCCDSlip .modal-body').html('');*/
                 $.ajax({
                     url: '{!! route('admin.delivery.cash_collection.pending.shipments.ccd_slip') !!}',
                     method: 'POST',

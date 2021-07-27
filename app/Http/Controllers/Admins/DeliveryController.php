@@ -6903,4 +6903,10 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
     }
 
+    public function cash_collection_upload_receipt(Request $request){
+        $file = $request->file('receipt_upload');
+        $picture_path = 'img/receipts' . $vendor_request->id  .'.'. $file->extension();;
+        Storage::disk('public')->put($picture_path, file_get_contents($request->delivery_challan));
+    }
+
 }

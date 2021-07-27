@@ -991,6 +991,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments','Admins\DeliveryController@cash_collection_shipments')->name('shipments');
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
+                Route::post('upload_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('cash_collection_upload_receipt');
+
             });
             Route::prefix('retail')->name('retail.')->group(function(){
                 Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');
