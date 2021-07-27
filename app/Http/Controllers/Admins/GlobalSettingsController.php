@@ -4083,7 +4083,9 @@ class GlobalSettingsController extends Controller
         }
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
-            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
+            ->leftjoin('fleet_drivers as fd','fd.id','=','fleets.driver_id')
+            ->leftjoin('fleet_vendors as fv','fv.id','=','fleets.vendor_id')
+            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type','fd.name as driver','fv.name as vendor'])
             ->orderBy('fleets.created_at','desc');
                 // ->select();
 
@@ -4158,7 +4160,9 @@ class GlobalSettingsController extends Controller
     public function fleet_edit($id){
         $vehicles = VehicleType::all();
         $fleet = Fleet::find($id);
-        return view('admin.settings.fleet_edit', compact('fleet','vehicles'));
+        $driver = FleetDriver::where('id',$fleet->driver_id)->first();
+        $vendor = FleetVendor::where('id',$fleet->vendor_id)->first();
+        return view('admin.settings.fleet_edit', compact('fleet','vehicles','driver','vendor'));
 
     }
 

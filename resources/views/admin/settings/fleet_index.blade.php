@@ -18,6 +18,8 @@
                         <th class="border-primary border-darken-1">Registration Number</th>
                         <th class="border-primary border-darken-1">Vehicle Type</th>
                         <th class="border-primary border-darken-1">Tracking ID</th>
+                        <th class="border-primary border-darken-1">Driver</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -275,6 +277,8 @@
                             head.push('Registration Number');
                             head.push('Vehicle Type');
                             head.push('Tracking ID');
+                            head.push('Driver');
+                            head.push('Vendor');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -285,6 +289,8 @@
                                 row.push(values.reg_number);
                                 row.push(values.vehicle_type);
                                 row.push(values.tracking_id);
+                                row.push(values.driver);
+                                row.push(values.vendor);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -354,6 +360,8 @@
                     {data: 'reg_number', name: 'reg_number', class: 'align-middle text-center reg_number'},
                     {data: 'vehicle_type', name: 'vt.name', class: 'align-middle text-center vehicle_type'},
                     {data: 'tracking_id', name: 'tracking_id', class: 'align-middle text-center tracking_id'},
+                    {data: 'driver', name: 'fd.name', class: 'align-middle text-center driver'},
+                    {data: 'vendor', name: 'fv.name', class: 'align-middle text-center vendor'},
                     {data: 'status', name: 'status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
