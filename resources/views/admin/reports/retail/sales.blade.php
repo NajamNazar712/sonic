@@ -321,7 +321,6 @@
                             head.push('Weight Charges');
                             head.push('Fuel Surcharge');
                             head.push('Total Charges');
-                            head.push('Estimated Charges');
                             head.push('Net Payable');
                             head.push('Delivered Date');
                             head.push('Booking Staff ID');
