@@ -8424,7 +8424,7 @@ class RiderAPIController extends Controller
         }
 
         if ($rider_incentives->exists()) {
-            return response()->json(["status" => 1, "message" => $total_earned_qs->pickup_incentive]);
+            return response()->json(["status" => 1, "message" => $total_earned_qs['pickup_incentive']]);
             $rider_incentives = $rider_incentives->get();
             $total_earned = $total_earned_qs->pickup_incentive + $total_earned_qs->delivery_incentive;
             return response()->json(["status" => 0, "incentives" => $rider_incentives, "total_earned" => $total_earned, "total_payable" => $total_payable]);
