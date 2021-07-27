@@ -2612,7 +2612,7 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 31) {
-                    $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details'];
+                    $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details','status'];
 
                     $crm_request = CrmRequest::find($reference_1_id);
                     if ($crm_request) {
@@ -2625,10 +2625,12 @@ class NotificationsController extends Controller
                                     $admin_department = Admin::whereIn('role_id', $roles)->where('status', 1);
                                     if ($admin_department->exists()) {
                                         $to = $admin_department->pluck('email');
+                                        $to_sms = $admin_department->pluck('phone_number');
                                     }
                                 } else if ($tagging->crm_request_tagging_type_id == 2) {
                                     $admin_department = Admin::find($tagging->tagged_id)->email;
                                     $to = $admin_department;
+                                    $to_sms = Admin::find($tagging->tagged_id)->phone_number;
                                 }
                             }
                         } else {
@@ -2639,21 +2641,33 @@ class NotificationsController extends Controller
 
                         if ($crm_request->shipment_id) {
                             $shipment = Shipment::find($crm_request->shipment_id);
+                            $tracking_number = '';
+                            $shipper_name = '';
+                            $shipper_email = '';
+                            $shipper_phone = '';
+                            $shipper_destination = '';
                             if ($shipment) {
                                 if (strpos($subject, '[tracking_number]') !== FALSE) {
                                     $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
+                                    $tracking_number = $shipment->tracking_number;
                                 }
                                 if (strpos($subject, '[shipper_name]') !== FALSE) {
                                     $subject = str_replace('[shipper_name]', $shipment->user->name, $subject);
+                                    $shipper_name = $shipment->user->name;
                                 }
                                 if (strpos($subject, '[email]') !== FALSE) {
                                     $subject = str_replace('[email]', $shipment->user->email, $subject);
+                                    $shipper_email = $shipment->user->email;
+
                                 }
                                 if (strpos($subject, '[phone]') !== FALSE) {
                                     $subject = str_replace('[phone]', $shipment->user->phone, $subject);
+                                    $shipper_phone = $shipment->user->phone;
+
                                 }
                                 if (strpos($subject, '[destination]') !== FALSE) {
                                     $subject = str_replace('[destination]', $shipment->consignee_city->name, $subject);
+                                    $shipper_destination = $shipment->consignee_city->name;
                                 }
 
 
@@ -2704,6 +2718,9 @@ class NotificationsController extends Controller
                         if (strpos($subject, '[case_nature_type]') !== FALSE) {
                             $subject = str_replace('[case_nature_type]', $crm_request->nature->type, $subject);
                         }
+                        if (strpos($subject, '[status]') !== FALSE) {
+                                $subject = str_replace('[status]', $crm_request->request_status->name, $subject);
+                        }
                         if (strpos($subject, '[details]') !== FALSE) {
                             $subject = str_replace('[details]', $crm_request->description, $subject);
                         }
@@ -2718,6 +2735,9 @@ class NotificationsController extends Controller
                             if (strpos($body, '[case_nature_type]') !== FALSE) {
                                 $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Case Nature Type</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm_request->nature_type->type . '</td></tr>';
                             }
+                        }
+                        if (strpos($body, '[status]') !== FALSE) {
+                            $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Status</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm_request->request_status->name . '</td></tr>';
                         }
                         if (strpos($body, '[details]') !== FALSE) {
                             $table_details .= '<tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">Description</th><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $crm_request->description . '</td></tr>';
@@ -2752,6 +2772,18 @@ class NotificationsController extends Controller
                         } else {
                             self::email($subject, $body, $to);
                         }
+                        $sms_body= 'Request ID: '.$crm_request->id.', Tracking Number :'.$tracking_number.' '.PHP_EOL.
+                        'Shipper Name: '.$shipper_name.''.PHP_EOL.
+                        'Shipper Email: '.$shipper_email.''.PHP_EOL.
+                        'Shipper Phone: '.$shipper_phone.''.PHP_EOL.
+                        'Destination: '.$shipper_destination.''.PHP_EOL.
+                        'Channel: '.$crm_request->channel->channel.''.PHP_EOL.
+                        'Case Nature: '.$crm_request->nature->name.''.PHP_EOL.
+                        'Case Nature Type: '.$crm_request->nature->type.''.PHP_EOL.
+                        'Status: '.$crm_request->request_status->name.''.PHP_EOL.
+                        'Description: '.$crm_request->description.''.PHP_EOL.'';
+                        
+                        self::sms($sms_body, $to_sms);
                     }
                 } else if ($id == 32) {
                     $nsa_shipment = Shipment::find($reference_1_id);

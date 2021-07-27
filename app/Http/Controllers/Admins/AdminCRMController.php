@@ -2191,6 +2191,8 @@ class AdminCRMController extends Controller
                 if($crm_request->case_nature_id == 4){
                     NotificationsController::send(117, $crm_request->id, 4);
                 }
+
+                NotificationsController::send(31,$crm_request_id);
             }
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
