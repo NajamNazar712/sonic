@@ -41,7 +41,7 @@
     <div class="modal fade" id="add_mapping" role="dialog" aria-labelledby="add_mapping_title" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <form class="form-horizontal" method="POST" action="{{ route('admin.cargo.mapping.store') }}" novalidate="novalidate">
+                <form class="form-horizontal" method="POST" action="{{ route('admin.cargo.mapping.manifest.store') }}" novalidate="novalidate">
                     {{ csrf_field() }}
 
                     <div class="modal-header">
@@ -280,7 +280,8 @@
 
             $('#add_mapping form .junctions').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Junction*'
+                placeholder: 'Junction*',
+                allowClear: true
             }).bind('change', function() {
                 $(this).valid();
                 junctions_display()
@@ -312,8 +313,8 @@
                     placeholder: 'Junction*'
                 }).bind('change', function() {
                     $(this).valid();
+                    junctions_display();
                 });
-                junctions_display()
             });
 
             $(document).on('click',"#add_mapping form .remove_junction",function (){
@@ -346,48 +347,72 @@
                 }
             });
 
+            function make_vehicle_select(index)
+            {
+                vehicles = `<div class="form-group">
+                                <select multiple="multiple" name="vehicles[${index}][]" id="vehicles_${index}" class="vehicles_select" data-msg-required="Vehicle is Required" data-rule-required="true">
+                                    @foreach($vehicles as $vehicle)
+                                        <option value="{{$vehicle->id}}">{{$vehicle->reg_number}}</option>
+                                    @endforeach
+                                </select>
+                             </div>`;
+
+                return vehicles;
+            }
             function junctions_display()
             {
                 origin = $("#add_mapping form .origin").find(":selected").text();
                 destination = $("#add_mapping form .destination").find(":selected").text();
-                origin_value = $("#add_mapping form .origin").val();
-                destination_value = $("#add_mapping form .destination").val();
-                if(origin_value == '')
-                {
-                    origin = "Not Selected";
-                }
-                if(destination_value == '')
-                {
-                    destination = "Not Selected";
-                }
-                junction_table.row().remove();
+                junction_table.rows().remove();
+
                 if($("#add_mapping form .junction_container .junctions").length > 1)
                 {
-                    // junction_table.row.add([1,origin,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),"Vehicles"]);
+                    var lastIndex = $("#add_mapping form .junction_container .junctions").length - 1;
                     $("#add_mapping form .junction_container .junctions").each(function (index){
                         if(index == 0)
                         {
+                            junction_table.row.add([index+1,origin,$(this).find(":selected").text(),make_vehicle_select(index + 1)]);
                             previous_junction = $(this).find(":selected").text();
-                            junction_table.row.add([index+1,origin,$(this).find(":selected").text(),"Vehicles"]);
                         }
                         else{
-                            junction_table.row.add([index+1,previous_junction,$(this).find(":selected").text(),"Vehicles"]);
+                            junction_table.row.add([index+1,previous_junction,$(this).find(":selected").text(),make_vehicle_select(index + 1)]);
+                            previous_junction = $(this).find(":selected").text();
                         }
                     });
-                    // junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").last().find(":selected").text(),destination,"Vehicles"]);
+                    junction_table.row.add([lastIndex + 2,previous_junction,destination,make_vehicle_select(lastIndex + 2)]);
                 }
                 else{
                     if($("#add_mapping form .junction_container .junctions").first().val() != '')
                     {
-                        junction_table.row.add([1,origin,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),"Vehicles"]);
-                        junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),destination,"Vehicles"]);
+                        junction_table.row.add([1,origin,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),make_vehicle_select(1)]);
+                        junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),destination,make_vehicle_select(2)]);
                     }
                     else{
-                        junction_table.row.add([1,origin,destination,"Vehicles"]);
+                        junction_table.row.add([1,origin,destination,make_vehicle_select(1)]);
                     }
                 }
                 junction_table.draw(false);
                 junction_table.columns.adjust().draw();
+
+                $("#add_mapping form .vehicles_select").select2({
+                    width: '100%',
+                    placeholder: 'Vehicles*'
+                }).bind('select2:select', function(e){
+                    var current_val = e.params.data.id;
+                    var select = $(this);
+                    $("#add_mapping form .vehicles_select").each(function (){
+                        if($.inArray(current_val,$(this).val()) != -1 && $(this).attr('id') != select.attr('id'))
+                        {
+                            toastr.error("Vehicle Can Not Be Repeated", 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            var arr = $(select).val();
+                            arr.splice(arr.indexOf(current_val),1);
+                            $(select).val(arr).trigger('change');
+                        }
+                    });
+                });
             }
 
             $('body').on('click','.edit_mapping',function () {

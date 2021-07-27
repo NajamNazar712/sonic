@@ -75,18 +75,18 @@ class AdminCargoManifestController extends Controller
 
     // not done
     public function manifest_mapping_store(Request $request){
-        $check = JunctionMapping::where(['origin_id' => $request->origin, 'destination_id' => $request->destiination_id])->first();
+        return $request;
+
+        $check = V2JunctionMapping::where(['origin_id' => $request->origin, 'destination_id' => $request->destiination_id])->first();
         if(!$check) {
-            $mapping = new JunctionMapping();
+            $mapping = new V2JunctionMapping();
 
             $mapping->origin_id = $request->origin;
             $mapping->destination_id = $request->destination;
-            $mapping->junction_1 = $request->junction_1;
-            $mapping->junction_2 = $request->junction_2;
-            $mapping->receiver = $request->receiver_id;
             $mapping->updated_by = Auth::id();
-
             $mapping->save();
+
+//            foreach ($request->junctions)
 
             return redirect()->back()->with('success', 'Mapping added successfully.');
         }
