@@ -8412,8 +8412,6 @@ class RiderAPIController extends Controller
                 ->sum('received_cod_amount');
             $total_earned = RidersIncentive::sum(DB::raw('sum(pickup_incentive) + sum(delivery_incentive)'))
                 ->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
-            return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
-
         } else {
             $rider_incentives = $rider_incentives->whereDate('date', $from_date);
             $total_payable = DeliveryNote::where('cash_collection_status', 0)
