@@ -8422,7 +8422,9 @@ class RiderAPIController extends Controller
             $total_earned_qs = RidersIncentive::select(DB::raw('sum(pickup_incentive) as  pickup_incentive'), DB::raw('sum(delivery_incentive) as  delivery_incentive'))
                 ->whereDate('date', $from_date)->get();
         }
+
         if ($rider_incentives->exists()) {
+            return response()->json(["status" => 1, "message" => $total_earned_qs]);
             $rider_incentives = $rider_incentives->get();
             $total_earned = $total_earned_qs->pickup_incentive + $total_earned_qs->delivery_incentive;
             return response()->json(["status" => 0, "incentives" => $rider_incentives, "total_earned" => $total_earned, "total_payable" => $total_payable]);
