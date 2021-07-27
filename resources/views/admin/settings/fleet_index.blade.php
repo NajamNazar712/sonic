@@ -18,6 +18,8 @@
                         <th class="border-primary border-darken-1">Registration Number</th>
                         <th class="border-primary border-darken-1">Vehicle Type</th>
                         <th class="border-primary border-darken-1">Tracking ID</th>
+                        <th class="border-primary border-darken-1">Driver</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -64,6 +66,25 @@
                             <input type="text" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
                         </div>
                     </div>
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                           <select class="form-control" id="driver_select" name="driver" data-rule-required="true" data-msg-required="Driver is required">
+                               @foreach($drivers as $driver)
+                                   <option value="{{$driver->id}}">{{$driver->name}} - {{$driver->cnic_no}}</option>
+                               @endforeach
+                           </select>
+                       </div>
+
+                   </div>
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                           <select class="form-control" id="vendor_select" name="vendor" data-rule-required="true" data-msg-required="Vendor is required">
+                               @foreach($vendors as $vendor)
+                                   <option value="{{$vendor->id}}">{{$vendor->name}}</option>
+                               @endforeach
+                           </select>
+                       </div>
+                   </div>
                    
                </div>
                <div class="modal-footer">
@@ -224,6 +245,16 @@
                 }
             });
 
+            $('#driver_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+                width: '100%',
+                placeholder: 'Select Driver*',
+                dropdownParent:$('#fleet_add_form')
+            });
+            $('#vendor_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+                width: '100%',
+                placeholder: 'Select Vendor*',
+                dropdownParent:$('#fleet_add_form')
+            });
 
             // $("#runner").prepend('<option value="" selected></option>').select2({
             //     placeholder: "Select Runner",
@@ -246,6 +277,8 @@
                             head.push('Registration Number');
                             head.push('Vehicle Type');
                             head.push('Tracking ID');
+                            head.push('Driver');
+                            head.push('Vendor');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -256,6 +289,8 @@
                                 row.push(values.reg_number);
                                 row.push(values.vehicle_type);
                                 row.push(values.tracking_id);
+                                row.push(values.driver);
+                                row.push(values.vendor);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -325,6 +360,8 @@
                     {data: 'reg_number', name: 'reg_number', class: 'align-middle text-center reg_number'},
                     {data: 'vehicle_type', name: 'vt.name', class: 'align-middle text-center vehicle_type'},
                     {data: 'tracking_id', name: 'tracking_id', class: 'align-middle text-center tracking_id'},
+                    {data: 'driver', name: 'fd.name', class: 'align-middle text-center driver'},
+                    {data: 'vendor', name: 'fv.name', class: 'align-middle text-center vendor'},
                     {data: 'status', name: 'status', class: 'align-middle text-center status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 

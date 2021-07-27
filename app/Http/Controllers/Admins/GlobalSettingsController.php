@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\FleetDriver;
 use App\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
@@ -4069,7 +4070,9 @@ class GlobalSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),246);
         $vehicles = VehicleType::all();
-        return view('admin.settings.fleet_index')->with('vehicles', $vehicles);
+        $drivers = FleetDriver::all();
+        $vendor = FleetVendor::all();
+        return view('admin.settings.fleet_index')->with(['vehicles'=> $vehicles,'drivers' => $drivers,'vendors' => $vendor]);
     }
 
     public function fleet_list(Request $request)
@@ -4080,7 +4083,9 @@ class GlobalSettingsController extends Controller
         }
         // $fleet = Fleet::all();
         $fleet = Fleet::leftjoin('vehicle_types as vt','fleets.vehicle_type_id','=','vt.id')
-            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type'])
+            ->leftjoin('fleet_drivers as fd','fd.id','=','fleets.driver_id')
+            ->leftjoin('fleet_vendors as fv','fv.id','=','fleets.vendor_id')
+            ->select(['fleets.id','fleets.created_at', 'fleets.reg_number', 'fleets.tracking_id', 'fleets.status', 'vt.name as vehicle_type','fd.name as driver','fv.name as vendor'])
             ->orderBy('fleets.created_at','desc');
                 // ->select();
 
@@ -4143,6 +4148,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $request->vehicle_select;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->status = 1;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Added successfully!');
@@ -4153,7 +4160,9 @@ class GlobalSettingsController extends Controller
     public function fleet_edit($id){
         $vehicles = VehicleType::all();
         $fleet = Fleet::find($id);
-        return view('admin.settings.fleet_edit', compact('fleet','vehicles'));
+        $driver = FleetDriver::where('id',$fleet->driver_id)->first();
+        $vendor = FleetVendor::where('id',$fleet->vendor_id)->first();
+        return view('admin.settings.fleet_edit', compact('fleet','vehicles','driver','vendor'));
 
     }
 
@@ -4507,7 +4516,7 @@ class GlobalSettingsController extends Controller
         $vendor_names = explode(',', $request->vendor_name);
 
         foreach($vendor_names as $vendor_name){
-            if(!in_array($vendor_name,$vendors )){
+            if(!in_array($vendor_name,$vendors)){
                 FleetVendor::create([
                     'name' => $vendor_name,
                 ]);
@@ -4515,6 +4524,5 @@ class GlobalSettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Vendor Added!');
-
     }
 }
