@@ -364,7 +364,7 @@ class LastMileDebriefingController extends Controller
         }
         $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
         if(Carbon::now() > $time){
-            $time = $time->addDays(1);
+            $time->addDays(1);
         }
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
@@ -386,7 +386,7 @@ class LastMileDebriefingController extends Controller
                 return view('admin.debriefing.caller_agent')->with(['data'=>false]);
             }
         }
-        $where = array(7, 8, 9, 15, 18, 56);
+        $where = array(7, 8, 9, 15, 18, 56, 12);
         $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
         $shipment = Shipment::find($data->shipment_id);
         $delivery_note = DeliveryNote::find($data->delivery_note_id);
