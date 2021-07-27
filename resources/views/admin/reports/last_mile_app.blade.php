@@ -12,7 +12,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-12 ">
+                    <div class="col-12">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
@@ -43,7 +43,7 @@
                             </div>
 
                             
-                            <div class="col-4 mt-1">
+                            <div class="col-5 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
                                 </fieldset>
