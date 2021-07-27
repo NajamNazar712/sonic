@@ -8430,11 +8430,9 @@ class RiderAPIController extends Controller
             $data = array();
             foreach ($rider_incentives as $rider_incentive) {
                 $datum = array();
-                return response()->json(["status" => 1, "message" => $rider_incentive->created_at]);
                 $payable = DeliveryNote::where('rider_id', $rider_id)
                     ->whereDate('created_at', $rider_incentive->created_at)
                     ->sum('received_cod_amount');
-
                 $datum['pickup_shipments'] = $rider_incentive->pickup_shipments;
                 $datum['pickup_incentive'] = $rider_incentive->pickup_incentive;
                 $datum['delivery_shipments'] = $rider_incentive->delivery_shipments;
