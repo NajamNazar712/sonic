@@ -8410,7 +8410,7 @@ class RiderAPIController extends Controller
                 ->where('rider_id', $rider_id)
                 ->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->sum('received_cod_amount');
-            $total_earned_qs = RidersIncentive::selectRaw('sum(pickup_incentive) as pickup_incentive, sum(delivery_incentive) as delivery_incentive')
+            $total_earned_qs = RidersIncentive::select(DB::raw('sum(pickup_incentive) as pickup_incentive, sum(delivery_incentive) as delivery_incentive'))
                 ->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
             $total_earned = $total_earned_qs->pickup_incentive + $total_earned_qs->delivery_incentive;
         } else {
@@ -8420,7 +8420,7 @@ class RiderAPIController extends Controller
                 ->where('rider_id', $rider_id)
                 ->whereDate('created_at', $from_date)
                 ->sum('received_cod_amount');
-            $total_earned_qs = RidersIncentive::selectRaw('sum(pickup_incentive) as pickup_incentive, sum(delivery_incentive) as delivery_incentive')
+            $total_earned_qs = RidersIncentive::select(DB::raw('sum(pickup_incentive) as pickup_incentive, sum(delivery_incentive) as delivery_incentive'))
                 ->whereDate('date', $from_date);
             $total_earned = $total_earned_qs->pickup_incentive + $total_earned_qs->delivery_incentive;
         }
