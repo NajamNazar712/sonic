@@ -287,4 +287,6 @@ Route::name('api.')->group(function () {
     });
 
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
+    Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
+    
 });

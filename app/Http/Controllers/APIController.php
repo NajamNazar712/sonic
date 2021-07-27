@@ -3600,4 +3600,18 @@ class APIController extends Controller
             }
         }
     }
+
+
+    public function live_tracking(Request $request){
+        $database = app('firebase.database');
+        $reference = $database->getReference('OnRouteShipments/in-transit');
+        if ($reference->getSnapshot()->getChild($request->tracking_id)->exists()) {
+              $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id);
+              return response()->json(['status' => 0, 'data' => $details]);
+      
+        } else {
+          return response()->json(['status' => 1, 'message' => 'No data found!']);
+           
+        }
+    }
 }
