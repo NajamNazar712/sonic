@@ -1,0 +1,482 @@
+@extends('admin.layout.master')
+
+@section('title', 'Mapping (Cargo Manifest)')
+
+@section('content')
+    <div class="app-content content">
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <h1 class="mb-1">
+                    Mapping (Cargo Manifest)
+                </h1>
+
+                <div class="card">
+                    <div class="card-content" aria-expanded="true">
+                        <div class="card-body">
+                            @include('admin.inc.messages')
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Origin Hub</th>
+                                    <th class="border-primary border-darken-1">Destination Hub</th>
+                                    <th class="border-primary border-darken-1">Junctions</th>
+                                    <th class="border-primary border-darken-1">Vehicle</th>
+                                    <th class="border-primary border-darken-1">Updated Date</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
+                                    <th class="border-primary border-darken-1"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add_mapping" role="dialog" aria-labelledby="add_mapping_title" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form class="form-horizontal" method="POST" action="{{ route('admin.cargo.mapping.store') }}" novalidate="novalidate">
+                    {{ csrf_field() }}
+
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="add_mapping_title">Add Mapping</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="origin" class="select2 origin" data-rule-required="true" data-msg-required="Origin Hub is required">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="destination" class="select2 destination" data-rule-required="true" data-msg-required="Destination Hub is required">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                        </div>
+                        <div class="mt-1" id="junctions_container">
+                            <div class="junction_container row">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <select name="junctions[1]" id="junction_1" class="select2 junctions" data-msg-required="Junction is Required">
+                                            @foreach($cities as $junction)
+                                                <option value="{{$junction->id}}">{{$junction->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                <div class="form-group">
+                                    <button type="button" id="add_junction" class="btn btn-primary">Add Junction</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-bordered" id="junction_table">
+                                    <thead>
+                                        <tr role="row" class="bg-primary white">
+                                            <th class="border-primary border-darken-1">S.No</th>
+                                            <th class="border-primary border-darken-1">Starting</th>
+                                            <th class="border-primary border-darken-1">Ending</th>
+                                            <th class="border-primary border-darken-1">Vehicle</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer text-center justify-content-around">
+                        <button type="submit" name="submit" class="btn btn-primary" value="submit">Add</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+@endsection
+
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+@endsection
+
+@section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.cargo.mapping.manifest.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Origin Hub');
+                            head.push('Destination Hub');
+                            head.push('Junctions');
+                            head.push('Vehicles');
+                            head.push('Updated Date Time');
+                            head.push('Updated By');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.junctions);
+                                row.push(values.vehicles);
+                                row.push(values.updated_at);
+                                row.push(values.updated_by);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '500px',
+                buttons: [
+                    {
+                        text: '<i class="la la-plus-circle"></i> Add',
+                        className: 'btn btn-primary add',
+                        action: function (e, dt, node, config) {
+                            $('#add_mapping').modal('show');
+                        }
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'Cargo Manifest Mapping',
+                        className:'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                    'reset'
+                ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
+                },
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('admin.cargo.mapping.manifest.list') }}'
+                },
+                rowId: 'id',
+                order: [6, 'desc'],
+                columns: [
+                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'junctions_display', name: 'jc1.name', class: 'align-middle junctions'},
+                    {data: 'vehicles_display', name: 'ar.name', class: 'align-middle vehicles'},
+                    {data: 'updated_at', name: 'junction_mappings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    this.api().table().columns.adjust();
+                }
+            });
+
+
+            var junction_table = $("#junction_table").DataTable({
+                dom: 'ltipr',
+                paging:false,
+                autoWidth: false,
+                columns: [
+                    {orderable: false, searchable: false, name: 'piece_serial_number', class: 'align-middle serial_number'},
+                    {name: 'starting', class: 'align-middle starting', orderable: false, searchable: false},
+                    {name: 'ending', class: 'align-middle ending', orderable: false, searchable: false},
+                    {name: 'vehicle', class: 'align-middle vehicle', sortable: false, orderable: false, searchable: false}
+                ],
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+
+            $('#add_mapping form .origin').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Origin Hub*'
+            }).bind('change', function() {
+                $(this).valid();
+                junctions_display()
+            });
+
+            $('#add_mapping form .destination').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Destination Hub*'
+            }).bind('change', function() {
+                $(this).valid();
+                junctions_display()
+            });
+
+            $('#add_mapping form .junctions').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Junction*'
+            }).bind('change', function() {
+                $(this).valid();
+                junctions_display()
+            });
+
+            $('#add_mapping form #add_junction').on('click',function (){
+                count = document.getElementById('junctions_container').children.length + 1;
+                html = `
+                <div class="junction_container row">
+                    <div class="col">
+                        <div class="form-group">
+                            <select name="junctions[${count}]" class="select2 junctions" id="junction_${count}" data-rule-required="true" data-msg-required="Junction is Required">
+                                @foreach($cities as $junction)
+                                    <option value="{{$junction->id}}">{{$junction->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-danger remove_junction">Remove Junction</button>
+                        </div>
+                    </div>
+                </div>`;
+                $("#junctions_container").append(html);
+
+                $('#add_mapping form #junction_'+count+'').prepend('<option value="" selected="selected"></option>').select2({
+                    width: '100%',
+                    placeholder: 'Junction*'
+                }).bind('change', function() {
+                    $(this).valid();
+                });
+                junctions_display()
+            });
+
+            $(document).on('click',"#add_mapping form .remove_junction",function (){
+                $(this).closest('.junction_container').remove();
+                junctions_display()
+            });
+
+            $('#add_mapping form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    blockPagePermanently();
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Mapping is being Added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
+            function junctions_display()
+            {
+                origin = $("#add_mapping form .origin").find(":selected").text();
+                destination = $("#add_mapping form .destination").find(":selected").text();
+                origin_value = $("#add_mapping form .origin").val();
+                destination_value = $("#add_mapping form .destination").val();
+                if(origin_value == '')
+                {
+                    origin = "Not Selected";
+                }
+                if(destination_value == '')
+                {
+                    destination = "Not Selected";
+                }
+                junction_table.row().remove();
+                if($("#add_mapping form .junction_container .junctions").length > 1)
+                {
+                    // junction_table.row.add([1,origin,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),"Vehicles"]);
+                    $("#add_mapping form .junction_container .junctions").each(function (index){
+                        if(index == 0)
+                        {
+                            previous_junction = $(this).find(":selected").text();
+                            junction_table.row.add([index+1,origin,$(this).find(":selected").text(),"Vehicles"]);
+                        }
+                        else{
+                            junction_table.row.add([index+1,previous_junction,$(this).find(":selected").text(),"Vehicles"]);
+                        }
+                    });
+                    // junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").last().find(":selected").text(),destination,"Vehicles"]);
+                }
+                else{
+                    if($("#add_mapping form .junction_container .junctions").first().val() != '')
+                    {
+                        junction_table.row.add([1,origin,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),"Vehicles"]);
+                        junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),destination,"Vehicles"]);
+                    }
+                    else{
+                        junction_table.row.add([1,origin,destination,"Vehicles"]);
+                    }
+                }
+                junction_table.draw(false);
+                junction_table.columns.adjust().draw();
+            }
+
+            $('body').on('click','.edit_mapping',function () {
+                var mapping_id = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url:'{!! route("admin.cargo.mapping.edit") !!}',
+                    method: 'POST',
+                    data: {
+                        'mapping_id': mapping_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#edit_mapping').modal('show');
+                    $('#edit_mapping form .mapping_id').val(mapping_id);
+                    $('#edit_mapping form .origin').val(data.details['origin_id']);
+                    $('#edit_mapping form .origin_line').html(data.origin['name']);
+                    $('#edit_mapping form .destination').val(data.details['destination_id']);
+                    $('#edit_mapping form .destination_line').html(data.destination['name']);
+                    $('#edit_mapping form .junction_1').val(data.details['junction_1']);
+
+                    $('#edit_mapping form .junction_1').select2({
+                        width: '100%',
+                        placeholder: 'Junction 1*'
+                    }).bind('change', function() {
+                        $(this).valid();
+                    });
+                    if(data.details['junction_2'] !== null) {
+                        $('#edit_mapping form .junction_2').val(data.details['junction_2']);
+                        $('#edit_mapping form .junction_2').select2({
+                            width: '100%',
+                            placeholder: 'Junction 2',
+                            allowClear: true
+                        });
+                    }
+                    else{
+                        $('#edit_mapping form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
+                            width: '100%',
+                            placeholder: 'Junction 2',
+                            allowClear: true
+                        }).bind('change', function() {
+                            $(this).valid();
+                        });
+                    }
+                    if(data.details['receiver'] !== null) {
+                        $('#edit_mapping form .receiver_id').val(data.details['receiver']);
+                        $('#edit_mapping form .receiver_id').select2({
+                            width: '100%',
+                            placeholder: 'Receiver Name',
+                            allowClear: true
+                        }).bind('change', function () {
+                            $(this).valid();
+                        });
+                    }
+                    else{
+                        $('#edit_mapping form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
+                            width: '100%',
+                            placeholder: 'Receiver Name',
+                            allowClear: true
+                        }).bind('change', function() {
+                            $(this).valid();
+                        });
+                    }
+                });
+
+                $('#edit_mapping form').validate({
+                    errorClass: 'danger',
+                    successClass: 'success',
+                    errorPlacement: function(error, element) {
+                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                    },
+                    normalizer: function(value) {
+                        return $.trim(value);
+                    },
+                    submitHandler: function(form) {
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                        blockPagePermanently();
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Mapping is being Updated!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    }
+                });
+            });
+        });
+    </script>
+@endsection

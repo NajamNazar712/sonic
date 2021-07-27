@@ -1355,11 +1355,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\AdminCargoController@mapping_edit_update')->name('update');
 //            Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
             Route::prefix('manifest')->name('manifest.')->group(function () {
-                Route::get('', 'Admins\AdminCargoController@manifest_mapping_index')->name('index');
-                Route::get('list', 'Admins\AdminCargoController@manifest_mapping_list')->name('list');
-                Route::post('store', 'Admins\AdminCargoController@manifest_mapping_store')->name('store');
-                Route::post('edit', 'Admins\AdminCargoController@manifest_mapping_edit')->name('edit');
-                Route::post('update', 'Admins\AdminCargoController@manifest_mapping_edit_update')->name('update');
+                Route::get('', 'Admins\AdminCargoManifestController@manifest_mapping_index')->name('index');
+                Route::get('list', 'Admins\AdminCargoManifestController@manifest_mapping_list')->name('list');
+                Route::post('store', 'Admins\AdminCargoManifestController@manifest_mapping_store')->name('store');
+                Route::post('edit', 'Admins\AdminCargoManifestController@manifest_mapping_edit')->name('edit');
+                Route::post('update', 'Admins\AdminCargoManifestController@manifest_mapping_edit_update')->name('update');
             });
         });
 
