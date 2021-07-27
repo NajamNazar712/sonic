@@ -29,6 +29,24 @@
                  <input type="text" value="{{$fleet->tracking_id}}" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
              </div>
          </div>
+        <div class="row justify-content-center">
+            <div class="col-12 form-group">
+                <select class="form-control driver_select" id="driver_select" name="driver" data-rule-required="true" data-msg-required="Driver is required">
+                    @foreach($drivers as $driver)
+                        <option value="{{ $driver->id }}">{{ $driver->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 form-group">
+                <select class="form-control vendor_select" id="vendor_select" name="vendor" data-rule-required="true" data-msg-required="Vendor is required">
+                    @foreach($vendors as $vendor)
+                        <option value="{{ $vendor->id }}">{{ $vendor->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
         
     </div>
     
@@ -48,6 +66,8 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+
 
 
         $('.vehicle_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({

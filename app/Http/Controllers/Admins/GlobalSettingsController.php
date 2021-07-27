@@ -4160,9 +4160,9 @@ class GlobalSettingsController extends Controller
     public function fleet_edit($id){
         $vehicles = VehicleType::all();
         $fleet = Fleet::find($id);
-        $driver = FleetDriver::where('id',$fleet->driver_id)->first();
-        $vendor = FleetVendor::where('id',$fleet->vendor_id)->first();
-        return view('admin.settings.fleet_edit', compact('fleet','vehicles','driver','vendor'));
+        $drivers = FleetDriver::all();
+        $vendors = FleetVendor::all();
+        return view('admin.settings.fleet_edit', compact('fleet','vehicles','drivers','vendors'));
 
     }
 
