@@ -8223,6 +8223,14 @@ class AdminReportsController extends Controller
         if ($search_hub = $request->get('search_hub')) {
             $datatable->where('c.id', $search_hub);
         }
+        if($dn_no = $request->get('search_dn_no')){
+            $datatable->where('delivery_notes.id','=',$dn_no);
+        }
+        if($tracking = $request->get('search_tracking')){
+            $datatable->join('delivery_note_shipments as rns','rns.delivery_note_id','=','delivery_notes.id')
+                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking);
+        }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');

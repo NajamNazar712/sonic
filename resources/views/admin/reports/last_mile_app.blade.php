@@ -42,7 +42,17 @@
                                 </fieldset>
                             </div>
 
-
+                            
+                            <div class="col-4 mt-1">
+                                <fieldset class="form-group input-group">
+                                    <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
+                                </fieldset>
+                            </div>
+                            <div class="col-5 mt-1">
+                                <fieldset class="form-group input-group">
+                                    <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                                </fieldset>
+                            </div>
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
@@ -394,6 +404,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_dn_no,#search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -545,6 +560,8 @@
                         d.search_rider = $('#search_rider').val();
                         d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
+                        d.search_dn_no = $('#search_dn_no').val();
+                        d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
