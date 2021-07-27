@@ -8433,11 +8433,12 @@ class RiderAPIController extends Controller
                 $payable = DeliveryNote::where('rider_id', $rider_id)
                     ->whereDate('created_at', date('Y-m-d',strtotime($rider_incentive->created_at)))
                     ->sum('received_cod_amount');
-                $datum['created_at'] = date('Y-m-d',strtotime($rider_incentive->created_at));
+                $datum['created_at'] = date('Y/m/d',strtotime($rider_incentive->created_at));
                 $datum['pickup_shipments'] = $rider_incentive->pickup_shipments;
                 $datum['pickup_incentive'] = $rider_incentive->pickup_incentive;
                 $datum['delivery_shipments'] = $rider_incentive->delivery_shipments;
                 $datum['delivery_incentive'] = $rider_incentive->delivery_incentive;
+                $datum['total_incentive'] = $rider_incentive->delivery_incentive;
                 $datum['cod_amount'] = $payable;
                 $data[] = $datum;
             }
