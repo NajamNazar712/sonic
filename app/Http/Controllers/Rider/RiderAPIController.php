@@ -8402,15 +8402,9 @@ class RiderAPIController extends Controller
         $rider_id = $request->rider_id;
         $from_date = $request->get('from_date');
         $to_date = $request->get('to_date');
-        $rider_incentives = RidersIncentive::leftjoin('delivery_notes as dn', 'riders_incentives.rider_id','=', 'dn.rider_id')
-            ->where('riders_incentives.rider_id', $rider_id);
+        $rider_incentives = RidersIncentive::where('rider_id', $rider_id);
         if ($to_date) {
-
-            $rider_incentives = $rider_incentives->select('riders_incentives.created_at as created_at', 'riders_incentives.pickup_shipments as pickup_shipments', 'riders_incentives.pickup_incentive as pickup_incentive', 'riders_incentives.delivery_shipments as delivery_shipments', 'riders_incentives.delivery_incentive as delivery_incentive', 'dn.received_cod_amount as amount')
-                ->whereBetween('riders_incentives.created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
-                ->whereBetween('dn.created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
-                ->where('dn.cash_collection_status', 0)
-                ->where('dn.status', '!=', 4);
+            $rider_incentives = $rider_incentives->whereBetween('created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59']);
 
             $total_payable = DeliveryNote::where('cash_collection_status', 0)
                 ->where('status', '!=', 4)
@@ -8422,11 +8416,7 @@ class RiderAPIController extends Controller
                 ->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->where('rider_id', $rider_id)->first();
         } else {
-            $rider_incentives = $rider_incentives->select('riders_incentives.created_at as created_at', 'riders_incentives.pickup_shipments as pickup_shipments', 'riders_incentives.pickup_incentive as pickup_incentive', 'riders_incentives.delivery_shipments as delivery_shipments', 'riders_incentives.delivery_incentive as delivery_incentive', 'dn.received_cod_amount as amount')
-                ->whereDate('riders_incentives.created_at', $from_date)
-                ->whereDate('dn.created_at', $from_date)
-                ->where('dn.cash_collection_status', 0)
-                ->where('dn.status', '!=', 4);
+            $rider_incentives = $rider_incentives->whereDate('created_at', $from_date);
 
             $total_payable = DeliveryNote::where('cash_collection_status', 0)
                 ->where('status', '!=', 4)
@@ -8441,8 +8431,23 @@ class RiderAPIController extends Controller
 
         if ($rider_incentives->exists()) {
             $rider_incentives = $rider_incentives->get();
+            $data = array();
+            foreach ($rider_incentives as $rider_incentive) {
+                $datum = array();
+                $payable = DeliveryNote::where('cash_collection_status', 0)
+                    ->where('status', '!=', 4)
+                    ->where('rider_id', $rider_id)
+                    ->whereDate('created_at', $rider_incentive->created_at)
+                    ->sum('received_cod_amount');
+                $datum['pickup_shipments'] = $rider_incentive->pickup_shipments;
+                $datum['pickup_incentive'] = $rider_incentive->pickup_incentive;
+                $datum['delivery_shipments'] = $rider_incentive->delivery_shipments;
+                $datum['delivery_incentive'] = $rider_incentive->delivery_incentive;
+                $datum['cod_amount'] = $payable;
+                $data[] = $datum;
+            }
             $total_earned = $total_earned_qs->pickup_incentive + $total_earned_qs->delivery_incentive;
-            return response()->json(["status" => 0, "incentives" => $rider_incentives, "total_earned" => $total_earned, "total_payable" => $total_payable]);
+            return response()->json(["status" => 0, "incentives" => $data, "total_earned" => $total_earned, "total_payable" => $total_payable]);
         }
         return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
 
