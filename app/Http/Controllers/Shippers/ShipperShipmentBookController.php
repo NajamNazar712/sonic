@@ -1877,7 +1877,10 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
 
                     }
-
+                    else if ($shipment->booking_type_id == 6) {
+                        $shipment_details .= $table_start;
+                        $shipment_details .= $table_end;
+                    }
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
