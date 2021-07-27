@@ -20,8 +20,40 @@
                             <div class="col-4 mb-1">
                                 <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                             </div>
+
+                            <div class="col-4 mb-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                    </div>
+                                    <input type="text" name="from_date"
+                                               class="form-control bg-primary border-primary white rounded-right"
+                                               id="from_date" placeholder="Date From"
+                                               data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            <div class="col-4 mb-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                    </div>
+                                    <input type="text" name="to_date"
+                                               class="form-control bg-primary border-primary white rounded-right"
+                                               id="to_date" placeholder="To Date"
+                                               data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+
+
                                 <div class="col-2">
-                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button type="button" id="search_filter_btn"
+                                            class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
+                                        Search
+                                    </button>
                                 </div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -61,10 +93,15 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
@@ -72,7 +109,35 @@
 
 	<script type="text/javascript">
 		$(document).ready(function() {
-            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+            $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+		    jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if ( this.context.length ) {
                     body = [];
                     var params = table.ajax.params();
@@ -269,6 +334,8 @@
                     url: '{{ route('admin.cancelled_shipments.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.search_from = $('input[name="from_date_formatted"]').val();
+                        d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 order: [[14, 'desc']],

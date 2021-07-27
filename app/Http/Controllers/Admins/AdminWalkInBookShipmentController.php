@@ -1431,6 +1431,8 @@ class AdminWalkInBookShipmentController extends Controller
         $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
         $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
         $cities = City::where('status',1)->where('business_category_id',1)->get();
+        $walk_in_cities = City::join('walk_in_cities as wc','wc.city_id','=','cities.id')
+            ->join('city_deliveries as cd','cd.city_id','=','cities.id')->select('cities.name as city_name','cities.id as city_id')->where('wc.delivery', 1)->where('cities.status',1)->where('cd.booking_type_id',6)->groupBy('cities.id')->get();
         $consignee_cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
             ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.delivery', 1)->get();
         $products = Product::orderBy('product_name')->get();
@@ -1438,8 +1440,7 @@ class AdminWalkInBookShipmentController extends Controller
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [1, 2])->get();
         $approve_ftl_requests = FtlRequest::where('status_id',3)->get();
-        
-        return view('admin.ftl.request.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities,'approve_ftl_requests' => $approve_ftl_requests]);
+        return view('admin.ftl.request.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities,'approve_ftl_requests' => $approve_ftl_requests,'walk_in_cities' => $walk_in_cities]);
     }
 
     public function get_ftl_info(Request $request){

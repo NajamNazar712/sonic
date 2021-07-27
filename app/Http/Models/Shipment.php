@@ -10,6 +10,9 @@ class Shipment extends Model
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}
+    public function distribution_products() {
+        return $this->hasMany('App\Http\Models\ShipmentDistributionProduct','shipment_id');
+    }
     public function shipment_pieces() {
         return $this->hasMany('App\Http\Models\ShipmentPiece');
     }

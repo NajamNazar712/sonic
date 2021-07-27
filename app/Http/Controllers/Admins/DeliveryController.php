@@ -54,6 +54,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInformationLog;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiece;
@@ -2246,7 +2247,7 @@ class DeliveryController extends Controller
     }
 
     //ajax function
-    //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy
+    //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy  status 4 -> distribution
     public function receive_delivery_status_check(Request $request)
     {
         $note_id = $request->delivery_note_id;
@@ -2293,6 +2294,20 @@ class DeliveryController extends Controller
                 }
             }
 
+            $regular_shipment = DeliveryNoteShipment::where(['delivery_note_id' => $note_id, 'status' => 6])->get();
+            if($regular_shipment){
+                $distribution_id = null;
+                foreach ($regular_shipment as $regular) {
+                    $regular_data = Shipment::where('id', $regular->shipment_id)->where('user_id',10354)->where('booking_type_id',1);
+                    if($regular_data->exists()){
+                        $regular_data = $regular_data->first();
+                        if(ShipmentDistributionProduct::where('shipment_id',$regular_data->id)->where('status',0)->exists()){
+                            $distribution_id = $regular_data->id;
+                        }
+                    }
+                }
+            }
+
             if (!empty($replacement_ids)) {
                 return ['status' => 2, 'success' => 'Shipment is replacement!', 'booking_type' => 2, 'replacement' => $replacement_ids];
             }
@@ -2300,6 +2315,8 @@ class DeliveryController extends Controller
                 return ['status' => 9, 'success' => 'Shipment is Non Service Area!', 'non_service_area_shipments' => $non_service_area_shipments];
             }elseif ($trybuy_id != null) {
                 return ['status' => 3, 'success' => 'Shipment is try and buy!', 'booking_type' => 3, 'try' => $trybuy_id];
+            }elseif ($distribution_id != null) {
+                return ['status' => 4, 'success' => 'Shipment is distribution!', 'booking_type' => 1, 'distribution' => $distribution_id];
             }
         } else {
             return ['status' => 0, 'error' => 'No shipments updated!'];
@@ -5318,8 +5335,9 @@ class DeliveryController extends Controller
     }
 
     public function history_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),303);
-        return view('admin.delivery.history.index');
+ActivityTrailController::createActivityTrailLog(Auth::id(),303);
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.delivery.history.index')->with(['status' => '1','operation_rider_category' => $operation_rider_category]);
     }
 
     public function history_list(Request $request){
@@ -5337,8 +5355,8 @@ class DeliveryController extends Controller
             ->leftjoin('rider_delivery_note_statuses as rdns','rdns.delivery_note_id','=','delivery_notes.id')
             ->leftjoin('rider_deliveries as rd','rd.delivery_note_id','=','delivery_notes.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at', 'delivery_notes.cash_collected_by','ccb.name as cash_collected', 'delivery_notes.cash_collected_at','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','rdns.status as updated_via_app', 'rd.id as rider_delivery_id','rd.delivered_status as delivered_status','rd.picture_path as picture_path'])
-        ->groupBy('delivery_notes.id');
-
+            ->where('riders.operation_rider_id', $request->get('operation_rider_id'))
+            ->groupBy('delivery_notes.id');
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
@@ -5875,6 +5893,12 @@ class DeliveryController extends Controller
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
+
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                    if($return_assign_shipment){
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+                    }
                     $print[] = $shipment_id;
                 }
             }
@@ -6829,4 +6853,54 @@ class DeliveryController extends Controller
             return response()->json(['status' => 0,'error'=> 'Status already approved']);
         }
     }
+
+    public function receive_delivery_get_distribution(Request $request)
+    {
+        $shipment = $request->distribution;
+        if (isset($shipment)) {
+            $product = array();
+            $parcels = ShipmentDistributionProduct::where('shipment_id', $shipment)->where('status',0)->get();
+            foreach ($parcels as $parcel) {
+                $product[] = ['pid' => $parcel->id, 'type' => $parcel->item->name,'items' => $parcel->items ,'units_per_item' => $parcel->units_per_item,'total_delivered_units' =>$parcel->total_delivered_units,'price' => $parcel->price];
+//
+            }
+           
+            return ['status' => 0, 'data' => $product];
+        } else {
+            return ['status' => 1, 'error' => 'No Shipment found'];
+        }
+    }
+
+    public function receive_delivery_distribution_submit(Request $request)
+    {
+        $shipment_id = $request->distribution_shipment_id;
+        $note_id = $request->delivery_note_distribution;
+        if (!empty($request->total_delivered_units)) {
+            $total_cod = 0;
+            foreach ($request->total_delivered_units as $id => $value) {
+
+                $shipment_item = ShipmentDistributionProduct::find($id);
+                $shipment_item->total_delivered_units = $value;
+                $shipment_item->total_delivered_skus =  $request->get('total_delivered_skus')[$id];
+                $shipment_item->received_amount =  $request->get('amount')[$id];
+                $shipment_item->status =  1;
+                $shipment_item->save();
+                $total_cod +=  $shipment_item->received_amount;
+            }
+
+            Shipment::where('id', $shipment_id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
+          /*  ShipmentsJourneyController::add($shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(), $request->delivery_note_trybuy, NULL, 0);*/
+
+            //ShipmentChargesController::cash_handling($request->trybuy_shipment_id);
+            //DeliveryNoteShipment::where(['shipment_id' => $shipment_id, 'delivery_note_id' =>$note_id])->update(['status' => 5]);
+
+            $delivery_note_data = DeliveryNote::find($note_id);
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->save();
+            return redirect()->back()->with('success', 'Distribution shipment updated');
+        }
+
+    }
+
 }

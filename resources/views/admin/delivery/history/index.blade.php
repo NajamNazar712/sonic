@@ -17,7 +17,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                             </div>
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" data-value="{{ Carbon\Carbon::today() }}" placeholder="Search Date (From)">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -27,8 +27,17 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                             </div>
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" data-value="{{ Carbon\Carbon::today() }}" placeholder="Search Date (To)">
                         </div>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group input-group ml">
+                            <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                                @foreach($operation_rider_category as $category)
+                                    <option value="{{$category->id}}">{{$category->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -219,6 +228,9 @@
                     }
                 }
             });
+            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Category*',
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -304,6 +316,7 @@
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.operation_rider_id=$('#operation_rider_id').val();
                     }
                 },
                 rowId: 'delivery_note_id',

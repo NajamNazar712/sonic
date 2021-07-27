@@ -43,6 +43,7 @@ class RiderManagementController extends Controller
     }
 
     public function permanent_index(){
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),58);
         $category = RiderCategory::all();
         return view('admin.management.riders.permanent_index')->with(['categories'=>$category]);

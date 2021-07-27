@@ -21,7 +21,9 @@ use App\Http\Models\CorporateDeliveryTypeStatus;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\DistributionProduct;
 use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\http\Models\ShipmentOrderDate;
@@ -271,6 +273,19 @@ class ShipperShipmentBookController extends Controller
         $shipment_item->price = $price;
         $shipment_item->insurance = $insurance;
         $shipment_item->type = $type;
+
+        $shipment_item->save();
+    }
+
+    static public function add_distribution_item($shipment_id, $product_type_id, $item_quantity,$units_per_item, $price, $insurance) {
+        $shipment_item = new ShipmentDistributionProduct();
+
+        $shipment_item->shipment_id = $shipment_id;
+        $shipment_item->product_type_id = $product_type_id;
+        $shipment_item->items = $item_quantity;
+        $shipment_item->units_per_item = $units_per_item;
+        $shipment_item->price = $price;
+        $shipment_item->insurance = $insurance;
 
         $shipment_item->save();
     }
@@ -1225,15 +1240,27 @@ class ShipperShipmentBookController extends Controller
                         $table_start .= '
                                 <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                     ';
+
+                        $distribution_logo = '
+                                <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                    ';
                     } else {
                         if ($type != 'pdf') {
                             $table_start .= '
                                 <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
                         ';
+
+                            $distribution_logo = '
+                               <td rowspan="3" colspan="3"  class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                    ';
                         } else {
                             $table_start .= '
                                 <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
                         ';
+
+                            $distribution_logo = '
+                                <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                    ';
                         }
                     }
                     if ($type != 'pdf') {
@@ -1269,8 +1296,15 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 6) {
+                        if($shipment->user_id == 10354 && $shipment->distribution_products->count() > 0)
+                        {
+                            $service_type = "Distribution";
+                        }
+                        else{
+                            $service_type = $shipment->booking_type->booking_type;
+                        }
                         $table_start .= '
-                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                                <td><strong>' . $service_type . '</strong></td>
                     ';
                     } else if ($shipment->booking_type_id == 2) {
                         if ($type != 'pdf') {
@@ -1724,7 +1758,7 @@ class ShipperShipmentBookController extends Controller
                     ';
                     }
 
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                    if ($shipment->booking_type_id == 4 || $shipment->booking_type_id == 5){
                         $shipment_details .= $table_start;
 
                         $item = $shipment->items->first();
@@ -1746,7 +1780,40 @@ class ShipperShipmentBookController extends Controller
                     ';
 
                         $shipment_details .= $table_end;
-                    } else if ($shipment->booking_type_id == 2) {
+                    }
+                    else if($shipment->booking_type_id == 1)
+                    {
+                        if($shipment->user_id == 10354 && $shipment->distribution_products->count() > 0)
+                        {
+                            $shipment_details .= $table_start;
+
+                            $shipment_details .= $table_end;
+                        }
+                        else{
+                            $shipment_details .= $table_start;
+
+                            $item = $shipment->items->first();
+
+                            $shipment_details .= '
+                              <tr>
+                                <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                                <td class="color secondary border twice-top"><strong>Type</strong></td>
+                                <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                                <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                <td>' . $item->quantity . '</td>
+                                <td colspan="1" class="color secondary border twice-top"><strong>Piece(s)</strong></td>
+                                <td>'. $shipment->pieces .'</td>
+                              </tr>
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                <td colspan="6" class="border twice-bottom">' . $item->description .'</td>
+                              </tr>
+                    ';
+
+                            $shipment_details .= $table_end;
+                        }
+                    }
+                    else if ($shipment->booking_type_id == 2) {
                         $shipment_details .= $table_start;
 
                         $items = $shipment->items;
@@ -1810,7 +1877,10 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
 
                     }
-
+                    else if ($shipment->booking_type_id == 6) {
+                        $shipment_details .= $table_start;
+                        $shipment_details .= $table_end;
+                    }
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
@@ -1909,6 +1979,188 @@ class ShipperShipmentBookController extends Controller
                             $shipment_details .= $logo_invoice;
                         }
 
+                    }
+
+                    if($shipment->user_id == 10354 && $shipment->booking_type_id == 1 && $shipment->distribution_products->count() > 0)
+                    {
+                        $distribution_performa_start = '<div class="position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>';
+
+                        $distribution_performa_start .= '<tr>
+                        '.$distribution_logo.'
+                        <td class="color primary font-weight-bold">Tracking Number</td>
+                        <td>'.$shipment->tracking_number.'</td>
+                        </tr>';
+
+                        $distribution_performa_start .= '<tr>
+                        <td class="color primary font-weight-bold">Service Type</td>
+                        <td>Distribution</td>
+                        </tr>';
+
+                        $distribution_performa_start .= '<tr>
+                        <td class="color primary font-weight-bold">Booking Date/Time</td>
+                        <td>'.$shipment->created_at->format('Y-m-d H:i:s').'</td>
+                        </tr>';
+
+                        $distribution_performa_start .= '
+                        <tr>
+                            <td colspan="3" class="color primary font-weight-bold text-center">Shipper</td>
+                            <td colspan="2" class="color primary font-weight-bold text-center">Consignee</td>
+                        </tr>
+                        ';
+
+                        $distribution_performa_start .='
+                            <tr>
+                                <td class="color primary font-weight-bold">Pickup Address</td>
+                                <td colspan="2">' . $shipment->pickup_address->pickup_address . '</td>
+                                <td class="color primary font-weight-bold">Delivery Address</td>
+                                <td>'.$shipment->consignee_address.'</td>
+                            </tr>
+                            <tr>
+                                <td class="color primary font-weight-bold">City</td>
+                                <td colspan="2">' . $shipment->pickup_address->city->name . '</td>
+                                <td class="color primary font-weight-bold">City</td>
+                                <td>' . $shipment->consignee_city->name . '</td>
+                            </tr>
+                            <tr>
+                                <td class="color primary font-weight-bold">Phone Number</td>
+                                <td colspan="2">'.$shipment->pickup_address->phone.'</td>
+                                <td class="color primary font-weight-bold">Phone Number</td>
+                                <td>' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                            </tr>
+                            <tr>
+                                <td class="color primary font-weight-bold">NTN Number</td>
+                                <td colspan="2">'.$shipment->user->ntn_no.'</td>
+                                <td colspan="2"></td>
+                            </tr>
+                            </tbody>
+                            </table>
+                        ';
+
+                        $distribution_booking_performa = '<table class="table mt-2 table-sm table-bordered border twice">
+                        <tbody>
+                        <tr>
+                            <td colspan="2" class="color primary font-weight-bold">Products</td>
+                            <td class="color primary font-weight-bold">Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Units Per Item</td>
+                            <td class="color primary font-weight-bold">Total Units</td>
+                            <td class="color primary font-weight-bold">Total Amount</td>
+                        </tr>';
+
+                        $total_items = 0;
+                        $total_units_per_item = 0;
+                        $total_units = 0;
+                        $total_price = 0;
+                        foreach ($shipment->distribution_products as $product)
+                        {
+                            $total_items += $product->items;
+                            $total_units_per_item += $product->units_per_item;
+                            $total_units += $product->items * $product->units_per_item;
+                            $total_price += $product->price;
+
+                            $distribution_booking_performa .= '
+                                <tr>
+                                    <td colspan="2">'.$product->item->name.'</td>
+                                    <td>'.$product->items.'</td>
+                                    <td>'.$product->units_per_item.'</td>
+                                    <td>'.$product->items * $product->units_per_item.'</td>
+                                    <td>'.$product->price.'</td>
+                                </tr>
+                            ';
+                        }
+
+                        $distribution_booking_performa .= '
+                                <tr>
+                                    <td colspan="2" class="color primary font-weight-bold">Total</td>
+                                    <td>'.$total_items.'</td>
+                                    <td>'.$total_units_per_item.'</td>
+                                    <td>'.$total_units.'</td>
+                                    <td>'.$total_price.'</td>
+                                </tr>
+                                </tbody>
+                                </table>
+                                </div>
+                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
+
+
+
+                        $shipment_details .= $distribution_performa_start;
+                        $shipment_details .= $distribution_booking_performa;
+
+                        if($shipment->shipment_journey->first()->shipper_status_id == 14)
+                        {
+                            $shipment_details .= $distribution_performa_start;
+
+                            $distribution_delivery_performa = '<table class="table mt-2 table-sm table-bordered border twice">
+                        <tbody>
+                        <tr>
+                            <td colspan="2" class="color primary font-weight-bold">Products</td>
+                            <td class="color primary font-weight-bold">Booked Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Delivered Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Return Items/SKU\'s</td>
+                            <td class="color primary font-weight-bold">Booked Units Per Item</td>
+                            <td class="color primary font-weight-bold">Booked Total Units</td>
+                            <td class="color primary font-weight-bold">Delivered Total Units</td>
+                            <td class="color primary font-weight-bold">Returned Total Units</td>
+                            <td class="color primary font-weight-bold">Total Amount</td>
+                        </tr>';
+
+
+                            $total_items = 0;
+                            $total_units_per_item = 0;
+                            $total_units = 0;
+                            $total_price = 0;
+                            $total_delivered_items = 0;
+                            $total_returned_items = 0;
+                            $total_delivered_units = 0;
+                            $total_returned_units = 0;
+                            foreach ($shipment->distribution_products as $product)
+                            {
+                                $total_items += $product->items;
+                                $total_delivered_items = $product->total_delivered_skus;
+                                $total_returned_items = $product->items - $product->total_delivered_skus;
+                                $total_units_per_item += $product->units_per_item;
+                                $total_units += $product->items * $product->units_per_item;
+                                $total_delivered_units += $product->total_delivered_units;
+                                $total_returned_units += ($product->items * $product->units_per_item) - $product->total_delivered_units;
+                                $total_price += $product->received_amount;
+
+                                $distribution_delivery_performa .= '
+                                <tr>
+                                    <td colspan="2">'.$product->item->name.'</td>
+                                    <td>'.$product->items.'</td>
+                                    <td>'.$product->total_delivered_skus.'</td>
+                                    <td>'.($product->items - $product->total_delivered_skus).'</td>
+                                    <td>'.$product->units_per_item.'</td>
+                                    <td>'.($product->items * $product->units_per_item).'</td>
+                                    <td>'.$product->total_delivered_units.'</td>
+                                    <td>'.(($product->items * $product->units_per_item) - $product->total_delivered_units).'</td>
+                                    <td>'.$product->received_amount.'</td>
+                                </tr>
+                            ';
+                            }
+
+                            $distribution_delivery_performa .= '
+                                <tr>
+                                    <td colspan="2" class="color primary font-weight-bold">Total</td>
+                                    <td>'.$total_items.'</td>
+                                    <td>'.$total_delivered_items.'</td>
+                                    <td>'.$total_returned_items.'</td>
+                                    <td>'.$total_units_per_item.'</td>
+                                    <td>'.$total_units.'</td>
+                                    <td>'.$total_delivered_units.'</td>
+                                    <td>'.$total_returned_units.'</td>
+                                    <td>'.$total_price.'</td>
+                                </tr>
+                                </tbody>
+                                </table>
+                                </div>
+                                <div class="col row align-items-center justify-content-center"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>';
+
+                            $shipment_details .= $distribution_delivery_performa;
+                        }
                     }
                 }
             }
@@ -2786,6 +3038,7 @@ class ShipperShipmentBookController extends Controller
             $consignee_cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         }
         $products = Product::orderBy('product_name')->get();
+        $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
         $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
@@ -2801,7 +3054,7 @@ class ShipperShipmentBookController extends Controller
         }
         $approve_ftl_requests = FtlRequest::where('shipper_id',session('user_id'))->where('status_id',3)->get();
 
-        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests]);
+        return view('client.shipment.book.corporate.index')->with(['booking_types' => $booking_types,'multi_piece' => $multi_piece, 'user' => $user, 'cities' => $cities,'distribution_products' => $distribution_products, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'date' => $date, 'air_waybill' => $air_waybill, 'user_delivery_types' => $user_delivery_types,'approve_ftl_requests' => $approve_ftl_requests]);
     }
 
     public function corporate_store(Request $request) {
@@ -2983,7 +3236,7 @@ class ShipperShipmentBookController extends Controller
 
                 $pieces_quantity = 1;
                 if($service_type_id == 1){
-                    $pieces_quantity = $request->pieces_quantity;
+                    $pieces_quantity = $request->pieces_quantity ?? 1;
                 }
                 $business_category_id = 1;
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
@@ -3040,7 +3293,7 @@ class ShipperShipmentBookController extends Controller
                     }
                     $shipper_reference->save();
                 }
-                if ($service_type_id == 1 || $service_type_id == 5) {
+                if ($service_type_id == 5) {
                     $product_type_id = $request->input('product_type');
 
                     if ($request->filled('item_description')) {
@@ -3066,6 +3319,64 @@ class ShipperShipmentBookController extends Controller
                     $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
                     if($service_type_id == 1 && $pieces_quantity > 1){
                         $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+                    }
+                }
+                else if($service_type_id == 1) {
+                    if($user_id == 10354 && $request->distribution_product_flag == 1)
+                    {
+                        foreach ($request->input('distribution') as $distribution) {
+                            $product_type_id = $distribution['product_type'];
+
+                            if($product_type_id == 0)
+                            {
+                                $distribution_product_new = new DistributionProduct();
+                                $distribution_product_new->name = $distribution['product_type_new'];
+                                $distribution_product_new->save();
+
+                                $product_type_id = $distribution_product_new->id;
+                            }
+
+                            $item_quantity = $distribution['item_quantity'];
+                            $units_per_item = $distribution['units'];
+                            $price = str_replace(',', '', $distribution['total_price']);
+
+                            if (isset($distribution['insurance']) && !empty($distribution['insurance'])) {
+                                $insurance = TRUE;
+                            }
+                            else {
+                                $insurance = FALSE;
+                            }
+
+                            $this->add_distribution_item($shipment_id, $product_type_id, $item_quantity,$units_per_item, $price, $insurance);
+                        }
+                    }
+                    else{
+                        $product_type_id = $request->input('product_type');
+
+                        if ($request->filled('item_description')) {
+                            $item_description = $request->input('item_description');
+                        }
+                        else {
+                            $item_description = NULL;
+                        }
+
+                        $item_quantity = $request->input('item_quantity');
+
+                        if ($request->filled('insurance')) {
+                            $price = str_replace(',', '', $request->input('item_price'));
+                            $insurance = TRUE;
+                        }
+                        else {
+                            $price = NULL;
+                            $insurance = FALSE;
+                        }
+
+                        $type = 0;
+
+                        $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+                        if($service_type_id == 1 && $pieces_quantity > 1){
+                            $this->create_shipment_pieces($shipment_id, $pieces_quantity);
+                        }
                     }
                 }
                 else if ($service_type_id == 2) {

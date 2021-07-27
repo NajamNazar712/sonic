@@ -519,6 +519,7 @@ class AdminCRMController extends Controller
     }
 
     public function add_comment(Request $request){
+
         $comment = $request->comment;
         $request_id = $request->request_id;
         $comment_by = 0;
@@ -536,8 +537,15 @@ class AdminCRMController extends Controller
         if(!$request_id){
             return ['status' => 0, 'error' => 'Request ID Not selected!'];
         }
+        $shipper_email = '';
+        if($request->email_check == 'true'){
+            $shipper_email = 1;
+        }
+        else{
+            $shipper_email = 0;
+        }
 
-        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment);
+        CRMCommentController::add($request_id, Auth::id(),$comment_by,$comment_type, $comment,$shipper_email);
         $last_comment = CrmComments::where('crm_request_id', $request_id)->where('comment_by',0)->latest()->first();
         return ['status' => 1, 'success' => 'Comment successfully added', 'last_comment_id' => $last_comment->id];
     }

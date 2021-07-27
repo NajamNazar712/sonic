@@ -846,7 +846,16 @@ class AdminTrackingController extends Controller
                     }
 
                     $details['order_information']['order_id'] = $shipment->order_id;
-                    $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                    if($shipment->breadth != null){
+                        $details['order_information']['height'] = $shipment->height;
+                        $details['order_information']['length'] = $shipment->length;
+                        $details['order_information']['breadth'] = $shipment->breadth;
+                        $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                        
+                    }
+                    else{
+                        $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                    }
                     $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
 
                     $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;

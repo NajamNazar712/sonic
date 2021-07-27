@@ -516,7 +516,7 @@ class Permission
 
             'reports.shipper_insurance.index' => 502,
             'reports.shipper_insurance.list' => 502,
-
+            
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -808,6 +808,9 @@ class Permission
             'settings.hr.rider_incentive.index' => 491,
             'settings.hr.rider_incentive.cron.index' => 494,
 
+            'settings.shipment_status_eta.index' => 534,
+            'settings.shipment_status_eta.list' => 534,
+
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
 
@@ -975,6 +978,9 @@ class Permission
             'route_management.index' => 499,
             'settings.escalation.launched.edit.index' => 507,
             'settings.escalation.in_process.edit.index' => 517,
+			'reports.operation_service_level.index' => 524,
+            'reports.operation_service_level.list' => 524,
+            
 			'finance.ftl_invoice.index' => 509,           
             'settings.debriefing_time_setting.index' => 526,
             'settings.debriefing_time_setting.update' => 526,
@@ -984,6 +990,11 @@ class Permission
             
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
+            
+            'incidence_monitoring.index' => 535,
+            'incidence_monitoring.list' => 535,
+            'incidence_monitoring.add' => 536,
+            'incidence_monitoring.view_report' => 539,
            
         ],
 

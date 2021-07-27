@@ -1034,6 +1034,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('nsa_shipments/submit','Admins\DeliveryController@nsa_shipments_submit')->name('nsa_shipments.submit');
             //Non Service Area Routes
 
+            Route::post('distribution','Admins\DeliveryController@receive_delivery_get_distribution')->name('distribution');
+            Route::put('distribution/submit','Admins\DeliveryController@receive_delivery_distribution_submit')->name('distribution.submit');
+
+
             Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
             Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
             Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
@@ -2184,6 +2188,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::prefix('operation_service_level')->name('operation_service_level.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@operation_service_level_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@operation_service_level_list')->name('list');
+        });
         Route::prefix('work_code_master')->name('work_code_master.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@work_code_master_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@work_code_master_list')->name('list');
@@ -2672,6 +2680,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
         });
 
+        Route::prefix('shipment_status_eta')->name('shipment_status_eta.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipment_status_eta_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@shipment_status_eta_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@shipment_status_eta_store')->name('store');
+            Route::post('edit', 'Admins\GlobalSettingsController@shipment_status_eta_edit')->name('edit');
+        });
+
     });
 
 
@@ -3073,6 +3088,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
+    });    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
+            Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
+            Route::get('/list','Admins\IncidenceMonitoringController@list')->name('list');
+            Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');
+            Route::post('/get_managers','Admins\IncidenceMonitoringController@get_managers')->name('get_managers');
+            Route::get('/view/{id}','Admins\IncidenceMonitoringController@view_report')->name('view_report');
+            Route::prefix('comment')->name('comment.')->group(function (){
+                Route::post('/add','Admins\IncidenceMonitoringController@add_comment')->name('add');
+                Route::post('/get','Admins\IncidenceMonitoringController@get_comments')->name('get');
+            });
+            Route::post('/image_details','Admins\IncidenceMonitoringController@image_details')->name('image_details');
+            Route::post('/image_submit','Admins\IncidenceMonitoringController@image_submit')->name('image_submit');
+            Route::post('/update_status','Admins\IncidenceMonitoringController@update_status')->name('update_status');
+            Route::get('{id}/edit/form', 'Admins\IncidenceMonitoringController@edit')->name('edit');
+            Route::put('{id}/update', 'Admins\IncidenceMonitoringController@update')->name('update');
+            
     });
 
 });
