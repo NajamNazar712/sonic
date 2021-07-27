@@ -598,6 +598,10 @@
                 });
 
             });
+            $('body').on('click','.upload_receipts',function () {
+                var rowid = $(this).parents('tr').attr('id');
+                    // modal calling
+            });
 
             var select = $('#track_form .tracking_numbers').selectize({
                 placeholder: 'Tracking Number(s)',

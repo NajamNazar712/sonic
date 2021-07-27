@@ -3987,7 +3987,7 @@ class DeliveryController extends Controller
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
                                 <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
-                            </div>
+                    <a href="javascript:void(0);" class="dropdown-item upload_receipts"><i class="la la-file-image-o primary"></i> Upload Receipts </a></div>
                           </div>
                         ';
 
