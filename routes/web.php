@@ -2245,6 +2245,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('unique', 'Admins\GlobalSettingsController@fleet_unique')->name('unique');
             Route::get('{id}/edit/form', 'Admins\GlobalSettingsController@fleet_edit')->name('edit');
             Route::put('{id}/update', 'Admins\GlobalSettingsController@fleet_update')->name('update');
+            Route::post('store/driver', 'Admins\GlobalSettingsController@fleet_store_driver')->name('store.driver');
+            Route::post('store/vendor', 'Admins\GlobalSettingsController@fleet_store_vendor')->name('store.vendor');
+            Route::get('unique/cnic', 'Admins\GlobalSettingsController@fleet_cnic_unique')->name('unique.cnic');
         });
 
         Route::prefix('route_management')->name('route_management.')->group(function () {

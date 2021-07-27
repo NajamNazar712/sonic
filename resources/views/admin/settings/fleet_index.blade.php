@@ -74,6 +74,72 @@
        </div>
    </div>
 </div>
+    <div class="modal fade text-left" id="AddDriverModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddDriverModal"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Add Driver</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <form id="driver_add_form" class="form-horizontal" action="{{ route('admin.settings.fleet.store.driver') }}" method="POST" novalidate="novalidate">
+               @csrf
+               <div class="modal-body">
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                           <input type="text" name="driver_name" id="driver_name" class="form-control driver_name" placeholder="Driver Name*" data-rule-required="true" data-msg-required="Driver Name is required">
+                       </div>
+                   </div>
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                           <input type="text" name="phone_number" id="phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                       </div>
+                   </div>
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+
+                           <input type="text" name="cnic" id="cnic" class="form-control cnic" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" data-rule-remote="{{ route('admin.settings.fleet.unique.cnic') }}" data-msg-remote="CNIC must be unique">
+                       </div>
+                   </div>
+               <div class="modal-footer">
+                   <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                   <button id="AddDriverBtn" type="submit" class="btn btn-info">Add</button>
+               </div>
+               </div>
+           </form>
+       </div>
+   </div>
+</div>
+
+    <div class="modal fade text-left" id="AddVendorModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddVendorModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Vendor</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="vendor_add_form" class="form-horizontal" action="{{ route('admin.settings.fleet.store.vendor') }}" method="POST" novalidate="novalidate">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row justify-content-center">
+                            <div class="col-12 form-group">
+                                <input type="text" name="vendor_name" id="vendor_name" class="form-control vendor_name" data-rule-required="true" data-msg-required="Vendor Name is required">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button id="AddDriverBtn" type="submit" class="btn btn-info">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -81,6 +147,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -137,11 +204,13 @@
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            $("#cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
+            $("#phone_number").inputmask({ 'mask': '9999-9999999','clearIncomplete': true});
             $('#vehicle_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
                 width: '100%',
                 placeholder: 'Select Vehicle Type*',
@@ -206,6 +275,22 @@
                     @if (session('role_id') == 1 || in_array(503, session('permissions')))
 
                         {
+                            text: '<i class="la la-plus"></i> Add Driver',
+                            className: 'btn btn-primary add_driver',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddDriverModal').modal('show');
+
+                            }
+                        },{
+                            text: '<i class="la la-plus"></i> Add Vendor',
+                            className: 'btn btn-primary add_vendor',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddVendorModal').modal('show');
+
+                            }
+                        },{
                             text: '<i class="la la-plus"></i> Add Fleet',
                             className: 'btn btn-primary add_fleet',
                             enabled: true,
@@ -364,11 +449,77 @@
                 
             });
 
-            
-        });
+            $('#driver_add_form').validate({
+                ignore: ":not(:visible),:disabled",
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-   
-        
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Adding Driver!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+
+            });
+            
+            var select = $('#vendor_name').selectize({
+                placeholder: 'Vendor Name(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                create: function (input) {
+                    var regex = /^[A-Za-z,]+$/;
+
+                    if (!regex.test(input)) {
+                        return false;
+                    }
+                    return {
+                        value: input,
+                        text: input
+                    }
+
+                }
+            });
+
+            $('#vendor_add_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function (form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Adding Vendor!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+        });
 
     </script>
 @endsection

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+
+use App\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -4471,5 +4473,48 @@ class GlobalSettingsController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Some Data missing!']);
         }
+    }
+
+    public function fleet_store_driver(Request $request){
+
+        $driver = new FleetDriver();
+        $driver->name = $request->driver_name;
+        $driver->phone_no = $request->phone_number;
+        $driver->cnic_no = $request->cnic;
+        $driver->save();
+
+        return redirect()->back()->with('success', 'Driver Added!');
+    }
+
+    public function fleet_cnic_unique(Request $request)
+    {
+        if ($request->filled('cnic')) {
+            $driver = FleetDriver::where('cnic_no', $request->input('cnic'));
+
+            if (!$driver->exists()) {
+                return 'true';
+            } else {
+                return 'false';
+            }
+        } else {
+            return 'true';
+        }
+    }
+
+    public function fleet_store_vendor(Request $request){
+
+        $vendors = FleetVendor::pluck('name')->toArray();
+        $vendor_names = explode(',', $request->vendor_name);
+
+        foreach($vendor_names as $vendor_name){
+            if(!in_array($vendor_name,$vendors )){
+                FleetVendor::create([
+                    'name' => $vendor_name,
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Vendor Added!');
+
     }
 }
