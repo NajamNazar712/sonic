@@ -64,6 +64,25 @@
                             <input type="text" name="tracking_id" id="tracking_id" class="form-control tracking_id" placeholder="Tracking ID*" data-rule-required="true" data-msg-required="Tracking ID is required">
                         </div>
                     </div>
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                           <select class="form-control" id="driver_select" name="driver" data-rule-required="true" data-msg-required="Driver is required">
+                               @foreach($drivers as $driver)
+                                   <option value="{{$driver->id}}">{{$driver->name}} - {{$driver->cnic_no}}</option>
+                               @endforeach
+                           </select>
+                       </div>
+
+                   </div>
+                   <div class="row justify-content-center">
+                       <div class="col-12 form-group">
+                           <select class="form-control" id="vendor_select" name="vendor" data-rule-required="true" data-msg-required="Vendor is required">
+                               @foreach($vendors as $vendor)
+                                   <option value="{{$vendor->id}}">{{$vendor->name}}</option>
+                               @endforeach
+                           </select>
+                       </div>
+                   </div>
                    
                </div>
                <div class="modal-footer">
@@ -224,6 +243,16 @@
                 }
             });
 
+            $('#driver_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+                width: '100%',
+                placeholder: 'Select Driver*',
+                dropdownParent:$('#fleet_add_form')
+            });
+            $('#vendor_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
+                width: '100%',
+                placeholder: 'Select Vendor*',
+                dropdownParent:$('#fleet_add_form')
+            });
 
             // $("#runner").prepend('<option value="" selected></option>').select2({
             //     placeholder: "Select Runner",

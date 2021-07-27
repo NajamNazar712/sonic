@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\FleetDriver;
 use App\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
@@ -4069,7 +4070,9 @@ class GlobalSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),246);
         $vehicles = VehicleType::all();
-        return view('admin.settings.fleet_index')->with('vehicles', $vehicles);
+        $drivers = FleetDriver::all();
+        $vendor = FleetVendor::all();
+        return view('admin.settings.fleet_index')->with(['vehicles'=> $vehicles,'drivers' => $drivers,'vendors' => $vendor]);
     }
 
     public function fleet_list(Request $request)
@@ -4143,6 +4146,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $request->vehicle_select;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->status = 1;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Added successfully!');
@@ -4507,7 +4512,7 @@ class GlobalSettingsController extends Controller
         $vendor_names = explode(',', $request->vendor_name);
 
         foreach($vendor_names as $vendor_name){
-            if(!in_array($vendor_name,$vendors )){
+            if(!in_array($vendor_name,$vendors)){
                 FleetVendor::create([
                     'name' => $vendor_name,
                 ]);
@@ -4515,6 +4520,5 @@ class GlobalSettingsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Vendor Added!');
-
     }
 }
