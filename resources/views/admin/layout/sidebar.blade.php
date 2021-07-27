@@ -1155,6 +1155,9 @@
                             <li class=" nav-item"><a href="#"><span class="menu-title">Supply Chain</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(198, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.cargo.mapping.manifest.index') }}">Mapping (Cargo Manifest)</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(198, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo.mapping.index') }}">Mapping</a></li>
                                     @endif
                                     
