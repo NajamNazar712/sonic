@@ -8405,9 +8405,9 @@ class RiderAPIController extends Controller
         $rider_incentives = RidersIncentive::where('rider_id', $rider_id);
         if ($to_date) {
 
-            $rider_incentives = $rider_incentives->leftjoin('delivery_notes as dn', 'rider_incentives.rider_id','=', 'dn.rider_id')
-                ->select('rider_incentives.created_at as created_at', 'rider_incentives.pickup_shipments as pickup_shipments', 'rider_incentives.pickup_incentive as pickup_incentive', 'rider_incentives.delivery_shipments as delivery_shipments', 'rider_incentives.delivery_incentive as delivery_incentive', 'dn.received_cod_amount as amount')
-                ->whereBetween('rider_incentives.created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
+            $rider_incentives = $rider_incentives->leftjoin('delivery_notes as dn', 'riders_incentives.rider_id','=', 'dn.rider_id')
+                ->select('riders_incentives.created_at as created_at', 'riders_incentives.pickup_shipments as pickup_shipments', 'riders_incentives.pickup_incentive as pickup_incentive', 'riders_incentives.delivery_shipments as delivery_shipments', 'riders_incentives.delivery_incentive as delivery_incentive', 'dn.received_cod_amount as amount')
+                ->whereBetween('riders_incentives.created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->whereBetween('dn.created_at', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->where('dn.cash_collection_status', 0)
                 ->where('dn.status', '!=', 4);
@@ -8422,9 +8422,9 @@ class RiderAPIController extends Controller
                 ->whereBetween('date', [$from_date . ' 00:00:00', $to_date . ' 23:59:59'])
                 ->where('rider_id', $rider_id)->first();
         } else {
-            $rider_incentives = $rider_incentives->leftjoin('delivery_notes as dn', 'rider_incentives.rider_id','=', 'dn.rider_id')
-                ->select('rider_incentives.created_at as created_at', 'rider_incentives.pickup_shipments as pickup_shipments', 'rider_incentives.pickup_incentive as pickup_incentive', 'rider_incentives.delivery_shipments as delivery_shipments', 'rider_incentives.delivery_incentive as delivery_incentive', 'dn.received_cod_amount as amount')
-                ->whereDate('rider_incentives.created_at', $from_date)
+            $rider_incentives = $rider_incentives->leftjoin('delivery_notes as dn', 'riders_incentives.rider_id','=', 'dn.rider_id')
+                ->select('riders_incentives.created_at as created_at', 'riders_incentives.pickup_shipments as pickup_shipments', 'riders_incentives.pickup_incentive as pickup_incentive', 'riders_incentives.delivery_shipments as delivery_shipments', 'riders_incentives.delivery_incentive as delivery_incentive', 'dn.received_cod_amount as amount')
+                ->whereDate('riders_incentives.created_at', $from_date)
                 ->whereDate('dn.created_at', $from_date)
                 ->where('dn.cash_collection_status', 0)
                 ->where('dn.status', '!=', 4);
