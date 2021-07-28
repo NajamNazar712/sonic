@@ -46,6 +46,8 @@ use App\Http\Models\Rates\InternationalEconomyRate;
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\Rates\PendingCorporateRateStatus;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Rates\RateOriginHub;
 use App\Http\Models\Reference;
 use App\Http\Models\Operataions\OperationForecastShipments;
 use App\Http\Models\Operataions\OperationForecastWeightRange;
@@ -1748,7 +1750,9 @@ class AdminDashboardController extends Controller
             $all_users['results'][1]['text'] = 'Admins';
             $all_users['results'][1]['children'] = $users;
             $all_users['pagination']['more'] = true;
-            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users]);
+
+            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -5966,6 +5970,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
+        return $request;
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -6400,6 +6405,25 @@ class AdminDashboardController extends Controller
             $ONRateAlready = RateStatus::where('user_id',$id)->where('shipping_mode_id',1)->get();
 
             if($ONRateAlready->isEmpty()) {
+
+                if($request->has('on_origin_hubs')) {
+                    foreach($request->on_origin_hubs as $origin_id){
+                        $rate_origin_hub = new RateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 1;
+                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('on_destination_hubs')) {
+                    foreach($request->on_destination_hubs as $destination_id){
+                        $rate_destination_hub = new RateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 1;
+                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 RateStatus::create([
                     'user_id'=>$id,
                     'shipping_mode_id'=>1,
@@ -6560,6 +6584,26 @@ class AdminDashboardController extends Controller
             $OLRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',2)->get();
 
             if($OLRatePresent->isEmpty()) {
+
+                if($request->has('ol_origin_hubs')) {
+                    foreach($request->ol_origin_hubs as $origin_id){
+                        $rate_origin_hub = new RateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 2;
+                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('ol_destination_hubs')) {
+                    foreach($request->ol_destination_hubs as $destination_id){
+                        $rate_destination_hub = new RateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 2;
+                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
                 RateStatus::create([
                     'user_id'=>$id,
                     'shipping_mode_id'=>2,
@@ -6719,6 +6763,26 @@ class AdminDashboardController extends Controller
             $DetainRatePresent = RateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
             if ($DetainRatePresent->isEmpty()) {
+
+                if($request->has('detain_origin_hubs')) {
+                    foreach($request->detain_origin_hubs as $origin_id){
+                        $rate_origin_hub = new RateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 3;
+                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('detain_destination_hubs')) {
+                    foreach($request->detain_destination_hubs as $destination_id){
+                        $rate_destination_hub = new RateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 3;
+                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
                 RateStatus::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 3,
@@ -6877,6 +6941,26 @@ class AdminDashboardController extends Controller
 
             $SamedayRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
             if($SamedayRatePresent->isEmpty()) {
+
+                if($request->has('sameday_origin_hubs')) {
+                    foreach($request->sameday_origin_hubs as $origin_id){
+                        $rate_origin_hub = new RateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 4;
+                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('sameday_destination_hubs')) {
+                    foreach($request->sameday_destination_hubs as $destination_id){
+                        $rate_destination_hub = new RateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 4;
+                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
                 RateStatus::create([
                     'user_id'=>$id,
                     'shipping_mode_id'=>4,
