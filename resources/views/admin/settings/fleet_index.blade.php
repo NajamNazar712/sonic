@@ -55,8 +55,8 @@
                         </select>
                        </div>
 
-                       <div class="col-12 form-group d-none" id="other_picker_name_div">
-                        <div class="form-group col-md">
+                       <div class="col-12 d-none" id="other_picker_name_div">
+                        <div class="form-group">
                             <input type="text" name="vehicle_type_name" id="vehicle_type_name" class="form-control" placeholder="New Vehicle Type" data-rule-required="true" data-msg-required="Vehicle Type is required">
                         </div>
                         </div>
