@@ -18,8 +18,8 @@
              </select>
             </div>
 
-            <div class="col-12 form-group d-none" id="other_picker_name_div_edit">
-             <div class="form-group col-md">
+            <div class="col-12 d-none" id="other_picker_name_div_edit">
+             <div class="form-group">
                  <input type="text" name="vehicle_type_name" id="vehicle_type_name" class="form-control" placeholder="New Vehicle Type" data-rule-required="true" data-msg-required="Vehicle Type is required">
              </div>
              </div>
@@ -68,8 +68,6 @@
     $(document).ready(function () {
 
 
-
-
         $('.vehicle_select').prepend('<option value="" selected="selected"></option>').append('<option value="other">Other</option>').select2({
                 width: '100%',
                 placeholder: 'Select Vehicle*',
@@ -86,6 +84,27 @@
 
                 var id = @json($fleet->vehicle_type_id);
                 $('.vehicle_select').val(id).trigger('change');
+
+        $('.driver_select').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Driver*',
+            dropdownParent:$('#editFleetForm')
+        });
+
+                
+        var driver_id = @json($fleet->driver_id);
+        $('.driver_select').val(driver_id).trigger('change');
+
+
+        $('.vendor_select').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Vendor*',
+            dropdownParent:$('#editFleetForm')
+        });
+
+
+        var vendor_id = @json($fleet->vendor_id);
+        $('.vendor_select').val(vendor_id).trigger('change');
 
 
         var errors = 0;

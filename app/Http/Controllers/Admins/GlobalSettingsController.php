@@ -4167,7 +4167,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function fleet_update(Request $request, $id)
-    {
+    {  
         $vehicle_select = $request->vehicle_select;
         if ($vehicle_select == 'other') {
             $vehicle_type = new VehicleType;
@@ -4178,6 +4178,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $vehicle_type->id;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Updated successfully!');
 
@@ -4186,6 +4188,8 @@ class GlobalSettingsController extends Controller
             $fleet->reg_number = $request->reg_number;
             $fleet->vehicle_type_id = $request->vehicle_select;
             $fleet->tracking_id = $request->tracking_id;
+            $fleet->driver_id = $request->driver;
+            $fleet->vendor_id = $request->vendor;
             $fleet->save();
             return redirect()->back()->with('success', 'Fleet Updated successfully!');
     
