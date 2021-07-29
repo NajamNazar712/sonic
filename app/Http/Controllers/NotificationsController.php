@@ -3716,7 +3716,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
@@ -3911,7 +3911,7 @@ class NotificationsController extends Controller
 //                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
 //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -5305,6 +5305,7 @@ class NotificationsController extends Controller
                     } else {
                         $to[] = 'faizan.ahmed@trax.pk';
                         $cc[] = 'mohsin.qamar@trax.pk';
+                        $cc[] = 'fawad.ahmed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $cc[] = 'shafay.tariq@trax.pk';
                     }
@@ -5594,6 +5595,7 @@ class NotificationsController extends Controller
                         $bcc = array();
                         $to[] = 'hassan@trax.pk';
                         $to[] = 'mohsin.qamar@trax.pk';
+                        $to[] = 'fawad.ahmed@trax.pk';
                         $to[] = 'talha.motiwala@trax.pk';
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
@@ -7408,7 +7410,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['mohsin.qamar@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
                 }
