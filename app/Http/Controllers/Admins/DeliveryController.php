@@ -716,6 +716,7 @@ class DeliveryController extends Controller
                 }
             }
         }
+        $normal_rider = TRUE;
         if ($shipments_count != 0) {
             $rider = Rider::find($request->selected_rider_id);
             if($rider->special_rider){
@@ -733,6 +734,7 @@ class DeliveryController extends Controller
                     'special_rider' => 1,
                     'order' => $order
                 ]);
+                $normal_rider = FALSE;
             }
             else{
                 $note = DeliveryNote::create([
@@ -746,16 +748,7 @@ class DeliveryController extends Controller
                     'last_updated_at' => Carbon::now(),
                     'ordering' => $order
                 ]);
-                $rider_device_token = EmployeeDeviceToken::where('employee_id',$request->selected_rider_id)
-                    ->where('employee_type_id', 2)
-                    ->select('device_token');
-                if ($rider_device_token->exists()) {
-                    $rider_device_token = $rider_device_token->first();
-                    $device_token = $rider_device_token->device_token;
-                    $title = "Delivery Note Assigned";
-                    $message = "Dear Rider Delivery Note # " . $note->id . " Has Been Assigned To You";
-                    NotificationsController::bolt_app_notification($request->selected_rider_id, 2,$device_token, $title, $message);
-                }
+
             }
             if ($note) {
                 $otp_pin = rand(1000, 9999);
@@ -781,9 +774,11 @@ class DeliveryController extends Controller
                     $shipment_data->shipper_status_id = 5;
                     $shipment_data->consignee_status_id = 5;
                     if(in_array($shipment, $open_box_ids)){
-                        $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->first();
-                        $shipment_detail->is_open = 1;
-                        $shipment_detail->save();
+                        $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
+                        if($shipment_detail){
+                            $shipment_detail->is_open = 1;
+                            $shipment_detail->save();
+                        }
 
                         $shipment_data->open_box = 1;
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
@@ -824,6 +819,19 @@ class DeliveryController extends Controller
                         HandoverShipmentJourneyController::add( $shipment,$handover_shipments->handover_id,2);
                     }
 
+                }
+
+                if($normal_rider){
+                    $rider_device_token = EmployeeDeviceToken::where('employee_id',$request->selected_rider_id)
+                        ->where('employee_type_id', 2)
+                        ->select('device_token');
+                    if ($rider_device_token->exists()) {
+                        $rider_device_token = $rider_device_token->first();
+                        $device_token = $rider_device_token->device_token;
+                        $title = "Delivery Note Assigned";
+                        $message = "Dear Rider Delivery Note # " . $note->id . " Has Been Assigned To You";
+                        NotificationsController::bolt_app_notification($request->selected_rider_id, 2,$device_token, $title, $message);
+                    }
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
