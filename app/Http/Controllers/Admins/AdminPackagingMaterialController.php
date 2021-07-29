@@ -1328,6 +1328,7 @@ class AdminPackagingMaterialController extends Controller
         $type->type = $request->type;
         $type->description = $request->description;
         $type->packaging_type = $packaging_type;
+        $type->category = $request->category;
         $type->status = 1;
         $type->created_by = Auth::id();
 
@@ -1336,6 +1337,17 @@ class AdminPackagingMaterialController extends Controller
             $file = $request->file('packaging_picture');
             Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
             $type->picture = $filename;
+
+
+            // $filename = 'packaging_picture_' . $type->id . '.png';
+            // $file = $request->file('packaging_picture');
+            // $extension = $file->getClientOriginalExtension();
+            // $random = rand(1000, 100000);
+            // $now = Carbon::now();
+            // $time = $now->year . '_' . $now->month;
+            // $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+            // $file->move(public_path('uploads/packaging_pictures'), $generated_image_name);
+            // $type->picture = $filename;
         }
 
         $type->save();

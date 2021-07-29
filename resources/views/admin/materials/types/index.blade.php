@@ -47,7 +47,7 @@
                         <div class="container">
                             <div class="row justify-content-center">
                                 <div class="col-8 form-group">
-                                    <input type="text" name="type" id="type" class="form-control type" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">
+                                    <input type="text" name="type" id="type" class="form-control type" placeholder="Type Name *" data-rule-required="true" data-msg-required="Type name is required">
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -88,6 +88,31 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-12 card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Category</h4>
+
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <fieldset>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-primary" value="1" name="category" id="colorRadio10">
+                                                    <label class="custom-control-label" for="colorRadio10">Packaging Material</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-success" value="2" name="category" id="colorRadio11">
+                                                    <label class="custom-control-label" for="colorRadio11">Stationary</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row justify-content-center">
                                 <div class="col-12 form-group">
                                     <label for="packaging_picture">Picture</label>

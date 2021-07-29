@@ -177,6 +177,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
             Route::post('cancel','Shippers\ShipperPackagingMaterialController@packaging_request_cancel')->name('cancel');
 
+            Route::get('categories','Shippers\ShipperPackagingMaterialController@select_categories')->name('categories');
+            Route::get('category/{id}','Shippers\ShipperPackagingMaterialController@category_products')->name('category');
+            Route::get('product/{id}','Shippers\ShipperPackagingMaterialController@product_details')->name('product');
+            Route::post('get_charges','Shippers\ShipperPackagingMaterialController@get_charges')->name('get_charges');
+            Route::post('add_to_cart','Shippers\ShipperPackagingMaterialController@add_to_cart')->name('add_to_cart');
+            Route::post('get_cart_count','Shippers\ShipperPackagingMaterialController@cart_count')->name('get_cart_count');
+            Route::get('checkout','Shippers\ShipperPackagingMaterialController@checkout')->name('checkout');
+            
             Route::prefix('cart')->name('cart.')->group(function (){
                 Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');
                 Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_cart_details')->name('details');
