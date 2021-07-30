@@ -214,6 +214,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function manifest_mapping_edit($id){
+
         $mapping = V2JunctionMapping::where('id', $id);
         if($mapping->doesntExist())
         {
