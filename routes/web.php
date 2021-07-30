@@ -1478,6 +1478,38 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
     });
+    Route::prefix('cargo_manifest')->name('cargo_manifest.')->group(function () {
+        Route::prefix('bags')->name('bags.')->group(function () {
+            Route::prefix('pending')->name('pending.')->group(function () {
+                Route::get('', 'Admins\AdminCargoManifestController@pending_bag_index')->name('index');
+                Route::get('list', 'Admins\AdminCargoManifestController@pending_bag_list')->name('list');
+            });
+
+            Route::prefix('create')->name('create.')->group(function () {
+                Route::get('', 'Admins\AdminCargoManifestController@create_index')->name('index');
+                Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_shipment_details')->name('shipment_details');
+                Route::post('bag_details', 'Admins\AdminCargoManifestController@create_bag_details')->name('bag_details');
+                Route::get('seal_number', 'Admins\AdminCargoManifestController@create_bag_seal_number')->name('seal_number');
+                Route::post('', 'Admins\AdminCargoManifestController@create_store')->name('store');
+
+               /* Route::prefix('open_bag')->name('open_bag.')->group(function () {
+                    Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
+                    Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_open_bag_shipment_details')->name('shipment_details');
+                    Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
+                });*/
+
+            });
+            Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
+            Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
+
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');
+                Route::get('list', 'Admins\AdminCargoManifestController@history_list')->name('list');
+            });
+
+        });
+
+    });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
         Route::get('list','Admins\DisputeController@dispute_list')->name('list');
