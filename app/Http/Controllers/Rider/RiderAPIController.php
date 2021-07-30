@@ -8800,6 +8800,7 @@ class RiderAPIController extends Controller
                             if ($request->distribution == 1) {
                                 if ($request->has('distribution_items_list')) {
                                     $distribution_items = json_decode($request->distribution_items_list, true);
+                                    return response()->json(['status' => 1, 'message' => $distribution_items]);
                                     foreach ($distribution_items as $distribution_item) {
                                         $product = ShipmentDistributionProduct::find($distribution_item->pid);
                                         $product->total_delivered_units = $distribution_item->delivered_qty;
@@ -8808,7 +8809,6 @@ class RiderAPIController extends Controller
                                         $product->total_delivered_skus = (int)$total_delivered_skus;
                                         $product->save();
                                     }
-                                    return response()->json(['status' => 1, 'message' => $distribution_items]);
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $request->total_cod_amount;
