@@ -17,14 +17,13 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;width: 100%">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Origin Hub</th>
                                     <th class="border-primary border-darken-1">Destination Hub</th>
                                     <th class="border-primary border-darken-1">Junctions</th>
-                                    <th class="border-primary border-darken-1">Vehicle</th>
                                     <th class="border-primary border-darken-1">Updated Date</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -72,7 +71,7 @@
                                     </div>
                                 </div>
                         </div>
-                        <div class="mt-1" id="junctions_container">
+                        <div class="mt-1" id="add_junctions_container">
                             <div class="junction_container row">
                                 <div class="col">
                                     <div class="form-group">
@@ -144,7 +143,6 @@
                             head.push('Origin Hub');
                             head.push('Destination Hub');
                             head.push('Junctions');
-                            head.push('Vehicles');
                             head.push('Updated Date Time');
                             head.push('Updated By');
 
@@ -156,7 +154,6 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.junctions);
-                                row.push(values.vehicles);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
 
@@ -175,6 +172,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                @if (session('role_id') == 1 || in_array(548, session('permissions')))
                     {
                         text: '<i class="la la-plus-circle"></i> Add',
                         className: 'btn btn-primary add',
@@ -182,6 +180,7 @@
                             $('#add_mapping').modal('show');
                         }
                     },
+                @endif
                     {
                         extend: 'excel',
                         title: 'Cargo Manifest Mapping',
@@ -205,10 +204,9 @@
                 order: [6, 'desc'],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'junctions_display', name: 'jc1.name', class: 'align-middle junctions'},
-                    {data: 'vehicles_display', name: 'ar.name', class: 'align-middle vehicles'},
+                    {data: 'origin_display',  class: 'align-middle origin' ,orderable: false, searchable: false},
+                    {data: 'destination_display',  class: 'align-middle destination',orderable: false, searchable: false},
+                    {data: 'junctions_display',  class: 'align-middle junctions',orderable: false, searchable: false},
                     {data: 'updated_at', name: 'junction_mappings.updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -229,7 +227,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.origin') || $(header).is('.destination') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -247,7 +245,7 @@
             });
 
 
-            var junction_table = $("#junction_table").DataTable({
+            var junction_table = $("#add_mapping form #junction_table").DataTable({
                 dom: 'ltipr',
                 paging:false,
                 autoWidth: false,
@@ -288,27 +286,27 @@
             });
 
             $('#add_mapping form #add_junction').on('click',function (){
-                count = document.getElementById('junctions_container').children.length + 1;
+                count = document.getElementById("add_junctions_container").children.length + 1;
                 html = `
                 <div class="junction_container row">
                     <div class="col">
                         <div class="form-group">
                             <select name="junctions[${count}]" class="select2 junctions" id="junction_${count}" data-rule-required="true" data-msg-required="Junction is Required">
                                 @foreach($cities as $junction)
-                                    <option value="{{$junction->id}}">{{$junction->name}}</option>
+                <option value="{{$junction->id}}">{{$junction->name}}</option>
                                 @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="form-group">
-                            <button type="button" class="btn btn-danger remove_junction">Remove Junction</button>
-                        </div>
-                    </div>
-                </div>`;
-                $("#junctions_container").append(html);
+                </select>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <button type="button" class="btn btn-danger remove_junction">Remove Junction</button>
+            </div>
+        </div>
+    </div>`;
+                $("#add_junctions_container").append(html);
 
-                $('#add_mapping form #junction_'+count+'').prepend('<option value="" selected="selected"></option>').select2({
+                $('#add_junctions_container #junction_'+count+'').prepend('<option value="" selected="selected"></option>').select2({
                     width: '100%',
                     placeholder: 'Junction*'
                 }).bind('change', function() {
@@ -359,10 +357,19 @@
 
                 return vehicles;
             }
+
+            function make_junction_input(text,id,index)
+            {
+                var junction_html = `${text}<input type='hidden' value='${id}' name='route_junctions[${index}]'>`;
+
+                return junction_html;
+            }
+
             function junctions_display()
             {
                 origin = $("#add_mapping form .origin").find(":selected").text();
                 destination = $("#add_mapping form .destination").find(":selected").text();
+                destination_id = $("#add_mapping form .destination").find(":selected").val();
                 junction_table.rows().remove();
 
                 if($("#add_mapping form .junction_container .junctions").length > 1)
@@ -371,24 +378,24 @@
                     $("#add_mapping form .junction_container .junctions").each(function (index){
                         if(index == 0)
                         {
-                            junction_table.row.add([index+1,origin,$(this).find(":selected").text(),make_vehicle_select(index + 1)]);
+                            junction_table.row.add([index+1,origin,make_junction_input($(this).find(":selected").text(),$(this).find(":selected").val(),index+1),make_vehicle_select(index + 1)]);
                             previous_junction = $(this).find(":selected").text();
                         }
                         else{
-                            junction_table.row.add([index+1,previous_junction,$(this).find(":selected").text(),make_vehicle_select(index + 1)]);
+                            junction_table.row.add([index+1,previous_junction,make_junction_input($(this).find(":selected").text(),$(this).find(":selected").val(),index+1),make_vehicle_select(index + 1)]);
                             previous_junction = $(this).find(":selected").text();
                         }
                     });
-                    junction_table.row.add([lastIndex + 2,previous_junction,destination,make_vehicle_select(lastIndex + 2)]);
+                    junction_table.row.add([lastIndex + 2,previous_junction,make_junction_input(destination,destination_id,lastIndex+2),make_vehicle_select(lastIndex + 2)]);
                 }
                 else{
                     if($("#add_mapping form .junction_container .junctions").first().val() != '')
                     {
-                        junction_table.row.add([1,origin,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),make_vehicle_select(1)]);
-                        junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),destination,make_vehicle_select(2)]);
+                        junction_table.row.add([1,origin,make_junction_input($("#add_mapping form .junction_container .junctions").first().find(":selected").text(),$("#add_mapping form .junction_container .junctions").first().find(":selected").val(),1),make_vehicle_select(1)]);
+                        junction_table.row.add([2,$("#add_mapping form .junction_container .junctions").first().find(":selected").text(),make_junction_input(destination,destination_id,2),make_vehicle_select(2)]);
                     }
                     else{
-                        junction_table.row.add([1,origin,destination,make_vehicle_select(1)]);
+                        junction_table.row.add([1,origin,make_junction_input(destination,destination_id,1),make_vehicle_select(1)]);
                     }
                 }
                 junction_table.draw(false);
@@ -415,90 +422,59 @@
                 });
             }
 
-            $('body').on('click','.edit_mapping',function () {
+            $('body').on('click','.status_mapping',function () {
                 var mapping_id = $(this).parents('tr').attr('id');
-                $.ajax({
-                    url:'{!! route("admin.cargo.mapping.edit") !!}',
-                    method: 'POST',
-                    data: {
-                        'mapping_id': mapping_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#edit_mapping').modal('show');
-                    $('#edit_mapping form .mapping_id').val(mapping_id);
-                    $('#edit_mapping form .origin').val(data.details['origin_id']);
-                    $('#edit_mapping form .origin_line').html(data.origin['name']);
-                    $('#edit_mapping form .destination').val(data.details['destination_id']);
-                    $('#edit_mapping form .destination_line').html(data.destination['name']);
-                    $('#edit_mapping form .junction_1').val(data.details['junction_1']);
-
-                    $('#edit_mapping form .junction_1').select2({
-                        width: '100%',
-                        placeholder: 'Junction 1*'
-                    }).bind('change', function() {
-                        $(this).valid();
-                    });
-                    if(data.details['junction_2'] !== null) {
-                        $('#edit_mapping form .junction_2').val(data.details['junction_2']);
-                        $('#edit_mapping form .junction_2').select2({
-                            width: '100%',
-                            placeholder: 'Junction 2',
-                            allowClear: true
-                        });
-                    }
-                    else{
-                        $('#edit_mapping form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
-                            width: '100%',
-                            placeholder: 'Junction 2',
-                            allowClear: true
-                        }).bind('change', function() {
-                            $(this).valid();
-                        });
-                    }
-                    if(data.details['receiver'] !== null) {
-                        $('#edit_mapping form .receiver_id').val(data.details['receiver']);
-                        $('#edit_mapping form .receiver_id').select2({
-                            width: '100%',
-                            placeholder: 'Receiver Name',
-                            allowClear: true
-                        }).bind('change', function () {
-                            $(this).valid();
-                        });
-                    }
-                    else{
-                        $('#edit_mapping form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
-                            width: '100%',
-                            placeholder: 'Receiver Name',
-                            allowClear: true
-                        }).bind('change', function() {
-                            $(this).valid();
-                        });
-                    }
-                });
-
-                $('#edit_mapping form').validate({
-                    errorClass: 'danger',
-                    successClass: 'success',
-                    errorPlacement: function(error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
+                swal({
+                    text: 'Are you sure, you want to update mapping status',
+                    icon: 'info',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
                     },
-                    normalizer: function(value) {
-                        return $.trim(value);
-                    },
-                    submitHandler: function(form) {
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                        blockPagePermanently();
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
                         swal({
                             title: 'Please Wait!',
-                            text: 'Mapping is being Updated!',
+                            text: 'Status is being updated!',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-
-                        form.submit();
+                        $.ajax({
+                            url:'{!! route("admin.cargo.mapping.manifest.status") !!}',
+                            method: 'POST',
+                            data: {
+                                'id': mapping_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0)
+                            {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            else{
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            swal.close();
+                            table.draw();
+                        });
                     }
                 });
             });

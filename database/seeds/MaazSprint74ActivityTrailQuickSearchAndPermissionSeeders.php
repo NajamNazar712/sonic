@@ -20,5 +20,12 @@ class MaazSprint74ActivityTrailQuickSearchAndPermissionSeeders extends Seeder
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings  >  Supply Chain  >  Mapping (Cargo Manifest)', 'url'=>'admin.cargo.mapping.manifest.index', 'permission_id' => 544),
         ));
+
+        DB::table('module_permissions')->insert(array(
+            array('id' => 544, 'name' => 'Mapping (Cargo Manifest)', 'module_id' => ),
+            array('id' => 548, 'name' => 'Mapping (Cargo Manifest) - Add', 'module_id' => ),
+            array('id' => 549, 'name' => 'Mapping (Cargo Manifest) - Edit', 'module_id' => ),
+            array('id' => 550, 'name' => 'Mapping (Cargo Manifest) - Enable/Disable', 'module_id' => ),
+        ));
     }
 }
