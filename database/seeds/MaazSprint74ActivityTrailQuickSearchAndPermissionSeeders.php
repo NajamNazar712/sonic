@@ -22,10 +22,10 @@ class MaazSprint74ActivityTrailQuickSearchAndPermissionSeeders extends Seeder
         ));
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 544, 'name' => 'Mapping (Cargo Manifest)', 'module_id' => ),
-            array('id' => 548, 'name' => 'Mapping (Cargo Manifest) - Add', 'module_id' => ),
-            array('id' => 549, 'name' => 'Mapping (Cargo Manifest) - Edit', 'module_id' => ),
-            array('id' => 550, 'name' => 'Mapping (Cargo Manifest) - Enable/Disable', 'module_id' => ),
+            array('id' => 544, 'name' => 'Mapping (Cargo Manifest)', 'module_id' => 32),
+            array('id' => 548, 'name' => 'Mapping (Cargo Manifest) - Add', 'module_id' => 32),
+            array('id' => 549, 'name' => 'Mapping (Cargo Manifest) - Edit', 'module_id' => 32),
+            array('id' => 550, 'name' => 'Mapping (Cargo Manifest) - Enable/Disable', 'module_id' => 32),
         ));
     }
 }

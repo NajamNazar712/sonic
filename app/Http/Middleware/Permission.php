@@ -195,6 +195,15 @@ class Permission
             'master_cargo.receive.quick.list.details' => 31,
             'master_cargo.receive.quick.list.ajax' => 31,
 
+
+            'cargo_manifest.bags.pending.index' => 545,
+            'cargo_manifest.bags.pending.list' => 545,
+            'cargo_manifest.bags.create.index' => 546,
+            'cargo_manifest.bags.history.index' => 547,
+            'cargo_manifest.bags.history.list' => 547,
+
+
+
             'sameday.index' => 32,
             'sameday.list' => 32,
 
