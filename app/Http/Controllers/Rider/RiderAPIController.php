@@ -8797,9 +8797,7 @@ class RiderAPIController extends Controller
                         }
 
                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
-                            dd($request->distribution);
-                            if ($request->get("distribution") == 1) {
-
+                            if ($request->distribution == 1) {
                                 if ($request->has('distribution_items_list')) {
                                     $distribution_items = json_decode($request->distribution_items_list, true);
                                     foreach ($distribution_items as $distribution_item) {
