@@ -195,7 +195,7 @@
 
 
             $('#edit_mapping #add_junction').on('click',function (){
-                count = document.getElementById("add_junctions_container").children.length + 1;
+                count = parseInt($(".junction_container").last().find('select').attr('id').replace("junction_","")) + 1;
                 html = `
                 <div class="junction_container row">
                     <div class="col">
