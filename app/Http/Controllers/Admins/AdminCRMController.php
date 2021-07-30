@@ -2193,6 +2193,7 @@ class AdminCRMController extends Controller
                 }
 
                 NotificationsController::send(31,$crm_request_id);
+                NotificationsController::send(142,$crm_request_id);
             }
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }
