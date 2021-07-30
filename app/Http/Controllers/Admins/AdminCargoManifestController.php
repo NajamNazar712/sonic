@@ -221,30 +221,74 @@ class AdminCargoManifestController extends Controller
             return back()->with(['error'=>'Invalid Mapping ID']);
         }
 
-        $mapping = $mapping->with(['junctions','routes','routes.vehicles'])
+        $mapping = $mapping->with(['junctions','routes','routes.vehicles','routes.starting','routes.ending'])
             ->first();
-
-        return view('admin.cargo.manifest.edit')->with(['mapping' => $mapping]);
+        $cities = City::select(['id', 'name'])->where('business_category_id', 1)->where('hub', 1)->get();
+        $vehicles = Fleet::where('status', 1)->select(['id', 'reg_number'])->get();
+        return view('admin.cargo.manifest.edit')->with(['mapping' => $mapping,'cities'=>$cities,'vehicles'=>$vehicles]);
     }
 
     // not done
-    public function manifest_mapping_edit_update(Request $request){
-        $mapping = JunctionMapping::where('id', $request->mapping_id);
-        if($mapping) {
-            $mapping = $mapping->first();
-
-            $mapping->junction_1 = $request->junction_1;
-            $mapping->junction_2 = $request->junction_2;
-            $mapping->receiver = $request->receiver_id;
-            $mapping->updated_by = Auth::id();
-
-            $mapping->save();
-
-            return redirect()->back()->with('success', 'Mapping added successfully.');
+    public function manifest_mapping_edit_update($id,Request $request){
+        if(count($request->junctions) > 1 && $request->junctions[1] == null)
+        {
+            return redirect()->back()->with('error', 'Please Select Junction 1');
         }
-        else{
+
+        $check = V2JunctionMapping::where([['origin_id', $request->origin], ['destination_id' , $request->destination],['status',1],['id','!=',$id]]);
+        if($check->exists()) {
             return redirect()->back()->with('error', 'Mapping against these hubs already exists!');
         }
+
+        $mapping = V2JunctionMapping::find($id);
+
+        if(!$mapping)
+        {
+            return redirect()->back()->with('error', 'Mapping ot found!');
+        }
+
+        $mapping->origin_id = $request->origin;
+        $mapping->destination_id = $request->destination;
+        $mapping->updated_by = Auth::id();
+        $mapping->update();
+
+        $mapping->junctions()->delete();
+        foreach ($mapping->routes as $routes)
+        {
+            $routes->vehicles()->delete();
+        }
+        $mapping->routes()->delete();
+
+        foreach ($request->junctions as $j) {
+            if($j != null) {
+                $junction = new V2Junctions();
+                $junction->junction_mapping_id = $mapping->id;
+                $junction->junction_id = $j;
+                $junction->save();
+            }
+        }
+
+        $previous = $request->origin;
+        foreach ($request->route_junctions as $key => $rj)
+        {
+            $route_junction = new V2JunctionRoutes();
+            $route_junction->junction_mapping_id = $mapping->id;
+            $route_junction->starting_hub_id = $previous;
+            $route_junction->ending_hub_id = $rj;
+            $route_junction->save();
+
+            $previous = $rj;
+
+            foreach ($request->vehicles[$key] as $vehicle)
+            {
+                $route_vehicle = new V2JunctionVehicles();
+                $route_vehicle->junction_route_id = $route_junction->id;
+                $route_vehicle->vehicle_id = $vehicle;
+                $route_vehicle->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Mapping added successfully.');
     }
 
     public function pending_bag_index() {
