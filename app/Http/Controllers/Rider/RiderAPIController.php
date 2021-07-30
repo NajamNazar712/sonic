@@ -8808,6 +8808,7 @@ class RiderAPIController extends Controller
                                         $product->total_delivered_skus = (int)$total_delivered_skus;
                                         $product->save();
                                     }
+                                    return response()->json(['status' => 1, 'message' => $distribution_items]);
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $request->total_cod_amount;
