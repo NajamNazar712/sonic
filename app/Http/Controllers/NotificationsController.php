@@ -2624,7 +2624,7 @@ class NotificationsController extends Controller
                                     $roles = AdminRole::where('department_id', $tagging->tagged_id)->pluck('id');
                                     $admin_department = Admin::whereIn('role_id', $roles)->where('status', 1);
                                     if ($admin_department->exists()) {
-                                        $to = $admin_department->pluck('email');
+                                        $to = $admin_department->pluck('email')->toArray();
                                         // $to_sms = $admin_department->pluck('phone_number');
                                     }
                                 } else if ($tagging->crm_request_tagging_type_id == 2) {
@@ -2774,11 +2774,15 @@ class NotificationsController extends Controller
                             if($to!='complaints@trax.pk'){
                                 $complains_email = 'complaints@trax.pk';
                                 array_push($cc, $complains_email);
+                                self::email($subject, $body, $to, $cc);
+                            }else{
+                                self::email($subject, $body, $to);
+                                self::email($subject, $body, $shipment->user->email);
                             }
-                            self::email($subject, $body, $to, $cc);
                         } else {
 
-                            self::email($subject, $body, [$to,$shipment->user->email]);
+                            self::email($subject, $body, $to);
+                            self::email($subject, $body, $shipment->user->email);
                         }
                         // $sms_body= 'Request ID: '.$crm_request->id.', Tracking Number :'.$tracking_number.' '.PHP_EOL.
                         // 'Shipper Name: '.$shipper_name.''.PHP_EOL.

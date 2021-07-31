@@ -469,7 +469,14 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
-                                    blockPagePermanently();
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Request(s) are being marked Closed.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                                     if (confirm) {
                                             $.ajax({
                                                 url: '{!! route('admin.crm.close') !!}',
@@ -517,7 +524,7 @@
                                                     });
 
                                                     table.draw('false');
-                                                    UnblockPagePermanently();
+                                                    swal.close();
                                                 });
                                     }
                                 });
