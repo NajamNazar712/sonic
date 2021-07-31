@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 
-use App\FleetDriver;
-use App\FleetVendor;
+use App\Http\Models\FleetDriver;
+use App\Http\Models\FleetVendor;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;

@@ -1359,7 +1359,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\AdminCargoManifestController@manifest_mapping_list')->name('list');
                 Route::post('store', 'Admins\AdminCargoManifestController@manifest_mapping_store')->name('store');
                 Route::get('edit/{id}', 'Admins\AdminCargoManifestController@manifest_mapping_edit')->name('edit');
-                Route::post('update', 'Admins\AdminCargoManifestController@manifest_mapping_edit_update')->name('update');
+                Route::post('update/{id}', 'Admins\AdminCargoManifestController@manifest_mapping_edit_update')->name('update');
                 Route::post('status', 'Admins\AdminCargoManifestController@manifest_mapping_status')->name('status');
             });
         });
