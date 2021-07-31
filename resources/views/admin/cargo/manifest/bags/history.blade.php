@@ -51,6 +51,7 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
+                                    <th class="border-primary border-darken-1">Junction(s)</th>
                                   {{--  <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Junction 1</th>
@@ -205,6 +206,7 @@
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'shipments', name: 'cargo_manifest_bags.shipments', class: 'align-middle text-center shipments'},
+                    {data: 'junctions', name: 'junctions', class: 'align-middle text-center junctions',orderable: false},
                    /* {data: 'short_received_shipments', name: 'bags.short_received', class: 'align-middle text-center short_received_shipments'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},

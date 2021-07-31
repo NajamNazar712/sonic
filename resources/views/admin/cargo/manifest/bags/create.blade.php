@@ -67,6 +67,7 @@
                                             {{ csrf_field() }}
 
                                             <input type="hidden" name="bag_type" class="bag_type">
+                                            <input type="hidden" name="junction_mapping_id" class="junction_mapping_id">
 
 
                                             <input type="hidden" name="shipment_ids" class="shipment_ids">
@@ -411,145 +412,50 @@
                         toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     },
                     success: function (data) {
-                        open_box_ids = [];
-                        table.rows().every(function(index) {
-                            var node = $(this.node());
-                            if(node.find('td.open_box input').is(':checked')){
-                                open_box_ids.push(parseInt(node.attr('id')));
-                            }
-                        });
+                       if(data.status == 1) {
+                           console.log(data);
+                           open_box_ids = [];
+                           table.rows().every(function (index) {
+                               var node = $(this.node());
+                               if (node.find('td.open_box input').is(':checked')) {
+                                   open_box_ids.push(parseInt(node.attr('id')));
+                               }
+                           });
 
-                        $('#cargo_consignment form .shipment_ids').val(shipment_ids);
-                        $('#cargo_consignment form .open_box_ids').val(open_box_ids);
+                           $('#cargo_consignment form .shipment_ids').val(shipment_ids);
+                           $('#cargo_consignment form .open_box_ids').val(open_box_ids);
 
-                        $('#cargo_consignment form .origin_hub_id').val(data.origin.id);
-                        $('#cargo_consignment form .origin_hub_name').val(data.origin.name);
+                           $('#cargo_consignment form .origin_hub_id').val(data.origin.id);
+                           $('#cargo_consignment form .origin_hub_name').val(data.origin.name);
 
-                        $('#cargo_consignment form .destination_hub_id').val(data.destination.id);
-                        $('#cargo_consignment form .destination_hub_name').val(data.destination.name);
+                           $('#cargo_consignment form .destination_hub_id').val(data.destination.id);
+                           $('#cargo_consignment form .destination_hub_name').val(data.destination.name);
 
-                        $('#cargo_consignment form .actual_weight').val(data.actual_weight);
+                           $('#cargo_consignment form .junction_mapping_id').val(data.junction_id);
 
-                      /*  $.each(data.junctions, function(index, junction) {
-                            $('#cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-                            $('#cargo_consignment form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-                        });*/
+                           $('#cargo_consignment form .actual_weight').val(data.actual_weight);
 
-                       /* if(data.junction_1) {
-                            $('#cargo_consignment form .junction_1').val(data.junction_1);
-                            $('#cargo_consignment form .junction_1').select2({
-                                width: '100%',
-                                placeholder: 'Junction 1'
-                            }).bind('change', function() {
-                                $(this).valid();
-                            });
-                        }
-                        else{
-                            $('#cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Junction 1'
-                            }).bind('change', function() {
-                                $(this).valid();
-                            });
-                        }
-                        if(data.junction_2) {
-                            $('#cargo_consignment form .junction_2').val(data.junction_2);
-                            $('#cargo_consignment form .junction_2').select2({
-                                width: '100%',
-                                placeholder: 'Junction 2',
-                                allowClear: true
-                            });
-                        }
-                        else{
-                            $('#cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Junction 2',
-                                allowClear: true
-                            })
-                        }
-*/
-                        $('#cargo_consignment form input.seal_number').inputmask({
-                            'alias': 'integer',
-                            'allowMinus': false,
-                            'allowPlus': false
-                        });
+                           $('#cargo_consignment form input.seal_number').inputmask({
+                               'alias': 'integer',
+                               'allowMinus': false,
+                               'allowPlus': false
+                           });
 
-                         $('#cargo_consignment form input.seal_number').on('change', function(){
-                             var seal = this.value;
-                             if(seal.length != 12 && seal.length != 13 && seal.length != 6){
-                                 this.value = '';
-                             }
-                         });
+                           $('#cargo_consignment form input.seal_number').on('change', function () {
+                               var seal = this.value;
+                               if (seal.length != 12 && seal.length != 13 && seal.length != 6) {
+                                   this.value = '';
+                               }
+                           });
 
-                       /* $('#cargo_consignment form input.actual_weight').inputmask({
-                            'alias': 'decimal',
-                            'allowMinus': false,
-                            'allowPlus': false,
-                            'digits': 2,
-                            'min': 0.1,
-                            'max': 100000
-                        });
-                        $.each(data.shipping_modes, function(index, shipping_mode) {
-                            $('#cargo_consignment form .shipping_mode_select').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
-                        });
+                       }
+                       else{
 
-                        $('#cargo_consignment form .shipping_mode_select').prepend('<option value="" selected="selected"></option>').select2({
-                            width: '100%',
-                            placeholder: 'Select Shipping Mode*'
-                        }).bind('change', function() {
-                            $(this).valid();
-                        });
-
-                        $.each(data.transport_modes, function(index, transport_mode) {
-                            $('#cargo_consignment form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
-                        });
-
-                        $('#cargo_consignment form .transport_mode').select2({
-                            width: '100%',
-                            placeholder: 'Transport Mode*'
-                        }).bind('change', function() {
-                            $(this).valid();
-
-                            $('#cargo_consignment form .transport_mode_vendor').html('');
-
-                            $.each(transport_mode_vendors[this.value], function(index, vendor) {
-                                var option = new Option(vendor.name, vendor.id, false, false);
-                                $('#cargo_consignment form .transport_mode_vendor').append(option);
-                            });
-
-                            var option = new Option('Others', 0, false, false);
-                            $('#cargo_consignment form .transport_mode_vendor').append(option);
-
-                            $('#cargo_consignment form .transport_mode_vendor').val(null).trigger('change');
-                        });
-
-                        transport_mode_vendors = data.transport_mode_vendors;
-
-                        $('#cargo_consignment form .transport_mode_vendor').select2({
-                            width: '100%',
-                            placeholder: 'Vendor*'
-                        }).bind('change', function() {
-                            if (this.value) {
-                                $(this).valid();
-                            }
-
-                            if (this.value && this.value == 0) {
-                                $('#cargo_consignment #new_vendor').removeClass('d-none');
-                            }
-                            else {
-                                $('#cargo_consignment #new_vendor').addClass('d-none');
-
-                                $('#cargo_consignment #vendor_name-error').remove();
-                            }
-                        });
-                        $('#cargo_consignment form .transport_mode').val(2).trigger('change');
-                        $('#cargo_consignment form .transport_mode').prop("disabled", true);
-                        $('#cargo_consignment form .junction_1').prop("disabled", true);
-                        $('#cargo_consignment form .junction_2').prop("disabled", true);
-                        $('#cargo_consignment form .shipping_mode_select').val(1).trigger('change');
-                        $('#cargo_consignment form .transport_mode_vendor').val(9).trigger('change');
-                        $('#cargo_consignment form .transport_mode_vendor').prop("disabled",true);*/
+                           $('#cargo_consignment').modal('hide');
+                           toastr.error('No junctions found for this origin and destination ', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
                         UnblockPagePermanently();
+
                     }
                 });
             });

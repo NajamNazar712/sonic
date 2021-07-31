@@ -578,7 +578,18 @@ class AdminCargoManifestController extends Controller
             $details['actual_weight'] = $details['actual_weight'] + $shipment_actual_weight->actual_weight;
         }
 
-        return $details;
+         $junction = V2JunctionMapping::where('origin_id',$origin->id)->where('destination_id',$destination->id);
+         if($junction->exists()){
+
+             $junction = $junction->first();
+             $details['status'] = 1;
+             $details['junction_id'] = $junction->id;
+         }
+         else{
+             $details['status'] = 0;
+         }
+
+         return $details;
     }
     
     public function create_bag_seal_number(Request $request) {
@@ -865,7 +876,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function create_store(Request $request) {
-
+      
         $shipments = 0;
         $quantity = 0;
         $shipments_weight = 0;
@@ -886,9 +897,9 @@ class AdminCargoManifestController extends Controller
         }
 
         if (!empty($shipment_ids)) {
-
+            
             $bag = new CargoManifestBag();
-            $bag->seal_number = $request->seal_number;
+            $bag->seal_number = $request->input('seal_number');
             $bag->origin_hub_id = $request->input('origin_hub_id');
             $bag->destination_hub_id = $request->input('destination_hub_id');
             $bag->shipments = $shipments;
@@ -899,6 +910,7 @@ class AdminCargoManifestController extends Controller
             $bag->type = $request->input('bag_type');
             $bag->transport_mode_id = 2;
             $bag->status_id = 1;
+            $bag->junction_mapping_id = $request->input('junction_mapping_id');
             $bag->save();
 
             CargoManifestBagJourneyController::add($bag->id,$bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
@@ -981,7 +993,7 @@ class AdminCargoManifestController extends Controller
             ->join('admins as a', 'cargo_manifest_bags.created_by', '=', 'a.id')
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
-            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode','cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number', 'bs.name as status');
+            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode','cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number', 'bs.name as status','cargo_manifest_bags.junction_mapping_id as junction_mapping_id');
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
@@ -1019,6 +1031,19 @@ class AdminCargoManifestController extends Controller
             })
             ->addColumn('shipments', function ($bag) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $bag->shipments . '</button>';
+            })
+            ->addColumn('junctions', function ($bag) {
+                $junctions = V2Junctions::where('junction_mapping_id',$bag->junction_mapping_id)->get();
+                $junction_data = '';
+
+
+                foreach ($junctions as $junction) {
+                    $city = City::find($junction->junction_id);
+                    $junction_data.= "<a href='https://www.google.com/maps/?q=".$city->hub_location_latitude.",".$city->hub_location_longitude."' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> ".$city->name ."<br><br>";
+
+                }
+                return $junction_data;
+                // return $route_management->id;
             })
             ->filterColumn('cargo_manifest_bags.seal_number', function ($query, $keyword) {
                 return $query->where('cargo_manifest_bags.seal_number', '=', $keyword);
