@@ -314,6 +314,7 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
+                                    blockPagePermanently();
                                     if (confirm) {
                                         $.ajax({
                                             url: '{!! route('admin.crm.close') !!}',
@@ -340,6 +341,7 @@
                                                 table.rows().deselect();
 
                                                 table.draw('false');
+                                                UnblockPagePermanently();
                                             });
                                     }
                                 });

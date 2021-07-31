@@ -469,6 +469,7 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
+                                    blockPagePermanently();
                                     if (confirm) {
                                             $.ajax({
                                                 url: '{!! route('admin.crm.close') !!}',
@@ -479,7 +480,6 @@
                                                 }
                                             })
                                                 .done(function (data) {
-                                                    console.log(data.crm_request_ids);
                                                     if (data.status == 0) {
                                                         toastr.success(data.success, 'Success!', {
                                                             positionClass: 'toast-bottom-center',
@@ -517,6 +517,7 @@
                                                     });
 
                                                     table.draw('false');
+                                                    UnblockPagePermanently();
                                                 });
                                     }
                                 });

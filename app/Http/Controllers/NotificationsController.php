@@ -2633,6 +2633,8 @@ class NotificationsController extends Controller
                                     // $to_sms = Admin::find($tagging->tagged_id)->phone_number;
                                 }
                             }else{
+                                // $to = array();
+                                // array_push($to, 'complaints@trax.pk');
                                  $to = 'complaints@trax.pk';
 
                             }
@@ -2775,7 +2777,8 @@ class NotificationsController extends Controller
                             }
                             self::email($subject, $body, $to, $cc);
                         } else {
-                            self::email($subject, $body, $to);
+
+                            self::email($subject, $body, [$to,$shipment->user->email]);
                         }
                         // $sms_body= 'Request ID: '.$crm_request->id.', Tracking Number :'.$tracking_number.' '.PHP_EOL.
                         // 'Shipper Name: '.$shipper_name.''.PHP_EOL.
