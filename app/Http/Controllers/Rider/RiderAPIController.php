@@ -8803,15 +8803,15 @@ class RiderAPIController extends Controller
                                     foreach ($distribution_items as $distribution_item) {
                                         $product = ShipmentDistributionProduct::find($distribution_item["pid"]);
                                         $product->total_delivered_units = $distribution_item["delivered_qty"];
-                                        $product->received_amount = $distribution_item["total_amount"];
+                                        $product->received_amount = round($distribution_item["total_amount"]);
                                         $total_delivered_skus = $distribution_item["delivered_qty"] / $product->units_per_item;
                                         $product->total_delivered_skus = (int)$total_delivered_skus;
                                         $product->save();
                                     }
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
-                                    $shipment->received_amount = $request->total_cod_amount;
-                                    $shipment->amount = $request->total_cod_amount;
+                                    $shipment->received_amount = round($request->total_cod_amount);
+                                    $shipment->amount = round($request->total_cod_amount);
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                     ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 }
