@@ -1097,6 +1097,7 @@
                                         distribution.row.add([rowNo+1,value.type,value.items,value.units_per_item,total_units,total_delivered_units,total_units,total_delivered_skus,value.items,amount]).node().id = value.pid;
                                         distribution.draw(false);
                                     });
+                                    update_distribution();
                                     calculate_total();
                                 }
                                 else if (data.status == 1) {
@@ -1121,6 +1122,7 @@
             }
 
             $('#distributiontable').on('change', ".total_delivered_units", update_distribution);
+
 
             function update_distribution() {
 
