@@ -975,6 +975,14 @@
                         }
                         if(nature_flag){
                             $('#AddNewRequest').attr('disabled',true);
+                            swal({
+                                        title: 'Please Wait!',
+                                        text: 'Launching Request.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                             $.ajax({
                                 url: '{!! route('cod.crm.request.add') !!}',
                                 method: 'POST',
@@ -985,6 +993,8 @@
                                 contentType: false,
                             })
                                 .done(function(data) {
+                                    swal.close();
+
                                     if(data.status){
                                         if(data.flag){
                                             var html = '';
