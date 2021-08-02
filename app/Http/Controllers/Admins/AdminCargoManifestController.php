@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\CargoManifestBag;
+use App\CargoManifestBagShipments;
+use App\CargoManifestBagStatus;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\CargoManifest\V2JunctionVehicles;
-use App\CargoManifestBag;
-use App\CargoManifestBagShipments;
-use App\CargoManifestBagStatus;
+
 use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
