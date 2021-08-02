@@ -1042,6 +1042,7 @@
                             });
 
                             $('#DistributionModal').modal('show');
+                            update_distribution();
                             // checkShipmentStatuses();
 
                             $('#distributiontable').append("<tfoot><tr><th colspan='2'>Total:</th><th id='total_booked_items' class='align-middle pl-2'></th><th id='total_booked_units_per_item' class='align-middle pl-2'></th><th id='total_unit' class='align-middle pl-2'></th><th id='total_delivered_units' class='align-middle pl-2'></th><th id='total_return_unit' class='align-middle pl-2'></th><th id='total_delivered_skus' class='align-middle pl-2'></th><th id='total_return_skus' class='align-middle pl-2'></th><th id='amount_total' class='align-middle pl-2'></th></tr></tfoot>");
@@ -1097,7 +1098,6 @@
                                         distribution.row.add([rowNo+1,value.type,value.items,value.units_per_item,total_units,total_delivered_units,total_units,total_delivered_skus,value.items,amount]).node().id = value.pid;
                                         distribution.draw(false);
                                     });
-                                    update_distribution();
                                     calculate_total();
                                 }
                                 else if (data.status == 1) {
