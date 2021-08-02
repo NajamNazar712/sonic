@@ -1042,7 +1042,7 @@
                             });
 
                             $('#DistributionModal').modal('show');
-                            $('.total_delivered_units').trigger('change');
+                            $('#distributiontable .total_delivered_units').trigger('change');
                             // checkShipmentStatuses();
 
                             $('#distributiontable').append("<tfoot><tr><th colspan='2'>Total:</th><th id='total_booked_items' class='align-middle pl-2'></th><th id='total_booked_units_per_item' class='align-middle pl-2'></th><th id='total_unit' class='align-middle pl-2'></th><th id='total_delivered_units' class='align-middle pl-2'></th><th id='total_return_unit' class='align-middle pl-2'></th><th id='total_delivered_skus' class='align-middle pl-2'></th><th id='total_return_skus' class='align-middle pl-2'></th><th id='amount_total' class='align-middle pl-2'></th></tr></tfoot>");
