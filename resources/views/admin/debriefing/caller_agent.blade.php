@@ -213,7 +213,7 @@
                                         </div>
                                         <div class="col-12 mb-1">
                                             <h4><u>Other Information</u></h4>
-                                            <div class="border table-responsive">
+                                            <div class="border table-responsive spacing">
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
@@ -311,6 +311,11 @@
         .bg-gradient-directional-pending-calls {
             background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
             background-repeat: repeat-x;
+        }
+        .spacing{
+            padding-top: 20px;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
         }
     </style>
 @endsection
