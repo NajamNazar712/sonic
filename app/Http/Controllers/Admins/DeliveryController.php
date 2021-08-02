@@ -83,6 +83,7 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\PODImage;
 use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
@@ -1797,14 +1798,26 @@ class DeliveryController extends Controller
 
             })
             ->addColumn('action', function ($deliveries) {
-                return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                            <button type='button' class='dropdown-item upload_pod' data-target-id='" . $deliveries->id . "' data-toggle='modal' data-target='#UploadPOD'><i class='ft-plus-circle'></i>Upload POD</button>
+                $pod_file = PODImage::where('shipment_id' , $deliveries->shId);
+                if ($pod_file->exists()) {
+                    return " <span class='dropdown'>
+                    <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                            aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                    <div class='dropdown-menu open-left arrow'>
 
-                                              <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
-                                            </div></span>";
+                      <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                    </div></span>";
+                }else{
+                    return " <span class='dropdown'>
+                    <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                            aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                    <div class='dropdown-menu open-left arrow'>
+                    <button type='button' class='dropdown-item upload_pod' data-target-id='" . $deliveries->id . "' data-toggle='modal' data-target='#UploadPOD'><i class='ft-plus-circle'></i>Upload POD</button>
+
+                      <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                    </div></span>";
+                }
+              
             })
             ->make(true);
     }
@@ -6906,7 +6919,21 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     }
 
     public function upload_pod(Request $request){
-        dd($request->all());
+        
+                    $image = $request->file('pod_file');
+                    $extension = $image->getClientOriginalExtension();
+                    $random = rand(1000, 100000);
+                    $now = Carbon::now();
+                    $time = $now->year . '_' . $now->month;
+                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/pod_images'), $generated_image_name);
+                    $pod_image = new PODImage();
+                    $pod_image->pod_file = $generated_image_name;
+                    $pod_image->added_by = Auth::id();
+                    $pod_image->shipment_id = $request->shipment_id;
+                    $pod_image->save();
+                    return redirect()->back()->with('success', 'POD File Uploaded');
+
     }
 
 }

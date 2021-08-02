@@ -82,7 +82,10 @@ class AdminTrackingController extends Controller
                     $details = array();
 
                     $details['tracking_number'] = $tracking_number;
-
+                    if($shipment->pod_image()->exists()){
+                        $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
+                      
+                    }
                     $details['open_box'] = $shipment->open_box;
 
                     $shipper = $shipment->user;
@@ -735,7 +738,10 @@ class AdminTrackingController extends Controller
                     $details = array();
 
                     $details['tracking_number'] = $tracking_number;
-
+                    if($shipment->pod_image()->exists()){
+                        $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
+                      
+                    }
                     $details['open_box'] = $shipment->open_box;
                     if($shipment->payment_mode_id == 2){
                         $details['ccd'] = 1;

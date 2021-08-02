@@ -102,7 +102,7 @@
     <div class="modal fade" id="upload_pod_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_pod_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
-                <form id="upload_pod_form" method="post" action="{{route('admin.delivery.receive.upload_pod')}}">
+                <form id="upload_pod_form" method="post" action="{{route('admin.delivery.receive.upload_pod')}}" enctype="multipart/form-data">
                     @method('POST')
                         @csrf
                 <div class="modal-header">
