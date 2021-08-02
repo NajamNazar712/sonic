@@ -14,7 +14,8 @@ class UpdateCargoManifestBagsForJunctionMappingId extends Migration
     public function up()
     {
         Schema::table('cargo_manifest_bags', function (Blueprint $table) {
-            $table->integer('junction_mapping_id')->index();
+            $table->integer('junction_mapping_id')->nullable()->index();
+            $table->bigInteger('seal_number')->change();
         });
     }
 
@@ -27,6 +28,7 @@ class UpdateCargoManifestBagsForJunctionMappingId extends Migration
     {
         Schema::table('cargo_manifest_bags', function (Blueprint $table) {
             $table->dropColumn('junction_mapping_id');
+            $table->integer('seal_number')->change();
         });
     }
 }

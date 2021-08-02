@@ -117,8 +117,9 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+                    params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.master_cargo.bag.history.list') }}',
+                        url: '{{ route('admin.cargo_manifest.bags.history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -198,7 +199,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[9, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'cargo_manifest_bags.seal_number', class: 'align-middle seal_number'},
@@ -322,75 +323,7 @@
             });
             var route = '{!! route('admin.tracking.index') !!}';
 
-           /* $('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                $('#info_modal .modal-body').html('');
-
-                $.ajax({
-                    url: '{!! route('admin.master_cargo.bag.in_transit.short_received') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var head = '';
-                            var tracking_numbers = '';
-
-                            head = '<h4 class="modal-title" id="info_modal_title">Short Received Shipments(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
-
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                            });
-
-                            $('#shipments .modal-header').html(head);
-                            $('#shipments .modal-body').html(tracking_numbers);
-
-                            $('#shipments').modal('show');
-                        }
-                    });
-            });*/
-            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                $('#shipments .modal-body').html('');
-
-                $.ajax({
-                    url: '{!! route('admin.master_cargo.pending.shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var head = '';
-                            var tracking_numbers = '';
-
-                            head = '<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
-
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                            });
-
-                            $('#shipments .modal-header').html(head);
-                            $('#shipments .modal-body').html(tracking_numbers);
-
-                            $('#shipments').modal('show');
-                        }
-                    });
-            });
-
+        
             $('#bag_type_search_form #bag_type').select2({
                 width: '125px',
                 placeholder: 'Bag Type'

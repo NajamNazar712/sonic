@@ -412,8 +412,7 @@
                         toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     },
                     success: function (data) {
-                       if(data.status == 1) {
-                           console.log(data);
+
                            open_box_ids = [];
                            table.rows().every(function (index) {
                                var node = $(this.node());
@@ -448,14 +447,7 @@
                                }
                            });
 
-                       }
-                       else{
-
-                           $('#cargo_consignment').modal('hide');
-                           toastr.error('No junctions found for this origin and destination ', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                       }
                         UnblockPagePermanently();
-
                     }
                 });
             });

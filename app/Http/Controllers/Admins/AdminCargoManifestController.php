@@ -627,11 +627,7 @@ class AdminCargoManifestController extends Controller
          if($junction->exists()){
 
              $junction = $junction->first();
-             $details['status'] = 1;
              $details['junction_id'] = $junction->id;
-         }
-         else{
-             $details['status'] = 0;
          }
 
          return $details;
@@ -921,7 +917,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function create_store(Request $request) {
-      
+
         $shipments = 0;
         $quantity = 0;
         $shipments_weight = 0;
@@ -957,7 +953,7 @@ class AdminCargoManifestController extends Controller
             $bag->status_id = 1;
             $bag->junction_mapping_id = $request->input('junction_mapping_id');
             $bag->save();
-
+          
             CargoManifestBagJourneyController::add($bag->id,$bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);
 
             $id = $bag->id;
@@ -1033,6 +1029,10 @@ class AdminCargoManifestController extends Controller
     }
 
     public function history_list(Request $request) {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),402);
+        }
         $bags = CargoManifestBag::join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
             ->join('admins as a', 'cargo_manifest_bags.created_by', '=', 'a.id')
