@@ -8803,7 +8803,7 @@ class RiderAPIController extends Controller
                                     foreach ($distribution_items as $distribution_item) {
                                         $product = ShipmentDistributionProduct::find($distribution_item["pid"]);
                                         $product->total_delivered_units = $distribution_item["delivered_qty"];
-                                        $product->received_amount = round($distribution_item["total_amount"]);
+                                        $product->received_amount = round($distribution_item["total_amount_in_double"]);
                                         $total_delivered_skus = $distribution_item["delivered_qty"] / $product->units_per_item;
                                         $product->total_delivered_skus = (int)$total_delivered_skus;
                                         $product->save();
