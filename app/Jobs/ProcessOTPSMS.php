@@ -216,7 +216,8 @@ class ProcessOTPSMS implements ShouldQueue
                         'session_id' => $telenor->session_id,
                         'to' => $sms->to,
                         'text' => $sms->body,
-                        'mask' => 'TRAX'
+                        'mask' => 'TRAX',
+                        'transaction_message' => TRUE
                     ]
                 ]);
 
