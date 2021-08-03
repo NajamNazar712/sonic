@@ -1808,14 +1808,26 @@ class DeliveryController extends Controller
                       <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                     </div></span>";
                 }else{
-                    return " <span class='dropdown'>
+                    $shipmnet = Shipment::find($deliveries->shId);
+                    if($shipmnet->business_category_id==2){
+                        return " <span class='dropdown'>
+                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                        <div class='dropdown-menu open-left arrow'>
+                        <button type='button' class='dropdown-item upload_pod' data-target-id='" . $deliveries->id . "' data-toggle='modal' data-target='#UploadPOD'><i class='ft-plus-circle'></i>Upload POD</button>
+    
+                          <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                        </div></span>";
+                    }else{
+                        return " <span class='dropdown'>
                     <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                             aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                     <div class='dropdown-menu open-left arrow'>
-                    <button type='button' class='dropdown-item upload_pod' data-target-id='" . $deliveries->id . "' data-toggle='modal' data-target='#UploadPOD'><i class='ft-plus-circle'></i>Upload POD</button>
 
                       <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                     </div></span>";
+                    }
+                   
                 }
               
             })
