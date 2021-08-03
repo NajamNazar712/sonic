@@ -67,7 +67,7 @@
                                             {{ csrf_field() }}
 
                                             <input type="hidden" name="bag_type" class="bag_type">
-                                            <input type="hidden" name="junction_mapping_id" class="junction_mapping_id">
+
 
 
                                             <input type="hidden" name="shipment_ids" class="shipment_ids">
@@ -430,7 +430,7 @@
                            $('#cargo_consignment form .destination_hub_id').val(data.destination.id);
                            $('#cargo_consignment form .destination_hub_name').val(data.destination.name);
 
-                           $('#cargo_consignment form .junction_mapping_id').val(data.junction_id);
+
 
                            $('#cargo_consignment form .actual_weight').val(data.actual_weight);
 

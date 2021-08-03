@@ -22,6 +22,8 @@ class CargoManifestBagStatusSeeder extends Seeder
             array('id' => 6, 'name' => 'Misrouted Forwarded', 'created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 7, 'name' => 'Received','created_at'=>$timestamp,'updated_at'=>$timestamp),
             array('id' => 8, 'name' => 'Dispute','created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 9, 'name' => 'Short Received','created_at'=>$timestamp,'updated_at'=>$timestamp),
+            array('id' => 10, 'name' => 'Lost','created_at'=>$timestamp,'updated_at'=>$timestamp),
         ));
     }
 }
