@@ -3043,7 +3043,7 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [4])->get();}
+                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
                 else
                 {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
             }
@@ -3955,7 +3955,7 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [4])->get();}
+                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
                 else
                 {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
             }
