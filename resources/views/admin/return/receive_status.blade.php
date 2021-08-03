@@ -39,6 +39,12 @@
                                 </select>
                             </fieldset>
                         </div>
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="select_all_reason" id="select_all_reason" class="form-control select2">
+                                </select>
+                            </fieldset>
+                        </div>
                         @if($return_note_status == 0)
                             <div class="col-3">
                                 <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
@@ -196,6 +202,12 @@
                 width:'100%',
                 allowClear:true
             });
+
+            $('#select_all_reason').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Reason',
+                width:'100%'
+            });
+
             var open_box_ids = [];
             var selected_rows = [];
             var shipment_remarks_obj = {};
@@ -563,6 +575,40 @@
                     e.preventDefault();
                 }
             });
+
+            $('body').on('select2:select','#select_all_status',function (e) {
+
+                var statusSelection = $(this).find(':selected');
+                var status = statusSelection.val();
+                console.log(statusSelection,status);
+                var all_reason = $('#select_all_reason');
+                $.ajax({
+                    url:'{!! route('admin.delivery.receive.reason_all') !!}',
+                    type:'POST',
+                    dataType:'json',
+                    data: {
+                        'status':status,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 0){
+                        all_reason.empty().trigger('change');
+                        $.each(data.reasons,function (key,value) {
+                            var newOption = new Option(value.name, value.id, false, false);
+                            all_reason.append(newOption).trigger('change');
+                            if(all_reason != 24 || all_reason != 60){
+                                all_reason.attr('data-rule-required', 'true');
+                                all_reason.attr('data-msg-required', 'Reason is required');
+                            }
+                        });
+                        all_reason.val('').trigger('change');
+                    }else{
+                        all_reason.empty().trigger('change');
+                        toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                });
+            });
+
             var shipments = [];
             $('#status_update_form').bind('submit', function(event) {
                 var shipment = $('#shipment_ids');
