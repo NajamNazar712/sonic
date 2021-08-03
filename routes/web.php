@@ -1188,6 +1188,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('list','Admins\ReturnController@return_marked_list')->name('list');
         Route::post('confirm/status','Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status','Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
+       
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
@@ -1200,6 +1201,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
+            Route::post('revert/status','Admins\ReturnController@return_revert_status')->name('revert.status');
+            Route::post('excel/store','Admins\ReturnController@excel_store_revert')->name('excel.store');
         });
 
         Route::prefix('create')->name('create.')->group(function(){
