@@ -8,6 +8,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagStatus;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
@@ -1237,136 +1238,24 @@ class AdminCargoManifestController extends Controller
         }
     }
 
-    public function store_manifest_old(Request $request){
-        $bags = 0;
-        $shipments = 0;
-        $bags_weight = 0;
-
-        $bag_ids = explode(',', $request->input('bag_ids'));
-        foreach ($bag_ids as $key => $bag_id) {
-            $bag = Bag::find($bag_id);
-
-            if (in_array($bag->status_id, [1, 3, 5])) {
-                $bags++;
-                $bags_weight += $bag->actual_weight;
-                $shipments += $bag->shipments;
-                $quantity += $bag->quantity;
-
-            }
-            else {
-                unset($bag_ids[$key]);
-            }
-        }
-
-        if (!empty($bag_ids)) {
-            $master_cargo = new MasterCargo();
-
-            $master_cargo->origin_hub_id = $request->input('origin_hub_id');
-            $master_cargo->destination_hub_id = $request->input('destination_hub_id');
-//            $master_cargo->route_management_id = $request->input('route_management_id');
-//            $master_cargo->fleet_id = $request->input('fleet_id');
-
-            // $master_cargo->junction_hub_1_id = $request->input('junction_1');
-            // $master_cargo->junction_hub_2_id = $request->input('junction_2');
-            $master_cargo->shipping_mode_id = $request->input('shipping_mode_id');
-            $master_cargo->transport_mode_id = $request->input('transport_mode');
-            $master_cargo->driver_name = $request->input('driver_name');
-            // $master_cargo->vehicle = $request->input('vehicle');
-            $master_cargo->phone_number = $request->input('phone_number');
-//            if($request->has('cnic')){
-//                $master_cargo->cnic = $request->input('cnic');
-//            }
-
-            if ($request->input('transport_mode_vendor') == 0) {
-                $transport_mode_vendor = new TransportModeVendor();
-
-                $transport_mode_vendor->transport_mode_id = $request->input('transport_mode');
-                $transport_mode_vendor->name = $request->input('vendor_name');
-
-                $transport_mode_vendor->save();
-
-                $master_cargo->transport_mode_vendor_id = $transport_mode_vendor->id;
-            }
-            else {
-                $master_cargo->transport_mode_vendor_id = $request->input('transport_mode_vendor');
-            }
-
-            $master_cargo->bags = $bags;
-            $master_cargo->shipments = $shipments;
-            $master_cargo->quantity = $quantity;
-            $master_cargo->bags_weight = $bags_weight;
-
-            $master_cargo->actual_weight = $request->input('actual_weight');
-            $master_cargo->created_by = Auth::id();
-            if($request->onward_forwarding == 1){
-                $master_cargo_status_id = 6;
-                $master_cargo->onward_forwarding = 1;
-            }
-            else{
-                $master_cargo_status_id = 1;
-            }
-
-            $master_cargo->status_id = $master_cargo_status_id;
-            $master_cargo->save();
-
-            $master_cargo_id = $master_cargo->id;
-
-            foreach ($bag_ids as $bag_id) {
-                $mater_cargo_bags= new MasterCargoBag();
-
-                $mater_cargo_bags->master_cargo_id = $master_cargo_id;
-                $mater_cargo_bags->bag_id = $bag_id;
-
-                $mater_cargo_bags->save();
-
-                $bag = Bag::find($bag_id);
-
-                $bag->status_id = 2;
-
-                $bag->save();
-
-                MasterCargoBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, $master_cargo_status_id);
-            }
-
-            if ($request->filled('submit_and_print_form')) {
-                $print = $master_cargo_id;
-            }
-            else {
-                $print = FALSE;
-            }
-            $path = $this::master_cargo_print($master_cargo_id, 1);
-            NotificationsController::send(87, $master_cargo->destination_hub_id, url('/') . '/' . 'reports/master_cargo_'. str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT) .'.pdf');
-            if($master_cargo_status_id == 6){
-                $text = 'Onward Forwarding';
-            }
-            else{
-                $text = 'Master';
-            }
-            if($request->onward_forwarding == 1){
-                return redirect()->route('admin.master_cargo.create.index')->with(['success' => ' Cargo Created with Onward Forwarded Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
-            }
-            else{
-                return redirect()->route('admin.master_cargo.create.index')->with(['success' => ' Cargo Created with Master Cargo Number: ' . str_pad($master_cargo_id, 6, '0', STR_PAD_LEFT), 'print' => $print]);
-            }
-        }
-        else {
-            return back()->withErrors('All Bags have already been added to another Master Cargo!');
-        }
-    }
-
     public function store_manifest(Request $request)
     {
-        return $request;
         $error_hubs = array();
+        $success_cargo_ids = array();
         foreach ($request->bag_ids as $hub_id => $bag_ids_array)
         {
+            $bags = 0;
+            $bags_weight = 0;
+            $actual_weight = 0;
+            $shipments = 0;
             $bag_ids = explode(',', $bag_ids_array);
             foreach ($bag_ids as $key => $bag_id) {
                 $bag = CargoManifestBag::find($bag_id);
 
                 if (in_array($bag->status_id, [1, 3, 5])) {
                     $bags++;
-                    $bags_weight += $bag->actual_weight;
+                    $bags_weight += $bag->shipments_weight;
+                    $actual_weight += $bag->actual_weight;
                     $shipments += $bag->shipments;
 
                 } else {
@@ -1376,34 +1265,111 @@ class AdminCargoManifestController extends Controller
 
             if(!empty($bag_ids))
             {
+                $master_cargo = new CargoManifest();
+
+                $master_cargo->origin_hub_id = Auth::user()->default_hub_id;
+                $master_cargo->destination_hub_id = $hub_id;
+                $master_cargo->shipping_mode_id = $request->input('shipping_mode');
+                $master_cargo->transport_mode_id = 1;
+
+                $master_cargo->bags = $bags;
+                $master_cargo->shipments = $shipments;
+                $master_cargo->bags_weight = $bags_weight;
+                $master_cargo->actual_weight = $actual_weight;
+                $master_cargo->created_by = Auth::id();
+
+                if($request->has('vehicle_type'))
+                {
+                    $master_cargo->vehicle_type = 1;
+                    $master_cargo->vehicle_id = $request->vehicle_number;
+                }
+                else{
+                    $master_cargo->vehicle_type = 2;
+                    $master_cargo->vehicle_number = $request->vehicle_number_text;
+                }
+
+                $master_cargo->driver_name = $request->driver_name;
+                $master_cargo->driver_phone = $request->driver_phone;
+                $master_cargo->vendor_name = $request->vendor_name;
+
+                $master_cargo->status_id = 1;
+                $master_cargo->save();
+
+                $master_cargo_id = $master_cargo->id;
+
+                $mapping = V2JunctionMapping::where([['origin_id',Auth::user()->default_hub_id],['destination_id',$hub_id],['status',1]])->first();
+                foreach ($bag_ids as $bag_id) {
+                    $mater_cargo_bags= new ManifestBag();
+
+                    $mater_cargo_bags->cargo_manifest_id = $master_cargo_id;
+                    $mater_cargo_bags->cargo_manifest_bag__id = $bag_id;
+
+                    $mater_cargo_bags->save();
+
+                    $bag = CargoManifestBag::find($bag_id);
+
+                    if($bag->status_id == 1)
+                    {
+                        $bag->status_id = 2;
+                    }
+                    else if($bag->status_id == 3)
+                    {
+                        $bag->status_id = 4;
+                    }
+                    else if($bag->status_id == 5)
+                    {
+                        $bag->status_id = 6;
+                    }
+
+                    $bag->junction_mapping_id = $mapping->id;
+
+                    $bag->update();
+
+                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1);
+                }
+
+                $success_cargo_ids[$hub_id] = $master_cargo_id;
 
             }
             else {
                 array_push($error_hubs,$hub_id);
             }
         }
-//        }
-//        $bag_ids = explode(',', $request->input('bag_ids'));
-//        foreach ($bag_ids as $key => $bag_id) {
-//            $bag = CargoManifestBag::find($bag_id);
-//
-//            if (in_array($bag->status_id, [1, 3, 5])) {
-//                $bags++;
-//                $bags_weight += $bag->actual_weight;
-//                $shipments += $bag->shipments;
-//                $quantity += $bag->quantity;
-//
-//            }
-//            else {
-//                unset($bag_ids[$key]);
-//            }
-//        }
-//        if(!empty($bag_ids)){
-//
-//        }
-//        else {
-//            return back()->withErrors('All Bags have already been added to another Master Cargo!');
-//        }
+
+        if ($request->filled('submit_and_print_form')) {
+            $print = implode(',',$success_cargo_ids);
+        }
+        else {
+            $print = FALSE;
+        }
+
+        if(count($error_hubs) > 0)
+        {
+            $error = "Every Bag in following Hubs Is Already In Some Cargo Manifest. <br><ul>";
+            foreach ($error_hubs as $error_hub)
+            {
+                $error .= "<li>".City::find($error_hub)->name."</li>";
+            }
+            $error .= "</ul>";
+        }
+        else{
+            $error = FALSE;
+        }
+
+        if(count($success_cargo_ids) > 0)
+        {
+            $success = "Cargo Manifest Created Successfully. <br><ul>";
+            foreach ($success_cargo_ids as $hub_id => $cargo_id)
+            {
+                $success .= "<li>For ".City::find($hub_id)->name." with cargo manifest id ".str_pad($cargo_id, 6, '0', STR_PAD_LEFT)."</li>";
+            }
+            $success .="</ul>";
+        }
+        else{
+            $success = FALSE;
+        }
+
+        return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
     }
 
 

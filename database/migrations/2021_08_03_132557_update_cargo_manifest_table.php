@@ -16,7 +16,7 @@ class UpdateCargoManifestTable extends Migration
         Schema::table('cargo_manifests', function (Blueprint $table) {
             $table->string('driver_phone');
             $table->string('vendor_name');
-            $table->integer('vehicle_id')->index();
+            $table->integer('vehicle_id')->nullable()->index();
             $table->dropColumn('quantity');
         });
     }
