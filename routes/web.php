@@ -1480,6 +1480,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
     Route::prefix('cargo_manifest')->name('cargo_manifest.')->group(function () {
+        Route::post('print', 'Admins\AdminCargoManifestController@print')->name('print');
         Route::prefix('bags')->name('bags.')->group(function () {
             Route::prefix('pending')->name('pending.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@pending_bag_index')->name('index');

@@ -26,7 +26,10 @@ class CreateCargoManifestsTable extends Migration
             $table->decimal('actual_weight', 16,2);
             $table->integer('status_id');
             $table->integer('vehicle_type');
-            $table->integer('created_by');
+            $table->integer('created_by')->index();
+            $table->integer('received_by')->index()->nullable();
+            $table->string('vehicle_number')->nullable();
+            $table->string('driver_name')->nullable();
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\CargoManifest;
 use App\CargoManifestBag;
 use App\CargoManifestBagShipments;
 use App\CargoManifestBagStatus;
@@ -1131,8 +1132,309 @@ class AdminCargoManifestController extends Controller
         return $datatables->make(true);
     }
 
-    public function create_manifest()
+ public function create_manifest()
     {
         return view('admin.cargo.manifest.create');
+    }
+
+    public static function print($cargo_id, $type = NULL) {
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $cargo = CargoManifest::find($cargo_id);
+
+
+        $jucntion_names = '';
+       /* if($master_cargo->route_management_id){
+            foreach ($master_cargo->route_management->junctions as $value) {
+                $jucntion_names .= ' - '.$value->junction['name'].' - ';
+            }
+        }*/
+        $sender = $cargo->sender;
+        $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Manifest Slip & Checklist</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                    </style>';
+
+        if ($type == 'pdf') {
+            $html .= '
+                    <style>
+                      body {
+                        font-size: 0.75rem !important;
+                        font-weight: bold !important;
+                      }
+
+                      td.replacement span {
+                        width: auto !important;
+                      }
+
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
+                    </style>
+                ';
+        }
+        $html .= '</head>
+                  <body>
+                    <div>
+                      <div class="cargo_slip">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Manifest Slip</strong></td>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                              </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Destination Hub</strong></td>
+                              <td>' . $cargo->destination_hub->name . '</td>
+                              <td rowspan="9" class="text-center align-middle">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Transit Date</strong></td>
+                              <td>' . $cargo->created_at . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Shipping Mode</strong></td>
+                              <td>' . $cargo->shipping_mode->mode . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Transport Mode</strong></td>
+                              <td>' . $cargo->transport_mode->name . '</td>
+                            </tr>
+                          
+                            <tr>
+                              ';
+      /*  if($master_cargo->onward_forwarding == 1){
+            $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
+        }
+        else{
+            $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
+        }*/
+        $html .= '
+                              <td>' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>No. of Bags</strong></td>
+                              <td>' . $cargo->bags . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td colspan="2" class="color primary"><strong>Sender Information</strong></td>
+                              <td colspan="2" class="color primary"><strong>Receiver Information</strong></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Name</strong></td>
+                              <td>' . $sender->name . '</td>
+                              <td class="color secondary"><strong>Name</strong></td>
+                              <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Phone No.</strong></td>
+                              <td>' . $sender['phone_number'] . '</td>
+                              <td class="color secondary"><strong>Phone No.</strong></td>
+                              <td>' . (($receiver) ? $receiver['phone_number'] : '') . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>Route Information</strong></td>
+                            </tr>
+                            <tr>
+                              <td class="text-center">' . $cargo->origin_hub->name . '-'. $cargo->destination_hub->name . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="cargo_checklist">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Manifest Checklist</strong></td>
+                              <td colspan="4" class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Origin Hub</strong></td>
+                              <td>' . $cargo->origin_hub->name . '</td>
+                              <td class="color secondary"><strong>Driver Name</strong></td>
+                              <td>' . $cargo->driver_name . '</td>
+                              <td rowspan="6" class="text-center align-middle">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Destination Hub</strong></td>
+                              <td>' . $cargo->destination_hub->name . '</td>
+                              <td class="color secondary"><strong>Vehicle Number</strong></td>
+                              <td>' . (($cargo->fleet_id) ? $cargo->fleet->reg_number :  '-') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Transit Date</strong></td>
+                              <td>' . $cargo->created_at . '</td>
+                              <td class="color secondary"><strong>Contact Phone</strong></td>
+                              <td>' . $cargo->phone_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>No. of Bags</strong></td>
+                              <td>' . $cargo->bags . '</td>
+                              <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>No. of Shipments</strong></td>
+                              <td>' . $cargo->shipments . '</td>
+                              <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Weight</strong></td>
+                              <td>' . $cargo->actual_weight . '</td>
+                              <td colspan="2"></td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>S. No.</strong></td>
+                              <td class="color primary"><strong>Bag No.</strong></td>
+                              <td class="color primary"><strong>No. of Shipments</strong></td>
+                              <td class="color primary"><strong>Quantity</strong></td>
+                              <td class="color primary"><strong>Origin</strong></td>
+                              <td class="color primary"><strong>Destination</strong></td>
+                              <td class="color primary"><strong>Actual Weight</strong></td>
+      ';
+
+        $serial_number = 1;
+
+        foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
+            $bag = $manifest_cargo_bag->bag;
+
+
+            $html .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $bag->seal_number . '</td>
+                              <td>' . $bag->shipments . '</td>
+                              <td>' . $bag->quantity . '</td>
+                              <td>' . $bag->origin_hub->name . '</td>
+                              <td>' . $bag->destination_hub->name . '</td>
+                              <td>' . $bag->actual_weight . '</td>
+                            </tr>
+        ';
+
+            $serial_number++;
+        }
+
+        if($type == 1){
+            $html .= '
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </body>
+                </html>
+      ';
+            $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest'. str_pad($cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf');
+            return $pdf;
+        }
+        else{
+            $html .= '
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+            return $html;
+        }
     }
 }
