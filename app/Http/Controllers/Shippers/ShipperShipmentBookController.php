@@ -3037,7 +3037,16 @@ class ShipperShipmentBookController extends Controller
         $products = Product::orderBy('product_name')->get();
         $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [4])->get();}
+                else
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+            }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [3])->get();
@@ -3941,7 +3950,15 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [4])->get();}
+                else
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+            }
 
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
