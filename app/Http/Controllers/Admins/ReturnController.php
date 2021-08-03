@@ -685,7 +685,7 @@ class ReturnController extends Controller
     public function excel_store_revert(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
-            'shipper_status_id' => 'Status (0 - Confirm / 1 - Re-Attempt)',
+            'shipper_status_id' => 'Status (0 - Revert)',
             'remarks' => 'Remarks'
         ];
         $messages = [
@@ -706,7 +706,7 @@ class ReturnController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'Status (0 - Confirm / 1 - Re-Attempt)', 'Remarks'];
+            $header = ['Tracking Number', 'Status (0 - Revert)', 'Remarks'];
         }
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
