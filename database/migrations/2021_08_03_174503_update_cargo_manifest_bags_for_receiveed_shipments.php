@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateCargoManifestBagsForDroppingJunctionMappingId extends Migration
+class UpdateCargoManifestBagsForReceiveedShipments extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class UpdateCargoManifestBagsForDroppingJunctionMappingId extends Migration
     public function up()
     {
         Schema::table('cargo_manifest_bags', function (Blueprint $table) {
-            $table->dropColumn('junction_mapping_id');
+            $table->integer('received_shipments')->default(0);
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateCargoManifestBagsForDroppingJunctionMappingId extends Migration
     public function down()
     {
         Schema::table('cargo_manifest_bags', function (Blueprint $table) {
-            $table->integer('junction_mapping_id')->nullable();
+           $table->dropColumn('received_shipments');
         });
     }
 }

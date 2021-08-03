@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagJourney;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\CargoConsignment;
@@ -327,6 +333,48 @@ class LostShipmentsController extends Controller
                         $shipment_details->save();
                         ShipmentsJourneyController::add($shipment_details->id, 18, NULL, NULL, $remarks[$shipment], NULL, Auth::id());
                     }
+
+                    if($shipment_details->shipper_status_id == 3){
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment_details->id)->first();
+                        if($cargo_manifest_bag_shipments){
+                            $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                            if($bag){
+                              $bag_total_shipments = $bag->shipments;
+                              $shipment_weight = $bag->shipment_weight;
+                              $shipments_count = $bag_total_shipments - 1;
+                              $bag->shipments = $shipments_count;
+                              $bag->actual_weight = $shipment_weight - $shipment_details->actual_weight;
+                                if ($shipments_count == 0) {
+                                    $bag->status_id = 10;
+                                    CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,10,Auth::id(),NULL,NULL);
+                                } else {
+                                    $bag->status_id = 8;
+                                }
+                                $bag->save();
+                            }
+
+                            $cargo_bag = ManifestBag::where('cargo_manifest_bag__id',$bag->id)->first();
+                            if($cargo_bag){
+                                $cargo = CargoManifest::find($cargo_bag->cargo_manifest_id);
+                                if($cargo){
+                                    $total_bags = $cargo->bags;
+                                    $cargo_total_shipments = $cargo->shipments;
+                                  if($bag->shipments_count == 0){
+                                      $cargo->bags = $total_bags - 1;
+                                  }
+                                  $cargo->shipments = $cargo_total_shipments - 1;
+                                  $cargo_weight = $cargo->bags_weight;
+                                  $cargo->actual_weight = $cargo_weight - $shipment_details->actual_weight;
+                                  $cargo->save();
+                                }
+                            }
+                            $shipment_details->shipper_status_id = 18;
+                            $shipment_details->save();
+                            ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
+
+                        }
+                    }
+
                 }
             }
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
