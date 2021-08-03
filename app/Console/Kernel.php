@@ -92,7 +92,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\StatusBookedEmailKhaddi',
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
-        'App\Console\Commands\email:emailofreturnconfirmtokams',
+        'App\Console\Commands\EmailsOfReturnConfirmToKams',
     ];
 
     /**
