@@ -583,7 +583,7 @@
                 console.log(statusSelection,status);
                 var all_reason = $('#select_all_reason');
                 $.ajax({
-                    url:'{!! route('admin.delivery.receive.reason_all') !!}',
+                    url:'{!! route('admin.return.receive.reason') !!}',
                     type:'POST',
                     dataType:'json',
                     data: {
@@ -838,6 +838,7 @@
                                                     'open_box_ids': open_box_ids,
                                                     'return_note_id': note_id,
                                                     'shipment_status':select_all_status,
+                                                    'shipment_reason':select_all_reason,
                                                     'remarks': shipment_remarks,
                                                     'received_or_refused_by': null,
                                                     'actual_date' : actual_date,
