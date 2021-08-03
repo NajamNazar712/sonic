@@ -662,6 +662,7 @@
             var submit_all_status_flag = true;
             $('#submit_selected_status').on('click', function () {
                 var select_all_status = $('#select_all_status').val();
+                var select_all_reason = $('#select_all_reason').val();
                 var return_note = $('#return_note').val();
                 var errros = 'Something went wrong, Refresh page and try again';
                 var actual_date = $('input[name="actual_date_formatted"]').val();
@@ -753,6 +754,7 @@
                                                         'open_box_ids': open_box_ids,
                                                         'return_note_id': note_id,
                                                         'shipment_status':select_all_status,
+
                                                         'remarks': shipment_remarks_obj,
                                                         'received_or_refused_by': shipment_received_refused_obj,
                                                         'actual_date' : actual_date,
@@ -780,6 +782,7 @@
                                                 'open_box_ids': open_box_ids,
                                                 'return_note_id': note_id,
                                                 'shipment_status':select_all_status,
+                                                'shipment_reason':select_all_reason,
                                                 'remarks': shipment_remarks_obj,
                                                 'received_or_refused_by': shipment_received_refused_obj,
                                                 'actual_date' : actual_date,

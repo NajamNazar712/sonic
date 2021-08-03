@@ -2335,7 +2335,7 @@ class ReturnController extends Controller
                     $shipment = Shipment::find($shipment_id);
                     $shipment->shipper_status_id = $shipment_status;
                     $shipment->save();
-                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, NULL, $remarks, NULL, Auth::id(), $request->return_note_id);
+                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, Auth::id(), $request->return_note_id);
 
 
                     ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
