@@ -295,7 +295,7 @@
                                                 shipment_remarks[id] = remark;
                                             }
                                         });
-                                        alert(selected_rows);
+                                        //alert(selected_rows);
                                     $.ajax({
                                         url:"{{route('admin.return.confirmed.revert.status')}}",
                                         method:'POST',
