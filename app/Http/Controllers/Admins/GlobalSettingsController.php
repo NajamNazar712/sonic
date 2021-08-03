@@ -1798,12 +1798,12 @@ class GlobalSettingsController extends Controller
     {
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'ccd_booking');
-        $foc_account_tags = array();
+        $ccd_booking = array();
         if ($settings->exists()) {
             $settings = $settings->first();
-            $foc_account_tags = array_map('intval', explode(',', $settings->text));
+            $ccd_booking = array_map('intval', explode(',', $settings->text));
         }
-        return view('admin.settings.ccd_booking')->with(['shippers' => $shippers, 'ccd_booking' => $foc_account_tags]);
+        return view('admin.settings.ccd_booking')->with(['shippers' => $shippers, 'ccd_booking' => $ccd_booking]);
     }
 
     public function ccd_booking_store(Request $request)
