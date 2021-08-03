@@ -4878,6 +4878,7 @@ class RiderAPIController extends Controller
                         $information['cnic'] = $rider->cnic;
                         $information['address'] = $rider->address;
                         $information['role'] = 'rider';
+                        $information['cargo_user'] = 0;
 
                         if($request->has('device_token')){
                             $employee_device_token = EmployeeDeviceToken::where('employee_id', $rider->id)
