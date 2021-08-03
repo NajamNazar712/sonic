@@ -38,6 +38,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetail;
+use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -7857,7 +7858,49 @@ class NotificationsController extends Controller
                     $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk'];
                     self::email($subject, $body_updated, $to);
                 }
+
+
+                else if($id == 143){
+                    $shipment = Shipment::join('users as u' , 'shipments.user_id' ,'=' , 'u.id' )
+                        ->join('sale_tier_tags as stt' ,function($join){
+                            $join->on('stt.user_id','u.id');
+                        })
+                        ->join('admins as a','a.id','stt.kam')
+                    ->select('u.name as username','u.id as userid' ,'a.name as adminname' ,'a.email as email')
+                        ->where('shipments.shipper_status_id',20)
+                        ->groupBy('userid')
+                        ->get();
+
+
+                    foreach($shipment as $data) {
+                        echo $data;
+                        $getdata = Shipment::where('user_id','=',$data->userid)->where('shipments.shipper_status_id',20)->get();
+                        $html = '<b>Shipper Name is :' .$data->username . '</b>';
+                        $html .= '<table style="width:100%;">';
+                        $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>';
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Data/Time</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        foreach ($getdata as $value){
+                            $html .='<tr>';
+                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$value->tracking_number.'</td>';
+                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$value->updated_at.'</td>';
+
+                        }
+                        $html .='</tr></tbody></table>';
+                        $body_updated = $body;
+                        $body_updated = str_replace('[preview]', $html, $body_updated);
+                        $subject = 'Return Confirm Mail';
+                        $to = $data->email;
+                        self::email($subject, $body_updated, $to);
+
+                    }
+
+
+                }
             }
+
+
         }
     }
 
