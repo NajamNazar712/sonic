@@ -1146,14 +1146,7 @@ class AdminCargoManifestController extends Controller
                 $hub_id = $bag->origin_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
 
-                $allowed = FALSE;
-
-                if (session('role_id') == 1) {
-                    $allowed = TRUE;
-                }
-                else if (in_array($hub_id, session('hubs'))) {
-                    $allowed = TRUE;
-                }
+                $allowed = TRUE;
 
                 if ($allowed) {
                         $details = array();
@@ -1166,7 +1159,7 @@ class AdminCargoManifestController extends Controller
                         $details['shipments'] = $bag->shipments;
                         $details['origin'] = $origin->name;
                         $details['destination'] = $destination->name;
-                        $details['actual_weight'] = $request->bag_weight;
+                        $details['bag_weight'] = $request->bag_weight;
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
