@@ -56,11 +56,11 @@
             </div>
         </div>
         <div id="proceed_cart">
-            <form action="{{route('cod.packaging.requests.cart.details')}}" id="material_request_cart_form" method="post">
+            <form action="{{route('cod.packaging.requests.checkout')}}" id="material_request_cart_form" method="post">
                 @csrf
-                <input type="hidden" id="size_ids" name="size_ids" value="">
+                <input type="hidden" id="size_ids" name="size_ids" value="{{$count}}">
                 <div class="display-inline-block">
-                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> 0 </span></button>
+                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> {{$count}} </span></button>
                 </div>
             </form>
         </div>
@@ -143,8 +143,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                    if(sizes.length > 0){
-                        $('#size_ids').val(sizes);
+                    if($('#size_ids').val() > 0){
                         form.submit();
                     }
                     else{

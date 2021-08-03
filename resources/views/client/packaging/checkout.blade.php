@@ -37,15 +37,15 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <hr>
+                                            
                                            
                                             @foreach($cart as $index => $item)
-                                           
-                                                <div class="col" id="packaging_{{$index}}">
+                                            <hr>
+                                                <div class="col" id="packaging_{{$item->id}}">
                                                     <input type="hidden" id="size_{{$index}}" name="size[{{$index}}]" value="{{$item->size->id}}">
                                                     <div class="row">
                                                         <div class="col mb-1 align-middle text-center">
-                                                            {{-- <img class="" alt="flyer" src="{{asset($pictures[$size->type_id])}}" width="100" height="100"> --}}
+                                                            <img class="" alt="flyer" src="{{asset($pictures[$item->type_id])}}" width="100" height="100">
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <p>{{$item->size->size}}</p>
@@ -65,7 +65,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
-                                                            <button type="button" class="btn btn-icon btn-danger remove" value="{{$index}}"><i class="la la-close"></i></button>
+                                                            <button type="button" class="btn btn-icon btn-danger remove" value="{{$item->id}}"><i class="la la-close"></i></button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -236,14 +236,27 @@
             });
 
             $('.remove').on('click', function (){
-                console.log(total_sizes);
                 if(total_sizes > 1){
                     total_sizes--;
                     var index = parseInt($(this).val());
-                    $('#packaging_' + index).remove();
-                    var message = 'Packaging Type successfully removed';
-                    toastr.success(message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'
+                    $.ajax({
+                    url: '{!! route('cod.packaging.requests.remove_product') !!}',
+                    method: 'POST',
+                        data: {
+                            'id':index,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function(data) {
+                        if(data.status){
+                            $('#packaging_' + index).remove();
+                            var message = 'Packaging Type successfully removed';
+                            toastr.success(message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        
                     });
+                   
+                    
                 }
                 else{
                     var message = 'At least one Packaging type is required';

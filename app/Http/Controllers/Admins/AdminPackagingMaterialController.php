@@ -1331,6 +1331,7 @@ class AdminPackagingMaterialController extends Controller
         $type->category = $request->category;
         $type->status = 1;
         $type->created_by = Auth::id();
+        $type->save();
 
         if ($request->hasFile('packaging_picture')) {
             $filename = 'packaging_picture_' . $type->id . '.png';

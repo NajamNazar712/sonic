@@ -184,6 +184,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('add_to_cart','Shippers\ShipperPackagingMaterialController@add_to_cart')->name('add_to_cart');
             Route::post('get_cart_count','Shippers\ShipperPackagingMaterialController@cart_count')->name('get_cart_count');
             Route::get('checkout','Shippers\ShipperPackagingMaterialController@checkout')->name('checkout');
+            Route::post('remove_product','Shippers\ShipperPackagingMaterialController@remove_product')->name('remove_product');
             
             Route::prefix('cart')->name('cart.')->group(function (){
                 Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');

@@ -29,7 +29,9 @@
                                                     <div class="row">
                                                         
                                                         <div class="col-lg-4 order-lg-2 order-1">
-                                                            <div class="image_selected"><img src="https://i.imgur.com/qEwct2O.jpg" alt=""></div>
+                                                             
+                                                            <div class="image_selected"><img id="xzoom" src="{{asset($picture)}}"
+                                                                data-zoom-image="{{asset($picture)}}"/></div>
                                                         </div>
                                                         <div class="col-lg-6 order-3">
                                                             <div class="product_description">
@@ -101,7 +103,7 @@
             </div>
         </div>
         <div id="proceed_cart">
-            <form action="{{route('cod.packaging.requests.cart.details')}}" id="material_request_cart_form" method="post">
+            <form action="{{route('cod.packaging.requests.checkout')}}" id="material_request_cart_form" method="get">
                 @csrf
                 <input type="hidden" id="size_ids" name="size_ids" value="{{$count}}">
                 <div class="display-inline-block">
@@ -118,7 +120,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/xzoom/dist/xzoom.css">
+    
     
     <style>
         #proceed_cart {
@@ -232,9 +234,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
-    <script src="https://unpkg.com/xzoom/dist/xzoom.min.js" type="text/javascript"></script>
 
-    
+    <script type="text/javascript" src="https://cdn.rawgit.com/igorlino/elevatezoom-plus/1.1.6/src/jquery.ez-plus.js"></script>
+
 
     <script type="text/javascript">
         $('document').ready(function(){
@@ -317,6 +319,12 @@
                 }
             });
 
+            $("#xzoom").ezPlus({
+    zoomType: 'inner',
+    cursor: 'crosshair',
+    
+    
+});
         });
     </script>
 

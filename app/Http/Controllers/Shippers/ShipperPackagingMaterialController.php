@@ -352,6 +352,7 @@ class ShipperPackagingMaterialController extends Controller
             $packaging_type_ids[$index] = $packaging_type_id;
             $packaging_wms_product_ids[$index] = $size->wms_product_id;
             $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first();
+            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first()->delete();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }else{
@@ -654,10 +655,16 @@ class ShipperPackagingMaterialController extends Controller
 
     public function product_details($id){
         // dd('te');
+        
         $product = PackagingMaterialTypes::find($id);
+        if ($product->picture != NULL) {
+            $picture = Storage::url('packaging_pictures/' . $product->picture);
+        } else {
+            $picture = 'img/trax_logo.png';
+        }
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
 
-        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count]);
+        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture]);
 
 
     }
@@ -671,28 +678,35 @@ class ShipperPackagingMaterialController extends Controller
 
     public function add_to_cart(Request $request){
 
-
-        $cart  = new PackagingMaterialCart;
-        $cart->user_id = session('user_id');
-        $cart->size_id = $request->product_size;
-        $cart->quantity = $request->quantity;
-        $cart->type_id = $request->type_id;
-        $cart->save();
+        $check_cart = PackagingMaterialCart::where([
+            'user_id' => session('user_id'),
+             'type_id' => $request->type_id,
+             'size_id' => $request->product_size,
+             ]);
+        if($check_cart->exists()){
+            $check_cart = $check_cart->first();
+            $check_cart->quantity = $check_cart->quantity + $request->quantity;
+            $check_cart->save();
+        }else{
+            $cart  = new PackagingMaterialCart;
+            $cart->user_id = session('user_id');
+            $cart->size_id = $request->product_size;
+            $cart->quantity = $request->quantity;
+            $cart->type_id = $request->type_id;
+            $cart->save();
+        }
 
         if ($request->filled('add_cart')) {
             return redirect()->back()->with('success', 'Product Added');
         }
-        // else {
-        //     return redirect()->back()->with('success', 'Product Added');
-
-        // }
+        else {
+            return redirect()->route('cod.packaging.requests.checkout')->with('success', 'Product Added');
+        }
     }
 
     public function cart_count(){
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
-
         return ['status' => 0, 'count' => $cart_count];
-
     }
 
     public function checkout(){
@@ -701,13 +715,27 @@ class ShipperPackagingMaterialController extends Controller
             $cart = $cart->get();
             // $sizes = $cart->sizes;
             $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
-           
+            foreach($cart as $packaging_type){
+                if($packaging_type->type->picture != NULL){
+                    $pictures[$packaging_type->type->id] = Storage::url('packaging_pictures/' . $packaging_type->type->picture);
+                }
+                else{
+                    $pictures[$packaging_type->type->id] = 'img/trax_logo.png';
+                }
+            }
           
             $cities = City::where('status',1)->orderBy('name')->get();
             $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
             $payment_mode = PackagingPaymentMode::all();
-            return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode]);
+            return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'pictures' => $pictures]);
         }
   
+    }
+    public function remove_product(Request $request){
+
+        PackagingMaterialCart::where('id',$request->id)->delete();
+        return ['status' => 1];
+
+
     }
 }

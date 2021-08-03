@@ -207,6 +207,29 @@
                                 </div>
                             </div>
                             <div class="row justify-content-center">
+                                <div class="col-12 card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Category</h4>
+
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <fieldset>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-primary packaging_category" value="1" name="category_edit" id="colorRadio12">
+                                                    <label class="custom-control-label" for="colorRadio10">Packaging Material</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-success stationary_category" value="2" name="category_edit" id="colorRadio13">
+                                                    <label class="custom-control-label" for="colorRadio11">Stationary</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
                                 <div class="col-12 form-group" id="picture_div">
 
                                 </div>
@@ -637,6 +660,12 @@
                             $("#shippers_select_edit").html('');
 
                         }
+                        if(data.type.category === 1){
+                            $('input.packaging_category').attr('checked', true);
+                        }else if(data.type.category === 2){
+                            $('input.stationary_category').attr('checked', true);
+                        }
+                        
                         $('#EditMaterialModal #type_div').html(html_type);
                         $('#EditMaterialModal #type_existing').html(html_type_existing);
 

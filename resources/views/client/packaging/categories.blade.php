@@ -21,7 +21,7 @@
 
                                                     <div class="col-6">
                                                         <div class="col mb-1 text-center border border-3">
-                                                            <img class="" alt="packaging" src="" width="100" height="100">
+                                                            <img class="category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-primary select_category"><b>Packaging Materials</b></a>
@@ -30,7 +30,7 @@
                                                    
                                                     <div class="col-6">
                                                         <div class="col mb-1 text-center border border-3">
-                                                            <img class="" alt="stationary" src="" width="100" height="100">
+                                                            <img class="category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-primary select_category"><b>Stationary Items</b></a>
@@ -46,11 +46,11 @@
             </div>
         </div>
         <div id="proceed_cart">
-            <form action="{{route('cod.packaging.requests.cart.details')}}" id="material_request_cart_form" method="post">
+            <form action="{{route('cod.packaging.requests.checkout')}}" id="material_request_cart_form" method="post">
                 @csrf
-                <input type="hidden" id="size_ids" name="size_ids" value="">
+                <input type="hidden" id="size_ids" name="size_ids" value="{{$count}}">
                 <div class="display-inline-block">
-                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> 0 </span></button>
+                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> {{$count}} </span></button>
                 </div>
             </form>
         </div>
@@ -98,6 +98,10 @@
         .categories_row{
             margin: 120px 20px;
         }
+        .category_banner{
+            width: 500px;
+            height: 230px;
+        }
     </style>
 
 @endsection
@@ -133,8 +137,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function(form) {
-                    if(sizes.length > 0){
-                        $('#size_ids').val(sizes);
+                    if($('#size_ids').val() > 0){
                         form.submit();
                     }
                     else{
