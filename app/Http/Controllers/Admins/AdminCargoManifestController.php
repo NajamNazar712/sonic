@@ -612,7 +612,7 @@ class AdminCargoManifestController extends Controller
 
         $origin_details = array();
 
-        $origin_details['id'] = $origin->id;
+        $origin_details['id'] = Auth::user()->default_hub_id;
         $origin_details['name'] = $origin->name;
 
         $destination = $shipment->consignee_city->hub_city;
