@@ -201,6 +201,8 @@ class Permission
             'cargo_manifest.bags.create.index' => 546,
             'cargo_manifest.bags.history.index' => 547,
             'cargo_manifest.bags.history.list' => 547,
+            'cargo_manifest.create' => 551,
+            'cargo_manifest.store' => 551,
 
 
 

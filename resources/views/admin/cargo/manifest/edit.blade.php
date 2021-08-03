@@ -54,6 +54,9 @@
                                                                     <option value="{{$junction->id}}" {{$junction->id == $j->junction_id ? 'selected' : ''}}>{{$junction->name}}</option>
                                                                 @endforeach
                                                             </select>
+                                                            @if($loop->first)
+                                                                <span id="junction_error" class="text-danger small d-none">Junction 1 is required</span>
+                                                            @endif
                                                         </div>
                                                     </div>
                                                     @if($loop->first)
@@ -81,6 +84,7 @@
                                                                 @endforeach
                                                             </select>
                                                         </div>
+                                                        <span id="junction_error" class="text-danger small d-none">Junction 1 is required</span>
                                                     </div>
                                                     <div class="col">
                                                         <div class="form-group">
@@ -239,6 +243,14 @@
                     return $.trim(value);
                 },
                 submitHandler: function(form) {
+                    if($(".junction_container .junctions").length > 1)
+                    {
+                        if($("#junction_1").val() == '')
+                        {
+                            $("#junction_error").removeClass('d-none');
+                            return;
+                        }
+                    }
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     blockPagePermanently();
                     swal({
@@ -314,7 +326,7 @@
 
                 $("#edit_mapping .vehicles_select").select2({
                     width: '100%',
-                    placeholder: 'Vehicles*'
+                    placeholder: 'Vehicle Numbers*'
                 }).bind('select2:select', function(e){
                     var current_val = e.params.data.id;
                     var select = $(this);
@@ -335,7 +347,7 @@
 
             $("#edit_mapping .vehicles_select").select2({
                 width: '100%',
-                placeholder: 'Vehicles*'
+                placeholder: 'Vehicle Numbers*'
             }).bind('select2:select', function(e){
                 var current_val = e.params.data.id;
                 var select = $(this);

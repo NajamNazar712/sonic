@@ -24,6 +24,7 @@
                                     <th class="border-primary border-darken-1">Origin Hub</th>
                                     <th class="border-primary border-darken-1">Destination Hub</th>
                                     <th class="border-primary border-darken-1">Junctions</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Updated Date</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -80,6 +81,7 @@
                                                 <option value="{{$junction->id}}">{{$junction->name}}</option>
                                             @endforeach
                                         </select>
+                                        <span id="junction_error" class="text-danger small d-none">Junction 1 is required</span>
                                     </div>
                                 </div>
                                 <div class="col">
@@ -143,6 +145,7 @@
                             head.push('Origin Hub');
                             head.push('Destination Hub');
                             head.push('Junctions');
+                            head.push('Status');
                             head.push('Updated Date Time');
                             head.push('Updated By');
 
@@ -154,6 +157,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.junctions);
+                                row.push(values.status);
                                 row.push(values.updated_at);
                                 row.push(values.updated_by);
 
@@ -201,13 +205,14 @@
                     url: '{{ route('admin.cargo.mapping.manifest.list') }}'
                 },
                 rowId: 'id',
-                order: [6, 'desc'],
+                order: [5, 'desc'],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'origin_display',  class: 'align-middle origin' ,orderable: false, searchable: false},
                     {data: 'destination_display',  class: 'align-middle destination',orderable: false, searchable: false},
                     {data: 'junctions_display',  class: 'align-middle junctions',orderable: false, searchable: false},
-                    {data: 'updated_at', name: 'junction_mappings.updated_at', class: 'align-middle updated_at'},
+                    {data: 'status', name:"status",  class: 'align-middle status'},
+                    {data: 'updated_at', name: 'updated_at', class: 'align-middle updated_at'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -222,6 +227,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Disabled</option>' +
+                        '<option value="1">Enabled</option>' +
+                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -229,6 +238,12 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.origin') || $(header).is('.destination') || $(header).is('.junctions')) {
                             $(td).appendTo($(search));
+                        }
+                        else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -239,6 +254,12 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
@@ -330,6 +351,15 @@
                     return $.trim(value);
                 },
                 submitHandler: function(form) {
+                    if($(".junction_container .junctions").length > 1)
+                    {
+                        if($("#junction_1").val() == '')
+                        {
+                            $("#junction_error").removeClass('d-none');
+                            return;
+                        }
+                    }
+                    $("#junction_error").addClass('d-none');
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     blockPagePermanently();
                     swal({
@@ -403,7 +433,7 @@
 
                 $("#add_mapping form .vehicles_select").select2({
                     width: '100%',
-                    placeholder: 'Vehicles*'
+                    placeholder: 'Vehicle Numbers*'
                 }).bind('select2:select', function(e){
                     var current_val = e.params.data.id;
                     var select = $(this);

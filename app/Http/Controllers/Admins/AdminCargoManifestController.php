@@ -101,6 +101,15 @@ class AdminCargoManifestController extends Controller
                 }
                 return $junction_data;
             })
+            ->editColumn('status',function ($mapping){
+                if($mapping->status == 1)
+                {
+                    return "Enabled";
+                }
+                else{
+                    return "Disabled";
+                }
+            })
             ->addColumn('action',function ($mapping) {
                 $dropdown = "";
 
@@ -1120,5 +1129,10 @@ class AdminCargoManifestController extends Controller
         }
 
         return $datatables->make(true);
+    }
+
+    public function create_manifest()
+    {
+        return view('admin.cargo.manifest.create');
     }
 }

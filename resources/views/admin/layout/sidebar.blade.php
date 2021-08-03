@@ -341,6 +341,9 @@
                                         </ul>
                                     </li>
                                 </ul>
+                                @if (session('role_id') == 1 || in_array(551, session('permissions')))
+                                    <li><a class="menu-item" href="{{ route('admin.cargo_manifest.create') }}">Create Manifest</a></li>
+                                @endif
                             </li>
                         @endif
                     </ul>
