@@ -1794,6 +1794,45 @@ class GlobalSettingsController extends Controller
 
     }
 
+    public function ccd_booking_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'ccd_booking');
+        $foc_account_tags = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $foc_account_tags = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.ccd_booking')->with(['shippers' => $shippers, 'ccd_booking' => $foc_account_tags]);
+    }
+
+    public function ccd_booking_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'ccd_booking');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'ccd_booking';
+                    $settings->setting_value = 0;
+
+                }
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
+
     public function minimum_chargeable_weight_index()
     {
         $minimum_chargeable_weights = MinimumChargeableWeightSetting::get();

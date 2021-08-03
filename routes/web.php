@@ -2411,6 +2411,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@ccd_booking_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@ccd_booking_store')->name('store');
+        });
+
         Route::prefix('nsa_account')->name('nsa_account.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@nsa_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
