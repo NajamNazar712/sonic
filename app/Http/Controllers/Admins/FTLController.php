@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\ZoneClassCity;
 
 class FTLController extends Controller
 {
@@ -119,6 +121,34 @@ class FTLController extends Controller
 
     public function ftl_request_add(Request $request)
     {
+        $origin_city = City::find($request->origin);
+        $destination_city = City::find($request->destination);
+        $zone_city = ZoneClassCity::where('zone_id',$destination_city->zone_id)->where('city_id',$destination_city->id);
+        if($zone_city->exists()){
+            $zone_city = $zone_city->latest()->first();
+            $class_type = $zone_city->class;
+        }
+        $weight_charges = CorporateWeightCharge::where('user_id',$request->shipper);
+        $weight_charge = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
+
+        dd($request->shipper);
+        if($weight_charges->exists()){
+            $weight_charges = $weight_charges->latest()->first();
+
+            if($class_type == 0){
+                $charges = $weight_charges->national_charges_class_0;
+            }elseif ($class_type == 1) {
+                $charges = $weight_charges->national_charges_class_1;
+
+            }elseif ($class_type == 2) {
+                $charges = $weight_charges->national_charges_class_2;
+
+            }elseif ($class_type == 3) {
+                $charges = $weight_charges->national_charges_class_3;
+
+            }
+        }
+        dd();
         $ftl_request = new FtlRequest();
         $ftl_request->salesperson_id = $request->sale_person;
         $ftl_request->origin_id = $request->origin;
@@ -135,6 +165,36 @@ class FTLController extends Controller
         }
         else{
             $ftl_request->shipper_id = $request->shipper;
+            $origin_city = City::find($request->origin);
+            $destination_city = City::find($request->destination);
+            if($origin_city->zone_id == $destination_city->zone_id){
+                $weight_charges = CorporateWeightCharge::where('user_id',$request->shipper)->where('shipping_mode_id',2)
+                ->where('range_up','>=',$request->weight)->orwhere('range_up','<=',$request->weight);
+                if($weight_charges->exists()){
+                    $weight_charges = $weight_charges->latest()->first();
+                    $charges = $weight_charges->local_or_6hr;
+                }   
+            }else{
+                $class_type = $destination_city->zone->zone_class_cities->class;
+                $weight_charges = CorporateWeightCharge::where('user_id',$request->shipper)->where('shipping_mode_id',2)
+                ->where('range_up','>=',$request->weight)->orwhere('range_up','<=',$request->weight);
+                if($weight_charges->exists()){
+                    $weight_charges = $weight_charges->latest()->first();
+
+                    if($class_type == 0){
+                        $charges = $weight_charges->national_charges_class_0;
+                    }elseif ($class_type == 1) {
+                        $charges = $weight_charges->national_charges_class_1;
+
+                    }elseif ($class_type == 2) {
+                        $charges = $weight_charges->national_charges_class_2;
+
+                    }elseif ($class_type == 3) {
+                        $charges = $weight_charges->national_charges_class_3;
+
+                    }
+                }
+            }
         }
         $ftl_request->save();
         $this::FTLRequestStatusHistory($ftl_request->id,1,Auth::id());

@@ -112,6 +112,9 @@
                                             <div class="text-center col-12">
                                                 <form id="update_ftl_request_form" method="post" action="{{route('admin.ftl.request.update.status',$ftl->id)}}">
                                                     @csrf
+
+                                                    @if (in_array(552, session('permissions')) || session('role_id') == 1)
+                                                        
                                                     <div class="row mb-2">
                                                             <div class="col-6">
                                                                 <label for="" class="pull-left font-weight-bold">Select Vendor</label>
@@ -160,6 +163,10 @@
                                                             </table>
                                                        </div>
                                                     </div>
+
+                                                    @endif
+                                                    @if (in_array(553, session('permissions')) || session('role_id') == 1)
+
                                                     <div class="row mb-2">
                                                         <div class="col-6">
                                                             <label for="" class="pull-left font-weight-bold">Total Cost</label>
@@ -180,6 +187,8 @@
                                                             <input type="text" readonly name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges">
                                                         </div>
                                                     </div>
+                                                    @endif
+
                                                     @if($ftl->status_id != 5 && (session('role_id') == 1 || in_array(514,session('permissions'))))
                                                         <button type="submit" name="btn" value="Update" class="btn btn-secondary mr-1">
                                                             <span class="d-none d-lg-block">
@@ -199,6 +208,7 @@
                                                             </span>
                                                         </button>
                                                     @endif
+                                                    
                                                 </form>
                                             </div>
                                         </div>
