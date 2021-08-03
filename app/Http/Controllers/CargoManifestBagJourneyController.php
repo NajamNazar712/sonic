@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\CargoManifestBagJourney;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagJourney;
 use Illuminate\Http\Request;
 
 class CargoManifestBagJourneyController extends Controller

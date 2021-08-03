@@ -1511,6 +1511,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
         Route::get('/create','Admins\AdminCargoManifestController@create_manifest')->name('create');
+        Route::post('bag/details','Admins\AdminCargoManifestController@bag_details')->name('bag_details');
         Route::post('/store','Admins\AdminCargoManifestController@store_manifest')->name('store');
 
     });

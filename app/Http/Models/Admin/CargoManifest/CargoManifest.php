@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Http\Models\Admin\CargoManifest;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -8,7 +8,7 @@ class CargoManifest extends Model
 {
 
     public function manifest_bags() {
-        return $this->hasMany('App\Http\Models\ManifestBags')->orderBy('bag_id');
+        return $this->hasMany('App\Http\Models\Admin\CargoManifest\ManifestBags')->orderBy('bag_id');
     }
 
     public function origin_hub() {

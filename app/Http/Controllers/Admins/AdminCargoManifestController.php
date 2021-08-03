@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Admins;
 
 
-use App\CargoManifest;
-use App\CargoManifestBag;
-use App\CargoManifestBagShipments;
-use App\CargoManifestBagStatus;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagStatus;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\CargoManifest\V2JunctionVehicles;
-
 use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
@@ -1132,9 +1131,56 @@ class AdminCargoManifestController extends Controller
         return $datatables->make(true);
     }
 
- public function create_manifest()
+    public function create_manifest()
     {
         return view('admin.cargo.manifest.create');
+    }
+
+    public function bag_details(Request $request) {
+        $bag = CargoManifestBag::where('seal_number', $request->bag_number);
+
+        if ($bag->exists()) {
+            $bag = $bag->first();
+
+            if (in_array($bag->status_id, [1, 3, 5])) {
+                $hub_id = $bag->origin_hub_id;
+                $destination_hub_id = $bag->destination_hub_id;
+
+                $allowed = FALSE;
+
+                if (session('role_id') == 1) {
+                    $allowed = TRUE;
+                }
+                else if (in_array($hub_id, session('hubs'))) {
+                    $allowed = TRUE;
+                }
+
+                if ($allowed) {
+                        $details = array();
+
+                        $origin = $bag->origin_hub;
+                        $destination = $bag->destination_hub;
+
+                        $details['id'] = $bag->id;
+                        $details['bag_number'] = $bag->seal_number;
+                        $details['shipments'] = $bag->shipments;
+                        $details['origin'] = $origin->name;
+                        $details['destination'] = $destination->name;
+                        $details['actual_weight'] = $request->bag_weight;
+
+                        return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                }
+                else {
+                    return ['status' => 1, 'error' => 'Given Bag Number\'s does not belong to any of your assigned Hub\'s Cities'];
+                }
+            }
+            else {
+                return ['status' => 1, 'error' => 'Given Bag Number\'s has already been modified'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
+        }
     }
 
     public static function print($cargo_id, $type = NULL) {

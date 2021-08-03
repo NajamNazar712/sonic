@@ -31,17 +31,13 @@
                                         </a>
                                     </div>
 
-                                    <input type="text" name="bag_weight" class="form-control bag_weight" placeholder="Bag Weight*" data-rule-required="true" data-msg-required="Bag Weight is required">
+                                    <input type="text" name="bag_weight" class="form-control bag_weight ml-1" placeholder="Bag Weight*" data-rule-required="true" data-msg-required="Bag Weight is required">
                                 </div>
 
                                 <div class="form-group ml-1">
                                     <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
                                 </div>
                             </form>
-
-                            <div id="information" class="information text-center">
-                                Hub: <span class="hub">None</span> | Scanned: <span class="scanned">0</span>/<span class="total">0</span>
-                            </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -61,135 +57,135 @@
                                 <button type="submit" class="btn btn-primary mr-2" id="master_cargo_consignment_confirm" data-toggle="modal" data-target="#master_cargo_consignment" disabled="disabled">Confirm</button>
                             </div>
 
-                            <div class="modal fade" id="master_cargo_consignment" role="dialog" aria-labelledby="master_cargo_consignment_title" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <form class="form-horizontal" method="POST" action="{{ route('admin.master_cargo.create.store') }}" novalidate="novalidate">
-                                            {{ csrf_field() }}
-                                            <input type="hidden" name="onward_forwarding" value="{{$id}}">
-                                            <input type="hidden" name="bag_ids" class="bag_ids">
+{{--                            <div class="modal fade" id="master_cargo_consignment" role="dialog" aria-labelledby="master_cargo_consignment_title" aria-hidden="true">--}}
+{{--                                <div class="modal-dialog modal-lg" role="document">--}}
+{{--                                    <div class="modal-content">--}}
+{{--                                        <form class="form-horizontal" method="POST" action="{{ route('admin.master_cargo.create.store') }}" novalidate="novalidate">--}}
+{{--                                            {{ csrf_field() }}--}}
+{{--                                            <input type="hidden" name="onward_forwarding" value="{{$id}}">--}}
+{{--                                            <input type="hidden" name="bag_ids" class="bag_ids">--}}
 
-                                            <div class="modal-header">
-                                                <h4 class="modal-title" id="master_cargo_consignment_title">Master Cargo</h4>
-                                            </div>
-                                            <div class="modal-body">
-                                                <div class="row">
-                                                    <div class="col-12">
-                                                        <h4 class="form-section mb-2 text-center">Cargo Information</h4>
-                                                    </div>
+{{--                                            <div class="modal-header">--}}
+{{--                                                <h4 class="modal-title" id="master_cargo_consignment_title">Master Cargo</h4>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="modal-body">--}}
+{{--                                                <div class="row">--}}
+{{--                                                    <div class="col-12">--}}
+{{--                                                        <h4 class="form-section mb-2 text-center">Cargo Information</h4>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="col-3">
-                                                        <div class="form-group">
-                                                            <input type="hidden" name="origin_hub_id" class="origin_hub_id">
+{{--                                                    <div class="col-3">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="hidden" name="origin_hub_id" class="origin_hub_id">--}}
 
-                                                            <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 origin"></p>
-                                                        </div>
-                                                    </div>
+{{--                                                            <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 origin"></p>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="col-3">
-                                                        <div class="form-group">
-                                                            <input type="hidden" name="destination_hub_id" class="destination_hub_id">
+{{--                                                    <div class="col-3">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="hidden" name="destination_hub_id" class="destination_hub_id">--}}
 
-                                                            <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination"></p>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        {{--                                                        <div class="form-group">--}}
-                                                        {{--                                                            <select name="route_management_id" class="select2 route_management_id" data-rule-required="true" data-msg-required="Route is required">--}}
-                                                        {{--                                                            </select>--}}
-                                                        {{--                                                        </div>--}}
-                                                    </div>
-                                                    {{-- <div class="col">
-                                                        <div class="form-group">
-                                                            <select name="junction_1" class="select2 junction_1">
-                                                            </select>
-                                                        </div>
-                                                    </div>
+{{--                                                            <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination"></p>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="col-6">--}}
+{{--                                                        --}}{{--                                                        <div class="form-group">--}}
+{{--                                                        --}}{{--                                                            <select name="route_management_id" class="select2 route_management_id" data-rule-required="true" data-msg-required="Route is required">--}}
+{{--                                                        --}}{{--                                                            </select>--}}
+{{--                                                        --}}{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    --}}{{-- <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="junction_1" class="select2 junction_1">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <select name="junction_2" class="select2 junction_2">
-                                                            </select>
-                                                        </div>
-                                                    </div> --}}
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="junction_2" class="select2 junction_2">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div> --}}
 
-                                                    <div class="w-100"></div>
+{{--                                                    <div class="w-100"></div>--}}
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">
-                                                            </select>
-                                                        </div>
-                                                    </div>
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <select name="transport_mode_vendor" class="select2 transport_mode_vendor" data-rule-required="true" data-msg-required="Vendor is required">
-                                                            </select>
-                                                        </div>
-                                                    </div>
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="transport_mode_vendor" class="select2 transport_mode_vendor" data-rule-required="true" data-msg-required="Vendor is required">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div id="new_vendor" class="col d-none">
-                                                        <div class="form-group">
-                                                            <input type="text" name="vendor_name" class="form-control vendor_name" placeholder="Vendor Name*" data-rule-required="true" data-msg-required="Vendor Name is required">
-                                                        </div>
-                                                    </div>
+{{--                                                    <div id="new_vendor" class="col d-none">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="text" name="vendor_name" class="form-control vendor_name" placeholder="Vendor Name*" data-rule-required="true" data-msg-required="Vendor Name is required">--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="w-100"></div>
+{{--                                                    <div class="w-100"></div>--}}
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>
-                                                        </div>
-                                                    </div>
-                                                    {{-- <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="vehicle" class="form-control rounded-right vehicle" placeholder="Vehicle Number*" data-rule-required="true" data-msg-required="Vehicle Number is required">
-                                                        </div>
-                                                    </div> --}}
-                                                    <div class="col">
-                                                        {{--                                                        <div class="form-group">--}}
-                                                        {{--                                                            <select name="fleet_id" class="select2 fleet_id"  data-rule-required="true" data-msg-required="Route is required">--}}
-                                                        {{--                                                            </select>--}}
-                                                        {{--                                                        </div>--}}
-                                                    </div>
-                                                    <div class="w-100"></div>
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    --}}{{-- <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="text" name="vehicle" class="form-control rounded-right vehicle" placeholder="Vehicle Number*" data-rule-required="true" data-msg-required="Vehicle Number is required">--}}
+{{--                                                        </div>--}}
+{{--                                                    </div> --}}
+{{--                                                    <div class="col">--}}
+{{--                                                        --}}{{--                                                        <div class="form-group">--}}
+{{--                                                        --}}{{--                                                            <select name="fleet_id" class="select2 fleet_id"  data-rule-required="true" data-msg-required="Route is required">--}}
+{{--                                                        --}}{{--                                                            </select>--}}
+{{--                                                        --}}{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="w-100"></div>--}}
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="driver_name" class="form-control rounded-right driver_name" placeholder="Driver Name*" data-rule-required="true" data-msg-required="Driver Name is required">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" name="phone_number" class="form-control rounded-right phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
-                                                        </div>
-                                                    </div>
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="text" name="driver_name" class="form-control rounded-right driver_name" placeholder="Driver Name*" data-rule-required="true" data-msg-required="Driver Name is required">--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    <div class="col">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <input type="text" name="phone_number" class="form-control rounded-right phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
 
-                                                    <div class="w-100"></div>
+{{--                                                    <div class="w-100"></div>--}}
 
-                                                    <div class="col-md-6">
-                                                        <div class="form-group">
-                                                            <select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    {{--                                                    <div class="col">--}}
-                                                    {{--                                                        <div class="form-group">--}}
-                                                    {{--                                                            <input type="text" name="cnic" class="form-control rounded-right cnic" placeholder="CNIC">--}}
-                                                    {{--                                                        </div>--}}
-                                                    {{--                                                    </div>--}}
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer text-center justify-content-around">
-                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary btn-block" value="submit_and_print_form">Submit &amp; Print</button>
-                                                {{--                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>--}}
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+{{--                                                    <div class="col-md-6">--}}
+{{--                                                        <div class="form-group">--}}
+{{--                                                            <select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">--}}
+{{--                                                            </select>--}}
+{{--                                                        </div>--}}
+{{--                                                    </div>--}}
+{{--                                                    --}}{{--                                                    <div class="col">--}}
+{{--                                                    --}}{{--                                                        <div class="form-group">--}}
+{{--                                                    --}}{{--                                                            <input type="text" name="cnic" class="form-control rounded-right cnic" placeholder="CNIC">--}}
+{{--                                                    --}}{{--                                                        </div>--}}
+{{--                                                    --}}{{--                                                    </div>--}}
+{{--                                                </div>--}}
+{{--                                            </div>--}}
+{{--                                            <div class="modal-footer text-center justify-content-around">--}}
+{{--                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary btn-block" value="submit_and_print_form">Submit &amp; Print</button>--}}
+{{--                                                --}}{{--                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>--}}
+{{--                                            </div>--}}
+{{--                                        </form>--}}
+{{--                                    </div>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
                     </div>
                 </div>
             </div>
