@@ -1280,7 +1280,7 @@ class ShipperShipmentBookController extends Controller
                         $table_start .= '
                                 <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                  <span><strong>' . $shipment->tracking_number . '123</strong></span>
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
                                 </td>
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                     <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
