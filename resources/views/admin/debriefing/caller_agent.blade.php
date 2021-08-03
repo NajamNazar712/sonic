@@ -86,10 +86,10 @@
                                 <div class="align-items-center bg-primary">
                                     <div class="d-flex flex-wrap ml-1 mr-1 font-medium-3 white">
                                         <div>
-                                                Rider Name : <span class="font-medium-2">asd</span>
+                                                Rider Name : <span class="font-medium-2">{{$delivery_note->rider->name}}</span>
                                         </div>
                                         <div class="ml-auto mr-0 mr-sm-1">
-                                            Rider Phone Number : <span class="font-medium-2">qwe</span>
+                                            Rider Phone Number : <span class="font-medium-2">{{$delivery_note->rider->phone}}</span>
                                         </div>
                                     </div>
                                 </div>
