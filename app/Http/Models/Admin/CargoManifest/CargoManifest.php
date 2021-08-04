@@ -45,9 +45,9 @@ class CargoManifest extends Model
 
    /* public function route_management() {
         return $this->belongsTo('App\Http\Models\Admin\RouteManagement');
-    }
+    }*/
 
     public function fleet() {
-        return $this->belongsTo('App\Http\Models\Admin\Fleet');
-    }*/
+        return $this->belongsTo('App\Http\Models\Admin\Fleet','vehicle_id','id');
+    }
 }

@@ -34,4 +34,5 @@ class CargoManifestBag extends Model
     public function status() {
         return $this->belongsTo('App\Http\Models\Admin\CargoManifest\CargoManifestBagStatus', 'status_id', 'id');
     }
+
 }

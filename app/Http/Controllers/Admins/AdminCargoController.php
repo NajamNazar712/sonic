@@ -1155,6 +1155,13 @@ class AdminCargoController extends Controller
             if($cargo_manifest->exists()){
                 $cargo_manifest = $cargo_manifest->first();
                 $cargo_manifest = CargoManifest::find($cargo_manifest->cargo_manifest_id);
+                if($cargo_manifest->vehicle_number != NULL){
+                    $vehicle_number =  $cargo_manifest->vehicle_number;
+                }
+                else{
+                  $vehicle_number = $cargo_manifest->fleet->reg_number;
+                }
+
                 // <td class="text-center">' . $master_cargo->origin_hub->name . ' - ' . (($master_cargo->junction_hub_1_id) ? ($master_cargo->junction_hub_1->name . ' - ') : '') . ' - ' . (($master_cargo->junction_hub_2_id) ? ($master_cargo->junction_hub_2->name . ' - ') : '') . $master_cargo->destination_hub->name . '</td>
 
 
@@ -1238,6 +1245,10 @@ class AdminCargoController extends Controller
                         <tr>
                           <td class="color secondary"><strong>Transport Mode</strong></td>
                           <td>' . $cargo_manifest->transport_mode->name . '</td>
+                        </tr> 
+                        <tr>
+                          <td class="color secondary"><strong>Vendor</strong></td>
+                          <td>' . $cargo_manifest->vendor_name . '</td>
                         </tr>
                          <tr>
                           <td class="color secondary"><strong>No of Bags</strong></td>
@@ -1297,7 +1308,7 @@ class AdminCargoController extends Controller
                           <td class="color secondary"><strong>Origin Hub</strong></td>
                           <td>' . $cargo_manifest->origin_hub->name . '</td>
                            <td class="color secondary"><strong>Driver Name</strong></td>
-                          <td>' . $cargo_manifest->origin_hub->name . '</td> 
+                          <td>' . $cargo_manifest->driver_name . '</td> 
                          
                           <td rowspan="6" class="text-center align-middle">
                             <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_manifest->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
@@ -1308,13 +1319,13 @@ class AdminCargoController extends Controller
                           <td class="color secondary"><strong>Destination Hub</strong></td>
                           <td>' . $cargo_manifest->destination_hub->name . '</td>
                            <td class="color secondary"><strong>Vehicle Number</strong></td>
-                          <td>' . $cargo_manifest->origin_hub->name . '</td>
+                          <td>' . $vehicle_number . '</td>
                         </tr>
                         <tr>
                           <td class="color secondary"><strong>Transit Date</strong></td>
                           <td>' . $cargo_manifest->created_at . '</td>
                            <td class="color secondary"><strong>Contact Phone</strong></td>
-                          <td>' . $cargo_manifest->origin_hub->name . '</td>
+                          <td>' . $cargo_manifest->driver_phone . '</td>
                         </tr>
                         <tr>
                           <td class="color secondary"><strong>No. of Bags</strong></td>
