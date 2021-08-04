@@ -3087,6 +3087,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
     });
 
+    Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
+        Route::get('', 'Admins\UserManagementController@rider_delivery_note_otp_index')->name('index');
+        Route::get('list', 'Admins\UserManagementController@rider_delivery_note_otp_list')->name('list');
+    });
+
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');

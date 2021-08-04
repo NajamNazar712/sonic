@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\Rider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -517,6 +518,18 @@ class UserManagementController extends Controller
         }
         return redirect()->back()->with('error', 'User not found!!');
 
+    }
+
+    public function rider_delivery_note_otp_index(){
+        return view('admin.otp.rider_delivery_note');
+    }
+
+    public function rider_delivery_note_otp_list(Request $request){
+        $riders = Rider::select('id as id', 'name as name', 'phone as phone_no', 'delivery_note_otp as otp')
+            ->where('status', 1)
+            ->whereNotNull('delivery_note_otp');
+        $datatable = Datatables::of($riders);
+        return $datatable->make(true);
     }
 
 }
