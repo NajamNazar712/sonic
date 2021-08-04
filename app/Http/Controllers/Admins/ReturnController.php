@@ -934,6 +934,7 @@ class ReturnController extends Controller
                 });
             }
         }
+
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function($query) {
                 $query->where(function ($sub_query){
@@ -2792,6 +2793,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_revert(Request $request) {
+
         $shipment = Shipment::find($request->id);
         $flag = true;
         $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
