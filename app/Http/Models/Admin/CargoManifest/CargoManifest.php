@@ -8,7 +8,7 @@ class CargoManifest extends Model
 {
 
     public function manifest_bags() {
-        return $this->hasMany('App\Http\Models\Admin\CargoManifest\ManifestBags')->orderBy('bag_id');
+        return $this->hasMany('App\Http\Models\Admin\CargoManifest\ManifestBag')->orderBy('cargo_manifest_bag_id');
     }
 
     public function origin_hub() {

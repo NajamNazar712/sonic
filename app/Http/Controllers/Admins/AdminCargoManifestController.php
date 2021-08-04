@@ -1166,12 +1166,6 @@ class AdminCargoManifestController extends Controller
         $cargo = CargoManifest::find($cargo_id);
 
 
-        $jucntion_names = '';
-       /* if($master_cargo->route_management_id){
-            foreach ($master_cargo->route_management->junctions as $value) {
-                $jucntion_names .= ' - '.$value->junction['name'].' - ';
-            }
-        }*/
         $sender = $cargo->sender;
         $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
 

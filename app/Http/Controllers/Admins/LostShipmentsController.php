@@ -353,7 +353,7 @@ class LostShipmentsController extends Controller
                                 $bag->save();
                             }
 
-                            $cargo_bag = ManifestBag::where('cargo_manifest_bag__id',$bag->id)->first();
+                            $cargo_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->first();
                             if($cargo_bag){
                                 $cargo = CargoManifest::find($cargo_bag->cargo_manifest_id);
                                 if($cargo){
