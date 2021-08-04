@@ -327,7 +327,7 @@
                                                 <li><a class="menu-item" href="{{ route('admin.cargo_manifest.bags.pending.index') }}">Pending</a></li>
                                             @endif
 
-                                            @if ((session('role_id') == 1 || in_array(546, session('permissions'))) && Auth::user()->default_hub_id != NULL)
+                                            @if (session('role_id') == 1 || in_array(546, session('permissions')) && Auth::user()->default_hub_id != NULL)
                                                 <li><a class="menu-item" href="{{ route('admin.cargo_manifest.bags.create.index') }}">Create Bag</a></li>
                                             @endif
 
@@ -341,8 +341,12 @@
                                         </ul>
                                     </li>
                                 </ul>
+
                                 @if (session('role_id') == 1 || in_array(551, session('permissions')))
                                     <li><a class="menu-item" href="{{ route('admin.cargo_manifest.create') }}">Create Manifest</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(552, session('permissions')))
+                                <li><a class="menu-item" href="{{ route('admin.cargo_manifest.index') }}">Bags in Transit</a></li>
                                 @endif
                             </li>
                         @endif

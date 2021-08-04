@@ -1510,6 +1510,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
 
         });
+        Route::get('/','Admins\AdminCargoManifestController@manifest_index')->name('index');
+        Route::get('/list','Admins\AdminCargoManifestController@manifest_list')->name('list');
         Route::get('/create','Admins\AdminCargoManifestController@create_manifest')->name('create');
         Route::post('bag/details','Admins\AdminCargoManifestController@bag_details')->name('bag_details');
         Route::post('cargo/details','Admins\AdminCargoManifestController@cargo_details')->name('cargo_details');

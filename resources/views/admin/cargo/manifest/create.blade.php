@@ -187,7 +187,7 @@
                 url: '{!! route('admin.cargo_manifest.print') !!}',
                 method: 'POST',
                 data: {
-                    'id': '{{ session('print') }}',
+                    'ids': '{{ session('print') }}',
                     '_token': '{{ csrf_token() }}'
                 }
             })

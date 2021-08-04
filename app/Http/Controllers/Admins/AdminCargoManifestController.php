@@ -1302,7 +1302,7 @@ class AdminCargoManifestController extends Controller
                     $mater_cargo_bags= new ManifestBag();
 
                     $mater_cargo_bags->cargo_manifest_id = $master_cargo_id;
-                    $mater_cargo_bags->cargo_manifest_bag__id = $bag_id;
+                    $mater_cargo_bags->cargo_manifest_bag_id = $bag_id;
 
                     $mater_cargo_bags->save();
 
@@ -1372,15 +1372,9 @@ class AdminCargoManifestController extends Controller
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
     }
 
-
-    public static function print($cargo_id, $type = NULL) {
+    public static function print(Request $request) {
+       $type = NULL;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
-        $cargo = CargoManifest::find($cargo_id);
-
-
-        $sender = $cargo->sender;
-        $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
 
         $html = '
                 <!doctype html>
@@ -1468,7 +1462,13 @@ class AdminCargoManifestController extends Controller
                     </style>
                 ';
         }
-        $html .= '</head>
+        $cargo_ids = explode(',',$request->ids);
+        foreach($cargo_ids as $id) {
+            $cargo = CargoManifest::find($id);
+
+            $sender = $cargo->sender;
+            $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
+            $html .= '</head>
                   <body>
                     <div>
                       <div class="cargo_slip">
@@ -1502,13 +1502,13 @@ class AdminCargoManifestController extends Controller
                           
                             <tr>
                               ';
-      /*  if($master_cargo->onward_forwarding == 1){
-            $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
-        }
-        else{
-            $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
-        }*/
-        $html .= '
+            /*  if($master_cargo->onward_forwarding == 1){
+                  $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
+              }
+              else{
+                  $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
+              }*/
+            $html .= '
                               <td>' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '</td>
                             </tr>
                             <tr>
@@ -1532,7 +1532,7 @@ class AdminCargoManifestController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Role</strong></td>
-                              <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
+                              <td>' . $sender->role->name . ' - ' . $sender->role->department->name . '</td>
                               <td class="color secondary"><strong>Role</strong></td>
                               <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
                             </tr>
@@ -1551,7 +1551,7 @@ class AdminCargoManifestController extends Controller
                               <td class="color primary"><strong>Route Information</strong></td>
                             </tr>
                             <tr>
-                              <td class="text-center">' . $cargo->origin_hub->name . '-'. $cargo->destination_hub->name . '</td>
+                              <td class="text-center">' . $cargo->origin_hub->name . '-' . $cargo->destination_hub->name . '</td>
                             </tr>
                           </tbody>
                         </table>
@@ -1571,7 +1571,7 @@ class AdminCargoManifestController extends Controller
                               <td class="color secondary"><strong>Driver Name</strong></td>
                               <td>' . $cargo->driver_name . '</td>
                               <td rowspan="6" class="text-center align-middle">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                 <span><strong>' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
@@ -1579,7 +1579,7 @@ class AdminCargoManifestController extends Controller
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $cargo->destination_hub->name . '</td>
                               <td class="color secondary"><strong>Vehicle Number</strong></td>
-                              <td>' . (($cargo->fleet_id) ? $cargo->fleet->reg_number :  '-') . '</td>
+                              <td>' . (($cargo->fleet_id) ? $cargo->fleet->reg_number : '-') . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
@@ -1617,13 +1617,13 @@ class AdminCargoManifestController extends Controller
                               <td class="color primary"><strong>Actual Weight</strong></td>
       ';
 
-        $serial_number = 1;
+            $serial_number = 1;
 
-        foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
-            $bag = $manifest_cargo_bag->bag;
+            foreach ($cargo->manifest_bags as $manifest_cargo_bag) {
+                $bag = $manifest_cargo_bag->bag;
 
 
-            $html .= '
+                $html .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $bag->seal_number . '</td>
@@ -1635,10 +1635,32 @@ class AdminCargoManifestController extends Controller
                             </tr>
         ';
 
-            $serial_number++;
+                $serial_number++;
+            }
+
+            $html .= '
+                          </tbody>
+                        </table>
+                        <hr>';
         }
 
-        if($type == 1){
+
+            $html .= '
+                        
+                       
+                      </div>
+                    </div>
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+            return $html;
+
+        /*if($type == 1){
             $html .= '
                           </tbody>
                         </table>
@@ -1665,6 +1687,13 @@ class AdminCargoManifestController extends Controller
                 </html>
       ';
             return $html;
-        }
+        }*/
+    }
+
+    public function manifest_index(){
+        return view('admin.cargo.manifest.index');
+    }
+    public function manifest_list(){
+        //
     }
 }

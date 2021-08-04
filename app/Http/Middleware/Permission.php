@@ -203,6 +203,8 @@ class Permission
             'cargo_manifest.bags.history.list' => 547,
             'cargo_manifest.create' => 551,
             'cargo_manifest.store' => 551,
+            'cargo_manifest.index' => 552,
+            'cargo_manifest.list' => 552,
 
 
 
