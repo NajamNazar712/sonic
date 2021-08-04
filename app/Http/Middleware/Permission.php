@@ -205,6 +205,8 @@ class Permission
             'cargo_manifest.store' => 551,
             'cargo_manifest.index' => 552,
             'cargo_manifest.list' => 552,
+            'cargo_manifest.receive.index' => 554,
+            'cargo_manifest.receive.store' => 554,
 
 
 

@@ -41,6 +41,8 @@ class AdminCargoManifestController extends Controller
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
+
+        $this->bag_can_be_received_statuses = [2,4,6,8,9,10];
     }
 
     public function manifest_mapping_index()
@@ -1696,4 +1698,115 @@ class AdminCargoManifestController extends Controller
     public function manifest_list(){
         //
     }
+
+    public function receive_bag_index ()
+    {
+        if(Auth::user()->default_hub_id == null)
+        {
+            return back()->with(['error'=>'Default Hub not set for this admin.']);
+        }
+
+        $total = 0;
+        $bags = CargoManifestBag::leftjoin('v2_junction_mappings as vjm','vjm.id','cargo_manifest_bags.junction_mapping_id')
+            ->leftjoin('v2_junctions as vj','vj.junction_mapping_id','vjm.id')
+            ->select(['vjm.destination_id as destination','vj.junction_id as junction','cargo_manifest_bags.status_id as status','cargo_manifest_bags.id as id'])
+            ->whereIn('cargo_manifest_bags.status_id',$this->bag_can_be_received_statuses)
+            ->get()
+            ->groupBy('id');
+
+        foreach ($bags as $key => $bag)
+        {
+            $flag = false;
+            foreach ($bag as $locations)
+            {
+                if($locations->destination == Auth::user()->default_hub_id || $locations->junction == Auth::user()->default_hub_id)
+                {
+                    $flag = true;
+                }
+            }
+
+            if($flag)
+            {
+                $total++;
+            }
+        }
+
+        return view('admin.cargo.manifest.receive',compact('total'));
+    }
+
+    public function receive_bag_details(Request $request)
+    {
+        $bag = CargoManifestBag::where('seal_number', $request->bag_number);
+
+        if ($bag->exists()) {
+            $bag = $bag->whereIn('status_id',$this->bag_can_be_received_statuses);
+            if ($bag->exists()) {
+                $bag = $bag->first();
+
+                $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
+                    $join->on('mb.cargo_manifest_id','cargo_manifests.id')
+                        ->where('mb.cargo_manifest_bag__id',$bag->id);
+                })
+                    ->select(['cargo_manifests.*'])
+                    ->where('cargo_manifests.status_id',1);
+
+                if ($cargo_bag->exists()) {
+                    $cargo_bag = $cargo_bag->first();
+
+                    $mapping = V2JunctionMapping::where('id',$bag->junction_mapping_id);
+
+                    if($mapping->exists())
+                    {
+                        $mapping = $mapping->first();
+                        $misroute = 1;
+                        if($mapping->destination_id == Auth::user()->default_hub_id)
+                        {
+                            $misroute = 0;
+                        }
+                        if($misroute == 1)
+                        {
+                            foreach ($mapping->junctions as $junction)
+                            {
+                                if($junction->junction_id == Auth::user()->default_hub_id)
+                                {
+                                    $misroute = 0;
+                                }
+                            }
+                        }
+                        $details = array();
+
+                        $details['misroute'] = $misroute;
+                        $details['bag_id'] = $bag->id;
+                        $details['bag_number'] = $request->bag_number;
+                        $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
+                        $details['origin'] = $cargo_bag->origin_hub->name;
+                        $details['destination'] = $cargo_bag->destination_hub->name;
+                        $details['last_junction'] = 1;
+                        $details['actual_weight'] = $bag->actual_weight;
+                        $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
+
+                        return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
+                    }
+                    else{
+                        return ['status' => 1, 'error' => 'Bag Number is not associated with any mapping'];
+                    }
+
+                } else {
+                    return ['status' => 1, 'error' => 'Given Bag Number is not in any Cargo Manifest'];
+                }
+            }
+            else {
+                return ['status' => 1, 'error' => 'Given Bag Number is already received'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
+        }
+    }
+
+    public function receive_bag_store(Request $request)
+    {
+        
+    }
+
 }
