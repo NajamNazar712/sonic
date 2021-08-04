@@ -7873,7 +7873,7 @@ class NotificationsController extends Controller
 
 
                     foreach($shipment as $data) {
-                        echo $data;
+
                         $getdata = Shipment::where('user_id','=',$data->userid)->where('shipments.shipper_status_id',20)->get();
                         $html = '<b>Shipper Name is :' .$data->username . '</b>';
                         $html .= '<table style="width:100%;">';
