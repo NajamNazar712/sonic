@@ -122,6 +122,36 @@
                                 <input type="hidden" name="on_rate_record" value="{{ ((isset($switches[1][0]) && $switches[1][0]->id != '') ? $switches[1][0]->id : '') }}">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="on_origin_hubs[]" id="on_origin_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="on_destination_hubs[]" id="on_destination_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="weight-addition-overnight">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -796,7 +826,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Overland</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 2)
                                                 <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" checked data-size="xs" data-switchery="true" disabled>
@@ -816,6 +846,35 @@
                                  <input type="hidden" name="ol_rate_record" value="{{ ((isset($switches[2][0]) && $switches[2][0]->id != '') ? $switches[2][0]->id : '') }}">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="ol_origin_hubs[]" id="ol_origin_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="ol_destination_hubs[]" id="ol_destination_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-overland">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -1486,7 +1545,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Detain</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 3)
                                                 <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" checked data-size="xs" data-switchery="true" disabled>
@@ -1506,6 +1565,35 @@
                                  <input type="hidden" name="det_rate_record" value="{{ ((isset($switches[3][0]) && $switches[3][0]->id != '') ? $switches[3][0]->id : '') }}">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="detain_origin_hubs[]" id="detain_origin_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="detain_destination_hubs[]" id="detain_destination_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-detain">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -2176,7 +2264,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Sameday</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1"> Default</label>
                                             @if($shipper['default_shipping_mode'] == 4)
                                                 <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" checked data-size="xs" data-switchery="true" disabled>
@@ -2196,6 +2284,35 @@
                                  <input type="hidden" name="same_rate_record" value="{{ ((isset($switches[4][0]) && $switches[4][0]->id != '') ? $switches[4][0]->id : '') }}">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="sameday_origin_hubs[]" id="sameday_origin_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="sameday_destination_hubs[]" id="sameday_destination_hubs" class="form-control select2" multiple="multiple" disabled>
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-sameday">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -3209,6 +3326,89 @@
             }
         };
         @endisset
+
+
+            //Origin And Destination Hubs Start
+            $('#on_origin_hubs').select2({
+                width:'100%',
+                placeholder:"Origin(s)",
+                allowClear:true
+            });
+
+            $('#on_destination_hubs').select2({
+                width:'100%',
+                placeholder:"Destination(s)",
+                allowClear:true
+            });
+
+            $('#ol_origin_hubs').select2({
+                width:'100%',
+                placeholder:"Origin(s)",
+                allowClear:true
+            });
+
+            $('#ol_destination_hubs').select2({
+                width:'100%',
+                placeholder:"Destination(s)",
+                allowClear:true
+            });
+
+            $('#detain_origin_hubs').select2({
+                width:'100%',
+                placeholder:"Origin(s)",
+                allowClear:true
+            });
+
+            $('#detain_destination_hubs').select2({
+                width:'100%',
+                placeholder:"Destination(s)",
+                allowClear:true
+            });
+
+            $('#sameday_origin_hubs').select2({
+                width:'100%',
+                placeholder:"Origin(s)",
+                allowClear:true
+            });
+
+            $('#sameday_destination_hubs').select2({
+                width:'100%',
+                placeholder:"Destination(s)",
+                allowClear:true
+            });
+
+            var overnight_origins = @json($overnight_origins);
+            var overland_origins = @json($overland_origins);
+            var detain_origins = @json($detain_origins);
+            var sameday_origins = @json($sameday_origins);
+
+            $('#on_origin_hubs').val(overnight_origins).trigger('change');
+
+
+            $('#ol_origin_hubs').val(overland_origins).trigger('change');
+
+
+            $('#detain_origin_hubs').val(detain_origins).trigger('change');
+
+
+            $('#sameday_origin_hubs').val(sameday_origins).trigger('change');
+
+            var overnight_destinations = @json($overnight_destinations);
+            var overland_destinations = @json($overland_destinations);
+            var detain_destinations = @json($detain_destinations);
+            var sameday_destinations = @json($sameday_destinations);
+
+            $('#on_destination_hubs').val(overnight_destinations).trigger('change');
+
+
+            $('#ol_destination_hubs').val(overland_destinations).trigger('change');
+
+
+            $('#detain_destination_hubs').val(detain_destinations).trigger('change');
+
+
+            $('#sameday_destination_hubs').val(sameday_destinations).trigger('change');
+            //Origin And Destination Hubs End
 
  });
 

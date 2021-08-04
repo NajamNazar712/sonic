@@ -40,6 +40,35 @@
                                  aria-expanded="true">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="on_origin_hubs[]" id="on_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="on_destination_hubs[]" id="on_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-overnight">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -478,6 +507,35 @@
                             <div id="overland" class="border-success no-border-top card hide" aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="ol_origin_hubs[]" id="ol_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="ol_destination_hubs[]" id="ol_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-overland">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -911,6 +969,35 @@
                                  aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="detain_origin_hubs[]" id="detain_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="detain_destination_hubs[]" id="detain_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-detain">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -1347,6 +1434,35 @@
                             <div id="sameday" class="border-success no-border-top card hide">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="sameday_origin_hubs[]" id="sameday_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Hubs</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="sameday_destination_hubs[]" id="sameday_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-sameday">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -3671,6 +3787,58 @@
                 e.preventDefault();
             }
         });
+
+        //Origin And Destination Hubs Start
+        $('#on_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#on_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+        $('#ol_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#ol_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+        $('#detain_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#detain_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+        $('#sameday_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#sameday_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+
+        //Origin And Destination Hubs End
 
         var overnightSwitch = document.querySelector('.switchery.on-main-switch');
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');
