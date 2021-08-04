@@ -16,6 +16,17 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            @if(session('success_html'))
+                                <div class="alert alert-success">
+                                    {!! session('success_html') !!}
+                                </div>
+                            @endif
+
+                            @if(session('error_html'))
+                                <div class="alert alert-danger">
+                                    {!! session('error_html') !!}
+                                </div>
+                            @endif
 
                             <div id="camera_scan" class="d-none">
                                 <div id="camera_view" class="camera_view"></div>
@@ -54,138 +65,100 @@
                             </table>
 
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary mr-2" id="master_cargo_consignment_confirm" data-toggle="modal" data-target="#master_cargo_consignment" disabled="disabled">Confirm</button>
+                                <button type="submit" class="btn btn-primary mr-2" id="master_cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_details" disabled="disabled">Confirm</button>
                             </div>
 
-{{--                            <div class="modal fade" id="master_cargo_consignment" role="dialog" aria-labelledby="master_cargo_consignment_title" aria-hidden="true">--}}
-{{--                                <div class="modal-dialog modal-lg" role="document">--}}
-{{--                                    <div class="modal-content">--}}
-{{--                                        <form class="form-horizontal" method="POST" action="{{ route('admin.master_cargo.create.store') }}" novalidate="novalidate">--}}
-{{--                                            {{ csrf_field() }}--}}
-{{--                                            <input type="hidden" name="onward_forwarding" value="{{$id}}">--}}
-{{--                                            <input type="hidden" name="bag_ids" class="bag_ids">--}}
+                            <div class="modal fade" id="cargo_details" role="dialog" aria-labelledby="cargo_details_title" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <form class="form-horizontal" method="POST" action="{{ route('admin.cargo_manifest.store') }}" novalidate="novalidate">
+                                            {{ csrf_field() }}
+                                            <input type="hidden" name="bag_ids" id="bag_ids">
 
-{{--                                            <div class="modal-header">--}}
-{{--                                                <h4 class="modal-title" id="master_cargo_consignment_title">Master Cargo</h4>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="modal-body">--}}
-{{--                                                <div class="row">--}}
-{{--                                                    <div class="col-12">--}}
-{{--                                                        <h4 class="form-section mb-2 text-center">Cargo Information</h4>--}}
-{{--                                                    </div>--}}
+                                            <div class="modal-header">
+                                                <h4 class="modal-title" id="cargo_details_title">Cargo Manifest</h4>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <input type="text" name="total_weight" placeholder="Total Weight*" readonly class="form-control" id="total_weight">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
+                                                                @foreach($shipping_modes as $mode)
+                                                                    <option value="{{$mode->id}}"> {{$mode->mode}} </option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="row">
+                                                            <div class="col-4">
+                                                                <label for=""><b>Vehicle Type :</b></label>
+                                                            </div>
+                                                            <div class="col-8">
+                                                                <label class="display-inline ml-1">Temporary</label>
+                                                                <input type="checkbox" name="vehicle_type" id="vehicle_type" class="switchery vehicle_type" data-size="xs" data-switchery="true" checked>
+                                                                <label class="display-inline ml-1">Fixed</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                     <div class="col-3">
+                                                        <div class="form-group" id="vehicle_number_container">
+                                                            <select name="vehicle_number" class="select2 vehicle_number" id="vehicle_number" data-rule-required="true" data-msg-required="Vehicle Number is Required">
+                                                            </select>
+                                                        </div>
+                                                         <div class="form-group d-none" id="vehicle_number_text_container">
+                                                             <input type="text" name="vehicle_number_text" id="vehicle_number_text" class="form-control" placeholder="Vehicle Number*" data-rule-required="true" data-msg-required="Vehicle Number is Required">
+                                                         </div>
+                                                    </div>
 
-{{--                                                    <div class="col-3">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="hidden" name="origin_hub_id" class="origin_hub_id">--}}
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <input type="text" name="driver_name" class="form-control" placeholder="Drivers Name*" id="driver_name" readonly data-rule-required="true" data-msg-required="Driver Name is Required">
+                                                        </div>
+                                                    </div>
 
-{{--                                                            <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 origin"></p>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <input type="text" name="driver_phone" class="form-control" placeholder="Drivers Phone*" id="driver_phone" readonly data-rule-required="true" data-msg-required="Driver Phone is Required">
+                                                        </div>
+                                                    </div>
 
-{{--                                                    <div class="col-3">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="hidden" name="destination_hub_id" class="destination_hub_id">--}}
-
-{{--                                                            <p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination"></p>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="col-6">--}}
-{{--                                                        --}}{{--                                                        <div class="form-group">--}}
-{{--                                                        --}}{{--                                                            <select name="route_management_id" class="select2 route_management_id" data-rule-required="true" data-msg-required="Route is required">--}}
-{{--                                                        --}}{{--                                                            </select>--}}
-{{--                                                        --}}{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    --}}{{-- <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <select name="junction_1" class="select2 junction_1">--}}
-{{--                                                            </select>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-
-{{--                                                    <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <select name="junction_2" class="select2 junction_2">--}}
-{{--                                                            </select>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div> --}}
-
-{{--                                                    <div class="w-100"></div>--}}
-
-{{--                                                    <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">--}}
-{{--                                                            </select>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-
-{{--                                                    <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <select name="transport_mode_vendor" class="select2 transport_mode_vendor" data-rule-required="true" data-msg-required="Vendor is required">--}}
-{{--                                                            </select>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-
-{{--                                                    <div id="new_vendor" class="col d-none">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="text" name="vendor_name" class="form-control vendor_name" placeholder="Vendor Name*" data-rule-required="true" data-msg-required="Vendor Name is required">--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-
-{{--                                                    <div class="w-100"></div>--}}
-
-{{--                                                    <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required" readonly>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    --}}{{-- <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="text" name="vehicle" class="form-control rounded-right vehicle" placeholder="Vehicle Number*" data-rule-required="true" data-msg-required="Vehicle Number is required">--}}
-{{--                                                        </div>--}}
-{{--                                                    </div> --}}
-{{--                                                    <div class="col">--}}
-{{--                                                        --}}{{--                                                        <div class="form-group">--}}
-{{--                                                        --}}{{--                                                            <select name="fleet_id" class="select2 fleet_id"  data-rule-required="true" data-msg-required="Route is required">--}}
-{{--                                                        --}}{{--                                                            </select>--}}
-{{--                                                        --}}{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="w-100"></div>--}}
-
-{{--                                                    <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="text" name="driver_name" class="form-control rounded-right driver_name" placeholder="Driver Name*" data-rule-required="true" data-msg-required="Driver Name is required">--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    <div class="col">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <input type="text" name="phone_number" class="form-control rounded-right phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-
-{{--                                                    <div class="w-100"></div>--}}
-
-{{--                                                    <div class="col-md-6">--}}
-{{--                                                        <div class="form-group">--}}
-{{--                                                            <select name="shipping_mode_id" class="select2 shipping_mode_select" data-rule-required="true" data-msg-required="Shipping Mode is required">--}}
-{{--                                                            </select>--}}
-{{--                                                        </div>--}}
-{{--                                                    </div>--}}
-{{--                                                    --}}{{--                                                    <div class="col">--}}
-{{--                                                    --}}{{--                                                        <div class="form-group">--}}
-{{--                                                    --}}{{--                                                            <input type="text" name="cnic" class="form-control rounded-right cnic" placeholder="CNIC">--}}
-{{--                                                    --}}{{--                                                        </div>--}}
-{{--                                                    --}}{{--                                                    </div>--}}
-{{--                                                </div>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="modal-footer text-center justify-content-around">--}}
-{{--                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary btn-block" value="submit_and_print_form">Submit &amp; Print</button>--}}
-{{--                                                --}}{{--                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>--}}
-{{--                                            </div>--}}
-{{--                                        </form>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <input type="text" name="vendor_name" placeholder="Vendors Name*" class="form-control" id="vendor_name" readonly data-rule-required="true" data-msg-required="Vendor Name is Required">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <table class="table table-bordered datatable" id="cargo_datatable" style="z-index: 3;width: 100%">
+                                                        <thead>
+                                                            <tr role="row" class="bg-primary white">
+                                                                <th class="border-primary border-darken-1">S. No.</th>
+                                                                <th class="border-primary border-darken-1"></th>
+                                                                <th class="border-primary border-darken-1">Hub</th>
+                                                                <th class="border-primary border-darken-1">Junctions</th>
+                                                                <th class="border-primary border-darken-1">No. of Bags</th>
+                                                            </tr>
+                                                        </thead>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="submit" name="submit_and_print_form" class="btn btn-primary" value="submit_and_print_form">Submit &amp; Print</button>
+                                                                                                <button type="submit" name="submit_form" class="btn btn-primary" value="submit_form">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -263,13 +236,30 @@
                 }
             });
 
+            var cargo_table = $('#cargo_datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: true,
+                autoWidth : false,
+                paging:false,
+                columns: [
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {name: 'vehicle_serial_number', class: 'align-middle vehicle_serial_number', orderable: false},
+                    {name: 'hub', class: 'align-middle hub'},
+                    {name: 'junctions', class: 'align-middle junctions', orderable: false},
+                    {name: 'bags', class: 'align-middle bags'},
+                ],
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
+            });
+
             $('#add_bag_form input.bag_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
 
-            $('#add_bag_form input.bag_number').inputmask({
+            $('#add_bag_form input.bag_weight').inputmask({
                 'alias': 'decimal',
                 'digits': 2,
                 'allowMinus': false,
@@ -347,260 +337,177 @@
                     return false;
                 }
             });
-            {{--$('#master_cargo_consignment_confirm').bind('click', function() {--}}
+            $('#master_cargo_consignment_confirm').bind('click', function() {
 
-            {{--    // if ($('#master_cargo_consignment form .junction_1').hasClass('select2-hidden-accessible')) {--}}
-            {{--    //     $('#master_cargo_consignment form .junction_1').html('').select2('destroy');--}}
-            {{--    // }--}}
+                let total_weight = 0;
+                table.columns('.bag_weight').data().eq(0).each(function (v){
+                        total_weight += parseFloat(v);
+                });
 
-            {{--    // if ($('#master_cargo_consignment form .junction_2').hasClass('select2-hidden-accessible')) {--}}
-            {{--    //     $('#master_cargo_consignment form .junction_2').html('').select2('destroy');--}}
-            {{--    // }--}}
+                $("#cargo_details #total_weight").val(total_weight);
 
-            {{--    if ($('#master_cargo_consignment form .transport_mode').hasClass('select2-hidden-accessible')) {--}}
-            {{--        $('#master_cargo_consignment form .transport_mode').html('').select2('destroy');--}}
-            {{--    }--}}
+                blockPagePermanently();
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.cargo_details') !!}',
+                    method: 'POST',
+                    data: {
+                        'bag_ids': bag_ids,
+                        '_token': '{{ csrf_token() }}'
+                    },
+                    timeout: 5000,
+                    error: function (data) {
+                        $('#cargo_details').modal('hide');
 
-            {{--    if ($('#master_cargo_consignment form .transport_mode_vendor').hasClass('select2-hidden-accessible')) {--}}
-            {{--        $('#master_cargo_consignment form .transport_mode_vendor').html('').select2('destroy');--}}
-            {{--    }--}}
+                        UnblockPagePermanently();
 
-            {{--    if ($('#master_cargo_consignment form .shipping_mode_select').hasClass('select2-hidden-accessible')) {--}}
-            {{--        $('#master_cargo_consignment form .shipping_mode_select').html('').select2('destroy');--}}
-            {{--    }--}}
-            {{--    blockPagePermanently();--}}
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.master_cargo.create.cargo_details') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            'bag_ids': bag_ids,--}}
-            {{--            '_token': '{{ csrf_token() }}'--}}
-            {{--        },--}}
-            {{--        timeout: 5000,--}}
-            {{--        error: function (data) {--}}
-            {{--            $('#master_cargo_consignment').modal('hide');--}}
+                        toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    },
+                    success: function (data) {
+                        if(data.status == 0) {
+                            $('#cargo_details form #bag_ids').val(bag_ids);
 
-            {{--            UnblockPagePermanently();--}}
+                            $('#cargo_details form #vehicle_number').html("");
+                            $.each(data.details.vehicles, function (index, vehicle) {
+                                $('#cargo_details form #vehicle_number').append('<option value="' + vehicle.id + '" data-driver_name="' + vehicle.driver_name + '" data-driver_phone="' + vehicle.driver_phone + '" data-vendor_name="' + vehicle.vendor_name + '">' + vehicle.reg_number + '</option>');
+                            });
 
-            {{--            toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--        },--}}
-            {{--        success: function (data) {--}}
-            {{--            // $('#master_cargo_consignment form .shipping_mode_id').val(shipping_mode_id);--}}
-            {{--            $('#master_cargo_consignment form .bag_ids').val(bag_ids);--}}
+                            $('#cargo_details form #vehicle_number').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '100%',
+                                placeholder: 'Select Vehicle Number*'
+                            }).bind('change', function () {
+                                $(this).valid();
+                                if ($(this).find(":selected").attr('data-driver_name') == "null") {
+                                    $('#cargo_details form #driver_name').val("");
+                                } else {
+                                    $('#cargo_details form #driver_name').val($(this).find(":selected").attr('data-driver_name'));
+                                }
+                                if ($(this).find(":selected").attr('data-vendor_name') == "null") {
+                                    $('#cargo_details form #vendor_name').val("");
+                                } else {
+                                    $('#cargo_details form #vendor_name').val($(this).find(":selected").attr('data-vendor_name'));
+                                }
+                                $('#cargo_details form #driver_phone').val($(this).find(":selected").attr('data-driver_phone'));
+                            });
 
-            {{--            $('#master_cargo_consignment form .origin_hub_id').val(data.origin.id);--}}
-            {{--            $('#master_cargo_consignment form .origin').html(data.origin.name);--}}
+                            $("#cargo_details form #vehicle_type").on('change', function () {
+                                if ($(this).prop('checked')) {
+                                    $('#cargo_details form #vehicle_number').val("").trigger('change');
+                                    $('#cargo_details form #vehicle_number_container').removeClass('d-none');
+                                    $('#cargo_details form #vehicle_number_text_container').addClass('d-none');
+                                    $('#cargo_details form input#driver_phone').val("");
+                                    $('#cargo_details form input#driver_name').val("");
+                                    $('#cargo_details form input#vendor_name').val("");
+                                    $('#cargo_details form input#driver_phone').attr('readonly', true);
+                                    $('#cargo_details form input#driver_name').attr('readonly', true);
+                                    $('#cargo_details form input#vendor_name').attr('readonly', true);
+                                } else {
+                                    $('#cargo_details form #vehicle_number').val("").trigger('change');
+                                    $('#cargo_details form #vehicle_number_container').addClass('d-none');
+                                    $('#cargo_details form #vehicle_number_text_container').removeClass('d-none');
+                                    $('#cargo_details form input#driver_phone').val("");
+                                    $('#cargo_details form input#driver_name').val("");
+                                    $('#cargo_details form input#vendor_name').val("");
+                                    $('#cargo_details form input#driver_phone').attr('readonly', false);
+                                    $('#cargo_details form input#driver_name').attr('readonly', false);
+                                    $('#cargo_details form input#vendor_name').attr('readonly', false);
+                                }
+                            });
 
-            {{--            $('#master_cargo_consignment form .destination_hub_id').val(data.destination.id);--}}
-            {{--            $('#master_cargo_consignment form .destination').html(data.destination.name);--}}
+                            $('#cargo_details form input#driver_phone').inputmask({
+                                'mask': '9999-9999999',
+                                'clearIncomplete': true
+                            });
 
-            {{--            $('#master_cargo_consignment form .actual_weight').val(data.actual_weight);--}}
+                            $('#cargo_details form #shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+                                width: '100%',
+                                placeholder: 'Select Shipping Mode*'
+                            }).bind('change', function () {
+                                $(this).valid();
+                            });
+                            cargo_table.rows().remove();
+                            $.each(data.details.details,function (hub,value){
+                                vehicle_seal_number_input = "<input type='hidden' value='"+value['bag_ids']+"' name='bag_ids["+hub+"]' ><div class='form-group'><input type='text' name='vehicle_seal["+hub+"]' class='vehicle_seal form-control' id='vehicle_seal_"+hub+"' data-rule-required='true' data-msg-required='Vehicle Seal is required' placeholder='Enter Vehicle Seal No.*' ></div>";
+                                junctions = value['junctions'];
+                                var rowNo = cargo_table.rows().count();
+                                cargo_table.row.add([rowNo+1,vehicle_seal_number_input,value["destination"],junctions,value['number_of_bags']]);
+                                cargo_table.draw(false);
+                            });
+                            $("#cargo_details form .vehicle_seal").inputmask({
+                                'alias': 'integer',
+                                'allowMinus': false,
+                                'allowPlus': false
+                            });
 
-            {{--            // $.each(data.junctions, function(index, junction) {--}}
-            {{--            //     $('#master_cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');--}}
-            {{--            //     $('#master_cargo_consignment form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');--}}
-            {{--            // });--}}
+                            UnblockPagePermanently();
+                        }
+                        else{
+                            $('#cargo_details').modal('hide');
 
+                            UnblockPagePermanently();
 
-            {{--            $.each(data.routes, function(index, route) {--}}
-            {{--                $('#master_cargo_consignment form .route_management_id').append('<option value="' + route.id + '">' + route.route_code    + '</option>');--}}
-            {{--            });--}}
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    }
+                });
+            });
 
-            {{--            $('#master_cargo_consignment form .route_management_id').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--                width: '100%',--}}
-            {{--                placeholder: 'Select Route'--}}
-            {{--            }).bind('change', function() {--}}
-            {{--                $(this).valid();--}}
-            {{--            });--}}
+            $('#cargo_details form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    var pressed_button = $(this.submitButton);
 
-            {{--            $.each(data.fleets, function(index, fleet) {--}}
-            {{--                console.log(fleet)--}}
-            {{--                $('#master_cargo_consignment form .fleet_id').append('<option value="' + fleet.id + '">' + fleet.reg_number    + '</option>');--}}
-            {{--            });--}}
+                    $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
 
-            {{--            $('#master_cargo_consignment form .fleet_id').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--                width: '100%',--}}
-            {{--                placeholder: 'Select Fleet'--}}
-            {{--            }).bind('change', function() {--}}
-            {{--                $(this).valid();--}}
-            {{--            });--}}
-            {{--            // if(data.junction_1) {--}}
-            {{--            //     $('#master_cargo_consignment form .junction_1').val(data.junction_1);--}}
-            {{--            //     $('#master_cargo_consignment form .junction_1').select2({--}}
-            {{--            //         width: '100%',--}}
-            {{--            //         placeholder: 'Junction 1'--}}
-            {{--            //     }).bind('change', function() {--}}
-            {{--            //         $(this).valid();--}}
-            {{--            //     });--}}
-            {{--            // }--}}
-            {{--            // else{--}}
-            {{--            //     $('#master_cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--            //         width: '100%',--}}
-            {{--            //         placeholder: 'Junction 1'--}}
-            {{--            //     }).bind('change', function() {--}}
-            {{--            //         $(this).valid();--}}
-            {{--            //     });--}}
-            {{--            // }--}}
-            {{--            // if(data.junction_2) {--}}
-            {{--            //     $('#master_cargo_consignment form .junction_2').val(data.junction_2);--}}
-            {{--            //     $('#master_cargo_consignment form .junction_2').select2({--}}
-            {{--            //         width: '100%',--}}
-            {{--            //         placeholder: 'Junction 2',--}}
-            {{--            //         allowClear: true--}}
-            {{--            //     });--}}
-            {{--            // }--}}
-            {{--            // else{--}}
-            {{--            //     $('#master_cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--            //         width: '100%',--}}
-            {{--            //         placeholder: 'Junction 2',--}}
-            {{--            //         allowClear: true--}}
-            {{--            //     })--}}
-            {{--            // }--}}
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-            {{--            $('#master_cargo_consignment form input.actual_weight').inputmask({--}}
-            {{--                'alias': 'decimal',--}}
-            {{--                'allowMinus': false,--}}
-            {{--                'allowPlus': false,--}}
-            {{--                'digits': 2,--}}
-            {{--                'min': 0.1,--}}
-            {{--                'max': 100000--}}
-            {{--            });--}}
+                    blockPagePermanently();
 
-            {{--            $('#master_cargo_consignment form input.phone_number').inputmask({--}}
-            {{--                'mask': '9999-9999999',--}}
-            {{--                'clearIncomplete': true--}}
-            {{--            });--}}
-            {{--            $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});--}}
+                    swal({
+                        text: 'Are you sure you want to submit?',
+                        icon: 'info',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                    }).then(function(confirm) {
+                        if(confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Your Master cargo is being created!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            form.submit();
+                        }
+                        else {
+                            $(form).find('button[type=submit]').prop('disabled', false);
 
-            {{--            $('#master_cargo_consignment form input.cnic').inputmask({--}}
-            {{--                'mask': "99999-9999999-9",--}}
-            {{--                'clearIncomplete': true--}}
-            {{--            }).bind('change', function() {--}}
-            {{--                $(this).valid();--}}
-            {{--            });--}}
-            {{--            $.each(data.shipping_modes, function(index, shipping_mode) {--}}
-            {{--                $('#master_cargo_consignment form .shipping_mode_select').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');--}}
-            {{--            });--}}
-
-            {{--            $('#master_cargo_consignment form .shipping_mode_select').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--                width: '100%',--}}
-            {{--                placeholder: 'Select Shipping Mode*'--}}
-            {{--            }).bind('change', function() {--}}
-            {{--                $(this).valid();--}}
-            {{--            });--}}
-
-            {{--            $.each(data.transport_modes, function(index, transport_mode) {--}}
-            {{--                $('#master_cargo_consignment form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');--}}
-            {{--            });--}}
-
-            {{--            $('#master_cargo_consignment form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--                width: '100%',--}}
-            {{--                placeholder: 'Transport Mode*'--}}
-            {{--            }).bind('change', function() {--}}
-            {{--                $(this).valid();--}}
-
-            {{--                $('#master_cargo_consignment form .transport_mode_vendor').html('');--}}
-
-            {{--                $.each(transport_mode_vendors[this.value], function(index, vendor) {--}}
-            {{--                    var option = new Option(vendor.name, vendor.id, false, false);--}}
-            {{--                    $('#master_cargo_consignment form .transport_mode_vendor').append(option);--}}
-            {{--                });--}}
-
-            {{--                var option = new Option('Others', 0, false, false);--}}
-            {{--                $('#master_cargo_consignment form .transport_mode_vendor').append(option);--}}
-
-            {{--                $('#master_cargo_consignment form .transport_mode_vendor').val(null).trigger('change');--}}
-
-            {{--            });--}}
-
-            {{--            transport_mode_vendors = data.transport_mode_vendors;--}}
-
-            {{--            $('#master_cargo_consignment form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({--}}
-            {{--                width: '100%',--}}
-            {{--                placeholder: 'Vendor*'--}}
-            {{--            }).bind('change', function() {--}}
-            {{--                if (this.value) {--}}
-            {{--                    $(this).valid();--}}
-            {{--                }--}}
-            {{--                console.log(this.value);--}}
-            {{--                if (this.value && this.value == 0) {--}}
-            {{--                    $('#master_cargo_consignment #new_vendor').removeClass('d-none');--}}
-            {{--                }--}}
-            {{--                else {--}}
-            {{--                    $('#master_cargo_consignment #new_vendor').addClass('d-none');--}}
-
-            {{--                    $('#master_cargo_consignment #vendor_name-error').remove();--}}
-            {{--                }--}}
-            {{--            });--}}
-            {{--            $('#master_cargo_consignment form .transport_mode').val(2).trigger('change');--}}
-            {{--            $('#master_cargo_consignment form .transport_mode').prop("disabled", true);--}}
-            {{--            $('#master_cargo_consignment form .shipping_mode_select').val(1).trigger('change');--}}
-            {{--            $('#master_cargo_consignment form .transport_mode_vendor').val(9).trigger('change');--}}
-            {{--            $('#master_cargo_consignment form .transport_mode_vendor').prop("disabled", true);--}}
-            {{--            UnblockPagePermanently();--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--});--}}
-
-            {{--$('#master_cargo_consignment form').validate({--}}
-            {{--    errorClass: 'danger',--}}
-            {{--    successClass: 'success',--}}
-            {{--    errorPlacement: function(error, element) {--}}
-            {{--        error.addClass('w-100').appendTo(element.parent('.form-group'));--}}
-            {{--    },--}}
-            {{--    normalizer: function(value) {--}}
-            {{--        return $.trim(value);--}}
-            {{--    },--}}
-            {{--    submitHandler: function(form) {--}}
-            {{--        var pressed_button = $(this.submitButton);--}}
-
-            {{--        $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');--}}
-
-            {{--        $(form).find('button[type=submit]').attr('disabled', 'disabled');--}}
-
-            {{--        blockPagePermanently();--}}
-
-            {{--        swal({--}}
-            {{--            text: 'Are you sure you want to submit?',--}}
-            {{--            icon: 'info',--}}
-            {{--            buttons: {--}}
-            {{--                cancel: {--}}
-            {{--                    text: 'No',--}}
-            {{--                    value: null,--}}
-            {{--                    visible: true,--}}
-            {{--                    closeModal: true,--}}
-            {{--                },--}}
-            {{--                confirm: {--}}
-            {{--                    text: 'Yes',--}}
-            {{--                    value: true,--}}
-            {{--                    visible: true,--}}
-            {{--                    closeModal: true--}}
-            {{--                }--}}
-            {{--            },--}}
-            {{--            closeOnClickOutside: false,--}}
-            {{--            closeOnEsc: false,--}}
-            {{--        }).then(function(confirm) {--}}
-            {{--            if(confirm) {--}}
-            {{--                swal({--}}
-            {{--                    title: 'Please Wait!',--}}
-            {{--                    text: 'Your Master cargo is being created!',--}}
-            {{--                    icon: 'info',--}}
-            {{--                    buttons: false,--}}
-            {{--                    closeOnClickOutside: false,--}}
-            {{--                    closeOnEsc: false--}}
-            {{--                });--}}
-            {{--                $('#master_cargo_consignment form .transport_mode').prop("disabled", false);--}}
-            {{--                $('#master_cargo_consignment form .transport_mode_vendor').prop("disabled", false);--}}
-            {{--                form.submit();--}}
-            {{--            }--}}
-            {{--            else {--}}
-            {{--                $(form).find('button[type=submit]').prop('disabled', false);--}}
-
-            {{--                UnblockPagePermanently();--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--    }--}}
-            {{--});--}}
+                            UnblockPagePermanently();
+                        }
+                    });
+                }
+            });
             $('#camera_scan_initiate').bind('click', function() {
                 if ($('#camera_scan').hasClass('d-none')) {
                     $('#camera_scan').removeClass('d-none');

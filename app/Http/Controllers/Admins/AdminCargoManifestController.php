@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagStatus;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2JunctionRoutes;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
@@ -1110,7 +1112,12 @@ class AdminCargoManifestController extends Controller
 
     public function create_manifest()
     {
-        return view('admin.cargo.manifest.create');
+        if(Auth::user()->default_hub_id == null)
+        {
+            return back()->with(['error'=>'Default Hub not set for this admin.']);
+        }
+        $shipping_modes = ShippingMode::all();
+        return view('admin.cargo.manifest.create',compact('shipping_modes'));
     }
 
     public function bag_details(Request $request) {
@@ -1120,19 +1127,20 @@ class AdminCargoManifestController extends Controller
             $bag = $bag->first();
 
             if (in_array($bag->status_id, [1, 3, 5])) {
-                $hub_id = $bag->origin_hub_id;
+                $origin_id = Auth::user()->default_hub_id;
                 $destination_hub_id = $bag->destination_hub_id;
+                $mapping = V2JunctionMapping::where([['origin_id',$origin_id],['destination_id',$destination_hub_id],['status',1]]);
 
                 $allowed = FALSE;
 
-                if (session('role_id') == 1) {
-                    $allowed = TRUE;
-                }
-                else if (in_array($hub_id, session('hubs'))) {
+                if($mapping->exists())
+                {
                     $allowed = TRUE;
                 }
 
                 if ($allowed) {
+                        $bag->actual_weight = $request->bag_weight;
+                        $bag->update();
                         $details = array();
 
                         $origin = $bag->origin_hub;
@@ -1143,12 +1151,12 @@ class AdminCargoManifestController extends Controller
                         $details['shipments'] = $bag->shipments;
                         $details['origin'] = $origin->name;
                         $details['destination'] = $destination->name;
-                        $details['actual_weight'] = $request->bag_weight;
+                        $details['bag_weight'] = $request->bag_weight;
 
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
                 }
                 else {
-                    return ['status' => 1, 'error' => 'Given Bag Number\'s does not belong to any of your assigned Hub\'s Cities'];
+                    return ['status' => 1, 'error' => 'Given Bag Number\'s does not have any mapping'];
                 }
             }
             else {
@@ -1159,6 +1167,211 @@ class AdminCargoManifestController extends Controller
             return ['status' => 1, 'error' => 'No Bag with given Bag Number is present'];
         }
     }
+
+    public function cargo_details(Request $request)
+    {
+        $bags = CargoManifestBag::whereIn('id', $request->bag_ids);
+
+        if($bags->exists() && $bags->count() == count($request->bag_ids))
+        {
+            $bags = $bags->get();
+            $origin_id = Auth::user()->default_hub_id;
+            $details = [];
+            foreach ($bags as $bag)
+            {
+//                $details[$bag->destination_hub_id]['origin_id'] = $origin_id;
+                if(!isset($details[$bag->destination_hub_id]["bag_ids"]))
+                {
+                    $details[$bag->destination_hub_id]["bag_ids"] = array();
+                }
+                 array_push($details[$bag->destination_hub_id]["bag_ids"],$bag->id);
+                $details[$bag->destination_hub_id]["number_of_bags"] = isset($details[$bag->destination_hub_id]["number_of_bags"]) ? $details[$bag->destination_hub_id]["number_of_bags"] + 1 : 1;
+//                $details[$bag->destination_hub_id]['shipments'] = isset($details[$bag->destination_hub_id]["shipments"]) ? $details[$bag->destination_hub_id]["shipments"] + $bag->shipments : $bag->shipments;
+//                $details[$bag->destination_hub_id]["destination_id"] = $bag->destination_hub_id;
+                $details[$bag->destination_hub_id]["destination"] = $bag->destination_hub->name;
+
+                $mapping = V2JunctionMapping::where([['origin_id',$origin_id],['destination_id',$bag->destination_hub_id],['status',1]])->first();
+                $details[$bag->destination_hub_id]["junctions"] = array();
+                foreach ($mapping->junctions as $junction)
+                {
+                    array_push($details[$bag->destination_hub_id]["junctions"],City::where('id',$junction->junction_id)->first()->name);
+                }
+                $details[$bag->destination_hub_id]["junctions"] = array_unique($details[$bag->destination_hub_id]["junctions"]);
+
+                $details[$bag->destination_hub_id]['vehicles'] = array();
+                foreach ($mapping->routes as $routes)
+                {
+                    foreach ($routes->vehicles as $vehicles)
+                    {
+                        array_push($details[$bag->destination_hub_id]['vehicles'],$vehicles->vehicle_id);
+                    }
+                }
+
+            }
+           $previous_flag = false;
+           $previous_array = array();
+           foreach ($details as $detail)
+           {
+
+               if($previous_flag)
+               {
+                   $previous_array = array_intersect($previous_array,$detail['vehicles']);
+               }
+               else{
+                   $previous_flag = true;
+                   $previous_array = $detail['vehicles'];
+               }
+           }
+            $vehicles = Fleet::leftjoin('fleet_vendors as fv','fv.id','fleets.vendor_id')
+                ->leftjoin('fleet_drivers as fd','fd.id','fleets.driver_id')
+                ->select(['fleets.id as id','fv.name as vendor_name','fd.name as driver_name','fd.phone_no as driver_phone','fleets.reg_number as reg_number'])
+                ->whereIn('fleets.id',$previous_array)
+                ->get()
+                ->toArray();
+           $data['vehicles'] = $vehicles;
+           $data['details'] = $details;
+           return ['status' => 0, 'details' => $data];
+
+        }
+        else{
+            return ['status' => 1, 'error' => 'Bag Not Found..'];
+        }
+    }
+
+    public function store_manifest(Request $request)
+    {
+        $error_hubs = array();
+        $success_cargo_ids = array();
+        foreach ($request->bag_ids as $hub_id => $bag_ids_array)
+        {
+            $bags = 0;
+            $bags_weight = 0;
+            $actual_weight = 0;
+            $shipments = 0;
+            $bag_ids = explode(',', $bag_ids_array);
+            foreach ($bag_ids as $key => $bag_id) {
+                $bag = CargoManifestBag::find($bag_id);
+
+                if (in_array($bag->status_id, [1, 3, 5])) {
+                    $bags++;
+                    $bags_weight += $bag->shipments_weight;
+                    $actual_weight += $bag->actual_weight;
+                    $shipments += $bag->shipments;
+
+                } else {
+                    unset($bag_ids[$key]);
+                }
+            }
+
+            if(!empty($bag_ids))
+            {
+                $master_cargo = new CargoManifest();
+
+                $master_cargo->origin_hub_id = Auth::user()->default_hub_id;
+                $master_cargo->destination_hub_id = $hub_id;
+                $master_cargo->shipping_mode_id = $request->input('shipping_mode');
+                $master_cargo->transport_mode_id = 1;
+
+                $master_cargo->bags = $bags;
+                $master_cargo->shipments = $shipments;
+                $master_cargo->bags_weight = $bags_weight;
+                $master_cargo->actual_weight = $actual_weight;
+                $master_cargo->created_by = Auth::id();
+
+                if($request->has('vehicle_type'))
+                {
+                    $master_cargo->vehicle_type = 1;
+                    $master_cargo->vehicle_id = $request->vehicle_number;
+                }
+                else{
+                    $master_cargo->vehicle_type = 2;
+                    $master_cargo->vehicle_number = $request->vehicle_number_text;
+                }
+
+                $master_cargo->driver_name = $request->driver_name;
+                $master_cargo->driver_phone = $request->driver_phone;
+                $master_cargo->vendor_name = $request->vendor_name;
+
+                $master_cargo->status_id = 1;
+                $master_cargo->save();
+
+                $master_cargo_id = $master_cargo->id;
+
+                $mapping = V2JunctionMapping::where([['origin_id',Auth::user()->default_hub_id],['destination_id',$hub_id],['status',1]])->first();
+                foreach ($bag_ids as $bag_id) {
+                    $mater_cargo_bags= new ManifestBag();
+
+                    $mater_cargo_bags->cargo_manifest_id = $master_cargo_id;
+                    $mater_cargo_bags->cargo_manifest_bag__id = $bag_id;
+
+                    $mater_cargo_bags->save();
+
+                    $bag = CargoManifestBag::find($bag_id);
+
+                    if($bag->status_id == 1)
+                    {
+                        $bag->status_id = 2;
+                    }
+                    else if($bag->status_id == 3)
+                    {
+                        $bag->status_id = 4;
+                    }
+                    else if($bag->status_id == 5)
+                    {
+                        $bag->status_id = 6;
+                    }
+
+                    $bag->junction_mapping_id = $mapping->id;
+
+                    $bag->update();
+
+                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1);
+                }
+
+                $success_cargo_ids[$hub_id] = $master_cargo_id;
+
+            }
+            else {
+                array_push($error_hubs,$hub_id);
+            }
+        }
+
+        if ($request->filled('submit_and_print_form')) {
+            $print = implode(',',$success_cargo_ids);
+        }
+        else {
+            $print = FALSE;
+        }
+
+        if(count($error_hubs) > 0)
+        {
+            $error = "Every Bag in following Hubs Is Already In Some Cargo Manifest. <br><ul>";
+            foreach ($error_hubs as $error_hub)
+            {
+                $error .= "<li>".City::find($error_hub)->name."</li>";
+            }
+            $error .= "</ul>";
+        }
+        else{
+            $error = FALSE;
+        }
+
+        if(count($success_cargo_ids) > 0)
+        {
+            $success = "Cargo Manifest Created Successfully. <br><ul>";
+            foreach ($success_cargo_ids as $hub_id => $cargo_id)
+            {
+                $success .= "<li>For ".City::find($hub_id)->name." with cargo manifest id ".str_pad($cargo_id, 6, '0', STR_PAD_LEFT)."</li>";
+            }
+            $success .="</ul>";
+        }
+        else{
+            $success = FALSE;
+        }
+
+        return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
+    }
+
 
     public static function print($cargo_id, $type = NULL) {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
