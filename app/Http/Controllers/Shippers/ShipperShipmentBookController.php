@@ -351,7 +351,15 @@ class ShipperShipmentBookController extends Controller
         }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
+                else
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+            }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
@@ -2270,7 +2278,15 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
+                else
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+            }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
