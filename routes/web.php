@@ -979,6 +979,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::post('request/submit','Admins\DeliveryController@request_submit')->name('request_submit');
 			Route::post('request/info','Admins\DeliveryController@delivery_note_info')->name('request.info');
 			Route::post('request/approve','Admins\DeliveryController@request_approve')->name('request.approve');
+			Route::post('otp/generate','Admins\DeliveryController@delivery_note_otp_generation')->name('otp.generate');
+			Route::post('otp/verify','Admins\DeliveryController@delivery_note_otp_verification')->name('otp.verify');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {

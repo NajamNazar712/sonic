@@ -7857,6 +7857,19 @@ class NotificationsController extends Controller
                     $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk','fabiha.shahid@trax.pk'];
                     self::email($subject, $body_updated, $to);
                 }
+                else if ($id == 144) {
+                    $rider = $reference_1_id;
+                    $otp = $reference_2_id;
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $otp, $body);
+                    }
+                    $to = $rider->phone;
+                    self::delivery_note_otp_sms($body, $to);
+                }
             }
         }
     }

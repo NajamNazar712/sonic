@@ -198,6 +198,36 @@
         </div>
     </div>
 
+    <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="OtpModal"
+         aria-hidden="true" style="top:30%;">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content col">
+                <div class="modal-header text-center">
+                    <div class="row align-items-center">
+                        <div class="col sonic_logo align-middle text-left">
+                            <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                        </div>
+
+                        <div class="col trax_logo align-middle text-right">
+                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body  text-center">
+                    <div class="row justify-content-center">
+                        <div class="form-group form-inline">
+                            <input type="text" class="form-control otp" autofocus id="otp_input" placeholder="Enter Verification Code">
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 @endsection
 
@@ -267,6 +297,21 @@
             $('.phone').inputmask({
                 'mask': '9999-9999999',
                 'clearIncomplete': true
+            });
+            $('#otp_input').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask': '999999'
+            });
+            $('body').on('keyup change','#otp_input',function() {
+                if($(this).val().length === 6){
+                    $('#otp_submit').attr('disabled', false);
+                }
+                else{
+                    $('#otp_submit').attr('disabled', true);
+                }
             });
            @if(session('print'))
             var pid = '{{ session('print') }}';
@@ -899,6 +944,60 @@
                 }
 
             });
+
+            $('#otp_submit').on('click', function () {
+                otp_verification();
+            });
+
+            $('#otp_input').keypress(function (event) {
+                if(event.keyCode == 13){
+                    otp_verification();
+                }
+            });
+
+            function otp_generation(){
+                $('#OtpModal').modal('show');
+                var rider = $('#rider_name').val();
+                $.ajax({
+                    url: '{!! route('admin.delivery.note.otp.generate') !!}',
+                    method: 'POST',
+                    data: {
+                        'rider': rider,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                });
+            }
+
+            function otp_verification() {
+                var otp = $('#otp_input').val();
+                var rider = $('#rider_name').val();
+
+                if (otp.length == 6) {
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.otp.verify') !!}',
+                        type: 'POST',
+                        data: {
+                            'rider': rider,
+                            'otp': otp,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status === 0) {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $('#otp_input').val('');
+                            $('#otp_submit').attr('disabled', true);
+                        } else {
+                            $('#OtpModal').modal('hide');
+                            create_delivery_note();
+                        }
+                    });
+                }
+            }
+
             var special_rider_name = '';
             var special_rider_phone = '';
             var special_rider_flag = false;
@@ -1151,7 +1250,7 @@
                             if(special == 1){
                                 $('#SpecialRiderModal').modal('show');
                             }else{
-                                create_delivery_note();
+                                otp_generation();
                             }
                         }
                         
@@ -1192,7 +1291,7 @@
                     special_rider_flag = true;
                     form.reset();
                     $('#SpecialRiderModal').modal('hide');
-                    create_delivery_note();
+                    otp_generation();
                     return false;
                 }
             });
