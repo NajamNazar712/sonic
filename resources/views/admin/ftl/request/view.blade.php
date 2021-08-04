@@ -174,7 +174,7 @@
                                                         </div>
                                                         <div class="col-6">
                                                             <label for="freight_charges" class="pull-left font-weight-bold">Freight Charges</label>
-                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{$ftl->freight_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges">
+                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{($ftl->freight_charges) ? $ftl->freight_charges : $ftl->calculated_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges" data-rule-min="{{$ftl->calculated_charges}}" data-msg-min="Freight Cost can not be less than {{$ftl->calculated_charges}}">
                                                         </div>
                                                     </div>
                                                     <div class="row mb-2">
@@ -450,6 +450,13 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function () {
+            var calculated_charges = "{{$ftl->calculated_charges}}";
+            console.log(calculated_charges);
+            var min_charges = 0.00;
+            if(calculated_charges>0){
+            min_charges = calculated_charges;
+                
+            }
             $('#edit_shipper_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Shipper',
                 width: '100%',

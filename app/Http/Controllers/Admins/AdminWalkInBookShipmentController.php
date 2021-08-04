@@ -49,6 +49,7 @@ use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\FtlRequestAdditionalCost;
 
 class AdminWalkInBookShipmentController extends Controller
 {
@@ -1567,8 +1568,13 @@ class AdminWalkInBookShipmentController extends Controller
 
                 }
                 $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
+                $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
                 $business_category_id = 1;
-                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $ftl_request->total_charges, $delivery_type, null, null, $pickup, $business_category_id,0);
+
+                $calc_total = ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
+                // $ftl_request->total_charges
+
+                $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $calc_total, $delivery_type, null, null, $pickup, $business_category_id,0);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
