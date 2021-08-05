@@ -2883,9 +2883,8 @@ class AdminAPIController extends Controller
                     $datum['vehicle_no'] = $cargo->vehicle_no;
                     $data[] = $datum;
                 }
-
             }
-            if(!$data->isEmpty()){
+            if(!empty($data)){
                 return response()->json(['status' => 0, 'data' => $data]);
             }
             return response()->json(['status' => 1, 'message' => "No cargo found!"]);
