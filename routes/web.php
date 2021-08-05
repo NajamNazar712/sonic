@@ -2227,7 +2227,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('short_received', 'Admins\AdminReportsController@short_received_shipments')->name('short_received');
                 });
             });
-            
+            Route::prefix('short_received_shipments')->name('short_received_shipments.')->group(function (){
+                Route::get('', 'Admins\AdminReportsController@master_cargo_short_received_shipments_index')->name('index');
+                Route::get('list', 'Admins\AdminReportsController@master_cargo_short_received_shipments_list')->name('list');
+            });
+
         });
 
         Route::prefix('retail_sales')->name('retail_sales.')->group(function (){
@@ -2253,14 +2257,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('manifest')->name('manifest.')->group(function () {
-            Route::prefix('bag')->name('bag.')->group(function (){
-                Route::prefix('in_transit')->name('in_transit.')->group(function (){
-                    Route::get('', 'Admins\AdminReportsController@in_transit_index')->name('index');
-                    Route::get('list', 'Admins\AdminReportsController@in_transit_list')->name('list');
-                    Route::post('shipments', 'Admins\AdminReportsController@in_transit_shipments')->name('shipments');
-                    Route::post('short_received', 'Admins\AdminReportsController@short_received_shipments')->name('short_received');
-                });
-            });
             Route::prefix('short_received_shipments')->name('short_received_shipments.')->group(function (){
                 Route::get('', 'Admins\AdminReportsController@manifest_short_received_shipments_index')->name('index');
                 Route::get('list', 'Admins\AdminReportsController@manifest_short_received_shipments_list')->name('list');
