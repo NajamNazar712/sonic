@@ -573,6 +573,30 @@
                 }
             });
             var hub_ids = [];
+            $('#return_status_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+					swal({
+						title: 'Please Wait!',
+						text: 'Transaction(s) are being updated!',
+						icon: 'info',
+						buttons: false,
+						closeOnClickOutside: false,
+						closeOnEsc: false
+					});
+
+					form.submit();
+				}
+			});
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var con_id = parseInt($(this).parent('tr').attr('tracking_number'));
