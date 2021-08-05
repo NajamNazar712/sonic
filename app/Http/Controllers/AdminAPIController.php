@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -40,6 +41,7 @@ use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
+use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +50,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use PharIo\Manifest\Manifest;
 
 class AdminAPIController extends Controller
 {
@@ -2956,60 +2959,47 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 1, 'message' => "No details found!"]);
     }
 
-    /*public function cargo_bag_recieve(Request $request)
+    public function cargo_bag_recieve(Request $request)
     {
-
+        $admin_id = $request->admin_id;
+        $admin = Admin::find($admin_id);
         if ($request->has('bags')) {
             $bag_details = json_decode($request->bags, true);
             foreach ($bag_details as $bag_detail) {
-                $medical_info->employee_id = $employee_request->id;
-                $medical_info->name = $medical_detail['name_of_family_member'];
-                $medical_info->relationship_id = $medical_detail['relation_ship'];
-                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
-                $medical_info->marital_status = $medical_detail['marital_status'];
-                $medical_info->save();
-            }
-        }
-        $admin_id = $request->admin_id;
-        $admin = Admin::find($admin_id);
-        $bag_ids = explode(',', $request->bags);
-        $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
-            ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
-            ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
-            ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
-            ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
-            ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
-            ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id')->get();
-        return response()->json(['status' => 0, 'data' => $bags]);
-        if ($bags->exists()) {
-            $bags = $bags->get();
-            $data = array();
-            foreach ($bags as $bag) {
-                $datum = array();
-                $datum["bag_no"] = $bag->bag_no;
-                $datum["manifest_id"] = $bag->manifest_id;
-                $datum["destination"] = $bag->destination;
-                $datum["origin"] = $bag->origin;
-                $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id);
-                $datum["misroute"] = 0;
-                if ($bag->dest_id != $admin->default_hub_id) {
-                    $datum["misroute"] = 1;
-                }
-                if ($bag->j_dest_id != $admin->default_hub_id) {
-                    $datum["misroute"] = 1;
-                }
-                if ($junctions->exists()) {
-                    $junctions->pluck('junction_id')->toArray();
-                    if (!in_array($admin->default_hub_id, $junctions)) {
-                        $datum["misroute"] = 1;
+                $bag_no = $bag_detail['bag_no'];
+                $destination_id = $bag_detail['destination_id'];
+                $manifest_id = $bag_detail['manifest_id'];
+                $status = $bag_detail['status'];
+                $cargo_manifest_bags = CargoManifestBag::where('seal_number', $bag_no);
+                if ($cargo_manifest_bags->exists()) {
+                    $cargo_manifest_bags = $cargo_manifest_bags->first();
+                    if ($status == 1) {
+                        $cargo_manifest_bags->status_id = 5;
+                        $cargo_manifest_bags->junction_mapping_id = null;
+                        $cargo_manifest_bags->save();
+                        $cargo_manifest_bags_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $cargo_manifest_bags->id)->pluck('shipment_id')->toArray();
+                        $shipments = Shipment::whereIn('id', $cargo_manifest_bags_shipments);
+                        if ($shipments->exists()) {
+                            $shipments = $shipments->get();
+                            foreach ($shipments as $shipment) {
+                                $shipment->shipper_status_id = 11;
+                                $shipment->consignee_status_id = 11;
+                                $shipment->save();
+                                ShipmentsJourneyController::add($shipment->id, 11, 11, NULL, NULL, NULL, $admin_id, NULL, NULL, 1, NULL, NULL);
+                            }
+                        }
+                    } else {
+                        if ($destination_id == $admin->default_hub_id) {
+                            $status_id = 7;
+                        } else {
+                            $status_id = 3;
+                        }
+                        $cargo_manifest_bags->status_id = $status_id;
+                        $cargo_manifest_bags->save();
                     }
                 }
-                $data[] = $datum;
             }
-            return response()->json(['status' => 0, 'data' => $data]);
+            return response()->json(['status' => 0, 'message' => "Bag Recieved!"]);
         }
-        return response()->json(['status' => 1, 'message' => "No details found!"]);
-    }*/
-
-
+    }
 }
