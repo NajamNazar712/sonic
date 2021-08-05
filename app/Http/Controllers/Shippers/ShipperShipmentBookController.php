@@ -77,6 +77,7 @@ use DNS2D;
 
 class ShipperShipmentBookController extends Controller
 {
+
     private function unique_order_id($order_id) {
         if(is_numeric($order_id)){
             $length = strlen(session('prefix'));
@@ -622,7 +623,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     if ($service_type_id == 3 && $payment_mode_id == 4) {
-                        $payment_mode_id == 1;
+                        $payment_mode_id = 1;
                     }
 
                     if ($payment_mode_id == 4) {
@@ -1368,18 +1369,21 @@ class ShipperShipmentBookController extends Controller
                                 ';
                                 }
 
+                        $origin = $return_address_id == NULL ? 'Origin':'Return';
+                        $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
 
+                        $origin_data = $return_address_id == NULL ?  $shipment->pickup_address->city->name : $return_address_city;
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
                                 <td>' . $shipment->order_id . '</td>
                               </tr>
                               <tr>
-                                <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                                '.$originstyle.'
+                                <td class="border twice-bottom"><strong>' . $origin_data . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>';
-                                if($return_address_id == NULL){
+
                                     $table_start .='
                                               <tr>
                                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -1388,18 +1392,8 @@ class ShipperShipmentBookController extends Controller
                                               <tr>
                                                 <td class="color secondary"><strong>Name</strong></td>
                                     ';
-                                }
-                                else{
-                                    $table_start .='
-                                              <tr>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
-                                                <td colspan="2" class="text-center color primary border twice-top twice-left"><strong>Return Address</strong></td>
-                                              </tr>
-                                              <tr>
-                                                <td class="color secondary"><strong>Name</strong></td>
-                                    ';
-                                }
+
+
 
                     } else {
                         $table_start .= '
@@ -1427,7 +1421,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>';
-                        if($return_address_id == NULL){
+
                             $table_start .='
                                               <tr>
                                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -1436,18 +1430,8 @@ class ShipperShipmentBookController extends Controller
                                               <tr>
                                                 <td class="color secondary"><strong>Name</strong></td>
                                     ';
-                        }
-                        else{
-                            $table_start .='
-                                              <tr>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
-                                                <td colspan="2" class="text-center color primary border twice-top twice-left"><strong>Return Address</strong></td>
-                                              </tr>
-                                              <tr>
-                                                <td class="color secondary"><strong>Name</strong></td>
-                                    ';
-                        }
+
+
 
                     }
                     if($shipment->pickup_address->pickup_brand_name != NULL){
@@ -1465,7 +1449,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
 
-                    if($return_address_id == NULL){
+
                         if ($shipment->booking_type_id != 4) {
                             $table_start .= '
                                 <td colspan="3" class="border twice-right">' . $company_name . '</td>
@@ -1483,131 +1467,68 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                 ';
 
-                    }
-                    else{
-
-                        if ($shipment->booking_type_id != 4) {
-                            $table_start .= '
-                                <td colspan="2" class="border twice-right">' . $company_name . '</td>
-                    ';
-                        } else {
-                            $table_start .= '
-                                <td colspan="2" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
-                    ';
-                        }
-                        $table_start .= '
-                                <td class="color secondary border twice-left"><strong>Name</strong></td>
-                                <td colspan="2">' . $shipment->consignee_name . '</td>
-                                <td class="color secondary border twice-left"><strong>City</strong></td>
-                                <td colspan="2">' . $return_address_city . '</td>
-                              </tr>
-
-                              <tr>
-                ';
-                    }
 
 
 
 
+
+                    $address = $return_address_id == NULL ?  $shipment->pickup_address->pickup_address : $return_address ;
+                    $addressstyle = $return_address_id == NULL ?'<td class="color secondary"><strong>Address</strong></td>':'<td style="background-color: #6e6e6e !important;" class="color secondary"><strong>Address</strong></td>';
                     if ($shipment->information_display == 1) {
-                        if($return_address_id == NULL){
+
                             if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                                '.$addressstyle.'
+                                <td colspan="3" class="border twice-right">' . $address . '</td>
                         ';
                             } else {
                                 $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                                '.$addressstyle.'
+                                <td colspan="3" class="border twice-right">' . $address . '</td>
                         ';
                             }
-                        }
-                        else{
-                            if ($shipment->booking_type_id != 4) {
-                                $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="2" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
-                        ';
-                            } else {
-                                $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
-                        ';
-                            }
-                        }
+
+
 
                     } else {
-                        if($return_address_id == NULL){
                             $table_start .= '
                                 <td colspan="4" class="border twice-bottom twice-right"></td>
                                 ';
-                        }
-                        else{
-                            $table_start .= '
-                                <td colspan="3" class="border twice-bottom twice-right"></td>
-                                ';
-                        }
+
 
 
                     }
-                    if($return_address_id == NULL){
+
                         $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Address</strong></td>
                                 <td colspan="3">' . $shipment->consignee_address . '</td>
                               </tr>
                               <tr>
                         ';
-                    }
-                    else{
-                        $table_start .= '
-                                <td class="color secondary border twice-left"><strong>Address</strong></td>
-                                <td colspan="2">' . $shipment->consignee_address . '</td>
-                                <td class="color secondary border twice-left"><strong>Address</strong></td>
-                                <td colspan="2">' . $return_address . '</td>
-                              </tr>
-                              <tr>
-                        ';
-                    }
 
 
+                    $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
+                    $phonenumberstyle = $return_address_id == NULL ? '<td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>' : '<td class="color secondary border twice-bottom" style="background-color: #6e6e6e !important;"><strong>Phone Number(s)</strong></td>';
                     if ($type != 'pdf') {
                         if ($shipment->booking_type_id != 4) {
-                            if($return_address_id == NULL){
                                 $table_start .= '
-                                    <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                                    '.$phonenumberstyle.'
+                                    <td colspan="3" class="border twice-bottom twice-right">' . $phonenumber . '</td>
                                 ';
-                            }
-                            else{
-                                $table_start .= '
-                                    <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                                    
-                                ';
-                            }
 
                         } else {
                             $table_start .= '
-                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            '.$phonenumberstyle.'
+                            <td colspan="3" class="border twice-bottom twice-right">' . $phonenumber . '</td>
                         ';
                         }
                     } else {
                         if ($shipment->booking_type_id != 4) {
-                            if($return_address_id == NULL){
                                 $table_start .= '
                                     <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
                                     <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
                                 ';
-                            }
-                            else{
-                                $table_start .= '
-                                    <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
-                                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                                    
-                                ';
-                            }
+
 
                         } else {
                             $table_start .= '
@@ -1617,7 +1538,6 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
-                    if($return_address_id == NULL){
                         if ($type != 'pdf') {
                             $table_start .= '
                                 <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
@@ -1631,26 +1551,6 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                     ';
                         }
-                    }
-                    else{
-                        if ($type != 'pdf') {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $return_address_phone . '</td>
-                              </tr>
-                    ';
-                        } else {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone No(s).</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $return_address_phone . '</td>
-                              </tr>
-                    ';
-                        }
-                    }
 
 
                     if ($type != 'pdf') {
@@ -1898,7 +1798,10 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
 
                     }
-
+                    else if ($shipment->booking_type_id == 6) {
+                        $shipment_details .= $table_start;
+                        $shipment_details .= $table_end;
+                    }
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
