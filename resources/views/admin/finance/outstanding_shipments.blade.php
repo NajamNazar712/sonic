@@ -548,26 +548,8 @@
 
                                     table.button('.revert_request').enable();
                                     table.button('.bulk_resolved').enable();
-                                    var a = false;
-                                    const arr = [row.data().aging.slice(0,-1)];
-                                    arr.forEach(myfunction);
-                                    function myfunction(item){
-                                        if(item>2){
-                                            a = true;
-
-
-                                        }
-
-                                    }
-                                   
-                                    if(a == false)
-                                    {
                                         table.button('.bulk_adjust_in_payments').enable();
-                                    }
-                                    else{
-                                        table.button('.bulk_adjust_in_payments').disable();
 
-                                    }
                                 }
                             });
                         }
@@ -790,23 +772,9 @@
                 if (selected_rows.length > 0) {
                     table.button('.revert_request').enable();
                     table.button('.bulk_resolved').enable();
-                    flag = true;
-                    table.rows().data().each(function (i,v) {
-                        selected_rows.each(function (j,k) {
-                            if(k == v.id)
-                            {
-                                aging = v.aging.slice(0,-1);
-                                if(aging > 2)
-                                {
-                                    flag = false;
-                                }
-                            }
-                        });
-                    });
-                    console.log(selected_rows);
-                    if(flag) {
+
                         table.button('.bulk_adjust_in_payments').enable();
-                    }
+
                 }
                 else {
                     table.button('.revert_request').disable();
