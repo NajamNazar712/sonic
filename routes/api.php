@@ -225,6 +225,13 @@ Route::name('api.')->group(function () {
                 Route::post('retail_bank_info', 'AdminAPIController@retail_bank_info')->name('retail_bank_info');
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
+
+            Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
+                Route::get('list', 'AdminAPIController@master_cargo')->name('list');
+                Route::post('bags', 'AdminAPIController@cargo_bags')->name('bags');
+                Route::post('bags/validate', 'AdminAPIController@cargo_bags_validator')->name('bags.validate');
+            });
+
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
 
         });

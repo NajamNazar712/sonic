@@ -6,10 +6,13 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Retail\RetailShipmentBookController;
 use App\Http\Controllers\Rider\RiderAPIController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
 use App\http\Models\Admin\Retail\RetailCashDeposit;
 use App\http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\http\Models\Admin\Retail\RetailPaymentMode;
@@ -121,6 +124,7 @@ class AdminAPIController extends Controller
                     $information['name'] = $user->name;
                     $information['phone'] = $user->phone_number;
                     $information['cnic'] = $user->cnic;
+                    $information['cargo_user'] = ($user->role_id == 11) ? 1 : 0;
                     if ($employee->exists()) {
                         $employee = $employee->first();
                         $information['address'] = ($employee->address) ? $employee->address : "" ;
@@ -2836,6 +2840,74 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
         return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+    }
+
+    public function master_cargo(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $bag_no = $request->bag_no;
+        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+        $cargos = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
+            ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
+            ->leftjoin('route_management_junctions as rmj', 'master_cargoes.route_management_id', '=', 'rmj.id')
+            ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+            ->where(function ($query) use ($admin_hubs) {
+                $query->whereIn('master_cargoes.destination_hub_id', $admin_hubs)
+                    ->orwhereIn('rmj.junction_id', $admin_hubs);
+            })
+            ->select('master_cargoes.id as cargo_id', 'master_cargoes.bags as bags', 'master_cargoes.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'f.reg_number as vehicle_no');
+
+        if ($bag_no != null) {
+            $cargos = $cargos->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
+                ->join('bags as b', 'mcb.bag_id', '=', 'b.id')
+                ->where('b.seal_number', $bag_no)
+                ->groupBy('master_cargoes.id');
+        }
+
+        if ($cargos->exists()) {
+            $cargos = $cargos->get();
+            $data = array();
+            foreach ($cargos as $cargo){
+                $cargo_bags = Bag::join('master_cargo_bags as mcb', 'bags.id', '=', 'mcb.bag_id')
+                    ->where('mcb.master_cargo_id', $cargo->cargo_id)
+                    ->pluck('seal_number')->toArray();
+                $datum = array();
+                $datum['cargo_id'] = $cargo->cargo_id;
+                $datum['bags'] = $cargo->bags;
+                $datum['shipments'] = $cargo->shipments;
+                $datum['destination'] = $cargo->destination;
+                $datum['origin'] = $cargo->origin;
+                $datum['vehicle_no'] = $cargo->vehicle_no;
+                $datum['bags_list'] = $cargo_bags;
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No cargo found!"]);
+    }
+
+    public function cargo_bags(Request $request)
+    {
+        $cargo_id = $request->cargo_id;
+        $cargo_bags = Bag::join('master_cargo_bags as mcb', 'bags.id', '=', 'mcb.bag_id')
+            ->where('mcb.master_cargo_id', $cargo_id)
+            ->select('seal_number as bag_no');
+        if($cargo_bags->exists()){
+            $cargo_bags = $cargo_bags->get();
+            return response()->json(['status' => 0, 'bags' => $cargo_bags]);
+        }
+        return response()->json(['status' => 1, 'message' => "No bags found!"]);
+    }
+
+    public function cargo_bags_validator(Request $request)
+    {
+        $bag_id = $request->bag_no;
+        $bags = Bag::where('seal_number', $bag_id);
+        if($bags->exists()){
+            $bags = $bags->first();
+            return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Bag is present"]);
+        }
+        return response()->json(['status' => 0, 'bag_no' => null, 'message' => "Invalid Bag No."]);
     }
 
 }
