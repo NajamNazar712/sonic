@@ -1370,7 +1370,7 @@ class ShipperShipmentBookController extends Controller
                                 }
 
                         $origin = $return_address_id == NULL ? 'Origin':'Return';
-                        $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
+                        $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important; color: white;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
 
                         $origin_data = $return_address_id == NULL ?  $shipment->pickup_address->city->name : $return_address_city;
                         $table_start .= '
@@ -1473,7 +1473,7 @@ class ShipperShipmentBookController extends Controller
 
 
                     $address = $return_address_id == NULL ?  $shipment->pickup_address->pickup_address : $return_address ;
-                    $addressstyle = $return_address_id == NULL ?'<td class="color secondary"><strong>Address</strong></td>':'<td style="background-color: #6e6e6e !important;" class="color secondary"><strong>Address</strong></td>';
+                    $addressstyle = $return_address_id == NULL ?'<td class="color secondary"><strong>Address</strong></td>':'<td style="background-color: #6e6e6e !important; color: white;" class="color secondary"><strong>Address</strong></td>';
                     if ($shipment->information_display == 1) {
 
                             if ($shipment->booking_type_id != 4) {
@@ -1508,7 +1508,7 @@ class ShipperShipmentBookController extends Controller
 
 
                     $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
-                    $phonenumberstyle = $return_address_id == NULL ? '<td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>' : '<td class="color secondary border twice-bottom" style="background-color: #6e6e6e !important;"><strong>Phone Number(s)</strong></td>';
+                    $phonenumberstyle = $return_address_id == NULL ? '<td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>' : '<td class="color secondary border twice-bottom" style="background-color: #6e6e6e !important; color: white;"><strong>Phone Number(s)</strong></td>';
                     if ($type != 'pdf') {
                         if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
