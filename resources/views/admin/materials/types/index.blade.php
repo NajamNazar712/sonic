@@ -217,11 +217,11 @@
                                             <fieldset>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
                                                     <input type="radio" class="custom-control-input bg-primary packaging_category" value="1" name="category_edit" id="colorRadio12">
-                                                    <label class="custom-control-label" for="colorRadio10">Packaging Material</label>
+                                                    <label class="custom-control-label" for="colorRadio12">Packaging Material</label>
                                                 </div>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
                                                     <input type="radio" class="custom-control-input bg-success stationary_category" value="2" name="category_edit" id="colorRadio13">
-                                                    <label class="custom-control-label" for="colorRadio11">Stationary</label>
+                                                    <label class="custom-control-label" for="colorRadio13">Stationary</label>
                                                 </div>
                                             </fieldset>
                                         </div>
@@ -616,6 +616,7 @@
                             index_count++;
                         });
                         $('#edit_material_form input[name="packaging_type_edit"]').attr('checked', false);
+                        $('#edit_material_form input[name="category_edit"]').attr('checked', false);
 
                         if(data.type.packaging_type === 1){
                             $('input.edit_internal').attr('checked', true);

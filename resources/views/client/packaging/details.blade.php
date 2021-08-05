@@ -104,7 +104,6 @@
         </div>
         <div id="proceed_cart">
             <form action="{{route('cod.packaging.requests.checkout')}}" id="material_request_cart_form" method="get">
-                @csrf
                 <input type="hidden" id="size_ids" name="size_ids" value="{{$count}}">
                 <div class="display-inline-block">
                     <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> {{$count}} </span></button>

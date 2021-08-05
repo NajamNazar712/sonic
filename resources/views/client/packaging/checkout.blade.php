@@ -40,6 +40,9 @@
                                             
                                            
                                             @foreach($cart as $index => $item)
+                                            @if ($item->type->status==1)
+                                                
+                                            
                                             <hr>
                                                 <div class="col" id="packaging_{{$item->id}}">
                                                     <input type="hidden" id="size_{{$index}}" name="size[{{$index}}]" value="{{$item->size->id}}">
@@ -69,7 +72,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                           
+                                            @endif
                                             @endforeach
                                         </div>
                                         <div class="col-4">
