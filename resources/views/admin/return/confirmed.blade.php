@@ -264,7 +264,7 @@
                             if(selected_rows !== '' && restricted_rows.length == 0){
                                 swal({
                                     title: 'Are You Sure?',
-                                    text: 'Are you sure, you want to revert this Shipment? Allinone',
+                                    text: 'Are you sure, you want to revert this Shipment?',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: {
@@ -322,6 +322,7 @@
                                                 containerId: 'toast-top-center'
                                             });
                                         }
+                                            table.button('.revert').disable();
                                     });
                                     }
                             });
