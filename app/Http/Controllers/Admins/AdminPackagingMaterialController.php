@@ -53,6 +53,7 @@ use App\Http\Models\WMS\WmsShipmentProduct;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\PackagingMaterialCart;
 use App\Http\Models\ShipperPackagingMaterailType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -1470,6 +1471,7 @@ class AdminPackagingMaterialController extends Controller
             $type->picture = $filename;
         }
         $type->save();
+        
 
         $type_history = new PackagingMaterialTypesHistory();
         $type_history->type_id = $type->id;
@@ -1565,7 +1567,9 @@ class AdminPackagingMaterialController extends Controller
         $type->status = $request->status;
         $type->updated_by = Auth::id();
         $type->save();
-
+        if($type->status== 0){
+            PackagingMaterialCart::where('type_id',$type->id)->delete();
+        }
         $type_history = new PackagingMaterialTypesHistory();
         $type_history->type_id = $request->id;
         $type_history->type = $type->type;

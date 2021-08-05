@@ -592,9 +592,8 @@ class ShipperPackagingMaterialController extends Controller
 
     public function select_categories(){
 
-        $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
         
-        return view('client.packaging.categories')->with(['count' => $cart_count]);
+        return view('client.packaging.categories');
 
     }
 
@@ -650,7 +649,7 @@ class ShipperPackagingMaterialController extends Controller
             $category_name = "Stationary Items";
 
         }
-        return view('client.packaging.products')->with(['packaging_types' => $packaging_types,'shipper_packaging_types' => $shipper->packaging_materails, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures,'category' => $id, 'category_name' => $category_name, 'count' => $cart_count]);
+        return view('client.packaging.products')->with(['packaging_types' => $packaging_types,'shipper_packaging_types' => $shipper->packaging_materails, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures,'category' => $id, 'category_name' => $category_name]);
     }
 
     public function product_details($id){
@@ -697,7 +696,7 @@ class ShipperPackagingMaterialController extends Controller
         }
 
         if ($request->filled('add_cart')) {
-            return redirect()->back()->with('success', 'Product Added');
+            return redirect()->route('cod.packaging.requests.categories')->with('success', 'Product Added');
         }
         else {
             return redirect()->route('cod.packaging.requests.checkout')->with('success', 'Product Added');
@@ -728,6 +727,9 @@ class ShipperPackagingMaterialController extends Controller
             $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
             $payment_mode = PackagingPaymentMode::all();
             return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'pictures' => $pictures]);
+        }
+        else{
+            return redirect()->route('cod.packaging.requests.categories')->with('success', 'Product Added');
         }
   
     }

@@ -12,7 +12,9 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                @include('client.inc.messages')
+                                <div class="col-10">
+                                    @include('client.inc.messages')
+                                </div>
                                     <div class="col">
                                         <h1 class="mb-1 text-center">
                                             Material Request
@@ -47,9 +49,9 @@
         </div>
         <div id="proceed_cart">
             <form action="{{route('cod.packaging.requests.checkout')}}" id="material_request_cart_form" method="get">
-                <input type="hidden" id="size_ids" name="size_ids" value="{{$count}}">
+                <input type="hidden" id="size_ids" name="size_ids" >
                 <div class="display-inline-block">
-                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'> {{$count}} </span></button>
+                    <button type="submit" class="col btn btn-dark width" title="Checkout"><i class="la la-shopping-cart" style="font-size:24px"></i><span class='badge badge-warning' id='cart_count'></span></button>
                 </div>
             </form>
         </div>
@@ -120,6 +122,19 @@
 
     <script type="text/javascript">
         $('document').ready(function(){
+            $.ajax({
+                       url: '{!! route('cod.packaging.requests.get_cart_count') !!}',
+                       method: 'POST',
+                       data: {
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                        if(data.status == 0){
+                            $('#size_ids').val(data.count);
+                            $('#cart_count').html(data.count);
+                            
+                        }
+                   });
             var sizes = [];
             // $('.add_to_cart').on('click', function(){
             //     sizes.push(this.value);
@@ -145,6 +160,8 @@
                     }
                 }
             });
+
+            
         });
     </script>
 

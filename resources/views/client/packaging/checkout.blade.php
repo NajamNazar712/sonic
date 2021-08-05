@@ -12,7 +12,9 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                @include('client.inc.messages')
+                                <div class="col-10">
+                                    @include('client.inc.messages')
+                                </div>
                                 <form action="{{route('cod.packaging.requests.submit')}}" id="material_request_form" method="post">
                                     @csrf
                                     <input type="hidden" value="{{$cart_count}}" id="cart_count">
