@@ -248,7 +248,9 @@ class AdminSearchSonicSeeder extends Seeder
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipment Handover  >  Handover List', 'url'=>'admin.handover.list.index', 'permission_id' => 342),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Shipment Handover  >  Responsibles', 'url'=>'admin.handover.responsibles.index', 'permission_id' => 340),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Power BI Dashboard  >  Report  Sales Dashboard', 'url'=>'admin.power_bi.sales', 'permission_id' => 342),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Power BI Dashboard  >  Operation Dashboard', 'url'=>'admin.power_bi.operation', 'permission_id' => 342)
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Power BI Dashboard  >  Operation Dashboard', 'url'=>'admin.power_bi.operation', 'permission_id' => 342),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings  >  Shippers  >  CCD Shipper', 'url'=>'admin.settings.ccd_booking.index', 'permission_id' => 558)
+
         ));
     }
 }

@@ -1796,6 +1796,7 @@ class GlobalSettingsController extends Controller
 
     public function ccd_booking_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 412);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'ccd_booking');
         $ccd_booking = array();

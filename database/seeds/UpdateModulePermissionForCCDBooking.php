@@ -12,7 +12,7 @@ class UpdateModulePermissionForCCDBooking extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 498, 'name' => 'CCD Shipper', 'module_id' => 2)
+            array('id' => 558, 'name' => 'CCD Shipper', 'module_id' => 2)
         ));
     }
 }
