@@ -356,9 +356,9 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
-                else
                 {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
             }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
@@ -2283,9 +2283,9 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
-                else
                 {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
             }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
@@ -3059,9 +3059,9 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
-                else
                 {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
             }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
@@ -3971,9 +3971,9 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [3,2])->get();}
-                else
                 {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
             }
 
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);

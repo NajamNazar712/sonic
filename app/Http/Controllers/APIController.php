@@ -454,7 +454,7 @@ class APIController extends Controller
               else
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                $query->whereNotIn('id', [3]);
+                $query->whereNotIn('id', [2]);
                 })];
               }
             }
@@ -531,7 +531,7 @@ class APIController extends Controller
               else
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
-                $query->whereNotIn('id', [3]);
+                $query->whereNotIn('id', [2]);
                 })];
               }
             }
