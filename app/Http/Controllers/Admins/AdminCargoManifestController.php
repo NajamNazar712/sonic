@@ -21,6 +21,7 @@ use App\Http\Models\Admin\Fleet;
 use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
+use App\Http\Models\FleetDriver;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
@@ -41,8 +42,6 @@ class AdminCargoManifestController extends Controller
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
-
-        $this->bag_can_be_received_statuses = [2,4,6,8,9,10];
     }
 
     public function manifest_mapping_index()
@@ -1465,9 +1464,10 @@ class AdminCargoManifestController extends Controller
                 ';
         }
         $cargo_ids = explode(',',$request->ids);
+       
         foreach($cargo_ids as $id) {
             $cargo = CargoManifest::find($id);
-
+            
             $sender = $cargo->sender;
             $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
             $html .= '</head>
@@ -1693,13 +1693,200 @@ class AdminCargoManifestController extends Controller
     }
 
     public function manifest_index(){
-        return view('admin.cargo.manifest.index');
+        $shipping_mode = ShippingMode::all();
+        $bag_status = CargoManifestBagStatus::all();
+        return view('admin.cargo.manifest.index')->with(['shipping_mode' => $shipping_mode,'bag_status' => $bag_status]);
     }
     public function manifest_list(){
-        //
+        $bags = CargoManifestBag::leftjoin('manifest_bags as mcb', function ($join) {
+            $join->on('mcb.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
+                ->where('mcb.id', '=',
+                    DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
+        })
+             ->leftjoin('cargo_manifests as cm', 'cm.id', '=', 'mcb.cargo_manifest_id')
+             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
+             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
+             ->leftjoin('shipping_modes as sm', 'cm.shipping_mode_id', '=', 'sm.id')
+             ->leftjoin('admins as a', 'cm.created_by', '=', 'a.id')
+             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
+             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
+             ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity','tm.name as transport_mode','cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as shipments', 'a.name as transitted_by','oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number','bs.name as status','sm.mode as shipping_mode','cm.id as manifest_id','cargo_manifest_bags.seal_number','cm.created_at as manifest_created_at','cargo_manifest_bags.origin_hub_id as origin_hub_id','cargo_manifest_bags.destination_hub_id as destination_hub_id','cm.id as manifest')
+           /* ->whereIn('bags.status_id', [3, 4, 5, 6, 7])*/;
+
+        $datatables = Datatables::of($bags)
+            ->editColumn('bag_type',function ($bag){
+                if($bag->bag_type == 1){
+                    return 'Normal';
+                }else{
+                    return 'Return';
+                }
+            })
+            ->editColumn('manifest_id',function ($bag){
+                return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
+                    ;
+            })
+            ->addColumn('action', function($bag) {
+                if ((session('role_id') == 1 || in_array(453, session('permissions'))) && $bag->status_id == 1) {
+                    return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                      <button type="button" class="dropdown-item edit_seal_number"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Seal Number</div></button>
+                    </div>
+                  </div>
+          ';
+                }
+                else {
+                    return '';
+                }
+            })
+            ->addColumn('shipments', function ($bag) {
+                if($bag->status_id == 2){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $bag->shipments . '</button>';
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('short_received_shipments', function ($bag) {
+                if($bag->status_id == 3){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $bag->shipments . '</button>';
+                }
+                else{
+                    return 0;
+                }
+            })
+            ->addColumn('junctions', function ($bag) {
+                $junction_data = '';
+                $mapping = V2JunctionMapping::where('origin_id',$bag->origin_hub_id)->where('destination_id',$bag->destination_hub_id)->first();
+                if($mapping){
+                    $count = count($mapping->junctions);
+                    if($count > 0){
+
+                        $junction_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $count . "</button>";
+                    }
+                    else{
+                        $junction_data = 0;
+                    }
+                }
+                else{
+                    $junction_data = 0;
+                }
+                return $junction_data;
+
+            })
+            ->addColumn('vehicles', function ($bag) {
+                $vehicle_data = '';
+                $manifest = CargoManifest::find($bag->manifest_id);
+                if($manifest){
+                    if($manifest->vehicle_id != null){
+                      $fleet = Fleet::find($manifest->vehicle_id);
+                        $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $fleet->reg_number . "</button>";
+                    }
+                    else{
+                        $vehicle_data .= "<button class='btn btn-sm btn-outline-info align-middle'>" . $manifest->vehicle_number . "</button>";
+                    }
+                }
+                return $vehicle_data;
+            })
+        ;
+        return $datatables->make(true);
     }
 
-    public function receive_bag_index ()
+    public function update_seal_number(Request $request){
+        $existing = CargoManifestBag::where('seal_number', $request->seal_number)->where('id', '!=', $request->id);
+        if($existing->exists()){
+            return ['status' => 0, 'error' => 'Seal Number must be unique!'];
+        }
+        else{
+            $bag = CargoManifestBag::find($request->id);
+            $bag->seal_number = $request->seal_number;
+            $bag->save();
+
+            return ['status' => 1, 'success' => 'Seal Number updated successfully!'];
+        }
+    }
+    public function junctions_info(Request $request){
+        $bag = CargoManifestBag::find($request->id);
+        if($bag){
+            $received_date = '';
+            if($bag->status_id == 3){
+                $received_date = $bag->updated_at;
+            }
+            $mapping = V2JunctionMapping::where('origin_id',$bag->origin_hub_id)->where('destination_id',$bag->destination_hub_id);
+            if($mapping->exists()){
+                $junction_name = array();
+                $mapping = $mapping->first();
+                if($mapping->junctions){
+                    $junctions = $mapping->junctions->pluck('junction_id')->toArray();
+                    foreach($junctions as $junction_id){
+                        $junction_name[]  = City::find($junction_id)->name;
+                    }
+                    return ['status' => 1, 'junction_name' => $junction_name, 'received_date' => $received_date];
+                }
+                else{
+                    return ['status' => 0, 'error' => 'Seal Number updated successfully!'];
+                }
+            }
+        }
+    }
+    public function vehicle_info(Request $request){
+        if($request->manifest_id){
+            $vehicle_data = array();
+            $manifest = CargoManifest::find($request->manifest_id);
+            if($manifest){
+                if($manifest->vehicle_id != null){
+                    $fleet = Fleet::find($manifest->vehicle_id);
+                    $vehicle_data['vehicle_number'] = $fleet->reg_number;
+                    $driver = FleetDriver::find($fleet->driver_id);
+                    $vehicle_data['driver_phone_no'] = $driver->phone_no;
+                    $vehicle_data['driver_name'] = $driver->name;
+
+                }
+                else{
+                    $vehicle_data['vehicle_number'] = $manifest->vehicle_number;
+                    $vehicle_data['driver_phone_no'] = $manifest->phone_no;
+                    $vehicle_data['driver_name'] = $manifest->driver_name;
+               }
+            }
+            return $vehicle_data;
+        }
+    }
+    public function transitted_shipments(Request $request){
+
+          $tracking_numbers = array();
+          $bag = CargoManifestBag::where('seal_number',$request->seal_number)->first();
+          $cargo_manifest_shipment_ids = array();
+
+          foreach ($bag->shipment as $shipments) {
+              $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
+          }
+
+          $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->select('tracking_number')->get();
+          foreach ($trackings as $number){
+              $tracking_numbers[]  = $number->tracking_number;
+          }
+
+          return $tracking_numbers;
+    }
+    public function short_received_shipments(Request $request){
+
+        $tracking_numbers = array();
+        $bag = CargoManifestBag::where('seal_number',$request->seal_number)->first();
+        $cargo_manifest_shipment_ids = array();
+
+        foreach ($bag->shipment as $shipments) {
+            $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
+        }
+
+        $trackings = Shipment::whereIn('id',$cargo_manifest_shipment_ids)->select('tracking_number')->get();
+        foreach ($trackings as $number){
+            $tracking_numbers[]  = $number->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+ public function receive_bag_index ()
     {
         if(Auth::user()->default_hub_id == null)
         {
@@ -1745,7 +1932,7 @@ class AdminCargoManifestController extends Controller
 
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
                     $join->on('mb.cargo_manifest_id','cargo_manifests.id')
-                        ->where('mb.cargo_manifest_bag__id',$bag->id);
+                        ->where('mb.cargo_manifest_bag_id',$bag->id);
                 })
                     ->select(['cargo_manifests.*'])
                     ->where('cargo_manifests.status_id',1);
@@ -1806,7 +1993,208 @@ class AdminCargoManifestController extends Controller
 
     public function receive_bag_store(Request $request)
     {
-        
+        $bag_exists = array();
+        $bag_misroute = array();
+        $bag_not_exists = array();
+        $bag_not_exists_in_manifest = array();
+        $bag_not_exists_in_mapping = array();
+        $bag_short_received = array();
+        $request_bag_ids = explode(',',$request->bag_ids);
+        foreach ($request_bag_ids as $bag_id)
+        {
+            $bag = CargoManifestBag::where('id', $bag_id)
+                ->whereIn('status_id',$this->bag_can_be_received_statuses);
+
+            if($bag->exists())
+            {
+                $bag = $bag->first();
+                $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
+                    $join->on('mb.cargo_manifest_id','cargo_manifests.id')
+                        ->where('mb.cargo_manifest_bag_id',$bag->id);
+                })
+                    ->select(['cargo_manifests.*'])
+                    ->where('cargo_manifests.status_id',1);
+
+                if($cargo_bag->exists())
+                {
+                    $cargo_bag = $cargo_bag->first();
+                    $mapping = V2JunctionMapping::where('id',$bag->junction_mapping_id);
+
+                    if($mapping->exists())
+                    {
+                        $mapping = $mapping->first();
+                        $misroute = 1;
+                        if($mapping->destination_id == Auth::user()->default_hub_id)
+                        {
+                            $misroute = 0;
+                            $bag->status_id = 7;
+                            $bag->received_shipments = $bag->shipments->count();
+                            $bag->short_received_shipments = 0;
+                        }
+                        if($misroute == 1)
+                        {
+                            foreach ($mapping->junctions as $junction)
+                            {
+                                if($junction->junction_id == Auth::user()->default_hub_id)
+                                {
+                                    $misroute = 0;
+                                    $bag->status_id = 3;
+                                }
+                            }
+                        }
+
+                        if($misroute == 1)
+                        {
+                            $bag->status_id = 5;
+                            $bag->junction_mapping_id = null;
+                            $bag->short_received_shipments = $bag->shipments->count();
+                            $bag->received_shipments = 0;
+                        }
+
+                        $bag->update();
+
+                        $manifest_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id)
+                            ->where('cargo_manifest_id',$cargo_bag->id)->update(['status' => 1]);
+
+                        if($misroute == 0) {
+                            array_push($bag_exists, $bag->id);
+                        }
+                        else{
+                            array_push($bag_misroute, $bag->id);
+                        }
+                        CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,$bag->status_id,Auth::id());
+                    }
+                    else{
+                        array_push($bag_not_exists_in_mapping,$bag_id);
+                    }
+                }
+                else{
+                    array_push($bag_not_exists_in_manifest,$bag_id);
+                }
+            }
+            else{
+                array_push($bag_not_exists,$bag_id);
+            }
+        }
+        foreach ($bag_exists as $bag_id)
+        {
+            $bag = CargoManifestBag::find($bag_id);
+            $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
+                $join->on('mb.cargo_manifest_id','cargo_manifests.id')
+                    ->where('mb.cargo_manifest_bag_id',$bag->id);
+            })
+                ->select(['cargo_manifests.*'])
+                ->where('cargo_manifests.status_id',1);
+
+            if($cargo_bag->exists())
+            {
+                $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->get();
+                $bag_short_received_count = 0;
+                $cargo_short_received = array();
+                foreach ($manifest_bags as $manifest_bag)
+                {
+                    if($manifest_bag->status == 0)
+                    {
+                        if(!in_array($manifest_bag->cargo_manifest_bag_id,$bag_short_received)) {
+                            $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
+                            $short_received_bag->status_id = 9;
+                            $short_received_bag->update();
+                            CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
+                            $bag_short_received_count++;
+                            array_push($bag_short_received, $short_received_bag->id);
+                            array_push($cargo_short_received, $short_received_bag->id);
+                        }
+                        else{
+                            $bag_short_received_count++;
+                        }
+                    }
+                }
+
+                if($bag_short_received_count == 0)
+                {
+                    CargoManifest::find($cargo_bag->id)->update(['status'=>2]);
+                }
+
+                if(count($cargo_short_received) > 0){
+                    foreach ($cargo_short_received as $cargo_short)
+                    {
+                        $bag_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id',$cargo_short)->get(['shipment_id']);
+                        $shipments = array();
+                        foreach ($bag_shipments as $shipment)
+                        {
+                            array_push($shipments,$shipment->shipment_id);
+                        }
+
+                        DisputeController::add_cargo_short_received($cargo_bag->id,$shipments,null,CargoManifestBag::find($cargo_short)->seal_number);
+                    }
+                }
+            }
+        }
+
+        $success_html = false;
+        $misroute_html = false;
+        $bag_not_exists_error = false;
+        $bag_not_exists_in_manifest_error = false;
+        $bag_not_exists_in_mapping_error = false;
+        $bag_short_received_error = false;
+        if(count($bag_not_exists) > 0)
+        {
+            $bag_not_exists_error = "Following Bag(s) doesn\'t exists.<br><ul>";
+            foreach ($bag_not_exists as $v)
+            {
+                $bag_not_exists_error .= "<li>".$v."</li>";
+            }
+            $bag_not_exists_error .= "</ul>";
+        }
+        if(count($bag_not_exists_in_manifest) > 0)
+        {
+            $bag_not_exists_in_manifest_error = "Following Bag(s) doesn\'t exists in any manifest.<br><ul>";
+            foreach ($bag_not_exists_in_manifest as $v)
+            {
+                $bag_not_exists_in_manifest_error .= "<li>".$v."</li>";
+            }
+            $bag_not_exists_in_manifest_error .= "</ul>";
+        }
+        if(count($bag_not_exists_in_mapping) > 0)
+        {
+            $bag_not_exists_in_mapping_error = "Following Bag(s) doesn\'t associated with any mapping.<br><ul>";
+            foreach ($bag_not_exists_in_mapping as $v)
+            {
+                $bag_not_exists_in_mapping_error .= "<li>".$v."</li>";
+            }
+            $bag_not_exists_in_mapping_error .= "</ul>";
+        }
+        if(count($bag_short_received) > 0)
+        {
+            $bag_short_received_error = "Following Bag(s) are short received.<br><ul>";
+            foreach ($bag_short_received as $v)
+            {
+                $bag_short_received_error .= "<li>".$v."</li>";
+            }
+            $bag_short_received_error .= "</ul>";
+        }
+        if(count($bag_exists) > 0)
+        {
+            $success_html = "Following Bag(s) are received successfully.<br><ul>";
+            foreach ($bag_exists as $v)
+            {
+                $success_html .= "<li>".$v."</li>";
+            }
+            $success_html .= "</ul>";
+        }
+        if(count($bag_misroute) > 0)
+        {
+            $misroute_html = "Following Bag(s) are received as misrouted successfully.<br><ul>";
+            foreach ($bag_misroute as $v)
+            {
+                $misroute_html .= "<li>".$v."</li>";
+            }
+            $misroute_html .= "</ul>";
+        }
+
+        return back()->with(['success_html'=>$success_html,'misroute_html'=>$misroute_html,'bag_short_received_error'=>$bag_short_received_error,'bag_not_exists_in_mapping_error'=>$bag_not_exists_in_mapping_error,'bag_not_exists_in_manifest_error'=>$bag_not_exists_in_manifest_error,'bag_not_exist_error'=>$bag_not_exists_error]);
+
     }
+
 
 }
