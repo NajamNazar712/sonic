@@ -3039,8 +3039,7 @@ class AdminAPIController extends Controller
                     if ($bag_short_received_count == 0) {
                         CargoManifest::find($cargo_bag->id)->update(['status' => 2]);
                     }
-
-                    if (count($cargo_short_received) > 0) {
+                    /*if (count($cargo_short_received) > 0) {
                         foreach ($cargo_short_received as $cargo_short) {
                             $bag_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $cargo_short)->get(['shipment_id']);
                             $shipments = array();
@@ -3048,12 +3047,12 @@ class AdminAPIController extends Controller
                                 array_push($shipments, $shipment->shipment_id);
                             }
 
-                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, CargoManifestBag::find($cargo_short)->seal_number);
+                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, CargoManifestBag::find($cargo_short)->seal_number,$admin_id);
                         }
-                    }
+                    }*/
                 }
             }
-            return response()->json(['status' => 0, 'message' => "Bag Recieved!"]);
+            return response()->json(['status' => 0, 'message' => "Bags Recieved!"]);
         }
     }
 }
