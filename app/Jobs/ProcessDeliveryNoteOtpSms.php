@@ -39,8 +39,17 @@ class ProcessDeliveryNoteOtpSms implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->sms->status < 2) {
-            $this->telenor($this->sms);
+        try {
+            if ($this->sms->status < 2) {
+                $this->telenor($this->sms);
+            }
+        }
+        catch(Exception $exception) {
+            $to = ['muhammad.yousuf@trax.pk'];
+            $subject = '[Error] SMS API';
+            $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
+
+            $mail = Mail::to($to)->send(new Notifications($subject, $body));
         }
     }
 
