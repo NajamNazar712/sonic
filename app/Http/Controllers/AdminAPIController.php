@@ -2858,32 +2858,32 @@ class AdminAPIController extends Controller
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->leftjoin('v2_junction_mappings as jm', 'cargo_manifests.junction_mapping_id', '=', 'jm.id')
-            ->where('cargo_manifests.status_id',1)
-            ->where(function ($query) use ($admin) {
-                $query->where('cargo_manifests.destination_hub_id', $admin->default_hub_id)
-                    ->orwhere('jm.destination_id', $admin->default_hub_id);
-            })
+            ->where('cargo_manifests.status_id', 1)
             ->select('cargo_manifests.id as cargo_id', 'cargo_manifests.bags as bags', 'cargo_manifests.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'cargo_manifests.vehicle_number as vehicle_no', 'cargo_manifests.destination_hub_id as destination_id', 'cargo_manifests.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
 
         if ($bag_no != null) {
             $cargos = $cargos->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
                 ->join('cargo_manifest_bags as b', 'mb.cargo_manifest_bag_id', '=', 'b.id')
                 ->where('b.seal_number', $bag_no)
-                ->whereIn('b.status_id', [2,4,6,8,9,10])
+                ->whereIn('b.status_id', [2, 4, 6, 8, 9, 10])
                 ->groupBy('cargo_manifests.id');
         }
         if ($cargos->exists()) {
             $cargos = $cargos->get();
             $data = array();
-            foreach ($cargos as $cargo){
-                $datum = array();
-                $datum['cargo_id'] = $cargo->cargo_id;
-                $datum['bags'] = $cargo->bags;
-                $datum['shipments'] = $cargo->shipments;
-                $datum['destination'] = $cargo->destination;
-                $datum['origin'] = $cargo->origin;
-                $datum['vehicle_no'] = $cargo->vehicle_no;
-                $data[] = $datum;
+            foreach ($cargos as $cargo) {
+                $junctions = V2Junctions::where('junction_mapping_id', $cargos->junction_mapping_id)->pluck('junction_id')->toArray();
+                if ($cargos->destination_id == $admin->default_hub_id || $cargos->j_dest_id == $admin->default_hub_id || in_array($admin->default_hub_id, $junctions)) {
+                    $datum = array();
+                    $datum['cargo_id'] = $cargo->cargo_id;
+                    $datum['bags'] = $cargo->bags;
+                    $datum['shipments'] = $cargo->shipments;
+                    $datum['destination'] = $cargo->destination;
+                    $datum['origin'] = $cargo->origin;
+                    $datum['vehicle_no'] = $cargo->vehicle_no;
+                    $data[] = $datum;
+                }
+
             }
             return response()->json(['status' => 0, 'data' => $data]);
         }
@@ -2895,9 +2895,9 @@ class AdminAPIController extends Controller
         $cargo_id = $request->cargo_id;
         $cargo_bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
             ->where('mb.cargo_manifest_id', $cargo_id)
-            ->whereIn('cargo_manifest_bags.status_id', [2,4,6,8,9,10])
+            ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
             ->select('cargo_manifest_bags.seal_number as bag_no');
-        if($cargo_bags->exists()){
+        if ($cargo_bags->exists()) {
             $cargo_bags = $cargo_bags->get();
             return response()->json(['status' => 0, 'bags' => $cargo_bags]);
         }
@@ -2908,7 +2908,7 @@ class AdminAPIController extends Controller
     {
         $bag_id = $request->bag_no;
         $bags = CargoManifestBag::where('seal_number', $bag_id);
-        if($bags->exists()){
+        if ($bags->exists()) {
             $bags = $bags->first();
             return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Valid Bag No."]);
         }
@@ -2999,8 +2999,8 @@ class AdminAPIController extends Controller
                     }
                 }
                 CargoManifestBagJourneyController::add($cargo_manifest_bags->id, $bag_no, $cargo_manifest_bags->status_id, $admin_id);
-                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id',$cargo_manifest_bags->id)
-                    ->where('cargo_manifest_id',$manifest_id)->update(['status' => 1]);
+                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id', $cargo_manifest_bags->id)
+                    ->where('cargo_manifest_id', $manifest_id)->update(['status' => 1]);
                 array_push($bag_numbers, $bag_no);
             }
             $bag_short_received = array();
@@ -3045,7 +3045,7 @@ class AdminAPIController extends Controller
                                 array_push($shipments, $shipment->shipment_id);
                             }
 
-                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, CargoManifestBag::find($cargo_short)->seal_number,$admin_id);
+                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, CargoManifestBag::find($cargo_short)->seal_number, $admin_id);
                         }
                     }
                 }
