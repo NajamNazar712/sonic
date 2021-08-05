@@ -73,7 +73,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.confirmed.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row align-items-center justify-content-center">
                             <div class="col">
