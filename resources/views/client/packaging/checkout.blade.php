@@ -50,25 +50,33 @@
                                             <hr>
                                                 <div class="col">
                                                     <input type="hidden" id="size_{{$index}}" name="size[{{$index}}]" value="{{$item->size->id}}">
+                                                    <input type="hidden" id="types_{{$index}}" name="types[{{$index}}]" value="{{$item->type->id}}">
                                                     <div class="row">
                                                         <div class="col mb-1 align-middle text-center">
                                                             <img class="" alt="flyer" src="{{asset($pictures[$item->type_id])}}" width="100" height="100">
+                                                            <br>
+                                                            <h4 class="mt-1">{{$item->type->type}}</h4>
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <p>{{$item->size->size}}</p>
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <div class="row justify-content-center">
-                                                                <div class="form-group">
-                                                                    <input type="text" class="form-control text-center number" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                <div class="col-10">
+
+                                                                    <div class="form-group">
+                                                                        <input type="text" class="form-control text-center number" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <div class="row justify-content-center">
-                                                                <div class="form-group">
-                                                                    <input type="text" class="form-control text-center" readonly id="" name="" value="{{$item->size->standard_charges}}" >
-                                                                </div>
+                                                                <div class="col-10">
+                                                                    <div class="form-group">
+                                                                        <input type="text" class="form-control text-center" readonly id="" name="" value="{{$item->size->standard_charges}}" >
+                                                                    </div>
+                                                                </div>   
                                                             </div>
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
