@@ -2376,7 +2376,7 @@ class APIController extends Controller
             }
 
             if ($service_type_id == 3 && $payment_mode_id == 4) {
-                $payment_mode_id == 1;
+                $payment_mode_id = 1;
             }
 
             if ($payment_mode_id == 4) {
@@ -3232,6 +3232,24 @@ class APIController extends Controller
         }
     }
 
+    private function shipment_google_location_name($id, $cities) {
+      if (in_array($id, [1, 2, 53, 61, 63, 17, 19, 25, 18, 51])) {
+        return $cities['origin']['city'];
+      }
+      elseif (in_array($id, [3])) {
+        return $cities['origin']['hub'];
+      }
+      elseif (in_array($id, [4, 15, 11, 49, 56, 6, 7, 9, 12, 13, 52, 54, 55, 58, 59, 62, 20, 21, 22, 23, 24, 44, 47, 48, 57, 60, 50])) {
+        return $cities['destination']['hub'];
+      }
+      elseif (in_array($id, [5, 8, 10, 14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+        return $cities['destination']['city'];
+      }
+      else {
+        return $cities['origin']['city'];
+      }
+    }
+
     private function shipment_google_status_name($id) {
       if (in_array($id, [1])) {
         return 'TICKET_CREATED';
@@ -3260,7 +3278,7 @@ class APIController extends Controller
       elseif (in_array($id, [15])) {
         return 'AVAILABLE_FOR_PICKUP';
       }
-      elseif (in_array($id, [1, 11, 49, 56])) {
+      elseif (in_array($id, [11, 49, 56])) {
         return 'DELAYED';
       }
       elseif (in_array($id, [6, 7, 9, 12, 13, 52, 54, 55, 58, 59, 62])) {
@@ -3291,7 +3309,7 @@ class APIController extends Controller
           $current_status = array();
 
           $current_status['Status'] = 'ERROR';
-          $current_status['Date'] = Carbon::now();
+          $current_status['Date'] = Carbon::now()->toIso8601String();
           $current_status['Error'] = 'Missing Tracking Number';
 
           return response()->json(['CurrentStatus' => $current_status]);
@@ -3309,7 +3327,7 @@ class APIController extends Controller
             $current_status = array();
 
             $current_status['Status'] = 'ERROR';
-            $current_status['Date'] = Carbon::now();
+            $current_status['Date'] = Carbon::now()->toIso8601String();
             $current_status['Error'] = 'Invalid Tracking Number';
 
             return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $request->TrackingNumber]);
@@ -3334,7 +3352,17 @@ class APIController extends Controller
 
               $shipment = $shipment->first();
 
-              $created_date = $shipment->created_at;
+              $cities = array();
+
+              $origin = $shipment->pickup_address->city;
+              $destination = $shipment->pickup_address->city;
+
+              $cities['origin']['city'] = $origin->name;
+              $cities['origin']['hub'] = $origin->hub_city->name;
+              $cities['destination']['city'] = $destination->name;
+              $cities['destination']['hub'] = $destination->hub_city->name;
+
+              $created_date = Carbon::parse($shipment->created_at)->toIso8601String();
 
               $output['CreateDate'] = $created_date;
 
@@ -3361,19 +3389,20 @@ class APIController extends Controller
                   $transit_event = array();
 
                   $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
-                  $transit_event['Date'] = $shipment_journey->created_at;
+                  $transit_event['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                  $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                   $transit_events[] = $transit_event;
 
                   if ($pickup) {
                     if (!isset($output['PickupDate']) && in_array($shipment_journey->shipper_status_id, [2, 53, 61, 63])) {
-                      $pickup_date = $shipment_journey->created_at;
+                      $pickup_date = Carbon::parse($shipment_journey->created_at)->toIso8601String();
 
                       $output['PickupDate'] = $pickup_date;
                     }
 
                     if ($delivered && in_array($shipment_journey->shipper_status_id, [14, 30, 36, 37])) {
-                      $delivered_date = $shipment_journey->created_at;
+                      $delivered_date = Carbon::parse($shipment_journey->created_at)->toIso8601String();
 
                       $output['DeliveredDate'] = $delivered_date;
                     }
@@ -3383,16 +3412,19 @@ class APIController extends Controller
                 $shipment_journey = $shipments_journey->last();
 
                 $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
-                $current_status['Date'] = $shipment_journey->created_at;
+                $current_status['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
               }
               else {
                 $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
-                $current_status['Date'] = $shipment->updated_at;
+                $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
+                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                 $transit_event = array();
 
                 $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
-                $transit_event['Date'] = $shipment->updated_at;
+                $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
+                $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                 $transit_events[] = $transit_event;
               }
@@ -3406,7 +3438,7 @@ class APIController extends Controller
               $current_status = array();
 
               $current_status['Status'] = 'ERROR';
-              $current_status['Date'] = Carbon::now();
+              $current_status['Date'] = Carbon::now()->toIso8601String();
               $current_status['Error'] = 'Invalid Tracking Number';
 
               return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $tracking_number]);
@@ -3418,7 +3450,7 @@ class APIController extends Controller
         $current_status = array();
 
         $current_status['Status'] = 'ERROR';
-        $current_status['Date'] = Carbon::now();
+        $current_status['Date'] = Carbon::now()->toIso8601String();
         $current_status['Error'] = 'Unauthorized Host';
 
         return response()->json(['CurrentStatus' => $current_status]);
