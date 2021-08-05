@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ManifestBag extends Model
 {
+
+    protected $fillable = ['status'];
     public function bag() {
         return $this->belongsTo('App\Http\Models\Admin\CargoManifest\CargoManifestBag', 'cargo_manifest_bag_id', 'id');
     }
