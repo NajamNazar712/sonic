@@ -2227,10 +2227,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     Route::post('short_received', 'Admins\AdminReportsController@short_received_shipments')->name('short_received');
                 });
             });
-            Route::prefix('short_received_shipments')->name('short_received_shipments.')->group(function (){
-                Route::get('', 'Admins\AdminReportsController@master_cargo_short_received_shipments_index')->name('index');
-                Route::get('list', 'Admins\AdminReportsController@master_cargo_short_received_shipments_list')->name('list');
-            });
             
         });
 
@@ -2254,6 +2250,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('work_code_master')->name('work_code_master.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@work_code_master_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@work_code_master_list')->name('list');
+        });
+
+        Route::prefix('manifest')->name('manifest.')->group(function () {
+            Route::prefix('bag')->name('bag.')->group(function (){
+                Route::prefix('in_transit')->name('in_transit.')->group(function (){
+                    Route::get('', 'Admins\AdminReportsController@in_transit_index')->name('index');
+                    Route::get('list', 'Admins\AdminReportsController@in_transit_list')->name('list');
+                    Route::post('shipments', 'Admins\AdminReportsController@in_transit_shipments')->name('shipments');
+                    Route::post('short_received', 'Admins\AdminReportsController@short_received_shipments')->name('short_received');
+                });
+            });
+            Route::prefix('short_received_shipments')->name('short_received_shipments.')->group(function (){
+                Route::get('', 'Admins\AdminReportsController@manifest_short_received_shipments_index')->name('index');
+                Route::get('list', 'Admins\AdminReportsController@manifest_short_received_shipments_list')->name('list');
+            });
         });
     });
 

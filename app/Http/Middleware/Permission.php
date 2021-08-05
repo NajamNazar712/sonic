@@ -532,6 +532,9 @@ class Permission
             'reports.master_cargo.short_received_shipments.index' =>476,
             'reports.master_cargo.short_received_shipments.list' => 476,
 
+            'reports.manifest.short_received_shipments.index' =>555,
+            'reports.manifest.short_received_shipments.list' => 555,
+
             'reports.retail_sales.index' =>493,
             'reports.retail_sales.list' => 493,
 
