@@ -123,40 +123,38 @@ class FTLController extends Controller
     public function ftl_request_add(Request $request)
     {
         $ftl_request = new FtlRequest();
-        $ftl_request->salesperson_id = $request->sale_person;
-        $ftl_request->origin_id = $request->origin;
-        $ftl_request->destination_id = $request->destination;
-        $ftl_request->weight = $request->weight;
-        $ftl_request->quantity = $request->quantity;
-        $ftl_request->vehicle_id = $request->vehicle;
-        $ftl_request->date = $request->date_formatted;
-        $ftl_request->updated_by = Auth::id();
-        $ftl_request->updated_on = now();
+       
         $origin_city = City::find($request->origin);
         $destination_city = City::find($request->destination);
         if($request->shipper == 0)
         {
             $ftl_request->shipper_name = $request->shipper_name;
             $walk_in_weight = WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
-            if ($origin_city->zone_id == $destination_city->zone_id) {
-                $walk_in_weight = $walk_in_weight->chargeable_weight_local;
-            } else {
-                
-                    $zone_class = ZoneClassCity::where(['zone_id' => $destination_city->zone_id, 'city_id' => $destination_city->id])->first();
-                if ($zone_class->class == 1) {
-                    $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_1;
-                } elseif ($zone_class->class == 2) {
-                    $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_2;
-                } elseif ($zone_class->class == 3) {
-                    $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_3;
-                } else {
-                    $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_0;
-                }
-                if($walk_in_weight==0){
+            if($walk_in_weight){
+                if ($origin_city->zone_id == $destination_city->zone_id) {
                     $walk_in_weight = $walk_in_weight->chargeable_weight_local;
+                } else {
+                    
+                        $zone_class = ZoneClassCity::where(['zone_id' => $destination_city->zone_id, 'city_id' => $destination_city->id])->first();
+                        // ->where('zone_classification_id', 2)
+                    if ($zone_class->class == 1) {
+                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_1;
+                    } elseif ($zone_class->class == 2) {
+                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_2;
+                    } elseif ($zone_class->class == 3) {
+                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_3;
+                    } else {
+                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_0;
+                    }
+                    if($walk_in_weight==0){
+                        $walk_in_weight = $walk_in_weight->chargeable_weight_local;
+                    }
                 }
+                $charges = $walk_in_weight * $request->weight ;
+            }else{
+                return back()->with(['error'=>'Weight Charges Not Set']);
             }
-            $charges = $walk_in_weight * $request->weight ;
+
         }
         else{
             $ftl_request->shipper_id = $request->shipper;
@@ -166,6 +164,8 @@ class FTLController extends Controller
                 if($weight_charges->exists()){
                     $weight_charges = $weight_charges->latest()->first();
                     $charges = $weight_charges->local_or_6hr;
+                }else{
+                    return back()->with(['error'=>'Shipper Weight Charges Not Set']);
                 }   
             }else{
                 $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
@@ -200,10 +200,21 @@ class FTLController extends Controller
                             }
                         }             
                     $charges = $weight_charges->local_or_6hr;
+                } else{
+                    return back()->with(['error'=>'Shipper Weight Charges Not Set']);
                 } 
                 
             }
         }
+        $ftl_request->salesperson_id = $request->sale_person;
+        $ftl_request->origin_id = $request->origin;
+        $ftl_request->destination_id = $request->destination;
+        $ftl_request->weight = $request->weight;
+        $ftl_request->quantity = $request->quantity;
+        $ftl_request->vehicle_id = $request->vehicle;
+        $ftl_request->date = $request->date_formatted;
+        $ftl_request->updated_by = Auth::id();
+        $ftl_request->updated_on = now();
         $ftl_request->calculated_charges = $charges;
         $ftl_request->save();
         $this::FTLRequestStatusHistory($ftl_request->id,1,Auth::id());

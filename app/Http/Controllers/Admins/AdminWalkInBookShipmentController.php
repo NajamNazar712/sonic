@@ -1457,7 +1457,6 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function ftl_store(Request $request) {
-       
         $test = 0;
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
