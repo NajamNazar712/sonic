@@ -2848,13 +2848,12 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $bag_no = $request->bag_no;
-        $admin_hubs = Admin::find($admin_id);
-//        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+        $admin = Admin::find($admin_id);
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->where('cargo_manifests.status_id',1)
-            ->where(function ($query) use ($admin_hubs) {
-                $query->where('cargo_manifests.destination_hub_id', $admin_hubs->default_hub_id);
+            ->where(function ($query) use ($admin) {
+                $query->where('cargo_manifests.destination_hub_id', $admin->default_hub_id);
             })
             ->select('cargo_manifests.id as cargo_id', 'cargo_manifests.bags as bags', 'cargo_manifests.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'cargo_manifests.vehicle_number as vehicle_no');
 
@@ -2908,7 +2907,7 @@ class AdminAPIController extends Controller
         $bags = CargoManifestBag::where('seal_number', $bag_id);
         if($bags->exists()){
             $bags = $bags->first();
-            return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Bag is present"]);
+            return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Valid Bag No."]);
         }
         return response()->json(['status' => 0, 'bag_no' => null, 'message' => "Invalid Bag No."]);
     }
