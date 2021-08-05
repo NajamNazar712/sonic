@@ -3606,13 +3606,34 @@ class APIController extends Controller
     public function live_tracking(Request $request){
       $database = app('firebase.database');
       $reference = $database->getReference('OnRouteShipments/in-transit');
+      
+      // if ($reference->getSnapshot()->getChild($request->tracking_id)->exists()) {
+      //       $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->getValue();
+      //       return response()->json(['status' => 0, 'data' => $details]);
+    
+      // } else {
+      //   return response()->json(['status' => 1, 'message' => 'No data found!']);
+         
+      // }
+
       if ($reference->getSnapshot()->getChild($request->tracking_id)->exists()) {
+            $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->set(
+                [
+                    'runner_location_latitude' => $request->latitude,
+                    'runner_location_longitude' => $request->longitude,
+                ]
+            );
             $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->getValue();
             return response()->json(['status' => 0, 'data' => $details]);
-    
-      } else {
-        return response()->json(['status' => 1, 'message' => 'No data found!']);
-         
-      }
+        } else {
+            $reference = $database->getReference('OnRouteShipments/in-transit')
+                ->update([
+                    $request->tracking_id => [
+                        'runner_location_latitude' => $request->latitude,
+                        'runner_location_longitude' => $request->longitude,
+            ]]);
+            $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->getValue();
+            return response()->json(['status' => 0, 'data' => $details]);
+        }
   }
 }
