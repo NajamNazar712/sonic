@@ -240,16 +240,16 @@ class ProcessSMS implements ShouldQueue
 
                         $sms->save();
                     }
-                    else {
-                        $error = TRUE;
-                    }
-                }
-                else if ($xml['data'] == 'Error 102') {
-                    if (!$retry) {
-                        $result = $this->telenor_generate_session_id($base_uri, $sms);
+                    else if ($xml['data'] == 'Error 102') {
+                        if (!$retry) {
+                            $result = $this->telenor_generate_session_id($base_uri, $sms);
 
-                        if ($result) {
-                            $this->telenor_sms($base_uri, $sms, TRUE);
+                            if ($result) {
+                                $this->telenor_sms($base_uri, $sms, TRUE);
+                            }
+                            else {
+                                $error = TRUE;
+                            }
                         }
                         else {
                             $error = TRUE;
