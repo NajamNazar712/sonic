@@ -130,6 +130,7 @@
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
+                        <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered Date</th>
@@ -320,8 +321,8 @@
                             head.push('Actual Weight');
                             head.push('Weight Charges');
                             head.push('Fuel Surcharge');
+                            head.push('GST');
                             head.push('Total Charges');
-                            head.push('Estimated Charges');
                             head.push('Net Payable');
                             head.push('Delivered Date');
                             head.push('Booking Staff ID');
@@ -351,6 +352,7 @@
                                 row.push(values.actual_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.fuel_surcharge);
+                                row.push(values.gst);
                                 row.push(values.total_charges);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
@@ -429,6 +431,7 @@
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
+                    { data:'gst' ,name: 'rs.gst', class: 'align-middle gst'},
                     { data:'total_charges' ,name: 'rs.total_charges', class: 'align-middle total_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},

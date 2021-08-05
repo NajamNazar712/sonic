@@ -652,6 +652,34 @@
 						}
 					});
 				}
+				else if ($(this).hasClass('print_gst_wise')) {
+					$.ajax({
+						url: '{!! route('admin.finance.invoices.print_gst_wise') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'id': id
+						}
+					})
+					.done(function(data) {
+						var tab = window.open('', '_blank');
+
+						if(!tab) {
+							swal({
+								title: 'Popup Blocker Enabled!',
+								text: 'Please add this site to your exception list.',
+								icon: 'error',
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+						}
+						else {
+							tab.document.write(data);
+							tab.document.close();
+							tab.focus();
+						}
+					});
+				}
 			});
 		});
 	</script>

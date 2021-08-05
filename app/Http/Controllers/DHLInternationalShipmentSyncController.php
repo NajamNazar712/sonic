@@ -230,6 +230,7 @@ class DHLInternationalShipmentSyncController extends Controller
         $shipment->shipper_status_id = 14;
         $shipment->consignee_status_id = 14;
         $shipment->save();
+        AdminFinanceController::add_payment($shipment_id, 0);
         ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 14, 14, NULL, NULL, NULL, $this->admin_id);
 
@@ -253,6 +254,7 @@ class DHLInternationalShipmentSyncController extends Controller
         $shipment->shipper_status_id = 22;
         $shipment->consignee_status_id = 22;
         $shipment->save();
+        AdminFinanceController::add_payment($shipment_id, 1);
         ShipmentsJourneyController::add($shipment_id, 5, 5, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 12, 12, NULL, NULL, NULL, $this->admin_id);
         ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, $this->admin_id);
