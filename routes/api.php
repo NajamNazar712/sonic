@@ -83,7 +83,7 @@ Route::name('api.')->group(function () {
 
 	});
 
-	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
+	Route::middleware('APIThrottle:150,0.5')->prefix('shipment')->name('shipment.')->group(function() {
 		Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
 	});
 
