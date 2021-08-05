@@ -1495,11 +1495,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('seal_number', 'Admins\AdminCargoManifestController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminCargoManifestController@create_store')->name('store');
 
-               /* Route::prefix('open_bag')->name('open_bag.')->group(function () {
-                    Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
-                    Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_open_bag_shipment_details')->name('shipment_details');
-                    Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
-                });*/
+               Route::prefix('open_bag')->name('open_bag.')->group(function () {
+                    Route::get('', 'Admins\AdminCargoManifestController@create_open_bag_index')->name('index');
+//                    Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_open_bag_shipment_details')->name('shipment_details');
+                    Route::post('', 'Admins\AdminCargoManifestController@create_open_bag_store')->name('store');
+                });
 
             });
             Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
