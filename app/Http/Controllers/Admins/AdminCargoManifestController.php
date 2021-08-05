@@ -2221,7 +2221,7 @@ class AdminCargoManifestController extends Controller
 
                         $bag->update();
 
-                        $manifest_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id)
+                        ManifestBag::where('cargo_manifest_bag_id',$bag->id)
                             ->where('cargo_manifest_id',$cargo_bag->id)->update(['status' => 1]);
 
                         if($misroute == 0) {
@@ -2248,11 +2248,11 @@ class AdminCargoManifestController extends Controller
         {
             $bag = CargoManifestBag::find($bag_id);
             $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
-                $join->on('mb.cargo_manifest_id','cargo_manifests.id')
-                    ->where('mb.cargo_manifest_bag_id',$bag->id);
+                $join->on('mb.cargo_manifest_id','cargo_manifests.id');
             })
-                ->select(['cargo_manifests.*'])
-                ->where('cargo_manifests.status_id',1);
+                ->select(['cargo_manifests.*','mb.cargo_manifest_bag_id'])
+                ->where('cargo_manifests.status_id',1)
+                ->where('mb.cargo_manifest_bag_id',$bag->id);
 
             if($cargo_bag->exists())
             {
@@ -2303,11 +2303,11 @@ class AdminCargoManifestController extends Controller
         {
             $bag = CargoManifestBag::find($bag_id);
             $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
-                $join->on('mb.cargo_manifest_id','cargo_manifests.id')
-                    ->where('mb.cargo_manifest_bag_id',$bag->id);
+                $join->on('mb.cargo_manifest_id','cargo_manifests.id');
             })
-                ->select(['cargo_manifests.*'])
-                ->where('cargo_manifests.status_id',1);
+                ->select(['cargo_manifests.*','mb.cargo_manifest_bag_id'])
+                ->where('cargo_manifests.status_id',1)
+                ->where('mb.cargo_manifest_bag_id',$bag->id);
 
             if($cargo_bag->exists())
             {
