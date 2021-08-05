@@ -3035,7 +3035,7 @@ class AdminAPIController extends Controller
                     }
 
                     if ($bag_short_received_count == 0) {
-                        CargoManifest::find($cargo_bag->id)->update(['status' => 2]);
+                        CargoManifest::find($cargo_bag->id)->update(['status_id' => 2]);
                     }
                     if (count($cargo_short_received) > 0) {
                         foreach ($cargo_short_received as $cargo_short) {
