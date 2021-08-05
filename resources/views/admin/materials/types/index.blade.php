@@ -99,7 +99,7 @@
                                         <div class="card-body">
                                             <fieldset>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
-                                                    <input type="radio" class="custom-control-input bg-primary" value="1" name="category" id="colorRadio10">
+                                                    <input type="radio" class="custom-control-input bg-primary" value="1" name="category" id="colorRadio10" checked>
                                                     <label class="custom-control-label" for="colorRadio10">Packaging Material</label>
                                                 </div>
                                                 <div class="d-inline-block custom-control custom-radio mr-1">
