@@ -65,7 +65,7 @@
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <div class="row justify-content-center">
                                                                 <div class="form-group">
-                                                                    <input type="text" class="form-control text-center number" readonly id="" name="" value="{{$item->size->standard_charges}}" >
+                                                                    <input type="text" class="form-control text-center" readonly id="" name="" value="{{$item->size->standard_charges}}" >
                                                                 </div>
                                                             </div>
                                                         </div>

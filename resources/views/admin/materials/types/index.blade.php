@@ -17,6 +17,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Type</th>
                         <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Updated At</th>
@@ -422,6 +423,7 @@
                             head.push('S.No');
                             head.push('Type');
                             head.push('Description');
+                            head.push('Category');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('Updated At');
@@ -435,6 +437,7 @@
                                 row.push(index + 1);
                                 row.push(values.type);
                                 row.push(values.description);
+                                row.push(values.category);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
@@ -487,6 +490,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'type', name: 'packaging_material_types.type', class: 'align-middle type'},
                     {data: 'description', name: 'packaging_material_types.description', class: 'align-middle description'},
+                    {data: 'category', name: 'packaging_material_types.category', class: 'align-middle category'},
                     {data: 'created_at', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'packaging_material_types.updated_at', class: 'align-middle updated_at'},
@@ -509,6 +513,10 @@
                         '<option value="1">Enabled</option>' +
                         '<option value="0">Disabled</option>' +
                         '</select>';
+                    var category_select = '<select name="status_select" id="category_select" class="select2 form-control">' +
+                        '<option value="1">Packaging Material</option>' +
+                        '<option value="2">Stationary</option>' +
+                        '</select>';
                     // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
@@ -520,6 +528,12 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.category')){
+                            $(category_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -536,6 +550,12 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#category_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Category",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

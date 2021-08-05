@@ -1212,7 +1212,7 @@ class AdminPackagingMaterialController extends Controller
         }
         $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
-        ->select('packaging_material_types.id','packaging_material_types.type','packaging_material_types.description','packaging_material_types.status','packaging_material_types.created_at','packaging_material_types.updated_at','ac.name as created_by','au.name as updated_by');
+        ->select('packaging_material_types.id','packaging_material_types.type','packaging_material_types.category','packaging_material_types.description','packaging_material_types.status','packaging_material_types.created_at','packaging_material_types.updated_at','ac.name as created_by','au.name as updated_by');
         return Datatables::of($types)
             ->editColumn('status',function ($type){
                 if($type->status == 0){
@@ -1236,6 +1236,15 @@ class AdminPackagingMaterialController extends Controller
                 }
                 else{
                     return $type->updated_at;
+                }
+            })
+            ->editColumn('category', function($type){
+                if($type->category == 1){
+                    return 'Packaging Material';
+                }
+                else{
+                    return 'Stationary';
+
                 }
             })
             ->addColumn('action', function($type) {//Change ID
@@ -1448,6 +1457,8 @@ class AdminPackagingMaterialController extends Controller
         
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->type = $request->edit_type;
+        $type->category = $request->category_edit;
+
         $type->description = $request->edit_description;
         $type->updated_by = Auth::id();
         $type->packaging_type = $packaging_type_edit;

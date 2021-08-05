@@ -12,7 +12,9 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                    @include('client.inc.messages')
+                                    <div class="col-10">
+                                        @include('client.inc.messages')
+                                    </div>
                                     <div class="col">
                                         <h1 class="mb-1 ">
                                             @if ($product->category==1)
@@ -49,32 +51,21 @@
                                                                     </select>
                                                                     </div>
                                                                 </div>
-                                                                <div class="row mt-1">
-                                                                    <div class="col-xs-6" style="margin-left: 13px;">
-                                                                        <div class="product_quantity"> <span>Charges: </span> 
+                                                                <div class="col-4 size_product">
+                                                                    <div class="product_quantity"> <span>Charges: </span> 
                                                                         <div class="form-group">
                                                                         <input type="text" class="form-control text-center " id="charges" name="charges" readonly data-rule-min="1"  data-rule-required="true" data-msg-required="Charges is required">
                                                                         </div>
-
-                                                                            
                                                                     </div>
-                                                                    </div>
-                                                                   
                                                                 </div>
-                                                                
-                                                               
-                                                                <div class="row mt-1">
-                                                                    <div class="col-xs-6" style="margin-left: 13px;">
-                                                                        <div class="product_quantity"> <span>QTY: </span> 
-                                                                            <div class="form-group">
-                                                                                <input type="text" class="form-control text-center number" id="quantity" name="quantity" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
-                                                                            </div>
-
-                                                                            
+                                                                <div class="col-4 size_product">
+                                                                    <div class="product_quantity"> <span>QTY: </span> 
+                                                                        <div class="form-group">
+                                                                            <input type="text" class="form-control text-center number" id="quantity" name="quantity" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
                                                                         </div>
                                                                     </div>
-                                                                   
                                                                 </div>
+                                                                
                                                                 <hr class="singleline">
 
                                                                 <div class="mt-1">
@@ -84,7 +75,7 @@
                                                                 </div>
                                                                 <div class="mt-1">
                                                                     <div class="col-xs-6"> 
-                                                                        <button type="submit" name="checkout" class="btn btn-success shop-button" value="Check Out">Check Out </button>
+                                                                        <button type="submit" name="checkout" class="btn btn-success checkout-button" value="Check Out">Check Out </button>
                                                                     </div>
                                                                 </div>
 
@@ -217,6 +208,12 @@
 .shop-button{
     padding: 8px 58px;
 }
+.checkout-button{
+    padding: 8px 62px;
+}
+                                                              
+                                                              
+
 
 
     </style>
