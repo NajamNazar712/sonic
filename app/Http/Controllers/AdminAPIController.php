@@ -10,6 +10,8 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminUserRequest;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
@@ -2847,30 +2849,27 @@ class AdminAPIController extends Controller
         $admin_id = $request->admin_id;
         $bag_no = $request->bag_no;
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
-        $cargos = MasterCargo::join('cities as oh', 'master_cargoes.origin_hub_id', '=', 'oh.id')
-            ->join('cities as dh', 'master_cargoes.destination_hub_id', '=', 'dh.id')
-            ->leftjoin('route_management_junctions as rmj', 'master_cargoes.route_management_id', '=', 'rmj.id')
-            ->leftjoin('fleets as f', 'master_cargoes.fleet_id', '=', 'f.id')
+        $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
+            ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
+            ->where('cargo_manifests.')
             ->where(function ($query) use ($admin_hubs) {
-                $query->whereIn('master_cargoes.destination_hub_id', $admin_hubs)
-                    ->orwhereIn('rmj.junction_id', $admin_hubs);
+                $query->whereIn('cargo_manifests.destination_hub_id', $admin_hubs);
             })
-            ->select('master_cargoes.id as cargo_id', 'master_cargoes.bags as bags', 'master_cargoes.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'f.reg_number as vehicle_no');
+            ->select('cargo_manifests.id as cargo_id', 'cargo_manifests.bags as bags', 'cargo_manifests.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'cargo_manifests.vehicle_number as vehicle_no');
 
         if ($bag_no != null) {
-            $cargos = $cargos->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
-                ->join('bags as b', 'mcb.bag_id', '=', 'b.id')
+            $cargos = $cargos->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
+                ->join('cargo_manifest_bags as b', 'mb.cargo_manifest_bag_id', '=', 'b.id')
                 ->where('b.seal_number', $bag_no)
-                ->groupBy('master_cargoes.id');
+                ->groupBy('cargo_manifests.id');
         }
-
         if ($cargos->exists()) {
             $cargos = $cargos->get();
             $data = array();
             foreach ($cargos as $cargo){
-                $cargo_bags = Bag::join('master_cargo_bags as mcb', 'bags.id', '=', 'mcb.bag_id')
-                    ->where('mcb.master_cargo_id', $cargo->cargo_id)
-                    ->pluck('seal_number')->toArray();
+                $cargo_bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
+                    ->where('mb.cargo_manifest_id', $cargo->cargo_id)
+                    ->pluck('cargo_manifest_bags.seal_number')->toArray();
                 $datum = array();
                 $datum['cargo_id'] = $cargo->cargo_id;
                 $datum['bags'] = $cargo->bags;
