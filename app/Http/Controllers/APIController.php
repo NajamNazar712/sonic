@@ -445,7 +445,7 @@ class APIController extends Controller
             if($ccd_booking->exists()){
               $ccd_booking = $ccd_booking->first();
               $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
-              if(!in_array($user_id,$ccd_account_tags))
+              if(in_array($user_id,$ccd_account_tags))
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->first();
@@ -522,7 +522,7 @@ class APIController extends Controller
             if($ccd_booking->exists()){
               $ccd_booking = $ccd_booking->first();
               $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
-              if(!in_array($user_id,$ccd_account_tags))
+              if(in_array($user_id,$ccd_account_tags))
               {
                 $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 $query->first();
