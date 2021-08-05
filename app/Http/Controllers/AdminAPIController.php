@@ -12,6 +12,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargo;
@@ -2921,14 +2922,34 @@ class AdminAPIController extends Controller
         $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
-            ->leftjoin('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
-            ->leftjoin('v2_junctions as j', 'cargo_manifest_bags.junction_mapping_id', 'j.junction_mapping_id')
+            ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
-            ->whereIn('cargo_manifest_bags.seal_number',$bag_ids)
-            ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id', 'dh.name as destination', 'oh.name as origin','cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'j.junction_id as junction_id')->get();
-
-        return response()->json(['status' => 0, 'data' => $bags]);
-
+            ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
+            ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
+        if ($bags->exists()) {
+            $data = array();
+            foreach ($bags as $bag) {
+                $datum = array();
+                $datum["bag_no"] = $bags->bag_no;
+                $datum["manifest_id"] = $bags->manifest_id;
+                $datum["destination"] = $bags->destination;
+                $datum["origin"] = $bags->origin;
+                $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->pluck('junction_id')->toArray();
+                $datum["misroute"] = 0;
+                if ($bag->dest_id == $admin->default_hub_id) {
+                    $datum["misroute"] = 1;
+                }
+                if ($bag->j_dest_id == $admin->default_hub_id) {
+                    $datum["misroute"] = 1;
+                }
+                if (in_array($admin->default_hub_id, $junctions)) {
+                    $datum["misroute"] = 1;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => "No details found!"]);
     }
 
 
