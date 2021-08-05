@@ -3986,10 +3986,7 @@ class DeliveryController extends Controller
                           <div class="btn-group">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
-                                <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
-                    <a href="javascript:void(0);" class="dropdown-item upload_receipts"><i class="la la-file-image-o primary"></i> Upload Receipts </a></div>
-                          </div>
-                        ';
+                                <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a></div></div>';
 
                     return $dropdown;
                 }
@@ -5278,30 +5275,41 @@ class DeliveryController extends Controller
         $rider_deliveries = RiderDelivery::join('shipments as s', 's.id', '=', 'rider_deliveries.shipment_id')
             ->where('delivery_note_id', $delivery_note_id)
             ->where('delivered_status', 1)
-            ->select('rider_deliveries.id as id','s.tracking_number as tracking_number', 'rider_deliveries.ccd_image as ccd_image')->get();
+            ->select('rider_deliveries.id as id','s.tracking_number as tracking_number', 's.payment_mode_id as payment_mode_id' ,'rider_deliveries.ccd_image as ccd_image')->get();
         if(count($rider_deliveries) > 0){
             $sorted_array = array();
             $now = Carbon::now();
             foreach ($rider_deliveries as $rider_delivery) {
                 $sorted_array[$rider_delivery->id]['tracking_number'] = $rider_delivery->tracking_number;
+                $image = '';
+                $upload_image = '';
                 if ($rider_delivery->ccd_image != null) {
-                    $image = '';
                     $exists = Storage::disk('public')->exists($rider_delivery->ccd_image);
                     if ($exists) {
                         $image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture" href ="' . asset(Storage::url($rider_delivery->ccd_image)) . '" target="_blank"><i class="la la-image"></i> View</a></div>';
-                    } else {
+                    }
+                    else {
                         $img = Storage::disk('s3')->temporaryUrl($rider_delivery->ccd_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                     $sorted_array[$rider_delivery->id]['ccd_image'] = $image;
-                } else {
+                 } else {                                                    // <----------upload Image button
                     $sorted_array[$rider_delivery->id]['ccd_image'] = '-';
+                }
+                if ($rider_delivery->payment_mode_id == 2)
+                {
+                    $upload_image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture_upload white"  target="_blank"><i class="la la-image"></i> Upload</a></div>';
+
+                    $sorted_array[$rider_delivery->id]['ccd_upload'] = $upload_image;
+                }else{
+                    $sorted_array[$rider_delivery->id]['ccd_upload'] = '-';
                 }
             }
             return ['status' => 0, 'ccd_slips' => $sorted_array];
         }else{
             return ['status' => 1, 'error' => 'No CCD slips found!'];
         }
+
     }
     public function completed_shipments(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
@@ -6904,9 +6912,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     }
 
     public function cash_collection_upload_receipt(Request $request){
-        $file = $request->file('receipt_upload');
+      /*  $file = $request->file('receipt_upload');
         $picture_path = 'img/receipts' . $vendor_request->id  .'.'. $file->extension();;
-        Storage::disk('public')->put($picture_path, file_get_contents($request->delivery_challan));
+        Storage::disk('public')->put($picture_path, file_get_contents($request->delivery_challan));*/
     }
 
 }

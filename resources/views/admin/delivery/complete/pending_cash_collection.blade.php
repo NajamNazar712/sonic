@@ -125,6 +125,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No</th>
                             <th class="border-primary border-darken-1">CCD Slip</th>
+                            <th class="border-primary border-darken-1">CCD Upload </th>
 
                         </tr>
                         </thead>
@@ -140,17 +141,18 @@
             </div>
         </div>
     </div>
+            {{--div for upload image --}}
     <div class="modal fade" id="image_upload" data-backdrop="static" role="dialog" aria-labelledby="image_upload" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="excel_upload_modal_title">Upload Receipts</h4>
+                    <h4 class="modal-title" id="excel_upload_modal_title">Upload Receipt</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="upload_image_form" class="form-horizontal" method="POST" action="{{route('admin.cash_collection.pending.cash_collection_upload_receipt')}}" novalidate="novalidate" enctype="multipart/form-data">
+                    <form id="upload_image_form" class="form-horizontal" method="POST" action="#" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <input type="hidden" name="receipt_image_input" id="receipt_image_input">
                         <div class="row align-items-center justify-content-center">
@@ -175,6 +177,7 @@
             </div>
         </div>
     </div>
+        {{--it ends here --}}
 @endsection
 
 @section('css')
@@ -634,12 +637,6 @@
                 });
 
             });
-            $('body').on('click','.upload_receipts',function () {
-                var rowid = $(this).parents('tr').attr('id');
-                    // modal calling -----------------
-               $('#receipt_image_input').val(rowid);
-                $('#image_upload').modal('show');
-            });
 
             var select = $('#track_form .tracking_numbers').selectize({
                 placeholder: 'Tracking Number(s)',
@@ -851,7 +848,8 @@
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                                     {name: 'tracking_number', class: 'align-middle tracking_number form-group'},
-                                    {name: 'ccd_image', class: 'align-middle ccd_image form-group'}
+                                    {name: 'ccd_image', class: 'align-middle ccd_image form-group'},
+                                    {name: 'ccd_upload', class: 'align-middle ccd_upload form-group'}
                                 ],
 
                                 rowCallback: function(row, data, index) {
@@ -866,13 +864,23 @@
                                 }
                             });
 
+                            //upload image modal calling
+                            $('body').on('click','.ccd_upload',function () {
+                                var rowid = $(this).parents('tr').attr('id');
+                                // modal calling -----------------
+                                $('#receipt_image_input').val(rowid);
+                                $('#image_upload').modal('show');
+
+                                $('#ViewCCDSlip').modal('hide');
+
+                            });
+
                             $.each(data.ccd_slips, function (index, value) {
-                                ccd_slip_table.row.add([0, value.tracking_number, value.ccd_image]);
+                                ccd_slip_table.row.add([0, value.tracking_number, value.ccd_image, value.ccd_upload]);
                                 ccd_slip_table.draw(true);
                             });
                         }
                     });
-
             });
 
             $('#ViewCCDSlip').on('hidden.bs.modal', function () {
