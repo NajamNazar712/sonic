@@ -16,7 +16,36 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            @if(session('success_html'))
+                                <div class="alert alert-success">
+                                    {!! session('success_html') !!}
+                                </div>
+                            @endif
+                            @if(session('misroute_html'))
+                                <div class="alert alert-info">
+                                    {!! session('misroute_html') !!}
+                                </div>
+                            @endif
+                            @if(session('bag_short_received_error'))
+                                <div class="alert alert-danger">
+                                    {!! session('bag_short_received_error') !!}
+                                </div>
+                            @endif
+                            @if(session('bag_not_exists_in_mapping_error'))
+                                <div class="alert alert-danger">
+                                    {!! session('bag_not_exists_in_mapping_error') !!}
+                                </div>
+                            @endif
+                            @if(session('bag_not_exists_in_manifest_error'))
+                                <div class="alert alert-danger">
+                                    {!! session('bag_not_exists_in_manifest_error') !!}
+                                </div>
+                            @endif
+                            @if(session('bag_not_exist_error'))
+                                <div class="alert alert-danger">
+                                    {!! session('bag_not_exist_error') !!}
+                                </div>
+                            @endif
                             <form id="add_bag_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                                 <div id="camera_scan" class="d-none">
                                     <div id="camera_view" class="camera_view"></div>
