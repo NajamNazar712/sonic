@@ -643,7 +643,7 @@ class AdminCargoManifestController extends Controller
     
     public function create_bag_seal_number(Request $request) {
         if ($request->filled('seal_number')) {
-            $seal_number = CargoManifestBag::where('seal_number', $request->input('seal_number'));
+            $seal_number = CargoManifestBag::where('seal_number', $request->input('seal_number'))->where('open_bag', 0);
 
             if ($request->has('id')) {
                 $seal_number = $seal_number->where('id', '!=', $request->input('id'));
@@ -1062,6 +1062,7 @@ class AdminCargoManifestController extends Controller
                 $bag->type = $bag_type;
                 $bag->transport_mode_id = 2;
                 $bag->status_id = 1;
+                $bag->open_bag = 1;
                 $bag->save();
 
                 CargoManifestBagJourneyController::add($bag->id,$bag->seal_number, $bag->status_id, Auth::id(), NULL, NULL);

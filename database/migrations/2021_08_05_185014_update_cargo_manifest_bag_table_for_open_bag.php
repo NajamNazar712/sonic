@@ -13,7 +13,9 @@ class UpdateCargoManifestBagTableForOpenBag extends Migration
      */
     public function up()
     {
-        //
+        Schema::table('cargo_manifest_bags', function (Blueprint $table) {
+            $table->integer('open_bag')->index()->default(0);
+        });
     }
 
     /**
@@ -23,6 +25,8 @@ class UpdateCargoManifestBagTableForOpenBag extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('cargo_manifest_bags', function (Blueprint $table) {
+            $table->dropColumn('open_bag');
+        });
     }
 }
