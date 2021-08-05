@@ -2852,7 +2852,7 @@ class AdminAPIController extends Controller
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->where('cargo_manifests.status_id',1)
-            ->where('cargo_manifests.destination_hub_id', $admin->default_hub_id)
+//            ->where('cargo_manifests.destination_hub_id', $admin->default_hub_id)
             /*->where(function ($query) use ($admin) {
                 $query->where('cargo_manifests.destination_hub_id', $admin->default_hub_id);
             })*/
