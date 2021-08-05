@@ -49,6 +49,7 @@ use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use DNS2D;
 
 class AdminWalkInBookShipmentController extends Controller
 {
@@ -702,9 +703,12 @@ class AdminWalkInBookShipmentController extends Controller
                         <tbody>
                           <tr>
                             <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>
@@ -1764,9 +1768,12 @@ class AdminWalkInBookShipmentController extends Controller
                         <tbody>
                           <tr>
                             <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>

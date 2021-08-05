@@ -163,7 +163,8 @@ return [
         Buzz\LaravelGoogleCaptcha\CaptchaServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
         Barryvdh\Snappy\ServiceProvider::class,
-        Fx3costa\LaravelChartJs\Providers\ChartjsServiceProvider::class
+        Fx3costa\LaravelChartJs\Providers\ChartjsServiceProvider::class,
+        Milon\Barcode\BarcodeServiceProvider::class
     ],
 
     /*
@@ -215,7 +216,10 @@ return [
 
         'SnappyPDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
         'SnappyImage' => Barryvdh\Snappy\Facades\SnappyImage::class,
-        'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class
+        'PDF' => Barryvdh\Snappy\Facades\SnappyPdf::class,
+
+        'DNS1D' => Milon\Barcode\Facades\DNS1DFacade::class,
+        'DNS2D' => Milon\Barcode\Facades\DNS2DFacade::class
     ],
 
 ];

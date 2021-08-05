@@ -14,6 +14,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\PODImage;
 
 class AdminInternationalShipmentsController extends Controller
 {
@@ -40,16 +41,51 @@ class AdminInternationalShipmentsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->addColumn('pod_file', function ($shipments) {
+                $pod_image = PODImage::where('shipment_id',$shipments->shipment_id);
+                if($pod_image->exists()){
+                    $pod_image = asset('uploads/pod_images/' . $pod_image->latest()->first()->pod_file);
+                    return '<a class="btn btn-sm btn-outline-info align-middle pod_file_view" href="'.$pod_image.'" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }
+            })
             ->addColumn('action',function ($shipments) {
 
-                $dropdown = '
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                $pod_file = PODImage::where('shipment_id' , $shipments->shipment_id);
+
+                if ($pod_file->exists()) {
+                    $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                            </div>
                         </div>
-                    </div>
-                ';
+                    ';
+                }else{
+                    $shipment_check = Shipment::find($shipments->shipment_id);
+                    if($shipment_check->shipper_status_id == 14){
+                        $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                                <button type="button" class="dropdown-item upload_pod" data-target-id="' . $shipments->shipment_id . '" data-toggle="modal" data-target="#UploadPOD"><i class="ft-plus-circle"></i> Upload POD</button>
+                            
+                                </div>
+                        </div>
+                    ';
+                    }else{
+                        $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item remove"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                            </div>
+                        </div>
+                    ';
+                    }
+                   
+                }
 
                 return $dropdown;
             });

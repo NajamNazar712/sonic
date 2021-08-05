@@ -314,6 +314,14 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Request(s) are being marked Closed.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                                     if (confirm) {
                                         $.ajax({
                                             url: '{!! route('admin.crm.close') !!}',
@@ -340,6 +348,7 @@
                                                 table.rows().deselect();
 
                                                 table.draw('false');
+                                                swal.close();
                                             });
                                     }
                                 });
