@@ -2851,7 +2851,7 @@ class AdminAPIController extends Controller
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
-            ->whereIn('cargo_manifests.status_id',[2,4,6,8,9,10])
+            ->where('cargo_manifests.status_id',1)
             ->where(function ($query) use ($admin_hubs) {
                 $query->whereIn('cargo_manifests.destination_hub_id', $admin_hubs);
             })
@@ -2861,6 +2861,7 @@ class AdminAPIController extends Controller
             $cargos = $cargos->join('manifest_bags as mb', 'cargo_manifests.id', '=', 'mb.cargo_manifest_id')
                 ->join('cargo_manifest_bags as b', 'mb.cargo_manifest_bag_id', '=', 'b.id')
                 ->where('b.seal_number', $bag_no)
+                ->whereIn('b.status_id', [2,4,6,8,9,10])
                 ->groupBy('cargo_manifests.id');
         }
         if ($cargos->exists()) {
@@ -2869,6 +2870,7 @@ class AdminAPIController extends Controller
             foreach ($cargos as $cargo){
                 $cargo_bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
                     ->where('mb.cargo_manifest_id', $cargo->cargo_id)
+                    ->whereIn('cargo_manifest_bags.status_id', [2,4,6,8,9,10])
                     ->pluck('cargo_manifest_bags.seal_number')->toArray();
                 $datum = array();
                 $datum['cargo_id'] = $cargo->cargo_id;
