@@ -5311,9 +5311,7 @@ class DeliveryController extends Controller
                     $upload_image .= ' <div class="col">
                                 <div class="form-group">
                                 <input type="hidden" name="shipment_ids[]" value="'. $rider_delivery->shipment_id .'">
-                                    <input type="file" name="images['. $rider_delivery->shipment_id .']" class="w-20p p-1 border-primary"
-                                           title="Select File"
-                                           data-msg-required="File is required" data-rule-maxsize="5242880">
+                                    <input type="file" name="images['. $rider_delivery->shipment_id .']" class="w-20p p-1 border-primary" title="Select File" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-maxsize="5242880">
                                 </div> 
                             </div>';
 
@@ -6947,16 +6945,20 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     public function cash_collection_upload_receipt(Request $request)
     {
         $delivery_note_id = $request->input('ccd_delivery_note_id');
-        foreach ($request->shipment_ids as $shipment_id) {
-            if(array_key_exists($shipment_id, $request->images)) {
-                $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
-                if ($rider_delivery->exists()) {
-                    $rider_delivery = $rider_delivery->first();
+        if(count($request->shipment_ids) > 0){
+            if(count($request->images) > 0) {
+                foreach ($request->shipment_ids as $shipment_id) {
+                    if (array_key_exists($shipment_id, $request->images)) {
+                        $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
+                        if ($rider_delivery->exists()) {
+                            $rider_delivery = $rider_delivery->first();
 
-                    $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
-                    Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
-                    $rider_delivery->ccd_image = $picture_path;
-                    $rider_delivery->save();
+                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
+                            Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
+                            $rider_delivery->ccd_image = $picture_path;
+                            $rider_delivery->save();
+                        }
+                    }
                 }
             }
         }
