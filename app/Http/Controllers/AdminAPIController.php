@@ -2936,13 +2936,13 @@ class AdminAPIController extends Controller
                 $datum["origin"] = $bag->origin;
                 $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->pluck('junction_id')->toArray();
                 $datum["misroute"] = 0;
-                if ($bag->dest_id == $admin->default_hub_id) {
+                if ($bag->dest_id != $admin->default_hub_id) {
                     $datum["misroute"] = 1;
                 }
-                if ($bag->j_dest_id == $admin->default_hub_id) {
+                if ($bag->j_dest_id != $admin->default_hub_id) {
                     $datum["misroute"] = 1;
                 }
-                if (in_array($admin->default_hub_id, $junctions)) {
+                if (!in_array($admin->default_hub_id, $junctions)) {
                     $datum["misroute"] = 1;
                 }
                 $data[] = $datum;
