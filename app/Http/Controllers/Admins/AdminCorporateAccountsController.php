@@ -179,7 +179,7 @@ class AdminCorporateAccountsController extends Controller
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             if(($rate_type == 1 && $rate_type_id == null) || $rate_type_id == 1){
                 $weight = CorporateStandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -750,7 +750,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 1;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -759,7 +759,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 1;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -966,7 +966,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 2;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -975,7 +975,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 2;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -1178,7 +1178,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 3;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -1187,7 +1187,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 3;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -1393,7 +1393,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 4;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -1402,7 +1402,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 4;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -1767,7 +1767,7 @@ class AdminCorporateAccountsController extends Controller
             }
             $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = CorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = CorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -1781,22 +1781,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -1811,22 +1811,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -1933,7 +1933,7 @@ class AdminCorporateAccountsController extends Controller
             }
             $hub_delivery_type_status = PendingCorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = PendingCorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = PendingCorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -1947,22 +1947,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -1977,22 +1977,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -2077,7 +2077,7 @@ class AdminCorporateAccountsController extends Controller
             }
             $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = PendingCorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = PendingCorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -2091,22 +2091,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -2121,22 +2121,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -2739,7 +2739,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -2749,7 +2749,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -3087,7 +3087,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -3097,7 +3097,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -3432,7 +3432,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -3442,7 +3442,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -3780,7 +3780,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -3790,7 +3790,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -4791,7 +4791,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -4801,7 +4801,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -5008,7 +5008,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -5018,7 +5018,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -5226,7 +5226,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -5236,7 +5236,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -5443,7 +5443,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -5453,7 +5453,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -5767,7 +5767,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
                         $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                         $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                        $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                         $history_rate_origin_hub->save();
                     }
                 }
@@ -5776,7 +5776,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
                         $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                         $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                        $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                         $history_rate_destination_hub->save();
                     }
                 }
@@ -6356,7 +6356,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                         $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                        $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                        $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -6365,7 +6365,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                         $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                        $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                        $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -7647,7 +7647,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -7657,7 +7657,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -7863,7 +7863,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -7873,7 +7873,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -8079,7 +8079,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -8089,7 +8089,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -8295,7 +8295,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -8306,7 +8306,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -8564,7 +8564,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
                             $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                             $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                            $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                             $history_rate_origin_hub->save();
                         }
                     }
@@ -8573,7 +8573,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_destination_hub = new HistoryCorporateDefaultRateDestinationHub();
                             $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                             $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                            $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                             $history_rate_destination_hub->save();
                         }
                     }
@@ -9058,7 +9058,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                             $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                            $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -9067,7 +9067,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                             $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                            $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -9621,7 +9621,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
                             $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                             $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                            $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                             $history_rate_origin_hub->save();
                         }
                     }
@@ -9630,7 +9630,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
                             $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                             $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                            $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                             $history_rate_destination_hub->save();
                         }
                     }
@@ -10195,7 +10195,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                             $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                            $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -10204,7 +10204,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                             $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                            $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -11134,7 +11134,7 @@ class AdminCorporateAccountsController extends Controller
             }
         }
 
-        $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
         $overnight_origins = [];
         $overland_origins = [];
@@ -11145,22 +11145,22 @@ class AdminCorporateAccountsController extends Controller
 
                 if($index == 1){
                     foreach($origin as $origin_data){
-                        $overnight_origins[] = $origin_data->hub_id;
+                        $overnight_origins[] = $origin_data->city_id;
                     }
                 }
                 else if($index == 2){
                     foreach($origin as $origin_data){
-                        $overland_origins[] = $origin_data->hub_id;
+                        $overland_origins[] = $origin_data->city_id;
                     }
                 }
                 else if($index == 3){
                     foreach($origin as $origin_data){
-                        $detain_origins[] = $origin_data->hub_id;
+                        $detain_origins[] = $origin_data->city_id;
                     }
                 }
                 else if($index == 4){
                     foreach($origin as $origin_data){
-                        $sameday_origins[] = $origin_data->hub_id;
+                        $sameday_origins[] = $origin_data->city_id;
                     }
                 }
 
@@ -11175,22 +11175,22 @@ class AdminCorporateAccountsController extends Controller
 
                 if($index == 1){
                     foreach($destination as $destination_data){
-                        $overnight_destinations[] = $destination_data->hub_id;
+                        $overnight_destinations[] = $destination_data->city_id;
                     }
                 }
                 else if($index == 2){
                     foreach($destination as $destination_data){
-                        $overland_destinations[] = $destination_data->hub_id;
+                        $overland_destinations[] = $destination_data->city_id;
                     }
                 }
                 else if($index == 3){
                     foreach($destination as $destination_data){
-                        $detain_destinations[] = $destination_data->hub_id;
+                        $detain_destinations[] = $destination_data->city_id;
                     }
                 }
                 else if($index == 4){
                     foreach($destination as $destination_data){
-                        $sameday_destinations[] = $destination_data->hub_id;
+                        $sameday_destinations[] = $destination_data->city_id;
                     }
                 }
 
@@ -11684,7 +11684,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 1;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -11694,7 +11694,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 1;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -11896,7 +11896,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 2;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -11906,7 +11906,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 2;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -12104,7 +12104,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 3;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -12114,7 +12114,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 3;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -12315,7 +12315,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 4;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -12325,7 +12325,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 4;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -13097,7 +13097,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -13107,7 +13107,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -13433,7 +13433,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -13443,7 +13443,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -13773,7 +13773,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -13783,7 +13783,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -14115,7 +14115,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -14125,7 +14125,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -15062,7 +15062,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -15072,7 +15072,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -15270,7 +15270,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -15280,7 +15280,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -15478,7 +15478,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -15488,7 +15488,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -15685,7 +15685,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -15695,7 +15695,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -15999,7 +15999,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
                         $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                         $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                        $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                         $history_rate_origin_hub->save();
                     }
                 }
@@ -16008,7 +16008,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
                         $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                         $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                        $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                         $history_rate_destination_hub->save();
                     }
                 }
@@ -16564,7 +16564,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateRateOriginHub();
                         $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                         $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                        $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                        $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -16573,7 +16573,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateRateDestinationHub();
                         $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                         $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                        $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                        $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -17775,7 +17775,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -17785,7 +17785,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -17983,7 +17983,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -17993,7 +17993,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -18190,7 +18190,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -18200,7 +18200,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -18397,7 +18397,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -18407,7 +18407,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -18703,7 +18703,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
                             $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                             $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                            $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                             $history_rate_origin_hub->save();
                         }
                     }
@@ -18712,7 +18712,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_destination_hub = new HistoryCorporateDefaultRateDestinationHub();
                             $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                             $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                            $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                             $history_rate_destination_hub->save();
                         }
                     }
@@ -19151,7 +19151,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                             $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                            $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -19160,7 +19160,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                             $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                            $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -19715,7 +19715,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
                             $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                             $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                            $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                             $history_rate_origin_hub->save();
                         }
                     }
@@ -19724,7 +19724,7 @@ class AdminCorporateAccountsController extends Controller
                             $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
                             $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                             $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                            $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                             $history_rate_destination_hub->save();
                         }
                     }
@@ -20287,7 +20287,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateRateOriginHub();
                             $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                             $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                            $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -20296,7 +20296,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateRateDestinationHub();
                             $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                             $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                            $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -21432,7 +21432,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateDefaultRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 1;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -21442,7 +21442,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 1;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -21613,7 +21613,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateDefaultRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 2;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -21623,7 +21623,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 2;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -21792,7 +21792,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateDefaultRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 3;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -21802,7 +21802,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 3;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -21971,7 +21971,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_origin_hub = new CorporateDefaultRateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 4;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -21981,7 +21981,7 @@ class AdminCorporateAccountsController extends Controller
                         $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 4;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -22398,7 +22398,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = CorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = CorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -22412,22 +22412,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -22442,22 +22442,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -22549,7 +22549,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = PendingCorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -22563,22 +22563,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -22593,22 +22593,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -22668,7 +22668,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = PendingCorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -22682,22 +22682,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -22712,22 +22712,22 @@ class AdminCorporateAccountsController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -23239,7 +23239,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -23249,7 +23249,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -23509,7 +23509,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -23519,7 +23519,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -23777,7 +23777,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -23787,7 +23787,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -24044,7 +24044,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new CorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -24054,7 +24054,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new CorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -24946,7 +24946,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -24956,7 +24956,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -25127,7 +25127,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -25137,7 +25137,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -25303,7 +25303,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -25313,7 +25313,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -25475,7 +25475,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -25485,7 +25485,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -25699,7 +25699,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
                         $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                         $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                        $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                         $history_rate_origin_hub->save();
                     }
                 }
@@ -25708,7 +25708,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_destination_hub = new HistoryCorporateDefaultRateDestinationHub();
                         $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                         $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                        $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                         $history_rate_destination_hub->save();
                     }
                 }
@@ -26242,7 +26242,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_origin_hub = new CorporateDefaultRateOriginHub();
                         $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                         $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                        $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                         $history_rate_origin_hub->save();
                     }
                 }
@@ -26251,7 +26251,7 @@ class AdminCorporateAccountsController extends Controller
                         $history_rate_destination_hub = new CorporateDefaultRateDestinationHub();
                         $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                         $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                        $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                         $history_rate_destination_hub->save();
                     }
                 }
@@ -27346,7 +27346,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -27356,7 +27356,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -27526,7 +27526,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -27536,7 +27536,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -27700,7 +27700,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -27710,7 +27710,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -27872,7 +27872,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -27882,7 +27882,7 @@ class AdminCorporateAccountsController extends Controller
                             $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -28095,7 +28095,7 @@ class AdminCorporateAccountsController extends Controller
                        $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
                        $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                        $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                       $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                       $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                        $history_rate_origin_hub->save();
                    }
                }
@@ -28104,7 +28104,7 @@ class AdminCorporateAccountsController extends Controller
                        $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
                        $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                        $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                       $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                       $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                        $history_rate_destination_hub->save();
                    }
                }
@@ -28668,7 +28668,7 @@ class AdminCorporateAccountsController extends Controller
                        $history_rate_origin_hub = new CorporateDefaultRateOriginHub();
                        $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                        $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                       $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                       $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                        $history_rate_origin_hub->save();
                    }
                }
@@ -28677,7 +28677,7 @@ class AdminCorporateAccountsController extends Controller
                        $history_rate_destination_hub = new CorporateDefaultRateDestinationHub();
                        $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                        $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                       $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                       $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                        $history_rate_destination_hub->save();
                    }
                }
@@ -29722,7 +29722,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 1;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -29732,7 +29732,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 1;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -29940,7 +29940,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 2;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -29950,7 +29950,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 2;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -30153,7 +30153,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 3;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -30163,7 +30163,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 3;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -30369,7 +30369,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 4;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -30379,7 +30379,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 4;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -31062,7 +31062,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 1;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -31072,7 +31072,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 1;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -31273,7 +31273,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 2;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -31283,7 +31283,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 2;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -31480,7 +31480,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 3;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -31490,7 +31490,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 3;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -31690,7 +31690,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 4;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -31700,7 +31700,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 4;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -32379,7 +32379,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 1;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -32389,7 +32389,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 1;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -32559,7 +32559,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 2;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -32569,7 +32569,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 2;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -32737,7 +32737,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 3;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -32747,7 +32747,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 3;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -32914,7 +32914,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
                           $rate_origin_hub->user_id = $id;
                           $rate_origin_hub->shipping_mode_id = 3;
-                          $rate_origin_hub->hub_id = $origin_id;
+                          $rate_origin_hub->city_id = $origin_id;
                           $rate_origin_hub->save();
                       }
                   }
@@ -32924,7 +32924,7 @@ class AdminCorporateAccountsController extends Controller
                           $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
                           $rate_destination_hub->user_id = $id;
                           $rate_destination_hub->shipping_mode_id = 3;
-                          $rate_destination_hub->hub_id = $destination_id;
+                          $rate_destination_hub->city_id = $destination_id;
                           $rate_destination_hub->save();
                       }
                   }
@@ -33257,7 +33257,7 @@ class AdminCorporateAccountsController extends Controller
 
         $rate_origin_hubs = CorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         $rate_destination_hubs = CorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-        $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
         $overnight_origins = [];
         $overland_origins = [];
@@ -33268,22 +33268,22 @@ class AdminCorporateAccountsController extends Controller
 
                 if($index == 1){
                     foreach($origin as $origin_data){
-                        $overnight_origins[] = $origin_data->hub_id;
+                        $overnight_origins[] = $origin_data->city_id;
                     }
                 }
                 else if($index == 2){
                     foreach($origin as $origin_data){
-                        $overland_origins[] = $origin_data->hub_id;
+                        $overland_origins[] = $origin_data->city_id;
                     }
                 }
                 else if($index == 3){
                     foreach($origin as $origin_data){
-                        $detain_origins[] = $origin_data->hub_id;
+                        $detain_origins[] = $origin_data->city_id;
                     }
                 }
                 else if($index == 4){
                     foreach($origin as $origin_data){
-                        $sameday_origins[] = $origin_data->hub_id;
+                        $sameday_origins[] = $origin_data->city_id;
                     }
                 }
 
@@ -33298,22 +33298,22 @@ class AdminCorporateAccountsController extends Controller
 
                 if($index == 1){
                     foreach($destination as $destination_data){
-                        $overnight_destinations[] = $destination_data->hub_id;
+                        $overnight_destinations[] = $destination_data->city_id;
                     }
                 }
                 else if($index == 2){
                     foreach($destination as $destination_data){
-                        $overland_destinations[] = $destination_data->hub_id;
+                        $overland_destinations[] = $destination_data->city_id;
                     }
                 }
                 else if($index == 3){
                     foreach($destination as $destination_data){
-                        $detain_destinations[] = $destination_data->hub_id;
+                        $detain_destinations[] = $destination_data->city_id;
                     }
                 }
                 else if($index == 4){
                     foreach($destination as $destination_data){
-                        $sameday_destinations[] = $destination_data->hub_id;
+                        $sameday_destinations[] = $destination_data->city_id;
                     }
                 }
 

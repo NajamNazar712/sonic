@@ -17,7 +17,7 @@ class CreateCorporateDefaultRateOriginHubsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->index();
             $table->integer('shipping_mode_id');
-            $table->integer('hub_id')->index();
+            $table->integer('city_id')->index();
             $table->timestamps();
             $table->index('shipping_mode_id','default_rate_origin_smi');
 

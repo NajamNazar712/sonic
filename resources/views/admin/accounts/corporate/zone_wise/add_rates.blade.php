@@ -24,54 +24,6 @@
 
                             <div class="card">
                                 <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
-                               {{-- <div class="">
-                                    @if(count($packaging_material_types) > 0)
-
-                                        <div class="card-header border-primary">
-                                            <div class="row">
-                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
-                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" /></a></div>
-
-                                            </div>
-                                        </div>
-
-                                        <div id="packaging_material_charges_div" class="card border-primary p-1 hide">
-                                            @foreach($packaging_material_types as $index => $type)
-                                                <div class="card-header border-primary">
-                                                    <div class="row">
-                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
-                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" checked/></a></a></div>
-
-                                                    </div>
-                                                </div>
-
-                                                <div id="package_type_{{$type->id}}" class="card border-primary" aria-expanded="true">
-                                                    <div class="card-content">
-                                                        <div class="card-body packaging-charges-div">
-                                                            <div class="row">
-                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
-
-                                                                    @if($size->type_id == $type->id)
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                    @endif
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            @endforeach
-                                        </div>
-
-
-                                    @endif
-
-                                </div>--}}
 
                             </div>
                             <div id="" class="card-header border-success">
@@ -94,7 +46,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Origin Hubs</h3>
+                                                <h3>Add Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -109,7 +61,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Destination Hubs</h3>
+                                                <h3>Add Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -620,7 +572,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Overland</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true">
                                         @endif
@@ -636,7 +588,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Origin Hubs</h3>
+                                                <h3>Add Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -651,7 +603,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Destination Hubs</h3>
+                                                <h3>Add Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -1146,7 +1098,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Detain</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" data-size="xs" data-switchery="true">
                                         @endif
@@ -1163,7 +1115,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Origin Hubs</h3>
+                                                <h3>Add Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -1178,7 +1130,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Destination Hubs</h3>
+                                                <h3>Add Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -1675,7 +1627,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Sameday</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" data-size="xs" data-switchery="true">
                                         @endif
@@ -1691,7 +1643,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Origin Hubs</h3>
+                                                <h3>Add Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -1706,7 +1658,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Add Destination Hubs</h3>
+                                                <h3>Add Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">

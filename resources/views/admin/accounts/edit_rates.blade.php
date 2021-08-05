@@ -128,7 +128,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Origin Hubs</h3>
+                                                <h3>Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -143,7 +143,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Destination Hubs</h3>
+                                                <h3>Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -911,7 +911,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Origin Hubs</h3>
+                                                <h3>Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -926,7 +926,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Destination Hubs</h3>
+                                                <h3>Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -1693,7 +1693,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Origin Hubs</h3>
+                                                <h3>Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -1708,7 +1708,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Destination Hubs</h3>
+                                                <h3>Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -2482,7 +2482,7 @@
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Origin Hubs</h3>
+                                                <h3>Origin Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -2497,7 +2497,7 @@
 
                                         <div class="row">
                                             <div class="col-2">
-                                                <h3>Destination Hubs</h3>
+                                                <h3>Destination Cities</h3>
                                             </div>
                                             <div class="col-8">
                                                 <div class="form-group card border-success p-2">
@@ -5657,7 +5657,7 @@
 
 
 
-        //Origin And Destination Hubs Start
+        //Origin And Destination Cities Start
         $('#on_origin_hubs').select2({
             width:'100%',
             placeholder:"Origin(s)",
@@ -5737,7 +5737,7 @@
 
         $('#sameday_destination_hubs').val(sameday_destinations).trigger('change');
 
-        //Origin And Destination Hubs End
+        //Origin And Destination Cities End
 
         $('#ratesAdditionForm').on('keypress',function (e) {
             if(e.which == 13 || e.keyCode == 13) {

@@ -1755,7 +1755,7 @@ class AdminDashboardController extends Controller
             $all_users['results'][1]['children'] = $users;
             $all_users['pagination']['more'] = true;
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
             return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
         }
         return redirect()->back()->with('error','User rates not found!');
@@ -1823,7 +1823,7 @@ class AdminDashboardController extends Controller
 
             $sales_commission = SalesCommission::where('shipper_id', $id)->first();
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $overnight_origins = [];
             $overland_origins = [];
@@ -1834,22 +1834,22 @@ class AdminDashboardController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -1864,22 +1864,22 @@ class AdminDashboardController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -2018,7 +2018,7 @@ class AdminDashboardController extends Controller
 
             $existing = 0;
 
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = RateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = RateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -2032,22 +2032,22 @@ class AdminDashboardController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -2062,22 +2062,22 @@ class AdminDashboardController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -2166,7 +2166,7 @@ class AdminDashboardController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
-            $cities = City::where('hub', 1)->where('status', 1)->select('id', 'name')->get();
+            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = PendingRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = PendingRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -2180,22 +2180,22 @@ class AdminDashboardController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -2210,22 +2210,22 @@ class AdminDashboardController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -2755,7 +2755,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -2765,7 +2765,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -3025,7 +3025,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -3035,7 +3035,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -3292,7 +3292,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -3302,7 +3302,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -3560,7 +3560,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new RateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -3570,7 +3570,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new RateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -4440,7 +4440,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 1;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -4450,7 +4450,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 1;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -4616,7 +4616,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 2;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -4626,7 +4626,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 2;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -4791,7 +4791,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 3;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -4801,7 +4801,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 3;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -4964,7 +4964,7 @@ class AdminDashboardController extends Controller
                             $rate_origin_hub = new PendingRateOriginHub();
                             $rate_origin_hub->user_id = $id;
                             $rate_origin_hub->shipping_mode_id = 4;
-                            $rate_origin_hub->hub_id = $origin_id;
+                            $rate_origin_hub->city_id = $origin_id;
                             $rate_origin_hub->save();
                         }
                     }
@@ -4975,7 +4975,7 @@ class AdminDashboardController extends Controller
                             $rate_destination_hub = new PendingRateDestinationHub();
                             $rate_destination_hub->user_id = $id;
                             $rate_destination_hub->shipping_mode_id = 4;
-                            $rate_destination_hub->hub_id = $destination_id;
+                            $rate_destination_hub->city_id = $destination_id;
                             $rate_destination_hub->save();
                         }
                     }
@@ -5189,7 +5189,7 @@ class AdminDashboardController extends Controller
                         $history_rate_origin_hub = new HistoryRateOriginHub();
                         $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
                         $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
-                        $history_rate_origin_hub->hub_id = $rate_origin_hub->hub_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
                         $history_rate_origin_hub->save();
                     }
                 }
@@ -5198,7 +5198,7 @@ class AdminDashboardController extends Controller
                         $history_rate_destination_hub = new HistoryRateDestinationHub();
                         $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
                         $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
-                        $history_rate_destination_hub->hub_id = $rate_destination_hub->hub_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
                         $history_rate_destination_hub->save();
                     }
                 }
@@ -5728,7 +5728,7 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
                         $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
-                        $rate_origin_hub->hub_id = $pending_rate_origin_hub->hub_id;
+                        $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -5737,7 +5737,7 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
                         $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
-                        $rate_destination_hub->hub_id = $pending_rate_destination_hub->hub_id;
+                        $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -6761,26 +6761,6 @@ class AdminDashboardController extends Controller
                 ->withInput();
         }
 
-        //Packaging Charges
-/*        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
-            $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
-
-            foreach ($packaging_types as $type){
-                if($request->has('packaging_type_'.$type->id)){
-                    $packaging_size = PackagingMaterialTypeSizes::where('type_id', $type->id)->get();
-                    foreach ($packaging_size as $size) {
-                        $packaging_charges = new PackagingCharge();
-                        $packaging_charges->user_id = $id;
-                        $packaging_charges->type_id = $type->id;
-                        $packaging_charges->size_id = $size->id;
-                        $packaging_charges->charges = $request->packaging_material_size[$size->id];
-                        $packaging_charges->save();
-                    }
-
-                }
-            }
-
-        }*/
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             if($request->has('on_default') && $request->on_default == 'on'){
@@ -6797,7 +6777,7 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 1;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -6806,7 +6786,7 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 1;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -6976,7 +6956,7 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 2;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -6985,7 +6965,7 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 2;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -7155,7 +7135,7 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 3;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -7164,7 +7144,7 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 3;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }
@@ -7333,7 +7313,7 @@ class AdminDashboardController extends Controller
                         $rate_origin_hub = new RateOriginHub();
                         $rate_origin_hub->user_id = $id;
                         $rate_origin_hub->shipping_mode_id = 4;
-                        $rate_origin_hub->hub_id = $origin_id;
+                        $rate_origin_hub->city_id = $origin_id;
                         $rate_origin_hub->save();
                     }
                 }
@@ -7342,7 +7322,7 @@ class AdminDashboardController extends Controller
                         $rate_destination_hub = new RateDestinationHub();
                         $rate_destination_hub->user_id = $id;
                         $rate_destination_hub->shipping_mode_id = 4;
-                        $rate_destination_hub->hub_id = $destination_id;
+                        $rate_destination_hub->city_id = $destination_id;
                         $rate_destination_hub->save();
                     }
                 }

@@ -1787,7 +1787,7 @@
                     check_consignee_return_ratio();
                     check_city_booking_allow();
 
-                    if(allow_origin_city == true && allow_destination_city ==  true){
+                    if((allow_origin_city == true) && (allow_destination_city ==  true)){
                         var pressed_button = $(this.submitButton);
 
                         $(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');

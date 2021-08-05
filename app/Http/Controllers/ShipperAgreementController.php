@@ -35,8 +35,14 @@ use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
 use App\Http\Models\Rates\InternationalEconomyRate;
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Rates\RateOriginHub;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\Shipper\User;
@@ -450,30 +456,233 @@ otherwise it will be rejected</li>
                               </table>';
                 }*/
 
+
                 if($shipper->account_type_id == 1){
                     $rates_switch = RateStatus::where('user_id', $id)->where('status', 1)->get();
+                    $rate_origin_hubs = RateOriginHub::where('user_id', $id);
+                    if($rate_origin_hubs->exists()){
+                        $rate_origin_hubs = $rate_origin_hubs->get();
+                    }
+                    $rate_destination_hubs = RateDestinationHub::where('user_id', $id);
+                    if($rate_destination_hubs->exists()){
+                        $rate_destination_hubs = $rate_destination_hubs->get();
+                    }
 
                 }else if($shipper->account_type_id == 2){
                     if($corporate_rate_type == 3){
                         $rates_switch = CorporateDefaultRateStatus::where('user_id', $id)->where('status', 1)->get();
+                        $rate_origin_hubs = CorporateDefaultRateOriginHub::where('user_id', $id);
+                        if($rate_origin_hubs->exists()){
+                            $rate_origin_hubs = $rate_origin_hubs->get();
+                        }
+                        $rate_destination_hubs = CorporateDefaultRateDestinationHub::where('user_id', $id);
+                        if($rate_destination_hubs->exists()){
+                            $rate_destination_hubs = $rate_destination_hubs->get();
+                        }
                     }
                     else{
                         $rates_switch = CorporateRateStatus::where('user_id', $id)->where('status', 1)->get();
+                        $rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id);
+                        if($rate_origin_hubs->exists()){
+                            $rate_origin_hubs = $rate_origin_hubs->get();
+                        }
+                        $rate_destination_hubs = CorporateRateDestinationHub::where('user_id', $id);
+                        if($rate_destination_hubs->exists()){
+                            $rate_destination_hubs = $rate_destination_hubs->get();
+                        }
                     }
                 }
 
                 $rate_details = '';
 
+                $overnight_origins = [];
+                $overland_origins = [];
+                $detain_origins = [];
+                $sameday_origins = [];
+
+                if(count($rate_origin_hubs) > 0){
+                    foreach($rate_origin_hubs as $index => $origin){
+
+                        if($origin->shipping_mode_id == 1){
+
+                            $overnight_origins[] = $origin->city_id;
+                        }
+                        else if($origin->shipping_mode_id == 2){
+
+                            $overland_origins[] = $origin->city_id;
+                        }
+                        else if($origin->shipping_mode_id == 3){
+
+                            $detain_origins[] = $origin->city_id;
+                        }
+                        else if($origin->shipping_mode_id == 4){
+
+                            $sameday_origins[] = $origin->city_id;
+                        }
+
+                    }
+                }
+                $overnight_destinations = [];
+                $overland_destinations = [];
+                $detain_destinations = [];
+                $sameday_destinations = [];
+                if(count($rate_destination_hubs) > 0){
+                    foreach($rate_destination_hubs as $index => $destination){
+
+                        if($destination->shipping_mode_id == 1){
+
+                            $overnight_destinations[] = $destination->city_id;
+
+                        }
+                        else if($destination->shipping_mode_id == 2){
+
+                            $overland_destinations[] = $destination->city_id;
+
+                        }
+                        else if($destination->shipping_mode_id == 3){
+
+                            $detain_destinations[] = $destination->city_id;
+
+                        }
+                        else if($destination->shipping_mode_id == 4){
+
+                            $sameday_destinations[] = $destination->city_id;
+
+                        }
+
+                    }
+                }
+
                 foreach ($rates_switch as $rate){
                     $service_type_details = '';
                     $chargeable_weight_details = '';
                     $weight_charges_details = '';
+                    $rate_origin_details = '';
+                    $rate_destination_details = '';
+
                     $service_type = ShippingMode::find($rate->shipping_mode_id);
                     $service_type_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
 <tr>
 <td><strong>Shipping Mode </strong></td>
 <td>' . $service_type->mode . '</td>
 </tr></thead></table></div></div>';
+                    if($rate->shipping_mode_id == 1){
+                        if(count($overnight_origins) > 0){
+                            $rate_origin_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Origin Cities </strong></td>';
+
+                            $origin_names = City::whereIn('id',$overnight_origins)->select('name')->get();
+                            $origin_hub_names = '';
+                            foreach ($origin_names as $origin_name){
+                                $origin_hub_names .= $origin_name->name . ', ';
+                            }
+                            $rate_origin_details .= '<td>' . $origin_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+
+                        if(count($overnight_destinations) > 0){
+                            $rate_destination_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Destination Cities </strong></td>';
+
+                            $destination_names = City::whereIn('id',$overnight_destinations)->select('name')->get();
+                            $destination_hub_names = '';
+                            foreach ($destination_names as $destination_name){
+                                $destination_hub_names .= $destination_name->name . ', ';
+                            }
+                            $rate_destination_details .= '<td>' . $destination_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+                    }
+                    if($rate->shipping_mode_id == 2){
+                        if(count($overland_origins) > 0){
+                            $rate_origin_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Origin Cities </strong></td>';
+
+                            $origin_names = City::whereIn('id',$overland_origins)->select('name')->get();
+                            $origin_hub_names = '';
+                            foreach ($origin_names as $origin_name){
+                                $origin_hub_names .= $origin_name->name . ', ';
+                            }
+                            $rate_origin_details .= '<td>' . $origin_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+
+                        if(count($overland_destinations) > 0){
+                            $rate_destination_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Destination Cities </strong></td>';
+
+                            $destination_names = City::whereIn('id',$overland_destinations)->select('name')->get();
+                            $destination_hub_names = '';
+                            foreach ($destination_names as $destination_name){
+                                $destination_hub_names .= $destination_name->name . ', ';
+                            }
+                            $rate_destination_details .= '<td>' . $destination_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+                    }
+                    if($rate->shipping_mode_id == 3){
+                        if(count($detain_origins) > 0){
+                            $rate_origin_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Origin Cities </strong></td>';
+
+                            $origin_names = City::whereIn('id',$detain_origins)->select('name')->get();
+                            $origin_hub_names = '';
+                            foreach ($origin_names as $origin_name){
+                                $origin_hub_names .= $origin_name->name . ', ';
+                            }
+                            $rate_origin_details .= '<td>' . $origin_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+
+                        if(count($detain_destinations) > 0){
+                            $rate_destination_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Destination Cities </strong></td>';
+
+                            $destination_names = City::whereIn('id',$detain_destinations)->select('name')->get();
+                            $destination_hub_names = '';
+                            foreach ($destination_names as $destination_name){
+                                $destination_hub_names .= $destination_name->name . ', ';
+                            }
+                            $rate_destination_details .= '<td>' . $destination_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+                    }
+                    if($rate->shipping_mode_id == 4){
+                        if(count($sameday_origins) > 0){
+                            $rate_origin_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Origin Cities </strong></td>';
+
+                            $origin_names = City::whereIn('id',$sameday_origins)->select('name')->get();
+                            $origin_hub_names = '';
+                            foreach ($origin_names as $origin_name){
+                                $origin_hub_names .= $origin_name->name . ', ';
+                            }
+                            $rate_origin_details .= '<td>' . $origin_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+
+                        if(count($sameday_destinations) > 0){
+                            $rate_destination_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+<tr>
+<td><strong>Destination Cities </strong></td>';
+
+                            $destination_names = City::whereIn('id',$sameday_destinations)->select('name')->get();
+                            $destination_hub_names = '';
+                            foreach ($destination_names as $destination_name){
+                                $destination_hub_names .= $destination_name->name . ', ';
+                            }
+                            $rate_destination_details .= '<td>' . $destination_hub_names . '</td>
+</tr></thead></table></div></div>';
+                        }
+                    }
+
 
 
                     if($shipper->account_type_id == 1){
@@ -734,6 +943,8 @@ otherwise it will be rejected</li>
 
 
                     $rate_details .= $service_type_details;
+                    $rate_details .= $rate_origin_details;
+                    $rate_details .= $rate_destination_details;
                     $rate_details .= $weight_charges_details;
                     $rate_details .= $cash_handling_details;
                     $rate_details .= $insurance_charges_details;
