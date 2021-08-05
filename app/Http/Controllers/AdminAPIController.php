@@ -2850,6 +2850,7 @@ class AdminAPIController extends Controller
         $admin_id = $request->admin_id;
         $bag_no = $request->bag_no;
         $admin = Admin::find($admin_id);
+        return response()->json(['status' => 1, 'message' => $admin->default_hub_id]);
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->where('cargo_manifests.status_id',1)
