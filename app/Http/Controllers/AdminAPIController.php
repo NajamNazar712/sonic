@@ -2924,7 +2924,7 @@ class AdminAPIController extends Controller
             ->leftjoin('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
             ->leftjoin('v2_junctions as j', 'cargo_manifest_bags.junction_mapping_id', 'j.junction_mapping_id')
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
-            ->whereIn('cargo_manifest_bags.id',$bag_ids)
+            ->whereIn('cargo_manifest_bags.seal_number',$bag_ids)
             ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id', 'dh.name as destination', 'oh.name as origin','cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'j.junction_id as junction_id')->get();
 
         return response()->json(['status' => 0, 'data' => $bags]);
