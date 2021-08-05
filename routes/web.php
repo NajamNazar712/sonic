@@ -1528,6 +1528,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bag_details','Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details');
             Route::post('store','Admins\AdminCargoManifestController@receive_bag_store')->name('store');
         });
+
+        Route::get('history','Admins\AdminCargoManifestController@manifest_history')->name('history');
+        Route::get('history/list','Admins\AdminCargoManifestController@manifest_history_list')->name('history.list');
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');

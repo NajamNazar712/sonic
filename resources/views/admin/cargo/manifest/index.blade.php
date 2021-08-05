@@ -17,37 +17,31 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Search Bag Number" name="bag_number" id="bag_number">
-                                        </div>
+                            <div class="text-center">
+                                <form id="manifest_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
+                                    <div class="form-group">
+                                        <input type="text" name="manifest_number" class="form-control manifest_number" id="manifest_number" placeholder="Manifest Number">
                                     </div>
-                                    <div class="col-3">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Search Manifest Id " name="manifest_id" id="manifest_id">
-                                        </div>
+                                </form>
+
+                                <form id="vehicle_number_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
+                                    <div class="form-group">
+                                        <input type="text" name="vehicle_number" class="form-control vehicle_number" id="vehicle_number" placeholder="Vehicle Number">
                                     </div>
-                                    <div class="col-3">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Search Vehicle Number" name="vehicle_number" id="vehicle_number">
-                                        </div>
+                                </form>
+
+                                <form id="tracking_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
                                     </div>
-                                    <div class="col-3">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Tracking Number" name="tracking_number" id="tracking_number">
-                                        </div>
+                                </form>
+
+                                <form id="bag_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="form-group">
+                                        <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag Number">
                                     </div>
-                                </div>
-                                 <div class="row justify-content-center">
-                                    <div class="col-6 text-center">
-                                        <div class="form-group">
-                                            <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
 
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -71,6 +65,7 @@
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1">Transited At</th>    --}}
                                     <th class="border-primary border-darken-1">Manifest Created At</th>
+                                    <th class="border-primary border-darken-1">Transited Date</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -82,7 +77,7 @@
                 </div>
             </div>
         </div>
-    </div>
+   </div>
     <div class="modal fade" id="SealNumberUpdateModal" data-backdrop="static" role="dialog" aria-labelledby="SealNumberUpdateModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -180,43 +175,43 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
-                    params.excel = true;
+                    //params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.cargo_manifest.bags.pending.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Tracking Number');
-                            head.push('Order ID');
-                            head.push('Service Type');
-                            head.push('Status');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Shipper');
-                            head.push('Amount');
+                            head.push('Seal Number');
+                            head.push('Bag Type');
+                            head.push('Shipments');
+                            head.push('Short Received');
+                            head.push('Actual Weight');
                             head.push('Shipping Mode');
-                            head.push('Booked Datetime');
-                            head.push('Arrival Datetime');
-                            head.push('Current Status Datetime');
+                            head.push('Manifest Id');
+                            head.push('Status');
+                            head.push('Manifest Created At');
+                            head.push('Transited By');
+                            head.push('Updated By');
 
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking);
-                                row.push(values.order_id);
-                                row.push(values.service_type);
-                                row.push(values.status);
+                                row.push(values.seal_number);
+                                row.push(values.bag_type);
+                                row.push(values.shipments);
+                                row.push(values.short_received_shipments);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.shipper);
-                                row.push(values.amount);
+                                row.push(values.actual_weight);
                                 row.push(values.shipping_mode);
-                                row.push(values.booked_at);
-                                row.push(values.arrival_at);
-                                row.push(values.current_status);
+                                row.push(values.manifest_id);
+                                row.push(values.status);
+                                row.push(values.manifest_created_at);
+                                row.push(values.transitted_by);
+                                row.push(values.updated_by);
 
 
                                 body.push(row);
@@ -254,10 +249,10 @@
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.list') }}',
                     data: function (d) {
-                        d.bag_number = $('#bag_number').val();
-                        d.manifest_id = $('#manifest_id').val();
-                        d.vehicle_number = $('#vehicle_number').val();
-                        d.tracking_number = $('#tracking_number').val();
+                        d.manifest_number = $('#manifest_number_search_form #manifest_number').val();
+                        d.vehicle_number = $('#vehicle_number_search_form #vehicle_number').val();
+                        d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+                        d.bag_number = $('#bag_number_search_form #bag_number').val();
 
                     }
                 },
@@ -279,6 +274,7 @@
                     /*{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'},*/
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'manifest_created_at', name: 'cm.created_at', class: 'align-middle manifest_created_at'},
+                    {data: 'transitted_date', name: 'cargo_manifest_bags.created_at', class: 'align-middle transitted_date'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'updated_by', name: 'ah.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
@@ -617,6 +613,32 @@
                             tab.focus();
                         }
                     });
+            });
+
+            $('#bag_number_search_form').bind('submit', function(e) {
+                e.preventDefault();
+
+                table.draw();
+            });
+            $('#manifest_number_search_form').bind('submit', function(e) {
+                e.preventDefault();
+
+                table.draw();
+            });
+            $('#vehicle_number_search_form').bind('submit', function(e) {
+                e.preventDefault();
+
+                table.draw();
+            });
+
+            $('#tracking_number_search_form').bind('submit', function(e) {
+                e.preventDefault();
+
+                length = $('#tracking_number_search_form #tracking_number').val().length;
+
+                if (length == 0 || length >= 12) {
+                    table.draw();
+                }
             });
         });
     </script>
