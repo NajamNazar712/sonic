@@ -17,18 +17,38 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <form id="shipment_type_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-
-
-                                <div class="form-group">
-                                    <select name="shipment_type" class="select2" id="shipment_type">
-                                        <option value="" selected="selected"></option>
-                                        <option value="0">All</option>
-                                        <option value="1">Normal</option>
-                                        <option value="2">Return</option>
-                                    </select>
+                            <form id="track_form" class=" mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Bag Number" name="bag_number" id="bag_number">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Manifest Id " name="manifest_id" id="manifest_id">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Search Vehicle Number" name="vehicle_number" id="vehicle_number">
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Tracking Number" name="tracking_number" id="tracking_number">
+                                        </div>
+                                    </div>
+                                </div>
+                                 <div class="row justify-content-center">
+                                    <div class="col-6 text-center">
+                                        <div class="form-group">
+                                            <button type="submit" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
+
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -52,6 +72,7 @@
                                     <th class="border-primary border-darken-1">Transited At</th>    --}}
                                     <th class="border-primary border-darken-1">Manifest Created At</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
+                                    <th class="border-primary border-darken-1">Updated By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -233,8 +254,11 @@
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.list') }}',
                     data: function (d) {
-                        d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
-                        d.search_shipping_mode = $('#shipment_type_search_form #search_shipping_mode').val();
+                        d.bag_number = $('#bag_number').val();
+                        d.manifest_id = $('#manifest_id').val();
+                        d.vehicle_number = $('#vehicle_number').val();
+                        d.tracking_number = $('#tracking_number').val();
+
                     }
                 },
                 rowId: 'id',
@@ -256,6 +280,7 @@
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                     {data: 'manifest_created_at', name: 'cm.created_at', class: 'align-middle manifest_created_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
+                    {data: 'updated_by', name: 'ah.name', class: 'align-middle updated_by'},
                     {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
