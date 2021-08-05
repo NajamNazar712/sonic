@@ -2893,7 +2893,7 @@ class AdminAPIController extends Controller
         $cargo_bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
             ->where('mb.cargo_manifest_id', $cargo_id)
             ->whereIn('cargo_manifest_bags.status_id', [2,4,6,8,9,10])
-            ->pluck('cargo_manifest_bags.seal_number');
+            ->select('cargo_manifest_bags.seal_number as bag_no');
         if($cargo_bags->exists()){
             $cargo_bags = $cargo_bags->get();
             return response()->json(['status' => 0, 'bags' => $cargo_bags]);
