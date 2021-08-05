@@ -1527,6 +1527,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminCargoManifestController@receive_bag_index')->name('index');
             Route::post('bag_details','Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details');
             Route::post('store','Admins\AdminCargoManifestController@receive_bag_store')->name('store');
+
+            Route::prefix('bag')->name('bag.')->group(function () {
+                Route::get('','Admins\AdminCargoManifestController@receive_bag_shipments_index')->name('index');
+                Route::post('details','Admins\AdminCargoManifestController@receive_bag_shipments_details')->name('details');
+                Route::post('store','Admins\AdminCargoManifestController@receive_bag_shipments_store')->name('store');
+            });
         });
 
         Route::get('history','Admins\AdminCargoManifestController@manifest_history')->name('history');

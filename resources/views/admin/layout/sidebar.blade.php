@@ -350,6 +350,9 @@
                                     @if ((session('role_id') == 1 || in_array(554, session('permissions'))) && Auth::user()->default_hub_id != NULL)
                                         <li><a class="menu-item" href="{{ route('admin.cargo_manifest.receive.index') }}">Quick Receive Bags</a></li>
                                     @endif
+                                    @if ((session('role_id') == 1 || in_array(557, session('permissions'))) && Auth::user()->default_hub_id != NULL)
+                                        <li><a class="menu-item" href="{{ route('admin.cargo_manifest.receive.bag.index') }}">Quick Receive Bag Shipments</a></li>
+                                    @endif
                                     @if (session('role_id') == 1 || in_array(556, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo_manifest.history') }}">Manifest History</a></li>
                                     @endif
