@@ -1844,6 +1844,8 @@ class AdminCargoManifestController extends Controller
                         {
                             $misroute = 0;
                             $bag->status_id = 7;
+                            $bag->received_shipments = $bag->shipments->count();
+                            $bag->short_received_shipments = 0;
                         }
                         if($misroute == 1)
                         {
@@ -1861,6 +1863,8 @@ class AdminCargoManifestController extends Controller
                         {
                             $bag->status_id = 5;
                             $bag->junction_mapping_id = null;
+                            $bag->short_received_shipments = $bag->shipments->count();
+                            $bag->received_shipments = 0;
                         }
 
                         $bag->update();
