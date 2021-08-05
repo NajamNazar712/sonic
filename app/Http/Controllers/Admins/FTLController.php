@@ -132,25 +132,25 @@ class FTLController extends Controller
             $walk_in_weight = WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
             if($walk_in_weight){
                 if ($origin_city->zone_id == $destination_city->zone_id) {
-                    $walk_in_weight = $walk_in_weight->chargeable_weight_local;
+                    $walk_in_weight_charges = $walk_in_weight->chargeable_weight_local;
                 } else {
                     
                         $zone_class = ZoneClassCity::where(['zone_id' => $destination_city->zone_id, 'city_id' => $destination_city->id])->first();
                         // ->where('zone_classification_id', 2)
                     if ($zone_class->class == 1) {
-                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_1;
+                        $walk_in_weight_charges = $walk_in_weight->chargeable_weight_charges_class_1;
                     } elseif ($zone_class->class == 2) {
-                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_2;
+                        $walk_in_weight_charges = $walk_in_weight->chargeable_weight_charges_class_2;
                     } elseif ($zone_class->class == 3) {
-                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_3;
+                        $walk_in_weight_charges = $walk_in_weight->chargeable_weight_charges_class_3;
                     } else {
-                        $walk_in_weight = $walk_in_weight->chargeable_weight_charges_class_0;
+                        $walk_in_weight_charges = $walk_in_weight->chargeable_weight_charges_class_0;
                     }
-                    if($walk_in_weight==0){
-                        $walk_in_weight = $walk_in_weight->chargeable_weight_local;
+                    if($walk_in_weight_charges==0){
+                        $walk_in_weight_charges = $walk_in_weight->chargeable_weight_local;
                     }
                 }
-                $charges = $walk_in_weight * $request->weight ;
+                $charges = $walk_in_weight_charges * $request->weight ;
             }else{
                 return back()->with(['error'=>'Weight Charges Not Set']);
             }
