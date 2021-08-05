@@ -361,9 +361,7 @@ class ShipperPackagingMaterialController extends Controller
             $packaging_type_ids[$index] = $packaging_type_id;
             $packaging_wms_product_ids[$index] = $size->wms_product_id;
             $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first();
-            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first();
-        $packaging_cart = PackagingMaterialCart::where('user_id',session('user_id'))->whereIn('type_id', $request->types);
-            
+            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first()->delete();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }else{
