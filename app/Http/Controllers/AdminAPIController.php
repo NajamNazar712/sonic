@@ -2934,7 +2934,7 @@ class AdminAPIController extends Controller
                 $datum["manifest_id"] = $bag->manifest_id;
                 $datum["destination"] = $bag->destination;
                 $datum["origin"] = $bag->origin;
-                $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->pluck('junction_id')->toArray();
+                $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id);
                 $datum["misroute"] = 0;
                 if ($bag->dest_id != $admin->default_hub_id) {
                     $datum["misroute"] = 1;
