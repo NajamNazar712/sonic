@@ -1806,7 +1806,21 @@ class AdminCargoManifestController extends Controller
 
     public function receive_bag_store(Request $request)
     {
-        
+        return $request;
+        $bag_not_exists = array();
+        foreach ($request->bag_ids as $bag_id)
+        {
+            $bag = CargoManifestBag::where('id', $bag_id)
+                ->whereIn('status_id',$this->bag_can_be_received_statuses);
+
+            if($bag->exists())
+            {
+
+            }
+            else{
+                array_push($bag_not_exists,$bag_id);
+            }
+        }
     }
 
 }
