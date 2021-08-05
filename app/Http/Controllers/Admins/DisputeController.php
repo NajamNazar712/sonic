@@ -505,7 +505,7 @@ class DisputeController extends Controller
 
             NotificationsController::send(19, $dispute->id);
     }
-    public static function add_cargo_short_received($cargo_id,$shipments, $master = NULL){
+    public static function add_cargo_short_received($cargo_id,$shipments, $master = NULL,$manifest = NULL){
         if($master != NULL){
             if($master == 2){
                 $description = "Short received shipments dispute for Bag Number # " . $cargo_id;
@@ -513,6 +513,31 @@ class DisputeController extends Controller
             else{
                 $description = "Short received shipments dispute for Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
             }
+            $admin = Auth::id();
+            $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
+            $count = count($shipments);
+            $dispute = Dispute::create([
+                'description'=>$description,
+                'raised_by'=>$admin,
+                'raised_by_status'=>0,
+                'city_id'=>$city_id,
+                'dispute_type_id'=>7,
+                'shipments_count'=>$count
+            ]);
+            if($dispute){
+                foreach ($shipments as $shipment_id){
+                    DisputeShipment::create([
+                        'dispute_id'=>$dispute->id,
+                        'shipment_id'=>$shipment_id
+                    ]);
+                }
+
+                NotificationsController::send(19, $dispute->id);
+            }
+        }
+        else if($manifest != NULL)
+        {
+            $description = "Short received shipments dispute for Cargo Manifest # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT)." and Bag # ".$manifest;
             $admin = Auth::id();
             $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
             $count = count($shipments);

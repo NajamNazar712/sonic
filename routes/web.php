@@ -1523,6 +1523,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/transitted_shipments','Admins\AdminCargoManifestController@transitted_shipments')->name('transitted_shipments');
         Route::post('short_received_shipments', 'Admins\AdminMasterCargoController@short_received_shipments')->name('short_received_shipments');
 
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('','Admins\AdminCargoManifestController@receive_bag_index')->name('index');
+            Route::post('bag_details','Admins\AdminCargoManifestController@receive_bag_details')->name('bag_details');
+            Route::post('store','Admins\AdminCargoManifestController@receive_bag_store')->name('store');
+        });
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
         Route::get('','Admins\DisputeController@dispute_index')->name('index');
