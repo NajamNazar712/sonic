@@ -2933,6 +2933,7 @@ class AdminAPIController extends Controller
                 $datum["bag_no"] = $bag->bag_no;
                 $datum["manifest_id"] = $bag->manifest_id;
                 $datum["destination"] = $bag->destination;
+                $datum["destination_id"] = $bag->dest_id;
                 $datum["origin"] = $bag->origin;
                 $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id);
                 $datum["misroute"] = 0;
@@ -2955,8 +2956,20 @@ class AdminAPIController extends Controller
         return response()->json(['status' => 1, 'message' => "No details found!"]);
     }
 
-    public function cargo_bag_recieve(Request $request)
+    /*public function cargo_bag_recieve(Request $request)
     {
+
+        if ($request->has('bags')) {
+            $bag_details = json_decode($request->bags, true);
+            foreach ($bag_details as $bag_detail) {
+                $medical_info->employee_id = $employee_request->id;
+                $medical_info->name = $medical_detail['name_of_family_member'];
+                $medical_info->relationship_id = $medical_detail['relation_ship'];
+                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                $medical_info->marital_status = $medical_detail['marital_status'];
+                $medical_info->save();
+            }
+        }
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
         $bag_ids = explode(',', $request->bags);
@@ -2996,7 +3009,7 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "No details found!"]);
-    }
+    }*/
 
 
 }
