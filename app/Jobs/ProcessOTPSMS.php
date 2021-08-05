@@ -217,7 +217,7 @@ class ProcessOTPSMS implements ShouldQueue
                         'to' => $sms->to,
                         'text' => $sms->body,
                         'mask' => 'TRAX',
-                        'transaction_message' => TRUE
+                        'transaction_message' => 'true'
                     ]
                 ]);
 
