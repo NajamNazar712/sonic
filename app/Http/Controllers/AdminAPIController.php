@@ -2851,7 +2851,7 @@ class AdminAPIController extends Controller
         $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
-            ->where('cargo_manifests.')
+            ->whereIn('cargo_manifests.status_id',[2,4,6,8,9,10])
             ->where(function ($query) use ($admin_hubs) {
                 $query->whereIn('cargo_manifests.destination_hub_id', $admin_hubs);
             })
