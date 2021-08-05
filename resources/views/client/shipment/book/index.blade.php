@@ -1303,6 +1303,40 @@
 				}
 			});
 
+			var allow_origin_city = false;
+			var allow_destination_city = false;
+			function check_city_booking_allow(){
+				if ($('#pickup_address').val() == 0) {
+					var pickup_city_id = $('#new_pickup_city').val();
+				}
+				else {
+					var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+				}
+
+				var consignee_city_id = parseInt($('#consignee_city').val());
+				var shipping_mode_id = parseInt($('#shipping_mode').val());
+				if((pickup_city_id != '') && (consignee_city_id != '') && (shipping_mode_id != '')){
+					$.ajax({
+						url:'{!! route('cod.shipment.book.check_shipment_allowed_city') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'shipping_mode_id': shipping_mode_id,
+							'consignee_city_id': consignee_city_id,
+							'pickup_city_id': pickup_city_id,
+						}
+					}).done(function (data) {
+						if(data.origin_city_allowed == true){
+							allow_origin_city = true;
+						}
+						if(data.destination_city_allowed == true){
+							allow_destination_city = true;
+						}
+
+					});
+				}
+			}
+
 			$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
 				placeholder: 'Mode of Shipping*',
@@ -1318,6 +1352,7 @@
 				else {
 					$('#shipping_same-day').addClass('d-none');
 				}
+				check_city_booking_allow();
 			});
 
 			$('#amount').bind('keypress', function () {
@@ -1421,128 +1456,45 @@
 				},
 				submitHandler: function(form) {
 					check_consignee_return_ratio();
-					var pressed_button = $(this.submitButton);
+					check_city_booking_allow();
 
-					$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+					if(allow_origin_city == true && allow_destination_city ==  true){
+						var pressed_button = $(this.submitButton);
 
-					$(form).find('button[type=submit]').attr('disabled', 'disabled');
-					var consignee_address = $('#consignee_address').val();
-					var strArray = consignee_address.split(/[ ,]+/);
-					var present = [];
-					for(k=0;k<strArray.length;k++) {
-						for (i = 0; i < check.length; i++) {
-							if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
-								present.push(strArray[k]);
+						$(form).append('<input type="hidden" name="' + pressed_button.attr('name') + '" value="' + pressed_button.attr('value') + '">');
+
+						$(form).find('button[type=submit]').attr('disabled', 'disabled');
+						var consignee_address = $('#consignee_address').val();
+						var strArray = consignee_address.split(/[ ,]+/);
+						var present = [];
+						for(k=0;k<strArray.length;k++) {
+							for (i = 0; i < check.length; i++) {
+								if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+									present.push(strArray[k]);
+								}
 							}
 						}
-					}
-					if(!isEmpty(breakup_rows)){
-						$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
-						var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
-						var cod_breakup_total_cod = $('#cod_breakup_total').val();
-						$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
-						$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
+						if(!isEmpty(breakup_rows)){
+							$(form).append('<input type="hidden" name="cod_breakup" value="TRUE">');
+							var cod_breakup_shipping_charges = $('#cod_breakup_shipping_charges').val();
+							var cod_breakup_total_cod = $('#cod_breakup_total').val();
+							$(form).append('<input type="hidden" name="cod_breakup_shipping_charges" value="' +cod_breakup_shipping_charges + '">');
+							$(form).append('<input type="hidden" name="cod_breakup_total_cod" value="' + cod_breakup_total_cod + '">');
 
-						$.each(breakup_rows, function (index, value) {
-							$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
-							$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
-						});
-					}
+							$.each(breakup_rows, function (index, value) {
+								$(form).append('<input type="hidden" name="cod_breakup_description[]" value="' + value.description + '">');
+								$(form).append('<input type="hidden" name="cod_breakup_amount[]" value="' + value.amount + '">');
+							});
+						}
 
-					if(present.length > 0){
-						var url = '{{asset('img/nsa_osa.png')}}';
-						var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
-						html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
-						html += '<div class="text-left">In case of,<br/>';
-						html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
-						html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
-						html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
-						content = document.createElement('div');
-						content.innerHTML = html;
-						swal({
-							content: content,
-							buttons: {
-								cancel: {
-									text: 'Cancel',
-									value: null,
-									visible: true,
-									closeModal: true,
-								},
-								confirm: {
-									text: 'Continue to Booking',
-									value: true,
-									visible: true,
-									closeModal: true
-								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							// dangerMode: true
-						}).then(function(confirm) {
-							if(confirm) {
-
-								if(blacklist == true){
-									var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
-									content = document.createElement('div');
-									content.innerHTML = html;
-									swal({
-										content: content,
-										buttons: {
-											cancel: {
-												text: 'Cancel',
-												value: null,
-												visible: true,
-												closeModal: true,
-											},
-											confirm: {
-												text: 'Book Anyway',
-												value: true,
-												visible: true,
-												closeModal: true
-											}
-										},
-										closeOnClickOutside: false,
-										closeOnEsc: false,
-										// dangerMode: true
-									}).then(function(confirm) {
-										if (confirm) {
-											swal({
-												title: 'Please Wait!',
-												text: 'Your shipment is being booked!',
-												icon: 'info',
-												buttons: false,
-												closeOnClickOutside: false,
-												closeOnEsc: false
-											});
-
-											form.submit();
-										}
-										else{
-											$(form).find('button[type=submit]').prop('disabled', false);
-										}
-									});
-								}else{
-									swal({
-										title: 'Please Wait!',
-										text: 'Your shipment is being booked!',
-										icon: 'info',
-										buttons: false,
-										closeOnClickOutside: false,
-										closeOnEsc: false
-									});
-
-									form.submit();
-								}
-
-							}
-							else{
-								$(form).find('button[type=submit]').prop('disabled', false);
-							}
-						});
-					}
-					else {
-						if(blacklist == true) {
-							var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+						if(present.length > 0){
+							var url = '{{asset('img/nsa_osa.png')}}';
+							var html = '<div class="row justify-content-center"><img src="' + url + '"></div>';
+							html += '<div class="row justify-content-center"><h2><b>A Possible Address Anomaly: ' + present + ' Detected!</b></h2></div>';
+							html += '<div class="text-left">In case of,<br/>';
+							html += '<b>Out of Service Area:</b> Additional charges may apply.</br>';
+							html += '<b>Non Service Area:</b> Shipment may be returned.</br>';
+							html += '<b>For assistance, Call:</b> 021-38772222</br></div>';
 							content = document.createElement('div');
 							content.innerHTML = html;
 							swal({
@@ -1555,7 +1507,7 @@
 										closeModal: true,
 									},
 									confirm: {
-										text: 'Book Anyway',
+										text: 'Continue to Booking',
 										value: true,
 										visible: true,
 										closeModal: true
@@ -1564,36 +1516,139 @@
 								closeOnClickOutside: false,
 								closeOnEsc: false,
 								// dangerMode: true
-							}).then(function (confirm) {
-								if (confirm) {
-									swal({
-										title: 'Please Wait!',
-										text: 'Your shipment is being booked!',
-										icon: 'info',
-										buttons: false,
-										closeOnClickOutside: false,
-										closeOnEsc: false
-									});
+							}).then(function(confirm) {
+								if(confirm) {
 
-									form.submit();
+									if(blacklist == true){
+										var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">'+ blacklist_message +'</div>';
+										content = document.createElement('div');
+										content.innerHTML = html;
+										swal({
+											content: content,
+											buttons: {
+												cancel: {
+													text: 'Cancel',
+													value: null,
+													visible: true,
+													closeModal: true,
+												},
+												confirm: {
+													text: 'Book Anyway',
+													value: true,
+													visible: true,
+													closeModal: true
+												}
+											},
+											closeOnClickOutside: false,
+											closeOnEsc: false,
+											// dangerMode: true
+										}).then(function(confirm) {
+											if (confirm) {
+												swal({
+													title: 'Please Wait!',
+													text: 'Your shipment is being booked!',
+													icon: 'info',
+													buttons: false,
+													closeOnClickOutside: false,
+													closeOnEsc: false
+												});
+
+												form.submit();
+											}
+											else{
+												$(form).find('button[type=submit]').prop('disabled', false);
+											}
+										});
+									}else{
+										swal({
+											title: 'Please Wait!',
+											text: 'Your shipment is being booked!',
+											icon: 'info',
+											buttons: false,
+											closeOnClickOutside: false,
+											closeOnEsc: false
+										});
+
+										form.submit();
+									}
+
 								}
 								else{
 									$(form).find('button[type=submit]').prop('disabled', false);
 								}
 							});
-						}else{
-							swal({
-								title: 'Please Wait!',
-								text: 'Your shipment is being booked!',
-								icon: 'info',
-								buttons: false,
-								closeOnClickOutside: false,
-								closeOnEsc: false
-							});
-
-							form.submit();
 						}
+						else {
+							if(blacklist == true) {
+								var html = '<div class="row justify-content-center p-1" style="background-color: '+ blacklist_color +'; color:white;">' + blacklist_message + '</div>';
+								content = document.createElement('div');
+								content.innerHTML = html;
+								swal({
+									content: content,
+									buttons: {
+										cancel: {
+											text: 'Cancel',
+											value: null,
+											visible: true,
+											closeModal: true,
+										},
+										confirm: {
+											text: 'Book Anyway',
+											value: true,
+											visible: true,
+											closeModal: true
+										}
+									},
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+									// dangerMode: true
+								}).then(function (confirm) {
+									if (confirm) {
+										swal({
+											title: 'Please Wait!',
+											text: 'Your shipment is being booked!',
+											icon: 'info',
+											buttons: false,
+											closeOnClickOutside: false,
+											closeOnEsc: false
+										});
 
+										form.submit();
+									}
+									else{
+										$(form).find('button[type=submit]').prop('disabled', false);
+									}
+								});
+							}else{
+								swal({
+									title: 'Please Wait!',
+									text: 'Your shipment is being booked!',
+									icon: 'info',
+									buttons: false,
+									closeOnClickOutside: false,
+									closeOnEsc: false
+								});
+
+								form.submit();
+							}
+
+						}
+					}
+					else{
+						if(!allow_origin_city){
+							var error = 'Origin city not allowed, please contact your sales person!';
+							toastr.error(error, 'Error!', {
+								positionClass: 'toast-top-center',
+								containerId: 'toast-top-center'
+							});
+						}
+						if(!allow_destination_city){
+							var error = 'Destination city not allowed, please contact your sales person!';
+							toastr.error(error, 'Error!', {
+								positionClass: 'toast-top-center',
+								containerId: 'toast-top-center'
+							});
+						}
 					}
 				}
 			});

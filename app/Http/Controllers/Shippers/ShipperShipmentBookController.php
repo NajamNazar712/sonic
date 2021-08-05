@@ -22,6 +22,12 @@ use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Rates\RateOriginHub;
 use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
@@ -2307,7 +2313,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_store(Request $request) {
-//         dd($request);
+
         $user_id = session('user_id');
         Validator::extend('phone_number', function($attribute, $value, $parameters) {
             if ($value) {
@@ -2321,6 +2327,36 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         });
+
+        Validator::extend('origin_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = self::check_origin($value, $shipping_mode_id, $user_id);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
+
+        Validator::extend('destination_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = self::check_destination($value, $shipping_mode_id, $user_id, 1);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
+
+
 //        dd($request->all('form'));
         $names = [
             'service_type_id' => 'Service Type ID',
@@ -2412,14 +2448,16 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+            'origin_check' => 'Origin city not allowed, please contact your sales person!',
+            'destination_check' => 'Destination city not allowed, please contact your sales person!',
         ];
 
         $rules = [
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
-            })->where('hidden', 0)],
+            })->where('hidden', 0), 'origin_check'],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1), 'destination_check'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -4049,6 +4087,34 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         });
+
+        Validator::extend('origin_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = self::check_origin($value, $shipping_mode_id, $user_id);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
+
+        Validator::extend('destination_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = self::check_destination($value, $shipping_mode_id, $user_id, 1);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
 //        dd($request->all('form'));
         $names = [
             'service_type_id' => 'Service Type ID',
@@ -4141,19 +4207,21 @@ class ShipperShipmentBookController extends Controller
 
             'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
-            'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).'
+            'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+            'origin_check' => 'Origin city not allowed, please contact your sales person!',
+            'destination_check' => 'Destination city not allowed, please contact your sales person!',
         ];
 
         $rules = [
             'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
-            })->where('hidden', 0)],
+            })->where('hidden', 0), 'origin_check'],
             'delivery_type_id' => ['required_if:service_type_id,1,2,3', 'integer', 'digits_between:1,10', Rule::exists('delivery_types', 'id')],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [3]);
             })],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 1), 'destination_check'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
             'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -5643,5 +5711,172 @@ class ShipperShipmentBookController extends Controller
         else{
             return response()->json(['status' => 0]);
         }
+    }
+
+    public function check_shipment_allowed_city(Request $request){
+        $shipping_mode_id = $request->shipping_mode_id;
+        $pickup_city_id = $request->pickup_city_id;
+        $consignee_city_id = $request->consignee_city_id;
+        $user_id = session('user_id');
+
+        $user = User::find($user_id);
+
+        $pickup_hub = City::find($pickup_city_id)->hub_id;
+        $destination_hub = City::find($consignee_city_id)->hub_id;
+        $origin_city_allowed = TRUE;
+        $destination_city_allowed = TRUE;
+        if($user->account_type_id == 1){
+            $rate_origin = RateOriginHub::where('user_id', $user_id);
+            if($rate_origin->exists()){
+                $origin = RateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                if(!$origin->exists()){
+                    $origin_city_allowed = FALSE;
+                }
+            }
+            $rate_destination = RateDestinationHub::where('user_id', $user_id);
+            if($rate_destination->exists()){
+                $destination = RateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                if(!$destination->exists()){
+                    $destination_city_allowed = FALSE;
+                }
+            }
+
+        }
+        else{
+            if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
+                $rate_origin = CorporateRateOriginHub::where('user_id', $user_id);
+                if($rate_origin->exists()){
+                    $origin = CorporateRateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$origin->exists()){
+                        $origin_city_allowed = FALSE;
+                    }
+                }
+                $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id);
+                if($rate_destination->exists()){
+                    $destination = CorporateRateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$destination->exists()){
+                        $destination_city_allowed = FALSE;
+                    }
+                }
+            }
+            else if($user->corporate_rate_type_id == 3){
+                $rate_origin = CorporateDefaultRateOriginHub::where('user_id', $user_id);
+                if($rate_origin->exists()){
+                    $origin = CorporateDefaultRateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$origin->exists()){
+                        $origin_city_allowed = FALSE;
+                    }
+                }
+                $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id);
+                if($rate_destination->exists()){
+                    $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$destination->exists()){
+                        $destination_city_allowed = FALSE;
+                    }
+                }
+            }
+
+
+        }
+        return ['origin_city_allowed' => $origin_city_allowed, 'destination_city_allowed' => $destination_city_allowed];
+    }
+    static public function check_origin($pickup_address_id, $shipping_mode_id, $user_id){
+
+        $pickup_city_id = UserShippingInfo::find($pickup_address_id)->city_id;
+        $pickup_hub = City::find($pickup_city_id)->hub_id;
+
+        $user = User::find($user_id);
+
+
+        $origin_city_allowed = TRUE;
+
+        if($user->account_type_id == 1){
+            $rate_origin = RateOriginHub::where('user_id', $user_id);
+            if($rate_origin->exists()){
+                $origin = RateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                if(!$origin->exists()){
+                    $origin_city_allowed = FALSE;
+                }
+            }
+
+        }
+        else{
+            if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
+                $rate_origin = CorporateRateOriginHub::where('user_id', $user_id);
+                if($rate_origin->exists()){
+                    $origin = CorporateRateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$origin->exists()){
+                        $origin_city_allowed = FALSE;
+                    }
+                }
+            }
+            else if($user->corporate_rate_type_id == 3){
+                $rate_origin = CorporateDefaultRateOriginHub::where('user_id', $user_id);
+                if($rate_origin->exists()){
+                    $origin = CorporateDefaultRateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$origin->exists()){
+                        $origin_city_allowed = FALSE;
+                    }
+                }
+            }
+
+
+        }
+        return $origin_city_allowed;
+    }
+
+    static public function check_destination($consignee_city, $shipping_mode_id, $user_id, $type){
+
+        if($type == 1){
+            $destination_hub = City::where('name', $consignee_city)->first();
+        }
+        else{
+            $destination_hub = City::where('id', $consignee_city)->first();
+        }
+        if($destination_hub){
+            $destination_hub = $destination_hub->hub_id;
+            $user = User::find($user_id);
+
+            $destination_city_allowed = TRUE;
+
+            if($user->account_type_id == 1){
+                $rate_destination = RateDestinationHub::where('user_id', $user_id);
+                if($rate_destination->exists()){
+                    $destination = RateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$destination->exists()){
+                        $destination_city_allowed = FALSE;
+                    }
+                }
+
+            }
+            else{
+                if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
+                    $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id);
+                    if($rate_destination->exists()){
+                        $destination = CorporateRateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                        if(!$destination->exists()){
+                            $destination_city_allowed = FALSE;
+                        }
+                    }
+                }
+                else if($user->corporate_rate_type_id == 3){
+                    $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id);
+                    if($rate_destination->exists()){
+                        $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_hub, 'shipping_mode_id' => $shipping_mode_id]);
+                        if(!$destination->exists()){
+                            $destination_city_allowed = FALSE;
+                        }
+                    }
+                }
+
+
+            }
+            return $destination_city_allowed;
+        }
+        else{
+            return FALSE;
+        }
+
+
     }
 }
