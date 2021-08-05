@@ -50,6 +50,7 @@
                                     <th class="border-primary border-darken-1">Bag Type</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Manifest Id</th>
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Junction(s)</th>
                                   {{--  <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
@@ -128,6 +129,7 @@
                             head.push('Bag Type');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Manifest Id');
                             head.push('Shipment(s)');
                            /* head.push('Short Received Shipment(s)');
                             head.push('Shipping Mode');
@@ -150,6 +152,7 @@
                                 row.push(values.bag_type);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.manifest_id);
                                 row.push(values.shipments_count);
                                /* row.push(values.short_received);
                                 row.push(values.shipping_mode);
@@ -159,7 +162,7 @@
                                /* row.push(values.vendor);*/
                                 row.push(values.shipments_weight);
                                 row.push(values.actual_weight);
-                                row.push(values.transit_at);
+                                row.push(values.transitted_at);
                                 row.push(values.transitted_by);
                                 row.push(values.status);
 
@@ -206,6 +209,7 @@
                     {data: 'bag_type', name: 'cargo_manifest_bags.type', class: 'align-middle bag_type'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
+                    {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'shipments', name: 'cargo_manifest_bags.shipments', class: 'align-middle text-center shipments'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle text-center junctions',orderable: false},
                    /* {data: 'short_received_shipments', name: 'bags.short_received', class: 'align-middle text-center short_received_shipments'},
@@ -216,7 +220,7 @@
                    /* {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},*/
                     {data: 'shipments_weight', name: 'cargo_manifest_bags.shipments_weight', class: 'align-middle shipments_weight'},
                     {data: 'actual_weight', name: 'cargo_manifest_bags.actual_weight', class: 'align-middle actual_weight'},
-                    {data: 'transit_at', name: 'cargo_manifest_bags.created_at', class: 'align-middle transit_at'},
+                    {data: 'transitted_at', name: 'cargo_manifest_bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                 ],
@@ -283,7 +287,69 @@
                             }
                         }
                     });
+                    $('#datatable tbody').on('click', '.manifest_id', function () {
+                        var manifest_id = table.row($(this).parents('tr')).data().manifest;
+                        $.ajax({
+                            url: '{!! route('admin.cargo_manifest.print') !!}',
+                            method: 'POST',
+                            data: {
+                                'ids': manifest_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                var tab = window.open('', '_blank');
 
+                                if (!tab) {
+                                    swal({
+                                        title: 'Popup Blocker Enabled!',
+                                        text: 'Please add this site to your exception list.',
+                                        icon: 'error',
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
+                                }
+                                else {
+                                    tab.document.write(data);
+                                    tab.document.close();
+                                    tab.focus();
+                                }
+                            });
+                    });
+                    $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+                        var seal_number = table.row($(this).parents('tr')).data().seal_number;
+
+                        $('#shipments .modal-body').html('');
+
+                        $.ajax({
+                            url: '{!! route('admin.cargo_manifest.transitted_shipments') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'seal_number': seal_number
+                            }
+                        })
+                            .done(function(data) {
+                                if (data) {
+                                    var head = '';
+                                    var tracking_numbers = '';
+
+                                    head = '<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>' +
+                                        '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                        '<span aria-hidden="true">×</span>\n' +
+                                        '</button>';
+
+                                    $.each(data, function(index, tracking_number) {
+                                        tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    });
+
+                                    $('#shipments .modal-header').html(head);
+                                    $('#shipments .modal-body').html(tracking_numbers);
+
+                                    $('#shipments').modal('show');
+                                }
+                            });
+                    });
                     $("#bag_type_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Type",
                         width:'100%',
@@ -364,6 +430,36 @@
             }).bind('input', function() {
                 table.draw();
             });
+        });
+        $('#datatable tbody').on('click', '.manifest_id', function () {
+            var manifest_id = table.row($(this).parents('tr')).data().manifest_id;
+            console.log(manifest_id);
+            $.ajax({
+                url: '{!! route('admin.cargo_manifest.print') !!}',
+                method: 'POST',
+                data: {
+                    'ids': manifest_id,
+                    '_token': '{{ csrf_token() }}'
+                }
+            })
+                .done(function (data) {
+                    var tab = window.open('', '_blank');
+
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
         });
     </script>
 @endsection
