@@ -136,13 +136,7 @@
                         }
                    });
             var sizes = [];
-            // $('.add_to_cart').on('click', function(){
-            //     sizes.push(this.value);
-            //     var count = sizes.length;
-            //     $('#cart_count').text(count);
-            //     $(this).addClass('d-none');
-            // });
-
+            
             $('#material_request_cart_form').validate({
                 ignore: [],
                 errorClass: 'danger',
@@ -160,8 +154,6 @@
                     }
                 }
             });
-
-            
         });
     </script>
 

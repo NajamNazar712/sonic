@@ -211,10 +211,6 @@
 .checkout-button{
     padding: 8px 62px;
 }
-                                                              
-                                                              
-
-
 
     </style>
 
@@ -250,12 +246,6 @@
                         }
                    });
             var sizes = [];
-            // $('.add_to_cart').on('click', function(){
-            //     sizes.push(this.value);
-            //     var count = sizes.length;
-            //     $('#cart_count').text(count);
-            //     $(this).addClass('d-none');
-            // });
            
             $('#product_size').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
