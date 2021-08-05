@@ -652,7 +652,7 @@
                     var shipment_id = $('#piece_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
                     $.ajax({
-                        url: '{!! route('admin.master_cargo.bag.create.shipment_details') !!}',
+                        url: '{!! route('admin.cargo_manifest.bags.create.shipment_details') !!}',
                         method: 'POST',
                         data: {
                             'tracking_number': tracking_number,
