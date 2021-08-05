@@ -2943,7 +2943,7 @@ class AdminAPIController extends Controller
                     $datum["misroute"] = 1;
                 }
                 if ($junctions->exists()) {
-                    $junctions->pluck('junction_id')->toArray();
+                    $junctions = $junctions->pluck('junction_id')->toArray();
                     if (!in_array($admin->default_hub_id, $junctions)) {
                         $datum["misroute"] = 1;
                     }
