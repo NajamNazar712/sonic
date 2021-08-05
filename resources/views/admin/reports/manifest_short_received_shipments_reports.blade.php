@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Master Cargo Short Received Shipments')
+@section('title', 'Manifest Short Received Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Master Cargo Short Received Shipments
+        Manifest Short Received Shipments
     </h1>
 
     <div class="card">
@@ -16,11 +16,11 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Master Cargo </th>
-                        <th class="border-primary border-darken-1">Bag</th>
+                        <th class="border-primary border-darken-1">Bag No.</th>
+                        <th class="border-primary border-darken-1">Manifest ID</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Type</th>
+                        <th class="border-primary border-darken-1">Bag Type</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Transited Date/Time</th>
                     </tr>
@@ -107,7 +107,7 @@
 
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.master_cargo.in_transit.print') !!}',
+                    url: '{!! route('admin.cargo_manifest.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -147,18 +147,17 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.master_cargo.short_received_shipments.list') }}',
+                        url: '{{ route('admin.reports.manifest.short_received_shipments.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
 
                             head.push('S. No.');
-                            head.push('Tracking No.');
-                            head.push('Master Cargo No.');
-                            head.push('Bag');
+                            head.push('Bag No.');
+                            head.push('Manifest ID');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Cargo Type');
+                            head.push('Bag Type');
                             head.push('Shipping Mode');
                             head.push('Transited Date/Time');
                             $.each(result.data, function(index, values) {
@@ -166,11 +165,11 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.cargo);
+                                row.push(values.manifest_id);
                                 row.push(values.seal_number);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.cargo_type);
+                                row.push(values.bag_type);
                                 row.push(values.shipping_mode);
                                 row.push(values.transited_at);
 
@@ -190,7 +189,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Master Cargo Short Received Shipments Report',
+                        title: 'Manifest Short Received Shipments Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -203,18 +202,18 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.reports.master_cargo.short_received_shipments.list') }}',
+                ajax: '{{ route('admin.reports.manifest.short_received_shipments.list') }}',
                 order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
-                    { data:'id_padded_link' ,name: 'cargo', class: 'align-middle cargo text-center'},
                     { data:'seal_number' ,name: 'seal_number', class: 'align-middle seal_number'},
+                    { data:'id_padded_link' ,name: 'cm.id', class: 'align-middle manifest_id_link'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    { data:'cargo_type' ,name: 'bags.type', class: 'align-middle hub'},
-                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle zone'},
-                    { data:'transited_at' ,name: 'mc.created_at', class: 'align-middle class'}
+                    { data:'bag_type' ,name: 'bags.type', class: 'align-middle bag_type'},
+                    { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    { data:'transited_at' ,name: 'mc.created_at', class: 'align-middle transited_at'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -225,82 +224,9 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var cargo_id = parseInt(table.row($(this).parents('tr')).data().cargo);;
-                console.log(cargo_id);
-
-                if ($(this).hasClass('print')) {
-                  
-                    print(cargo_id);
-                }
-                        @if (session('role_id') == 1 || in_array(31, session('permissions')))
-                else if ($(this).hasClass('receive')) {
-
-                    $('#receive_form .cargo').val(cargo_id);
-
-                    $('#receive_form').submit();
-                }
-                @endif
-
-                        @if (session('role_id') == 1 || in_array(222, session('permissions')))
-                else if ($(this).hasClass('lost')) {
-                    blockPagePermanently();
-
-                    swal({
-                        text: 'Are you sure you want to update Master Cargo as Lost?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if(confirm) {
-                            $.ajax({
-                                url: '{{ route('admin.master_cargo.in_transit.lost') }}',
-                                method:'POST',
-                                data:{
-                                    '_token': '{{ csrf_token() }}',
-                                    'cargo_id': cargo_id
-                                }
-                            }).done(function (data) {
-                                selected_rows = [];
-                                table.rows().deselect();
-                                table.draw('false');
-
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-
-                                UnblockPagePermanently();
-                            });
-                        }
-                        else {
-                            UnblockPagePermanently();
-                        }
-                    });
-                }
-                @endif
-            });
-
-            $('#datatable tbody').on('click','tr td.cargo button.print',function () {
-                var cargo_id = parseInt(table.row($(this).parents('tr')).data().cargo);
-                print(cargo_id);
+            $('#datatable tbody').on('click','tr td.manifest_id_link button.print',function () {
+                var manifest_id = parseInt(table.row($(this).parents('tr')).data().manifest_id);
+                print(manifest_id);
             });
 
         });
