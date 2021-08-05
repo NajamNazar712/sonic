@@ -3003,6 +3003,9 @@ class AdminAPIController extends Controller
                         }
                     }
                 }
+                CargoManifestBagJourneyController::add($cargo_manifest_bags->id, $bag_no, $cargo_manifest_bags->status_id, $admin_id);
+                $manifest_bag = ManifestBag::where('cargo_manifest_bag_id',$cargo_manifest_bags->id)
+                    ->where('cargo_manifest_id',$manifest_id)->update(['status' => 1]);
                 array_push($bag_numbers, $bag_no);
             }
             $bag_short_received = array();
