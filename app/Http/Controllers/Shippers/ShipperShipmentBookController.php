@@ -512,6 +512,7 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
+
 					
                     if ($service_type_id == 1 || $service_type_id == 2) {
                         if ($request->filled('return_address')) {
@@ -581,6 +582,18 @@ class ShipperShipmentBookController extends Controller
                         $consignee_email_address = $user_shipping_info->email;
                     }
 
+                    $shipping_mode_id = $request->input('shipping_mode');
+
+                    $origin_allow = self::check_origin($pickup_address_id, $shipping_mode_id, $user_id);
+                    if($origin_allow == false){
+                        return redirect()->back()->with('error', 'Origin city not allowed, please contact your sales person!');
+                    }
+
+                    $destination_allow = self::check_destination($consignee_city_id, $shipping_mode_id, $user_id,2);
+                    if($destination_allow == false){
+                        return redirect()->back()->with('error', 'Destination city not allowed, please contact your sales person!');
+                    }
+
                     if ($request->filled('order_id')) {
                         $order_id = $request->input('order_id');
                     }
@@ -605,7 +618,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $estimated_weight = $request->input('estimated_weight');
-                    $shipping_mode_id = $request->input('shipping_mode');
+
                     if ($service_type_id != 5) {
                         $charges_mode_id = $request->charges_mode;
                     }
