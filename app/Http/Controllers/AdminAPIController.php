@@ -2848,12 +2848,13 @@ class AdminAPIController extends Controller
     {
         $admin_id = $request->admin_id;
         $bag_no = $request->bag_no;
-        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
+        $admin_hubs = Admin::find($admin_id);
+//        $admin_hubs = AdminHub::where('admin_id', $admin_id)->pluck('hub_id')->toArray();
         $cargos = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->where('cargo_manifests.status_id',1)
             ->where(function ($query) use ($admin_hubs) {
-                $query->whereIn('cargo_manifests.destination_hub_id', $admin_hubs);
+                $query->where('cargo_manifests.destination_hub_id', $admin_hubs->default_hub_id);
             })
             ->select('cargo_manifests.id as cargo_id', 'cargo_manifests.bags as bags', 'cargo_manifests.shipments as shipments', 'dh.name as destination', 'oh.name as origin', 'cargo_manifests.vehicle_number as vehicle_no');
 
