@@ -2885,7 +2885,10 @@ class AdminAPIController extends Controller
                 }
 
             }
-            return response()->json(['status' => 0, 'data' => $data]);
+            if(!$data->isEmpty()){
+                return response()->json(['status' => 0, 'data' => $data]);
+            }
+            return response()->json(['status' => 1, 'message' => "No cargo found!"]);
         }
         return response()->json(['status' => 1, 'message' => "No cargo found!"]);
     }
