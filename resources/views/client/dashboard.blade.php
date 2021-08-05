@@ -69,6 +69,8 @@
                                         <th class="border-primary border-darken-1">Booking Date</th>
                                         <th class="border-primary border-darken-1">Instructions</th>
                                         <th class="border-primary border-darken-1">Cancellation Remarks</th>
+                                        <th class="border-primary border-darken-1">Payment Mode</th>
+{{--                                        <th class="border-primary border-darken-1">Payment Mode</th>--}}
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
                                     </thead>
@@ -98,6 +100,7 @@
             </div>
         </div>
     </div>
+
     <!--Shipment Charges Modal -->
     <!--Dispute Modal -->
     <div class="modal fade text-left" id="DisputeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal"
@@ -809,6 +812,8 @@
 
                                 }
                             });
+
+
                         }
                     },
                     {
@@ -868,6 +873,7 @@
                 },
                 rowId: 'shipment_id',
                 order: [[17, 'desc']],
+
                 columns: [
                     {
                         data: 'id',
@@ -916,6 +922,11 @@
                         class: 'align-middle cancellation_remarks'
                     },
                     {
+                        data: 'payment_module',
+                        name: 'shipments.payment_mode_id',
+                        class: 'align-middle payment_module'
+                    },
+                    {
                         data: 'action',
                         name: 'action',
                         class: 'text-center align-middle action p-1',
@@ -924,7 +935,8 @@
                     }
 
                 ],
-                rowCallback: function (row, data, index) {
+
+            rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
@@ -944,6 +956,7 @@
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '</select>';
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
+                    var payment_mode ='<select name="payment_mode" id="payment_mode" class="select2 form-control"></select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
                     var business_category = '<select name="business_category" id="business_category" class="select2 form-control"></select>';
@@ -969,6 +982,11 @@
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
+                        } else if ($(header).is('.payment_module')) {
+                                $(payment_mode).appendTo($(search))
+                                    .on('change', function () {
+                                        column.search($(this).val(), false, false, true).draw();
+                                    }).wrap(td);
                         }  else if ($(header).is('.business_category')) {
                             $(business_category).appendTo($(search))
                                 .on('change', function () {
@@ -1075,6 +1093,20 @@
                     $("#payment_select").prepend('<option value="" selected></option>').select2({
                         data: data4,
                         placeholder: "Select Payment",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data6 = $.map({!! $payment_module !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.mode;
+
+                        return obj;
+                    });
+                    $("#payment_mode").prepend('<option value="" selected></option>').select2({
+                        data: data6,
+                        placeholder: "Select Payment Mode",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

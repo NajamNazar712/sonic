@@ -38,6 +38,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
 use App\http\Models\Runner;
 use App\http\Models\RunnerDetail;
+use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\ShipmentsPaymentJourney;
@@ -3760,7 +3761,7 @@ class NotificationsController extends Controller
                     $to = array_merge($to, $extra_admins);*/
 
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
@@ -3955,7 +3956,7 @@ class NotificationsController extends Controller
 //                    $extra_admins = ['rahat.ali@trax.pk', 'muhammad.yousuf@trax.pk'];
 //                    $to = array_merge($to, $extra_admins);
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk' , 'muhammad.yousuf@trax.pk','fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk'];
                     $cc = array();
                     $bcc = array();
                     $bcc = ['muhammad.waqas@trax.pk'];
@@ -5349,6 +5350,7 @@ class NotificationsController extends Controller
                     } else {
                         $to[] = 'faizan.ahmed@trax.pk';
                         $cc[] = 'mohsin.qamar@trax.pk';
+                        $cc[] = 'fawad.ahmed@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
                         $cc[] = 'shafay.tariq@trax.pk';
                     }
@@ -5638,6 +5640,7 @@ class NotificationsController extends Controller
                         $bcc = array();
                         $to[] = 'hassan@trax.pk';
                         $to[] = 'mohsin.qamar@trax.pk';
+                        $to[] = 'fawad.ahmed@trax.pk';
                         $to[] = 'talha.motiwala@trax.pk';
                         $to[] = 'shafay.tariq@trax.pk';
                         $to[] = 'wajiha.majeed@trax.pk';
@@ -7452,7 +7455,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['mohsin.qamar@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
                 }
@@ -7898,7 +7901,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = 'Inactive Rider For 2 Days or More ';
-                    $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk'];
+                    $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk','fabiha.shahid@trax.pk'];
                     self::email($subject, $body_updated, $to);
                 }
 
@@ -7946,8 +7949,48 @@ class NotificationsController extends Controller
                         }
                     }
                     
+                }    
+                else if($id == 143){
+                    $shipment = Shipment::join('users as u' , 'shipments.user_id' ,'=' , 'u.id' )
+                        ->join('sale_tier_tags as stt' ,function($join){
+                            $join->on('stt.user_id','u.id');
+                        })
+                        ->join('admins as a','a.id','stt.kam')
+                    ->select('u.name as username','u.id as userid' ,'a.name as adminname' ,'a.email as email')
+                        ->where('shipments.shipper_status_id',20)
+                        ->groupBy('userid')
+                        ->get();
+
+
+                    foreach($shipment as $data) {
+
+                        $getdata = Shipment::where('user_id','=',$data->userid)->where('shipments.shipper_status_id',20)->get();
+                        $html = '<b>Shipper Name is :' .$data->username . '</b>';
+                        $html .= '<table style="width:100%;">';
+                        $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>';
+                        $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Data/Time</th>';
+                        $html .= '</tr></thead><tbody>';
+
+                        foreach ($getdata as $value){
+                            $html .='<tr>';
+                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$value->tracking_number.'</td>';
+                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$value->updated_at.'</td>';
+
+                        }
+                        $html .='</tr></tbody></table>';
+                        $body_updated = $body;
+                        $body_updated = str_replace('[preview]', $html, $body_updated);
+                        $subject = 'Return Confirm Mail';
+                        $to = $data->email;
+                        self::email($subject, $body_updated, $to);
+
+                    }
+
+
                 }
             }
+
+
         }
     }
 
