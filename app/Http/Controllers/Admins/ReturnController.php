@@ -844,12 +844,10 @@ class ReturnController extends Controller
                                     }
                                 }
                             }
+                            $shipment->save();
+                            $tracking_numbers['Row #' . $row_id] = $tracking;
                         }
-
                     }
-                    $shipment->save();
-                    $tracking_numbers['Row #' . $row_id] = $tracking;
-
                 }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                     return $row . ': ' . $tracking_number;
