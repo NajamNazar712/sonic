@@ -3943,8 +3943,8 @@ class AdminReportsController extends Controller
         $call_verification_report = DB::connection('reports')->table('delivery_notes')->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('admins as ad','ad.id','=','delivery_notes.verified_by')
-            ->join('cities as c','c.hub_id','=', 'delivery_notes.hub_id')
-            ->join('shipments_journey as sj', function($join){
+            ->leftjoin('cities as c','c.id','=', 'delivery_notes.hub_id')
+            ->leftjoin('shipments_journey as sj', function($join){
                 $join->on('sj.shipment_id', '=', 'dns.shipment_id')
                     ->where('sj.id','=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = dns.shipment_id and shipments_journey.reference_1_id = dns.delivery_note_id and shipments_journey.verification = 1)'));
