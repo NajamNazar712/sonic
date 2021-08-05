@@ -16,9 +16,11 @@ class CreateCorporateDefaultRateOriginHubsTable extends Migration
         Schema::create('corporate_default_rate_origin_hubs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->index();
-            $table->integer('shipping_mode_id')->index();
+            $table->integer('shipping_mode_id');
             $table->integer('hub_id')->index();
             $table->timestamps();
+            $table->index('shipping_mode_id','default_rate_origin_smi');
+
         });
     }
 
