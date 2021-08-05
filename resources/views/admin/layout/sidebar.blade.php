@@ -350,6 +350,12 @@
                                     @if ((session('role_id') == 1 || in_array(554, session('permissions'))) && Auth::user()->default_hub_id != NULL)
                                         <li><a class="menu-item" href="{{ route('admin.cargo_manifest.receive.index') }}">Quick Receive Bags</a></li>
                                     @endif
+                                    @if ((session('role_id') == 1 || in_array(557, session('permissions'))) && Auth::user()->default_hub_id != NULL)
+                                        <li><a class="menu-item" href="{{ route('admin.cargo_manifest.receive.bag.index') }}">Quick Receive Bag Shipments</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(556, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.cargo_manifest.history') }}">Manifest History</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
@@ -881,7 +887,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301,319, 327,328,337,356, 401, 437, 444,472,476,493,502,524, 532], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,113, 138, 148, 153, 156, 169, 170, 172, 176, 200, 210, 258, 259, 263, 264, 275, 300, 301,319, 327,328,337,356, 401, 437, 444,472,476,493,502,524, 532, 555], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(113, session('permissions')))
@@ -1077,6 +1083,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(476, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.master_cargo.short_received_shipments.index') }}">Master Cargo Short Received Shipments</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(555, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.manifest.short_received_shipments.index') }}">Manifest Short Received Shipments</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(493, session('permissions')))
