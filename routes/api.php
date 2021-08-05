@@ -231,6 +231,7 @@ Route::name('api.')->group(function () {
                 Route::post('bags', 'AdminAPIController@cargo_bags')->name('bags');
                 Route::post('bags/validate', 'AdminAPIController@cargo_bags_validator')->name('bags.validate');
                 Route::post('bags/details', 'AdminAPIController@cargo_bags_details')->name('bags.details');
+                Route::post('bags/details', 'AdminAPIController@cargo_bags_details')->name('bags.details');
             });
 
             Route::get('notification_history', 'AdminAPIController@notification_history')->name('notification_history');
