@@ -3026,7 +3026,7 @@ class AdminAPIController extends Controller
                                 $short_received_bag = CargoManifestBag::find($manifest_bag->cargo_manifest_bag_id);
                                 $short_received_bag->status_id = 9;
                                 $short_received_bag->update();
-                                CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
+                                CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, $admin_id);
                                 $bag_short_received_count++;
                                 array_push($bag_short_received, $short_received_bag->id);
                                 array_push($cargo_short_received, $short_received_bag->id);
