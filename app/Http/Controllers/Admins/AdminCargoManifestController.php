@@ -22,6 +22,7 @@ use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\FleetDriver;
+use App\Http\Models\FleetVendor;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentPiece;
@@ -42,6 +43,8 @@ class AdminCargoManifestController extends Controller
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
+
+        $this->bag_can_be_received_statuses = [2,4,6,8,9,10];
     }
 
     public function manifest_mapping_index()
@@ -1113,6 +1116,7 @@ class AdminCargoManifestController extends Controller
 
     public function create_manifest()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 403);
         if(Auth::user()->default_hub_id == null)
         {
             return back()->with(['error'=>'Default Hub not set for this admin.']);
@@ -1271,7 +1275,7 @@ class AdminCargoManifestController extends Controller
                 $master_cargo->origin_hub_id = Auth::user()->default_hub_id;
                 $master_cargo->destination_hub_id = $hub_id;
                 $master_cargo->shipping_mode_id = $request->input('shipping_mode');
-                $master_cargo->transport_mode_id = 1;
+                $master_cargo->transport_mode_id = 2;
 
                 $master_cargo->bags = $bags;
                 $master_cargo->shipments = $shipments;
@@ -1886,8 +1890,10 @@ class AdminCargoManifestController extends Controller
         return $tracking_numbers;
     }
 
- public function receive_bag_index ()
+    public function receive_bag_index ()
     {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 408);
         if(Auth::user()->default_hub_id == null)
         {
             return back()->with(['error'=>'Default Hub not set for this admin.']);
@@ -2028,7 +2034,6 @@ class AdminCargoManifestController extends Controller
                         {
                             $misroute = 0;
                             $bag->status_id = 7;
-                            $bag->received_shipments = $bag->shipments->count();
                             $bag->short_received_shipments = 0;
                         }
                         if($misroute == 1)
@@ -2194,6 +2199,100 @@ class AdminCargoManifestController extends Controller
 
         return back()->with(['success_html'=>$success_html,'misroute_html'=>$misroute_html,'bag_short_received_error'=>$bag_short_received_error,'bag_not_exists_in_mapping_error'=>$bag_not_exists_in_mapping_error,'bag_not_exists_in_manifest_error'=>$bag_not_exists_in_manifest_error,'bag_not_exist_error'=>$bag_not_exists_error]);
 
+    }
+
+    public function manifest_history ()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 409);
+        $shipping_mode = ShippingMode::all();
+        $transport_vendor = FleetVendor::all();
+        $transport_mode = TransportMode::all();
+        return view('admin.cargo.manifest.history')->with(['shipping_mode'=>$shipping_mode,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
+    }
+
+    public function manifest_history_list (Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 410);
+        }
+
+        $receive_cargo = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
+            ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
+            ->join('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
+            ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
+            ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
+            ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
+            ->select('cargo_manifests.id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id');
+
+
+        if (session('role_id') != 1) {
+//            $receive_cargo = $receive_cargo->leftjoin('route_management_junctions as rmj', 'rm.id', '=', 'rmj.route_management_id')->where(function ($query) {
+//                $query->where(function ($sub_query) {
+//                    $sub_query->whereIn('oh.hub_id', session('hubs'))
+//                        ->orWhereIn('dh.hub_id', session('hubs'))
+//                        ->orWhereIn('rmj.junction_id', session('hubs'))
+//                        ->orWhere('a.id', Auth::id());
+//                });
+//            });
+        }
+        $datatables = Datatables::of($receive_cargo)
+            ->addColumn('id_padded', function ($master_cargo) {
+                return str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('id_padded_link', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->addColumn('bags_count', function ($master_cargo) {
+                return $master_cargo->bags;
+            })
+            ->addColumn('shipments_count', function ($master_cargo) {
+                return $master_cargo->shipments;
+            })
+            ->addColumn('short_received_bags_count', function ($master_cargo) {
+                return $master_cargo->short_received_bags;
+            })
+            ->addColumn('bags', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->bags . '</button>';
+            })
+            ->addColumn('short_received_bags', function ($master_cargo) {
+                if($master_cargo->short_received_bags > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->short_received_bags . '</button>';
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('shipments', function ($master_cargo) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->shipments . '</button>';
+            })
+            ->filterColumn('master_cargoes.id', function ($query, $keyword) {
+                return $query->where('master_cargoes.id', '=', $keyword);
+            })
+            ->filterColumn('shipping_mode',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            });
+
+//        if(($request->tracking_number != null && $request->tracking_number != '') || $request->bag_number != null && $request->bag_number != ''){
+//            $datatables->join('master_cargo_bags as mcb', 'master_cargoes.id', '=', 'mcb.master_cargo_id')
+//                ->join('bags as b', 'b.id', '=', 'mcb.bag_id');
+//            if ($tracking_number = $request->get('tracking_number')) {
+//                $datatables->join('bag_shipments as bs', 'b.id', '=', 'bs.bag_id')
+//                    ->join('shipments as s', 'bs.shipment_id', '=', 's.id')
+//                    ->where('s.tracking_number', '=', $tracking_number);
+//            }
+//
+//            if ($bag_number = $request->get('bag_number')) {
+//                $datatables->where('b.seal_number', '=', $bag_number);
+//            }
+//        }
+
+        return $datatables->make(true);
     }
 
 
