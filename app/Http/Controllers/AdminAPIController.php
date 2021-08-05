@@ -2917,7 +2917,7 @@ class AdminAPIController extends Controller
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
         $bag_ids = explode(',', $request->bags);
-        $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'manifest_bags.cargo_manifest_bag_id')
+        $bags = CargoManifestBag::join('manifest_bags as mb', 'cargo_manifest_bags.id', '=', 'mb.cargo_manifest_bag_id')
             ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
