@@ -1043,6 +1043,7 @@ class ShipperReceivingSheetController extends Controller
                         }
                     }
                 }
+
                 $shipment_info['tracking_number'] = $shipment->tracking_number;
                 $shipment_info['consignee_name'] = $shipment->consignee_name;
                 $shipment_info['consignee_address'] = $shipment->consignee_address;
@@ -1086,7 +1087,7 @@ class ShipperReceivingSheetController extends Controller
                 if($request->has('update_order_id')){
                     $shipment->order_id = $request->update_order_id;
                 }
-                if($request->has('shipping_mode')){
+                if($request->has('shipping_mode') && $request->shipping_mode > 0){
                     $shipment->shipping_mode_id = $request->shipping_mode;
                 }
                 $shipment->amount = $amount;

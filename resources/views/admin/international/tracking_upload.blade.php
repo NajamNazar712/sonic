@@ -45,6 +45,7 @@
                         <th class="border-primary border-darken-1">Third Party Tracking Number</th>
                         <th class="border-primary border-darken-1">Postal Code</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
+                        <th class="border-primary border-darken-1">POD File</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -89,6 +90,38 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="upload_pod_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_pod_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <form id="upload_pod_form" method="post" action="{{route('admin.delivery.receive.upload_pod')}}" enctype="multipart/form-data">
+                    @method('POST')
+                        @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title" id="bookings_modal_title">Upload POD</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                        
+                        <input type="hidden" name="shipment_id" id="pod_shipment" >
+                        <div class="form-group">
+                            <label for="pod_file">
+                                POD File: 
+                            </label><br>
+                            <input class="form-control form-control-sm" type="file" name="pod_file" id="pod_file" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                        </div>
+                    
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
 
 
 @endsection
@@ -121,7 +154,7 @@
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
-                'min': 1,
+                'min': 0.01,
                 'max':100000,
             });
             $('body').on('change','#edit_international_tracking_number',function() {
@@ -192,6 +225,7 @@
                     {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
                     {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
                     {data: 'actual_weight', name: 'international_shipments.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'pod_file', name: 'international_shipments.pod_file', class: 'align-middle pod_file', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -210,7 +244,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.pod_file')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -302,6 +336,39 @@
 
                     form.submit();
                 }
+            });
+            $('#upload_pod_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Uploading POD File!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+            
+
+            $('body').on('click', 'button.upload_pod',  function(){
+                var id = $(this).parents('tr').attr('id');
+                $('#pod_shipment').val(id);
+                console.log(id)
+                $('#upload_pod_modal').modal('show');
+                // if(id){
+                //     $('#corporate_rate_type_modal').modal('show');
+                //     $('#corporate_rate_type_shipper_id').val(id);
+                // }
             });
         });
     </script>

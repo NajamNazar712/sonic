@@ -34,8 +34,7 @@
                             </div>
                             <div class="col-2">
                                 <div class="form-group">
-                                    <button id="datatable_filter_btn" type="submit" class=" btn btn-outline-primary btn-min-width"><i
-                                                class="la la-search"></i> Search
+                                    <button id="datatable_filter_btn" type="submit" class=" btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search
                                     </button>
                                 </div>
                             </div>

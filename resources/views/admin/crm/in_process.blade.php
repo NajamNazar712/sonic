@@ -469,6 +469,14 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
+                                    swal({
+                                        title: 'Please Wait!',
+                                        text: 'Request(s) are being marked Closed.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                                     if (confirm) {
                                             $.ajax({
                                                 url: '{!! route('admin.crm.close') !!}',
@@ -479,7 +487,6 @@
                                                 }
                                             })
                                                 .done(function (data) {
-                                                    console.log(data.crm_request_ids);
                                                     if (data.status == 0) {
                                                         toastr.success(data.success, 'Success!', {
                                                             positionClass: 'toast-bottom-center',
@@ -517,6 +524,7 @@
                                                     });
 
                                                     table.draw('false');
+                                                    swal.close();
                                                 });
                                     }
                                 });
