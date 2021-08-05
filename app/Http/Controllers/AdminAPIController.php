@@ -2931,10 +2931,10 @@ class AdminAPIController extends Controller
             $data = array();
             foreach ($bags as $bag) {
                 $datum = array();
-                $datum["bag_no"] = $bags->bag_no;
-                $datum["manifest_id"] = $bags->manifest_id;
-                $datum["destination"] = $bags->destination;
-                $datum["origin"] = $bags->origin;
+                $datum["bag_no"] = $bag->bag_no;
+                $datum["manifest_id"] = $bag->manifest_id;
+                $datum["destination"] = $bag->destination;
+                $datum["origin"] = $bag->origin;
                 $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->pluck('junction_id')->toArray();
                 $datum["misroute"] = 0;
                 if ($bag->dest_id == $admin->default_hub_id) {
