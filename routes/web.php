@@ -177,6 +177,15 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
             Route::post('cancel','Shippers\ShipperPackagingMaterialController@packaging_request_cancel')->name('cancel');
 
+            Route::get('categories','Shippers\ShipperPackagingMaterialController@select_categories')->name('categories');
+            Route::get('category/{id}','Shippers\ShipperPackagingMaterialController@category_products')->name('category');
+            Route::get('product/{id}','Shippers\ShipperPackagingMaterialController@product_details')->name('product');
+            Route::post('get_charges','Shippers\ShipperPackagingMaterialController@get_charges')->name('get_charges');
+            Route::post('add_to_cart','Shippers\ShipperPackagingMaterialController@add_to_cart')->name('add_to_cart');
+            Route::post('get_cart_count','Shippers\ShipperPackagingMaterialController@cart_count')->name('get_cart_count');
+            Route::get('checkout','Shippers\ShipperPackagingMaterialController@checkout')->name('checkout');
+            Route::post('remove_product','Shippers\ShipperPackagingMaterialController@remove_product')->name('remove_product');
+            
             Route::prefix('cart')->name('cart.')->group(function (){
                 Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request_cart_index')->name('index');
                 Route::post('details','Shippers\ShipperPackagingMaterialController@packaging_request_cart_details')->name('details');
@@ -245,8 +254,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Shippers\ShipperFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('print_origin_wise', 'Shippers\ShipperFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
-
-
         });
     });
 
@@ -991,6 +998,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('shipments','Admins\DeliveryController@cash_collection_shipments')->name('shipments');
                 Route::post('shipments/delivered','Admins\DeliveryController@cash_collection_shipments_delivered')->name('shipments.delivered');
                 Route::post('shipments/ccd_slip','Admins\DeliveryController@cash_collection_shipments_ccd_slip')->name('shipments.ccd_slip');
+                Route::post('shipments/upload_ccd_receipt','Admins\DeliveryController@cash_collection_upload_receipt')->name('shipments.upload_ccd_receipt');
+
             });
             Route::prefix('retail')->name('retail.')->group(function(){
                 Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');
@@ -1047,6 +1056,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('undelivered/print','Admins\DeliveryController@dncc_undelivered_print')->name('undelivered.print');
             Route::post('reassign_rider','Admins\DeliveryController@reassign_rider')->name('reassign_rider');
             Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
+            Route::post('/upload_pod','Admins\DeliveryController@upload_pod')->name('upload_pod');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){
@@ -1188,6 +1198,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('list','Admins\ReturnController@return_marked_list')->name('list');
         Route::post('confirm/status','Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status','Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
+       
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
@@ -1200,6 +1211,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
+            Route::post('revert/status','Admins\ReturnController@return_revert_status')->name('revert.status');
+            Route::post('excel/store','Admins\ReturnController@excel_store_revert')->name('excel.store');
         });
 
         Route::prefix('create')->name('create.')->group(function(){
@@ -1495,11 +1508,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('seal_number', 'Admins\AdminCargoManifestController@create_bag_seal_number')->name('seal_number');
                 Route::post('', 'Admins\AdminCargoManifestController@create_store')->name('store');
 
-               /* Route::prefix('open_bag')->name('open_bag.')->group(function () {
-                    Route::get('', 'Admins\AdminMasterCargoController@create_open_bag_index')->name('index');
-                    Route::post('shipment_details', 'Admins\AdminMasterCargoController@create_open_bag_shipment_details')->name('shipment_details');
-                    Route::post('', 'Admins\AdminMasterCargoController@create_open_bag_store')->name('store');
-                });*/
+               Route::prefix('open_bag')->name('open_bag.')->group(function () {
+                    Route::get('', 'Admins\AdminCargoManifestController@create_open_bag_index')->name('index');
+//                    Route::post('shipment_details', 'Admins\AdminCargoManifestController@create_open_bag_shipment_details')->name('shipment_details');
+                    Route::post('', 'Admins\AdminCargoManifestController@create_open_bag_store')->name('store');
+                });
 
             });
             Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
@@ -1748,6 +1761,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
             Route::post('print', 'Admins\AdminFinanceController@invoices_print')->name('print');
             Route::post('print_origin_wise', 'Admins\AdminFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
+            Route::post('print_gst_wise', 'Admins\AdminFinanceController@invoices_print_gst_wise')->name('print_gst_wise');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@invoices_export_to_excel')->name('export_to_excel');
             Route::put('email_reminder', 'Admins\AdminFinanceController@invoices_email_reminder')->name('email_reminder');
             Route::post('mark_as_received', 'Admins\AdminFinanceController@invoices_mark_as_received')->name('mark_as_received');

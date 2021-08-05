@@ -142,7 +142,7 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="short_recieved_shipments" role="dialog" aria-labelledby="short_recieved_shipments" aria-hidden="true">
+    <div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="short_received_shipments" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -175,9 +175,9 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
-                    //params.excel = true;
+                    params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.cargo_manifest.bags.pending.list') }}',
+                        url: '{{ route('admin.cargo_manifest.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -186,6 +186,8 @@
                             head.push('Bag Type');
                             head.push('Shipments');
                             head.push('Short Received');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Actual Weight');
                             head.push('Shipping Mode');
                             head.push('Manifest Id');
@@ -232,7 +234,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Pending For Bags',
+                        title: 'Manifest list',
                         className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -549,10 +551,10 @@
                     });
             });
 
-            $('#datatable tbody').on('click', 'tr td.short_recieved_shipments button', function() {
+            $('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
                 var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
-                $('#short_recieved_shipments .modal-body').html('');
+                $('#short_received_shipments .modal-body').html('');
 
                 $.ajax({
                     url: '{!! route('admin.cargo_manifest.short_received_shipments') !!}',
@@ -576,10 +578,10 @@
                                 tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                             });
 
-                            $('#short_recieved_shipments .modal-header').html(head);
-                            $('#short_recieved_shipments .modal-body').html(tracking_numbers);
+                            $('#short_received_shipments .modal-header').html(head);
+                            $('#short_received_shipments .modal-body').html(tracking_numbers);
 
-                            $('#short_recieved_shipments').modal('show');
+                            $('#short_received_shipments').modal('show');
                         }
                     });
             });

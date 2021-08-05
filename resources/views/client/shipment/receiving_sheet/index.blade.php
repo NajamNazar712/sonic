@@ -702,17 +702,21 @@
 								var tracking_number = data.shipment_info.tracking_number;
 								$('#shipping_mode').removeClass('d-none');
 								if(data.shipping_modes != null){
+									$('.shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+										width: '100%',
+										placeholder: 'Mode of Shipping*',
+									});
 									$.each(data.shipping_modes, function (index, shipping_mode) {
 										if(shipping_mode_id === shipping_mode['id']) {
-											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" selected>' + shipping_mode['mode'] + '</option>');
+											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" selected class="select2">' + shipping_mode['mode'] + '</option>');
 										}
 										else{
-											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+											$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '" class="select2">' + shipping_mode['mode'] + '</option>');
 										}
 									});
 								}
 								else{
-									$('#shipping_mode').addClass('d-none');
+									$('#shipping_mode').addClass('d-none','select2');
 								}
 
 								html_row = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking_number +'</b></span></div>';
@@ -812,7 +816,9 @@
 			$('#UpdateConsigneeInfoModal').on('hide.bs.modal', function (e) {
 				// console.log($('#update_consignee_info_form')[0]);
 				validator_consignee_info_form.resetForm();
-				$('#shipping_mode').html('').select2('destroy');
+				if ($('#shipping_mode').hasClass("select2-hidden-accessible")) {
+					$('#shipping_mode').html('').select2('destroy');
+				}
 				$('#update_consignee_info_form')[0].reset();
 				$('#update_consignee_info_shipment_id').val('');
 				$('#update_consignee_name').val('');

@@ -199,6 +199,7 @@ class Permission
             'cargo_manifest.bags.pending.index' => 545,
             'cargo_manifest.bags.pending.list' => 545,
             'cargo_manifest.bags.create.index' => 546,
+            'cargo_manifest.bags.create.open_bag.index' => 559,
             'cargo_manifest.bags.history.index' => 547,
             'cargo_manifest.bags.history.list' => 547,
             'cargo_manifest.create' => 551,
@@ -209,6 +210,7 @@ class Permission
             'cargo_manifest.receive.store' => 554,
             'cargo_manifest.history' => 556,
             'cargo_manifest.history.list' => 556,
+
 
 
 

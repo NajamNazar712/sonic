@@ -343,11 +343,17 @@ class LostShipmentsController extends Controller
                               $shipment_weight = $bag->shipment_weight;
                               $shipments_count = $bag_total_shipments - 1;
                               $bag->shipments = $shipments_count;
+                              $not_received_shipments_count =  $bag->shipment()->where('status','!=',1)->count();
                               $bag->actual_weight = $shipment_weight - $shipment_details->actual_weight;
                                 if ($shipments_count == 0) {
                                     $bag->status_id = 10;
                                     CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,10,Auth::id(),NULL,NULL);
-                                } else {
+                                }
+                                else if($not_received_shipments_count > 0 && in_array($bag->status_id, [8,9,10])){
+                                    $bag->status_id = 7;
+                                    CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,7,Auth::id(),NULL,NULL);
+                                }
+                                else {
                                     $bag->status_id = 8;
                                 }
                                 $bag->save();

@@ -99,7 +99,38 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="upload_pod_modal" data-backdrop="static" role="dialog" aria-labelledby="upload_pod_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <form id="upload_pod_form" method="post" action="{{route('admin.delivery.receive.upload_pod')}}" enctype="multipart/form-data">
+                    @method('POST')
+                        @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title" id="bookings_modal_title">Upload POD</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                        
+                        <input type="hidden" name="shipment_id" id="pod_shipment" >
+                        <div class="form-group">
+                            <label for="pod_file">
+                                POD File: 
+                            </label><br>
+                            <input class="form-control form-control-sm" type="file" name="pod_file" id="pod_file" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                        </div>
+                    
 
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
 
     <!--Replacement Modal -->
     <div class="modal fade text-left" id="ReplacementModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
@@ -1229,7 +1260,20 @@
                 }
             });
 
+            $("#upload_pod_form" ).validate({
+                errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
 
+                    form.submit();
+
+                }
+            });
 
 
             //on page load ajax
@@ -1905,7 +1949,16 @@
 
                 }
             });
-
+            $('body').on('click', 'button.upload_pod',  function(){
+                var id = $(this).parents('tr').attr('id');
+                $('#pod_shipment').val(id);
+                console.log(id)
+                $('#upload_pod_modal').modal('show');
+                // if(id){
+                //     $('#corporate_rate_type_modal').modal('show');
+                //     $('#corporate_rate_type_shipper_id').val(id);
+                // }
+            });
 
         });
     </script>
