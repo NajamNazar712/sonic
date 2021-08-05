@@ -3993,7 +3993,7 @@ class DeliveryController extends Controller
                 return '';
             })
             ->addColumn('ccd_image', function ($deliveries) {
-                $image = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm ccd_slip_list"><i class="la la-image"></i> View Receipts</button></div>';
+                $image = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm ccd_slip_list"><i class="la la-image"></i> CCD Receipts</button></div>';
                 return $image;
             });
         if ($tracking_number = $request->get('tracking_numbers')) {
@@ -5275,7 +5275,7 @@ class DeliveryController extends Controller
         $rider_deliveries = RiderDelivery::join('shipments as s', 's.id', '=', 'rider_deliveries.shipment_id')
             ->where('delivery_note_id', $delivery_note_id)
             ->where('delivered_status', 1)
-            ->select('rider_deliveries.id as id','s.tracking_number as tracking_number', 's.payment_mode_id as payment_mode_id' ,'rider_deliveries.ccd_image as ccd_image')->get();
+            ->select('rider_deliveries.id as id','s.tracking_number as tracking_number', 's.payment_mode_id as payment_mode_id' ,'rider_deliveries.ccd_image as ccd_image','s.id as shipment_id')->get();
         if(count($rider_deliveries) > 0){
             $sorted_array = array();
             $now = Carbon::now();
@@ -5298,7 +5298,14 @@ class DeliveryController extends Controller
                 }
                 if ($rider_delivery->payment_mode_id == 2)
                 {
-                    $upload_image .= '<div class="text-center"><a type="button" class="btn btn-primary btn-sm picture_upload white"  target="_blank"><i class="la la-image"></i> Upload</a></div>';
+                    $upload_image .= ' <div class="col">
+                                <div class="form-group">
+                                <input type="hidden" name="shipment_ids[]" value="'. $rider_delivery->shipment_id .'">
+                                    <input type="file" name="images['. $rider_delivery->shipment_id .']" class="w-20p p-1 border-primary"
+                                           title="Select File"
+                                           data-msg-required="File is required" data-rule-maxsize="5242880">
+                                </div> 
+                            </div>';
 
                     $sorted_array[$rider_delivery->id]['ccd_upload'] = $upload_image;
                 }else{
@@ -6911,10 +6918,23 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
     }
 
-    public function cash_collection_upload_receipt(Request $request){
-      /*  $file = $request->file('receipt_upload');
-        $picture_path = 'img/receipts' . $vendor_request->id  .'.'. $file->extension();;
-        Storage::disk('public')->put($picture_path, file_get_contents($request->delivery_challan));*/
+    public function cash_collection_upload_receipt(Request $request)
+    {
+        $delivery_note_id = $request->input('ccd_delivery_note_id');
+        foreach ($request->shipment_ids as $shipment_id) {
+            if(array_key_exists($shipment_id, $request->images)) {
+                $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
+                if ($rider_delivery->exists()) {
+                    $rider_delivery = $rider_delivery->first();
+
+                    $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
+                    Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
+                    $rider_delivery->ccd_image = $picture_path;
+                    $rider_delivery->save();
+                }
+            }
+        }
+        return redirect('/admin/delivery/cash_collection/pending');
     }
 
 }

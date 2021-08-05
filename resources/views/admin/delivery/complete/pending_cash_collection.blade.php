@@ -107,77 +107,50 @@
     <!--Shipments popup -->
     <!--CCD Slip popup-->
 
-    <div class="modal fade text-left" id="ViewCCDSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewCCDSlip"
+    <div class="modal fade text-left" id="ViewCCDSlip" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="ViewCCDSlip"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">CCD Receipts View</h4>
+                    <h4 class="modal-title white">CCD Receipts </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
-                    <table class="table table-bordered datatable" id="ccd_slip_table" style="z-index: 3;">
-                        <thead>
-                        <tr role="row" class="bg-primary white">
+                    <div class="modal-body text-center">
+                        <form id="upload_image_form" class="form-horizontal"
+                              action="{{route('admin.delivery.cash_collection.pending.shipments.upload_ccd_receipt')}}"
+                              method="POST" novalidate="novalidate" enctype="multipart/form-data">
+                            {{ csrf_field() }}
+                            <input type="hidden" name="ccd_delivery_note_id" id="ccd_delivery_note_id" value="">
+                            <table class="table table-bordered datatable" id="ccd_slip_table" style="z-index: 3;">
+                                <thead>
+                                <tr role="row" class="bg-primary white">
 
-                            <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Tracking No</th>
-                            <th class="border-primary border-darken-1">CCD Slip</th>
-                            <th class="border-primary border-darken-1">CCD Upload </th>
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Tracking No</th>
+                                    <th class="border-primary border-darken-1">CCD Slip</th>
+                                    <th class="border-primary border-darken-1">CCD Upload</th>
 
-                        </tr>
-                        </thead>
-                    </table>
-
-                    <hr>
-                    <div class="row justify-content-center">
-                        <div class="col-3">
-                            <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-            {{--div for upload image --}}
-    <div class="modal fade" id="image_upload" data-backdrop="static" role="dialog" aria-labelledby="image_upload" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="excel_upload_modal_title">Upload Receipt</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <form id="upload_image_form" class="form-horizontal" method="POST" action="#" novalidate="novalidate" enctype="multipart/form-data">
-                        {{ csrf_field() }}
-                        <input type="hidden" name="receipt_image_input" id="receipt_image_input">
-                        <div class="row align-items-center justify-content-center">
-                            <div class="col">
-                                <div class="form-group">
-                                    <input type="file" name="receipt_upload" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
-                                </div>
+                            </tr>
+                            </thead>
+                        </table>
+                        <hr>
+                        <div class="row justify-content-center">
+                                <div class="col-6">
+                                    <button type="submit" id="upload_ccd" class="btn btn-primary upload_ccd" name="upload">
+                                    Upload
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             </div>
-
-                            <div class="col">
-                                <div class="form-group text-left">
-                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
-                                </div>
-                            </div>
-
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>
-        {{--it ends here --}}
+
 @endsection
 
 @section('css')
@@ -239,6 +212,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -825,6 +799,51 @@
 
             });
 
+            //--------upload image function
+            $('#upload_image_form').validate({
+
+                submitHandler: function (form) {
+                    swal({
+                        text: 'Are you sure you want to upload the picture ?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if(confirm) {
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Adding CCD Image!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+
+                            form.submit();
+                        }
+                        else {
+                            $(form).find('button[type=submit]').prop('disabled', false);
+                        }
+                    });
+                }
+            });
+
+
             $('#datatable tbody').on('click','tr td.ccd_image button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 /*$('#ViewFCCDSlip .modal-body').html('');*/
@@ -841,6 +860,7 @@
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }else{
                             $('#ViewCCDSlip').modal('show');
+                            $('#ccd_delivery_note_id').val(id);
                             ccd_slip_table = $('#ccd_slip_table').DataTable({
                                 dom: 'ltipr',
                                 ordering:false,
@@ -862,17 +882,6 @@
 
                                     // this.api().table().columns.adjust();
                                 }
-                            });
-
-                            //upload image modal calling
-                            $('body').on('click','.ccd_upload',function () {
-                                var rowid = $(this).parents('tr').attr('id');
-                                // modal calling -----------------
-                                $('#receipt_image_input').val(rowid);
-                                $('#image_upload').modal('show');
-
-                                $('#ViewCCDSlip').modal('hide');
-
                             });
 
                             $.each(data.ccd_slips, function (index, value) {
