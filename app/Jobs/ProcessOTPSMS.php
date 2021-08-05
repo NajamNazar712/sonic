@@ -216,7 +216,8 @@ class ProcessOTPSMS implements ShouldQueue
                         'session_id' => $telenor->session_id,
                         'to' => $sms->to,
                         'text' => $sms->body,
-                        'mask' => 'TRAX'
+                        'mask' => 'TRAX',
+                        'transaction_message' => TRUE
                     ]
                 ]);
 
@@ -235,16 +236,16 @@ class ProcessOTPSMS implements ShouldQueue
 
                         $sms->save();
                     }
-                    else {
-                        $error = TRUE;
-                    }
-                }
-                else if ($xml['data'] == 'Error 102') {
-                    if (!$retry) {
-                        $result = $this->telenor_generate_session_id($base_uri, $sms);
+                    else if ($xml['data'] == 'Error 102') {
+                        if (!$retry) {
+                            $result = $this->telenor_generate_session_id($base_uri, $sms);
 
-                        if ($result) {
-                            $this->telenor_sms($base_uri, $sms, TRUE);
+                            if ($result) {
+                                $this->telenor_sms($base_uri, $sms, TRUE);
+                            }
+                            else {
+                                $error = TRUE;
+                            }
                         }
                         else {
                             $error = TRUE;

@@ -1738,7 +1738,11 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
-                    distribution_total_price();
+                    @if(session('user_id') == 10354)
+                    if(service_type == 1){
+                        distribution_total_price();
+                    }
+                    @endif
                     return $.trim(value);
                 },
                 errorPlacement: function(error, element) {
