@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CargoManifestBagShipments extends Model
 {
-    //
+    public function bag()
+    {
+        return $this->belongsTo('App\Http\Models\Admin\CargoManifest\CargoManifestBag','cargo_manifest_bag_id');
+    }
 }

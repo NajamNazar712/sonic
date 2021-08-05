@@ -2389,7 +2389,7 @@ class AdminCargoManifestController extends Controller
         return view('admin.cargo.manifest.receive_shipments');
     }
 
-    public function master_cargo_bag_quick_receive_bag_details(Request $request) {
+    public function receive_bag_shipments_details(Request $request) {
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
@@ -2406,7 +2406,7 @@ class AdminCargoManifestController extends Controller
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-                    if($bag->status_id == 4 || $bag->status_id == 7){
+                    if($bag->status_id == 9 || $bag->status_id == 7){
                         if(session('role_id') != 1){
                             if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
                                 return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
