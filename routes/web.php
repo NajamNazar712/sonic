@@ -1434,7 +1434,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_bags')->name('bags');
             Route::post('short_received_bags', 'Admins\AdminMasterCargoController@master_cargo_in_transit_short_received_bags')->name('short_received_bags');
             Route::post('shipments', 'Admins\AdminMasterCargoController@master_cargo_in_transit_shipments')->name('shipments');
-            
+
+
             Route::post('print', 'Admins\AdminMasterCargoController@master_cargo_in_transit_print')->name('print');
             Route::post('junctions', 'Admins\AdminMasterCargoController@master_cargo_in_transit_junctions')->name('junctions');
             Route::post('details', 'Admins\AdminMasterCargoController@master_cargo_in_transit_details')->name('details');
@@ -1516,6 +1517,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('bag/details','Admins\AdminCargoManifestController@bag_details')->name('bag_details');
         Route::post('cargo/details','Admins\AdminCargoManifestController@cargo_details')->name('cargo_details');
         Route::post('/store','Admins\AdminCargoManifestController@store_manifest')->name('store');
+        Route::post('/update/seal_number','Admins\AdminCargoManifestController@update_seal_number')->name('update.seal_number');
+        Route::post('/junctions','Admins\AdminCargoManifestController@junctions_info')->name('junctions_info');
+        Route::post('/vehicle','Admins\AdminCargoManifestController@vehicle_info')->name('vehicle_info');
+        Route::post('/transitted_shipments','Admins\AdminCargoManifestController@transitted_shipments')->name('transitted_shipments');
+        Route::post('short_received_shipments', 'Admins\AdminMasterCargoController@short_received_shipments')->name('short_received_shipments');
 
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
