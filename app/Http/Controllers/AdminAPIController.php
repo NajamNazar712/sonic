@@ -2925,7 +2925,6 @@ class AdminAPIController extends Controller
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
             ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
             ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id')->get();
-        return response()->json(['status' => 0, 'data' => $bags]);
         if ($bags->exists()) {
             $bags = $bags->get();
             $data = array();
@@ -2943,8 +2942,11 @@ class AdminAPIController extends Controller
                 if ($bag->j_dest_id != $admin->default_hub_id) {
                     $datum["misroute"] = 1;
                 }
-                if (!in_array($admin->default_hub_id, $junctions)) {
-                    $datum["misroute"] = 1;
+                if ($junctions->exists()) {
+                    $junctions->pluck('junction_id')->toArray();
+                    if (!in_array($admin->default_hub_id, $junctions)) {
+                        $datum["misroute"] = 1;
+                    }
                 }
                 $data[] = $datum;
             }
