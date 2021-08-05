@@ -1966,11 +1966,11 @@ class AdminCargoManifestController extends Controller
                 $bag = $bag->first();
 
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
-                    $join->on('mb.cargo_manifest_id','cargo_manifests.id')
-                        ->where('mb.cargo_manifest_bag_id',$bag->id);
+                    $join->on('mb.cargo_manifest_id','cargo_manifests.id');
                 })
-                    ->select(['cargo_manifests.*'])
-                    ->where('cargo_manifests.status_id',1);
+                    ->select(['cargo_manifests.*','mb.cargo_manifest_bag_id'])
+                    ->where('cargo_manifests.status_id',1)
+                    ->where('mb.cargo_manifest_bag_id',$bag->id);
 
                 if ($cargo_bag->exists()) {
                     $cargo_bag = $cargo_bag->first();
@@ -2127,6 +2127,7 @@ class AdminCargoManifestController extends Controller
 
             if($cargo_bag->exists())
             {
+                $cargo_bag = $cargo_bag->first();
                 $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
@@ -2399,7 +2400,6 @@ class AdminCargoManifestController extends Controller
                 return ['status' => 1, 'error' => 'Given Tracking Number has already been modified!'];
             }
             $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment->id);
-
             if ($bag_shipment->exists()) {
                 $bag_shipment = $bag_shipment->where('status', 0);
 
