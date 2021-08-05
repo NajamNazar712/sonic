@@ -227,7 +227,7 @@ Route::name('api.')->group(function () {
             });
 
             Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
-                Route::get('list', 'AdminAPIController@master_cargo')->name('list');
+                Route::post('list', 'AdminAPIController@master_cargo')->name('list');
                 Route::post('bags', 'AdminAPIController@cargo_bags')->name('bags');
                 Route::post('bags/validate', 'AdminAPIController@cargo_bags_validator')->name('bags.validate');
             });
