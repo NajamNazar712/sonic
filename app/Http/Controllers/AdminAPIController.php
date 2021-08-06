@@ -2932,6 +2932,7 @@ class AdminAPIController extends Controller
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
             ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
             ->where('cm.status_id', 1)
+            ->where('mb.status', 0)
             ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
         if ($bags->exists()) {
             $bags = $bags->get();
