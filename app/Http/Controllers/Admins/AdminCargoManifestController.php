@@ -2700,11 +2700,11 @@ class AdminCargoManifestController extends Controller
             $short_received = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 0)->count();
 
             if ($short_received > 0) {
-                $bag->short_received = $short_received;
+                $bag->short_received_shipments = $short_received;
                 $status_id = 8;
             }
             else {
-                $bag->short_received = 0;
+                $bag->short_received_shipments = 0;
                 $status_id = 7;
             }
             $bag->status_id = $status_id;
