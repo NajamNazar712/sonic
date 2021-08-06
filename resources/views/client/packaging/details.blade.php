@@ -12,7 +12,7 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                    <div class="col-10">
+                                    <div class="col-16">
                                         @include('client.inc.messages')
                                     </div>
                                     <div class="col">
@@ -56,8 +56,34 @@
                                                         </div>
                                                         <div class="col-lg-4 order-lg-2 order-1">
                                                              
-                                                            <div class="image_selected"><img id="xzoom" src="{{asset($picture)}}"
-                                                                data-zoom-image="{{asset($picture)}}"/></div>
+                                                            <div class="image_selected">
+                                                                <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel"  data-interval="false"  data-pause="hover">
+                                                                    <ol class="carousel-indicators" style="top: 300px;">
+                                                                      <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active bg-primary"></li>
+                                                                      <li data-target="#carouselExampleIndicators" data-slide-to="1" class="bg-primary"></li>
+                                                                      <li data-target="#carouselExampleIndicators" data-slide-to="2" class="bg-primary"></li>
+                                                                      <li data-target="#carouselExampleIndicators" data-slide-to="3" class="bg-primary"></li>
+                                                                      <li data-target="#carouselExampleIndicators" data-slide-to="4" class="bg-primary"></li>
+                                                                    </ol>
+                                                                    <div class="carousel-inner">
+                                                                      <div class="carousel-item active">
+                                                                        <img class="d-block w-100" src="{{asset($picture)}}" alt="First slide">
+                                                                      </div>
+                                                                      <div class="carousel-item">
+                                                                        <img class="d-block w-100" src="{{asset($picture1)}}" alt="Second slide">
+                                                                      </div>
+                                                                      <div class="carousel-item">
+                                                                        <img class="d-block w-100" src="{{asset($picture2)}}" alt="Third slide">
+                                                                      </div>
+                                                                      <div class="carousel-item">
+                                                                        <img class="d-block w-100" src="{{asset($picture3)}}" alt="Fourth slide">
+                                                                      </div>
+                                                                      <div class="carousel-item">
+                                                                        <img class="d-block w-100" src="{{asset($picture4)}}" alt="Fifth slide">
+                                                                      </div>
+                                                                    </div>
+                                                                  </div>
+                                                            </div>
                                                         </div>
                                                         <div class="col-lg-6 order-3">
                                                             <div class="product_description">
@@ -220,7 +246,8 @@
 
 
 .image_selected {
-    border: solid 1px #e8e8e8;
+    border: solid 1px #070707;
+    border-radius: 15px;
     box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     padding: 15px
@@ -267,7 +294,8 @@
     justify-content: center;
     align-items: center;
     height: 120px;
-    border: solid 1px #e8e8e8;
+    border: solid 1px #070707;
+    border-radius: 15px;
     box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.1) !important;
     margin-bottom: 15px;
     cursor: pointer;
@@ -305,7 +333,8 @@
     -ms-transform: translateX(-15px);
     -o-transform: translateX(-15px);
     transform: translateX(-15px);
-    border: solid 1px #e8e8e8;
+    border: solid 1px #070707;
+    border-radius: 15px;
     box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     padding: 15px
@@ -333,7 +362,8 @@ ul {
     justify-content: center;
     align-items: center;
     height: 120px;
-    border: solid 1px #e8e8e8;
+    border: solid 1px #070707;
+    border-radius: 15px;
     box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 15px;
     cursor: pointer;
@@ -375,7 +405,8 @@ ul {
     -ms-transform: translateX(-15px);
     -o-transform: translateX(-15px);
     transform: translateX(-15px);
-    border: solid 1px #e8e8e8;
+    border: solid 1px #070707;
+    border-radius: 15px;
     box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     padding: 15px
@@ -447,10 +478,10 @@ ul {
 
     <script type="text/javascript">
         $('document').ready(function(){
-
+            
             $('#search_package_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder:'Search Sonic',
+                placeholder:'Search',
                 dropdownParent:$('#search_package_type_from')
             }).bind('select2:select',function () {
                 var url = $(this).val();
@@ -481,30 +512,6 @@ ul {
                         }
                    });
             var sizes = [];
-           
-            // $('#product_size').prepend('<option value="" selected="selected"></option>').select2({
-            //     width: '100%',
-            //     placeholder: 'Select Size*'
-            // }).bind('change', function() {
-
-            //     var size_id = $(this).val();
-            //     $.ajax({
-            //         url: '{!! route('cod.packaging.requests.get_charges') !!}',
-            //         method: 'POST',
-            //         data: {
-            //             '_token': '{{ csrf_token() }}',
-            //             'size_id': size_id
-            //         }})
-            //         .done(function(data) {
-            //             if (data.status == 0) {
-            //                 $('#charges').val(data.charges);
-            //                 $('#charges_show').html(data.charges);
-                            
-            //             }
-                                      
-            //         });
-            // });
-
             $('input:radio[name=product_size]').change(function() {
                 var size_id = $(this).val();
                 $('#charges_show').html(" ");

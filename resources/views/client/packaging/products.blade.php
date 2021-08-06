@@ -149,7 +149,7 @@
         $('document').ready(function(){
             $('#search_package_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder:'Search Sonic',
+                placeholder:'Search',
                 dropdownParent:$('#search_package_type_from')
             }).bind('select2:select',function () {
                 var url = $(this).val();

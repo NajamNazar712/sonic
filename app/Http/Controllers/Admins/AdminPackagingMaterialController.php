@@ -1483,6 +1483,30 @@ class AdminPackagingMaterialController extends Controller
             Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
             $type->picture = $filename;
         }
+        if ($request->hasFile('edit_packaging_picture1')) {
+            $filename = 'packaging_picture_1_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture1');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_1 = $filename;
+        }
+        if ($request->hasFile('edit_packaging_picture2')) {
+            $filename = 'packaging_picture_2_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture2');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_2 = $filename;
+        }
+        if ($request->hasFile('edit_packaging_picture3')) {
+            $filename = 'packaging_picture_3_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture3');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_3 = $filename;
+        }
+        if ($request->hasFile('edit_packaging_picture4')) {
+            $filename = 'packaging_picture_4_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture4');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_4 = $filename;
+        }
         $type->save();
         
 
