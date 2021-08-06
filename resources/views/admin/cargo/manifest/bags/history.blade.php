@@ -53,12 +53,9 @@
                                     <th class="border-primary border-darken-1">Manifest Id</th>
                                     <th class="border-primary border-darken-1">Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Junction(s)</th>
-                                  {{--  <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
+                                   <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
-                                    <th class="border-primary border-darken-1">Junction 1</th>
-                                    <th class="border-primary border-darken-1">Junction 2</th>--}}
                                     <th class="border-primary border-darken-1">Transport Mode</th>
-                                  {{--  <th class="border-primary border-darken-1">Vendor</th>--}}
                                     <th class="border-primary border-darken-1">Shipments Weight</th>
                                     <th class="border-primary border-darken-1">Actual Weight</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
@@ -74,7 +71,19 @@
         </div>
     </div>
 
-
+    <div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="short_received_shipments" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
@@ -131,12 +140,9 @@
                             head.push('Destination');
                             head.push('Manifest Id');
                             head.push('Shipment(s)');
-                           /* head.push('Short Received Shipment(s)');
+                            head.push('Short Received Shipment(s)');
                             head.push('Shipping Mode');
-                            head.push('Junction 1');
-                            head.push('Junction 2');*/
                             head.push('Transport Mode');
-                           /* head.push('Vendor');*/
                             head.push('Shipments Weight');
                             head.push('Actual Weight');
                             head.push('Transit Datetime');
@@ -152,14 +158,11 @@
                                 row.push(values.bag_type);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.manifest_id);
+                                row.push(values.manifest);
                                 row.push(values.shipments_count);
-                               /* row.push(values.short_received);
+                                row.push(values.short_received);
                                 row.push(values.shipping_mode);
-                                row.push(values.junction_1);
-                                row.push(values.junction_2);*/
                                 row.push(values.transport_mode);
-                               /* row.push(values.vendor);*/
                                 row.push(values.shipments_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.transitted_at);
@@ -212,10 +215,9 @@
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
                     {data: 'shipments', name: 'cargo_manifest_bags.shipments', class: 'align-middle text-center shipments'},
                     {data: 'junctions', name: 'junctions', class: 'align-middle text-center junctions',orderable: false},
-                   /* {data: 'short_received_shipments', name: 'bags.short_received', class: 'align-middle text-center short_received_shipments'},
-                    {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
-                    {data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
-                    {data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},*/
+                    {data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle text-center short_received_shipments'},
+                    {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
+
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
                    /* {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},*/
                     {data: 'shipments_weight', name: 'cargo_manifest_bags.shipments_weight', class: 'align-middle shipments_weight'},
@@ -356,6 +358,20 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.mode;
+                        return obj;
+                    });
+
+                    $("#mode_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Shipping Mode",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     var data2 = $.map({!! $bag_statuses !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
@@ -430,6 +446,41 @@
             }).bind('input', function() {
                 table.draw();
             });
+
+            $('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
+                var seal_number = table.row($(this).parents('tr')).data().seal_number;
+
+                $('#short_received_shipments .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.short_received_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'seal_number': seal_number
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var head = '';
+                            var tracking_numbers = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Short Received Shipment(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            });
+
+                            $('#short_received_shipments .modal-header').html(head);
+                            $('#short_received_shipments .modal-body').html(tracking_numbers);
+
+                            $('#short_received_shipments').modal('show');
+                        }
+                    });
+            });
         });
         $('#datatable tbody').on('click', '.manifest_id', function () {
             var manifest_id = table.row($(this).parents('tr')).data().manifest_id;
@@ -461,5 +512,6 @@
                     }
                 });
         });
+
     </script>
 @endsection
