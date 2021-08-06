@@ -74,6 +74,32 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="bags_data" role="dialog" aria-labelledby="bags_data" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="short_received_bags" role="dialog" aria-labelledby="short_received_bags" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -347,119 +373,9 @@
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.bags button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                $('#info_modal .modal-body').html('');
-
-                $.ajax({
-                    url: '{!! route('admin.master_cargo.in_transit.bags') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var head = '';
-                            var bag_numbers = '';
-
-                            head = '<h4 class="modal-title" id="info_modal_title">Bag(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
-
-                            $.each(data, function(index, bag_number) {
-                                bag_numbers += bag_number + '<br>';
-                            });
-
-                            $('#info_modal .modal-header').html(head);
-                            $('#info_modal .modal-body').html(bag_numbers);
-
-                            $('#info_modal').modal('show');
-                        }
-                    });
-            });
-
-
-            $('#datatable tbody').on('click', 'tr td.short_received_bags button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                $('#info_modal .modal-body').html('');
-
-                $.ajax({
-                    url: '{!! route('admin.master_cargo.in_transit.short_received_bags') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': id
-                    }
-                })
-                    .done(function (data) {
-                        if (data) {
-                            var head = '';
-                            var bag_numbers = '';
-
-                            head = '<h4 class="modal-title" id="info_modal_title">Short Received Bag(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
-
-                            $.each(data.bag_numbers, function(index, bag_number) {
-                                bag_numbers += bag_number + '<br>';
-                                $.each(data.tracking_numbers, function(index, tracking_numbers) {
-                                    if(index == bag_number){
-                                        $.each(tracking_numbers, function(tracking_index, tracking_number) {
-                                            bag_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                        });
-                                    }
-                                });
-                                bag_numbers += '<br>';
-                            });
-
-                            $('#info_modal .modal-header').html(head);
-                            $('#info_modal .modal-body').html(bag_numbers);
-
-                            $('#info_modal').modal('show');
-                        }
-                    });
-            });
+          
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
 
-                $('#info_modal .modal-body').html('');
-
-                $.ajax({
-                    url: '{!! route('admin.master_cargo.in_transit.shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var head = '';
-                            var tracking_numbers = '';
-
-                            head = '<h4 class="modal-title" id="info_modal_title">Shipment(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
-
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                            });
-
-                            $('#info_modal .modal-header').html(head);
-                            $('#info_modal .modal-body').html(tracking_numbers);
-
-                            $('#info_modal').modal('show');
-                        }
-                    });
-            });
 
             $('#tracking_number_search_form').bind('submit', function(e) {
                 e.preventDefault();
@@ -494,13 +410,7 @@
             }).bind('input', function() {
                 table.draw();
             });
-
-            /*$('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                print(id);
-
-            });*/
-
+            
             $('#datatable tbody').on('click', '.manifest_id', function () {
                 var manifest_id = table.row($(this).parents('tr')).data().manifest;
                 console.log(manifest_id);
@@ -528,6 +438,82 @@
                             tab.document.write(data);
                             tab.document.close();
                             tab.focus();
+                        }
+                    });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.bags button', function() {
+                var manifest_id = table.row($(this).parents('tr')).data().manifest;
+
+
+                $('#bags_data .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.history.bags') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'manifest_id': manifest_id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var head = '';
+                            var tracking_numbers = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Bag(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data, function(index, $bag_numbers) {
+                                tracking_numbers += '<u>'+ $bag_numbers+ '</u><br>';
+                            });
+
+                            $('#bags_data .modal-header').html(head);
+                            $('#bags_data .modal-body').html(tracking_numbers);
+
+                            $('#bags_data').modal('show');
+                        }
+                    });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.bags button', function() {
+                var manifest_id = table.row($(this).parents('tr')).data().manifest;
+
+
+                $('#short_received_bags .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.history.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'manifest_id': manifest_id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var head = '';
+                            var tracking_numbers = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data, function(index, $bag_numbers) {
+                                tracking_numbers += '<u>'+ $bag_numbers+ '</u><br>';
+                            });
+
+                            $.each(data, function(index, tracking_numbers) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                            });
+
+                            $('#short_received_bags .modal-header').html(head);
+                            $('#short_received_bags .modal-body').html(tracking_numbers);
+
+                            $('#short_received_bags').modal('show');
                         }
                     });
             });
