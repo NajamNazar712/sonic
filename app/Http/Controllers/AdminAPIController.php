@@ -2928,7 +2928,7 @@ class AdminAPIController extends Controller
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
             ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
-            ->join('cargo_manifest as cm', 'mb.cargo_manifest_id', '=', 'cm.id')
+            ->join('cargo_manifests as cm', 'mb.cargo_manifest_id', '=', 'cm.id')
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
             ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
             ->where('cm.status_id', 1)
