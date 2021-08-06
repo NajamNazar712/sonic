@@ -2878,9 +2878,16 @@ class ShipperShipmentBookController extends Controller
                         $ccd_booking = $ccd_booking->first();
                         $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                         if(!in_array(session('user_id'),$ccd_account_tags))
-                        {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
+                        {
+                            $payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');
+                        }
                         else
-                        {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
+                        {
+                            $payment_modes = PaymentMode::first()->pluck('mode', 'id');
+                        }
+                    }
+                    else{
+                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
                     }
                     //$payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                     $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
@@ -3015,9 +3022,16 @@ class ShipperShipmentBookController extends Controller
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
                 if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                {
+                    $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                }
                 else
-                {$payment_modes = PaymentMode::all();}
+                {
+                    $payment_modes = PaymentMode::all();
+                }
+            }
+            else{
+                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
             }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
