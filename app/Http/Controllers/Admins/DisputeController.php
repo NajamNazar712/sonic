@@ -513,7 +513,7 @@ class DisputeController extends Controller
             else{
                 $description = "Short received shipments dispute for Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
             }
-            if($admin_id){
+            if($admin_id != NULL){
                 $admin = $admin_id;
             }else{
                 $admin = Auth::id();
@@ -541,8 +541,17 @@ class DisputeController extends Controller
         }
         else if($manifest != NULL)
         {
-            $description = "Short received shipments dispute for Cargo Manifest # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT)." and Bag # ".$manifest;
-            $admin = Auth::id();
+            if($master == 2){
+                $description = "Short received shipments dispute for Bag Number # " . $cargo_id;
+            }
+            else{
+                $description = "Short received shipments dispute for Cargo Manifest # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
+            }
+            if($admin_id){
+                $admin = $admin_id;
+            }else{
+                $admin = Auth::id();
+            }
             $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
             $count = count($shipments);
             $dispute = Dispute::create([

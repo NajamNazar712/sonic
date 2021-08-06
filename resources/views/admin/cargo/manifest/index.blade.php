@@ -92,7 +92,7 @@
                         <input type="hidden" name="bag_id" id="bag_id" value="">
                         <div class="row justify-content-center">
                             <div class="col-4 form-group">
-                                <input type="text" name="edit_seal_number" id="edit_seal_number" class="form-control edit_seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number" data-rule-required="true" data-msg-required="Seal Number is required">
+                                <input type="text" name="edit_seal_number" id="edit_seal_number" class="form-control edit_seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number" data-rule-required="true" data-msg-required="Seal Number is required" min="6" max="12">
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -160,6 +160,14 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style>
+        .red{
+            background-color: orangered;
+        }
+        .green{
+            background-color: limegreen;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -167,8 +175,21 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function() {
+            $.validator.addMethod(
+                "seal_number",
+                function(value,element){
+                    if(element.value.length == 6 || element.value.length == 11 ||  element.value.length == 12 ||  element.value.length == 13){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
+                "Invalid Seal Number"
+            );
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -204,12 +225,12 @@
                                 row.push(values.seal_number);
                                 row.push(values.bag_type);
                                 row.push(values.shipments);
-                                row.push(values.short_received_shipments);
+                                row.push(values.short_shipments);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.actual_weight);
                                 row.push(values.shipping_mode);
-                                row.push(values.manifest_id);
+                                row.push(values.manifest);
                                 row.push(values.status);
                                 row.push(values.manifest_created_at);
                                 row.push(values.transitted_by);
@@ -264,7 +285,7 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'seal_number', class: 'align-middle seal_number'},
                     {data: 'bag_type', name: 'cargo_manifest_bags.type', class: 'align-middle cargo_manifest_bags.type'},
-                    {data: 'shipments', name: 'shipments', class: 'align-middle shipments'},
+                    {data: 'bag_shipments', name: 'bag_shipments', class: 'align-middle bag_shipments'},
                     {data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle short_received_shipments'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
@@ -369,6 +390,12 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('.edit_seal_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+            });
 
             $('body').on('click','button.edit_seal_number',function () {
                 var id = $(this).parents('tr').attr('id');
@@ -378,6 +405,7 @@
                 $('#edit_seal_number').val(current_seal_number);
                 $('#SealNumberUpdateModal').modal('show');
             });
+
 
             $('#edit_seal_number_form').validate({
                 ignore: [],
@@ -516,7 +544,7 @@
 
             });
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+            $('#datatable tbody').on('click', 'tr td.bag_shipments button', function() {
                 var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
                 $('#shipments .modal-body').html('');
