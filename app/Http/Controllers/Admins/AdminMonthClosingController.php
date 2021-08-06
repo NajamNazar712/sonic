@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\CargoManifest\CargoManifest;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\MasterCargo\Bag;
@@ -476,6 +481,53 @@ class AdminMonthClosingController extends Controller
 //                                        }
                                     }
 
+                                }
+
+                                if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
+                                    $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);
+                                    if ($bag_shipment->exists()) {
+                                        $bag_shipment = $bag_shipment->max('cargo_manifest_bag_id');
+
+                                        $bag = CargoManifestBag::find($bag_shipment);
+                                        $bag->shipment()->where('shipment_id', $shipment_details->id)->delete();
+
+                                            $shipments_count = $bag->shipments;
+                                            $shipment_weight = $bag->shipment_weight;
+                                            $shipments_count = $shipments_count - 1;
+                                            $bag->shipments = $shipments_count;
+                                            $bag->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                            $not_received_shipments_count =  $bag->shipment()->where('status','!=',1)->count();
+                                            if ($shipments_count == 0) {
+                                                $bag->status_id = 10;
+                                                CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,10,Auth::id(),NULL,NULL);
+                                            }
+                                            else if($not_received_shipments_count > 0 && in_array($bag->status_id, [8,9,10])){
+                                                $bag->status_id = 7;
+                                                CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,7,Auth::id(),NULL,NULL);
+                                            }
+                                            else {
+                                                $bag->status_id = 8;
+                                            }
+                                            $bag->save();
+
+                                            $cargo_bag = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->first();
+                                            if($cargo_bag){
+                                                $cargo = CargoManifest::find($cargo_bag->cargo_manifest_id);
+                                                if($cargo){
+                                                    $total_bags = $cargo->bags;
+                                                    $cargo_total_shipments = $cargo->shipments;
+                                                    if($bag->shipments_count == 0){
+                                                        $cargo->bags = $total_bags - 1;
+                                                    }
+                                                    $cargo->shipments = $cargo_total_shipments - 1;
+                                                    $cargo_weight = $cargo->bags_weight;
+                                                    $cargo->actual_weight = $cargo_weight - $shipment_details->actual_weight;
+                                                    $cargo->save();
+                                                }
+                                            }
+                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
+
+                                    }
                                 }
 
                                 if(in_array($shipment_details->shipper_status_id,$return_note_statuses)){

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class CargoManifest extends Model
 {
 
+    protected $fillable = ['status_id'];
+
     public function manifest_bags() {
         return $this->hasMany('App\Http\Models\Admin\CargoManifest\ManifestBag')->orderBy('cargo_manifest_bag_id');
     }

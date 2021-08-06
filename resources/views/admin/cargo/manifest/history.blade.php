@@ -226,7 +226,7 @@
                 order: [[14, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'id_padded_link', name: 'cargo_manifests.id', class: 'align-middle master_cargo_number'},
+                    {data: 'manifest_id', name: 'cargo_manifests.id', class: 'align-middle manifest_id'},
                     {data: 'bags', name: 'cargo_manifests.bags', class: 'align-middle text-center bags'},
                     {data: 'short_received_bags', name: 'cargo_manifests.bags', class: 'align-middle text-center short_received_bags'},
                     {data: 'shipments', name: 'cargo_manifests.shipments', class: 'align-middle text-center shipments'},
@@ -235,13 +235,13 @@
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'actual_weight', name: 'cargo_manifests.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
-                    {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
+                    {data: 'vendor', name: 'cargo_manifests.vendor_name', class: 'align-middle vendor'},
                     {data: 'driver_name', name: 'cargo_manifests.driver_name', class: 'align-middle driver_name'},
                     {data: 'vehicle', name: 'f.reg_number', class: 'align-middle vehicle'},
                     {data: 'phone_number', name: 'cargo_manifests.phone_number', class: 'align-middle phone_number'},
                     {data: 'transit_at', name: 'cargo_manifests.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
-                    {data: 'status', name: 'status', class: 'align-middle status'}
+                    {data: 'status', name: 'cargo_manifests.status_id', class: 'align-middle status'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -330,7 +330,7 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data4 = $.map({!! $transport_vendor !!}, function (obj) {
-                        obj.id = obj.id;
+                        obj.id = obj.name;
                         obj.text = obj.name;
                         return obj;
                     });
@@ -495,11 +495,43 @@
                 table.draw();
             });
 
-            $('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
+            /*$('#datatable tbody').on('click','tr td.master_cargo_number button.print',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 print(id);
 
+            });*/
+
+            $('#datatable tbody').on('click', '.manifest_id', function () {
+                var manifest_id = table.row($(this).parents('tr')).data().manifest;
+                console.log(manifest_id);
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids': manifest_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        var tab = window.open('', '_blank');
+
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
             });
         });
+
     </script>
 @endsection
