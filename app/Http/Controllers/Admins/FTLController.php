@@ -172,7 +172,8 @@ class FTLController extends Controller
 
                 if($weight_charges->exists()){
                     $weight_charges = $weight_charges->latest()->first();
-                    $zone_class_city = ZoneClassCity::where('zone_id', $destination_city->zone_id)->where('city_id', $destination_city->id)->where('zone_classification_id', 2);
+                    $zone_class_city = ZoneClassCity::where('zone_id', $destination_city->zone_id)->where('city_id', $destination_city->id);
+                    // ->where('zone_classification_id', 2)
                         if ($zone_class_city->exists()) {
                             $zone_class_city = $zone_class_city->first();
 
