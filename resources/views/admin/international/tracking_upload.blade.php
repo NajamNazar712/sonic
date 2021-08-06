@@ -121,7 +121,7 @@
                 'alias': 'decimal',
                 'allowMinus': false,
                 'allowPlus': false,
-                'min': 1,
+                'min': 0.01,
                 'max':100000,
             });
             $('body').on('change','#edit_international_tracking_number',function() {

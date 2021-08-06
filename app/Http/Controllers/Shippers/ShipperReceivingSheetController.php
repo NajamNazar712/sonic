@@ -1087,7 +1087,7 @@ class ShipperReceivingSheetController extends Controller
                 if($request->has('update_order_id')){
                     $shipment->order_id = $request->update_order_id;
                 }
-                if($request->has('shipping_mode')){
+                if($request->has('shipping_mode') && $request->shipping_mode > 0){
                     $shipment->shipping_mode_id = $request->shipping_mode;
                 }
                 $shipment->amount = $amount;

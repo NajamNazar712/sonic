@@ -470,14 +470,8 @@ class AdminPackagingMaterialController extends Controller
                 $packaging_type_id = $package->type_id;
                 $packaging_size_id = $package->type_size_id;
 
-                $charges = PackagingCharge::where('user_id',$user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first();
-
-                if($charges != null){
-                    $total_charges += $quantity * $charges->charges;
-                }else{
-                    $size = PackagingMaterialTypeSizes::find($packaging_size_id);
-                    $total_charges += $quantity * $size->standard_charges;
-                }
+                $size = PackagingMaterialTypeSizes::find($packaging_size_id);
+                $total_charges += $quantity * $size->standard_charges;
 
                 $created_at = $package->packaging_request->created_at;
             }
@@ -2088,14 +2082,9 @@ class AdminPackagingMaterialController extends Controller
         $total_charges = 0;
 
         foreach ($packaging_type_ids as $index => $packaging_type_id){
-            $charges = PackagingCharge::where('user_id', $user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_ids[$index]])->latest()->first();
-            if($charges != null){
-                    $total_charges += $packaging_quantities[$index] * $charges->charges;
-            }else{
-                $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
+            $charges = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
 
-                $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
-            }
+            $total_charges += $packaging_quantities[$index] * $charges->standard_charges;
         }
 
         $today = Carbon::today();

@@ -4216,6 +4216,8 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),90);
         }
 
+        $count = DB::table('done_payments')->count();
+
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc','dpc.done_payment_id', '=', 'done_payments.id')
@@ -4250,6 +4252,7 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($done_payments)
+            ->setTotalRecords($count)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             })
