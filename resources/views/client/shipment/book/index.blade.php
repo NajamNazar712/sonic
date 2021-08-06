@@ -1303,11 +1303,10 @@
 				}
 			});
 
-			var allow_origin_city = true;
-			var allow_destination_city = true;
+			var allow_origin_city = false;
+			var allow_destination_city = false;
 			function check_city_booking_allow(){
-				allow_origin_city = false;
-				allow_destination_city = false;
+
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city_id = $('#new_pickup_city').val();
 				}
