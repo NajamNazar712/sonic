@@ -1727,13 +1727,13 @@ class AdminCargoManifestController extends Controller
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $cargo->destination_hub->name . '</td>
                               <td class="color secondary"><strong>Vehicle Number</strong></td>
-                              <td>' . (($cargo->fleet_id) ? $cargo->fleet->reg_number : '-') . '</td>
+                              <td>' . (($cargo->vehicle_id) ? $cargo->fleet->reg_number : $cargo->vehicle_number) . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
                               <td>' . $cargo->created_at . '</td>
                               <td class="color secondary"><strong>Contact Phone</strong></td>
-                              <td>' . $cargo->phone_number . '</td>
+                              <td>' . (($cargo->vehicle_id) ? $cargo->fleet->driver->phone_no : $cargo->driver_phone) . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>No. of Bags</strong></td>
