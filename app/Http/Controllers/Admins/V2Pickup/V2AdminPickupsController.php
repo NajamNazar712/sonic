@@ -1380,13 +1380,13 @@ class V2AdminPickupsController extends Controller
                         }
                     }
                     //here update amount
-                    if($shipment->booking_type_id==6){
+                    // if($shipment->booking_type_id==6){
 
-                        $ftl_request = FtlRequest::where('shipment_id',$shipment->id)->first();
-                        $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
-                        //amount or received_amount need to confirm
-                        $shipment->amount= ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
-                    }
+                        // $ftl_request = FtlRequest::where('shipment_id',$shipment->id)->first();
+                        // $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
+                        // //amount or received_amount need to confirm
+                        // $shipment->amount= ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
+                    // }
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
 
