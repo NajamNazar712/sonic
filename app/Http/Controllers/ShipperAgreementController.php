@@ -568,7 +568,7 @@ otherwise it will be rejected</li>
 </tr></thead></table></div></div>';
                     if($rate->shipping_mode_id == 1){
                         if(count($overnight_origins) > 0){
-                            $rate_origin_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+                            $rate_origin_details = '<div class="row"><div class="col-12"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
 <tr>
 <td><strong>Origin Cities </strong></td>';
 
@@ -582,7 +582,7 @@ otherwise it will be rejected</li>
                         }
 
                         if(count($overnight_destinations) > 0){
-                            $rate_destination_details = '<div class="row"><div class="col-5"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
+                            $rate_destination_details = '<div class="row"><div class="col-12"> <table class="table color secondary table-sm table-bordered mb-0 mt-0><thead class=" color secondary">
 <tr>
 <td><strong>Destination Cities </strong></td>';
 
