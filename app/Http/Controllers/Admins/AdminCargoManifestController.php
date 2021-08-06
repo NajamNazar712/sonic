@@ -2231,7 +2231,7 @@ class AdminCargoManifestController extends Controller
                         {
                             $bag->status_id = 5;
                             $bag->junction_mapping_id = null;
-                            $bag->short_received_shipments = $bag->shipments->count();
+                            $bag->short_received_shipments = $bag->shipment->count();
                             $bag->received_shipments = 0;
                             foreach($bag->shipment as $shipment)
                             {
