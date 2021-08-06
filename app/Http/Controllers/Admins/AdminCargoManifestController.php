@@ -2561,8 +2561,7 @@ class AdminCargoManifestController extends Controller
                 if ($bag_shipment->exists()) {
                     $bag_shipment = $bag_shipment->latest()->first();
                     $bag = $bag_shipment->bag;
-                    if($bag->status_id == 9 || $bag->status_id == 7){
-                        if(session('role_id') != 1){
+                    if(session('role_id') != 1){
                             if (!in_array($bag->destination_hub->hub_id, session('hubs'))) {
                                 return ['status' => 1, 'error' => 'Shipment Bag doesn\'t belong to your assigned hub(s)!'];
                             }
@@ -2594,10 +2593,6 @@ class AdminCargoManifestController extends Controller
                         $details['service_type'] = $shipment->booking_type->booking_type;
                         ShipmentScanningJourneyController::add($shipment->id,20,1,Auth::id(),null,null);
                         return ['status' => 0, 'success' => 'Bag has been added', 'details' => $details];
-                    }
-                    else {
-                        return ['status' => 1, 'error' => 'Given Tracking Number Bag is not received yet or already modified'];
-                    }
                 }
                 else {
                     return ['status' => 1, 'error' => 'Given Bag Number\'s has already been Received'];
