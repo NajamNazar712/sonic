@@ -3047,7 +3047,7 @@ class AdminAPIController extends Controller
                                 array_push($shipments, $shipment->shipment_id);
                             }
 
-                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, CargoManifestBag::find($cargo_short)->seal_number, $admin_id);
+                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, 2, $admin_id);
                         }
                     }
                 }
