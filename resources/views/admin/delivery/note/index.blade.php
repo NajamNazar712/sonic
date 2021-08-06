@@ -983,13 +983,13 @@
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
+                        $('#otp_input').val('');
+                        $('#otp_submit').attr('disabled', true);
                         if (data.status === 0) {
                             toastr.error(data.error, 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
                             });
-                            $('#otp_input').val('');
-                            $('#otp_submit').attr('disabled', true);
                         } else {
                             $('#OtpModal').modal('hide');
                             create_delivery_note();

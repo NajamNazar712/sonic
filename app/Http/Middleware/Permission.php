@@ -995,6 +995,9 @@ class Permission
             'incidence_monitoring.list' => 535,
             'incidence_monitoring.add' => 536,
             'incidence_monitoring.view_report' => 539,
+
+            'rider_delivery_note_otp.index' => 553,
+            'rider_delivery_note_otp.list' => 553,
            
         ],
 
