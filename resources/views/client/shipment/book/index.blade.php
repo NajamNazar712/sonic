@@ -1636,14 +1636,14 @@
 						}
 					}
 					else{
-						if(!allow_origin_city){
+						if(allow_origin_city == false){
 							var error = 'Origin city not allowed, please contact your sales person!';
 							toastr.error(error, 'Error!', {
 								positionClass: 'toast-top-center',
 								containerId: 'toast-top-center'
 							});
 						}
-						if(!allow_destination_city){
+						if(allow_destination_city == false){
 							var error = 'Destination city not allowed, please contact your sales person!';
 							toastr.error(error, 'Error!', {
 								positionClass: 'toast-top-center',
