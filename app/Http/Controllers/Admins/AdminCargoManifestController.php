@@ -2158,7 +2158,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
             else {
-                return ['status' => 1, 'error' => 'Given Bag Number is already received'];
+                return ['status' => 1, 'error' => 'Given Bag Number is already received or created'];
             }
         }
         else {
@@ -2239,10 +2239,10 @@ class AdminCargoManifestController extends Controller
                             ->where('cargo_manifest_id',$cargo_bag->id)->update(['status' => 1]);
 
                         if($misroute == 0) {
-                            array_push($bag_exists, $bag->id);
+                            array_push($bag_exists, $bag->seal_number);
                         }
                         else{
-                            array_push($bag_misroute, $bag->id);
+                            array_push($bag_misroute, $bag->seal_number);
                         }
                         CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,$bag->status_id,Auth::id());
                     }
@@ -2260,7 +2260,7 @@ class AdminCargoManifestController extends Controller
         }
         foreach ($bag_exists as $bag_id)
         {
-            $bag = CargoManifestBag::find($bag_id);
+            $bag = CargoManifestBag::where('seal_number',$bag_id);
             $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
                 $join->on('mb.cargo_manifest_id','cargo_manifests.id');
             })
@@ -2284,7 +2284,7 @@ class AdminCargoManifestController extends Controller
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
-                            array_push($bag_short_received, $short_received_bag->id);
+                            array_push($bag_short_received, $short_received_bag->seal_number);
                             array_push($cargo_short_received, $short_received_bag->id);
                         }
                         else{
@@ -2315,7 +2315,7 @@ class AdminCargoManifestController extends Controller
         }
         foreach ($bag_misroute as $bag_id)
         {
-            $bag = CargoManifestBag::find($bag_id);
+            $bag = CargoManifestBag::where('seal_number',$bag_id);
             $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
                 $join->on('mb.cargo_manifest_id','cargo_manifests.id');
             })
@@ -2338,7 +2338,7 @@ class AdminCargoManifestController extends Controller
                             $short_received_bag->update();
                             CargoManifestBagJourneyController::add($short_received_bag->id, $short_received_bag->seal_number, $short_received_bag->status_id, Auth::id());
                             $bag_short_received_count++;
-                            array_push($bag_short_received, $short_received_bag->id);
+                            array_push($bag_short_received, $short_received_bag->seal_number);
                             array_push($cargo_short_received, $short_received_bag->id);
                         }
                         else{
@@ -2379,7 +2379,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_error = "Following Bag(s) doesn\'t exists.<br><ul>";
             foreach ($bag_not_exists as $v)
             {
-                $bag_not_exists_error .= "<li>".$v."</li>";
+                $bag_not_exists_error .= "<li>".CargoManifestBag::find($bag_id)->seal_number."</li>";
             }
             $bag_not_exists_error .= "</ul>";
         }
@@ -2388,7 +2388,7 @@ class AdminCargoManifestController extends Controller
             $bag_not_exists_in_manifest_error = "Following Bag(s) doesn\'t exists in any manifest.<br><ul>";
             foreach ($bag_not_exists_in_manifest as $v)
             {
-                $bag_not_exists_in_manifest_error .= "<li>".$v."</li>";
+                $bag_not_exists_in_manifest_error .= "<li>".CargoManifestBag::find($bag_id)->seal_number."</li>";
             }
             $bag_not_exists_in_manifest_error .= "</ul>";
         }
