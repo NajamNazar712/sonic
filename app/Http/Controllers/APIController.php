@@ -393,6 +393,20 @@ class APIController extends Controller
             }
         });
 
+        Validator::extend('destination_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
+
         Validator::extend('destination_return_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
             $shipping_mode_id = $data['shipping_mode_id'];
@@ -482,7 +496,7 @@ class APIController extends Controller
                 }), 'origin_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                })],
+                }),'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
                 'consignee_name' => ['required', 'between:1,100'],
