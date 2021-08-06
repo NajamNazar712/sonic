@@ -513,7 +513,7 @@ class DisputeController extends Controller
             else{
                 $description = "Short received shipments dispute for Master Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
             }
-            if($admin_id){
+            if($admin_id != NULL){
                 $admin = $admin_id;
             }else{
                 $admin = Auth::id();

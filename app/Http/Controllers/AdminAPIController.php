@@ -2909,9 +2909,11 @@ class AdminAPIController extends Controller
     public function cargo_bags_validator(Request $request)
     {
         $bag_id = $request->bag_no;
-        $bags = CargoManifestBag::where('seal_number', $bag_id);
+        $bags = CargoManifestBag::where('seal_number', $bag_id)
+            ->whereIn('status_id',[2, 4, 6, 8, 9, 10]);
+
         if ($bags->exists()) {
-            $bags = $bags->first();
+            $bags = $bags->latest()->first();
             return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Valid Bag No."]);
         }
         return response()->json(['status' => 0, 'bag_no' => null, 'message' => "Invalid Bag No."]);
@@ -2926,8 +2928,11 @@ class AdminAPIController extends Controller
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
             ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
+            ->join('cargo_manifests as cm', 'mb.cargo_manifest_id', '=', 'cm.id')
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
             ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
+            ->where('cm.status_id', 1)
+            ->where('mb.status', 0)
             ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
         if ($bags->exists()) {
             $bags = $bags->get();
@@ -2940,17 +2945,17 @@ class AdminAPIController extends Controller
                 $datum["destination_id"] = $bag->dest_id;
                 $datum["origin"] = $bag->origin;
                 $junctions = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id);
-                $datum["misroute"] = 0;
-                if ($bag->dest_id != $admin->default_hub_id) {
-                    $datum["misroute"] = 1;
+                $datum["misroute"] = 1;
+                if ($bag->dest_id == $admin->default_hub_id) {
+                    $datum["misroute"] = 0;
                 }
-                if ($bag->j_dest_id != $admin->default_hub_id) {
-                    $datum["misroute"] = 1;
+                if ($bag->j_dest_id == $admin->default_hub_id) {
+                    $datum["misroute"] = 0;
                 }
                 if ($junctions->exists()) {
                     $junctions = $junctions->pluck('junction_id')->toArray();
-                    if (!in_array($admin->default_hub_id, $junctions)) {
-                        $datum["misroute"] = 1;
+                    if (in_array($admin->default_hub_id, $junctions)) {
+                        $datum["misroute"] = 0;
                     }
                 }
                 $data[] = $datum;
@@ -2974,7 +2979,7 @@ class AdminAPIController extends Controller
                 $status = $bag_detail['status'];
                 $cargo_manifest_bags = CargoManifestBag::where('seal_number', $bag_no);
                 if ($cargo_manifest_bags->exists()) {
-                    $cargo_manifest_bags = $cargo_manifest_bags->first();
+                    $cargo_manifest_bags = $cargo_manifest_bags->latest()->first();
                     if ($status == 1) {
                         $cargo_manifest_bags->status_id = 5;
                         $cargo_manifest_bags->junction_mapping_id = null;
@@ -3007,7 +3012,7 @@ class AdminAPIController extends Controller
             }
             $bag_short_received = array();
             foreach ($bag_numbers as $bag_id) {
-                $bag = CargoManifestBag::where('seal_number', $bag_id)->first();
+                $bag = CargoManifestBag::where('seal_number', $bag_id)->latest()->first();
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb', function ($join) use ($bag) {
                     $join->on('mb.cargo_manifest_id', 'cargo_manifests.id');
                 })
@@ -3047,7 +3052,7 @@ class AdminAPIController extends Controller
                                 array_push($shipments, $shipment->shipment_id);
                             }
 
-                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, CargoManifestBag::find($cargo_short)->seal_number, $admin_id);
+                            DisputeController::add_cargo_short_received($cargo_bag->id, $shipments, null, 2, $admin_id);
                         }
                     }
                 }
