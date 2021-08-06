@@ -17,7 +17,7 @@ class CreatePendingRateOriginHubsTable extends Migration
             $table->increments('id');
             $table->integer('user_id')->index();
             $table->integer('shipping_mode_id')->index();
-            $table->integer('hub_id')->index();
+            $table->integer('city_id')->index();
             $table->timestamps();
         });
     }
