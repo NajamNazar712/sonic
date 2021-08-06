@@ -100,6 +100,19 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="shipments" role="dialog" aria-labelledby="shipments" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -160,9 +173,7 @@
                     });
             }
 
-            @if (session('print'))
-            print('{{ session('print') }}');
-            @endif
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -175,7 +186,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Master Cargo No.');
+                            head.push('Cargo No.');
                             head.push('Bag Quantity');
                             head.push('Short Received Bags');
                             head.push('No. of Shipments');
@@ -197,7 +208,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id_padded);
+                                row.push(values.manifest);
                                 row.push(values.bags_count);
                                 row.push(values.short_received_bags_count);
                                 row.push(values.shipments_count);
@@ -478,11 +489,54 @@
                     });
             });
 
-            $('#datatable tbody').on('click', 'tr td.bags button', function() {
+            $('#datatable tbody').on('click', 'tr td.short_received_bags button', function() {
                 var manifest_id = table.row($(this).parents('tr')).data().manifest;
 
 
                 $('#short_received_bags .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.cargo_manifest.history.short_received_bags') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'manifest_id': manifest_id
+                    }
+                })
+                    .done(function(data) {
+                        if (data.status == 1) {
+                            var head = '';
+                            var tracking_numbers = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Short Received Bag(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            $.each(data.tracking_numbers, function(bag_number, tracking_number_array) {
+                                tracking_numbers += '<u>'+ bag_number+ '</u><br>';
+                                $.each(tracking_number_array, function(index, tracking_nuber) {
+                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_nuber+' target="_blank">'+tracking_nuber+'</a></u><br>';
+                                });
+                                tracking_numbers += '<br>';
+                            });
+
+                            $('#short_received_bags .modal-header').html(head);
+                            $('#short_received_bags .modal-body').html(tracking_numbers);
+
+                            $('#short_received_bags').modal('show');
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+            });
+
+            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+                var manifest_id = table.row($(this).parents('tr')).data().manifest;
+
+
+                $('#shipments .modal-body').html('');
 
                 $.ajax({
                     url: '{!! route('admin.cargo_manifest.history.shipments') !!}',
@@ -493,7 +547,7 @@
                     }
                 })
                     .done(function(data) {
-                        if (data) {
+
                             var head = '';
                             var tracking_numbers = '';
 
@@ -502,19 +556,15 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data, function(index, $bag_numbers) {
-                                tracking_numbers += '<u>'+ $bag_numbers+ '</u><br>';
+                            $.each(data, function(index, tracking_number) {
+                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
                             });
 
-                            $.each(data, function(index, tracking_numbers) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
-                            });
+                            $('#shipments .modal-header').html(head);
+                            $('#shipments .modal-body').html(tracking_numbers);
 
-                            $('#short_received_bags .modal-header').html(head);
-                            $('#short_received_bags .modal-body').html(tracking_numbers);
+                            $('#shipments').modal('show');
 
-                            $('#short_received_bags').modal('show');
-                        }
                     });
             });
         });
