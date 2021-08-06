@@ -1140,7 +1140,8 @@ class AdminCargoManifestController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),401);
         $transport_mode = TransportMode::all();
         $bag_statuses = CargoManifestBagStatus::all();
-        return view('admin.cargo.manifest.bags.history')->with(['bag_statuses' => $bag_statuses,'transport_mode' => $transport_mode]);
+        $shipping_mode = ShippingMode::all();
+        return view('admin.cargo.manifest.bags.history')->with(['bag_statuses' => $bag_statuses,'transport_mode' => $transport_mode,'shipping_mode' => $shipping_mode]);
     }
 
     public function history_list(Request $request) {
@@ -1149,37 +1150,43 @@ class AdminCargoManifestController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),402);
         }
         $bags = CargoManifestBag::join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
+            ->Leftjoin('manifest_bags as mcb', function ($join) {
+                $join->on('mcb.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
+                    ->where('mcb.id', '=',
+                        DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
+            })
+            ->leftjoin('cargo_manifests as cm', 'cm.id', '=', 'mcb.cargo_manifest_id')
+            ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'cm.shipping_mode_id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
             ->join('admins as a', 'cargo_manifest_bags.created_by', '=', 'a.id')
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
-            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode','cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number', 'bs.name as status','cargo_manifest_bags.junction_mapping_id as junction_mapping_id');
+            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode','cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number', 'bs.name as status','cm.id as manifest_id','cargo_manifest_bags.junction_mapping_id as junction_mapping_id','cargo_manifest_bags.created_at as transitted_at','cm.id as manifest','sm.mode as shipping_mode','cargo_manifest_bags.short_received_shipments as short_received_shipments','cargo_manifest_bags.short_received_shipments as short_received');
+
 
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
                 $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'));
             });
         }
-
+        
         $datatables = Datatables::of($bags)
-            ->addColumn('aging',function ($bag){
-
-                $days = Carbon::now()->diffInDays($bag->transit_at);
-                if($days == 0){
-                    return "-";
-                }else{
-                    return $days;
-                }
-            })
             ->addColumn('shipments_count', function ($bag) {
                 return $bag->shipments;
             })
-            ->addColumn('short_received_shipments', function ($master_cargo) {
-                if($master_cargo->short_received > 0){
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $master_cargo->short_received . '</button>';
+            ->editColumn('manifest_id',function ($bag){
+                if($bag->manifest_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
+                        ;
+                }
+
+            })
+            ->addColumn('short_received_shipments', function ($bag) {
+                if($bag->short_received_shipments > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $bag->short_received_shipments . '</button>';
                 }
                 else{
-                    return '-';
+                    return 0;
                 }
             })
             ->editColumn('bag_type',function ($bag){
@@ -1508,7 +1515,8 @@ class AdminCargoManifestController extends Controller
     }
 
     public static function print(Request $request) {
-       $type = NULL;
+
+        $type = NULL;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $html = '
@@ -1863,7 +1871,7 @@ class AdminCargoManifestController extends Controller
             })
             ->editColumn('manifest_id',function ($bag){
                 if($bag->manifest_id){
-                    return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
+                    return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad       ($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
                         ;
                 }
 
@@ -2035,7 +2043,7 @@ class AdminCargoManifestController extends Controller
         $tracking_numbers = array();
         $bag = CargoManifestBag::where('seal_number',$request->seal_number)->first();
         $cargo_manifest_shipment_ids = array();
-        $short_received_shipments = $bag->shipment->where('status',0)->get();
+        $short_received_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id',$bag->id)->where('status',0)->get();
         foreach ($short_received_shipments as $shipments) {
             $cargo_manifest_shipment_ids[] = $shipments->shipment_id;
         }
@@ -2433,14 +2441,13 @@ class AdminCargoManifestController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 410);
         }
-
         $receive_cargo = CargoManifest::join('cities as oh', 'cargo_manifests.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifests.destination_hub_id', '=', 'dh.id')
             ->join('shipping_modes as sm', 'cargo_manifests.shipping_mode_id', '=', 'sm.id')
             ->join('admins as a', 'cargo_manifests.created_by', '=', 'a.id')
             ->leftjoin('fleets as f', 'cargo_manifests.vehicle_id', '=', 'f.id')
             ->leftjoin('transport_modes as tm', 'cargo_manifests.transport_mode_id', '=', 'tm.id')
-            ->select('cargo_manifests.id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id');
+            ->select('cargo_manifests.id as manifest_id', 'cargo_manifests.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifests.shipments', 'cargo_manifests.bags', 'cargo_manifests.driver_name', 'f.reg_number as vehicle', 'cargo_manifests.driver_phone', 'sm.mode as shipping_mode', 'tm.name as transport_mode', 'cargo_manifests.bags_weight', 'cargo_manifests.actual_weight', 'cargo_manifests.created_at as transit_at', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id','cargo_manifests.vendor_name as vendor' ,'cargo_manifests.driver_phone as phone_number', 'cargo_manifests.status_id as status','cargo_manifests.id as manifest');
 
 
         if (session('role_id') != 1) {
@@ -2454,12 +2461,25 @@ class AdminCargoManifestController extends Controller
 //            });
         }
         $datatables = Datatables::of($receive_cargo)
+            ->editColumn('status', function($master_cargo){
+              if ($master_cargo->status == 1){
+                  return 'Created';
+              }
+              else{
+                  return 'Completed';
+              }
+            })
             ->addColumn('id_padded', function ($master_cargo) {
                 return str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT);
             })
-            ->addColumn('id_padded_link', function ($master_cargo) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($master_cargo->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            ->editColumn('manifest_id',function ($bag){
+                if($bag->manifest_id){
+                    return '<button class="btn btn-sm btn-outline-info align-middle print "><i class="la la-lg la-print align-middle "></i> <span class="align-middle id">' . str_pad       ($bag->manifest_id, 6, '0', STR_PAD_LEFT) . '</span></button>'
+                        ;
+                }
+
             })
+
             ->addColumn('bags_count', function ($master_cargo) {
                 return $master_cargo->bags;
             })
