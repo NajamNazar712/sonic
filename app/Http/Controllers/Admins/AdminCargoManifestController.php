@@ -2695,9 +2695,9 @@ class AdminCargoManifestController extends Controller
         $all_bag_ids = '';
         foreach ($bag_ids as $bag_id){
             $bag = CargoManifestBag::find($bag_id);
-            $bag->received_shipments = CargoManifestBagShipments::where('bag_id', $bag_id)->where('status', 1)->count();
+            $bag->received_shipments = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 1)->count();
 
-            $short_received = CargoManifestBagShipments::where('bag_id', $bag_id)->where('status', 0)->count();
+            $short_received = CargoManifestBagShipments::where('cargo_manifest_bag_id', $bag_id)->where('status', 0)->count();
 
             if ($short_received > 0) {
                 $bag->short_received = $short_received;
@@ -2716,7 +2716,7 @@ class AdminCargoManifestController extends Controller
 
             //dispute for short received
             if($bag->status_id == 8){
-                $bag_short_received_shipments = CargoManifestBagShipments::where(['bag_id'=>$bag_id,'status'=>0])->pluck('shipment_id')->toArray();
+                $bag_short_received_shipments = CargoManifestBagShipments::where(['cargo_manifest_bag_id'=>$bag_id,'status'=>0])->pluck('shipment_id')->toArray();
 
                 if(!empty($bag_short_received_shipments)){
                     DisputeController::add_cargo_short_received($bag->seal_number,$bag_short_received_shipments, null,2);
