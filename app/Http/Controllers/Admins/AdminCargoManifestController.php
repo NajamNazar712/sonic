@@ -1458,7 +1458,10 @@ class AdminCargoManifestController extends Controller
                         foreach($bag->shipment as $shipment)
                         {
                             ShipmentsJourneyController::add($shipment->shipment_id,49,49,null,null,null,Auth::id(),$bag->seal_number);
-                            Shipment::find($shipment->shipment_id)->update(['shipper_status_id'=>49,'consignee_status_id'=>49]);
+                            $shipment_table = Shipment::find($shipment->shipment_id);
+                            $shipment_table->shipper_status_id = 49;
+                            $shipment_table->consignee_status_id = 49;
+                            $shipment_table->update();
                         }
                     }
 
@@ -2223,7 +2226,10 @@ class AdminCargoManifestController extends Controller
                             foreach($bag->shipment as $shipment)
                             {
                                 ShipmentsJourneyController::add($shipment->shipment_id,11,11,null,null,null,Auth::id(),$bag->seal_number);
-                                Shipment::find($shipment->shipment_id)->update(['shipper_status_id'=>11,'consignee_status_id'=>11]);
+                                $shipment_table = Shipment::find($shipment->shipment_id);
+                                $shipment_table->shipper_status_id  = 11;
+                                $shipment_table->consignee_status_id  = 11;
+                                $shipment_table->update();
                             }
                         }
 
