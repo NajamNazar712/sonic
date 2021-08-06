@@ -524,7 +524,7 @@
 
             });
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+            $('#datatable tbody').on('click', 'tr td.bag_shipments button', function() {
                 var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
                 $('#shipments .modal-body').html('');
