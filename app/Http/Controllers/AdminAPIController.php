@@ -2928,8 +2928,10 @@ class AdminAPIController extends Controller
             ->join('cities as oh', 'cargo_manifest_bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'cargo_manifest_bags.destination_hub_id', '=', 'dh.id')
             ->join('v2_junction_mappings as jm', 'cargo_manifest_bags.junction_mapping_id', '=', 'jm.id')
+            ->join('cargo_manifest as cm', 'mb.cargo_manifest_id', '=', 'cm.id')
             ->whereIn('cargo_manifest_bags.status_id', [2, 4, 6, 8, 9, 10])
             ->whereIn('cargo_manifest_bags.seal_number', $bag_ids)
+            ->where('cm.status_id', 1)
             ->select('cargo_manifest_bags.seal_number as bag_no', 'mb.cargo_manifest_id as manifest_id', 'dh.name as destination', 'oh.name as origin', 'cargo_manifest_bags.destination_hub_id as dest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'jm.destination_id as j_dest_id');
         if ($bags->exists()) {
             $bags = $bags->get();
