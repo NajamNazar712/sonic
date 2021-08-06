@@ -7950,6 +7950,19 @@ class NotificationsController extends Controller
                     }
                     
                 }    
+                else if ($id == 144) {
+                    $rider = $reference_1_id;
+                    $otp = $reference_2_id;
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $otp, $body);
+                    }
+                    $to = $rider->phone;
+                    self::delivery_note_otp_sms($body, $to);
+                }
                 else if($id == 143){
                     $shipment = Shipment::join('users as u' , 'shipments.user_id' ,'=' , 'u.id' )
                         ->join('sale_tier_tags as stt' ,function($join){

@@ -2828,9 +2828,10 @@ class ShipperShipmentBookController extends Controller
                                 if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
                                     $row['payment_mode_id'] == 1;
                                 }
-
-                                if ($row['payment_mode_id'] == 4) {
-                                    $row['amount'] = 0;
+                                if($row['service_type_id'] != 5){
+                                    if ($row['payment_mode_id'] == 4) {
+                                        $row['amount'] = 0;
+                                    }
                                 }
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));

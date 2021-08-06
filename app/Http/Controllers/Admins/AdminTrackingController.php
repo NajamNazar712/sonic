@@ -723,617 +723,623 @@ class AdminTrackingController extends Controller
     		$shipment = Shipment::where('tracking_number', $tracking_number);
     		if ($shipment->exists()) {
     			$shipment = $shipment->first();
-                $check = false;
 
-                if (session('department_id') == 7) {
-                    if (session('role_id') != 4 ) {
-                        if (in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))) {
-                            $check = true;
+                if ($shipment->user->blacklist == 0) {
+                    $check = false;
+
+                    if (session('department_id') == 7) {
+                        if (session('role_id') != 4 ) {
+                            if (in_array($shipment->user->id, session('tagged_shippers')) || in_array(273, session('permissions'))) {
+                                $check = true;
+                            }
                         }
                     }
-                }
-                ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
+                    ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null,null);
 
-                if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
-                    $details = array();
+                    if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && session('role_id') == 4)) {
+                        $details = array();
 
-                    $details['tracking_number'] = $tracking_number;
+                        $details['tracking_number'] = $tracking_number;
                     if($shipment->pod_image()->exists()){
                         $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
                       
                     }
-                    $details['open_box'] = $shipment->open_box;
-                    if($shipment->payment_mode_id == 2){
-                        $details['ccd'] = 1;
-                    }
-                    else{
-                        $details['ccd'] = 0;
-                    }
-
-                    $shipper = $shipment->user;
-
-                    $sales_person = SalePersonTag::where('user_id', $shipper->id)->leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->where('sale_person_tags.status', 0);
-                    if ($sales_person->exists()){
-                        $sales_person = $sales_person->first();
-                        $sales_person_name = $sales_person->name;
-                    }
-                    else{
-                        $sales_person_name = null;
-                    }
-
-                    if($shipment->shipment_type == 1){
-                        $details['shipment_type'] = 1;
-                        $details['shipper']['name'] = $shipper->name;
-                        $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                        $details['shipper']['city'] = $shipper->city->name;
-                        $details['shipper']['phone_number_1'] = $shipper->phone;
-                        $details['shipper']['phone_number_2'] = $shipper->phone2;
-                        $details['shipper']['email'] = $shipper->email;
-                        $details['shipper']['sales_person'] = $sales_person_name;
-                    }
-                    else{
-                        $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
-                        if($retail_shipment){
-                            $retail_user_id = $retail_shipment->retail_user_id;
-                            $retail_admin_id = $retail_shipment->admin_id;
-                            $retail_rider_id = $retail_shipment->rider_id;
-                            if($retail_user_id){
-                                $retail_user = RetailUser::find($retail_user_id);
-                                if($retail_user->category == 1){
-                                    $franchise = RetailFranchise::find($retail_user->category_id);
-                                    $details['retail_user']['name'] = $franchise->name;
-                                    $details['retail_user']['code'] = 'Franchise';
-                                    $details['shipper']['city'] = $franchise->pickup_address->city->name;
-                                }
-                                else{
-                                    $trax_center  = RetailTraxCenter::find($retail_user->category_id);
-                                    $details['retail_user']['name'] = $trax_center->name;
-                                    $details['retail_user']['code'] = 'Trax Center';
-                                    $details['shipper']['city'] = $trax_center->pickup_address->city->name;
-                                }
-                            }
-                            elseif($retail_admin_id){
-                                $admin_id = $retail_shipment->admin_id;
-                                $admin_info = Admin::find($admin_id);
-                                $details['retail_user']['name'] = $admin_info->name;
-                                $details['retail_user']['code'] = 'Trax Center';
-                                $details['shipper']['city'] = $shipment->pickup_address->city->name;
-
-                            }
-                            elseif($retail_rider_id){
-                                $rider_id = $retail_shipment->rider_id;
-                                $rider_info = Rider::find($rider_id);
-                                $details['retail_user']['name'] = $rider_info->name;
-                                $details['retail_user']['code'] = 'Trax Center';
-                                $details['shipper']['city'] = $shipment->pickup_address->city->name;
-
-                            }
-
-                            $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
-
-                            $details['shipper']['name'] = $shipper->shipper_name;
-                            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                            $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
-                            $details['shipper']['sales_person'] = $sales_person_name;
-
+                        $details['open_box'] = $shipment->open_box;
+                        if($shipment->payment_mode_id == 2){
+                            $details['ccd'] = 1;
                         }
                         else{
-                            $details['retail_user']['name'] = null;
-                            $details['retail_user']['code'] = null;
-                            $tracking['invalid'][] = $tracking_number;
-                        }
-                    }
-
-
-                    $pickup = $shipment->pickup_address;
-
-                    $details['pickup']['person_of_contact'] = $pickup->poc;
-                    $details['pickup']['vendor'] = $pickup->vendor;
-                    $details['pickup']['phone_number'] = $pickup->phone;
-                    $details['pickup']['email'] = $pickup->email;
-                    $details['pickup']['origin'] = $pickup->city->name;
-                    $details['pickup']['address'] = $pickup->pickup_address;
-
-                    $details['consignee']['name'] = $shipment->consignee_name;
-                    $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-                    $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-                    $details['consignee']['destination'] = $shipment->consignee_city->name;
-                    $details['consignee']['address'] = $shipment->consignee_address;
-                    $details['consignee']['email'] = $shipment->consignee_email;
-
-                    foreach ($shipment->items as $item) {
-                        $item_details = array();
-
-                        $item_details['product_type'] = $item->product->product_name;
-                        $item_details['description'] = $item->description;
-                        $item_details['quantity'] = $item->quantity;
-
-                        $details['order_information']['items'][] = $item_details;
-                    }
-
-                    $details['order_information']['order_id'] = $shipment->order_id;
-                    if($shipment->breadth != null){
-                        $details['order_information']['height'] = $shipment->height;
-                        $details['order_information']['length'] = $shipment->length;
-                        $details['order_information']['breadth'] = $shipment->breadth;
-                        $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
-                        
-                    }
-                    else{
-                        $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
-                    }
-                    $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
-
-                    $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
-                    $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
-
-                    if ($shipment->booking_type_id != 4) {
-                        $details['order_information']['amount'] =  number_format($shipment->amount);
-                    }
-                    else {
-                        if ($shipment->charges_mode_id == 1) {
-                            $details['order_information']['amount'] = 0;
-                        }
-                        else {
-                            $details['order_information']['amount'] = number_format($shipment->amount);
-                        }
-                    }
-
-                    $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
-
-                    $details['order_information']['charges_mode_id'] = $shipment->charges_mode_id;
-
-                    if ($shipment->charges_mode_id) {
-                        $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
-                    }
-
-                    $details['order_information']['instructions'] = $shipment->special_instructions;
-                    $details['order_information']['pieces'] = $shipment->pieces;
-                    $details['order_information']['business_category'] = $shipment->business_category->name;
-                    foreach ($shipment->shipment_journey as $journey) {
-                        $journey_details = array();
-
-                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                        $journey_details['status'] = $journey->shipment_status_shipper->name;
-                        if(in_array($journey->shipper_status_id, [1])){
-                            if($shipment->booked_by == 1){
-                                $journey_details['status'] .= ' (Main User)';
-                            }
-                            else if($shipment->booked_by == 2){
-                                $journey_details['status'] .= ' (Substitute User)';
-                            }
+                            $details['ccd'] = 0;
                         }
 
-                        if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
-                            if ($journey->shipper_status_id == 3 || $journey->shipper_status_id == 21) {
-                                $bag = Bag::where('id', $journey->reference_1_id);
-                                if($bag->exists()){
-                                    $bag = $bag->first();
-                                    $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
-                                    if($master_cargo_bags->exists()){
-                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                        $shipper = $shipment->user;
+
+                        $sales_person = SalePersonTag::where('user_id', $shipper->id)->leftjoin('admins as a', 'a.id', '=', 'sale_person_tags.admin_id')->where('sale_person_tags.status', 0);
+                        if ($sales_person->exists()){
+                            $sales_person = $sales_person->first();
+                            $sales_person_name = $sales_person->name;
+                        }
+                        else{
+                            $sales_person_name = null;
+                        }
+
+                        if($shipment->shipment_type == 1){
+                            $details['shipment_type'] = 1;
+                            $details['shipper']['name'] = $shipper->name;
+                            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                            $details['shipper']['city'] = $shipper->city->name;
+                            $details['shipper']['phone_number_1'] = $shipper->phone;
+                            $details['shipper']['phone_number_2'] = $shipper->phone2;
+                            $details['shipper']['email'] = $shipper->email;
+                            $details['shipper']['sales_person'] = $sales_person_name;
+                        }
+                        else{
+                            $retail_shipment = RetailShipment::where('shipment_id',$shipment->id)->first();
+                            if($retail_shipment){
+                                $retail_user_id = $retail_shipment->retail_user_id;
+                                $retail_admin_id = $retail_shipment->admin_id;
+                                $retail_rider_id = $retail_shipment->rider_id;
+                                if($retail_user_id){
+                                    $retail_user = RetailUser::find($retail_user_id);
+                                    if($retail_user->category == 1){
+                                        $franchise = RetailFranchise::find($retail_user->category_id);
+                                        $details['retail_user']['name'] = $franchise->name;
+                                        $details['retail_user']['code'] = 'Franchise';
+                                        $details['shipper']['city'] = $franchise->pickup_address->city->name;
                                     }
                                     else{
-                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
+                                        $trax_center  = RetailTraxCenter::find($retail_user->category_id);
+                                        $details['retail_user']['name'] = $trax_center->name;
+                                        $details['retail_user']['code'] = 'Trax Center';
+                                        $details['shipper']['city'] = $trax_center->pickup_address->city->name;
                                     }
                                 }
-                                else{
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                                elseif($retail_admin_id){
+                                    $admin_id = $retail_shipment->admin_id;
+                                    $admin_info = Admin::find($admin_id);
+                                    $details['retail_user']['name'] = $admin_info->name;
+                                    $details['retail_user']['code'] = 'Trax Center';
+                                    $details['shipper']['city'] = $shipment->pickup_address->city->name;
+
                                 }
-                            }
-                            elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
-                                $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                            }
-                            else {
-                                if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                                    if($journey->shipper_status_id == 25 && $journey->reference_1_id){
-                                        $return_note = ReturnNote::find($journey->reference_1_id);
-                                        if($return_note && $return_note->actual_date != null){
-                                            $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
-                                        }
-                                    }
-                                }
-                                else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
-                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                                }
-                                else{
-                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                                elseif($retail_rider_id){
+                                    $rider_id = $retail_shipment->rider_id;
+                                    $rider_info = Rider::find($rider_id);
+                                    $details['retail_user']['name'] = $rider_info->name;
+                                    $details['retail_user']['code'] = 'Trax Center';
+                                    $details['shipper']['city'] = $shipment->pickup_address->city->name;
+
                                 }
 
-                                if ($journey->reference_2_id) {
-                                    if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
-                                        $rider = Rider::find($journey->reference_2_id);
-                                        if($rider){
-                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-                                        }
+                                $shipper = RetailShipperInfo::find($retail_shipment->shipper_account_no);
 
-                                    }
-                                    else {
-                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-                                    }
-                                }
-                            }
+                                $details['shipper']['name'] = $shipper->shipper_name;
+                                $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                                $details['shipper']['phone_number_1'] = $shipper->shipper_phone_no;
+                                $details['shipper']['sales_person'] = $sales_person_name;
 
-                            $journey_details['status'] .= ')';
-                        }
-                        $user = '';
-                        if($journey->admin_id){
-                            $user = $journey->admin->name;
-                        }else if($journey->user_id){
-                            $user = $journey->user->name;
-                        }
-
-                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
-                        $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
-                        $journey_details['user'] = $user;
-                        $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
-                        $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
-                        $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
-                        $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
-
-                        $details['tracking_history'][] = $journey_details;
-                    }
-
-                    $shipment_payment_journey = $shipment->shipment_payment_journey;
-
-
-
-                    if ($shipment_payment_journey) {
-
-                        foreach ($shipment_payment_journey as $journey) {
-                            $journey_details = array();
-                            if($shipment->shipment_type == 1){
-                                $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             }
                             else{
-                                $payment = RetailDonePaymentShipment::where('shipment_id', $shipment->id)->first();
+                                $details['retail_user']['name'] = null;
+                                $details['retail_user']['code'] = null;
+                                $tracking['invalid'][] = $tracking_number;
                             }
+                        }
 
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                        if($journey->payment_id == null){
-                            $journey_details['status'] = $journey->status->name;
+
+                        $pickup = $shipment->pickup_address;
+
+                        $details['pickup']['person_of_contact'] = $pickup->poc;
+                        $details['pickup']['vendor'] = $pickup->vendor;
+                        $details['pickup']['phone_number'] = $pickup->phone;
+                        $details['pickup']['email'] = $pickup->email;
+                        $details['pickup']['origin'] = $pickup->city->name;
+                        $details['pickup']['address'] = $pickup->pickup_address;
+
+                        $details['consignee']['name'] = $shipment->consignee_name;
+                        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                        $details['consignee']['destination'] = $shipment->consignee_city->name;
+                        $details['consignee']['address'] = $shipment->consignee_address;
+                        $details['consignee']['email'] = $shipment->consignee_email;
+
+                        foreach ($shipment->items as $item) {
+                            $item_details = array();
+
+                            $item_details['product_type'] = $item->product->product_name;
+                            $item_details['description'] = $item->description;
+                            $item_details['quantity'] = $item->quantity;
+
+                            $details['order_information']['items'][] = $item_details;
+                        }
+
+                        $details['order_information']['order_id'] = $shipment->order_id;
+                        if($shipment->breadth != null){
+                            $details['order_information']['height'] = $shipment->height;
+                            $details['order_information']['length'] = $shipment->length;
+                            $details['order_information']['breadth'] = $shipment->breadth;
+                            $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+
                         }
                         else{
-                            $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-shipment_type="' . $shipment->shipment_type . '" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
+                            $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                         }
-                        $journey_details['user'] = $journey->admin->name;
-                        $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
+                        $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
 
-                        $details['payment_history'][] = $journey_details;
-                        }
-                    }
+                        $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
+                        $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
-                    $shipment_pickup_journey = $shipment->shipments_v2_pickup_journeys;
-
-                    if ($shipment_pickup_journey) {
-                        foreach ($shipment_pickup_journey as $journey) {
-                            $journey_details = array();
-
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            $journey_details['status'] = $journey->status->name;
-
-                            if ($journey->reference_1_id) {
-                                $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
-
-                                if ($journey->reference_2_id) {
-                                    if ($journey->status_id == 2) {
-                                        $rider = Rider::find($journey->reference_2_id);
-                                        if($rider){
-                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-                                        }
-
-                                    }
-                                    else {
-                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-                                    }
-                                }
-
-                                $journey_details['status'] .= ')';
-                            }
-
-                            $admin = $journey->admin;
-
-                            if ($admin) {
-                                $journey_details['user'] = $admin->name;
-                            }
-                            else {
-                                $journey_details['user'] = '';
-                            }
-
-                            $details['pickup_history'][] = $journey_details;
-                        }
-                    }
-
-                    $old_shipment_pickup_journey = $shipment->shipment_pickup_journey;
-
-                    if ($old_shipment_pickup_journey) {
-                        foreach ($old_shipment_pickup_journey as $journey) {
-                            $journey_details = array();
-
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            $journey_details['status'] = $journey->status->name;
-
-                            if ($journey->reference_1_id) {
-                                $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
-
-                                if ($journey->reference_2_id) {
-                                    if ($journey->status_id == 2) {
-                                        $rider = Rider::find($journey->reference_2_id);
-                                        if($rider){
-                                            $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-                                        }
-
-                                    }
-                                    else {
-                                        $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-                                    }
-                                }
-
-                                $journey_details['status'] .= ')';
-                            }
-
-                            $admin = $journey->admin;
-
-                            if ($admin) {
-                                $journey_details['user'] = $admin->name;
-                            }
-                            else {
-                                $journey_details['user'] = '';
-                            }
-
-                            $details['old_pickup_history'][] = $journey_details;
-                        }
-                    }
-
-                    $handover_shipment_journey = $shipment->handover_shipments_journeys;
-
-                    if ($handover_shipment_journey) {
-                        foreach ($handover_shipment_journey as $journey) {
-                            $journey_details = array();
-                        
-                            $journey_details['handover_id'] = $journey->handover_id;
-                            $journey_details['status'] = $journey->my_status->name;
-                            // $journey_details['status'] = "adf>name";
-                            $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
-
-                            $details['handover_history'][] = $journey_details;
-                        }
-                    }
-
-                    $quick_receiving_shipment_journey = DeliveryShipmentsReceivedOperation::where('shipment_id', $shipment->id);
-
-                    if ($quick_receiving_shipment_journey->exists()) {
-                        $quick_receiving_shipment_journey = $quick_receiving_shipment_journey->get();
-                        foreach ($quick_receiving_shipment_journey as $quick_receiving_journey) {
-                            $journey_details = array();
-
-                            $journey_details['delivery_note_id'] = '<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $quick_receiving_journey->delivery_note_id . '">' . str_pad($quick_receiving_journey->delivery_note_id, 6, '0', STR_PAD_LEFT) . '</button>';
-                            $journey_details['received_by'] = $quick_receiving_journey->admin->name;
-                            $journey_details['created_at'] = Carbon::parse($quick_receiving_journey->created_at)->toDateTimeString();
-
-                            $details['quick_receiving_shipments_journeys'][] = $journey_details;
-                        }
-                    }
-
-
-                    $shipment_amount_log = $shipment->amount_change_log;
-
-                    if ($shipment_amount_log) {
-                        foreach ($shipment_amount_log as $journey) {
-                            $journey_details = array();
-
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            $journey_details['old_amount'] = number_format($journey->old_amount);
-                            $journey_details['new_amount'] = number_format($journey->new_amount);
-                            $journey_details['remarks'] = $journey->remarks;
-                            $journey_details['user'] = $journey->admin->name;
-
-                            $details['amount_history'][] = $journey_details;
-                        }
-                    }
-
-                    $shipment_weight_log = $shipment->weight_change_log;
-
-                    if ($shipment_weight_log) {
-                        foreach ($shipment_weight_log as $journey) {
-                            $journey_details = array();
-
-                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            $journey_details['old_weight'] = number_format($journey->old_weight);
-                            $journey_details['new_weight'] = number_format($journey->new_weight);
-                            $journey_details['user'] = $journey->admin->name;
-
-                            $details['weight_history'][] = $journey_details;
-                        }
-                    }
-
-                    $complain = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id', [2, 3, 5]);
-
-                    if ($complain->exists()) {
-                        $complain = $complain->first();
-
-                        $details['complain'] = array();
-                        $details['complain']['id'] = $complain->id;
-                        $details['complain']['padded_id'] = str_pad($complain->id, 6, '0', STR_PAD_LEFT);
-
-                        Carbon::setWeekendDays([
-                            Carbon::SUNDAY,
-                        ]);
-
-                        $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 5)->latest('id');
-                        if ($re_open_count->exists()) {
-                            $re_open_count = $re_open_count->first();
-
-                            $launched = Carbon::parse($re_open_count->created_at);
-                            $last_closed = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 4)->where('created_at', '>=', $re_open_count->created_at)->first();
-                            if ($last_closed) {
-                                $current = $last_closed->created_at;
-                            } else {
-                                $current = Carbon::now();
-                            }
-                            $time_format = 'H:i';
-                            $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
-                            $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
-                            $to_formatted = date($time_format, strtotime($time_to->setting_value));
-                            $cut_off_check = $complain->created_at->format($time_format);
-                            $additional_tat = $current->diffInWeekdays($launched);
-                            $current_tat = $additional_tat;
-                            $launched_check = $launched->toDateString();
-                            $current_check = $current->toDateString();
-                            if ($launched_check <= $current_check) {
-                                if ($to_formatted < $cut_off_check) {
-                                    $after_cut_off = $current_tat - 1;
-                                    $current_tat = $after_cut_off;
-                                }
-                            }
-                            $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
-                            foreach ($holidays as $holiday) {
-                                $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
-                                $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
-                                $launched_formatted_check = date('Y-m-d', strtotime($launched));
-                                if ($launched < $holiday_formatted || $current > $holiday_formatted) {
-                                    if ($holiday_formatted_check == $launched_formatted_check) {
-                                        if ($to_formatted < $cut_off_check) {
-                                            $after_cut_off = $current_tat + 1;
-                                            $current_tat = $after_cut_off;
-                                        }
-                                    }
-                                    $after_holidays = $current_tat - 1;
-                                    $current_tat = $after_holidays;
-                                }
-                            }
+                        if ($shipment->booking_type_id != 4) {
+                            $details['order_information']['amount'] =  number_format($shipment->amount);
                         }
                         else {
-                            $launched = Carbon::parse($complain->created_at);
-                            $first_closed = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 4)->first();
-                            if ($first_closed) {
-                                $current = $first_closed->created_at;
-                            } else {
-                                $current = Carbon::now();
+                            if ($shipment->charges_mode_id == 1) {
+                                $details['order_information']['amount'] = 0;
                             }
-                            $time_format = 'H:i';
-                            $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
-                            $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
-                            $to_formatted = date($time_format, strtotime($time_to->setting_value));
-                            $cut_off_check = $complain->created_at->format($time_format);
-                            $current_tat = $current->diffInWeekdays($launched);
-                            $launched_check = $launched->toDateString();
-                            $current_check = $current->toDateString();
-                            if ($launched_check <= $current_check) {
-                                if ($to_formatted < $cut_off_check) {
-                                    $after_cut_off = $current_tat - 1;
-                                    $current_tat = $after_cut_off;
+                            else {
+                                $details['order_information']['amount'] = number_format($shipment->amount);
+                            }
+                        }
+
+                        $details['order_information']['account_type_id'] = $shipment->user->account_type_id;
+
+                        $details['order_information']['charges_mode_id'] = $shipment->charges_mode_id;
+
+                        if ($shipment->charges_mode_id) {
+                            $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
+                        }
+
+                        $details['order_information']['instructions'] = $shipment->special_instructions;
+                        $details['order_information']['pieces'] = $shipment->pieces;
+                        $details['order_information']['business_category'] = $shipment->business_category->name;
+                        foreach ($shipment->shipment_journey as $journey) {
+                            $journey_details = array();
+
+                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            $journey_details['status'] = $journey->shipment_status_shipper->name;
+                            if(in_array($journey->shipper_status_id, [1])){
+                                if($shipment->booked_by == 1){
+                                    $journey_details['status'] .= ' (Main User)';
+                                }
+                                else if($shipment->booked_by == 2){
+                                    $journey_details['status'] .= ' (Substitute User)';
                                 }
                             }
-                            $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
-                            foreach ($holidays as $holiday) {
-                                $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
-                                $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
-                                $launched_formatted_check = date('Y-m-d', strtotime($launched));
-                                if ($launched < $holiday_formatted || $current > $holiday_formatted) {
-                                    if ($holiday_formatted_check == $launched_formatted_check) {
-                                        if ($to_formatted < $cut_off_check) {
-                                            $after_cut_off = $current_tat + 1;
-                                            $current_tat = $after_cut_off;
+
+                            if ($journey->reference_1_id && !in_array($journey->shipper_status_id, [1, 52])) {
+                                if ($journey->shipper_status_id == 3 || $journey->shipper_status_id == 21) {
+                                    $bag = Bag::where('id', $journey->reference_1_id);
+                                    if($bag->exists()){
+                                        $bag = $bag->first();
+                                        $master_cargo_bags = MasterCargoBag::where('bag_id', $bag->id);
+                                        if($master_cargo_bags->exists()){
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '">' . $bag->seal_number . '</button>';
+                                        }
+                                        else{
+                                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $bag->seal_number . '" disabled>' . $bag->seal_number . '</button>';
                                         }
                                     }
-                                    $after_holidays = $current_tat - 1;
-                                    $current_tat = $after_holidays;
+                                    else{
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . $journey->reference_1_id . '</button>';
+                                    }
                                 }
+                                elseif (in_array($journey->shipper_status_id, [21, 26, 32])) {
+                                    $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                }
+                                else {
+                                    if(in_array($journey->shipper_status_id, [23, 24, 25, 28, 29, 31, 44, 45, 47, 48])){
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle return_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                        if($journey->shipper_status_id == 25 && $journey->reference_1_id){
+                                            $return_note = ReturnNote::find($journey->reference_1_id);
+                                            if($return_note && $return_note->actual_date != null){
+                                                $journey_details['status'] .= ' | ' . Carbon::parse($return_note->actual_date)->toDateString();
+                                            }
+                                        }
+                                    }
+                                    else if(in_array($journey->shipper_status_id, [5, 6, 7, 8, 9, 11, 12, 14, 15, 18, 56, 30, 20])){
+                                        $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                    }
+                                    else{
+                                        $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                                    }
+
+                                    if ($journey->reference_2_id) {
+                                        if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if($rider){
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                            }
+
+                                        }
+                                        else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
+                                }
+
+                                $journey_details['status'] .= ')';
                             }
+                            $user = '';
+                            if($journey->admin_id){
+                                $user = $journey->admin->name;
+                            }else if($journey->user_id){
+                                $user = $journey->user->name;
+                            }
+
+                            $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                            $journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
+                            $journey_details['user'] = $user;
+                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                            $journey_details['received_or_refused_by'] = ($journey->received_or_refused_by) ? $journey->received_or_refused_by : '';
+                            $journey_details['ip'] = ($journey->ip_address) ? $journey->ip_address : '';
+                            $journey_details['rider'] = ($journey->rider_id) ? $journey->rider->name : '';
+
+                            $details['tracking_history'][] = $journey_details;
                         }
 
-                        $details['complain']['tat'] = $current_tat;
-                    }
+                        $shipment_payment_journey = $shipment->shipment_payment_journey;
 
-                    $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
-                        ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
-                        ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
-                        ->leftjoin('retail_users as ru', 'ru.id', '=', 'crm_requests.launched_by_id')
-                        ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
-                        ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
-                        ->select('crm_requests.id as id', 'crs.name as status', 'a.id as admin_id',
-                        'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user',
-                         'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by','crm_requests.launched_by_id', 'ru.name as created_by_retail_user')
-                        ->where('crm_requests.shipment_id', $shipment->id);
 
-                    if($crm_requests->exists()){
-                        $crm_requests = $crm_requests->get();
 
-                        foreach ($crm_requests as $crm_request){
-                            $crm_request_journey = array();
+                        if ($shipment_payment_journey) {
 
-                            $crm_request_journey['id'] = str_pad($crm_request->id, 6, '0', STR_PAD_LEFT);
-                            $crm_request_journey['status_id'] = $crm_request->status_id;
-                            $crm_request_journey['status'] = $crm_request->status;
-                            if($crm_request->status_id == 1){
-                                if($crm_request->launched_added_by == 0){
-                                       $crm_request_journey['created_by'] = Admin::find($crm_request->launched_by_id)->name . ' (Admin)';
-                                }
-                                else if($crm_request->launched_added_by == 1){
-                                    $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
-                                }
-                                else if($crm_request->launched_added_by == 3){
-                                    $crm_request_journey['created_by'] = $crm_request->created_by_retail_user . ' (Retail User)';
+                            foreach ($shipment_payment_journey as $journey) {
+                                $journey_details = array();
+                                if($shipment->shipment_type == 1){
+                                    $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                                 }
                                 else{
-                                    $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                                    $payment = RetailDonePaymentShipment::where('shipment_id', $shipment->id)->first();
                                 }
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            if($journey->payment_id == null){
+                                $journey_details['status'] = $journey->status->name;
                             }
                             else{
-                                $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                                $journey_details['status'] = $journey->status->name . ' (<button class="btn btn-sm btn-outline-info align-middle payment_print" data-shipment_type="' . $shipment->shipment_type . '" data-id="' . $journey->payment_id . '">' . str_pad($journey->payment_id, 6, '0', STR_PAD_LEFT) . '</button>)';
                             }
-                            $crm_request_journey['created_at'] = Carbon::parse($crm_request->created_at)->toDateTimeString();
+                            $journey_details['user'] = $journey->admin->name;
+                            $journey_details['payable_remarks'] = ($journey->payable_remarks) ? $journey->payable_remarks : '';
 
-                            $details['crm_requests'][] = $crm_request_journey;
+                            $details['payment_history'][] = $journey_details;
+                            }
                         }
 
+                        $shipment_pickup_journey = $shipment->shipments_v2_pickup_journeys;
+
+                        if ($shipment_pickup_journey) {
+                            foreach ($shipment_pickup_journey as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                $journey_details['status'] = $journey->status->name;
+
+                                if ($journey->reference_1_id) {
+                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+
+                                    if ($journey->reference_2_id) {
+                                        if ($journey->status_id == 2) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if($rider){
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                            }
+
+                                        }
+                                        else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
+
+                                    $journey_details['status'] .= ')';
+                                }
+
+                                $admin = $journey->admin;
+
+                                if ($admin) {
+                                    $journey_details['user'] = $admin->name;
+                                }
+                                else {
+                                    $journey_details['user'] = '';
+                                }
+
+                                $details['pickup_history'][] = $journey_details;
+                            }
+                        }
+
+                        $old_shipment_pickup_journey = $shipment->shipment_pickup_journey;
+
+                        if ($old_shipment_pickup_journey) {
+                            foreach ($old_shipment_pickup_journey as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                $journey_details['status'] = $journey->status->name;
+
+                                if ($journey->reference_1_id) {
+                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+
+                                    if ($journey->reference_2_id) {
+                                        if ($journey->status_id == 2) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if($rider){
+                                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                            }
+
+                                        }
+                                        else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
+
+                                    $journey_details['status'] .= ')';
+                                }
+
+                                $admin = $journey->admin;
+
+                                if ($admin) {
+                                    $journey_details['user'] = $admin->name;
+                                }
+                                else {
+                                    $journey_details['user'] = '';
+                                }
+
+                                $details['old_pickup_history'][] = $journey_details;
+                            }
+                        }
+
+                        $handover_shipment_journey = $shipment->handover_shipments_journeys;
+
+                        if ($handover_shipment_journey) {
+                            foreach ($handover_shipment_journey as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['handover_id'] = $journey->handover_id;
+                                $journey_details['status'] = $journey->my_status->name;
+                                // $journey_details['status'] = "adf>name";
+                                $journey_details['created_at'] = Carbon::parse($journey->created_at)->toDateTimeString();
+
+                                $details['handover_history'][] = $journey_details;
+                            }
+                        }
+
+                        $quick_receiving_shipment_journey = DeliveryShipmentsReceivedOperation::where('shipment_id', $shipment->id);
+
+                        if ($quick_receiving_shipment_journey->exists()) {
+                            $quick_receiving_shipment_journey = $quick_receiving_shipment_journey->get();
+                            foreach ($quick_receiving_shipment_journey as $quick_receiving_journey) {
+                                $journey_details = array();
+
+                                $journey_details['delivery_note_id'] = '<button class="btn btn-sm btn-outline-info align-middle delivery_note_print" data-id="' . $quick_receiving_journey->delivery_note_id . '">' . str_pad($quick_receiving_journey->delivery_note_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                                $journey_details['received_by'] = $quick_receiving_journey->admin->name;
+                                $journey_details['created_at'] = Carbon::parse($quick_receiving_journey->created_at)->toDateTimeString();
+
+                                $details['quick_receiving_shipments_journeys'][] = $journey_details;
+                            }
+                        }
+
+
+                        $shipment_amount_log = $shipment->amount_change_log;
+
+                        if ($shipment_amount_log) {
+                            foreach ($shipment_amount_log as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                $journey_details['old_amount'] = number_format($journey->old_amount);
+                                $journey_details['new_amount'] = number_format($journey->new_amount);
+                                $journey_details['remarks'] = $journey->remarks;
+                                $journey_details['user'] = $journey->admin->name;
+
+                                $details['amount_history'][] = $journey_details;
+                            }
+                        }
+
+                        $shipment_weight_log = $shipment->weight_change_log;
+
+                        if ($shipment_weight_log) {
+                            foreach ($shipment_weight_log as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                $journey_details['old_weight'] = number_format($journey->old_weight);
+                                $journey_details['new_weight'] = number_format($journey->new_weight);
+                                $journey_details['user'] = $journey->admin->name;
+
+                                $details['weight_history'][] = $journey_details;
+                            }
+                        }
+
+                        $complain = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id', [2, 3, 5]);
+
+                        if ($complain->exists()) {
+                            $complain = $complain->first();
+
+                            $details['complain'] = array();
+                            $details['complain']['id'] = $complain->id;
+                            $details['complain']['padded_id'] = str_pad($complain->id, 6, '0', STR_PAD_LEFT);
+
+                            Carbon::setWeekendDays([
+                                Carbon::SUNDAY,
+                            ]);
+
+                            $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 5)->latest('id');
+                            if ($re_open_count->exists()) {
+                                $re_open_count = $re_open_count->first();
+
+                                $launched = Carbon::parse($re_open_count->created_at);
+                                $last_closed = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 4)->where('created_at', '>=', $re_open_count->created_at)->first();
+                                if ($last_closed) {
+                                    $current = $last_closed->created_at;
+                                } else {
+                                    $current = Carbon::now();
+                                }
+                                $time_format = 'H:i';
+                                $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                                $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                                $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                                $cut_off_check = $complain->created_at->format($time_format);
+                                $additional_tat = $current->diffInWeekdays($launched);
+                                $current_tat = $additional_tat;
+                                $launched_check = $launched->toDateString();
+                                $current_check = $current->toDateString();
+                                if ($launched_check <= $current_check) {
+                                    if ($to_formatted < $cut_off_check) {
+                                        $after_cut_off = $current_tat - 1;
+                                        $current_tat = $after_cut_off;
+                                    }
+                                }
+                                $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                                foreach ($holidays as $holiday) {
+                                    $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                                    $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                                    $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                                    if ($launched < $holiday_formatted || $current > $holiday_formatted) {
+                                        if ($holiday_formatted_check == $launched_formatted_check) {
+                                            if ($to_formatted < $cut_off_check) {
+                                                $after_cut_off = $current_tat + 1;
+                                                $current_tat = $after_cut_off;
+                                            }
+                                        }
+                                        $after_holidays = $current_tat - 1;
+                                        $current_tat = $after_holidays;
+                                    }
+                                }
+                            }
+                            else {
+                                $launched = Carbon::parse($complain->created_at);
+                                $first_closed = CrmRequestStatusHistory::where('crm_request_id', $complain->id)->where('status_id', 4)->first();
+                                if ($first_closed) {
+                                    $current = $first_closed->created_at;
+                                } else {
+                                    $current = Carbon::now();
+                                }
+                                $time_format = 'H:i';
+                                $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                                $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                                $to_formatted = date($time_format, strtotime($time_to->setting_value));
+                                $cut_off_check = $complain->created_at->format($time_format);
+                                $current_tat = $current->diffInWeekdays($launched);
+                                $launched_check = $launched->toDateString();
+                                $current_check = $current->toDateString();
+                                if ($launched_check <= $current_check) {
+                                    if ($to_formatted < $cut_off_check) {
+                                        $after_cut_off = $current_tat - 1;
+                                        $current_tat = $after_cut_off;
+                                    }
+                                }
+                                $holidays = CrmTatHolidays::whereBetween('holiday', [$launched, $current])->get();
+                                foreach ($holidays as $holiday) {
+                                    $holiday_formatted = date('Y-m-d H:i:s', strtotime($holiday->holiday));
+                                    $holiday_formatted_check = date('Y-m-d', strtotime($holiday->holiday));
+                                    $launched_formatted_check = date('Y-m-d', strtotime($launched));
+                                    if ($launched < $holiday_formatted || $current > $holiday_formatted) {
+                                        if ($holiday_formatted_check == $launched_formatted_check) {
+                                            if ($to_formatted < $cut_off_check) {
+                                                $after_cut_off = $current_tat + 1;
+                                                $current_tat = $after_cut_off;
+                                            }
+                                        }
+                                        $after_holidays = $current_tat - 1;
+                                        $current_tat = $after_holidays;
+                                    }
+                                }
+                            }
+
+                            $details['complain']['tat'] = $current_tat;
+                        }
+
+                        $crm_requests = CrmRequest::leftjoin('crm_request_status_histories as crsh', 'crsh.crm_request_id', '=', 'crm_requests.id')
+                            ->leftjoin('admins as a', 'a.id', '=', 'crm_requests.agent_id')
+                            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.launched_by_id')
+                            ->leftjoin('retail_users as ru', 'ru.id', '=', 'crm_requests.launched_by_id')
+                            ->leftjoin('substitute_users as su', 'su.id', '=', 'crm_requests.launched_by_id')
+                            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crsh.status_id')
+                            ->select('crm_requests.id as id', 'crs.name as status', 'a.id as admin_id',
+                            'a.name as created_by_admin', 'u.name as created_by_user', 'su.name as created_by_sub_user',
+                             'crsh.created_at as created_at', 'crsh.status_id as status_id', 'crm_requests.launched_by as launched_added_by','crm_requests.launched_by_id', 'ru.name as created_by_retail_user')
+                            ->where('crm_requests.shipment_id', $shipment->id);
+
+                        if($crm_requests->exists()){
+                            $crm_requests = $crm_requests->get();
+
+                            foreach ($crm_requests as $crm_request){
+                                $crm_request_journey = array();
+
+                                $crm_request_journey['id'] = str_pad($crm_request->id, 6, '0', STR_PAD_LEFT);
+                                $crm_request_journey['status_id'] = $crm_request->status_id;
+                                $crm_request_journey['status'] = $crm_request->status;
+                                if($crm_request->status_id == 1){
+                                    if($crm_request->launched_added_by == 0){
+                                           $crm_request_journey['created_by'] = Admin::find($crm_request->launched_by_id)->name . ' (Admin)';
+                                    }
+                                    else if($crm_request->launched_added_by == 1){
+                                        $crm_request_journey['created_by'] = $crm_request->created_by_user . ' (Shipper)';
+                                    }
+                                    else if($crm_request->launched_added_by == 3){
+                                        $crm_request_journey['created_by'] = $crm_request->created_by_retail_user . ' (Retail User)';
+                                    }
+                                    else{
+                                        $crm_request_journey['created_by'] = $crm_request->created_by_sub_user . ' (Substitute Shipper)';
+                                    }
+                                }
+                                else{
+                                    $crm_request_journey['created_by'] = $crm_request->created_by_admin . ' (Admin)';
+                                }
+                                $crm_request_journey['created_at'] = Carbon::parse($crm_request->created_at)->toDateTimeString();
+
+                                $details['crm_requests'][] = $crm_request_journey;
+                            }
+
+                        }
+
+                        $shipment_open_box_journey = $shipment->open_box_journey;
+                        if($shipment_open_box_journey){
+                            foreach ($shipment_open_box_journey as $journey) {
+                                $open_box_journey_details = array();
+
+                                $open_box_journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                $open_box_journey_details['status'] = $journey->shipment_open_status->name;
+                                $open_box_journey_details['created_by'] = $journey->admin->name;
+
+                                $details['open_box_journey'][] = $open_box_journey_details;
+                            }
+                        }
+
+                        // $details['complain']['id'] = 10;
+                        // $details['complain']['tat'] = 3;
+                        if($request->has('key_accounts')){
+                            $date = Carbon::today()->toDateString();
+                            $key_accounts_daily_summary = KeyAccountDailySummary::where('admin_id', Auth::id())->whereDate('created_at', $date);
+                            if($key_accounts_daily_summary->exists()){
+                                $key_accounts_daily_summary = $key_accounts_daily_summary->first();
+                                $count = $key_accounts_daily_summary->count + 1;
+                                $key_accounts_daily_summary->count = $count;
+                                $key_accounts_daily_summary->save();
+                            }
+                            else{
+                                $key_accounts_daily_summary = new KeyAccountDailySummary();
+                                $key_accounts_daily_summary->admin_id = Auth::id();
+                                $key_accounts_daily_summary->count = 1;
+                                $key_accounts_daily_summary->save();
+                            }
+
+                            $key_accounts_daily_shipment = new KeyAccountDailyShipment();
+                            $key_accounts_daily_shipment->admin_id = Auth::id();
+                            $key_accounts_daily_shipment->shipment_id = $shipment->id;
+                            $key_accounts_daily_shipment->save();
+                        }
+
+                        $details['shipment_id'] = $shipment->id;
+
+                        $tracking['shipments'][] = $details;
                     }
-
-                    $shipment_open_box_journey = $shipment->open_box_journey;
-                    if($shipment_open_box_journey){
-                        foreach ($shipment_open_box_journey as $journey) {
-                            $open_box_journey_details = array();
-
-                            $open_box_journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            $open_box_journey_details['status'] = $journey->shipment_open_status->name;
-                            $open_box_journey_details['created_by'] = $journey->admin->name;
-
-                            $details['open_box_journey'][] = $open_box_journey_details;
-                        }
+                    else {
+                        $tracking['unauthorized'][] = $tracking_number;
                     }
-
-                    // $details['complain']['id'] = 10;
-                    // $details['complain']['tat'] = 3;
-                    if($request->has('key_accounts')){
-                        $date = Carbon::today()->toDateString();
-                        $key_accounts_daily_summary = KeyAccountDailySummary::where('admin_id', Auth::id())->whereDate('created_at', $date);
-                        if($key_accounts_daily_summary->exists()){
-                            $key_accounts_daily_summary = $key_accounts_daily_summary->first();
-                            $count = $key_accounts_daily_summary->count + 1;
-                            $key_accounts_daily_summary->count = $count;
-                            $key_accounts_daily_summary->save();
-                        }
-                        else{
-                            $key_accounts_daily_summary = new KeyAccountDailySummary();
-                            $key_accounts_daily_summary->admin_id = Auth::id();
-                            $key_accounts_daily_summary->count = 1;
-                            $key_accounts_daily_summary->save();
-                        }
-
-                        $key_accounts_daily_shipment = new KeyAccountDailyShipment();
-                        $key_accounts_daily_shipment->admin_id = Auth::id();
-                        $key_accounts_daily_shipment->shipment_id = $shipment->id;
-                        $key_accounts_daily_shipment->save();
-                    }
-
-                    $details['shipment_id'] = $shipment->id;
-
-                    $tracking['shipments'][] = $details;
                 }
                 else {
-                    $tracking['unauthorized'][] = $tracking_number;
+                    $tracking['invalid'][] = $tracking_number;
                 }
     		}
     		else {

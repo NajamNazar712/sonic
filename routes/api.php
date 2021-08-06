@@ -83,7 +83,7 @@ Route::name('api.')->group(function () {
 
 	});
 
-	Route::middleware('APIThrottle:25,0.5')->prefix('shipment')->name('shipment.')->group(function() {
+	Route::middleware('APIThrottle:150,0.5')->prefix('shipment')->name('shipment.')->group(function() {
 		Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
 	});
 
@@ -139,11 +139,13 @@ Route::name('api.')->group(function () {
                 Route::get('summary/multiple_v2', 'Rider\RiderAPIController@delivery_summary_multiple_v2')->name('delivery_summary_multiple_v2');
                 Route::get('summary/multiple_v3', 'Rider\RiderAPIController@delivery_summary_multiple_v3')->name('delivery_summary_multiple_v3');
                 Route::get('summary/multiple_v4', 'Rider\RiderAPIController@delivery_summary_multiple_v4')->name('delivery_summary_multiple_v4');
+                Route::get('summary/multiple_v5', 'Rider\RiderAPIController@delivery_summary_multiple_v5')->name('delivery_summary_multiple_v5');
                 Route::post('undelivered_v2', 'Rider\RiderAPIController@shipment_undelivered_v2')->name('undelivered_v2');
                 Route::post('delivered_v2', 'Rider\RiderAPIController@shipment_delivered_v2')->name('delivered_v2');
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('delivered_v3', 'Rider\RiderAPIController@shipment_delivered_v3')->name('delivered_v3');
                 Route::post('delivered_v4', 'Rider\RiderAPIController@shipment_delivered_v4')->name('delivered_v4');
+                Route::post('delivered_v5', 'Rider\RiderAPIController@shipment_delivered_v5')->name('delivered_v5');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');

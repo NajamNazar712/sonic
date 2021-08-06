@@ -1,0 +1,18 @@
+<?php
+
+use Illuminate\Database\Seeder;
+
+class UpdateModulePermissionForRiderDeliveryNoteOtpView extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        DB::table('module_permissions')->insert(array(
+            array('id' => 553, 'name' => 'Rider Delivery Note OTP - View', 'module_id' => 6),
+        ));
+    }
+}

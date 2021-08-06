@@ -2048,50 +2048,55 @@ class APIController extends Controller
 
             $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-            $details = array();
+            if ($shipment->user->blacklist == 0) {
+              $details = array();
 
-            $details['tracking_number'] = $tracking_number;
+              $details['tracking_number'] = $tracking_number;
 
-            $shipper = $shipment->user;
+              $shipper = $shipment->user;
 
-            $details['shipper']['name'] = $shipper->name;
+              $details['shipper']['name'] = $shipper->name;
 
-            $pickup = $shipment->pickup_address;
+              $pickup = $shipment->pickup_address;
 
-            $details['pickup']['origin'] = $pickup->city->name;
+              $details['pickup']['origin'] = $pickup->city->name;
 
-            $details['consignee']['name'] = $shipment->consignee_name;
-            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-            $details['consignee']['destination'] = $shipment->consignee_city->name;
-            $details['consignee']['address'] = $shipment->consignee_address;
+              $details['consignee']['name'] = $shipment->consignee_name;
+              $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+              $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+              $details['consignee']['destination'] = $shipment->consignee_city->name;
+              $details['consignee']['address'] = $shipment->consignee_address;
 
-            foreach ($shipment->items as $item) {
-                $item_details = array();
+              foreach ($shipment->items as $item) {
+                  $item_details = array();
 
-                $item_details['order_id'] = $shipment->order_id;
-                $item_details['product_type'] = $item->product->product_name;
-                $item_details['description'] = $item->description;
-                $item_details['quantity'] = $item->quantity;
+                  $item_details['order_id'] = $shipment->order_id;
+                  $item_details['product_type'] = $item->product->product_name;
+                  $item_details['description'] = $item->description;
+                  $item_details['quantity'] = $item->quantity;
 
-                $details['order_information']['items'][] = $item_details;
+                  $details['order_information']['items'][] = $item_details;
+              }
+
+              foreach ($shipment->shipment_journey as $journey) {
+                  if ($journey->verification) {
+                      $journey_details = array();
+
+                      $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                      $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                      $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                      $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+                      $details['tracking_history'][] = $journey_details;
+                  }
+              }
+
+              return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
             }
-
-            foreach ($shipment->shipment_journey as $journey) {
-                if ($journey->verification) {
-                    $journey_details = array();
-
-                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
-                    $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
-                    $journey_details['status'] = $journey->shipment_status_shipper->name;
-
-                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
-
-                    $details['tracking_history'][] = $journey_details;
-                }
+            else {
+              return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => 'Invalid Tracking Number']]);
             }
-
-            return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
         }
     }
 
@@ -3373,101 +3378,112 @@ class APIController extends Controller
             $shipment = Shipment::where('tracking_number', $tracking_number);
 
             if ($shipment->exists()) {
-              $output = array();
-
-              $output['TrackingNumber'] = $tracking_number;
-
-              $tracking_url = 'https://sonic.pk/tracking?tracking_number=' . $tracking_number;
-
-              $output['TrackingURL'] = $tracking_url;
-
-              $support_phone_numbers = ['+9221111118729'];
-
-              $output['SupportPhoneNumbers'] = $support_phone_numbers;
-
               $shipment = $shipment->first();
 
-              $cities = array();
+              if ($shipment->user->blacklist == 0) {
+                $output = array();
 
-              $origin = $shipment->pickup_address->city;
-              $destination = $shipment->pickup_address->city;
+                $output['TrackingNumber'] = $tracking_number;
 
-              $cities['origin']['city'] = $origin->name;
-              $cities['origin']['hub'] = $origin->hub_city->name;
-              $cities['destination']['city'] = $destination->name;
-              $cities['destination']['hub'] = $destination->hub_city->name;
+                $tracking_url = 'https://sonic.pk/tracking?tracking_number=' . $tracking_number;
 
-              $created_date = Carbon::parse($shipment->created_at)->toIso8601String();
+                $output['TrackingURL'] = $tracking_url;
 
-              $output['CreateDate'] = $created_date;
+                $support_phone_numbers = ['+9221111118729'];
 
-              $current_status = array();
-              $transit_events = array();
+                $output['SupportPhoneNumbers'] = $support_phone_numbers;
 
-              $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1);
+                $cities = array();
 
-              if ($shipments_journey->exists()) {
-                $shipments_journey = $shipments_journey->get();
+                $origin = $shipment->pickup_address->city;
+                $destination = $shipment->pickup_address->city;
 
-                $pickup = FALSE;
-                $delivered = FALSE;
+                $cities['origin']['city'] = $origin->name;
+                $cities['origin']['hub'] = $origin->hub_city->name;
+                $cities['destination']['city'] = $destination->name;
+                $cities['destination']['hub'] = $destination->hub_city->name;
 
-                if (!in_array($shipment->shipper_status_id, [1, 17])) {
-                  $pickup = TRUE;
+                $created_date = Carbon::parse($shipment->created_at)->toIso8601String();
 
-                  if (in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
-                    $delivered = TRUE;
+                $output['CreateDate'] = $created_date;
+
+                $current_status = array();
+                $transit_events = array();
+
+                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1);
+
+                if ($shipments_journey->exists()) {
+                  $shipments_journey = $shipments_journey->get();
+
+                  $pickup = FALSE;
+                  $delivered = FALSE;
+
+                  if (!in_array($shipment->shipper_status_id, [1, 17])) {
+                    $pickup = TRUE;
+
+                    if (in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+                      $delivered = TRUE;
+                    }
                   }
-                }
 
-                foreach ($shipments_journey as $shipment_journey) {
+                  foreach ($shipments_journey as $shipment_journey) {
+                    $transit_event = array();
+
+                    $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
+                    $transit_event['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                    $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+
+                    $transit_events[] = $transit_event;
+
+                    if ($pickup) {
+                      if (!isset($output['PickupDate']) && in_array($shipment_journey->shipper_status_id, [2, 53, 61, 63])) {
+                        $pickup_date = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+
+                        $output['PickupDate'] = $pickup_date;
+                      }
+
+                      if ($delivered && in_array($shipment_journey->shipper_status_id, [14, 30, 36, 37])) {
+                        $delivered_date = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+
+                        $output['DeliveredDate'] = $delivered_date;
+                      }
+                    }
+                  }
+
+                  $shipment_journey = $shipments_journey->last();
+
+                  $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
+                  $current_status['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                  $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                }
+                else {
+                  $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
+                  $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
+                  $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+
                   $transit_event = array();
 
-                  $transit_event['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
-                  $transit_event['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
+                  $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
+                  $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
                   $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
 
                   $transit_events[] = $transit_event;
-
-                  if ($pickup) {
-                    if (!isset($output['PickupDate']) && in_array($shipment_journey->shipper_status_id, [2, 53, 61, 63])) {
-                      $pickup_date = Carbon::parse($shipment_journey->created_at)->toIso8601String();
-
-                      $output['PickupDate'] = $pickup_date;
-                    }
-
-                    if ($delivered && in_array($shipment_journey->shipper_status_id, [14, 30, 36, 37])) {
-                      $delivered_date = Carbon::parse($shipment_journey->created_at)->toIso8601String();
-
-                      $output['DeliveredDate'] = $delivered_date;
-                    }
-                  }
                 }
 
-                $shipment_journey = $shipments_journey->last();
+                $output['CurrentStatus'] = $current_status;
+                $output['TransitEvents'] = $transit_events;
 
-                $current_status['Status'] = $this->shipment_google_status_name($shipment_journey->shipper_status_id);
-                $current_status['Date'] = Carbon::parse($shipment_journey->created_at)->toIso8601String();
-                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                return response()->json($output);
               }
               else {
-                $current_status['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
-                $current_status['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                $current_status['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
+                $current_status = array();
 
-                $transit_event = array();
+                $current_status['Status'] = 'ERROR';
+                $current_status['Date'] = Carbon::now()->toIso8601String();
+                $current_status['Error'] = 'Invalid Tracking Number';
 
-                $transit_event['Status'] = $this->shipment_google_status_name($shipment->shipper_status_id);
-                $transit_event['Date'] = Carbon::parse($shipment->updated_at)->toIso8601String();
-                $transit_event['Location'] = $this->shipment_google_location_name($shipment_journey->shipper_status_id, $cities);
-
-                $transit_events[] = $transit_event;
+                return response()->json(['CurrentStatus' => $current_status, 'TrackingNumber' => $request->TrackingNumber]);
               }
-
-              $output['CurrentStatus'] = $current_status;
-              $output['TransitEvents'] = $transit_events;
-
-              return response()->json($output);
             }
             else {
               $current_status = array();
