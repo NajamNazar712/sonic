@@ -1861,10 +1861,19 @@ class AdminCargoManifestController extends Controller
              ->leftjoin('admins as ah', 'cargo_manifest_bags.updated_by', '=', 'ah.id')
              ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
              ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
-             ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity','tm.name as transport_mode','cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as bag_shipments', 'a.name as transitted_by','oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number','bs.name as status','sm.mode as shipping_mode','cm.id as manifest_id','cargo_manifest_bags.seal_number','cm.created_at as manifest_created_at','cargo_manifest_bags.origin_hub_id as origin_hub_id','cargo_manifest_bags.destination_hub_id as destination_hub_id','cm.id as manifest','ah.name as updated_by','cargo_manifest_bags.created_at as transitted_date','cargo_manifest_bags.short_received_shipments as short_received_shipments');
+             ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity','tm.name as transport_mode','cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as bag_shipments', 'a.name as transitted_by','oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type','cargo_manifest_bags.seal_number','bs.name as status','sm.mode as shipping_mode','cm.id as manifest_id','cargo_manifest_bags.seal_number','cm.created_at as manifest_created_at','cargo_manifest_bags.origin_hub_id as origin_hub_id','cargo_manifest_bags.destination_hub_id as destination_hub_id','cm.id as manifest','ah.name as updated_by','cargo_manifest_bags.created_at as transitted_date','cargo_manifest_bags.short_received_shipments as short_received_shipments','cargo_manifest_bags.short_received_shipments as short_shipments','cargo_manifest_bags.received_shipments')->where('cargo_manifest_bags.shipments','!=',DB::raw('(select(received_shipments) from cargo_manifest_bags as cmb where cmb.id =cargo_manifest_bags.id)'));
 
 
         $datatables = Datatables::of($bags)
+            ->setRowAttr([
+                'class' => function ($bags) {
+                    if ($bags->status_id == 7) {
+                        return 'green';
+                    } else if ($bags->status_id == [5,8,9]) {
+                        return 'red';
+                    }
+                },
+            ])
             ->editColumn('bag_type',function ($bag){
                 if($bag->bag_type == 1){
                     return 'Normal';
