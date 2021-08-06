@@ -1455,7 +1455,7 @@ class AdminCargoManifestController extends Controller
                     else if($bag->status_id == 5)
                     {
                         $bag->status_id = 6;
-                        foreach($bag->shipments as $shipment)
+                        foreach($bag->shipment as $shipment)
                         {
                             ShipmentsJourneyController::add($shipment->shipment_id,49,49,null,null,null,Auth::id(),$bag->seal_number);
                             Shipment::find($shipment->shipment_id)->update(['shipper_status_id'=>49,'consignee_status_id'=>49]);
@@ -2220,7 +2220,7 @@ class AdminCargoManifestController extends Controller
                             $bag->junction_mapping_id = null;
                             $bag->short_received_shipments = $bag->shipments->count();
                             $bag->received_shipments = 0;
-                            foreach($bag->shipments as $shipment)
+                            foreach($bag->shipment as $shipment)
                             {
                                 ShipmentsJourneyController::add($shipment->shipment_id,11,11,null,null,null,Auth::id(),$bag->seal_number);
                                 Shipment::find($shipment->shipment_id)->update(['shipper_status_id'=>11,'consignee_status_id'=>11]);
