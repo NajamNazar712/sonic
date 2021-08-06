@@ -5650,14 +5650,14 @@ class ShipperShipmentBookController extends Controller
         $origin_city_allowed = TRUE;
         $destination_city_allowed = TRUE;
         if($user->account_type_id == 1){
-            $rate_origin = RateOriginHub::where('user_id', $user_id);
+            $rate_origin = RateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             if($rate_origin->exists()){
                 $origin = RateOriginHub::where(['user_id' => $user_id, 'city_id' => $pickup_city, 'shipping_mode_id' => $shipping_mode_id]);
                 if(!$origin->exists()){
                     $origin_city_allowed = FALSE;
                 }
             }
-            $rate_destination = RateDestinationHub::where('user_id', $user_id);
+            $rate_destination = RateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             if($rate_destination->exists()){
                 $destination = RateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city, 'shipping_mode_id' => $shipping_mode_id]);
                 if(!$destination->exists()){
@@ -5668,14 +5668,14 @@ class ShipperShipmentBookController extends Controller
         }
         else{
             if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
-                $rate_origin = CorporateRateOriginHub::where('user_id', $user_id);
+                $rate_origin = CorporateRateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_origin->exists()){
                     $origin = CorporateRateOriginHub::where(['user_id' => $user_id, 'city_id' => $pickup_city, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$origin->exists()){
                         $origin_city_allowed = FALSE;
                     }
                 }
-                $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id);
+                $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_destination->exists()){
                     $destination = CorporateRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$destination->exists()){
@@ -5684,16 +5684,16 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else if($user->corporate_rate_type_id == 3){
-                $rate_origin = CorporateDefaultRateOriginHub::where('user_id', $user_id);
+                $rate_origin = CorporateDefaultRateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_origin->exists()){
-                    $origin = CorporateDefaultRateOriginHub::where(['user_id' => $user_id, 'hub_id' => $pickup_city, 'shipping_mode_id' => $shipping_mode_id]);
+                    $origin = CorporateDefaultRateOriginHub::where(['user_id' => $user_id, 'city_id' => $pickup_city, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$origin->exists()){
                         $origin_city_allowed = FALSE;
                     }
                 }
-                $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id);
+                $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_destination->exists()){
-                    $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'hub_id' => $destination_city, 'shipping_mode_id' => $shipping_mode_id]);
+                    $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$destination->exists()){
                         $destination_city_allowed = FALSE;
                     }
@@ -5714,7 +5714,7 @@ class ShipperShipmentBookController extends Controller
         $origin_city_allowed = TRUE;
 
         if($user->account_type_id == 1){
-            $rate_origin = RateOriginHub::where('user_id', $user_id);
+            $rate_origin = RateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
             if($rate_origin->exists()){
                 $origin = RateOriginHub::where(['user_id' => $user_id, 'city_id' => $pickup_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                 if(!$origin->exists()){
@@ -5725,7 +5725,7 @@ class ShipperShipmentBookController extends Controller
         }
         else{
             if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
-                $rate_origin = CorporateRateOriginHub::where('user_id', $user_id);
+                $rate_origin = CorporateRateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_origin->exists()){
                     $origin = CorporateRateOriginHub::where(['user_id' => $user_id, 'city_id' => $pickup_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$origin->exists()){
@@ -5734,7 +5734,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
             else if($user->corporate_rate_type_id == 3){
-                $rate_origin = CorporateDefaultRateOriginHub::where('user_id', $user_id);
+                $rate_origin = CorporateDefaultRateOriginHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_origin->exists()){
                     $origin = CorporateDefaultRateOriginHub::where(['user_id' => $user_id, 'city_id' => $pickup_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$origin->exists()){
@@ -5763,7 +5763,7 @@ class ShipperShipmentBookController extends Controller
             $destination_city_allowed = TRUE;
 
             if($user->account_type_id == 1){
-                $rate_destination = RateDestinationHub::where('user_id', $user_id);
+                $rate_destination = RateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_destination->exists()){
                     $destination = RateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$destination->exists()){
@@ -5774,7 +5774,7 @@ class ShipperShipmentBookController extends Controller
             }
             else{
                 if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
-                    $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id);
+                    $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                     if($rate_destination->exists()){
                         $destination = CorporateRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                         if(!$destination->exists()){
@@ -5783,7 +5783,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                 else if($user->corporate_rate_type_id == 3){
-                    $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id);
+                    $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                     if($rate_destination->exists()){
                         $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                         if(!$destination->exists()){
@@ -5815,7 +5815,7 @@ class ShipperShipmentBookController extends Controller
             $destination_city_allowed = TRUE;
 
             if($user->account_type_id == 1){
-                $rate_destination = RateDestinationHub::where('user_id', $user_id);
+                $rate_destination = RateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                 if($rate_destination->exists()){
                     $destination = RateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                     if(!$destination->exists()){
@@ -5826,7 +5826,7 @@ class ShipperShipmentBookController extends Controller
             }
             else{
                 if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
-                    $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id);
+                    $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                     if($rate_destination->exists()){
                         $destination = CorporateRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                         if(!$destination->exists()){
@@ -5835,7 +5835,7 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
                 else if($user->corporate_rate_type_id == 3){
-                    $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id);
+                    $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id)->where('shipping_mode_id', $shipping_mode_id);
                     if($rate_destination->exists()){
                         $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
                         if(!$destination->exists()){
