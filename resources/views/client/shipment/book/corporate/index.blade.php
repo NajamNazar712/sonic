@@ -1170,6 +1170,7 @@
             var allow_origin_city = false;
             var allow_destination_city = false;
             function check_city_booking_allow(){
+
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
                 }
