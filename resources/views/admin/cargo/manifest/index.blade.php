@@ -92,7 +92,7 @@
                         <input type="hidden" name="bag_id" id="bag_id" value="">
                         <div class="row justify-content-center">
                             <div class="col-4 form-group">
-                                <input type="text" name="edit_seal_number" id="edit_seal_number" class="form-control edit_seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number" data-rule-required="true" data-msg-required="Seal Number is required">
+                                <input type="text" name="edit_seal_number" id="edit_seal_number" class="form-control edit_seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number" data-rule-required="true" data-msg-required="Seal Number is required" min="6" max="12">
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -175,8 +175,21 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function() {
+            $.validator.addMethod(
+                "seal_number",
+                function(value,element){
+                    if(element.value.length == 6 || element.value.length == 11 ||  element.value.length == 12 ||  element.value.length == 13){
+                        return true;
+                    } else {
+                        return false;
+                    }
+                },
+                "Invalid Seal Number"
+            );
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -377,6 +390,12 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('.edit_seal_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+            });
 
             $('body').on('click','button.edit_seal_number',function () {
                 var id = $(this).parents('tr').attr('id');
@@ -386,6 +405,7 @@
                 $('#edit_seal_number').val(current_seal_number);
                 $('#SealNumberUpdateModal').modal('show');
             });
+
 
             $('#edit_seal_number_form').validate({
                 ignore: [],
