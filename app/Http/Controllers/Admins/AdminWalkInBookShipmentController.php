@@ -1572,7 +1572,7 @@ class AdminWalkInBookShipmentController extends Controller
                 }
                 $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
                 // $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
-                // $business_category_id = 1;
+                $business_category_id = 1;
 
                 // $calc_total = ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
                 // $ftl_request->total_charges
