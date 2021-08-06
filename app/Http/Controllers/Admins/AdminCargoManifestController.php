@@ -753,7 +753,7 @@ class AdminCargoManifestController extends Controller
                             }
 
                             if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
-//                            if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
+                           if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
                                 $details = array();
 
                                 if ($request->bag_type != 0) {
@@ -815,14 +815,14 @@ class AdminCargoManifestController extends Controller
                                 $details['hub']['id'] = $hub->id;
                                 $details['hub']['name'] = $hub->name;
 
-                                /*   $shipping_mode_id = $request->shipping_mode_id;
+                                $shipping_mode_id = $request->shipping_mode_id;
 
                                    if ($shipping_mode_id == 0) {
                                        $shipping_mode_id = $shipment->shipping_mode->id;
 
                                        $details['shipping_mode']['id'] = $shipment->shipping_mode->id;
                                        $details['shipping_mode']['name'] = $shipment->shipping_mode->mode;
-                                   }*/
+                                   }
 
                                 if ($request->hub_id == 0) {
                                     if ($bag_type == 1) {
@@ -834,8 +834,8 @@ class AdminCargoManifestController extends Controller
                                             })
                                             ->select(DB::raw('count(shipments.id) as count'))
                                             ->where('dc.hub_id', $hub->id)
-                                            ->whereIn('shipments.shipper_status_id', [2, 49, 55]);
-                                        /*  ->where('shipments.shipping_mode_id', $shipping_mode_id);*/
+                                            ->whereIn('shipments.shipper_status_id', [2, 49, 55])
+                                        ->where('shipments.shipping_mode_id', $shipping_mode_id);
                                     } else {
 
                                         $shipments = Shipment::leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -867,8 +867,8 @@ class AdminCargoManifestController extends Controller
                                                             });
                                                     });
                                             })
-                                            ->select(DB::raw('count(shipments.id) as count'));
-                                        /*  ->where('shipments.shipping_mode_id', $shipping_mode_id);*/
+                                            ->select(DB::raw('count(shipments.id) as count'))
+                                            ->where('shipments.shipping_mode_id', $shipping_mode_id);
 
                                     }
 
@@ -883,10 +883,10 @@ class AdminCargoManifestController extends Controller
                                 ShipmentScanningJourneyController::add($shipment->id, 2, 1, Auth::id(), null, null);
 
                                 return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-//                            }
-//                            else {
-//                                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
-//                            }
+                           }
+                            else {
+                               return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
+                            }
                             } else {
                                 return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
                             }
