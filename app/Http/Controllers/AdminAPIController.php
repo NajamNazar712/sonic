@@ -2911,7 +2911,7 @@ class AdminAPIController extends Controller
         $bag_id = $request->bag_no;
         $bags = CargoManifestBag::where('seal_number', $bag_id);
         if ($bags->exists()) {
-            $bags = $bags->first();
+            $bags = $bags->latest()->first();
             return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Valid Bag No."]);
         }
         return response()->json(['status' => 0, 'bag_no' => null, 'message' => "Invalid Bag No."]);
@@ -2974,7 +2974,7 @@ class AdminAPIController extends Controller
                 $status = $bag_detail['status'];
                 $cargo_manifest_bags = CargoManifestBag::where('seal_number', $bag_no);
                 if ($cargo_manifest_bags->exists()) {
-                    $cargo_manifest_bags = $cargo_manifest_bags->first();
+                    $cargo_manifest_bags = $cargo_manifest_bags->latest()->first();
                     if ($status == 1) {
                         $cargo_manifest_bags->status_id = 5;
                         $cargo_manifest_bags->junction_mapping_id = null;
@@ -3007,7 +3007,7 @@ class AdminAPIController extends Controller
             }
             $bag_short_received = array();
             foreach ($bag_numbers as $bag_id) {
-                $bag = CargoManifestBag::where('seal_number', $bag_id)->first();
+                $bag = CargoManifestBag::where('seal_number', $bag_id)->latest()->first();
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb', function ($join) use ($bag) {
                     $join->on('mb.cargo_manifest_id', 'cargo_manifests.id');
                 })
