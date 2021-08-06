@@ -116,9 +116,28 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-12 form-group">
-                                    <label for="packaging_picture">Picture</label>
-                                    <input class="form-control form-control-sm" type="file" name="packaging_picture" id="packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                    <label for="packaging_picture">Default Picture</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture" id="packaging_picture" data-rule-required="true" data-msg-required="Picture is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                 </div>
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture">Picture 1</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture1" id="packaging_picture1" data-rule-required="true" data-msg-required="Picture 1 is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture">Picture 2</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture2" id="packaging_picture2" data-rule-required="true" data-msg-required="Picture 2 is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture">Picture 3</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture3" id="packaging_picture3" data-rule-required="true" data-msg-required="Picture 3 is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture">Picture 4</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture4" id="packaging_picture4" data-rule-required="true" data-msg-required="Picture 4 is required"  data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                
                             </div>
                             <div id="size_charges_wrapper">
                                 <div class="row">

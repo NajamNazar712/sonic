@@ -662,17 +662,37 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function product_details($id){
-        // dd('te');
         
         $product = PackagingMaterialTypes::find($id);
         if ($product->picture != NULL) {
             $picture = Storage::url('packaging_pictures/' . $product->picture);
         } else {
             $picture = 'img/trax_logo.png';
-        }
+        }   
+        if ($product->picture_1 != NULL) {
+            $picture1 = Storage::url('packaging_pictures/' . $product->picture_1);
+        } else {
+            $picture1 = 'img/trax_logo.png';
+        } 
+        if ($product->picture_2 != NULL) {
+            $picture2 = Storage::url('packaging_pictures/' . $product->picture_2);
+        } else {
+            $picture2 = 'img/trax_logo.png';
+        } 
+        if ($product->picture_3 != NULL) {
+            $picture3 = Storage::url('packaging_pictures/' . $product->picture_3);
+        } else {
+            $picture3 = 'img/trax_logo.png';
+        } 
+        if ($product->picture_4 != NULL) {
+            $picture4 = Storage::url('packaging_pictures/' . $product->picture_4);
+        } else {
+            $picture4 = 'img/trax_logo.png';
+        } 
+
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
 
-        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture]);
+        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture, 'picture1' => $picture1, 'picture2' => $picture2, 'picture3' => $picture3, 'picture4' => $picture4]);
 
 
     }

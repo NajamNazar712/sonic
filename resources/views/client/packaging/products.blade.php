@@ -21,12 +21,12 @@
 
                                             @foreach($packaging_types as $index => $packaging_type)
                                                             <div class="col-2 m-1">
-                                                                <div class="col mb-1 text-center border border-3">
+                                                                <div class="col mb-1 text-center border border-3 product_box">
                                                                     <img class="" alt="flyer" src="{{asset($pictures[$packaging_type->id])}}" width="100" height="100">
                                                                 </div>
                                                                
                                                                 <div class="col mb-1 text-center">
-                                                                    <a href="{{route('cod.packaging.requests.product', ['id' => $packaging_type->id])}}" class="btn btn-outline-primary" >{{$packaging_type->type}}</a>
+                                                                    <a href="{{route('cod.packaging.requests.product', ['id' => $packaging_type->id])}}" class="btn btn-outline-dark" >{{$packaging_type->type}}</a>
                                                                 </div>
                                                             </div>
                                             @endforeach
@@ -35,12 +35,12 @@
                                                 @foreach($shipper_packaging_types as $index => $shipper_packaging_type)
                                                     @if ($shipper_packaging_type->packaging_material->status != 0 && $shipper_packaging_type->packaging_material->category == $category)
                                                         <div class="col-2 m-1">
-                                                            <div class="col mb-1 text-center border border-3">
+                                                            <div class="col mb-1 text-center border border-3 product_box">
                                                                 <img class="" alt="flyer" src="{{asset($pictures[$shipper_packaging_type->packaging_material->id])}}" width="100" height="100">
                                                             </div>
                                                         
                                                             <div class="col mb-1 text-center">
-                                                                <a href="{{route('cod.packaging.requests.product', ['id' => $shipper_packaging_type->packaging_material->id])}}" class="btn btn-outline-primary" >{{$shipper_packaging_type->packaging_material->type}}</a>
+                                                                <a href="{{route('cod.packaging.requests.product', ['id' => $shipper_packaging_type->packaging_material->id])}}" class="btn btn-outline-dark" >{{$shipper_packaging_type->packaging_material->type}}</a>
                                                             </div>
                                                         </div>
                                                     @endif
@@ -106,6 +106,11 @@
         }
         .products_row{
             margin-top: 120px;
+        }
+        .product_box{
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-radius: 20px;
         }
     </style>
 

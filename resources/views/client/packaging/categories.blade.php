@@ -22,20 +22,20 @@
                                         <div class="row text-center categories_row">
 
                                                     <div class="col-6">
-                                                        <div class="col mb-1 text-center border border-3">
+                                                        <div class="col mb-1 text-center border border-3 box_padding">
                                                             <img class="category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
-                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-primary select_category"><b>Packaging Materials</b></a>
+                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-dark select_category"><b>Packaging Materials</b></a>
                                                         </div>
                                                     </div>
                                                    
                                                     <div class="col-6">
-                                                        <div class="col mb-1 text-center border border-3">
+                                                        <div class="col mb-1 text-center border border-3 box_padding">
                                                             <img class="category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
-                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-primary select_category"><b>Stationary Items</b></a>
+                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-dark select_category"><b>Stationary Items</b></a>
                                                         </div>
                                                     </div>
                                         </div>
@@ -102,6 +102,11 @@
         .category_banner{
             width: 500px;
             height: 230px;
+        }
+        .box_padding{
+            padding-top: 35px; 
+            padding-bottom: 35px;
+            border-radius: 30px; 
         }
     </style>
 

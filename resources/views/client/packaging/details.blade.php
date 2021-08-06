@@ -29,7 +29,14 @@
                                                     {{ csrf_field() }}
                                                     <input type="hidden" name="type_id" value="{{$product->id}}">
                                                     <div class="row">
-                                                        
+                                                        <div class="col-lg-2 order-lg-1 order-2">
+                                                            <ul class="image_list">
+                                                                <li class="other_images" data-image="{{asset($picture1)}}"><img src="{{asset($picture1)}}" alt=""></li>
+                                                                <li class="other_images" data-image="{{asset($picture2)}}"><img src="{{asset($picture2)}}" alt=""></li>
+                                                                <li class="other_images" data-image="{{asset($picture3)}}"><img src="{{asset($picture3)}}" alt=""></li>
+                                                                <li class="other_images" data-image="{{asset($picture4)}}"><img src="{{asset($picture4)}}" alt=""></li>
+                                                            </ul>
+                                                        </div>
                                                         <div class="col-lg-4 order-lg-2 order-1">
                                                              
                                                             <div class="image_selected"><img id="xzoom" src="{{asset($picture)}}"
@@ -41,27 +48,41 @@
                                                                 <div class="product_name mt-5 mb-1">{{$product->type}}</div>
                                                                 <hr class="singleline">
 
+                                                                
+                                                                
                                                                 <div class="col-4 size_product">
                                                                     <div class="form-group">
-                                                                    <select name="product_size" class="select2" id="product_size" data-rule-required="true" data-msg-required="Product Size is required">
                                                                         @foreach ($product->sizes as $size)
+                                                                            <button class="btn btn-primary btn-sm">{{$size->size}}</button>
+                                                                        @endforeach
+                                                                    {{-- <select name="product_size" class="select2" id="product_size" data-rule-required="true" data-msg-required="Product Size is required">
+                                                                        @foreach ($product->sizes as $size)
+
                                                                             <option value="{{$size->id}}">{{$size->size}}</option>
                                                                             
                                                                         @endforeach
-                                                                    </select>
+                                                                    </select> --}}
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-4 size_product">
+                                                                    <div class="form-group">
+                                                                     <h4>Price In PKR: <span id="charges_show"></span></h4>
+                                                                     <input type="hidden" class="form-control text-center " id="charges" name="charges" readonly data-rule-min="1"  data-rule-required="true" data-msg-required="Charges is required">
+
+                                                                    </div>
+                                                                </div>
+                                                                {{-- <div class="col-4 size_product">
                                                                     <div class="product_quantity"> <span>Charges: </span> 
                                                                         <div class="form-group">
-                                                                        <input type="text" class="form-control text-center " id="charges" name="charges" readonly data-rule-min="1"  data-rule-required="true" data-msg-required="Charges is required">
+                                                                        <input type="hidden" class="form-control text-center " id="charges" name="charges" readonly data-rule-min="1"  data-rule-required="true" data-msg-required="Charges is required">
                                                                         </div>
                                                                     </div>
-                                                                </div>
+                                                                </div> --}}
                                                                 <div class="col-4 size_product">
-                                                                    <div class="product_quantity"> <span>QTY: </span> 
-                                                                        <div class="form-group">
-                                                                            <input type="text" class="form-control text-center number" id="quantity" name="quantity" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                    <div class="product_quantity"> 
+                                                                        
+                                                                        <div class="form-group input-group item_quantity_div">
+                                                                            <input type="text" class="form-control text-center number quantity" id="quantity" placeholder="Quantity*" name="quantity" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -84,6 +105,8 @@
                                                     </div>
                                                 </form>
                                                 </div>
+
+                                                
                                         </div>
                                     </div>
                                     <hr>
@@ -110,6 +133,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
     
     
     <style>
@@ -212,6 +236,135 @@
     padding: 8px 62px;
 }
 
+.image_list li {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+    border: solid 1px #e8e8e8;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 15px;
+    cursor: pointer;
+    padding: 15px;
+    -webkit-transition: all 200ms ease;
+    -moz-transition: all 200ms ease;
+    -ms-transition: all 200ms ease;
+    -o-transition: all 200ms ease;
+    transition: all 200ms ease;
+    overflow: hidden
+}
+
+
+.single_product {
+    padding-top: 66px;
+    padding-bottom: 140px;
+    background-color: #e5e5e5;
+    margin-top: 0px;
+    padding: 17px
+}
+
+.image_selected {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% + 15px);
+    height: 525px;
+    -webkit-transform: translateX(-15px);
+    -moz-transform: translateX(-15px);
+    -ms-transform: translateX(-15px);
+    -o-transform: translateX(-15px);
+    transform: translateX(-15px);
+    border: solid 1px #e8e8e8;
+    box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 15px
+}
+
+
+
+ul {
+    list-style: none;
+    margin-bottom: 0px
+}
+
+.single_product {
+    padding-top: 16px;
+    padding-bottom: 140px
+}
+
+.image_list li {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+    border: solid 1px #e8e8e8;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+    cursor: pointer;
+    padding: 15px;
+    -webkit-transition: all 200ms ease;
+    -moz-transition: all 200ms ease;
+    -ms-transition: all 200ms ease;
+    -o-transition: all 200ms ease;
+    transition: all 200ms ease;
+    overflow: hidden
+}
+
+.image_list li:last-child {
+    margin-bottom: 0
+}
+
+.image_list li:hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.3)
+}
+
+.image_list li img {
+    max-width: 100%
+}
+
+
+.image_selected {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: calc(100% + 15px);
+    height: 525px;
+    -webkit-transform: translateX(-15px);
+    -moz-transform: translateX(-15px);
+    -ms-transform: translateX(-15px);
+    -o-transform: translateX(-15px);
+    transform: translateX(-15px);
+    border: solid 1px #e8e8e8;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 15px
+}
+
+.image_selected img {
+    max-width: 100%
+}
+
+
     </style>
 
 @endsection
@@ -226,12 +379,22 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript" src="https://cdn.rawgit.com/igorlino/elevatezoom-plus/1.1.6/src/jquery.ez-plus.js"></script>
 
 
     <script type="text/javascript">
         $('document').ready(function(){
+            $(".other_images").click(function(param) {
+                // var image = $(this).html();
+                  $('#xzoom').attr('src',$(this).attr('data-image'));
+                  $('#xzoom').attr('data-zoom-image',$(this).attr('data-image'));
+                  
+                //   var img = document.createElement($(this).html());
+
+                //   console.log(img);
+            });
             $.ajax({
                        url: '{!! route('cod.packaging.requests.get_cart_count') !!}',
                        method: 'POST',
@@ -263,6 +426,8 @@
                     .done(function(data) {
                         if (data.status == 0) {
                             $('#charges').val(data.charges);
+                            $('#charges_show').html(data.charges);
+                            
                         }
                                       
                     });
@@ -272,6 +437,19 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
+            });
+
+            $('.quantity').TouchSpin({
+                min: 1,
+                max: 10000,
+                buttondown_class: 'btn btn-primary rounded-left',
+                buttonup_class: 'btn btn-primary rounded-right',
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            }).bind('input change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
             });
 
             $('#material_request_cart_form').validate({
@@ -317,12 +495,12 @@
                 }
             });
 
-            $("#xzoom").ezPlus({
-    zoomType: 'inner',
-    cursor: 'crosshair',
+//             $("#xzoom").ezPlus({
+//     zoomType: 'inner',
+//     cursor: 'crosshair',
     
     
-});
+// });
         });
     </script>
 
