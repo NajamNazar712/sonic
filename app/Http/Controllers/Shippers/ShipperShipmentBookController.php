@@ -362,6 +362,9 @@ class ShipperShipmentBookController extends Controller
                 else
                 {$payment_modes = PaymentMode::all();}
             }
+            else{
+                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+            }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
@@ -2217,6 +2220,9 @@ class ShipperShipmentBookController extends Controller
                 else
                 {$payment_modes = PaymentMode::all();}
             }
+            else{
+                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+            }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
@@ -3948,6 +3954,9 @@ class ShipperShipmentBookController extends Controller
                 else
                 {$payment_modes = PaymentMode::all();}
             }
+            else{
+                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+            }
 
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
@@ -4728,6 +4737,9 @@ class ShipperShipmentBookController extends Controller
                         {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
                         else
                         {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
+                    }
+                    else{
+                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
                     }
                 $city_name = array();
                 foreach ($cities as $city){
