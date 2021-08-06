@@ -33,6 +33,7 @@
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -62,8 +63,45 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="excel_upload_modal" data-backdrop="static" role="dialog" aria-labelledby="excel_upload_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="excel_upload_modal_title">Upload Excel</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.confirmed.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                </div>
+                            </div>
 
+                            <div class="col">
+                                <div class="form-group text-left">
+                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                </div>
+                            </div>
 
+                            <div class="col ml-auto">
+                                <div class="form-group text-right">
+                                    <a href="{{ asset('file/Trax Revert Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -116,18 +154,28 @@
             width: auto !important;
             text-align: left;
         }
+        .selectize-control {
+            width: 300px !important;
+        }
+        .goldClass{
+            background-color: gold;
+        }
     </style>
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        var selected_rows = [];
+        var restricted_rows = [];
         $(document).ready(function () {
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -203,19 +251,193 @@
                     return {body: body, header: head};
                 }
             } );
+            var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
                     {
+                        text: 'Revert',
+                        className: 'btn btn-primary revert',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows !== '' && restricted_rows.length == 0){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Are you sure, you want to revert this Shipment?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
+
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                shipment_remarks[id] = remark;
+                                            }
+                                        });
+                                        //alert(selected_rows);
+                                    $.ajax({
+                                        url:"{{route('admin.return.confirmed.revert.status')}}",
+                                        method:'POST',
+                                        data:{
+                                            'shipment_ids':selected_rows,
+                                            '_token':'{{ csrf_token() }}',
+                                            'action': 'revert',
+                                            'remark': shipment_remarks
+                                        }
+                                    })
+                                    .done(function (data) {
+                                        UnblockPagePermanently();
+                                        table.draw(false);
+
+                                        if (data.status == 0) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                            table.button('.revert').disable();
+                                    });
+                                    }
+                            });
+
+                            }else{
+                                var error = "Not selected any shipments!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    },
+                    {
                         extend: 'excel',
                         title: 'Return Confirmed',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                    },{
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                    id = parseInt(row.id());
+
+                                    var assigned_agent_id = row.data().assigned_agent_id;
+                                    var tat = row.data().confirmation_on;
+
+                                    hub_id = $(row.node()).data('hub');
+
+                                    var allow = false;
+
+                                    if(hub_ids.length == 0) {
+                                        hub_ids.push(hub_id);
+
+                                        allow = true;
+                                    }
+                                    else if(hub_ids[0] == hub_id) {
+                                        allow = true;
+                                    }
+
+                                    if (allow) {
+                                        row.select();
+
+                                        var index = $.inArray(id, selected_rows);
+
+                                        if (index === -1) {
+                                            selected_rows.push(id);
+                                        }
+
+                                        if(restricted_rows.length == 0)
+                                        {
+                                            table.button('.revert').enable();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    var restricted_index = $.inArray(id,restricted_rows);
+
+                                    if(restricted_index !== -1)
+                                    {
+                                        restricted_rows.splice(restricted_index,1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.revert').disable();
+
+                                        hub_ids.splice(index, 1);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    {
+                        title: 'Upload',
+                        className: 'btn btn-primary excel-upload',
+                        text: '<i class="la la-file-excel-o"></i> Upload',
+                        action : function(e) {
+                            $('#excel_upload_modal').modal('show');
+                        }
                     },
                     'reset'
                 ],
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
+                lengthMenu: [[5,50, 100, 500, 1000, -1], [5,50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
@@ -234,6 +456,7 @@
                 rowId: 'shId',
                 order: [[19, 'desc']],
                 columns: [
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -259,7 +482,11 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.shId, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
+                   
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -274,7 +501,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.remarks') || $(header).is('.retuen_city')) {
+                        if ($(header).is('.serial_number')|| $(header).is('.select-checkbox') || $(header).is('.action') || $(header).is('.remarks') || $(header).is('.retuen_city')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -345,8 +572,92 @@
                     this.api().table().columns.adjust();
                 }
             });
+            var hub_ids = [];
+            $('#return_status_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-            @if (session('role_id') == 1 || in_array(109, session('permissions')))
+					swal({
+						title: 'Please Wait!',
+						text: 'Transaction(s) are being updated!',
+						icon: 'info',
+						buttons: false,
+						closeOnClickOutside: false,
+						closeOnEsc: false
+					});
+
+					form.submit();
+				}
+			});
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var con_id = parseInt($(this).parent('tr').attr('tracking_number'));
+                var hub_id = $(this).parents('tr').data('hub');
+                
+                    if(hub_ids.length == 0){
+                        hub_ids.push(hub_id);
+                        var index = $.inArray(id, selected_rows);
+
+                        if (index === -1) {
+                            selected_rows.push(id);
+                        }
+                        else {
+                            selected_rows.splice(index, 1);
+                        }
+
+                        if (selected_rows.length > 0) {
+                            if(restricted_rows.length == 0)
+                            {
+                                table.button('.revert').enable();
+                            }
+                            else{
+                                table.button('.revert').disable();
+                            }
+                        }
+                        else {
+                            table.button('.revert').disable();
+                        }
+                    }else{
+                        if(hub_ids[0] == hub_id){
+                            var index = $.inArray(id, selected_rows);
+
+                            if (index === -1) {
+                                selected_rows.push(id);
+                            }
+                            else {
+                                selected_rows.splice(index, 1);
+                            }
+
+                            if (selected_rows.length > 0) {
+                                if(restricted_rows.length == 0)
+                                {
+                                    table.button('.revert').enable();
+                                }
+                                else{
+                                    table.button('.revert').disable();
+                                }
+                            }
+                            else {
+                                table.button('.revert').disable();
+                            }
+                        }else{
+                            var error = "Selected hubs should be the same!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            return false;
+                        }
+
+                    }
+               
+
+            });
                 $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                     var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -405,8 +716,8 @@
                         });
                     }
                 });
-            @endif
 
+                
 
             //Selectize
             var select = $('#tracking_number').selectize({
