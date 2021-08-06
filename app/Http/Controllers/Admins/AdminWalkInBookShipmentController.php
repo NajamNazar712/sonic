@@ -130,7 +130,7 @@ class AdminWalkInBookShipmentController extends Controller
 
 
         $shipment->save();
-
+        
         $shipment_id = $shipment->id;
 
         $shipment_info = new ShipmentDetail();
@@ -1626,8 +1626,11 @@ class AdminWalkInBookShipmentController extends Controller
                   $invoice_number = $user_id . str_pad($walkin_ftl_invoice->id, 6, '0', STR_PAD_LEFT);
                   WalkinFtlInvoice::where('id',$walkin_ftl_invoice->id)->update(['invoice_number' => $invoice_number]);
 
-                  
 
+                  $ftl_shipment = Shipment::find($shipment_id);
+                  $calc_total = ((($ftl_shipment->ftl->freight_charges/$ftl_shipment->ftl->weight)*$ftl_shipment->actual_weight));
+                $ftl_shipment->weight_charges = $calc_total;
+                $ftl_shipment->save();
                 if ($request->filled('book_and_print')) {
                     $print = $shipment_id;
                 }
