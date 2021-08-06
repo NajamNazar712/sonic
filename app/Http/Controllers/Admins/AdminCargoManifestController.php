@@ -1043,11 +1043,11 @@ class AdminCargoManifestController extends Controller
                 $shipment = Shipment::find($shipment_id);
                 if($shipment->shipper_status_id == 2){
                     $bag_type = 1;
-                    $destination = $shipment->pickup_address->city->hub_id;
+                    $destination = $shipment->consignee_city->hub_id;
                 }
                 else{
                     $bag_type = 2;
-                    $destination = $shipment->consignee_city->hub_id;
+                    $destination = $shipment->pickup_address->city->hub_id;
                 }
 
                 $bag = new CargoManifestBag();
@@ -1129,7 +1129,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
 
-            return redirect()->route('admin.master_cargo.bag.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Numbers: ' . $bag_numbers]);
+            return redirect()->route('admin.manifest.bag.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Numbers: ' . $bag_numbers]);
         }
         else {
             return back()->withErrors('All Shipments have already been added to another Bag!');
