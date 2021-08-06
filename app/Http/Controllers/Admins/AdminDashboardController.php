@@ -1755,7 +1755,7 @@ class AdminDashboardController extends Controller
             $all_users['results'][1]['children'] = $users;
             $all_users['pagination']['more'] = true;
 
-            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
             return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'cities' => $cities]);
         }
         return redirect()->back()->with('error','User rates not found!');
@@ -1823,7 +1823,7 @@ class AdminDashboardController extends Controller
 
             $sales_commission = SalesCommission::where('shipper_id', $id)->first();
 
-            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $overnight_origins = [];
             $overland_origins = [];
@@ -2018,7 +2018,7 @@ class AdminDashboardController extends Controller
 
             $existing = 0;
 
-            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = RateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = RateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
@@ -2166,7 +2166,7 @@ class AdminDashboardController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
-            $cities = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             $rate_origin_hubs = PendingRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
             $rate_destination_hubs = PendingRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');

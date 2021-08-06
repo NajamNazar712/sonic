@@ -5802,4 +5802,56 @@ class ShipperShipmentBookController extends Controller
 
 
     }
+
+    static public function check_return_destination($pickup_address_id, $shipping_mode_id, $user_id){
+
+        $pickup_city_id = UserShippingInfo::find($pickup_address_id)->city_id;
+
+
+        if($pickup_city_id){
+            $destination_city_id = $pickup_city_id;
+            $user = User::find($user_id);
+
+            $destination_city_allowed = TRUE;
+
+            if($user->account_type_id == 1){
+                $rate_destination = RateDestinationHub::where('user_id', $user_id);
+                if($rate_destination->exists()){
+                    $destination = RateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
+                    if(!$destination->exists()){
+                        $destination_city_allowed = FALSE;
+                    }
+                }
+
+            }
+            else{
+                if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2 || $user->corporate_rate_type_id == NULL){
+                    $rate_destination = CorporateRateDestinationHub::where('user_id', $user_id);
+                    if($rate_destination->exists()){
+                        $destination = CorporateRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
+                        if(!$destination->exists()){
+                            $destination_city_allowed = FALSE;
+                        }
+                    }
+                }
+                else if($user->corporate_rate_type_id == 3){
+                    $rate_destination = CorporateDefaultRateDestinationHub::where('user_id', $user_id);
+                    if($rate_destination->exists()){
+                        $destination = CorporateDefaultRateDestinationHub::where(['user_id' => $user_id, 'city_id' => $destination_city_id, 'shipping_mode_id' => $shipping_mode_id]);
+                        if(!$destination->exists()){
+                            $destination_city_allowed = FALSE;
+                        }
+                    }
+                }
+
+
+            }
+            return $destination_city_allowed;
+        }
+        else{
+            return FALSE;
+        }
+
+
+    }
 }
