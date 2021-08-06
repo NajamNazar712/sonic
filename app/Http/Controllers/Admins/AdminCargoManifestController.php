@@ -2739,6 +2739,26 @@ class AdminCargoManifestController extends Controller
                 $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
             }
         }
+
+        foreach ($bag_ids as $bag_id)
+        {
+            $bag = CargoManifestBag::find($bag_id);
+            $manifest_id = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first()->cargo_manifest_id;
+            $manifest = CargoManifest::find($manifest_id);
+            $manifest->received_bags = ManifestBag::where('cargo_manifest_id',$manifest_id)->where('status',1)->count();
+            $short_received_bags = ManifestBag::where('cargo_manifest_id',$manifest_id)->where('status',0)->count();
+
+            if($short_received_bags > 0)
+            {
+                $manifest->short_received_bags = $short_received_bags;
+            }
+            else{
+                $manifest->short_received_bags = 0;
+                $manifest->status_id = 2;
+            }
+
+            $manifest->update();
+        }
         return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
     }
 }
