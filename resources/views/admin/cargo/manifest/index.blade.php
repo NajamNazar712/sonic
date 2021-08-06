@@ -160,6 +160,14 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style>
+        .red{
+            background-color: orangered;
+        }
+        .green{
+            background-color: limegreen;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -203,13 +211,13 @@
                                 row.push(index + 1);
                                 row.push(values.seal_number);
                                 row.push(values.bag_type);
-                                row.push(values.bag_shipments);
-                                row.push(values.short_received_shipments);
+                                row.push(values.shipments);
+                                row.push(values.short_shipments);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.actual_weight);
                                 row.push(values.shipping_mode);
-                                row.push(values.manifest_id);
+                                row.push(values.manifest);
                                 row.push(values.status);
                                 row.push(values.manifest_created_at);
                                 row.push(values.transitted_by);
@@ -516,7 +524,7 @@
 
             });
             var route = '{!! route('admin.tracking.index') !!}';
-            $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+            $('#datatable tbody').on('click', 'tr td.bag_shipments button', function() {
                 var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
                 $('#shipments .modal-body').html('');
