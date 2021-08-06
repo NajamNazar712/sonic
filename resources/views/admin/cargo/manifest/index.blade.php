@@ -203,7 +203,7 @@
                                 row.push(index + 1);
                                 row.push(values.seal_number);
                                 row.push(values.bag_type);
-                                row.push(values.shipments);
+                                row.push(values.bag_shipments);
                                 row.push(values.short_received_shipments);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -264,7 +264,7 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'seal_number', name: 'seal_number', class: 'align-middle seal_number'},
                     {data: 'bag_type', name: 'cargo_manifest_bags.type', class: 'align-middle cargo_manifest_bags.type'},
-                    {data: 'shipments', name: 'shipments', class: 'align-middle shipments'},
+                    {data: 'bag_shipments', name: 'bag_shipments', class: 'align-middle bag_shipments'},
                     {data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle short_received_shipments'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
