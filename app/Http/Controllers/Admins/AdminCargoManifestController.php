@@ -1455,7 +1455,7 @@ class AdminCargoManifestController extends Controller
                     else if($bag->status_id == 5)
                     {
                         $bag->status_id = 6;
-                        foreach($bag->shipments as $shipment)
+                        foreach($bag->shipment as $shipment)
                         {
                             ShipmentsJourneyController::add($shipment->shipment_id,49,49,null,null,null,Auth::id(),$bag->seal_number);
                             Shipment::find($shipment->shipment_id)->update(['shipper_status_id'=>49,'consignee_status_id'=>49]);
@@ -2220,7 +2220,7 @@ class AdminCargoManifestController extends Controller
                             $bag->junction_mapping_id = null;
                             $bag->short_received_shipments = $bag->shipments->count();
                             $bag->received_shipments = 0;
-                            foreach($bag->shipments as $shipment)
+                            foreach($bag->shipment as $shipment)
                             {
                                 ShipmentsJourneyController::add($shipment->shipment_id,11,11,null,null,null,Auth::id(),$bag->seal_number);
                                 Shipment::find($shipment->shipment_id)->update(['shipper_status_id'=>11,'consignee_status_id'=>11]);
@@ -2738,6 +2738,26 @@ class AdminCargoManifestController extends Controller
             else{
                 $all_bag_ids = $all_bag_ids . ', ' .$bag->seal_number;
             }
+        }
+
+        foreach ($bag_ids as $bag_id)
+        {
+            $bag = CargoManifestBag::find($bag_id);
+            $manifest_id = ManifestBag::where('cargo_manifest_bag_id',$bag->id)->latest()->first()->cargo_manifest_id;
+            $manifest = CargoManifest::find($manifest_id);
+            $manifest->received_bags = ManifestBag::where('cargo_manifest_id',$manifest_id)->where('status',1)->count();
+            $short_received_bags = ManifestBag::where('cargo_manifest_id',$manifest_id)->where('status',0)->count();
+
+            if($short_received_bags > 0)
+            {
+                $manifest->short_received_bags = $short_received_bags;
+            }
+            else{
+                $manifest->short_received_bags = 0;
+                $manifest->status_id = 2;
+            }
+
+            $manifest->update();
         }
         return redirect()->back()->with('success', 'Selected Shipments of Bag Number(s)#' . $all_bag_ids . ' has been Received');
     }
