@@ -17,6 +17,19 @@
                                         <h1 class="mb-1 text-center">
                                             {{$category_name}}
                                         </h1>
+                                        <div class="col-6 align-middle text-center search_style">
+                                            <form id="search_package_type_from">
+                                                <div class="form-group mb-0">
+                                                    <select name="search_package_type" id="search_package_type" class="form-control select2">
+                                                        @if(isset($search_packaging_types))
+                                                        @foreach($search_packaging_types as $search_packaging_type)
+                                                            <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
                                         <div class="row text-center products_row">
 
                                             @foreach($packaging_types as $index => $packaging_type)
@@ -112,6 +125,9 @@
             padding-bottom: 15px;
             border-radius: 20px;
         }
+        .search_style{
+            margin:0 auto;
+        }
     </style>
 
 @endsection
@@ -131,6 +147,15 @@
 
     <script type="text/javascript">
         $('document').ready(function(){
+            $('#search_package_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Search Sonic',
+                dropdownParent:$('#search_package_type_from')
+            }).bind('select2:select',function () {
+                var url = $(this).val();
+                window.location.href = url;
+            });
+
             $.ajax({
                        url: '{!! route('cod.packaging.requests.get_cart_count') !!}',
                        method: 'POST',

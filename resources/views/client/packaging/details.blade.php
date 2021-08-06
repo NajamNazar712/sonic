@@ -16,6 +16,10 @@
                                         @include('client.inc.messages')
                                     </div>
                                     <div class="col">
+                                        <div class="row">
+                                            
+                                        </div>
+
                                         <h1 class="mb-1 ">
                                             @if ($product->category==1)
                                                 Packaging Materials
@@ -23,6 +27,19 @@
                                                 Stationary Items
                                             @endif
                                         </h1>
+                                        <div class="col-6 align-middle text-center search_style">
+                                            <form id="search_package_type_from">
+                                                <div class="form-group mb-0">
+                                                    <select name="search_package_type" id="search_package_type" class="form-control select2">
+                                                        @if(isset($search_packaging_types))
+                                                        @foreach($search_packaging_types as $search_packaging_type)
+                                                            <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
                                         <div class="row products_row">
                                             <div class="container-fluid" style=" background-color: #fff; padding: 11px;">
                                                 <form action="{{route('cod.packaging.requests.add_to_cart')}}" id="add_to_cart_form" method="post">
@@ -51,10 +68,15 @@
                                                                 
                                                                 
                                                                 <div class="col-4 size_product">
-                                                                    <div class="form-group">
-                                                                        @foreach ($product->sizes as $size)
-                                                                            <button class="btn btn-primary btn-sm">{{$size->size}}</button>
-                                                                        @endforeach
+                                                                        
+                                                                        <div class="radio-toolbar">
+                                                                            @foreach ($product->sizes as $size)
+                                                                                <input type="radio" id="size_btn_{{$size->id}}" name="product_size" value="{{$size->id}}" checked>
+                                                                                <label for="size_btn_{{$size->id}}">{{$size->size}}</label>
+                                                                            @endforeach
+                                                                           
+                                                                        </div>
+                                                                        <p>&nbsp;</p>
                                                                     {{-- <select name="product_size" class="select2" id="product_size" data-rule-required="true" data-msg-required="Product Size is required">
                                                                         @foreach ($product->sizes as $size)
 
@@ -62,11 +84,10 @@
                                                                             
                                                                         @endforeach
                                                                     </select> --}}
-                                                                    </div>
                                                                 </div>
                                                                 <div class="col-4 size_product">
                                                                     <div class="form-group">
-                                                                     <h4>Price In PKR: <span id="charges_show"></span></h4>
+                                                                     <h4>Price In PKR: <span id="charges_show">{{$size_price}}</span></h4>
                                                                      <input type="hidden" class="form-control text-center " id="charges" name="charges" readonly data-rule-min="1"  data-rule-required="true" data-msg-required="Charges is required">
 
                                                                     </div>
@@ -364,6 +385,46 @@ ul {
     max-width: 100%
 }
 
+/* radio button  */
+
+
+.radio-toolbar {
+  margin: 10px;
+}
+
+.radio-toolbar input[type="radio"] {
+  opacity: 0;
+  position: fixed;
+  width: 0;
+}
+
+.radio-toolbar label {
+    display: inline-block;
+    background-color: #fefefe;
+    padding: 3px 15px;
+    font-family: sans-serif, Arial;
+    font-size: 16px;
+    border: 1px solid #444;
+    border-radius: 4px;
+}
+
+.radio-toolbar label:hover {
+  background-color: #64a0d2;
+}
+
+.radio-toolbar input[type="radio"]:focus + label {
+    border: 2px dashed #444;
+}
+
+.radio-toolbar input[type="radio"]:checked + label {
+    background-color: #5587b4 ;
+    border-color: #3c5a78;
+}
+
+.search_style{
+    margin:0 auto;
+}
+
 
     </style>
 
@@ -386,6 +447,17 @@ ul {
 
     <script type="text/javascript">
         $('document').ready(function(){
+
+            $('#search_package_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Search Sonic',
+                dropdownParent:$('#search_package_type_from')
+            }).bind('select2:select',function () {
+                var url = $(this).val();
+                window.location.href = url;
+            });
+
+
             $(".other_images").click(function(param) {
                 // var image = $(this).html();
                   $('#xzoom').attr('src',$(this).attr('data-image'));
@@ -410,12 +482,33 @@ ul {
                    });
             var sizes = [];
            
-            $('#product_size').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Size*'
-            }).bind('change', function() {
+            // $('#product_size').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '100%',
+            //     placeholder: 'Select Size*'
+            // }).bind('change', function() {
 
+            //     var size_id = $(this).val();
+            //     $.ajax({
+            //         url: '{!! route('cod.packaging.requests.get_charges') !!}',
+            //         method: 'POST',
+            //         data: {
+            //             '_token': '{{ csrf_token() }}',
+            //             'size_id': size_id
+            //         }})
+            //         .done(function(data) {
+            //             if (data.status == 0) {
+            //                 $('#charges').val(data.charges);
+            //                 $('#charges_show').html(data.charges);
+                            
+            //             }
+                                      
+            //         });
+            // });
+
+            $('input:radio[name=product_size]').change(function() {
                 var size_id = $(this).val();
+                $('#charges_show').html(" ");
+
                 $.ajax({
                     url: '{!! route('cod.packaging.requests.get_charges') !!}',
                     method: 'POST',
@@ -427,6 +520,7 @@ ul {
                         if (data.status == 0) {
                             $('#charges').val(data.charges);
                             $('#charges_show').html(data.charges);
+                            
                             
                         }
                                       
