@@ -1140,22 +1140,22 @@ class ShipperDashboardController extends Controller
 
                     if($index == 1){
                         foreach($origin as $origin_data){
-                            $overnight_origins[] = $origin_data->hub_id;
+                            $overnight_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($origin as $origin_data){
-                            $overland_origins[] = $origin_data->hub_id;
+                            $overland_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($origin as $origin_data){
-                            $detain_origins[] = $origin_data->hub_id;
+                            $detain_origins[] = $origin_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($origin as $origin_data){
-                            $sameday_origins[] = $origin_data->hub_id;
+                            $sameday_origins[] = $origin_data->city_id;
                         }
                     }
 
@@ -1170,22 +1170,22 @@ class ShipperDashboardController extends Controller
 
                     if($index == 1){
                         foreach($destination as $destination_data){
-                            $overnight_destinations[] = $destination_data->hub_id;
+                            $overnight_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 2){
                         foreach($destination as $destination_data){
-                            $overland_destinations[] = $destination_data->hub_id;
+                            $overland_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 3){
                         foreach($destination as $destination_data){
-                            $detain_destinations[] = $destination_data->hub_id;
+                            $detain_destinations[] = $destination_data->city_id;
                         }
                     }
                     else if($index == 4){
                         foreach($destination as $destination_data){
-                            $sameday_destinations[] = $destination_data->hub_id;
+                            $sameday_destinations[] = $destination_data->city_id;
                         }
                     }
 
@@ -1239,22 +1239,22 @@ class ShipperDashboardController extends Controller
 
                         if($index == 1){
                             foreach($origin as $origin_data){
-                                $overnight_origins[] = $origin_data->hub_id;
+                                $overnight_origins[] = $origin_data->city_id;
                             }
                         }
                         else if($index == 2){
                             foreach($origin as $origin_data){
-                                $overland_origins[] = $origin_data->hub_id;
+                                $overland_origins[] = $origin_data->city_id;
                             }
                         }
                         else if($index == 3){
                             foreach($origin as $origin_data){
-                                $detain_origins[] = $origin_data->hub_id;
+                                $detain_origins[] = $origin_data->city_id;
                             }
                         }
                         else if($index == 4){
                             foreach($origin as $origin_data){
-                                $sameday_origins[] = $origin_data->hub_id;
+                                $sameday_origins[] = $origin_data->city_id;
                             }
                         }
 
@@ -1269,22 +1269,22 @@ class ShipperDashboardController extends Controller
 
                         if($index == 1){
                             foreach($destination as $destination_data){
-                                $overnight_destinations[] = $destination_data->hub_id;
+                                $overnight_destinations[] = $destination_data->city_id;
                             }
                         }
                         else if($index == 2){
                             foreach($destination as $destination_data){
-                                $overland_destinations[] = $destination_data->hub_id;
+                                $overland_destinations[] = $destination_data->city_id;
                             }
                         }
                         else if($index == 3){
                             foreach($destination as $destination_data){
-                                $detain_destinations[] = $destination_data->hub_id;
+                                $detain_destinations[] = $destination_data->city_id;
                             }
                         }
                         else if($index == 4){
                             foreach($destination as $destination_data){
-                                $sameday_destinations[] = $destination_data->hub_id;
+                                $sameday_destinations[] = $destination_data->city_id;
                             }
                         }
 
@@ -1336,22 +1336,22 @@ class ShipperDashboardController extends Controller
 
                         if($index == 1){
                             foreach($origin as $origin_data){
-                                $overnight_origins[] = $origin_data->hub_id;
+                                $overnight_origins[] = $origin_data->city_id;
                             }
                         }
                         else if($index == 2){
                             foreach($origin as $origin_data){
-                                $overland_origins[] = $origin_data->hub_id;
+                                $overland_origins[] = $origin_data->city_id;
                             }
                         }
                         else if($index == 3){
                             foreach($origin as $origin_data){
-                                $detain_origins[] = $origin_data->hub_id;
+                                $detain_origins[] = $origin_data->city_id;
                             }
                         }
                         else if($index == 4){
                             foreach($origin as $origin_data){
-                                $sameday_origins[] = $origin_data->hub_id;
+                                $sameday_origins[] = $origin_data->city_id;
                             }
                         }
 
@@ -1366,22 +1366,22 @@ class ShipperDashboardController extends Controller
 
                         if($index == 1){
                             foreach($destination as $destination_data){
-                                $overnight_destinations[] = $destination_data->hub_id;
+                                $overnight_destinations[] = $destination_data->city_id;
                             }
                         }
                         else if($index == 2){
                             foreach($destination as $destination_data){
-                                $overland_destinations[] = $destination_data->hub_id;
+                                $overland_destinations[] = $destination_data->city_id;
                             }
                         }
                         else if($index == 3){
                             foreach($destination as $destination_data){
-                                $detain_destinations[] = $destination_data->hub_id;
+                                $detain_destinations[] = $destination_data->city_id;
                             }
                         }
                         else if($index == 4){
                             foreach($destination as $destination_data){
-                                $sameday_destinations[] = $destination_data->hub_id;
+                                $sameday_destinations[] = $destination_data->city_id;
                             }
                         }
 
