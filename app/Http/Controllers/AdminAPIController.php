@@ -2909,7 +2909,9 @@ class AdminAPIController extends Controller
     public function cargo_bags_validator(Request $request)
     {
         $bag_id = $request->bag_no;
-        $bags = CargoManifestBag::where('seal_number', $bag_id);
+        $bags = CargoManifestBag::where('seal_number', $bag_id)
+            ->whereIn('status_id',[2, 4, 6, 8, 9, 10]);
+
         if ($bags->exists()) {
             $bags = $bags->latest()->first();
             return response()->json(['status' => 0, 'bag_no' => $bags->seal_number, 'message' => "Valid Bag No."]);
