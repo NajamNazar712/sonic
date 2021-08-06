@@ -6945,18 +6945,22 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     public function cash_collection_upload_receipt(Request $request)
     {
         $delivery_note_id = $request->input('ccd_delivery_note_id');
-        if(count($request->shipment_ids) > 0){
-            if(count($request->images) > 0) {
-                foreach ($request->shipment_ids as $shipment_id) {
-                    if (array_key_exists($shipment_id, $request->images)) {
-                        $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
-                        if ($rider_delivery->exists()) {
-                            $rider_delivery = $rider_delivery->first();
-
-                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
-                            $rider_delivery->ccd_image = $picture_path;
-                            $rider_delivery->save();
+        if($request->has(('shipment_ids')) && is_array($request->images)){
+            if(count($request->shipment_ids) > 0){
+                if(count($request->images) > 0) {
+                    foreach ($request->shipment_ids as $shipment_id) {
+                        if (array_key_exists($shipment_id, $request->images)) {
+                            $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
+                            if ($rider_delivery->exists()) {
+                                $rider_delivery = $rider_delivery->first();
+                                if($rider_delivery->ccd_image != null){
+                                    Storage::disk('public')->delete('rider_delivery/' . $rider_delivery->ccd_image);
+                                }
+                                $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
+                                $rider_delivery->ccd_image = $picture_path;
+                                $rider_delivery->save();
+                            }
                         }
                     }
                 }

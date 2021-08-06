@@ -995,7 +995,7 @@ class Permission
             'incidence_monitoring.list' => 535,
             'incidence_monitoring.add' => 536,
             'incidence_monitoring.view_report' => 539,
-           
+            'settings.ccd_booking.index' => 558,
         ],
 
         'shipper' => [
