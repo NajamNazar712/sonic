@@ -22,7 +22,15 @@ use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\CorporateDefaultDiscountCharge;
+use App\Http\Models\CorporateDefaultRateStatus;
+use App\Http\Models\CorporateDefaultWeightCharge;
+use App\Http\Models\CorporateDiscountCharge;
+use App\Http\Models\CorporateMinChargeableWeight;
+use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateWeightCharge;
+use App\Http\Models\CorporateWeightChargeZoneWise;
+use App\Http\Models\WeightCharge;
 use App\Http\Models\ZoneClassCity;
 
 class FTLController extends Controller
@@ -150,7 +158,7 @@ class FTLController extends Controller
                         $walk_in_weight_charges = $walk_in_weight->chargeable_weight_local;
                     }
                 }
-                $charges = $walk_in_weight_charges * $request->weight ;
+                $result = $walk_in_weight_charges * $request->weight ;
             }else{
                 return back()->with(['error'=>'Weight Charges Not Set']);
             }
@@ -158,54 +166,422 @@ class FTLController extends Controller
         }
         else{
             $ftl_request->shipper_id = $request->shipper;
-           
-            if($origin_city->zone_id == $destination_city->zone_id){
-                $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
-                if($weight_charges->exists()){
-                    $weight_charges = $weight_charges->latest()->first();
-                    $charges = $weight_charges->local_or_6hr;
+            $weight = $request->weight;
+
+            // ftl weight charges code
+            $rate_type_id = User::find($request->shipper)->corporate_rate_type_id;
+
+            if($rate_type_id == 1 || $rate_type_id == 2 ){
+                $rate_status = CorporateRateStatus::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('status', 1);
+            }
+            else{
+                $rate_status = CorporateDefaultRateStatus::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('status', 1);
+            }
+            if ($rate_status->exists()) {
+                if( $rate_type_id != 3 ){
+                    $min_chargeable_weight = CorporateMinChargeableWeight::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1);
+
+                        if ($min_chargeable_weight->exists()) {
+                            $min_chargeable_weight = $min_chargeable_weight->first();
+
+                            $min_chargeable_weight = $min_chargeable_weight->min_chargeable_weight;
+
+                            if ($weight < $min_chargeable_weight) {
+                                $weight = $min_chargeable_weight;
+                            }
+                        }
+                    }
+
+
+                    if($rate_type_id == 1){
+                        $weight_charge = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    }
+                    else if($rate_type_id == 2){
+                        $weight_charge = CorporateWeightChargeZoneWise::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+                    }
+                    else{
+                        $weight_charge = CorporateDefaultWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
+
+                    }
+                    if ($weight_charge->exists()) {
+                        $weight_charge = $weight_charge->first();
+
+                        $base = FALSE;
+                        if ($rate_type_id != 3) {
+                            $base_weight_charge = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('id', '<', $weight_charge->id)->where('base', 1)->orderBy('id', 'DESC');
+
+                            if ($base_weight_charge->exists()) {
+                                $base_weight_charge = $base_weight_charge->first();
+
+                                $base = TRUE;
+                            }
+                        }
+
+                        $today = Carbon::today();
+                        if($rate_type_id == 3){
+                            $discount_charge = CorporateDefaultDiscountCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                        }
+                        else{
+                            $discount_charge = CorporateDiscountCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+                        }
+                        if ($discount_charge->exists()) {
+                            $discount_charge = $discount_charge->first();
+                            $discount = $discount_charge->weight;
+                        }
+                        else {
+                            $discount = 0;
+                        }
+
+                        $class = 0;
+                        $zone_wise = 1; // same zone
+                        if ($origin_city->id == $destination_city->id) {
+                            $type_of_charges = 0;
+                        }
+                        else {
+                            $type_of_charges = 1;
+                            if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
+                                $zone_class_city = ZoneClassCity::where('zone_id', $origin_city->zone_id)->where('city_id', $destination_city->zone_id);
+                                $zone_class_city = $zone_class_city->where('zone_classification_id', 2);
+                                if ($zone_class_city->exists()) {
+                                    $zone_class_city = $zone_class_city->first();
+                                    $class = $zone_class_city->class;
+                                }
+                            }
+                            else{
+                                if($destination_city->zone_id == $origin_city->zone_id){
+                                    $zone_wise = 1;
+                                }else{
+                                    $zone_wise = 2;
+                                }
+                            }
+                    }
+                    if ($weight_charge->weight_addition == 0 || $rate_type_id != 3) {
+                        if ($type_of_charges == 0) {
+                            if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
+                                $charges = $weight_charge->local_or_6hr;
+                            }
+                            else{
+                                $charges = $weight_charge->local;
+                            }
+                        }else{
+                            if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
+                                if ($class == 1) {
+                                    if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                        $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                    } else {
+                                        $charges = intval($weight_charge->national_charges_class_1);
+                                    }
+                                } else if ($class == 2) {
+                                    if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                        $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                    } else {
+                                        $charges = intval($weight_charge->national_charges_class_2);
+                                    }
+                                } else if ($class == 3) {
+                                    if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                        $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                    } else {
+                                        $charges = intval($weight_charge->national_charges_class_3);
+                                    }
+                                } else {
+                                    $charges = $weight_charge->national_charges_class_0;
+                                }
+                            }else{
+                                if($zone_wise == 1){
+                                    if (strpos($weight_charge->same_zone, '%') !== FALSE) {
+                                        $charges = ((floatval(str_replace('%', '', $weight_charge->same_zone)) / 100) * $weight_charge->local) + $weight_charge->local;
+                                    } else {
+                                        $charges = intval($weight_charge->same_zone);
+                                    }
+                                }else{
+                                    if (strpos($weight_charge->different_zone, '%') !== FALSE) {
+                                        $charges = ((floatval(str_replace('%', '', $weight_charge->different_zone)) / 100) * $weight_charge->local) + $weight_charge->local;
+                                    } else {
+                                        $charges = intval($weight_charge->different_zone);
+                                    }
+                                }
+                            }
+                        }
+                        if ($rate_type_id != 3) {
+                            if ($base) {
+                                $weight_difference = $weight - $base_weight_charge->range_down;
+                                if ($weight_difference > 0) {
+                                    $charges = $charges * (ROUND($weight_difference, 0));
+                                }
+                                else {
+                                    $charges = 0;
+                                }
+
+                                if ($type_of_charges == 0) {
+                                    if($rate_type_id == null || $rate_type_id == 1){
+                                        $charges += $base_weight_charge->local_or_6hr;
+                                    }
+                                    else{
+                                        $charges += $weight_charge->local;
+                                    }
+                                } else {
+                                    if($rate_type_id == null || $rate_type_id == 1 || $rate_type_id == 3){
+                                        if ($class == 1) {
+                                            if (strpos($base_weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_1)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
+                                            } else {
+                                                $charges += intval($base_weight_charge->national_charges_class_1);
+                                            }
+                                        } else if ($class == 2) {
+                                            if (strpos($base_weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_2)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
+                                            } else {
+                                                $charges += intval($base_weight_charge->national_charges_class_2);
+                                            }
+                                        } else if ($class == 3) {
+                                            if (strpos($base_weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $base_weight_charge->national_charges_class_3)) / 100) * $base_weight_charge->national_charges_class_0) + $base_weight_charge->national_charges_class_0;
+                                            } else {
+                                                $charges += intval($base_weight_charge->national_charges_class_3);
+                                            }
+                                        } else {
+                                            $charges += $base_weight_charge->national_charges_class_0;
+                                        }
+                                    }
+                                    else{
+                                        if($zone_wise == 1){
+                                            if (strpos($base_weight_charge->same_zone, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $base_weight_charge->same_zone)) / 100) * $base_weight_charge->local) + $base_weight_charge->local;
+                                            } else {
+                                                $charges += intval($base_weight_charge->same_zone);
+                                            }
+                                        }
+                                        else{
+                                            if (strpos($base_weight_charge->different_zone, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $base_weight_charge->different_zone)) / 100) * $base_weight_charge->local) + $base_weight_charge->local;
+                                            } else {
+                                                $charges += intval($base_weight_charge->different_zone);
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }   
+                            else {
+                                $charges = $charges * ROUND($weight, 0);
+                            }
+                        }
+                        if (strpos($discount, '%') !== FALSE) {
+                            $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                        }
+                        else {
+                            $discount = floatval($discount);
+                        }
+
+                        
+
+                        if ($charges < $discount) {
+                            
+                            $result = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                        }
+                        else {
+                            $result = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                        }
+
+
+                    }else {
+                        $multiplier = (intval($weight - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+                        if ($type_of_charges == 0) {
+                            $charges = ($weight_charge->local_or_6hr * $multiplier);
+                        }
+                        else{
+                            if ($class == 1) {
+                                if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                    $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                }
+                                else {
+                                    $charges = intval($weight_charge->national_charges_class_1) * $multiplier;
+                                }
+                            }
+                            else if ($class == 2) {
+                                if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                    $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                }
+                                else {
+                                    $charges = intval($weight_charge->national_charges_class_2) * $multiplier;
+                                }
+                            }
+                            else if ($class == 3) {
+                                if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                    $charges = (((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                }
+                                else {
+                                    $charges = intval($weight_charge->national_charges_class_3) * $multiplier;
+                                }
+                            }
+                            else {
+                                $charges = ($weight_charge->national_charges_class_0 * $multiplier);
+                            }
+                        }
+                        
+                        $previous = TRUE;
+                        while ($previous) {
+                            if($rate_type_id == 3){
+                                $weight_charge = CorporateDefaultWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');
+                            }
+                            else{
+                                $weight_charge = WeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('id', '<', $weight_charge->id)->orderBy('id', 'desc');  
+                            }
+    
+                            if ($weight_charge->exists()) {
+                                $weight_charge = $weight_charge->first();
+    
+                                if ($weight_charge->weight_addition == 0) {
+                                    if ($type_of_charges == 0) {
+                                        $charges += $weight_charge->local_or_6hr;
+                                    }
+                                    else {
+                                        if ($class == 1) {
+                                            if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                            }
+                                            else {
+                                                $charges += intval($weight_charge->national_charges_class_1);
+                                            }
+                                        }
+                                        else if ($class == 2) {
+                                            if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                            }
+                                            else {
+                                                $charges += intval($weight_charge->national_charges_class_2);
+                                            }
+                                        }
+                                        else if ($class == 3) {
+                                            if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                                $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0;
+                                            }
+                                            else {
+                                                $charges += intval($weight_charge->national_charges_class_3);
+                                            }
+                                        }
+                                        else {
+                                            $charges += $weight_charge->national_charges_class_0;
+                                        }
+                                    }
+    
+                                    $previous = FALSE;
+                                }
+                                else {
+                                    $multiplier = (intval($weight_charge->range_down - $weight_charge->range_up) / $weight_charge->spkg) + 1;
+    
+                                    if ($type_of_charges == 0) {
+                                        $charges += ($weight_charge->local_or_6hr * $multiplier);
+                                    }
+                                    else {
+                                        if ($class == 1) {
+                                            if (strpos($weight_charge->national_charges_class_1, '%') !== FALSE) {
+                                                $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                            }
+                                            else {
+                                                $charges += intval($weight_charge->national_charges_class_1) * $multiplier;
+                                            }
+                                        }
+                                        else if ($class == 2) {
+                                            if (strpos($weight_charge->national_charges_class_2, '%') !== FALSE) {
+                                                $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                            }
+                                            else {
+                                                $charges += intval($weight_charge->national_charges_class_2) * $multiplier;
+                                            }
+                                        }
+                                        else if ($class == 3) {
+                                            if (strpos($weight_charge->national_charges_class_3, '%') !== FALSE) {
+                                                $charges += (((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) + $weight_charge->national_charges_class_0) * $multiplier;
+                                            }
+                                            else {
+                                                $charges += intval($weight_charge->national_charges_class_3) * $multiplier;
+                                            }
+                                        }
+                                        else {
+                                            $charges += ($weight_charge->national_charges_class_0 * $multiplier);
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                $previous = FALSE;
+                            }
+                        }
+                        if (strpos($discount, '%') !== FALSE) {
+                            $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                        }
+                        else {
+                            $discount = floatval($discount);
+                        }
+    
+                        if ($charges < $discount) {
+                            $result = ROUND($charges, 2, PHP_ROUND_HALF_DOWN);
+                        }
+                        else {
+                            $result = ROUND(($charges - $discount), 2, PHP_ROUND_HALF_DOWN);
+                        }
+    
+                    }    
+
                 }else{
                     return back()->with(['error'=>'Shipper Weight Charges Not Set']);
-                }   
-            }else{
-                $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
+                }
+        }
+        else {
+            return back()->with(['error'=>'Shipper Weight Charges Not Set']);
+        }
 
-                if($weight_charges->exists()){
-                    $weight_charges = $weight_charges->latest()->first();
-                    $zone_class_city = ZoneClassCity::where('zone_id', $destination_city->zone_id)->where('city_id', $destination_city->id);
-                    // ->where('zone_classification_id', 2)
-                        if ($zone_class_city->exists()) {
-                            $zone_class_city = $zone_class_city->first();
 
-                            $class = $zone_class_city->class;
-                            if ($class == 1) {
-                                if (strpos($weight_charges->national_charges_class_1, '%') !== FALSE) {
-                                    $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_1)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
-                                } else {
-                                    $charges = intval($weight_charges->national_charges_class_1);
-                                }
-                            } else if ($class == 2) {
-                                if (strpos($weight_charges->national_charges_class_2, '%') !== FALSE) {
-                                    $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_2)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
-                                } else {
-                                    $charges = intval($weight_charges->national_charges_class_2);
-                                }
-                            } else if ($class == 3) {
-                                if (strpos($weight_charges->national_charges_class_3, '%') !== FALSE) {
-                                    $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_3)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
-                                } else {
-                                    $charges = intval($weight_charges->national_charges_class_3);
-                                }
-                            } else {
-                                $charges = $weight_charges->national_charges_class_0;
-                            }
-                        }             
-                    $charges = $weight_charges->local_or_6hr;
-                } else{
-                    return back()->with(['error'=>'Shipper Weight Charges Not Set']);
-                } 
+
+
+            // if($origin_city->zone_id == $destination_city->zone_id){
+            //     $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
+            //     if($weight_charges->exists()){
+            //         $weight_charges = $weight_charges->latest()->first();
+            //         $charges = $weight_charges->local_or_6hr;
+            //     }else{
+            //         return back()->with(['error'=>'Shipper Weight Charges Not Set']);
+            //     }   
+            // }else{
+            //     $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
+
+            //     if($weight_charges->exists()){
+            //         $weight_charges = $weight_charges->latest()->first();
+            //         $zone_class_city = ZoneClassCity::where('zone_id', $destination_city->zone_id)->where('city_id', $destination_city->id);
+            //         // ->where('zone_classification_id', 2)
+            //             if ($zone_class_city->exists()) {
+            //                 $zone_class_city = $zone_class_city->first();
+
+            //                 $class = $zone_class_city->class;
+            //                 if ($class == 1) {
+            //                     if (strpos($weight_charges->national_charges_class_1, '%') !== FALSE) {
+            //                         $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_1)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
+            //                     } else {
+            //                         $charges = intval($weight_charges->national_charges_class_1);
+            //                     }
+            //                 } else if ($class == 2) {
+            //                     if (strpos($weight_charges->national_charges_class_2, '%') !== FALSE) {
+            //                         $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_2)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
+            //                     } else {
+            //                         $charges = intval($weight_charges->national_charges_class_2);
+            //                     }
+            //                 } else if ($class == 3) {
+            //                     if (strpos($weight_charges->national_charges_class_3, '%') !== FALSE) {
+            //                         $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_3)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
+            //                     } else {
+            //                         $charges = intval($weight_charges->national_charges_class_3);
+            //                     }
+            //                 } else {
+            //                     $charges = $weight_charges->national_charges_class_0;
+            //                 }
+            //             }             
+            //         $charges = $weight_charges->local_or_6hr;
+            //     } else{
+            //         return back()->with(['error'=>'Shipper Weight Charges Not Set']);
+            //     } 
                 
-            }
+            // }
         }
         $ftl_request->salesperson_id = $request->sale_person;
         $ftl_request->origin_id = $request->origin;
@@ -216,7 +592,7 @@ class FTLController extends Controller
         $ftl_request->date = $request->date_formatted;
         $ftl_request->updated_by = Auth::id();
         $ftl_request->updated_on = now();
-        $ftl_request->calculated_charges = $charges;
+        $ftl_request->calculated_charges = $result;
         $ftl_request->save();
         $this::FTLRequestStatusHistory($ftl_request->id,1,Auth::id());
         return back()->with(['success'=>'Request Generated Successfully']);
