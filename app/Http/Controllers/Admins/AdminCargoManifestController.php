@@ -1870,7 +1870,7 @@ class AdminCargoManifestController extends Controller
                 'class' => function ($bags) {
                     if ($bags->status_id == 7) {
                         return 'green';
-                    } else if ($bags->status_id == [5,8,9]) {
+                    } else if ($bags->status_id == 5 || $bags->status_id == 8 || $bags->status_id == 9) {
                         return 'red';
                     }
                 },
@@ -1975,6 +1975,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function update_seal_number(Request $request){
+
         $existing = CargoManifestBag::where('seal_number', $request->seal_number)->where('id', '!=', $request->id);
         if($existing->exists()){
             return ['status' => 0, 'error' => 'Seal Number must be unique!'];
@@ -1984,7 +1985,6 @@ class AdminCargoManifestController extends Controller
             $bag->seal_number = $request->seal_number;
             $bag->updated_by = Auth::id();
             $bag->save();
-
             return ['status' => 1, 'success' => 'Seal Number updated successfully!'];
         }
     }
@@ -2013,6 +2013,7 @@ class AdminCargoManifestController extends Controller
         }
     }
     public function vehicle_info(Request $request){
+
         if($request->manifest_id){
             $vehicle_data = array();
             $manifest = CargoManifest::find($request->manifest_id);
@@ -2020,14 +2021,12 @@ class AdminCargoManifestController extends Controller
                 if($manifest->vehicle_id != null){
                     $fleet = Fleet::find($manifest->vehicle_id);
                     $vehicle_data['vehicle_number'] = $fleet->reg_number;
-                    $driver = FleetDriver::find($fleet->driver_id);
-                    $vehicle_data['driver_phone_no'] = $driver->phone_no;
-                    $vehicle_data['driver_name'] = $driver->name;
-
+                    $vehicle_data['driver_phone_no'] = $fleet->driver->phone_no;
+                    $vehicle_data['driver_name'] = $fleet->driver->name;
                 }
                 else{
                     $vehicle_data['vehicle_number'] = $manifest->vehicle_number;
-                    $vehicle_data['driver_phone_no'] = $manifest->phone_no;
+                    $vehicle_data['driver_phone_no'] = $manifest->driver_phone;
                     $vehicle_data['driver_name'] = $manifest->driver_name;
                }
             }

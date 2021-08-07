@@ -92,7 +92,7 @@
                         <input type="hidden" name="bag_id" id="bag_id" value="">
                         <div class="row justify-content-center">
                             <div class="col-4 form-group">
-                                <input type="text" name="edit_seal_number" id="edit_seal_number" class="form-control edit_seal_number" placeholder="Seal Number*" data-tags-input-name="seal_number" data-rule-required="true" data-msg-required="Seal Number is required" min="6" max="12">
+                                <input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-msg-remote="Seal Number must be unique" id="seal_number">
                             </div>
                         </div>
                         <div class="form-group ml-1">
@@ -162,10 +162,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style>
         .red{
-            background-color: orangered;
+            background-color: #FFC0CB;
         }
         .green{
-            background-color: limegreen;
+            background-color: #8AEFA8;
         }
     </style>
 @endsection
@@ -189,6 +189,19 @@
                 },
                 "Invalid Seal Number"
             );
+
+            $('#edit_seal_number_form form input.seal_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#edit_seal_number_form form input.seal_number').on('change', function () {
+                var seal = this.value;
+                if (seal.length != 12 && seal.length != 13 && seal.length != 6) {
+                    this.value = '';
+                }
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -246,8 +259,6 @@
                     return {body: body, header: head};
                 }
             } );
-
-
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -390,12 +401,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('.edit_seal_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-            });
 
             $('body').on('click','button.edit_seal_number',function () {
                 var id = $(this).parents('tr').attr('id');
@@ -407,6 +412,7 @@
             });
 
 
+
             $('#edit_seal_number_form').validate({
                 ignore: [],
                 errorClass: 'danger',
@@ -415,7 +421,7 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 },
                 submitHandler: function (form) {
-                    var seal_number = $('#edit_seal_number').val();
+                    var seal_number = $('#seal_number').val();
                     var bag_id = $('#bag_id').val();
                     swal({
                         title: 'Are You Sure?',
@@ -507,7 +513,9 @@
             });
 
             $('#datatable tbody').on('click', 'tr td.vehicles button', function() {
-                var manifest_id = table.row($(this).parents('tr')).data().manifest_id;
+
+                var manifest_id = table.row($(this).parents('tr')).data().manifest;
+
                 if(manifest_id){
                     $('#vehicle_info .modal-body').html('');
 
