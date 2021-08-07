@@ -39,8 +39,17 @@ class ProcessOTPSMS implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->sms->status < 2) {
-            $this->telenor($this->sms);
+        try {
+            if ($this->sms->status < 2) {
+                $this->telenor($this->sms);
+            }
+        }
+        catch(Exception $exception) {
+            $to = ['muhammad.yousuf@trax.pk'];
+            $subject = '[Error] SMS API';
+            $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
+
+            $mail = Mail::to($to)->send(new Notifications($subject, $body));
         }
     }
 
@@ -217,7 +226,7 @@ class ProcessOTPSMS implements ShouldQueue
                         'to' => $sms->to,
                         'text' => $sms->body,
                         'mask' => 'TRAX',
-                        'transaction_message' => TRUE
+                        'transaction_message' => 'true'
                     ]
                 ]);
 

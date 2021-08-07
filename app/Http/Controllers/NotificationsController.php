@@ -78,6 +78,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -7903,6 +7904,91 @@ class NotificationsController extends Controller
                     $subject = 'Inactive Rider For 2 Days or More ';
                     $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk','fabiha.shahid@trax.pk'];
                     self::email($subject, $body_updated, $to);
+                } else if ($id == 141) {
+                    $retail_done_payment_report = RetailDonePaymentsReport::get();
+                    if ($retail_done_payment_report) {
+                        $date = Carbon::today()->format('Y-m-d');
+                        $subject = $notification->subject;
+                        $body = $notification->body;
+                        if (strpos($subject, '[date]') !== FALSE) {
+                            $subject = str_replace('[date]', $date, $subject);
+                        }
+
+                        if (strpos($body, '[date]') !== FALSE) {
+                            $body = str_replace('[date]', $date, $body);
+                        }
+
+                        $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                        if (strpos($subject, '[link]') !== FALSE) {
+                            $subject = str_replace('[link]', $link, $subject);
+                        }
+
+                        if (strpos($body, '[link]') !== FALSE) {
+                            $body = str_replace('[link]', $link, $body);
+                        }
+                        $summary_html = '<div style="margin-bottom: 100px;"><table style="width:100%;">';
+                        $summary_html .= '<thead><tr>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Shippers</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total Amount</th>
+                                           </tr></thead><tbody>';
+                        $shippers = array();
+                        $html = '<table style="width:100%;">';
+                        $html .= '<thead><tr>
+                                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">S No.</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Payment ID</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">IBAN Number</th>
+                                           <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Amount</th>
+                                           </tr></thead><tbody>';
+                        $total_amount = 0;
+                        $serial = 1;
+                        foreach ($retail_done_payment_report as $retail_done_payment) {
+                            if (!in_array($retail_done_payment->shipper_id, $shippers)) {
+                                $shippers[$retail_done_payment->shipper_id] = $retail_done_payment->shipper_id;
+                            }
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . str_pad($retail_done_payment->payment_id, 6, '0', STR_PAD_LEFT) . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $retail_done_payment->shipper_name . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $retail_done_payment->iban_number . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($retail_done_payment->amount) . '</td>';
+                            $html .= '</tr>';
+                            $total_amount = $total_amount + $retail_done_payment->amount;
+                            $serial++;
+                        }
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        $html .= '</tr>';
+                        $html .= '</tbody></table>';
+
+                        $summary_html .= '<tr>';
+                        $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . count($shippers) . '</td>';
+                        $summary_html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($total_amount) . '</td>';
+                        $summary_html .= '</tr>';
+                        $summary_html .= '</tbody></table></div>';
+
+                        $html = $summary_html . $html;
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+
+                        $to = array();
+                        $bcc = array();
+                        $to[] = 'hassan@trax.pk';
+                        $to[] = 'mohsin.qamar@trax.pk';
+                        $to[] = 'talha.motiwala@trax.pk';
+                        $to[] = 'shafay.tariq@trax.pk';
+                        $to[] = 'wajiha.majeed@trax.pk';
+                        $to[] = 'jahanzaib.qamar@trax.pk';
+                        $bcc[] = 'muhammad.yousuf@trax.pk';
+
+                        self::email($subject, $body, $to, NULL, $bcc);
+                    }
                 }
 
                 else if ($id == 142) {
@@ -7950,6 +8036,19 @@ class NotificationsController extends Controller
                     }
                     
                 }    
+                else if ($id == 144) {
+                    $rider = $reference_1_id;
+                    $otp = $reference_2_id;
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $otp, $body);
+                    }
+                    $to = $rider->phone;
+                    self::delivery_note_otp_sms($body, $to);
+                }
                 else if($id == 143){
                     $shipment = Shipment::join('users as u' , 'shipments.user_id' ,'=' , 'u.id' )
                         ->join('sale_tier_tags as stt' ,function($join){
