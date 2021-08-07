@@ -392,6 +392,7 @@
                             $("#cargo_details form #vehicle_type").on('change', function () {
                                 if ($(this).prop('checked')) {
                                     $('#cargo_details form #vehicle_number').val("").trigger('change');
+                                    $('#cargo_details form #vehicle_number_text').val("");
                                     $('#cargo_details form #vehicle_number_container').removeClass('d-none');
                                     $('#cargo_details form #vehicle_number_text_container').addClass('d-none');
                                     $('#cargo_details form input#driver_phone').val("");
@@ -402,6 +403,7 @@
                                     $('#cargo_details form input#vendor_name').attr('readonly', true);
                                 } else {
                                     $('#cargo_details form #vehicle_number').val("").trigger('change');
+                                    $('#cargo_details form #vehicle_number_text').val("");
                                     $('#cargo_details form #vehicle_number_container').addClass('d-none');
                                     $('#cargo_details form #vehicle_number_text_container').removeClass('d-none');
                                     $('#cargo_details form input#driver_phone').val("");
@@ -531,6 +533,8 @@
                         $('#add_bag_form button.add').prop('disabled', false);
 
                         $('#master_cargo_confirm').prop('disabled', false);
+
+                        $("#master_cargo_consignment_confirm").prop('disabled',true);
 
                     }
                 }

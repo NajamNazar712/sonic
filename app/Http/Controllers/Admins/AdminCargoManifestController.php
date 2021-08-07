@@ -2131,20 +2131,28 @@ class AdminCargoManifestController extends Controller
                     {
                         $mapping = $mapping->first();
                         $misroute = 1;
+                        $last_junction = "-";
                         if($mapping->destination_id == Auth::user()->default_hub_id)
                         {
                             $misroute = 0;
+                            $last_junction = $mapping->junctions->sortByDesc('id')->first()->city->name ?? "-";
                         }
                         if($misroute == 1)
                         {
+                            $previous_junction = "-";
                             foreach ($mapping->junctions as $junction)
                             {
                                 if($junction->junction_id == Auth::user()->default_hub_id)
                                 {
                                     $misroute = 0;
+                                    $last_junction = $previous_junction;
+                                    break;
                                 }
+
+                                $previous_junction = $junction->city->name;
                             }
                         }
+
                         $details = array();
 
                         $details['misroute'] = $misroute;
@@ -2153,7 +2161,7 @@ class AdminCargoManifestController extends Controller
                         $details['manifest_id'] = str_pad($cargo_bag->id, 6, '0', STR_PAD_LEFT);
                         $details['origin'] = $cargo_bag->origin_hub->name;
                         $details['destination'] = $cargo_bag->destination_hub->name;
-                        $details['last_junction'] = 1;
+                        $details['last_junction'] = $last_junction;
                         $details['actual_weight'] = $bag->actual_weight;
                         $details['shipping_mode'] = $cargo_bag->shipping_mode->mode;
 
@@ -2270,7 +2278,7 @@ class AdminCargoManifestController extends Controller
         }
         foreach ($bag_exists as $bag_id)
         {
-            $bag = CargoManifestBag::where('seal_number',$bag_id);
+            $bag = CargoManifestBag::where('seal_number',$bag_id)->latest()->first();
             $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
                 $join->on('mb.cargo_manifest_id','cargo_manifests.id');
             })
@@ -2325,7 +2333,7 @@ class AdminCargoManifestController extends Controller
         }
         foreach ($bag_misroute as $bag_id)
         {
-            $bag = CargoManifestBag::where('seal_number',$bag_id);
+            $bag = CargoManifestBag::where('seal_number',$bag_id)->latest()->first();
             $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
                 $join->on('mb.cargo_manifest_id','cargo_manifests.id');
             })
@@ -2335,6 +2343,7 @@ class AdminCargoManifestController extends Controller
 
             if($cargo_bag->exists())
             {
+                $cargo_bag->first();
                 $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
