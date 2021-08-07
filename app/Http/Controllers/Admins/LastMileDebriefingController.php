@@ -364,7 +364,7 @@ class LastMileDebriefingController extends Controller
         }
         $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
         if(Carbon::now() > $time){
-            $time = $time->addDays(1);
+            $time->addDays(1);
         }
 
         $calls = AgentCallMonitoring::where('agent_id',Auth::id())
@@ -386,7 +386,7 @@ class LastMileDebriefingController extends Controller
                 return view('admin.debriefing.caller_agent')->with(['data'=>false]);
             }
         }
-        $where = array(7, 8, 9, 15, 18, 56);
+        $where = array(7, 8, 9, 15, 18, 56, 12);
         $statuses = ShipmentStatus::whereIn('id', $where)->select('id','name')->where('status', 1)->get();
         $shipment = Shipment::find($data->shipment_id);
         $delivery_note = DeliveryNote::find($data->delivery_note_id);
@@ -396,7 +396,16 @@ class LastMileDebriefingController extends Controller
         ->where('created_at','<=',$time)->where('completed',1)->count();
         $pending_calls = AgentCallMonitoring::where('agent_id',Auth::id())->where('created_at','>=',Carbon::today())
         ->where('created_at','<=',$time)->where('completed',0)->count();
-        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data]);
+
+        $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
+                ->where('shipper_status_id','=',13)
+                ->where('verification','=',1)
+                ->select(DB::raw('count(shipment_id) as reattempts'))
+                ->get()->first();
+
+        $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)->whereNotNull('rider_id')->get()->last();
+
+        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status]);
     }
 
     public function caller_agent_skip(Request $request)

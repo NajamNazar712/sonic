@@ -2158,7 +2158,8 @@ class AdminCRMController extends Controller
                     'status_id' => 4,
                     'agent_id' => Auth::id()
                 ]);
-
+                NotificationsController::send(31,$crm_request->id);
+                NotificationsController::send(142,$crm_request->id);
                 CrmRequestTagging::where('crm_request_id', $request->id)->delete();
                 return redirect()->back()->with(['success' => 'Request marked as Closed']);
             } else {
@@ -2191,6 +2192,9 @@ class AdminCRMController extends Controller
                 if($crm_request->case_nature_id == 4){
                     NotificationsController::send(117, $crm_request->id, 4);
                 }
+
+                NotificationsController::send(31,$crm_request_id);
+                NotificationsController::send(142,$crm_request_id);
             }
             return ['status' => 0, 'success' => 'Request marked as Closed'];
         }

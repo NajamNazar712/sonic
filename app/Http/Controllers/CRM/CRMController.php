@@ -119,6 +119,7 @@ class CRMController extends Controller
 
         $crm_request_status_history->save();
         NotificationsController::send(31, $id);
+        NotificationsController::send(142, $id);
 
         if($case_nature_type_id != null){
             if(in_array($case_nature_type_id, [11, 12, 13])){

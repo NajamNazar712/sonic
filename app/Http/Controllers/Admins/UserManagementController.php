@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\Rider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,9 +18,7 @@ use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Module;
 
-use Auth;
-use App\Http\Controllers\Admins\ActivityTrailController;
-
+use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -517,6 +517,23 @@ class UserManagementController extends Controller
         }
         return redirect()->back()->with('error', 'User not found!!');
 
+    }
+
+    public function rider_delivery_note_otp_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),414);
+        return view('admin.otp.rider_delivery_note');
+    }
+
+    public function rider_delivery_note_otp_list(Request $request){
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),415);
+        }
+        $riders = Rider::select('id as id', 'name as name', 'phone as phone_no', 'delivery_note_otp as otp')
+            ->where('status', 1)
+            ->whereNotNull('delivery_note_otp');
+        $datatable = Datatables::of($riders);
+        return $datatable->make(true);
     }
 
 }

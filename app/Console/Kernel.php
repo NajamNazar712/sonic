@@ -239,6 +239,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
         $schedule->command('report:donepayment')->dailyAt('16:00')->runInBackground();
+        $schedule->command('report:retaildonepayment')->dailyAt('16:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
 

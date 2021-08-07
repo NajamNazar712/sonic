@@ -353,7 +353,15 @@ class ShipperShipmentBookController extends Controller
         }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
+            }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
@@ -2200,7 +2208,15 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
+            }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
@@ -2377,9 +2393,9 @@ class ShipperShipmentBookController extends Controller
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3]);
-            })],
+            // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+            //     $query->whereNotIn('id', [2]);
+            // })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
             })],
@@ -2394,6 +2410,23 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
 
         ];
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+              $ccd_booking = $ccd_booking->first();
+              $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+              if(in_array($user_id,$ccd_account_tags))
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->first();
+                })];
+              }
+              else
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->whereNotIn('id', [2]);
+                })];
+              }
+            }
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -2795,9 +2828,10 @@ class ShipperShipmentBookController extends Controller
                                 if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
                                     $row['payment_mode_id'] == 1;
                                 }
-
-                                if ($row['payment_mode_id'] == 4) {
-                                    $row['amount'] = 0;
+                                if($row['service_type_id'] != 5){
+                                    if ($row['payment_mode_id'] == 4) {
+                                        $row['amount'] = 0;
+                                    }
                                 }
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));
@@ -2839,8 +2873,23 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $shipping_mode_same_day_timings = NULL;
                     }
-
-                    $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
+                    $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+                    if($ccd_booking->exists()){
+                        $ccd_booking = $ccd_booking->first();
+                        $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                        if(!in_array(session('user_id'),$ccd_account_tags))
+                        {
+                            $payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');
+                        }
+                        else
+                        {
+                            $payment_modes = PaymentMode::first()->pluck('mode', 'id');
+                        }
+                    }
+                    else{
+                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                    }
+                    //$payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                     $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
                     $city_name = array();
                     foreach ($cities as $city) {
@@ -2967,7 +3016,23 @@ class ShipperShipmentBookController extends Controller
         $products = Product::orderBy('product_name')->get();
         $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {
+                    $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                }
+                else
+                {
+                    $payment_modes = PaymentMode::all();
+                }
+            }
+            else{
+                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+            }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [3])->get();
@@ -3874,7 +3939,15 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
+            }
 
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
@@ -4111,9 +4184,9 @@ class ShipperShipmentBookController extends Controller
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3]);
-            })],
+            // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+            //     $query->whereNotIn('id', [3]);
+            // })],
 
             /*'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
@@ -4124,7 +4197,24 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
-        ]          ;
+        ];
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+              $ccd_booking = $ccd_booking->first();
+              $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+              if(in_array($user_id,$ccd_account_tags))
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->first();
+                })];
+              }
+              else
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->whereNotIn('id', [2]);
+                })];
+              }
+            }
             if($rate_type_id == 3){
                 $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
@@ -4630,7 +4720,15 @@ class ShipperShipmentBookController extends Controller
                     $shipping_mode_same_day_timings = NULL;
                 }
 
-                $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode','id');
+                $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+                    if($ccd_booking->exists()){
+                        $ccd_booking = $ccd_booking->first();
+                        $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                        if(!in_array(session('user_id'),$ccd_account_tags))
+                        {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
+                        else
+                        {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
+                    }
                 $city_name = array();
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;

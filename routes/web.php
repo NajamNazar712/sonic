@@ -988,6 +988,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::post('request/submit','Admins\DeliveryController@request_submit')->name('request_submit');
 			Route::post('request/info','Admins\DeliveryController@delivery_note_info')->name('request.info');
 			Route::post('request/approve','Admins\DeliveryController@request_approve')->name('request.approve');
+			Route::post('otp/generate','Admins\DeliveryController@delivery_note_otp_generation')->name('otp.generate');
+			Route::post('otp/verify','Admins\DeliveryController@delivery_note_otp_verification')->name('otp.verify');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
@@ -1056,6 +1058,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('undelivered/print','Admins\DeliveryController@dncc_undelivered_print')->name('undelivered.print');
             Route::post('reassign_rider','Admins\DeliveryController@reassign_rider')->name('reassign_rider');
             Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
+            Route::post('/upload_pod','Admins\DeliveryController@upload_pod')->name('upload_pod');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){
@@ -1197,6 +1200,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('list','Admins\ReturnController@return_marked_list')->name('list');
         Route::post('confirm/status','Admins\ReturnController@return_confirm_status')->name('confirm.status');
         Route::post('reattempt/status','Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
+       
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
@@ -1209,6 +1213,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
+            Route::post('revert/status','Admins\ReturnController@return_revert_status')->name('revert.status');
+            Route::post('excel/store','Admins\ReturnController@excel_store_revert')->name('excel.store');
         });
 
         Route::prefix('create')->name('create.')->group(function(){
@@ -2421,6 +2427,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@ccd_booking_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@ccd_booking_store')->name('store');
+        });
+
         Route::prefix('nsa_account')->name('nsa_account.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@nsa_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
@@ -3094,6 +3105,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+    });
+
+    Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
+        Route::get('', 'Admins\UserManagementController@rider_delivery_note_otp_index')->name('index');
+        Route::get('list', 'Admins\UserManagementController@rider_delivery_note_otp_list')->name('list');
     });
 
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
