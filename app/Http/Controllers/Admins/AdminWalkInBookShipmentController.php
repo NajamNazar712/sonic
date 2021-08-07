@@ -49,6 +49,8 @@ use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\FtlRequestAdditionalCost;
+use DNS2D;
 
 class AdminWalkInBookShipmentController extends Controller
 {
@@ -128,7 +130,7 @@ class AdminWalkInBookShipmentController extends Controller
 
 
         $shipment->save();
-
+        
         $shipment_id = $shipment->id;
 
         $shipment_info = new ShipmentDetail();
@@ -702,9 +704,12 @@ class AdminWalkInBookShipmentController extends Controller
                         <tbody>
                           <tr>
                             <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>
@@ -1456,7 +1461,6 @@ class AdminWalkInBookShipmentController extends Controller
     }
 
     public function ftl_store(Request $request) {
-       
         $test = 0;
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
@@ -1567,7 +1571,12 @@ class AdminWalkInBookShipmentController extends Controller
 
                 }
                 $ftl_request = FtlRequest::where('id',$request->approve_frieght_request)->first();
+                // $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
                 $business_category_id = 1;
+
+                // $calc_total = ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
+                // $ftl_request->total_charges
+
                 $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id,0 , null, $actual_weight, $ftl_request->gst, 0, $ftl_request->total_charges, $delivery_type, null, null, $pickup, $business_category_id,0);
 
                 $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
@@ -1617,8 +1626,11 @@ class AdminWalkInBookShipmentController extends Controller
                   $invoice_number = $user_id . str_pad($walkin_ftl_invoice->id, 6, '0', STR_PAD_LEFT);
                   WalkinFtlInvoice::where('id',$walkin_ftl_invoice->id)->update(['invoice_number' => $invoice_number]);
 
-                  
 
+                  $ftl_shipment = Shipment::find($shipment_id);
+                  $calc_total = ((($ftl_shipment->ftl->freight_charges/$ftl_shipment->ftl->weight)*$ftl_shipment->actual_weight));
+                $ftl_shipment->weight_charges = $calc_total;
+                $ftl_shipment->save();
                 if ($request->filled('book_and_print')) {
                     $print = $shipment_id;
                 }
@@ -1764,9 +1776,12 @@ class AdminWalkInBookShipmentController extends Controller
                         <tbody>
                           <tr>
                             <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>

@@ -17,6 +17,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Type</th>
                         <th class="border-primary border-darken-1">Description</th>
+                        <th class="border-primary border-darken-1">Category</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Updated At</th>
@@ -47,7 +48,7 @@
                         <div class="container">
                             <div class="row justify-content-center">
                                 <div class="col-8 form-group">
-                                    <input type="text" name="type" id="type" class="form-control type" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">
+                                    <input type="text" name="type" id="type" class="form-control type" placeholder="Type Name *" data-rule-required="true" data-msg-required="Type name is required">
                                 </div>
                             </div>
                             <div class="row justify-content-center">
@@ -88,6 +89,31 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row justify-content-center">
+                                <div class="col-12 card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Category</h4>
+
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <fieldset>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-primary" value="1" name="category" id="colorRadio10" checked>
+                                                    <label class="custom-control-label" for="colorRadio10">Packaging Material</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-success" value="2" name="category" id="colorRadio11">
+                                                    <label class="custom-control-label" for="colorRadio11">Stationary</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="row justify-content-center">
                                 <div class="col-12 form-group">
                                     <label for="packaging_picture">Picture</label>
@@ -178,6 +204,29 @@
                                         <div class="card-body" id="shippers_select_edit">
                                            
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-12 card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Category</h4>
+
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="card-body">
+                                            <fieldset>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-primary packaging_category" value="1" name="category_edit" id="colorRadio12">
+                                                    <label class="custom-control-label" for="colorRadio12">Packaging Material</label>
+                                                </div>
+                                                <div class="d-inline-block custom-control custom-radio mr-1">
+                                                    <input type="radio" class="custom-control-input bg-success stationary_category" value="2" name="category_edit" id="colorRadio13">
+                                                    <label class="custom-control-label" for="colorRadio13">Stationary</label>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                       
                                     </div>
                                 </div>
                             </div>
@@ -374,6 +423,7 @@
                             head.push('S.No');
                             head.push('Type');
                             head.push('Description');
+                            head.push('Category');
                             head.push('Created At');
                             head.push('Created By');
                             head.push('Updated At');
@@ -387,6 +437,7 @@
                                 row.push(index + 1);
                                 row.push(values.type);
                                 row.push(values.description);
+                                row.push(values.category);
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.updated_at);
@@ -434,11 +485,12 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.types.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'type', name: 'packaging_material_types.type', class: 'align-middle type'},
                     {data: 'description', name: 'packaging_material_types.description', class: 'align-middle description'},
+                    {data: 'category', name: 'packaging_material_types.category', class: 'align-middle category'},
                     {data: 'created_at', name: 'packaging_material_types.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'ac.name', class: 'align-middle created_by'},
                     {data: 'updated_at', name: 'packaging_material_types.updated_at', class: 'align-middle updated_at'},
@@ -461,6 +513,10 @@
                         '<option value="1">Enabled</option>' +
                         '<option value="0">Disabled</option>' +
                         '</select>';
+                    var category_select = '<select name="status_select" id="category_select" class="select2 form-control">' +
+                        '<option value="1">Packaging Material</option>' +
+                        '<option value="2">Stationary</option>' +
+                        '</select>';
                     // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
@@ -472,6 +528,12 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.category')){
+                            $(category_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -488,6 +550,12 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#category_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Category",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -568,6 +636,7 @@
                             index_count++;
                         });
                         $('#edit_material_form input[name="packaging_type_edit"]').attr('checked', false);
+                        $('#edit_material_form input[name="category_edit"]').attr('checked', false);
 
                         if(data.type.packaging_type === 1){
                             $('input.edit_internal').attr('checked', true);
@@ -612,6 +681,12 @@
                             $("#shippers_select_edit").html('');
 
                         }
+                        if(data.type.category === 1){
+                            $('input.packaging_category').attr('checked', true);
+                        }else if(data.type.category === 2){
+                            $('input.stationary_category').attr('checked', true);
+                        }
+                        
                         $('#EditMaterialModal #type_div').html(html_type);
                         $('#EditMaterialModal #type_existing').html(html_type_existing);
 
