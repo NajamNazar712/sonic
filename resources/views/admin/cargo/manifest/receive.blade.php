@@ -254,6 +254,10 @@
                 }
                 table.row( $(this).parents('tr') ).remove();
                 table.draw(0);
+                if(bag_ids.length < 1)
+                {
+                    $('#receive_form .receive').prop('disabled', true);
+                }
             });
 
             $('#receive_form').bind('submit', function(e) {

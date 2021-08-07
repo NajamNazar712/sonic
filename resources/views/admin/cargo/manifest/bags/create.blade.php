@@ -548,7 +548,7 @@
 
                         $('#add_shipment_form button.add').prop('disabled', false);
 
-                        $('#cargo_consignment_confirm').prop('disabled', false);
+                        $('#cargo_consignment_confirm').prop('disabled', true);
 
                     }else{
                         $('#information .scanned').html(shipment_ids.length);
