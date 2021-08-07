@@ -14,6 +14,7 @@ use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionExternalUser;
 use App\Http\Models\Commission\SalesCommissionUser;
@@ -56,9 +57,23 @@ use App\Http\Models\PendingCorporateDefaultWeightCharge;
 use App\Http\Models\PendingCorporateDeliveryTypeStatus;
 use App\Http\Models\PendingCorporateReturnChargeZoneWise;
 use App\Http\Models\PendingCorporateWeightChargeZoneWise;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Rates\Corporate\HistoryCorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\HistoryCorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\HistoryCorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\HistoryCorporateRateOriginHub;
+use App\Http\Models\Rates\Corporate\PendingCorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\PendingCorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\PendingCorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\PendingCorporateRateOriginHub;
 use App\Http\Models\Rates\HistoryPackagingCharge;
 use App\Http\Models\Rates\MinimumChargeableWeightSetting;
 use App\Http\Models\Rates\PendingPackagingCharge;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Rates\RateOriginHub;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\WeightCharge;
@@ -164,6 +179,7 @@ class AdminCorporateAccountsController extends Controller
             $invoicing_cycles = InvoicingCycle::where('id', '!=', 2)->get();
             $storage_types = WmsStorageType::all()->where('status', 1);
             $packaging_material_types = PackagingMaterialTypes::where('status', 1)->get();
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
 
             if(($rate_type == 1 && $rate_type_id == null) || $rate_type_id == 1){
                 $weight = CorporateStandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -243,13 +259,13 @@ class AdminCorporateAccountsController extends Controller
             }
             
             if(($rate_type == 1 && $rate_type_id == null) || $rate_type_id == 1){
-                return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes,'corporate_rate_type_id' => $corporate_rate_type_id]);
+                return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes,'corporate_rate_type_id' => $corporate_rate_type_id, 'cities' => $cities]);
             }
             else if(($rate_type == 2 && $rate_type_id == null) || $rate_type_id == 2){
-                return view('admin.accounts.corporate.zone_wise.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'corporate_rate_type_id' => $corporate_rate_type_id]);
+                return view('admin.accounts.corporate.zone_wise.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'corporate_rate_type_id' => $corporate_rate_type_id, 'cities' => $cities]);
             }
             else{
-                return view('admin.accounts.corporate.default.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users,'corporate_rate_type_id' => $corporate_rate_type_id]);
+                return view('admin.accounts.corporate.default.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users,'corporate_rate_type_id' => $corporate_rate_type_id, 'cities' => $cities]);
             }
         }
         return redirect()->back()->with('error', 'User rates not found!');
@@ -729,6 +745,24 @@ class AdminCorporateAccountsController extends Controller
             $ONRateAlready = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
 
             if ($ONRateAlready->isEmpty()) {
+                if($request->has('on_origin_hubs')) {
+                    foreach($request->on_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 1;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('on_destination_hubs')) {
+                    foreach($request->on_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 1;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 1,
@@ -927,6 +961,24 @@ class AdminCorporateAccountsController extends Controller
             $OLRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 2)->get();
 
             if ($OLRatePresent->isEmpty()) {
+                if($request->has('ol_origin_hubs')) {
+                    foreach($request->ol_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 2;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('ol_destination_hubs')) {
+                    foreach($request->ol_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 2;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 2,
@@ -1121,6 +1173,24 @@ class AdminCorporateAccountsController extends Controller
             $DetainRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
             if ($DetainRatePresent->isEmpty()) {
+                if($request->has('detain_origin_hubs')) {
+                    foreach($request->detain_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 3;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('detain_destination_hubs')) {
+                    foreach($request->detain_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 3;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 3,
@@ -1318,6 +1388,24 @@ class AdminCorporateAccountsController extends Controller
 
             $SamedayRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 4)->get();
             if ($SamedayRatePresent->isEmpty()) {
+                if($request->has('sameday_origin_hubs')) {
+                    foreach($request->sameday_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 4;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($request->has('sameday_destination_hubs')) {
+                    foreach($request->sameday_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 4;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 4,
@@ -1649,6 +1737,8 @@ class AdminCorporateAccountsController extends Controller
             $rate_remarks = RateRemark::where('user_id', $id)->orderBy('created_at','desc')->get();
             $rate_status = $user['rate_status'];
 
+
+
             if($rate_type == 1){
                 $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
                 $return = CorporateReturnCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1676,14 +1766,80 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
             $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $rate_origin_hubs = CorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = CorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if(count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if(count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
             $existing = 0;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))) {
                     if($rate_type == 1){
-                        return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                        return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                     }
                     else{
-                        return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                        return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                     }
 
                 } else {
@@ -1691,10 +1847,10 @@ class AdminCorporateAccountsController extends Controller
                 }
             } else {
                 if($rate_type == 1){
-                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
-                    return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                    return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
 
             }
@@ -1776,15 +1932,83 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
             $hub_delivery_type_status = PendingCorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $rate_origin_hubs = PendingCorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = PendingCorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if(count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if(count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
+
+
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4){
                     if($rate_type == 1){
-                        return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                        return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
                     }
                     else{
-                        return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                        return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
                     }
                 }
@@ -1794,11 +2018,11 @@ class AdminCorporateAccountsController extends Controller
             }
             else{
                 if($rate_type == 1){
-                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
                 }
                 else{
-                    return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                    return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing,'e_switches'=>$e_switches,'e_weight'=>$e_weight, 'e_shippingType' => $e_bookingType, 'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_min_weight' => $e_min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'storage_types' => $storage_types, 'invoicing_cycles' => $invoicing_cycles, 'packaging_material_types' => $packaging_material_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_packaging_type_ids' => $e_packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
                 }
             }
@@ -1852,14 +2076,81 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
             $hub_delivery_type_status = CorporateDeliveryTypeStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $rate_origin_hubs = PendingCorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = PendingCorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if(count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if(count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
+
             $existing = 0;
             if (session('department_id') == 7) {
                 if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))) {
                     if($user['new_rate_type_id'] == 1){
-                        return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                        return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                     }
                     else{
-                        return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                        return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                     }
 
                 } else {
@@ -1867,9 +2158,9 @@ class AdminCorporateAccountsController extends Controller
                 }
             } else {
                 if ($user['new_rate_type_id'] == 1) {
-                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                    return view('admin.accounts.corporate.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 } else {
-                    return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status]);
+                    return view('admin.accounts.corporate.zone_wise.edit_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'rate_status' => $rate_status, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'existing' => $existing, 'packaging_material_types' => $packaging_material_types, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'hub_delivery_type_status' => $hub_delivery_type_status, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
             }
         }
@@ -2442,6 +2733,26 @@ class AdminCorporateAccountsController extends Controller
                 $ONRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->overnight_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->overnight_door_min_chargeable_weight)
                             ->update([
@@ -2770,6 +3081,26 @@ class AdminCorporateAccountsController extends Controller
                 $OLRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
                 if (!$OLRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->overland_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->overland_door_min_chargeable_weight)
                             ->update([
@@ -3095,6 +3426,26 @@ class AdminCorporateAccountsController extends Controller
                 $DTRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$DTRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->detain_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->detain_door_min_chargeable_weight)
                             ->update([
@@ -3423,6 +3774,26 @@ class AdminCorporateAccountsController extends Controller
                 $SDRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$SDRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->sameday_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->sameday_door_min_chargeable_weight)
                             ->update([
@@ -4379,7 +4750,10 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
             PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+            PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
+
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
                 foreach ($packaging_types as $type){
@@ -4398,7 +4772,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
                 if ($ONRateAlready->isEmpty()) {
@@ -4411,6 +4785,27 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -4607,6 +5002,28 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -4804,6 +5221,27 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
                     ]);
 
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -4999,6 +5437,27 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
 
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
@@ -5247,7 +5706,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->approve == 1) {
                 $user = User::find($id);
 
-                if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
+                /*if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -5256,7 +5715,7 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $packaging->charges;
                         $packaging_charges->save();
                     }
-                }
+                }*/
                 if ($switches = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                     HistoryCorporateRateStatus::create([
@@ -5302,6 +5761,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
+
+                if($rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id)->get()) {
+                    foreach ($rate_origin_hubs as $rate_origin_hub) {
+                        $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
+                        $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                        $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                        $history_rate_origin_hub->save();
+                    }
+                }
+                if($rate_destination_hubs = CorporateRateDestinationHub::where('user_id', $id)->get()) {
+                    foreach ($rate_destination_hubs as $rate_destination_hub) {
+                        $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
+                        $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                        $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                        $history_rate_destination_hub->save();
+                    }
+                }
+
                 if ($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
@@ -5868,7 +6347,30 @@ class AdminCorporateAccountsController extends Controller
                 CorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PackagingCharge::where('user_id', $id)->delete();
                 CorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+
+                CorporateRateOriginHub::where('user_id', $id)->delete();
+                CorporateRateDestinationHub::where('user_id', $id)->delete();
+
+                if($pending_rate_origin_hubs = PendingCorporateRateOriginHub::where('user_id', $id)->get()) {
+                    foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
+                        $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
+                        $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($pending_rate_destination_hubs = PendingCorporateRateDestinationHub::where('user_id', $id)->get()) {
+                    foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
+                        $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
+                        $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
+                /*if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
                         $packaging_charges = new PackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -5877,7 +6379,7 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $pendingpackaging->charges;
                         $packaging_charges->save();
                     }
-                }
+                }*/
                 if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()){
                     $delivery_type_status = new CorporateDeliveryTypeStatus();
                     $delivery_type_status->user_id = $id;
@@ -6508,6 +7010,9 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                 PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+
+                PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+                PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
                 User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
@@ -7102,7 +7607,9 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
             PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+            PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
                 foreach ($packaging_types as $type){
@@ -7121,7 +7628,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
                 if ($ONRateAlready->isEmpty()) {
@@ -7134,6 +7641,26 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -7330,6 +7857,26 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -7527,6 +8074,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
                     ]);
 
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -7722,6 +8289,27 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
 
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
@@ -7971,6 +8559,24 @@ class AdminCorporateAccountsController extends Controller
                 if($user->corporate_rate_type_id == 3 && $user->new_rate_type_id == 1){
 
                     //history for old rate type
+                    if($rate_origin_hubs = CorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($rate_origin_hubs as $rate_origin_hub) {
+                            $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
+                            $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                            $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                            $history_rate_origin_hub->save();
+                        }
+                    }
+                    if($rate_destination_hubs = CorporateDefaultRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($rate_destination_hubs as $rate_destination_hub) {
+                            $history_rate_destination_hub = new HistoryCorporateDefaultRateDestinationHub();
+                            $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                            $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                            $history_rate_destination_hub->save();
+                        }
+                    }
 
                     if ($switches = CorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
@@ -8439,11 +9045,32 @@ class AdminCorporateAccountsController extends Controller
                     CorporateDefaultFuelSurcharge::where('user_id', $id)->delete();
                     CorporateDefaultDiscountCharge::where('user_id', $id)->delete();
                     //PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
-                    PackagingCharge::where('user_id', $id)->delete();
+//                    PackagingCharge::where('user_id', $id)->delete();
                     //PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+
+                    CorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+                    CorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
 
                     //pending->main table
 
+                    if($pending_rate_origin_hubs = PendingCorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
+                            $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
+                            $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    if($pending_rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
+                            $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
+                            $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($switches = PendingCorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                         CorporateRateStatus::create([
@@ -8985,8 +9612,28 @@ class AdminCorporateAccountsController extends Controller
                     PackagingCharge::where('user_id', $id)->delete();
                     PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
 
+                    PendingCorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+                    PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
                 }
                 if($user->corporate_rate_type_id == 2 && $user->new_rate_type_id == 1){
+                    if($rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($rate_origin_hubs as $rate_origin_hub) {
+                            $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
+                            $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                            $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                            $history_rate_origin_hub->save();
+                        }
+                    }
+                    if($rate_destination_hubs = CorporateRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($rate_destination_hubs as $rate_destination_hub) {
+                            $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
+                            $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                            $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                            $history_rate_destination_hub->save();
+                        }
+                    }
                     if ($switches = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                         HistoryCorporateRateStatus::create([
@@ -9525,10 +10172,14 @@ class AdminCorporateAccountsController extends Controller
                     CorporateFuelSurcharge::where('user_id', $id)->delete();
                     CorporateDiscountCharge::where('user_id', $id)->delete();
                     CorporateMinChargeableWeight::where('user_id', $id)->delete();
-                    PackagingCharge::where('user_id', $id)->delete();
+//                    PackagingCharge::where('user_id', $id)->delete();
                     CorporateDeliveryTypeStatus::where('user_id', $id)->delete();
 
-                    if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+                    CorporateRateOriginHub::where('user_id', $id)->delete();
+
+                    CorporateRateDestinationHub::where('user_id', $id)->delete();
+
+                    /*if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                         foreach ($pendingpackagings as $pendingpackaging) {
                             $packaging_charges = new PackagingCharge();
                             $packaging_charges->user_id = $id;
@@ -9536,6 +10187,25 @@ class AdminCorporateAccountsController extends Controller
                             $packaging_charges->size_id = $pendingpackaging->size_id;
                             $packaging_charges->charges = $pendingpackaging->charges;
                             $packaging_charges->save();
+                        }
+                    }*/
+
+                    if($pending_rate_origin_hubs = PendingCorporateRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
+                            $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    if($pending_rate_destination_hubs = PendingCorporateRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
+                            $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
+                            $rate_destination_hub->save();
                         }
                     }
                     if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()){
@@ -10105,8 +10775,10 @@ class AdminCorporateAccountsController extends Controller
                     PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
                     PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                     PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
-                    PendingPackagingCharge::where('user_id', $id)->delete();
+//                    PendingPackagingCharge::where('user_id', $id)->delete();
                     PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+                    PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+                    PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
 
                 }
 
@@ -10174,7 +10846,7 @@ class AdminCorporateAccountsController extends Controller
                 WmsLabellingCharge::where('user_id', $id)->delete();
 
 
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+                /*if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
                         $packaging_charges = new PackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -10183,7 +10855,7 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $pendingpackaging->charges;
                         $packaging_charges->save();
                     }
-                }
+                }*/
 
 
                 if ($wms_user_info = WmsPendingUserInformation::where('user_id', $id)->first()) {
@@ -10411,6 +11083,9 @@ class AdminCorporateAccountsController extends Controller
 
             $fuel = CorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $discount = CorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+
+            $rate_origin_hubs = CorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = CorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
         }
         else{
             $tomorrow = Carbon::parse($date)->addDay(1);
@@ -10431,6 +11106,10 @@ class AdminCorporateAccountsController extends Controller
 
             $fuel = HistoryCorporateFuelSurcharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
             $discount = HistoryCorporateDiscountCharge::all()->where('user_id', $id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+
+            $rate_origin_hubs = HistoryCorporateRateOriginHub::all()->where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = HistoryCorporateRateDestinationHub::all()->where('user_id',$id)->where('created_at', '>=', $date)->where('created_at', '<', $tomorrow)->groupBy('shipping_mode_id');
+
         }
 
         $packaging_material_types = PackagingMaterialTypes::with(['sizes'])->where('status', 1)->get();
@@ -10454,13 +11133,76 @@ class AdminCorporateAccountsController extends Controller
                 $packaging_charges[$charge->type_id][] = $charge;
             }
         }
+
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+        $overnight_origins = [];
+        $overland_origins = [];
+        $detain_origins = [];
+        $sameday_origins = [];
+        if(count($rate_origin_hubs) > 0){
+            foreach($rate_origin_hubs as $index => $origin){
+
+                if($index == 1){
+                    foreach($origin as $origin_data){
+                        $overnight_origins[] = $origin_data->city_id;
+                    }
+                }
+                else if($index == 2){
+                    foreach($origin as $origin_data){
+                        $overland_origins[] = $origin_data->city_id;
+                    }
+                }
+                else if($index == 3){
+                    foreach($origin as $origin_data){
+                        $detain_origins[] = $origin_data->city_id;
+                    }
+                }
+                else if($index == 4){
+                    foreach($origin as $origin_data){
+                        $sameday_origins[] = $origin_data->city_id;
+                    }
+                }
+
+            }
+        }
+        $overnight_destinations = [];
+        $overland_destinations = [];
+        $detain_destinations = [];
+        $sameday_destinations = [];
+        if(count($rate_destination_hubs) > 0){
+            foreach($rate_destination_hubs as $index => $destination){
+
+                if($index == 1){
+                    foreach($destination as $destination_data){
+                        $overnight_destinations[] = $destination_data->city_id;
+                    }
+                }
+                else if($index == 2){
+                    foreach($destination as $destination_data){
+                        $overland_destinations[] = $destination_data->city_id;
+                    }
+                }
+                else if($index == 3){
+                    foreach($destination as $destination_data){
+                        $detain_destinations[] = $destination_data->city_id;
+                    }
+                }
+                else if($index == 4){
+                    foreach($destination as $destination_data){
+                        $sameday_destinations[] = $destination_data->city_id;
+                    }
+                }
+
+            }
+        }
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))) {
                 if($rate_type == 1){
-                    return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                    return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
-                    return view('admin.accounts.corporate.zone_wise.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                    return view('admin.accounts.corporate.zone_wise.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
 
             } else {
@@ -10469,11 +11211,11 @@ class AdminCorporateAccountsController extends Controller
         }
         else{
             if($rate_type == 1){
-                return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                return view('admin.accounts.corporate.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
             }
             else{
-                return view('admin.accounts.corporate.zone_wise.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+                return view('admin.accounts.corporate.zone_wise.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'sale_person' => $sale_person, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
             }
         }
@@ -10907,7 +11649,7 @@ class AdminCorporateAccountsController extends Controller
         }
 
         //Packaging Charges
-        if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+        /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
             $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
             foreach ($packaging_types as $type){
@@ -10925,7 +11667,7 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
 
-        }
+        }*/
 
         if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
             if ($request->has('on_default') && $request->on_default == 'on') {
@@ -10936,6 +11678,26 @@ class AdminCorporateAccountsController extends Controller
             $ONRateAlready = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
 
             if ($ONRateAlready->isEmpty()) {
+                CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                if($request->has('on_origin_hubs')) {
+                    foreach($request->on_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 1;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                if($request->has('on_destination_hubs')) {
+                    foreach($request->on_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 1;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 1,
@@ -11128,6 +11890,26 @@ class AdminCorporateAccountsController extends Controller
             $OLRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 2)->get();
 
             if ($OLRatePresent->isEmpty()) {
+                CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                if($request->has('ol_origin_hubs')) {
+                    foreach($request->ol_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 2;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                if($request->has('ol_destination_hubs')) {
+                    foreach($request->ol_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 2;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 2,
@@ -11316,6 +12098,26 @@ class AdminCorporateAccountsController extends Controller
             $DetainRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
             if ($DetainRatePresent->isEmpty()) {
+                CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                if($request->has('detain_origin_hubs')) {
+                    foreach($request->detain_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 3;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                if($request->has('detain_destination_hubs')) {
+                    foreach($request->detain_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 3;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 3,
@@ -11507,6 +12309,26 @@ class AdminCorporateAccountsController extends Controller
 
             $SamedayRatePresent = CorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 4)->get();
             if ($SamedayRatePresent->isEmpty()) {
+                CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                if($request->has('sameday_origin_hubs')) {
+                    foreach($request->sameday_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 4;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                if($request->has('sameday_destination_hubs')) {
+                    foreach($request->sameday_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 4;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateMinChargeableWeight::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 4,
@@ -12239,7 +13061,7 @@ class AdminCorporateAccountsController extends Controller
                 ]);
             }
 
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
                 PackagingCharge::where('user_id', $id)->delete();
                 foreach ($packaging_types as $type){
@@ -12258,7 +13080,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 if ($request->has('on_default') && $request->on_default == 'on') {
@@ -12269,6 +13091,26 @@ class AdminCorporateAccountsController extends Controller
                 $ONRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->overnight_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->overnight_door_min_chargeable_weight)
                             ->update([
@@ -12585,6 +13427,26 @@ class AdminCorporateAccountsController extends Controller
                 $OLRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
                 if (!$OLRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->overland_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->overland_door_min_chargeable_weight)
                             ->update([
@@ -12905,6 +13767,26 @@ class AdminCorporateAccountsController extends Controller
                 $DTRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$DTRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->detain_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->detain_door_min_chargeable_weight)
                             ->update([
@@ -13227,6 +14109,26 @@ class AdminCorporateAccountsController extends Controller
                 $SDRateAlready = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$SDRateAlready->isEmpty()) {
+                    CorporateRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($request->sameday_door_min_chargeable_weight != null) {
                         CorporateMinChargeableWeight::where('id', $request->sameday_door_min_chargeable_weight)
                             ->update([
@@ -14118,7 +15020,11 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
             PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+
+            PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+            PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
+
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
                 foreach ($packaging_types as $type){
@@ -14137,7 +15043,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
                 if ($ONRateAlready->isEmpty()) {
@@ -14150,6 +15056,27 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -14337,6 +15264,27 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -14525,6 +15473,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
                     ]);
 
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -14711,6 +15679,26 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
 
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
@@ -14950,7 +15938,7 @@ class AdminCorporateAccountsController extends Controller
             if ($request->approve == 1) {
                 $user = User::find($id);
 
-                if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
+                /*if($packagings = PackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($packagings as $packaging) {
                         $packaging_charges = new HistoryPackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -14959,7 +15947,7 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $packaging->charges;
                         $packaging_charges->save();
                     }
-                }
+                }*/
                 if ($switches = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                     HistoryCorporateRateStatus::create([
@@ -15005,6 +15993,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
+
+                if($rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id)->get()) {
+                    foreach ($rate_origin_hubs as $rate_origin_hub) {
+                        $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
+                        $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                        $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                        $history_rate_origin_hub->save();
+                    }
+                }
+                if($rate_destination_hubs = CorporateRateDestinationHub::where('user_id', $id)->get()) {
+                    foreach ($rate_destination_hubs as $rate_destination_hub) {
+                        $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
+                        $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                        $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                        $history_rate_destination_hub->save();
+                    }
+                }
+
                 if ($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
                     HistoryCorporateMinChargeableWeight::create([
                         'user_id' => $id,
@@ -15547,7 +16555,30 @@ class AdminCorporateAccountsController extends Controller
                 CorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PackagingCharge::where('user_id', $id)->delete();
                 CorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+
+                CorporateRateOriginHub::where('user_id', $id)->delete();
+                CorporateRateDestinationHub::where('user_id', $id)->delete();
+
+                if($pending_rate_origin_hubs = PendingCorporateRateOriginHub::where('user_id', $id)->get()) {
+                    foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
+                        $rate_origin_hub = new CorporateRateOriginHub();
+                        $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
+                        $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
+                        $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+                if($pending_rate_destination_hubs = PendingCorporateRateDestinationHub::where('user_id', $id)->get()) {
+                    foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
+                        $rate_destination_hub = new CorporateRateDestinationHub();
+                        $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
+                        $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
+                        $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
+                /*if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
                         $packaging_charges = new PackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -15556,7 +16587,7 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $pendingpackaging->charges;
                         $packaging_charges->save();
                     }
-                }
+                }*/
                 if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()){
                     $delivery_type_status = new CorporateDeliveryTypeStatus();
                     $delivery_type_status->user_id = $id;
@@ -16163,6 +17194,11 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                 PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
                 PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+
+                PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+                PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
+
+
                 User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
@@ -16697,9 +17733,11 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
             PendingCorporateDiscountCharge::where('user_id', $id)->delete();
             PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
-            PendingPackagingCharge::where('user_id', $id)->delete();
+//            PendingPackagingCharge::where('user_id', $id)->delete();
             PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+            PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
                 foreach ($packaging_types as $type){
@@ -16718,7 +17756,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
                 if ($ONRateAlready->isEmpty()) {
@@ -16731,6 +17769,27 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -16918,6 +17977,26 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -17106,6 +18185,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
                     ]);
 
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -17292,6 +18391,26 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
                     ]);
+
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
 
                     PendingCorporateMinChargeableWeight::create([
                         'user_id' => $id,
@@ -17577,6 +18696,25 @@ class AdminCorporateAccountsController extends Controller
                             'return_charges' => $switches['return_charges'],
                             'fuel_charges' => $switches['fuel_charges']
                         ]);
+                    }
+
+                    if($rate_origin_hubs = CorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($rate_origin_hubs as $rate_origin_hub) {
+                            $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
+                            $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                            $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                            $history_rate_origin_hub->save();
+                        }
+                    }
+                    if($rate_destination_hubs = CorporateDefaultRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($rate_destination_hubs as $rate_destination_hub) {
+                            $history_rate_destination_hub = new HistoryCorporateDefaultRateDestinationHub();
+                            $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                            $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                            $history_rate_destination_hub->save();
+                        }
                     }
                     /* if ($min_charge = CorporateMinChargeableWeight::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 1])->first()) {
                          HistoryCorporateMinChargeableWeight::create([
@@ -18000,11 +19138,32 @@ class AdminCorporateAccountsController extends Controller
                     CorporateDefaultFuelSurcharge::where('user_id', $id)->delete();
                     CorporateDefaultDiscountCharge::where('user_id', $id)->delete();
                     //PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
-                    PackagingCharge::where('user_id', $id)->delete();
+//                    PackagingCharge::where('user_id', $id)->delete();
                     //PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+                    CorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+                    CorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
+
 
                     //pending->main table
 
+                    if($pending_rate_origin_hubs = PendingCorporateRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
+                            $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    if($pending_rate_destination_hubs = PendingCorporateRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
+                            $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     if ($switches = PendingCorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                         CorporateRateStatus::create([
@@ -18543,11 +19702,32 @@ class AdminCorporateAccountsController extends Controller
                     PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
                     PendingCorporateDiscountCharge::where('user_id', $id)->delete();
                     PendingCorporateMinChargeableWeight::where('user_id', $id)->delete();
-                    PackagingCharge::where('user_id', $id)->delete();
+//                    PackagingCharge::where('user_id', $id)->delete();
                     PendingCorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+                    PendingCorporateRateOriginHub::where('user_id', $id)->delete();
+                    PendingCorporateRateDestinationHub::where('user_id', $id)->delete();
 
                 }
                 if($user->corporate_rate_type_id == 2 && $user->new_rate_type_id == 2){
+
+                    if($rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($rate_origin_hubs as $rate_origin_hub) {
+                            $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
+                            $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                            $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                            $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                            $history_rate_origin_hub->save();
+                        }
+                    }
+                    if($rate_destination_hubs = CorporateRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($rate_destination_hubs as $rate_destination_hub) {
+                            $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
+                            $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                            $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                            $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                            $history_rate_destination_hub->save();
+                        }
+                    }
                     if ($switches = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                         HistoryCorporateRateStatus::create([
@@ -19086,17 +20266,38 @@ class AdminCorporateAccountsController extends Controller
                     CorporateFuelSurcharge::where('user_id', $id)->delete();
                     CorporateDiscountCharge::where('user_id', $id)->delete();
                     CorporateMinChargeableWeight::where('user_id', $id)->delete();
-                    PackagingCharge::where('user_id', $id)->delete();
+//                    PackagingCharge::where('user_id', $id)->delete();
                     CorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+                    CorporateRateOriginHub::where('user_id', $id)->delete();
+                    CorporateRateDestinationHub::where('user_id', $id)->delete();
 
-                    if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
-                        foreach ($pendingpackagings as $pendingpackaging) {
-                            $packaging_charges = new PackagingCharge();
-                            $packaging_charges->user_id = $id;
-                            $packaging_charges->type_id = $pendingpackaging->type_id;
-                            $packaging_charges->size_id = $pendingpackaging->size_id;
-                            $packaging_charges->charges = $pendingpackaging->charges;
-                            $packaging_charges->save();
+//                    if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+//                        foreach ($pendingpackagings as $pendingpackaging) {
+//                            $packaging_charges = new PackagingCharge();
+//                            $packaging_charges->user_id = $id;
+//                            $packaging_charges->type_id = $pendingpackaging->type_id;
+//                            $packaging_charges->size_id = $pendingpackaging->size_id;
+//                            $packaging_charges->charges = $pendingpackaging->charges;
+//                            $packaging_charges->save();
+//                        }
+//                    }
+
+                                                            if($pending_rate_origin_hubs = PendingCorporateRateOriginHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_origin_hubs as $pending_rate_origin_hub) {
+                            $rate_origin_hub = new CorporateRateOriginHub();
+                            $rate_origin_hub->user_id = $pending_rate_origin_hub->user_id;
+                            $rate_origin_hub->shipping_mode_id = $pending_rate_origin_hub->shipping_mode_id;
+                            $rate_origin_hub->city_id = $pending_rate_origin_hub->city_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    if($pending_rate_destination_hubs = PendingCorporateRateDestinationHub::where('user_id', $id)->get()) {
+                        foreach ($pending_rate_destination_hubs as $pending_rate_destination_hub) {
+                            $rate_destination_hub = new CorporateRateDestinationHub();
+                            $rate_destination_hub->user_id = $pending_rate_destination_hub->user_id;
+                            $rate_destination_hub->shipping_mode_id = $pending_rate_destination_hub->shipping_mode_id;
+                            $rate_destination_hub->city_id = $pending_rate_destination_hub->city_id;
+                            $rate_destination_hub->save();
                         }
                     }
                     if($pending_delivery_type_status = PendingCorporateDeliveryTypeStatus::where(['user_id' => $id, 'shipping_mode_id' => 1, 'delivery_type_id' => 2])->first()){
@@ -20225,6 +21426,27 @@ class AdminCorporateAccountsController extends Controller
 
             if($ONRateAlready->isEmpty()) {
 
+
+                if($request->has('on_origin_hubs')) {
+                    foreach($request->on_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 1;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+
+                if($request->has('on_destination_hubs')) {
+                    foreach($request->on_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 1;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
                 CorporateDefaultRateStatus::create([
                     'user_id'=>$id,
                     'shipping_mode_id'=>1,
@@ -20386,6 +21608,25 @@ class AdminCorporateAccountsController extends Controller
            
             if($OLRatePresent->isEmpty()) {
 
+                if($request->has('ol_origin_hubs')) {
+                    foreach($request->ol_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 2;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+
+                if($request->has('ol_destination_hubs')) {
+                    foreach($request->ol_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 2;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateDefaultRateStatus::create([
                     'user_id'=>$id,
                     'shipping_mode_id'=>2,
@@ -20545,6 +21786,27 @@ class AdminCorporateAccountsController extends Controller
             $DetainRatePresent = CorporateDefaultRateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
             if ($DetainRatePresent->isEmpty()) {
+
+                if($request->has('detain_origin_hubs')) {
+                    foreach($request->detain_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 3;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+
+                if($request->has('detain_destination_hubs')) {
+                    foreach($request->detain_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 3;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
+
                 CorporateDefaultRateStatus::create([
                     'user_id' => $id,
                     'shipping_mode_id' => 3,
@@ -20703,6 +21965,26 @@ class AdminCorporateAccountsController extends Controller
 
             $SamedayRatePresent = CorporateDefaultRateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
             if($SamedayRatePresent->isEmpty()) {
+
+                if($request->has('sameday_origin_hubs')) {
+                    foreach($request->sameday_origin_hubs as $origin_id){
+                        $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                        $rate_origin_hub->user_id = $id;
+                        $rate_origin_hub->shipping_mode_id = 4;
+                        $rate_origin_hub->city_id = $origin_id;
+                        $rate_origin_hub->save();
+                    }
+                }
+
+                if($request->has('sameday_destination_hubs')) {
+                    foreach($request->sameday_destination_hubs as $destination_id){
+                        $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                        $rate_destination_hub->user_id = $id;
+                        $rate_destination_hub->shipping_mode_id = 4;
+                        $rate_destination_hub->city_id = $destination_id;
+                        $rate_destination_hub->save();
+                    }
+                }
                 CorporateDefaultRateStatus::create([
                     'user_id'=>$id,
                     'shipping_mode_id'=>4,
@@ -21116,17 +22398,83 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
 
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $rate_origin_hubs = CorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = CorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if(count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if(count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
+
             $existing = 0;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
+                    return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
+                return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
 
         }
@@ -21200,17 +22548,84 @@ class AdminCorporateAccountsController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
+
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $rate_origin_hubs = PendingCorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if(count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if(count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
+
             $existing = 1;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
+                    return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
+                return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types,'e_switches'=>$e_switches,'e_weight'=>$e_weight,'e_shippingType'=>$e_bookingType,'e_cashHandling'=>$e_cash,'e_insuranceCharges'=>$e_insurance,'e_returnCharges'=>$e_return,'e_fuelCharges'=>$e_fuel, 'e_discountCharges'=>$e_discount, 'e_rate_status'=>$e_rate_status, 'e_packaging_material_types' => $e_packaging_material_types, 'e_packaging_type_ids' => $e_packaging_type_ids, 'e_packaging_charges' => $e_packaging_charges, 'e_wms_user_info' => $e_wms_user_info, 'e_wms_product_charges' => $e_wms_product_charges, 'e_wms_square_foot_charges' => $e_wms_square_foot_charges, 'e_wms_packing_charges' => $e_wms_packing_charges, 'e_wms_labelling_charges' => $e_wms_labelling_charges, 'e_wms_storage_charges' => $e_wms_storage_charges, 'e_invoicing_cycles' => $e_invoicing_cycles, 'e_storage_types' => $e_storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
         }
         else if($user['status'] == 3 && $user['new_rate_type_id'] != null){
@@ -21253,17 +22668,82 @@ class AdminCorporateAccountsController extends Controller
                 }
             }
 
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $rate_origin_hubs = PendingCorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if(count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if(count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
             $existing = 0;
             if(session('department_id') == 7){
                 if($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))){
-                    return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
+                    return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'existing' => $existing, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
                 }
                 else{
                     return view('admin.access_denied');
                 }
             }
             else{
-                return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array]);
+                return view('admin.accounts.corporate.default.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'existing' => $existing, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_type_sizes' => $packaging_sizes, 'rate_remarks' => $rate_remarks, 'on' => $on, 'ol' => $ol, 'det' => $det, 'same_day' => $same_day, 'commission_percentage' => $commission_percentage, 'sales_tiers' => $sales_tiers, 'users' => $all_users, 'existing_commission_array' => $existing_commission_array, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             }
         }
         else {
@@ -21753,6 +23233,27 @@ class AdminCorporateAccountsController extends Controller
 
                 if (!$ONRateAlready->isEmpty()) {
 
+                    CorporateDefaultRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateDefaultRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 1])->delete();
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     $wa_switch = array();
                     $wa_spkg = array();
                     CorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_weight_record)->delete();
@@ -22002,6 +23503,27 @@ class AdminCorporateAccountsController extends Controller
 
                 if (!$ONRateAlready->isEmpty()) {
 
+                    CorporateDefaultRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateDefaultRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 2])->delete();
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     $wa_switch = array();
                     $wa_spkg = array();
                     CorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_weight_record)->delete();
@@ -22249,7 +23771,26 @@ class AdminCorporateAccountsController extends Controller
                 $ONRateAlready = CorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
-
+                    CorporateDefaultRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateDefaultRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 3])->delete();
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch = array();
                     $wa_spkg = array();
                     CorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_weight_record)->delete();
@@ -22497,7 +24038,26 @@ class AdminCorporateAccountsController extends Controller
                 $ONRateAlready = CorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
                 if (!$ONRateAlready->isEmpty()) {
-
+                    CorporateDefaultRateOriginHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new CorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+                    CorporateDefaultRateDestinationHub::where(['user_id' => $id, 'shipping_mode_id' => 4])->delete();
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch = array();
                     $wa_spkg = array();
                     CorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_weight_record)->delete();
@@ -23341,8 +24901,10 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
             PendingCorporateDefaultDiscountCharge::where('user_id', $id)->delete();
+            PendingCorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+            PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
 
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
                 foreach ($packaging_types as $type){
@@ -23361,12 +24923,13 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
 
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $ONRateAlready = PendingCorporateDefaultRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
                 if ($ONRateAlready->isEmpty()) {
+
                     PendingCorporateDefaultRateStatus::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -23377,6 +24940,27 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
 
                     ]);
+
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     $wa_switch = array();
                     $wa_spkg = array();
                     foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
@@ -23538,6 +25122,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
 
                     ]);
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
+
                     $wa_switch_overland = array();
                     $wa_spkg_overland = array();
                     foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
@@ -23693,6 +25297,26 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
 
                     ]);
+
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch_detain = array();
                     $wa_spkg_detain = array();
                     foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
@@ -23846,6 +25470,25 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
                     ]);
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch_sameday = array();
                     $wa_spkg_sameday = array();
                     foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
@@ -24051,7 +25694,24 @@ class AdminCorporateAccountsController extends Controller
             if ($request->approve == 1) {
 
                 $user = User::find($id);
-
+                if($rate_origin_hubs = CorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
+                    foreach ($rate_origin_hubs as $rate_origin_hub) {
+                        $history_rate_origin_hub = new HistoryCorporateDefaultRateOriginHub();
+                        $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                        $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                        $history_rate_origin_hub->save();
+                    }
+                }
+                if($rate_destination_hubs = CorporateDefaultRateDestinationHub::where('user_id', $id)->get()) {
+                    foreach ($rate_destination_hubs as $rate_destination_hub) {
+                        $history_rate_destination_hub = new HistoryCorporateDefaultRateDestinationHub();
+                        $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                        $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                        $history_rate_destination_hub->save();
+                    }
+                }
                 if($switches = CorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
 
                     CorporateDefaultHistoryRateStatus::create([
@@ -24571,8 +26231,30 @@ class AdminCorporateAccountsController extends Controller
                 CorporateDefaultInsuranceCharge::where('user_id', $id)->delete();
                 CorporateDefaultReturnCharge::where('user_id', $id)->delete();
                 CorporateDefaultFuelSurcharge::where('user_id', $id)->delete();
-                PackagingCharge::where('user_id', $id)->delete();
+//                PackagingCharge::where('user_id', $id)->delete();
                 CorporateDefaultDiscountCharge::where('user_id', $id)->delete();
+
+                CorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+                CorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
+
+                if($rate_origin_hubs = PendingCorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
+                    foreach ($rate_origin_hubs as $rate_origin_hub) {
+                        $history_rate_origin_hub = new CorporateDefaultRateOriginHub();
+                        $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                        $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                        $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                        $history_rate_origin_hub->save();
+                    }
+                }
+                if($rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->get()) {
+                    foreach ($rate_destination_hubs as $rate_destination_hub) {
+                        $history_rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                        $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                        $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                        $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                        $history_rate_destination_hub->save();
+                    }
+                }
 
                 if($pendingswitchs = PendingCorporateDefaultRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                     CorporateDefaultRateStatus::create([
@@ -24902,7 +26584,7 @@ class AdminCorporateAccountsController extends Controller
                         ]);
                     }
                 }
-                if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
+                /*if($pendingpackagings = PendingPackagingCharge::where('user_id', '=', $id)->get()) {
                     foreach ($pendingpackagings as $pendingpackaging) {
                         $packaging_charges = new PackagingCharge();
                         $packaging_charges->user_id = $id;
@@ -24911,7 +26593,7 @@ class AdminCorporateAccountsController extends Controller
                         $packaging_charges->charges = $pendingpackaging->charges;
                         $packaging_charges->save();
                     }
-                }
+                }*/
                 if($pendingdiscounts = PendingCorporateDefaultDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
                     foreach ($pendingdiscounts as $pendingdiscount) {
                         CorporateDefaultDiscountCharge::create([
@@ -25049,8 +26731,12 @@ class AdminCorporateAccountsController extends Controller
                 PendingCorporateDefaultInsuranceCharges::where('user_id', $id)->delete();
                 PendingCorporateDefaultReturnCharge::where('user_id', $id)->delete();
                 PendingCorporateDefaultFuelSurcharge::where('user_id', $id)->delete();
-                PendingPackagingCharge::where('user_id', $id)->delete();
+//                PendingPackagingCharge::where('user_id', $id)->delete();
                 PendingCorporateDefaultDiscountCharge::where('user_id', $id)->delete();
+
+                PendingCorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+                PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
+
                 User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
@@ -25617,8 +27303,10 @@ class AdminCorporateAccountsController extends Controller
             PendingCorporateFuelSurcharge::where('user_id', $id)->delete();
             PendingPackagingCharge::where('user_id', $id)->delete();
             PendingCorporateDefaultDiscountCharge::where('user_id', $id)->delete();
+            PendingCorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+            PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
 
-            if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+            /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
                 $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
                 foreach ($packaging_types as $type){
@@ -25637,7 +27325,7 @@ class AdminCorporateAccountsController extends Controller
                     }
                 }
 
-            }
+            }*/
 
 
             if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
@@ -25653,6 +27341,25 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0
 
                     ]);
+                    if($request->has('on_origin_hubs')) {
+                        foreach($request->on_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 1;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('on_destination_hubs')) {
+                        foreach($request->on_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 1;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch = array();
                     $wa_spkg = array();
                     foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
@@ -25814,6 +27521,25 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0
 
                     ]);
+                    if($request->has('ol_origin_hubs')) {
+                        foreach($request->ol_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 2;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('ol_destination_hubs')) {
+                        foreach($request->ol_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 2;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch_overland = array();
                     $wa_spkg_overland = array();
                     foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
@@ -25969,6 +27695,25 @@ class AdminCorporateAccountsController extends Controller
                         'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0
 
                     ]);
+                    if($request->has('detain_origin_hubs')) {
+                        foreach($request->detain_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 3;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('detain_destination_hubs')) {
+                        foreach($request->detain_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 3;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch_detain = array();
                     $wa_spkg_detain = array();
                     foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
@@ -26122,6 +27867,25 @@ class AdminCorporateAccountsController extends Controller
                         'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
                         'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0
                     ]);
+                    if($request->has('sameday_origin_hubs')) {
+                        foreach($request->sameday_origin_hubs as $origin_id){
+                            $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                            $rate_origin_hub->user_id = $id;
+                            $rate_origin_hub->shipping_mode_id = 4;
+                            $rate_origin_hub->city_id = $origin_id;
+                            $rate_origin_hub->save();
+                        }
+                    }
+
+                    if($request->has('sameday_destination_hubs')) {
+                        foreach($request->sameday_destination_hubs as $destination_id){
+                            $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                            $rate_destination_hub->user_id = $id;
+                            $rate_destination_hub->shipping_mode_id = 4;
+                            $rate_destination_hub->city_id = $destination_id;
+                            $rate_destination_hub->save();
+                        }
+                    }
                     $wa_switch_sameday = array();
                     $wa_spkg_sameday = array();
                     foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
@@ -26325,6 +28089,25 @@ class AdminCorporateAccountsController extends Controller
             //dd($weightAlready);
 
            if($request->approve== 1){
+
+               if($rate_origin_hubs = CorporateRateOriginHub::where('user_id', $id)->get()) {
+                   foreach ($rate_origin_hubs as $rate_origin_hub) {
+                       $history_rate_origin_hub = new HistoryCorporateRateOriginHub();
+                       $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                       $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                       $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                       $history_rate_origin_hub->save();
+                   }
+               }
+               if($rate_destination_hubs = CorporateRateDestinationHub::where('user_id', $id)->get()) {
+                   foreach ($rate_destination_hubs as $rate_destination_hub) {
+                       $history_rate_destination_hub = new HistoryCorporateRateDestinationHub();
+                       $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                       $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                       $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                       $history_rate_destination_hub->save();
+                   }
+               }
 
                if ($switches = CorporateRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
@@ -26875,10 +28658,29 @@ class AdminCorporateAccountsController extends Controller
                CorporateFuelSurcharge::where('user_id', $id)->delete();
                CorporateDiscountCharge::where('user_id', $id)->delete();
                CorporateMinChargeableWeight::where('user_id', $id)->delete();
-               PackagingCharge::where('user_id', $id)->delete();
+//               PackagingCharge::where('user_id', $id)->delete();
                CorporateDeliveryTypeStatus::where('user_id', $id)->delete();
+               CorporateRateOriginHub::where('user_id', $id)->delete();
+               CorporateRateDestinationHub::where('user_id', $id)->delete();
 
-
+               if($rate_origin_hubs = PendingCorporateDefaultRateOriginHub::where('user_id', $id)->get()) {
+                   foreach ($rate_origin_hubs as $rate_origin_hub) {
+                       $history_rate_origin_hub = new CorporateDefaultRateOriginHub();
+                       $history_rate_origin_hub->user_id = $rate_origin_hub->user_id;
+                       $history_rate_origin_hub->shipping_mode_id = $rate_origin_hub->shipping_mode_id;
+                       $history_rate_origin_hub->city_id = $rate_origin_hub->city_id;
+                       $history_rate_origin_hub->save();
+                   }
+               }
+               if($rate_destination_hubs = PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->get()) {
+                   foreach ($rate_destination_hubs as $rate_destination_hub) {
+                       $history_rate_destination_hub = new CorporateDefaultRateDestinationHub();
+                       $history_rate_destination_hub->user_id = $rate_destination_hub->user_id;
+                       $history_rate_destination_hub->shipping_mode_id = $rate_destination_hub->shipping_mode_id;
+                       $history_rate_destination_hub->city_id = $rate_destination_hub->city_id;
+                       $history_rate_destination_hub->save();
+                   }
+               }
                if ($switches = PendingCorporateDefaultRateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->first()) {
 
                    CorporateDefaultRateStatus::create([
@@ -27281,7 +29083,10 @@ class AdminCorporateAccountsController extends Controller
                PendingCorporateDefaultReturnCharge::where('user_id', $id)->delete();
                PendingCorporateDefaultFuelSurcharge::where('user_id', $id)->delete();
                PendingCorporateDefaultDiscountCharge::where('user_id', $id)->delete();
-               PackagingCharge::where('user_id', $id)->delete();
+//               PackagingCharge::where('user_id', $id)->delete();
+               PendingCorporateDefaultRateOriginHub::where('user_id', $id)->delete();
+               PendingCorporateDefaultRateDestinationHub::where('user_id', $id)->delete();
+
 
                $rate_type_history = new CorporateRateTypeHistory();
                $rate_type_history->corporate_rate_type_id = $user->corporate_rate_type_id;
@@ -27912,6 +29717,26 @@ class AdminCorporateAccountsController extends Controller
               }
               $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
               if ($ONRateAlready->isEmpty()) {
+                  if($request->has('on_origin_hubs')) {
+                      foreach($request->on_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 1;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('on_destination_hubs')) {
+                      foreach($request->on_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 1;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
+
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 1,
@@ -28110,6 +29935,25 @@ class AdminCorporateAccountsController extends Controller
               $OLRatePresent = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 2)->get();
 
               if ($OLRatePresent->isEmpty()) {
+                  if($request->has('ol_origin_hubs')) {
+                      foreach($request->ol_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 2;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('ol_destination_hubs')) {
+                      foreach($request->ol_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 2;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 2,
@@ -28304,6 +30148,25 @@ class AdminCorporateAccountsController extends Controller
               $DetainRatePresent = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
               if ($DetainRatePresent->isEmpty()) {
+                  if($request->has('detain_origin_hubs')) {
+                      foreach($request->detain_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 3;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('detain_destination_hubs')) {
+                      foreach($request->detain_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 3;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 3,
@@ -28501,6 +30364,25 @@ class AdminCorporateAccountsController extends Controller
 
               $SamedayRatePresent = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 4)->get();
               if ($SamedayRatePresent->isEmpty()) {
+                  if($request->has('sameday_origin_hubs')) {
+                      foreach($request->sameday_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 4;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('sameday_destination_hubs')) {
+                      foreach($request->sameday_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 4;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 4,
@@ -29146,7 +31028,7 @@ class AdminCorporateAccountsController extends Controller
           }
 
           //Packaging Charges
-          if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
+          /*if($request->has('packaging_switch') && $request->packaging_switch == 'on'){
               $packaging_types = PackagingMaterialTypes::where('status', 1)->get();
 
               foreach ($packaging_types as $type){
@@ -29164,7 +31046,7 @@ class AdminCorporateAccountsController extends Controller
                   }
               }
 
-          }
+          }*/
 
           if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
               if ($request->has('on_default') && $request->on_default == 'on') {
@@ -29175,6 +31057,25 @@ class AdminCorporateAccountsController extends Controller
               $ONRateAlready = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 1)->get();
 
               if ($ONRateAlready->isEmpty()) {
+                  if($request->has('on_origin_hubs')) {
+                      foreach($request->on_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 1;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('on_destination_hubs')) {
+                      foreach($request->on_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 1;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 1,
@@ -29367,6 +31268,25 @@ class AdminCorporateAccountsController extends Controller
               $OLRatePresent = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 2)->get();
 
               if ($OLRatePresent->isEmpty()) {
+                  if($request->has('ol_origin_hubs')) {
+                      foreach($request->ol_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 2;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('ol_destination_hubs')) {
+                      foreach($request->ol_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 2;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 2,
@@ -29555,6 +31475,25 @@ class AdminCorporateAccountsController extends Controller
               $DetainRatePresent = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
 
               if ($DetainRatePresent->isEmpty()) {
+                  if($request->has('detain_origin_hubs')) {
+                      foreach($request->detain_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 3;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('detain_destination_hubs')) {
+                      foreach($request->detain_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 3;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 3,
@@ -29746,6 +31685,25 @@ class AdminCorporateAccountsController extends Controller
 
               $SamedayRatePresent = PendingCorporateRateStatus::where('user_id', $id)->where('shipping_mode_id', 4)->get();
               if ($SamedayRatePresent->isEmpty()) {
+                  if($request->has('sameday_origin_hubs')) {
+                      foreach($request->sameday_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 4;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('sameday_destination_hubs')) {
+                      foreach($request->sameday_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 4;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   PendingCorporateMinChargeableWeight::create([
                       'user_id' => $id,
                       'shipping_mode_id' => 4,
@@ -30416,6 +32374,25 @@ class AdminCorporateAccountsController extends Controller
                       'return_charges'=> ($request->has('on_return_switch'))? 1:0,
                       'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0
                   ]);
+                  if($request->has('on_origin_hubs')) {
+                      foreach($request->on_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 1;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('on_destination_hubs')) {
+                      foreach($request->on_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 1;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   $wa_switch = array();
                   $wa_spkg = array();
                   foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
@@ -30577,6 +32554,25 @@ class AdminCorporateAccountsController extends Controller
                       'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
                       'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0
                   ]);
+                  if($request->has('ol_origin_hubs')) {
+                      foreach($request->ol_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 2;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('ol_destination_hubs')) {
+                      foreach($request->ol_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 2;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   $wa_switch_overland = array();
                   $wa_spkg_overland = array();
                   foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
@@ -30736,6 +32732,25 @@ class AdminCorporateAccountsController extends Controller
                       'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
                       'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0
                   ]);
+                  if($request->has('detain_origin_hubs')) {
+                      foreach($request->detain_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 3;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('detain_destination_hubs')) {
+                      foreach($request->detain_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 3;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   $wa_switch_detain = array();
                   $wa_spkg_detain = array();
                   foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
@@ -30894,6 +32909,25 @@ class AdminCorporateAccountsController extends Controller
                       'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
                       'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0
                   ]);
+                  if($request->has('sameday_origin_hubs')) {
+                      foreach($request->sameday_origin_hubs as $origin_id){
+                          $rate_origin_hub = new PendingCorporateDefaultRateOriginHub();
+                          $rate_origin_hub->user_id = $id;
+                          $rate_origin_hub->shipping_mode_id = 3;
+                          $rate_origin_hub->city_id = $origin_id;
+                          $rate_origin_hub->save();
+                      }
+                  }
+
+                  if($request->has('sameday_destination_hubs')) {
+                      foreach($request->sameday_destination_hubs as $destination_id){
+                          $rate_destination_hub = new PendingCorporateDefaultRateDestinationHub();
+                          $rate_destination_hub->user_id = $id;
+                          $rate_destination_hub->shipping_mode_id = 3;
+                          $rate_destination_hub->city_id = $destination_id;
+                          $rate_destination_hub->save();
+                      }
+                  }
                   $wa_switch_sameday = array();
                   $wa_spkg_sameday = array();
                   foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
@@ -31195,7 +33229,7 @@ class AdminCorporateAccountsController extends Controller
         $bookingType = CorporateDefaultBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
         $discount = CorporateDefaultDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-        $packaging = PackagingCharge::all()->where('user_id', $id);
+//        $packaging = PackagingCharge::all()->where('user_id', $id);
 
         $sale_person = SalePersonTag::where('user_id', $id)->where('status', 0)->first();
         $packaging = PackagingCharge::all()->where('user_id', $id);
@@ -31220,14 +33254,79 @@ class AdminCorporateAccountsController extends Controller
         }
 
         $sales_commission = SalesCommission::where('shipper_id', $id)->first();
+
+        $rate_origin_hubs = CorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $rate_destination_hubs = CorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+        $overnight_origins = [];
+        $overland_origins = [];
+        $detain_origins = [];
+        $sameday_origins = [];
+        if(count($rate_origin_hubs) > 0){
+            foreach($rate_origin_hubs as $index => $origin){
+
+                if($index == 1){
+                    foreach($origin as $origin_data){
+                        $overnight_origins[] = $origin_data->city_id;
+                    }
+                }
+                else if($index == 2){
+                    foreach($origin as $origin_data){
+                        $overland_origins[] = $origin_data->city_id;
+                    }
+                }
+                else if($index == 3){
+                    foreach($origin as $origin_data){
+                        $detain_origins[] = $origin_data->city_id;
+                    }
+                }
+                else if($index == 4){
+                    foreach($origin as $origin_data){
+                        $sameday_origins[] = $origin_data->city_id;
+                    }
+                }
+
+            }
+        }
+        $overnight_destinations = [];
+        $overland_destinations = [];
+        $detain_destinations = [];
+        $sameday_destinations = [];
+        if(count($rate_destination_hubs) > 0){
+            foreach($rate_destination_hubs as $index => $destination){
+
+                if($index == 1){
+                    foreach($destination as $destination_data){
+                        $overnight_destinations[] = $destination_data->city_id;
+                    }
+                }
+                else if($index == 2){
+                    foreach($destination as $destination_data){
+                        $overland_destinations[] = $destination_data->city_id;
+                    }
+                }
+                else if($index == 3){
+                    foreach($destination as $destination_data){
+                        $detain_destinations[] = $destination_data->city_id;
+                    }
+                }
+                else if($index == 4){
+                    foreach($destination as $destination_data){
+                        $sameday_destinations[] = $destination_data->city_id;
+                    }
+                }
+
+            }
+        }
         if (session('department_id') == 7) {
             if ($sale_person['admin_id'] == Auth::id() || session('role_id') == 4 || in_array($id, session('tagged_shippers'))) {
-                return view('admin.accounts.corporate.default.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+                return view('admin.accounts.corporate.default.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
             } else {
                 return view('admin.access_denied');
             }
         } else {
-            return view('admin.accounts.corporate.default.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission]);
+            return view('admin.accounts.corporate.default.view_rates')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'sales_commission' => $sales_commission, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
         }
     }
 

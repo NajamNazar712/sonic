@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\http\Models\Admin\WalkInInternationalStandardWeightCharge;
@@ -800,9 +800,18 @@ class ShipmentChargesController extends Controller
         }
 
         if ($result) {
-            $shipment->weight_charges = $result['weight_charges'];
-            $shipment->chargeable_weight = $result['chargeable_weight'];
+            
+           
+            if($shipment->booking_type_id == 6){
+                $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$shipment->ftl->id)->sum('amount');
+                $calc_total = ((($shipment->ftl->freight_charges/$shipment->ftl->weight)*$shipment->actual_weight));
+                $shipment->weight_charges = $calc_total;
+                $shipment->chargeable_weight = $result['chargeable_weight'];
 
+            }else{
+                $shipment->weight_charges = $result['weight_charges'];
+                $shipment->chargeable_weight = $result['chargeable_weight'];
+            }
             $shipment->save();
         }
     }

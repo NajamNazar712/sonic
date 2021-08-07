@@ -340,9 +340,7 @@ class ShipperPackagingMaterialController extends Controller
 //
 //    }
     public function packaging_request_submit(Request $request){
-        // $packaging_cart = PackagingMaterialCart::where('user_id',session('user_id'))->whereIn('type_id', $request->types);
-        // dump($packaging_cart->get());
-        // dd($request->all());
+       
         $packaging_size_ids = $request->size;
         $packaging_quantities = $request->quantity;
         $packaging_type_ids = array();
@@ -355,19 +353,47 @@ class ShipperPackagingMaterialController extends Controller
         }else{
             return redirect()->route('cod.packaging.requests.index')->with('error', 'Request not submitted!');
         }
-        foreach ($packaging_cart as $index => $packaging_size_id){
-            $size = PackagingMaterialTypeSizes::find($packaging_size_id->size_id);
+        foreach ($packaging_size_ids as $index => $packaging_size_id){
+            $size = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
             $packaging_type_id = $size->type->id;
             $packaging_type_ids[$index] = $packaging_type_id;
             $packaging_wms_product_ids[$index] = $size->wms_product_id;
-            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first();
-            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first()->delete();
+            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $size->id])->latest()->first();
+            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $size->id])->latest()->first()->delete();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }else{
                 $total_charges += $packaging_quantities[$index] * $size->standard_charges;
             }
         }
+        
+        
+        //old
+        // $packaging_size_ids = $request->size;
+        // $packaging_quantities = $request->quantity;
+        // $packaging_type_ids = array();
+        // $packaging_wms_product_ids = array();
+        // $total_charges = 0;
+        // $packaging_cart = PackagingMaterialCart::where('user_id',session('user_id'))->whereIn('type_id', $request->types);
+
+        // if($packaging_cart->exists()){
+        //     $packaging_cart = $packaging_cart->get();
+        // }else{
+        //     return redirect()->route('cod.packaging.requests.index')->with('error', 'Request not submitted!');
+        // }
+        // foreach ($packaging_cart as $index => $packaging_size_id){
+        //     $size = PackagingMaterialTypeSizes::find($packaging_size_id->size_id);
+        //     $packaging_type_id = $size->type->id;
+        //     $packaging_type_ids[$index] = $packaging_type_id;
+        //     $packaging_wms_product_ids[$index] = $size->wms_product_id;
+        //     $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first();
+        //     PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first()->delete();
+        //     if($charges != null){
+        //             $total_charges += $packaging_quantities[$index] * $charges->charges;
+        //     }else{
+        //         $total_charges += $packaging_quantities[$index] * $size->standard_charges;
+        //     }
+        // }
 
         $today = Carbon::today();
 
@@ -601,12 +627,15 @@ class ShipperPackagingMaterialController extends Controller
 
     public function select_categories(){
 
-        
-        return view('client.packaging.categories');
+        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
+
+        return view('client.packaging.categories')->with(['search_packaging_types' => $search_packaging_type]);
 
     }
 
     public function category_products($id){
+        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
+
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
       
         $shipper = User::find(session('user_id'));
@@ -658,21 +687,43 @@ class ShipperPackagingMaterialController extends Controller
             $category_name = "Stationary Items";
 
         }
-        return view('client.packaging.products')->with(['packaging_types' => $packaging_types,'shipper_packaging_types' => $shipper->packaging_materails, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures,'category' => $id, 'category_name' => $category_name]);
+        return view('client.packaging.products')->with(['packaging_types' => $packaging_types,'shipper_packaging_types' => $shipper->packaging_materails, /*'user_charges' => $user_charges*/'standard_charges' => $standard_charges, 'pictures' => $pictures,'category' => $id, 'category_name' => $category_name, 'search_packaging_types' => $search_packaging_type]);
     }
 
     public function product_details($id){
-        // dd('te');
         
+        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
+        $size_price =PackagingMaterialTypeSizes::where('type_id',$id)->get()->last()->standard_charges;   
         $product = PackagingMaterialTypes::find($id);
         if ($product->picture != NULL) {
             $picture = Storage::url('packaging_pictures/' . $product->picture);
         } else {
             $picture = 'img/trax_logo.png';
-        }
+        }   
+        if ($product->picture_1 != NULL) {
+            $picture1 = Storage::url('packaging_pictures/' . $product->picture_1);
+        } else {
+            $picture1 = 'img/trax_logo.png';
+        } 
+        if ($product->picture_2 != NULL) {
+            $picture2 = Storage::url('packaging_pictures/' . $product->picture_2);
+        } else {
+            $picture2 = 'img/trax_logo.png';
+        } 
+        if ($product->picture_3 != NULL) {
+            $picture3 = Storage::url('packaging_pictures/' . $product->picture_3);
+        } else {
+            $picture3 = 'img/trax_logo.png';
+        } 
+        if ($product->picture_4 != NULL) {
+            $picture4 = Storage::url('packaging_pictures/' . $product->picture_4);
+        } else {
+            $picture4 = 'img/trax_logo.png';
+        } 
+
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
 
-        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture]);
+        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture, 'picture1' => $picture1, 'picture2' => $picture2, 'picture3' => $picture3, 'picture4' => $picture4,'search_packaging_types' => $search_packaging_type, 'size_price' => $size_price]);
 
 
     }
@@ -718,6 +769,8 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function checkout(){
+        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
+
         $cart = PackagingMaterialCart::where('user_id',session('user_id'));
         if($cart->count() > 0){
             $cart = $cart->get();
@@ -735,7 +788,7 @@ class ShipperPackagingMaterialController extends Controller
             $cities = City::where('status',1)->orderBy('name')->get();
             $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
             $payment_mode = PackagingPaymentMode::all();
-            return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'pictures' => $pictures]);
+            return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'pictures' => $pictures, 'search_packaging_types' => $search_packaging_type]);
         }
         else{
             return redirect()->route('cod.packaging.requests.categories')->with('success', 'Product Added');

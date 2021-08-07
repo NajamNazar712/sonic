@@ -12,30 +12,43 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                <div class="col-10">
+                                <div class="col-2">
                                     @include('client.inc.messages')
                                 </div>
                                     <div class="col">
                                         <h1 class="mb-1 text-center">
                                             Material Request
                                         </h1>
+                                        <div class="col-6 align-middle text-center search_style">
+                                            <form id="search_package_type_from">
+                                                <div class="form-group mb-0">
+                                                    <select name="search_package_type" id="search_package_type" class="form-control select2">
+                                                        @if(isset($search_packaging_types))
+                                                        @foreach($search_packaging_types as $search_packaging_type)
+                                                            <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                        @endforeach
+                                                        @endif
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
                                         <div class="row text-center categories_row">
 
                                                     <div class="col-6">
-                                                        <div class="col mb-1 text-center border border-3">
+                                                        <div class="col mb-1 text-center border border-3 box_padding">
                                                             <img class="category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
-                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-primary select_category"><b>Packaging Materials</b></a>
+                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-dark select_category"><b>Packaging Materials</b></a>
                                                         </div>
                                                     </div>
                                                    
                                                     <div class="col-6">
-                                                        <div class="col mb-1 text-center border border-3">
+                                                        <div class="col mb-1 text-center border border-3 box_padding">
                                                             <img class="category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
-                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-primary select_category"><b>Stationary Items</b></a>
+                                                            <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-dark select_category"><b>Stationary Items</b></a>
                                                         </div>
                                                     </div>
                                         </div>
@@ -66,8 +79,8 @@
 
     <style>
         #proceed_cart {
-            position: fixed;
-            top: 120px;
+            position: absolute;
+            top: 46px;
             padding-right: 80px;
             left: 0;
             width: 100%;
@@ -103,6 +116,14 @@
             width: 500px;
             height: 230px;
         }
+        .box_padding{
+            padding-top: 35px; 
+            padding-bottom: 35px;
+            border-radius: 30px; 
+        }
+        .search_style{
+            margin:0 auto;
+        }
     </style>
 
 @endsection
@@ -122,6 +143,14 @@
 
     <script type="text/javascript">
         $('document').ready(function(){
+            $('#search_package_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Search',
+                dropdownParent:$('#search_package_type_from')
+            }).bind('select2:select',function () {
+                var url = $(this).val();
+                window.location.href = url;
+            });
             $.ajax({
                        url: '{!! route('cod.packaging.requests.get_cart_count') !!}',
                        method: 'POST',

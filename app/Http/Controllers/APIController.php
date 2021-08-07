@@ -156,7 +156,10 @@ class APIController extends Controller
 
       'distinct' => ':attribute must not be Repeated.',
 
-      'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).'
+      'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
+      'origin_check' => 'Origin city not allowed, please contact your sales person!',
+      'destination_check' => 'Destination city not allowed, please contact your sales person!',
+      'destination_return_check' => 'Return city not allowed, please contact your sales person!',
     ];
 
     static public function phone_number($phone_number) {
@@ -376,6 +379,47 @@ class APIController extends Controller
             }
           }
         });
+        Validator::extend('origin_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = ShipperShipmentBookController::check_origin($value, $shipping_mode_id, $user_id);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
+
+        Validator::extend('destination_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
+
+        Validator::extend('destination_return_check', function($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            if ($value) {
+                $result = ShipperShipmentBookController::check_return_destination($value, $shipping_mode_id, $user_id);
+                if($result){
+                    return TRUE;
+                }
+                else{
+                    return FALSE;
+                }
+            }
+        });
 
         $user_type = User::where('id',$user_id)->first();
         if($user_type['account_type_id'] == 1) {
@@ -385,12 +429,12 @@ class APIController extends Controller
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                })],
+                }), 'origin_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                })],
+                }), 'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
+                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -466,12 +510,12 @@ class APIController extends Controller
                 })],
                 'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                })],
+                }), 'origin_check'],
                 'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function ($query) use ($user_id) {
                     $query->where('user_id', $user_id)->where('hidden', 0);
-                })],
+                }),'destination_return_check'],
                 'information_display' => ['required_if:service_type_id,1,2,3', 'nullable', 'boolean'],
-                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
+                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
                 'consignee_name' => ['required', 'between:1,100'],
                 'consignee_address' => ['required', 'between:1,255'],
                 'consignee_phone_number_1' => ['required', 'phone_number'],
@@ -3683,4 +3727,40 @@ class APIController extends Controller
             }
         }
     }
+
+
+    
+    public function live_tracking(Request $request){
+      $database = app('firebase.database');
+      $reference = $database->getReference('OnRouteShipments/in-transit');
+      
+      // if ($reference->getSnapshot()->getChild($request->tracking_id)->exists()) {
+      //       $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->getValue();
+      //       return response()->json(['status' => 0, 'data' => $details]);
+    
+      // } else {
+      //   return response()->json(['status' => 1, 'message' => 'No data found!']);
+         
+      // }
+
+      if ($reference->getSnapshot()->getChild($request->tracking_id)->exists()) {
+            $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->set(
+                [
+                    'runner_location_latitude' => $request->latitude,
+                    'runner_location_longitude' => $request->longitude,
+                ]
+            );
+            $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->getValue();
+            return response()->json(['status' => 0, 'data' => $details]);
+        } else {
+            $reference = $database->getReference('OnRouteShipments/in-transit')
+                ->update([
+                    $request->tracking_id => [
+                        'runner_location_latitude' => $request->latitude,
+                        'runner_location_longitude' => $request->longitude,
+            ]]);
+            $details = $database->getReference('OnRouteShipments/in-transit/' . $request->tracking_id)->getValue();
+            return response()->json(['status' => 0, 'data' => $details]);
+        }
+  }
 }
