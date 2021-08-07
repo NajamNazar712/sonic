@@ -1566,7 +1566,7 @@ class AdminReportsEmailController extends Controller
                     $retail_done_payment_report = new RetailDonePaymentsReport();
                     $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
                     $retail_done_payment_report->shipper_id = $retail_done_payment->retail_done_payment->shipper->id;
-                    $retail_done_payment_report->shipper_name = $retail_done_payment->retail_done_payment->shipper->name;
+                    $retail_done_payment_report->shipper_name = $retail_done_payment->retail_done_payment->shipper->shipper_name;
                     $retail_done_payment_report->amount = $retail_done_payment->payable;
                     $retail_done_payment_report->iban_number = $iban;
                     $retail_done_payment_report->save();
