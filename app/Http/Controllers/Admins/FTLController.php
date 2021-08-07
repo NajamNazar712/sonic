@@ -535,53 +535,6 @@ class FTLController extends Controller
 
 
 
-            // if($origin_city->zone_id == $destination_city->zone_id){
-            //     $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
-            //     if($weight_charges->exists()){
-            //         $weight_charges = $weight_charges->latest()->first();
-            //         $charges = $weight_charges->local_or_6hr;
-            //     }else{
-            //         return back()->with(['error'=>'Shipper Weight Charges Not Set']);
-            //     }   
-            // }else{
-            //     $weight_charges = CorporateWeightCharge::where('user_id', $request->shipper)->where('shipping_mode_id', 2)->where('delivery_type_id', 1)->where('range_up', '<=', $request->weight)->where('range_down', '>=', $request->weight);
-
-            //     if($weight_charges->exists()){
-            //         $weight_charges = $weight_charges->latest()->first();
-            //         $zone_class_city = ZoneClassCity::where('zone_id', $destination_city->zone_id)->where('city_id', $destination_city->id);
-            //         // ->where('zone_classification_id', 2)
-            //             if ($zone_class_city->exists()) {
-            //                 $zone_class_city = $zone_class_city->first();
-
-            //                 $class = $zone_class_city->class;
-            //                 if ($class == 1) {
-            //                     if (strpos($weight_charges->national_charges_class_1, '%') !== FALSE) {
-            //                         $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_1)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
-            //                     } else {
-            //                         $charges = intval($weight_charges->national_charges_class_1);
-            //                     }
-            //                 } else if ($class == 2) {
-            //                     if (strpos($weight_charges->national_charges_class_2, '%') !== FALSE) {
-            //                         $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_2)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
-            //                     } else {
-            //                         $charges = intval($weight_charges->national_charges_class_2);
-            //                     }
-            //                 } else if ($class == 3) {
-            //                     if (strpos($weight_charges->national_charges_class_3, '%') !== FALSE) {
-            //                         $charges = ((floatval(str_replace('%', '', $weight_charges->national_charges_class_3)) / 100) * $weight_charges->national_charges_class_0) + $weight_charges->national_charges_class_0;
-            //                     } else {
-            //                         $charges = intval($weight_charges->national_charges_class_3);
-            //                     }
-            //                 } else {
-            //                     $charges = $weight_charges->national_charges_class_0;
-            //                 }
-            //             }             
-            //         $charges = $weight_charges->local_or_6hr;
-            //     } else{
-            //         return back()->with(['error'=>'Shipper Weight Charges Not Set']);
-            //     } 
-                
-            // }
         }
         $ftl_request->salesperson_id = $request->sale_person;
         $ftl_request->origin_id = $request->origin;
