@@ -91,7 +91,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\DHLTrackingSync',
         'App\Console\Commands\StatusBookedEmailKhaddi',
         'App\Console\Commands\RiderWisePickupEmail',
-        'App\Console\Commands\InactiveRiderReport',        
+        'App\Console\Commands\InactiveRiderReport',
+        'App\Console\Commands\EmailsOfReturnConfirmToKams',
     ];
 
     /**
@@ -305,6 +306,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:inactiveriderreport')->dailyAt('08:00')->runInBackground();
+        $schedule->command('email:emailofreturnconfirmtokams')->dailyAt('03:00')->runInBackground();
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
     }

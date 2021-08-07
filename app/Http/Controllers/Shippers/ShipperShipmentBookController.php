@@ -73,9 +73,11 @@ use Validator;
 use Illuminate\Validation\Rule;
 
 use SnappyPDF;
+use DNS2D;
 
 class ShipperShipmentBookController extends Controller
 {
+
     private function unique_order_id($order_id) {
         if(is_numeric($order_id)){
             $length = strlen(session('prefix'));
@@ -351,7 +353,15 @@ class ShipperShipmentBookController extends Controller
         }
         $products = Product::orderBy('product_name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
+            }
         $check = NonServiceArea::pluck('name')->toArray();
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
         $air_waybill = ShipperAirWaybillSettings::where('user_id', session('user_id'));
@@ -621,7 +631,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     if ($service_type_id == 3 && $payment_mode_id == 4) {
-                        $payment_mode_id == 1;
+                        $payment_mode_id = 1;
                     }
 
                     if ($payment_mode_id == 4) {
@@ -1157,9 +1167,12 @@ class ShipperShipmentBookController extends Controller
                         }
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE') . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
@@ -1171,9 +1184,12 @@ class ShipperShipmentBookController extends Controller
                     ';
                         } else {
                             $table_start .= '
-                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment_item->id . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE') . '" class="d-block mx-auto">
                                 </td>
                                 <tr>
                                     <td class="color primary border twice-left"><strong>Type</strong></td>
@@ -1193,9 +1209,12 @@ class ShipperShipmentBookController extends Controller
                                 <td class="border twice-bottom">Rs ' . number_format($shipment_item->price) . '</td>';
                         if ($type != 'pdf') {
                             $table_start .= '
-                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-right">
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -1203,9 +1222,12 @@ class ShipperShipmentBookController extends Controller
                     ';
                         } else {
                             $table_start .= '
-                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                                 </td>
                               </tr>
                             </tbody>
@@ -1265,10 +1287,14 @@ class ShipperShipmentBookController extends Controller
                     }
                     if ($type != 'pdf') {
                         $table_start .= '
-                                <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
-                                </td>';
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
+                                </td>
+                        ';
 
                                 if($shipment->business_category->id==2){
                                     $table_start .= '<td class="color primary border twice-left"><strong>Service Type</strong></td>
@@ -1279,10 +1305,14 @@ class ShipperShipmentBookController extends Controller
                                 }
                     } else {
                         $table_start .= '
-                                <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                   <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $shipment->tracking_number . '</strong></span>
-                                </td>';
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
+                                </td>
+                        ';
 
                                 if($shipment->business_category->id==2){
                                     $table_start .= '<td class="color primary border twice-left"><strong>Service Type</strong></td>
@@ -1347,18 +1377,21 @@ class ShipperShipmentBookController extends Controller
                                 ';
                                 }
 
+                        $origin = $return_address_id == NULL ? 'Origin':'Return';
+                        $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important; color: white;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
 
+                        $origin_data = $return_address_id == NULL ?  $shipment->pickup_address->city->name : $return_address_city;
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
                                 <td>' . $shipment->order_id . '</td>
                               </tr>
                               <tr>
-                                <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
+                                '.$originstyle.'
+                                <td class="border twice-bottom"><strong>' . $origin_data . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>';
-                                if($return_address_id == NULL){
+
                                     $table_start .='
                                               <tr>
                                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -1367,18 +1400,8 @@ class ShipperShipmentBookController extends Controller
                                               <tr>
                                                 <td class="color secondary"><strong>Name</strong></td>
                                     ';
-                                }
-                                else{
-                                    $table_start .='
-                                              <tr>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
-                                                <td colspan="2" class="text-center color primary border twice-top twice-left"><strong>Return Address</strong></td>
-                                              </tr>
-                                              <tr>
-                                                <td class="color secondary"><strong>Name</strong></td>
-                                    ';
-                                }
+
+
 
                     } else {
                         $table_start .= '
@@ -1406,7 +1429,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                               </tr>';
-                        if($return_address_id == NULL){
+
                             $table_start .='
                                               <tr>
                                                 <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -1415,18 +1438,8 @@ class ShipperShipmentBookController extends Controller
                                               <tr>
                                                 <td class="color secondary"><strong>Name</strong></td>
                                     ';
-                        }
-                        else{
-                            $table_start .='
-                                              <tr>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
-                                                <td colspan="3" class="text-center color primary border twice-top twice-left"><strong>Consignee</strong></td>
-                                                <td colspan="2" class="text-center color primary border twice-top twice-left"><strong>Return Address</strong></td>
-                                              </tr>
-                                              <tr>
-                                                <td class="color secondary"><strong>Name</strong></td>
-                                    ';
-                        }
+
+
 
                     }
                     if($shipment->pickup_address->pickup_brand_name != NULL){
@@ -1444,7 +1457,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
 
-                    if($return_address_id == NULL){
+
                         if ($shipment->booking_type_id != 4) {
                             $table_start .= '
                                 <td colspan="3" class="border twice-right">' . $company_name . '</td>
@@ -1462,131 +1475,68 @@ class ShipperShipmentBookController extends Controller
                               <tr>
                 ';
 
-                    }
-                    else{
-
-                        if ($shipment->booking_type_id != 4) {
-                            $table_start .= '
-                                <td colspan="2" class="border twice-right">' . $company_name . '</td>
-                    ';
-                        } else {
-                            $table_start .= '
-                                <td colspan="2" class="border twice-right">' . $company_name . ' (' . $shipment->pickup_address->poc . ')</td>
-                    ';
-                        }
-                        $table_start .= '
-                                <td class="color secondary border twice-left"><strong>Name</strong></td>
-                                <td colspan="2">' . $shipment->consignee_name . '</td>
-                                <td class="color secondary border twice-left"><strong>City</strong></td>
-                                <td colspan="2">' . $return_address_city . '</td>
-                              </tr>
-
-                              <tr>
-                ';
-                    }
 
 
 
 
+
+                    $address = $return_address_id == NULL ?  $shipment->pickup_address->pickup_address : $return_address ;
+                    $addressstyle = $return_address_id == NULL ?'<td class="color secondary"><strong>Address</strong></td>':'<td style="background-color: #6e6e6e !important; color: white;" class="color secondary"><strong>Address</strong></td>';
                     if ($shipment->information_display == 1) {
-                        if($return_address_id == NULL){
+
                             if ($shipment->booking_type_id != 4) {
                                 $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                                '.$addressstyle.'
+                                <td colspan="3" class="border twice-right">' . $address . '</td>
                         ';
                             } else {
                                 $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
+                                '.$addressstyle.'
+                                <td colspan="3" class="border twice-right">' . $address . '</td>
                         ';
                             }
-                        }
-                        else{
-                            if ($shipment->booking_type_id != 4) {
-                                $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="2" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
-                        ';
-                            } else {
-                                $table_start .= '
-                                <td class="color secondary"><strong>Address</strong></td>
-                                <td colspan="3" class="border twice-right">' . $shipment->pickup_address->pickup_address . '</td>
-                        ';
-                            }
-                        }
+
+
 
                     } else {
-                        if($return_address_id == NULL){
                             $table_start .= '
                                 <td colspan="4" class="border twice-bottom twice-right"></td>
                                 ';
-                        }
-                        else{
-                            $table_start .= '
-                                <td colspan="3" class="border twice-bottom twice-right"></td>
-                                ';
-                        }
+
 
 
                     }
-                    if($return_address_id == NULL){
+
                         $table_start .= '
                                 <td class="color secondary border twice-left"><strong>Address</strong></td>
                                 <td colspan="3">' . $shipment->consignee_address . '</td>
                               </tr>
                               <tr>
                         ';
-                    }
-                    else{
-                        $table_start .= '
-                                <td class="color secondary border twice-left"><strong>Address</strong></td>
-                                <td colspan="2">' . $shipment->consignee_address . '</td>
-                                <td class="color secondary border twice-left"><strong>Address</strong></td>
-                                <td colspan="2">' . $return_address . '</td>
-                              </tr>
-                              <tr>
-                        ';
-                    }
 
 
+                    $phonenumber = $return_address_id == NULL ? $shipment->pickup_address->phone : $return_address_phone;
+                    $phonenumberstyle = $return_address_id == NULL ? '<td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>' : '<td class="color secondary border twice-bottom" style="background-color: #6e6e6e !important; color: white;"><strong>Phone Number(s)</strong></td>';
                     if ($type != 'pdf') {
                         if ($shipment->booking_type_id != 4) {
-                            if($return_address_id == NULL){
                                 $table_start .= '
-                                    <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                    <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                                    '.$phonenumberstyle.'
+                                    <td colspan="3" class="border twice-bottom twice-right">' . $phonenumber . '</td>
                                 ';
-                            }
-                            else{
-                                $table_start .= '
-                                    <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                                    
-                                ';
-                            }
 
                         } else {
                             $table_start .= '
-                            <td class="color secondary border twice-bottom"><strong>Phone Number(s)</strong></td>
-                            <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
+                            '.$phonenumberstyle.'
+                            <td colspan="3" class="border twice-bottom twice-right">' . $phonenumber . '</td>
                         ';
                         }
                     } else {
                         if ($shipment->booking_type_id != 4) {
-                            if($return_address_id == NULL){
                                 $table_start .= '
                                     <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
                                     <td colspan="3" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
                                 ';
-                            }
-                            else{
-                                $table_start .= '
-                                    <td class="color secondary border twice-bottom"><strong>Phone No(s).</strong></td>
-                                    <td colspan="2" class="border twice-bottom twice-right">' . $shipment->pickup_address->phone . '</td>
-                                    
-                                ';
-                            }
+
 
                         } else {
                             $table_start .= '
@@ -1596,7 +1546,6 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
 
-                    if($return_address_id == NULL){
                         if ($type != 'pdf') {
                             $table_start .= '
                                 <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
@@ -1610,26 +1559,6 @@ class ShipperShipmentBookController extends Controller
                               </tr>
                     ';
                         }
-                    }
-                    else{
-                        if ($type != 'pdf') {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $return_address_phone . '</td>
-                              </tr>
-                    ';
-                        } else {
-                            $table_start .= '
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone No(s).</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                                <td class="color secondary border twice-bottom twice-left"><strong>Phone Number(s)</strong></td>
-                                <td colspan="2" class="border twice-bottom">' . $return_address_phone . '</td>
-                              </tr>
-                    ';
-                        }
-                    }
 
 
                     if ($type != 'pdf') {
@@ -1877,7 +1806,10 @@ class ShipperShipmentBookController extends Controller
                         $shipment_details .= $table_end;
 
                     }
-
+                    else if ($shipment->booking_type_id == 6) {
+                        $shipment_details .= $table_start;
+                        $shipment_details .= $table_end;
+                    }
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
@@ -1887,8 +1819,11 @@ class ShipperShipmentBookController extends Controller
                         <tbody><tr>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>';
                             $shipment_pieces .= '<td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                   <span><strong>' . $piece->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($piece->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                                 </td>
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
@@ -1896,9 +1831,12 @@ class ShipperShipmentBookController extends Controller
                                 <td rowspan="1" class="border">' . $shipment->consignee_city->name . '</td>
                                 
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
                                 <span><strong>' . $shipment->tracking_number . '</strong></span>
-                            </td>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
+                                </td>
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right"><span class="piece_number"><strong>' . $piece->numbering. '/' .$shipment->pieces . '</strong></span>
                             </td>
                                 </tr>
@@ -2270,7 +2208,15 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
+            }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
         return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
@@ -2447,9 +2393,9 @@ class ShipperShipmentBookController extends Controller
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3]);
-            })],
+            // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+            //     $query->whereNotIn('id', [2]);
+            // })],
             'charges_mode_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->where(function($query) {
                 $query->whereIn('id', [4]);
             })],
@@ -2464,6 +2410,23 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
 
         ];
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+              $ccd_booking = $ccd_booking->first();
+              $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+              if(in_array($user_id,$ccd_account_tags))
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->first();
+                })];
+              }
+              else
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->whereNotIn('id', [2]);
+                })];
+              }
+            }
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -2865,9 +2828,10 @@ class ShipperShipmentBookController extends Controller
                                 if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
                                     $row['payment_mode_id'] == 1;
                                 }
-
-                                if ($row['payment_mode_id'] == 4) {
-                                    $row['amount'] = 0;
+                                if($row['service_type_id'] != 5){
+                                    if ($row['payment_mode_id'] == 4) {
+                                        $row['amount'] = 0;
+                                    }
                                 }
                                 if ($user_id != 3324) {
                                     dispatch(new ProcessShipmentBookingDB($row));
@@ -2909,8 +2873,23 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $shipping_mode_same_day_timings = NULL;
                     }
-
-                    $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
+                    $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+                    if($ccd_booking->exists()){
+                        $ccd_booking = $ccd_booking->first();
+                        $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                        if(!in_array(session('user_id'),$ccd_account_tags))
+                        {
+                            $payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');
+                        }
+                        else
+                        {
+                            $payment_modes = PaymentMode::first()->pluck('mode', 'id');
+                        }
+                    }
+                    else{
+                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                    }
+                    //$payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode', 'id');
                     $charges_modes = ChargesModes::whereIn('id' , [4])->pluck('charges_mode','id');
                     $city_name = array();
                     foreach ($cities as $city) {
@@ -3037,7 +3016,23 @@ class ShipperShipmentBookController extends Controller
         $products = Product::orderBy('product_name')->get();
         $distribution_products = DistributionProduct::orderBy('name')->get();
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {
+                    $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                }
+                else
+                {
+                    $payment_modes = PaymentMode::all();
+                }
+            }
+            else{
+                $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+            }
         $user_delivery_types = CorporateDeliveryTypeStatus::where('user_id', session('user_id'))->pluck('shipping_mode_id')->toArray();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::whereIn('id', [3])->get();
@@ -3601,9 +3596,12 @@ class ShipperShipmentBookController extends Controller
                         <tbody>
                           <tr>
                             <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
+                            </td>
+                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
 
                             <td class="color primary border twice-left"><strong>Service</strong></td>
@@ -3941,7 +3939,15 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $payment_modes = PaymentMode::whereNotIn('id', [3])->get();
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+                $ccd_booking = $ccd_booking->first();
+                $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                if(!in_array(session('user_id'),$ccd_account_tags))
+                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
+                else
+                {$payment_modes = PaymentMode::all();}
+            }
 
         return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
     }
@@ -4178,9 +4184,9 @@ class ShipperShipmentBookController extends Controller
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
-                $query->whereNotIn('id', [3]);
-            })],
+            // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+            //     $query->whereNotIn('id', [3]);
+            // })],
 
             /*'return_address_id' => ['nullable', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
                 $query->where('user_id', $user_id);
@@ -4191,7 +4197,24 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => ['nullable', 'between:0,190'],
             'shipper_reference_number_4' => ['nullable', 'between:0,190'],
             'shipper_reference_number_5' => ['nullable', 'between:0,190'],
-        ]          ;
+        ];
+        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if($ccd_booking->exists()){
+              $ccd_booking = $ccd_booking->first();
+              $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+              if(in_array($user_id,$ccd_account_tags))
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->first();
+                })];
+              }
+              else
+              {
+                $rules['payment_mode_id']  = ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
+                $query->whereNotIn('id', [2]);
+                })];
+              }
+            }
             if($rate_type_id == 3){
                 $rules['shipping_mode_id'] = ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id', Rule::exists('corporate_default_rate_statuses', 'shipping_mode_id')->where(function($query) use($user_id) {
                     $query->where('user_id', $user_id)->where('status', 1);
@@ -4697,7 +4720,15 @@ class ShipperShipmentBookController extends Controller
                     $shipping_mode_same_day_timings = NULL;
                 }
 
-                $payment_modes = PaymentMode::whereNotIn('id', [3])->pluck('mode','id');
+                $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+                    if($ccd_booking->exists()){
+                        $ccd_booking = $ccd_booking->first();
+                        $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+                        if(!in_array(session('user_id'),$ccd_account_tags))
+                        {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
+                        else
+                        {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
+                    }
                 $city_name = array();
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;

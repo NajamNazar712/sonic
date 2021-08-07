@@ -80,6 +80,10 @@ class ShipperTrackingController extends Controller
                         $details = array();
 
                         $details['tracking_number'] = $tracking_number;
+                        if($shipment->pod_image()->exists()){
+                            $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
+                          
+                        }
 
                         $shipper = $shipment->user;
 
