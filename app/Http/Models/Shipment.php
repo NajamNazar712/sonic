@@ -137,4 +137,7 @@ class Shipment extends Model
 	public function other_retail() {
         return $this->belongsTo('App\Http\Models\Admin\Retail\OtherRetailShipment', 'id', 'shipment_id');
     }
+    public function pod_image() {
+		return $this->hasOne('App\Http\Models\Admin\PODImage');
+	}
 }

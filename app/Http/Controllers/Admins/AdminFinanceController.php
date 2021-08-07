@@ -1388,7 +1388,8 @@ class AdminFinanceController extends Controller
     public function outstanding_shipments_bulk_adjust_in_payment(Request $request) {
         $now = Carbon::now()->startOfDay();
         foreach ($request->shipment_ids as $index => $shipment_id){
-            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $request->dncc[$index]);
+            $delivery_note_id = $request->dncc[$index];
+            $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11])->where('delivery_note_id', $delivery_note_id);
             if ($delivery_note_shipment->exists()) {
                 $delivery_note_shipment = $delivery_note_shipment->first();
 
@@ -1398,7 +1399,7 @@ class AdminFinanceController extends Controller
                     if($journey){
                         $start = $journey->created_at;
                         $difference = $start->diffInDays($now);
-                        if($difference <= 2 || (session('role_id') == 1 || in_array(346, session('permissions')))){
+                        if($difference <= 2 || (session('role_id') == 1)){
 
                             $delivery_note_shipment->status = 8;
 
@@ -1545,8 +1546,11 @@ class AdminFinanceController extends Controller
                 }
                 
             }
+
         }
         return ['status' => 0, 'success' => 'Shipments has been marked to be Adjusted in Payment'];
+
+
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
@@ -4216,6 +4220,8 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),90);
         }
 
+        $count = DB::table('done_payments')->count();
+
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
             ->leftjoin('done_payment_calculations as dpc','dpc.done_payment_id', '=', 'done_payments.id')
@@ -4250,6 +4256,7 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($done_payments)
+            ->setTotalRecords($count)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             })

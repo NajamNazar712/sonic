@@ -53,6 +53,7 @@ use App\Http\Models\WMS\WmsShipmentProduct;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\PackagingMaterialCart;
 use App\Http\Models\ShipperPackagingMaterailType;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -470,14 +471,8 @@ class AdminPackagingMaterialController extends Controller
                 $packaging_type_id = $package->type_id;
                 $packaging_size_id = $package->type_size_id;
 
-                $charges = PackagingCharge::where('user_id',$user_id)->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id])->latest()->first();
-
-                if($charges != null){
-                    $total_charges += $quantity * $charges->charges;
-                }else{
-                    $size = PackagingMaterialTypeSizes::find($packaging_size_id);
-                    $total_charges += $quantity * $size->standard_charges;
-                }
+                $size = PackagingMaterialTypeSizes::find($packaging_size_id);
+                $total_charges += $quantity * $size->standard_charges;
 
                 $created_at = $package->packaging_request->created_at;
             }
@@ -1212,7 +1207,7 @@ class AdminPackagingMaterialController extends Controller
         }
         $types = PackagingMaterialTypes::leftjoin('admins as ac', 'ac.id', '=', 'packaging_material_types.created_by')
             ->leftjoin('admins as au', 'au.id', '=', 'packaging_material_types.updated_by')
-        ->select('packaging_material_types.id','packaging_material_types.type','packaging_material_types.description','packaging_material_types.status','packaging_material_types.created_at','packaging_material_types.updated_at','ac.name as created_by','au.name as updated_by');
+        ->select('packaging_material_types.id','packaging_material_types.type','packaging_material_types.category','packaging_material_types.description','packaging_material_types.status','packaging_material_types.created_at','packaging_material_types.updated_at','ac.name as created_by','au.name as updated_by');
         return Datatables::of($types)
             ->editColumn('status',function ($type){
                 if($type->status == 0){
@@ -1236,6 +1231,15 @@ class AdminPackagingMaterialController extends Controller
                 }
                 else{
                     return $type->updated_at;
+                }
+            })
+            ->editColumn('category', function($type){
+                if($type->category == 1){
+                    return 'Packaging Material';
+                }
+                else{
+                    return 'Stationary';
+
                 }
             })
             ->addColumn('action', function($type) {//Change ID
@@ -1328,14 +1332,40 @@ class AdminPackagingMaterialController extends Controller
         $type->type = $request->type;
         $type->description = $request->description;
         $type->packaging_type = $packaging_type;
+        $type->category = $request->category;
         $type->status = 1;
         $type->created_by = Auth::id();
+        $type->save();
 
         if ($request->hasFile('packaging_picture')) {
             $filename = 'packaging_picture_' . $type->id . '.png';
             $file = $request->file('packaging_picture');
             Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
             $type->picture = $filename;
+        }
+        if ($request->hasFile('packaging_picture1')) {
+            $filename = 'packaging_picture_1_' . $type->id . '.png';
+            $file = $request->file('packaging_picture1');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_1 = $filename;
+        }
+        if ($request->hasFile('packaging_picture2')) {
+            $filename = 'packaging_picture_2_' . $type->id . '.png';
+            $file = $request->file('packaging_picture2');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_2 = $filename;
+        }
+        if ($request->hasFile('packaging_picture3')) {
+            $filename = 'packaging_picture_3_' . $type->id . '.png';
+            $file = $request->file('packaging_picture3');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_3 = $filename;
+        }
+        if ($request->hasFile('packaging_picture4')) {
+            $filename = 'packaging_picture_4_' . $type->id . '.png';
+            $file = $request->file('packaging_picture4');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_4 = $filename;
         }
 
         $type->save();
@@ -1435,6 +1465,8 @@ class AdminPackagingMaterialController extends Controller
         
         $type = PackagingMaterialTypes::where('id',$request->id)->first();
         $type->type = $request->edit_type;
+        $type->category = $request->category_edit;
+
         $type->description = $request->edit_description;
         $type->updated_by = Auth::id();
         $type->packaging_type = $packaging_type_edit;
@@ -1445,7 +1477,32 @@ class AdminPackagingMaterialController extends Controller
             Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
             $type->picture = $filename;
         }
+        if ($request->hasFile('edit_packaging_picture1')) {
+            $filename = 'packaging_picture_1_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture1');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_1 = $filename;
+        }
+        if ($request->hasFile('edit_packaging_picture2')) {
+            $filename = 'packaging_picture_2_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture2');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_2 = $filename;
+        }
+        if ($request->hasFile('edit_packaging_picture3')) {
+            $filename = 'packaging_picture_3_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture3');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_3 = $filename;
+        }
+        if ($request->hasFile('edit_packaging_picture4')) {
+            $filename = 'packaging_picture_4_' . $type->id . '.png';
+            $file = $request->file('edit_packaging_picture4');
+            Storage::disk('public')->putFileAs('packaging_pictures/', $file, $filename);
+            $type->picture_4 = $filename;
+        }
         $type->save();
+        
 
         $type_history = new PackagingMaterialTypesHistory();
         $type_history->type_id = $type->id;
@@ -1541,7 +1598,9 @@ class AdminPackagingMaterialController extends Controller
         $type->status = $request->status;
         $type->updated_by = Auth::id();
         $type->save();
-
+        if($type->status== 0){
+            PackagingMaterialCart::where('type_id',$type->id)->delete();
+        }
         $type_history = new PackagingMaterialTypesHistory();
         $type_history->type_id = $request->id;
         $type_history->type = $type->type;

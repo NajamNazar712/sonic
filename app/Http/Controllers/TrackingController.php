@@ -30,32 +30,37 @@ class TrackingController extends Controller
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
-    			$details = array();
+                if ($shipment->user->blacklist == 0) {
+        			$details = array();
 
-                $details['tracking_number'] = $tracking_number;
+                    $details['tracking_number'] = $tracking_number;
 
-    			$details['shipper']['name'] = $shipment->user->name;
+        			$details['shipper']['name'] = $shipment->user->name;
 
-                $details['pickup']['origin'] = $shipment->pickup_address->city->name;
+                    $details['pickup']['origin'] = $shipment->pickup_address->city->name;
 
-    			$details['consignee']['name'] = $shipment->consignee_name;
-    			$details['consignee']['destination'] = $shipment->consignee_city->name;
+        			$details['consignee']['name'] = $shipment->consignee_name;
+        			$details['consignee']['destination'] = $shipment->consignee_city->name;
 
-    			foreach ($shipment->shipment_journey as $journey) {
-                    if ($journey->consignee_status_id) {
-                        if ($journey->verification) {
-                            $journey_details = array();
+        			foreach ($shipment->shipment_journey as $journey) {
+                        if ($journey->consignee_status_id) {
+                            if ($journey->verification) {
+                                $journey_details = array();
 
-                            $journey_details['date_time'] = $journey->created_at->toDateTimeString();
-                            $journey_details['status'] = $journey->shipment_status_consignee->name;
+                                $journey_details['date_time'] = $journey->created_at->toDateTimeString();
+                                $journey_details['status'] = $journey->shipment_status_consignee->name;
 
-                            $details['tracking_history'][] = $journey_details;
+                                $details['tracking_history'][] = $journey_details;
+                            }
+
                         }
+        			}
 
-                    }
-    			}
-
-    			$tracking['shipments'][$shipment->id] = $details;
+        			$tracking['shipments'][$shipment->id] = $details;
+                }
+                else {
+                    $tracking['invalid'][] = $tracking_number;
+                }
     		}
     		else {
     			$tracking['invalid'][] = $tracking_number;
