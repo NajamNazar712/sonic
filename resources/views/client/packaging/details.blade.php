@@ -229,7 +229,7 @@
 }
 
 .product_name {
-    font-size: 24px;
+    font-size: 34px;
     font-weight: 400;
     margin-top: 0px
 }
