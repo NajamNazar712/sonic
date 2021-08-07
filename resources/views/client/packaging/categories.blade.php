@@ -12,7 +12,7 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                <div class="col-6">
+                                <div class="col-2">
                                     @include('client.inc.messages')
                                 </div>
                                     <div class="col">
@@ -79,8 +79,8 @@
 
     <style>
         #proceed_cart {
-            position: fixed;
-            top: 120px;
+            position: absolute;
+            top: 46px;
             padding-right: 80px;
             left: 0;
             width: 100%;

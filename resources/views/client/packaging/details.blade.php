@@ -12,7 +12,7 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                    <div class="col-16">
+                                    <div class="col-2">
                                         @include('client.inc.messages')
                                     </div>
                                     <div class="col">
@@ -185,8 +185,8 @@
     
     <style>
         #proceed_cart {
-            position: fixed;
-            top: 120px;
+            position: absolute;
+            top: 46px;
             padding-right: 80px;
             left: 0;
             width: 100%;
@@ -229,7 +229,7 @@
 }
 
 .product_name {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 400;
     margin-top: 0px
 }

@@ -70,7 +70,7 @@
                                                             <h5>Rs. {{$item->size->standard_charges}}</h5>
                                                             <h5>Quantity:</h5>
                                                             <div class="form-group input-group item_quantity_div">
-                                                                <input type="text" class="form-control text-center number quantity" id="quantity_{{$index}}" placeholder="Quantity*" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                <input type="text" class="form-control text-center number quantity" id="quantity_{{$item->id}}" placeholder="Quantity*" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
                                                             </div>
                                                             {{-- <p>{{$item->size->size}}</p> --}}
                                                         </div>

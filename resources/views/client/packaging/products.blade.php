@@ -87,8 +87,8 @@
 
     <style>
         #proceed_cart {
-            position: fixed;
-            top: 120px;
+            position: absolute;
+            top: 46px;
             padding-right: 80px;
             left: 0;
             width: 100%;

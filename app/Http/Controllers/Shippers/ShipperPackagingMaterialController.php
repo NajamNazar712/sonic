@@ -340,9 +340,7 @@ class ShipperPackagingMaterialController extends Controller
 //
 //    }
     public function packaging_request_submit(Request $request){
-        // $packaging_cart = PackagingMaterialCart::where('user_id',session('user_id'))->whereIn('type_id', $request->types);
-        // dump($packaging_cart->get());
-        // dd($request->all());
+       
         $packaging_size_ids = $request->size;
         $packaging_quantities = $request->quantity;
         $packaging_type_ids = array();
@@ -355,19 +353,47 @@ class ShipperPackagingMaterialController extends Controller
         }else{
             return redirect()->route('cod.packaging.requests.index')->with('error', 'Request not submitted!');
         }
-        foreach ($packaging_cart as $index => $packaging_size_id){
-            $size = PackagingMaterialTypeSizes::find($packaging_size_id->size_id);
+        foreach ($packaging_size_ids as $index => $packaging_size_id){
+            $size = PackagingMaterialTypeSizes::find($packaging_size_ids[$index]);
             $packaging_type_id = $size->type->id;
             $packaging_type_ids[$index] = $packaging_type_id;
             $packaging_wms_product_ids[$index] = $size->wms_product_id;
-            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first();
-            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first()->delete();
+            $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $size->id])->latest()->first();
+            PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $size->id])->latest()->first()->delete();
             if($charges != null){
                     $total_charges += $packaging_quantities[$index] * $charges->charges;
             }else{
                 $total_charges += $packaging_quantities[$index] * $size->standard_charges;
             }
         }
+        
+        
+        //old
+        // $packaging_size_ids = $request->size;
+        // $packaging_quantities = $request->quantity;
+        // $packaging_type_ids = array();
+        // $packaging_wms_product_ids = array();
+        // $total_charges = 0;
+        // $packaging_cart = PackagingMaterialCart::where('user_id',session('user_id'))->whereIn('type_id', $request->types);
+
+        // if($packaging_cart->exists()){
+        //     $packaging_cart = $packaging_cart->get();
+        // }else{
+        //     return redirect()->route('cod.packaging.requests.index')->with('error', 'Request not submitted!');
+        // }
+        // foreach ($packaging_cart as $index => $packaging_size_id){
+        //     $size = PackagingMaterialTypeSizes::find($packaging_size_id->size_id);
+        //     $packaging_type_id = $size->type->id;
+        //     $packaging_type_ids[$index] = $packaging_type_id;
+        //     $packaging_wms_product_ids[$index] = $size->wms_product_id;
+        //     $charges = PackagingCharge::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first();
+        //     PackagingMaterialCart::where('user_id',session('user_id'))->where(['type_id' => $packaging_type_id, 'size_id' => $packaging_size_id->size_id])->latest()->first()->delete();
+        //     if($charges != null){
+        //             $total_charges += $packaging_quantities[$index] * $charges->charges;
+        //     }else{
+        //         $total_charges += $packaging_quantities[$index] * $size->standard_charges;
+        //     }
+        // }
 
         $today = Carbon::today();
 
