@@ -44,8 +44,17 @@ class ProcessSMS implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->sms->status < 2) {
-            $this->telenor($this->sms);
+        try {
+            if ($this->sms->status < 2) {
+                $this->telenor($this->sms);
+            }
+        }
+        catch(Exception $exception) {
+            $to = ['muhammad.yousuf@trax.pk'];
+            $subject = '[Error] SMS API';
+            $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
+
+            $mail = Mail::to($to)->send(new Notifications($subject, $body));
         }
     }
 
@@ -221,7 +230,8 @@ class ProcessSMS implements ShouldQueue
                         'session_id' => $telenor->session_id,
                         'to' => $sms->to,
                         'text' => $sms->body,
-                        'mask' => 'TRAX'
+                        'mask' => 'TRAX',
+                        'transaction_message' => 'true'
                     ]
                 ]);
 
@@ -240,16 +250,16 @@ class ProcessSMS implements ShouldQueue
 
                         $sms->save();
                     }
-                    else {
-                        $error = TRUE;
-                    }
-                }
-                else if ($xml['data'] == 'Error 102') {
-                    if (!$retry) {
-                        $result = $this->telenor_generate_session_id($base_uri, $sms);
+                    else if ($xml['data'] == 'Error 102') {
+                        if (!$retry) {
+                            $result = $this->telenor_generate_session_id($base_uri, $sms);
 
-                        if ($result) {
-                            $this->telenor_sms($base_uri, $sms, TRUE);
+                            if ($result) {
+                                $this->telenor_sms($base_uri, $sms, TRUE);
+                            }
+                            else {
+                                $error = TRUE;
+                            }
                         }
                         else {
                             $error = TRUE;

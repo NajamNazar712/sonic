@@ -362,7 +362,15 @@
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1  add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
-                                shipment += '<button class="btn btn-secondary d-sm-inline-block print" id=' + id + '>Print</button>';
+                                if(details.pod_file){
+                              
+                                    shipment += '<button class="btn btn-secondary mr-sm-1 d-sm-inline-block print" id=' + id + '>Print</button>';
+                                    shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.pod_file + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> POD File</a>';
+
+                                }else{
+                                    shipment += '<button class="btn btn-secondary d-sm-inline-block print" id=' + id + '>Print</button>';
+
+                                }
                                 shipment += '</div>';
 
                                 shipment += '<div class="p-1">';
@@ -975,6 +983,14 @@
                         }
                         if(nature_flag){
                             $('#AddNewRequest').attr('disabled',true);
+                            swal({
+                                        title: 'Please Wait!',
+                                        text: 'Launching Request.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                             $.ajax({
                                 url: '{!! route('cod.crm.request.add') !!}',
                                 method: 'POST',
@@ -985,6 +1001,8 @@
                                 contentType: false,
                             })
                                 .done(function(data) {
+                                    swal.close();
+
                                     if(data.status){
                                         if(data.flag){
                                             var html = '';
@@ -1041,6 +1059,14 @@
                     }
                     else {
                         $('#AddNewRequest').attr('disabled',true);
+                        swal({
+                                        title: 'Please Wait!',
+                                        text: 'Launching Request.',
+                                        icon: 'info',
+                                        buttons: false,
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false
+                                    });
                         $.ajax({
                             url: '{!! route('cod.crm.request.add') !!}',
                             method: 'POST',
@@ -1053,6 +1079,8 @@
                             }
                         })
                             .done(function (data) {
+                                swal.close();
+
                                 if (data.status) {
                                     if (data.flag) {
                                         var html = '';

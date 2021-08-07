@@ -369,7 +369,7 @@
                     return {body: body, header: head};
                 }
             });
-            var route = '{!! route('cod.packaging.requests.cart.index') !!}';
+            var route = '{!! route('cod.packaging.requests.categories') !!}';
 
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '500px',

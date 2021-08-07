@@ -412,7 +412,7 @@ class ReturnController extends Controller
         $shipment_ids = $request->shipment_ids;
         $return_reason = $request->return_reason_select;
         // $remarks = $request->remark;
-        
+
         if($request->action == 'confirm'){
 
             foreach ($shipment_ids as $shipment){
@@ -682,6 +682,191 @@ class ReturnController extends Controller
         }
     }
 
+    public function excel_store_revert(Request $request){
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'shipper_status_id' => 'Status (0 - Revert)',
+            'remarks' => 'Remarks'
+        ];
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'unique' => ':attribute is already Present.'
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer'],
+            'shipper_status_id' => ['required', 'integer', 'digits_between:0,1'],
+            'remarks' => ['nullable', 'between:0,190']
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'shipper_status_id', 2 => 'remarks'];
+
+        if ($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Status (0 - Revert)', 'Remarks'];
+        }
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 2) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            } else {
+                unset($spreadsheet[0]);
+            }
+        }
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
+                }
+
+                $rows[] = $row;
+            }
+
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_ids = array();
+            $tracking_id_row = array();
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+                if (empty($errors['Row #' . $row_id])) {
+                    if (!empty(trim($row['tracking_number']))) {
+                        if (empty($tracking_ids)) {
+                            $tracking_ids[] = $row['tracking_number'];
+                            $tracking_id_row[$row['tracking_number']] = $row_id;
+                        } else {
+                            if (in_array($row['tracking_number'], $tracking_ids)) {
+                                $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                            } else {
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            }
+                        }
+                    }
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 20)->exists()) {
+                        $errors['Row #' . $row_id][] = 'Supplied Tracking Number is invalid #' . $row['tracking_number'];
+                    }
+                }
+
+
+            }
+            if (empty($errors)) {
+                $tracking_numbers = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $tracking = trim($row['tracking_number']);
+                    $status = trim($row['shipper_status_id']);
+                    $remarks = trim($row['remarks']);
+
+                    if (!empty($row['remarks'])) {
+                        $remarks = trim($row['remarks']);
+                    } else {
+                        $remarks = NULL;
+                    }
+                    $shipment = Shipment::where('tracking_number', $tracking)->first();
+                    // $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
+                    if ($status == 0) {
+                        $flag = true;
+                        $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
+                        if ($consolidation) {
+                            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                            foreach ($consolidation_shipments as $consolidation_shipment) {
+                                $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+                                if ($is_shipment->shipper_status_id == 23) {
+                                    $flag = false;
+                                }
+                            }
+                        }
+                        if ($flag == true) {
+                            if ($shipment->shipper_status_id == 20) {
+                                if ($consolidation) {
+                                    $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                                    foreach ($consolidation_shipments as $consolidation_shipment) {
+                                        $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+
+                                        $is_shipment->shipper_status_id = 13;
+                                        $is_shipment->consignee_status_id = 13;
+
+                                        $is_shipment->save();
+                                        $is_journey = ShipmentsJourney::where('shipment_id', $is_shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                                        if ($is_journey) {
+                                            $return_reattempt = new ReturnReattemptRatio();
+                                            $return_reattempt->shipment_id = $is_shipment->id;
+                                            $return_reattempt->return_confirm_date = $is_journey->created_at;
+                                            $return_reattempt->save();
+                                        }
+
+                                        ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, $remarks, NULL, Auth::id());
+                                        if ($is_shipment->shipment_type == 1) {
+                                            AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
+                                        }
+                                    }
+                                } else {
+                                    $shipment->shipper_status_id = 13;
+                                    $shipment->consignee_status_id = 13;
+
+                                    $shipment->save();
+
+                                    $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                                    if ($journey) {
+                                        $return_reattempt = new ReturnReattemptRatio();
+                                        $return_reattempt->shipment_id = $shipment->id;
+                                        $return_reattempt->return_confirm_date = $journey->created_at;
+                                        $return_reattempt->save();
+                                    }
+
+
+                                    ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, $remarks, NULL, Auth::id());
+                                    if ($shipment->shipment_type == 1) {
+                                        AdminFinanceController::return_confirmed_revert($shipment->id, 1);
+                                    }
+                                }
+                            }
+                            $shipment->save();
+                            $tracking_numbers['Row #' . $row_id] = $tracking;
+                        }
+                    }
+                }
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $row . ': ' . $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
+
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Reverted with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            } else {
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+
+                return redirect()->back()->withErrors($errors);
+            }
+
+        } else {
+            return redirect()->back()->with('error', 'No Shipments in File');
+        }
+    }
+
     public function excel_store(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
@@ -934,6 +1119,7 @@ class ReturnController extends Controller
                 });
             }
         }
+
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function($query) {
                 $query->where(function ($sub_query){
@@ -2229,6 +2415,7 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
+            $shipment_reason = $request->shipment_reason;
             $actual_date = $request->actual_date;
             $open_box_ids = array();
             if($request->has('open_box_ids')){
@@ -2256,17 +2443,17 @@ class ReturnController extends Controller
                                 $shipper_status_id = 25;
                                 $consignee_status_id = 25;
                             }
-                            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
+                            ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, $shipment_reason, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $consignee_status_id]);
 
                         } else if ($parcel->booking_type_id == 3) {
-                            ShipmentsJourneyController::add($shipment_id, 38, 38, NULL, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
+                            ShipmentsJourneyController::add($shipment_id, 38, 38, $shipment_reason, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 38, 'consignee_status_id' => 38]);
 
                         } else {
-                            ShipmentsJourneyController::add($shipment_id, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
+                            ShipmentsJourneyController::add($shipment_id, 25, 25, $shipment_reason, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
 //                            if($parcel->packaging_material_request){
@@ -2334,7 +2521,7 @@ class ReturnController extends Controller
                     $shipment = Shipment::find($shipment_id);
                     $shipment->shipper_status_id = $shipment_status;
                     $shipment->save();
-                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, NULL, $remarks, NULL, Auth::id(), $request->return_note_id);
+                    ShipmentsJourneyController::add($shipment_id, $shipment_status, NULL, $shipment_reason, $remarks, NULL, Auth::id(), $request->return_note_id);
 
 
                     ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
@@ -2792,6 +2979,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_revert(Request $request) {
+
         $shipment = Shipment::find($request->id);
         $flag = true;
         $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
@@ -2860,6 +3048,74 @@ class ReturnController extends Controller
         }
     }
 
+    public function return_revert_status(Request $request)
+    {
+        if($request->action=='revert'){
+            foreach($request->shipment_ids as $shipments)
+            {
+                $shipment = Shipment::find($shipments);
+                $flag = true;
+                $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
+                if($consolidation){
+                    $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                    foreach ($consolidation_shipments as $consolidation_shipment){
+                        $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+                        if($is_shipment->shipper_status_id == 23){
+                            $flag = false;
+                        }
+                    }
+                }
+                if($flag == true) {
+                    if ($shipment->shipper_status_id == 20) {
+                        if($consolidation){
+                            $consolidation_shipments = ConsolidationShipments::where('consolidation_id', $consolidation->consolidation_id)->get();
+                            foreach ($consolidation_shipments as $consolidation_shipment){
+                                $is_shipment = Shipment::find($consolidation_shipment->shipment_id);
+
+                                $is_shipment->shipper_status_id = 13;
+                                $is_shipment->consignee_status_id = 13;
+
+                                $is_shipment->save();
+                                $is_journey = ShipmentsJourney::where('shipment_id', $is_shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                                if ($is_journey) {
+                                    $return_reattempt = new ReturnReattemptRatio();
+                                    $return_reattempt->shipment_id = $is_shipment->id;
+                                    $return_reattempt->return_confirm_date = $is_journey->created_at;
+                                    $return_reattempt->save();
+                                }
+
+                                ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                if($is_shipment->shipment_type == 1) {
+                                    AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
+                                }
+                            }
+                        }
+                        else{
+                            $shipment->shipper_status_id = 13;
+                            $shipment->consignee_status_id = 13;
+
+                            $shipment->save();
+
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 20)->latest()->first();
+                            if ($journey) {
+                                $return_reattempt = new ReturnReattemptRatio();
+                                $return_reattempt->shipment_id = $shipment->id;
+                                $return_reattempt->return_confirm_date = $journey->created_at;
+                                $return_reattempt->save();
+                            }
+
+
+                            ShipmentsJourneyController::add($shipments, 13, 13, NULL, NULL, NULL, Auth::id());
+                            if($shipment->shipment_type == 1){
+                                AdminFinanceController::return_confirmed_revert($shipments, 1);
+                            }
+                        }
+                    }
+                }
+            }
+            return ['status' => 0, 'success' => 'Shipment has been Reverted'];
+        }
+    }
     public function receive_return_shipments(Request $request){
         $return_note_id = $request->input('return_note_id');
         $return_note_details = ReturnNote::find($return_note_id);
