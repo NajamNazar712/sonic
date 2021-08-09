@@ -1515,8 +1515,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 });
 
             });
-            Route::post('update_seal_number', 'Admins\AdminMasterCargoController@update_seal_number')->name('update_seal_number');
-            Route::post('piece_details', 'Admins\AdminMasterCargoController@bag_piece_details')->name('piece_details');
+            Route::post('piece_details', 'Admins\AdminCargoManifestController@bag_piece_details')->name('piece_details');
 
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\AdminCargoManifestController@history_index')->name('index');

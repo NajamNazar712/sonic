@@ -496,14 +496,13 @@ class AdminMonthClosingController extends Controller
                                             $shipments_count = $shipments_count - 1;
                                             $bag->shipments = $shipments_count;
                                             $bag->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                            $not_received_shipments_count =  $bag->shipment()->where('status','!=',1)->count();
                                             if ($shipments_count == 0) {
                                                 $bag->status_id = 10;
                                                 CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,10,Auth::id(),NULL,NULL);
                                             }
-                                            else if($not_received_shipments_count > 0 && in_array($bag->status_id, [8,9,10])){
+                                            else if($bag->short_received_shipments > 0 && in_array($bag->status_id, [8,9,10])) {
                                                 $bag->status_id = 7;
-                                                CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,7,Auth::id(),NULL,NULL);
+                                                CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, 7, Auth::id(), NULL, NULL);
                                             }
                                             else {
                                                 $bag->status_id = 8;

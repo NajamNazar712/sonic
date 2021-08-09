@@ -911,7 +911,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function create_store(Request $request) {
-
+        dd($request);
         $shipments = 0;
         $quantity = 0;
         $shipments_weight = 0;
@@ -2616,6 +2616,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function bag_piece_details(Request $request){
+      
         $shipment_id = $request->shipment_id;
         $shipment_piece_id = $request->piece_id;
 
