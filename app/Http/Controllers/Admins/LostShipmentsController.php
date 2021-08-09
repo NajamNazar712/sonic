@@ -348,12 +348,13 @@ class LostShipmentsController extends Controller
                                     $bag->status_id = 10;
                                     CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,10,Auth::id(),NULL,NULL);
                                 }
-                                else if($bag->short_received_shipments > 0 && in_array($bag->status_id, [8,9,10])){
+                                else if($bag->short_received_shipments > 0 && in_array($bag->status_id, [7,8,9,10])){
                                     $bag->status_id = 7;
                                     CargoManifestBagJourneyController::add($bag->id,$bag->seal_number,7,Auth::id(),NULL,NULL);
                                 }
                                 else {
                                     $bag->status_id = 8;
+                                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, 8, Auth::id(), NULL, NULL);
                                 }
                                 $bag->save();
                             }
