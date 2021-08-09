@@ -398,7 +398,7 @@ class LastMileDebriefingController extends Controller
         ->where('created_at','<=',$time)->where('completed',0)->count();
 
         $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
-                ->where('shipper_status_id','=',13)
+                ->where('shipper_status_id','=',5)
                 ->where('verification','=',1)
                 ->select(DB::raw('count(shipment_id) as reattempts'))
                 ->get()->first();
