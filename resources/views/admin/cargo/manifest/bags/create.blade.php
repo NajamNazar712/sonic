@@ -693,6 +693,7 @@
 
                                     if (bag_type == 0) {
                                         bag_type = data.details.bag_type;
+                                        $('.bag_type').val(bag_type);
                                     }
 
                                     $('#add_shipment_form button.add').prop('disabled', false);

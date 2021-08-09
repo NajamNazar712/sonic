@@ -911,7 +911,7 @@ class AdminCargoManifestController extends Controller
     }
 
     public function create_store(Request $request) {
-        dd($request);
+      
         $shipments = 0;
         $quantity = 0;
         $shipments_weight = 0;
