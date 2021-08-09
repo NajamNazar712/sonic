@@ -659,7 +659,7 @@ class RegisterController extends Controller
                 $sales_persons_city = $sales_persons_city->first();
                 $hub_id = $sales_persons_city->hub_id;
                 $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
-                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->get();
+                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->whereNotIn('admins.id', [32,124])->get();
                 return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
             }else{
                 $sale_person_admin = City::find($id)->name;
