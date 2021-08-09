@@ -127,8 +127,6 @@ class RegisterController extends Controller
                 'account_no.*'=>'required|string|max:255',
                 'account_title.*'=>'required|string|max:255',
                 'iban_no.*'=>'required|string|max:255',
-                'filled_and_signed_pdf' => 'mimes:pdf',
-                'signed_acknowledgement_pdf' => 'mimes:pdf',
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
@@ -170,8 +168,6 @@ class RegisterController extends Controller
                 'billing_person_phone' => 'required|string|max:255',
                 'billing_person_email' => 'required|string|email|max:255',
                 'billing_address' => 'required|string|max:255',
-                'filled_and_signed_pdf' => 'mimes:pdf',
-                'signed_acknowledgement_pdf' => 'mimes:pdf',
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
@@ -200,26 +196,7 @@ class RegisterController extends Controller
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
         $date = Carbon::now()->format('Y_m_d');
-        if ($request->hasFile('filled_and_signed_pdf')) {
-            if($user_attachment->filled_and_signed_pdf != NULL) {
-                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
-            }
-            $filename = 'filled_and_signed_pdf_' . $date . '_' . $user->id . '.pdf';
-            $file = $request->file('filled_and_signed_pdf');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->filled_and_signed_pdf = $filename;
-        }
-        
-        if ($request->hasFile('signed_acknowledgement_pdf')) {
-            if($user_attachment->signed_acknowledgement_pdf != NULL) {
-                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
-            }
-            $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $user->id . '.pdf';
-            $file = $request->file('signed_acknowledgement_pdf');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->signed_acknowledgement_pdf = $filename;
-        }
-        
+
         if ($request->hasFile('cnic_front_image')) {
             if($user_attachment->cnic_front_image != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
