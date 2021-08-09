@@ -3763,4 +3763,12 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'data' => $details]);
         }
   }
+
+  public function crm_request_create(Request $request){
+        $nature_id = $request->case_nature_id;
+        $complaint_id = $request->complaint_id;
+        $shipment_ids = $request->shipment_ids;
+        $shipment_id = $request->shipment_id;
+
+  }
 }
