@@ -33,6 +33,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Intercept Type </th>
                     </tr>
                     </thead>
                 </table>
@@ -222,6 +223,7 @@
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Intercept Type');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -243,6 +245,7 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.status_date);
+                                row.push(values.intercept_type);
 
                                 body.push(row);
                             });
@@ -427,7 +430,7 @@
                 processing: true,
                 language: {
                     processing: data_table_loader
-                },
+                },//test
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.intercept.list') }}',
                 rowId: 'shId',
@@ -451,6 +454,7 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'old_phone_number', name: 'irbrh.old_consignee_phone_number_1', class: 'align-middle old_phone_number'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -474,14 +478,18 @@
                         '</select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
                         '</select>';
+                    var consignee_drop_select = '<select name="service_select" id="consignee_select" class="select2 form-control">' +
+                        '<option value="Same Consignee">Same Consignee</option>'+
+                        '<option value="Different Consignee">Different Consignee</option>'+
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.select')) {
+                        if ($(header).is('.serial_number') || $(header).is('.select') ||($(header).is('.old_phone_number'))) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.shipping_mode')){
+                        }else if($(header).is('.shipping_mode') ){
                             $(mode_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
@@ -521,6 +529,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
                     var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.id = obj.id
 
@@ -535,6 +544,12 @@
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data:data2,
                         placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#consignee_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Intercept Type",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
