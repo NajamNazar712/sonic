@@ -454,7 +454,7 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'old_phone_number', name: 'irbrh.old_consignee_phone_number_1', class: 'align-middle old_phone_number'},
+                    {data: 'type', name: 'irbr.intercept_type', class: 'align-middle type'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -487,7 +487,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.select') ||($(header).is('.old_phone_number'))) {
+                        if ($(header).is('.serial_number') || $(header).is('.select') ||($(header).is('.type'))) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.shipping_mode') ){
                             $(mode_drop_select).appendTo($(search))

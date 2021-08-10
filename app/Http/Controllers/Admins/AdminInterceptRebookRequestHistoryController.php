@@ -105,12 +105,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
     }
 
     public function intercept_re_book_update(Request $request)
-    {  
+    {
         $s_amount = str_replace(",", "", $request->amount);
         $amount = intval($s_amount);
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
-
+        $intercept_type = $request->consignee;
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
@@ -136,6 +136,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         'amount' => $amount,
                         'shipper_id' => $user_id,
                         'status' => 0,
+                        'intercept_type' => $intercept_type,
                         'admin_id' => Auth::id()
                     ]);
 
