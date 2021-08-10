@@ -4222,6 +4222,8 @@ class AdminFinanceController extends Controller
 
         $count = DB::table('done_payments');
 
+        $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id');
+
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $count = $count->where(function ($query) {
@@ -4230,8 +4232,7 @@ class AdminFinanceController extends Controller
             }
         }
         else if (session('role_id') != 1) {
-            $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id')
-                ->join('cities as c', 'u.city_id', '=', 'c.id')
+            $count = $count->join('cities as c', 'u.city_id', '=', 'c.id')
                 ->whereIn('c.hub_id', session('hubs'));
         }
 
@@ -4244,10 +4245,6 @@ class AdminFinanceController extends Controller
 
         if ($payment_ids = $request->get('search_payment_ids')) {
             $count = $count->whereIn('done_payments.id', explode(',', $payment_ids));
-        }
-
-        if (!empty($request->get('search_shipper')) || !empty($request->get('search_shipper_status'))) {
-            $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id');
         }
 
         if ($shipper = $request->get('search_shipper')) {
