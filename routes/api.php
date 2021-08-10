@@ -53,8 +53,8 @@ Route::name('api.')->group(function () {
 
 		});
 		Route::prefix('request')->name('request.')->group(function() {
-			Route::post('create', 'APIController@crm_request_create')->name('create');
-			Route::get('status', 'APIController@crm_request_get')->name('status');
+			Route::post('crm', 'APIController@crm_request_create')->name('crm');
+			Route::post('rcp', 'APIController@rcp_request_create')->name('rcp');
 
         });
 
