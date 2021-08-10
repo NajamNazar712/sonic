@@ -2615,7 +2615,7 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 31) {
                     $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details','status'];
-
+                    $shipment_email = false;
                     $crm_request = CrmRequest::find($reference_1_id);
                     if ($crm_request) {
                         $tagging = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
@@ -2654,6 +2654,7 @@ class NotificationsController extends Controller
                             $shipper_phone = '';
                             $shipper_destination = '';
                             if ($shipment) {
+                                $shipment_email = true;
                                 if (strpos($subject, '[tracking_number]') !== FALSE) {
                                     $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
                                     $tracking_number = $shipment->tracking_number;
@@ -2779,12 +2780,16 @@ class NotificationsController extends Controller
                                 self::email($subject, $body, $to, $cc);
                             }else{
                                 self::email($subject, $body, $to);
-                                self::email($subject, $body, $shipment->user->email);
+                                if ($shipment_email) {
+                                    self::email($subject, $body, $shipment->user->email);
+                                }
                             }
                         } else {
 
                             self::email($subject, $body, $to);
-                            self::email($subject, $body, $shipment->user->email);
+                            if ($shipment_email) {
+                                self::email($subject, $body, $shipment->user->email);
+                            }
                         }
                         // $sms_body= 'Request ID: '.$crm_request->id.', Tracking Number :'.$tracking_number.' '.PHP_EOL.
                         // 'Shipper Name: '.$shipper_name.''.PHP_EOL.
