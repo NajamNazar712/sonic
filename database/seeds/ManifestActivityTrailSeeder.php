@@ -28,8 +28,8 @@ class ManifestActivityTrailSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Supply Chain > Cargo Vehicle Manifest > Manifest', 'url'=>'admin.cargo_manifest.index', 'permission_id' => 564),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Cargo Manifest Short Received Report', 'url'=>'admin.reports.short_received_shipments.index', 'permission_id' => 555),
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Cargo Manifest Short Received Report', 'url'=>'admin.cargo_manifest.create.open_bag.index', 'permission_id' => 559),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Reports > Cargo Manifest Short Received Report', 'url'=>'admin.reports.manifest.short_received_shipments.index', 'permission_id' => 555),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Supply Chain > Cargo Vehicle Manifest  >  Create Open Bag', 'url'=>'admin.cargo_manifest.bags.create.open_bag.index', 'permission_id' => 559),
 
         ));
 
