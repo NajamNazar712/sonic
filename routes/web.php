@@ -1265,7 +1265,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list','Admins\LastMileDebriefingController@supervisor_list')->name('list');
             Route::post('agents','Admins\LastMileDebriefingController@supervisor_agents')->name('agents');
             Route::post('assign_agents','Admins\LastMileDebriefingController@supervisor_assign_agents')->name('assign_agents');
-            
+            Route::post('get_undelivered_shipments','Admins\LastMileDebriefingController@get_undelivered_shipments')->name('get_undelivered_shipments');
+            Route::post('send_sms', 'Admins\LastMileDebriefingController@send_sms_to_undelivered_shipments')->name('send_sms');
             
         });
         Route::prefix('agents_call_monitoring')->name('agents_call_monitoring.')->group(function (){

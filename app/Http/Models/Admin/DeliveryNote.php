@@ -24,6 +24,10 @@ class DeliveryNote extends Model
         return $this->hasMany('App\Http\Models\Admin\DeliveryNoteShipment');
     }
 
+    public function delivery_note_undelivered_shipments() {
+        return $this->hasMany('App\Http\Models\Admin\DeliveryNoteShipment')->where('status', 1)->select('shipment_id');
+    }
+
     public function delivery_note_station_deposit_note() {
         return $this->hasOne('App\Http\Models\Admin\DeliveryNoteStationDepositNote', 'delivery_note_id', 'id');
     }

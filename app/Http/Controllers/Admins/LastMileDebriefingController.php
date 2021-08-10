@@ -170,11 +170,14 @@ class LastMileDebriefingController extends Controller
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-                <button type="button" class="dropdown-item assign_agent" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign Agent</div></button>
-                </div>
-              </div>  
-                ';
+                <div class="dropdown-menu dropdown-menu-sm">';
+                    $assign_agent = '<button type="button" class="dropdown-item assign_agent" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
+                    $bot_sms = '<button type="button" class="dropdown-item bot_sms" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-message-circle"></i></div><div class="col-9 offset-1">Send BOT SMS</div></button>';
+
+                    $dropdown .= $assign_agent;
+                    $dropdown .= $bot_sms;
+
+                    $dropdown .='</div></div>';
                 return $dropdown;
                 
             });
@@ -601,5 +604,32 @@ class LastMileDebriefingController extends Controller
             return redirect()->back()->with('error', 'No Data found!');
         }
 
+    }
+
+    public function get_undelivered_shipments(Request $request){
+
+        $delivery_note_id = $request->delivery_note_id;
+        $delivery_note = DeliveryNote::find($delivery_note_id);
+        if($delivery_note){
+            $tracking_numbers = array();
+            $delivery_note_shipments = $delivery_note->delivery_note_undelivered_shipments;
+
+            if(count($delivery_note_shipments) > 0){
+                foreach ($delivery_note_shipments as $delivery_note_shipment){
+                    $tracking_numbers[$delivery_note_shipment->shipment_id] = Shipment::find($delivery_note_shipment->shipment_id)->tracking_number;
+                }
+
+                return response()->json(['status' => 0, 'tracking_numbers' => $tracking_numbers]);
+            }
+            return response()->json(['status' => 1, 'error' => 'No undelived shipments found!']);
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Something went wrong!!']);
+        }
+    }
+
+    public function send_sms_to_undelivered_shipments(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        return $request;
     }
 }

@@ -83,7 +83,7 @@ class ReturnController extends Controller
         }
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
+            ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
