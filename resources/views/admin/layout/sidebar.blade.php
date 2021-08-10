@@ -319,7 +319,7 @@
                     </ul>
 
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || count(array_intersect([545, 546,547,551, 559], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([545, 546,547,551, 559,564], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Cargo Vehicle Manifest</span></a>
                                 <ul class="menu-content">
                                     <li class=" nav-item"><a href="#"><span class="menu-title">Bag</span></a>
@@ -348,7 +348,7 @@
                                     @if ((session('role_id') == 1 || in_array(551, session('permissions'))) && Auth::user()->default_hub_id != NULL)
                                         <li><a class="menu-item" href="{{ route('admin.cargo_manifest.create') }}">Create Manifest</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(552, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(564, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.cargo_manifest.index') }}">Bags in Transit</a></li>
                                     @endif
                                     @if ((session('role_id') == 1 || in_array(554, session('permissions'))) && Auth::user()->default_hub_id != NULL)
