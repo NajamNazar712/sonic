@@ -4230,7 +4230,9 @@ class AdminFinanceController extends Controller
             }
         }
         else if (session('role_id') != 1) {
-            $count = $count->whereIn('c.hub_id', session('hubs'));
+            $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id')
+                ->join('cities as c', 'u.city_id', '=', 'c.id')
+                ->whereIn('c.hub_id', session('hubs'));
         }
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
