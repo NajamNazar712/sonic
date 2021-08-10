@@ -84,7 +84,7 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
 
 
-        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+        if (!empty($request->get('dr_search_date_from')) && !empty($request->get('dr_search_date_to'))) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
 
