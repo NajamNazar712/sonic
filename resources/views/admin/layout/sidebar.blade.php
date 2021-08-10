@@ -1603,6 +1603,9 @@
                         @if (session('role_id') == 1 || in_array(506, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.erf.index')}}">ERF</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(560, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_clearance.index')}}">FNF</a></li>
+                        @endif
                    
 
                 </ul>

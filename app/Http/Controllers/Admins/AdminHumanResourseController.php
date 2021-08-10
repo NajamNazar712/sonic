@@ -2269,4 +2269,20 @@ class AdminHumanResourseController extends Controller
 
     }
 
+    public function fnf_index(){
+        $departments = AdminDepartment::all();
+        return view('admin.human_resource.employee_clearance.index')->with(['departments' => $departments]);
+    }
+
+    public function fnf_add(){
+        
+        $departments = AdminDepartment::all();
+        $employee_statuses = EmployeeStatus::all();
+        return view('admin.human_resource.employee_clearance.add',compact('departments','employee_statuses'));
+    }
+
+    public function fnf_submit(){
+        //
+    }
+
 }

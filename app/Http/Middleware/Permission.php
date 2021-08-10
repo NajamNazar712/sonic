@@ -952,6 +952,9 @@ class Permission
             'human_resource.erf.index' => 506,
             'human_resource.erf.list' => 506,
             'human_resource.erf.add' => 522,
+            'human_resource.employee_clearance.index' => 560,
+            'human_resource.employee_clearance.list' => 560,
+            'human_resource.employee_clearance.add' => 561,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,

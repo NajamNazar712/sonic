@@ -3102,6 +3102,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
 
         });
+
+        Route::prefix('employee_clearance')->name('employee_clearance.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@fnf_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@fnf_list')->name('list');
+            Route::get('/add', 'Admins\AdminHumanResourseController@fnf_add')->name('add');
+            Route::post('/submit', 'Admins\AdminHumanResourseController@fnf_submit')->name('submit');
+
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
