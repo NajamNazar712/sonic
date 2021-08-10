@@ -47,7 +47,23 @@
             // $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             // $('#cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
 
+        $("#agreement-form #agreement_signed").on('click',function(){
+            if($(this).prop('checked'))
+            {
+                $('#SignatureModal').modal('show');
+            }
+        });
+
+        $("#agreement-form #save_signature_btn").on('click',function(){
+
+        });
+
+        $("#agreement-form #clear_signature_btn").on('click',function(){
+
+        });
+
         $( "#agreement-form" ).validate({
+            ignore: [],
             errorClass:"danger",
             normalizer: function(value) {
                 return $.trim(value);
