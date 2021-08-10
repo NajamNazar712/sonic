@@ -390,6 +390,7 @@
                 var shipping_mode = parseInt($("#shipping_mode").val());
                 if(id == 2)
                 {
+                    $(".phone").inputmask({'mask': "99999-999999999999999", 'clearIncomplete': false});
                     $('#domestic_overland_destination_div').addClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
                     $('#international_destination_div').removeClass('d-none');
@@ -397,11 +398,13 @@
                 else{
                     if(shipping_mode == 1)
                     {
+                        alert(1);
                         $('#domestic_overland_destination_div').removeClass('d-none');
                         $('#domestic_destination_div').addClass('d-none');
                         $('#international_destination_div').addClass('d-none');
                     }
                     else{
+                        $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
                         $('#domestic_destination_div').removeClass('d-none');
                         $('#domestic_overland_destination_div').addClass('d-none');
                         $('#international_destination_div').addClass('d-none');
@@ -543,7 +546,7 @@
             });
 
 
-            $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+             $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $(".cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
             $('.amount').inputmask({
