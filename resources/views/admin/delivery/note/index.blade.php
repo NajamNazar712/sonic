@@ -966,6 +966,7 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
+                    $('#otp_input').focus();
                 });
             }
 
@@ -1086,8 +1087,7 @@
                                         }
                                     },
                                     closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
+                                    closeOnEsc: false
                                 }).then(function (confirm) {
                                     if (confirm) {
                                         blockPagePermanently();
@@ -1138,8 +1138,7 @@
                                 }
                             },
                             closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
+                            closeOnEsc: false
                         }).then(function (confirm) {
                             if(confirm){
                                 blockPagePermanently();

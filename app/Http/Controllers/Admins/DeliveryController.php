@@ -6960,22 +6960,33 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     }
 
     public function delivery_note_otp_generation(Request $request){
-        $rider_id = $request->get('rider');
-        $rider = Rider::find($rider_id);
-        $otp = mt_rand(100000, 999999);
-        $rider->delivery_note_otp = $otp;
-        $rider->save();
-        NotificationsController::send(144, $rider, $otp);
+        $environment = config('app.env');
+
+        if ($environment == 'production' || $environment == 'staging') {
+            $rider_id = $request->get('rider');
+            $rider = Rider::find($rider_id);
+            $otp = mt_rand(100000, 999999);
+            $rider->delivery_note_otp = $otp;
+            $rider->save();
+            NotificationsController::send(144, $rider, $otp);
+        }
         return response()->json(['status' => 1]);
     }
 
     public function delivery_note_otp_verification(Request $request)
     {
-        $rider = Rider::find($request->rider);
-        if ($rider->delivery_note_otp == $request->otp) {
+        $environment = config('app.env');
+
+        if($environment == 'production' || $environment == 'staging') {
+            $rider = Rider::find($request->rider);
+            if ($rider->delivery_note_otp == $request->otp) {
+                return response()->json(['status' => 1]);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+            }
+        }
+        else{
             return response()->json(['status' => 1]);
-        } else {
-            return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
         }
     }
 
