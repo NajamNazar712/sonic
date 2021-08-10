@@ -5764,11 +5764,13 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         }
     }
     public function intercept_request_index()
-    {    ActivityTrailController::createActivityTrailLog(Auth::id(),324);
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),324);
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
+        $intercept_rebook_request_histories = InterceptReBookRequestHistory::all();
 //        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
-        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
+        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type,'intercept_rebook_request_histories' => $intercept_rebook_request_histories]);
     }
 
     public function intercept_request_list(Request $request)
@@ -5803,10 +5805,11 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ->where('sj.created_at', '=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id','irbr.intercept_type as type')
             ->where('shipments.shipper_status_id', 54)
-        ->groupBy('shipments.id');
+            ->groupBy('shipments.id');
 
+//            dd($shipments);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
@@ -5842,14 +5845,17 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $query->whereRaw('false');
                 }
             })
-            ->filterColumn('service_type', function ($query, $keyword) {
-
-                if ($keyword != '') {
-                    $query->where('bt.id', $keyword);
+            ->editColumn('type', function ($shipments) {
+                if ($shipments->type == null){
+                    return '(NULL)';
+                }
+                else if ($shipments->type == 2 ) {
+                    return 'Same Consignee';
                 } else {
-                    $query->whereRaw('false');
+                    return 'Different Consignee';
                 }
             })
+
             ->make(true);
     }
 
