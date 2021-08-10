@@ -630,6 +630,11 @@ class LastMileDebriefingController extends Controller
 
     public function send_sms_to_undelivered_shipments(Request $request){
         $shipment_ids = $request->shipment_ids;
+        if(count($shipment_ids) > 0){
+            foreach ($shipment_ids as $shipment_id){
+                NotificationsController::send(145, $shipment_id);
+            }
+        }
         return $request;
     }
 }
