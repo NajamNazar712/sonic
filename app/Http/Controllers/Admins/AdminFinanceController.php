@@ -4220,7 +4220,60 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),90);
         }
 
-        $count = DB::table('done_payments')->count();
+        $count = DB::table('done_payments');
+
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $count = $count->where(function ($query) {
+                    $query->whereIn('u.id', session('tagged_shippers'));
+                });
+            }
+        }
+        else if (session('role_id') != 1) {
+            $count = $count->whereIn('c.hub_id', session('hubs'));
+        }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $count = $count->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('done_payments.id');
+        }
+
+        if ($payment_ids = $request->get('search_payment_ids')) {
+            $count = $count->whereIn('done_payments.id', explode(',', $payment_ids));
+        }
+
+        if (!empty($request->get('search_shipper')) || !empty($request->get('search_shipper_status'))) {
+            $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id');
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $count = $count->where('u.id', '=', $shipper);
+        }
+
+        if ($shipper_status = $request->get('search_shipper_status')) {
+            if ($shipper_status == 1) {
+                $count = $count->where('u.status', '=', 3)->where('u.blacklist', 0);
+            }
+            else {
+                $count = $count->where('u.status', '!=', 3);
+            }
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $count = $count->whereBetween('done_payments.created_at', [$from,$to]);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $count = $count->whereBetween('done_payments.status_updated_at', [$from,$to]);
+        }
+
+        $count = $count->count();
 
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
