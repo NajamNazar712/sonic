@@ -42,8 +42,8 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="add_material_form" action="{{route('admin.packaging.types.add')}}" method="post" enctype="multipart/form-data">
-                        @method('POST')
+                    <form id="add_material_form"  class="form" action="{{route('admin.packaging.types.add')}}" method="post" enctype="multipart/form-data">
+                        
                         @csrf
                         <div class="container">
                             <div class="row justify-content-center">
@@ -116,9 +116,28 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-12 form-group">
-                                    <label for="packaging_picture">Picture</label>
-                                    <input class="form-control form-control-sm" type="file" name="packaging_picture" id="packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                    <label for="packaging_picture">Default Picture</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture" id="packaging_picture" data-rule-required="true" data-msg-required="Picture is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
                                 </div>
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture1">Picture 1</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture1" id="packaging_picture1" data-rule-required="true" data-msg-required="Picture 1 is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture2">Picture 2</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture2" id="packaging_picture2" data-rule-required="true" data-msg-required="Picture 2 is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture3">Picture 3</label>
+                                    <input class="form-control form-control-sm" type="file" name="packaging_picture3" id="packaging_picture3" data-rule-required="true" data-msg-required="Picture 3 is required" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">
+                                </div>
+                                <div class="col-12 form-group">
+                                    <label for="packaging_picture4">Picture 4</label>
+                                    <input type="file" name="packaging_picture4" class="form-control form-control-sm" id="packaging_picture4" data-rule-extension="png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Picture 4 is required">
+                                </div>
+                                
                             </div>
                             <div id="size_charges_wrapper">
                                 <div class="row">
@@ -138,7 +157,7 @@
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-6">
-                                    <button id="AddNewStock" type="submit" class="btn btn-primary btn-block">Add</button>
+                                    <button type="submit" class="btn btn-primary btn-block">Add</button>
                                 </div>
                             </div>
                         </div>
@@ -234,6 +253,19 @@
                                 <div class="col-12 form-group" id="picture_div">
 
                                 </div>
+                                <div class="col-12 form-group" id="picture_div1">
+
+                                </div>
+                                <div class="col-12 form-group" id="picture_div2">
+
+                                </div>
+                                <div class="col-12 form-group" id="picture_div3">
+
+                                </div>
+                                <div class="col-12 form-group" id="picture_div4">
+
+                                </div>
+                                
                             </div>
                             <div id="edit_size_charges_wrapper">
 
@@ -315,6 +347,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -585,6 +618,10 @@
 
             $( "#add_material_form" ).validate({
                 errorClass:"danger",
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
@@ -603,7 +640,7 @@
                         form.submit();
                 }
             });
-
+            
 
             $('body').on('click', '#edit_material_form #row_close',function () {
                 $(this).parent().parent().remove();
@@ -624,7 +661,11 @@
 
                         var html_type = '<input type="hidden" name="id" value="' + data.type.id + '"><input type="text" name="edit_type" id="edit_type" class="form-control type" value="' + data.type.type + '" placeholder="Type *" data-rule-required="true" data-msg-required="Type name is required">';
                         var html_description = '<textarea name="edit_description" id="edit_description" class="form-control" placeholder="Description *" data-rule-required="true" data-msg-required="Description is required">' + data.type.description + '</textarea>';
-                        var html_picture = '<label for="packaging_picture">Picture</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture" id="edit_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                        var html_picture = '<label for="edit_packaging_picture">Default Picture</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture" id="edit_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                        var html_picture1 = '<label for="edit_packaging_picture1">Picture 1</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture1" id="edit_packaging_picture1" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                        var html_picture2 = '<label for="edit_packaging_picture2">Picture 2</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture2" id="edit_packaging_picture2" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                        var html_picture3 = '<label for="edit_packaging_picture3">Picture 3</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture3" id="edit_packaging_picture3" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                        var html_picture4 = '<label for="edit_packaging_picture4">Picture 4</label><input class="form-control form-control-sm" type="file" name="edit_packaging_picture4" id="edit_packaging_picture4" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                         var html_sizes = '';
                         data.sizes.forEach(function(size, index) {
                             html_sizes += '<div class="row size_row"><input type="hidden" name="size_id[' + index +']" value="' + size.id + '"><div class="col-5 form-group">' +
@@ -692,6 +733,10 @@
 
                         $('#EditMaterialModal #description_div').html(html_description);
                         $('#EditMaterialModal #picture_div').html(html_picture);
+                        $('#EditMaterialModal #picture_div1').html(html_picture1);
+                        $('#EditMaterialModal #picture_div2').html(html_picture2);
+                        $('#EditMaterialModal #picture_div3').html(html_picture3);
+                        $('#EditMaterialModal #picture_div4').html(html_picture4);
                         $('#EditMaterialModal #edit_size_charges_wrapper').html(html_sizes);
                         masks();
 

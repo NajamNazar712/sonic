@@ -112,6 +112,9 @@
                                             <div class="text-center col-12">
                                                 <form id="update_ftl_request_form" method="post" action="{{route('admin.ftl.request.update.status',$ftl->id)}}">
                                                     @csrf
+
+                                                    @if (in_array(552, session('permissions')) || session('role_id') == 1)
+                                                        
                                                     <div class="row mb-2">
                                                             <div class="col-6">
                                                                 <label for="" class="pull-left font-weight-bold">Select Vendor</label>
@@ -160,6 +163,10 @@
                                                             </table>
                                                        </div>
                                                     </div>
+
+                                                    @endif
+                                                    @if (in_array(553, session('permissions')) || session('role_id') == 1)
+
                                                     <div class="row mb-2">
                                                         <div class="col-6">
                                                             <label for="" class="pull-left font-weight-bold">Total Cost</label>
@@ -167,7 +174,7 @@
                                                         </div>
                                                         <div class="col-6">
                                                             <label for="freight_charges" class="pull-left font-weight-bold">Freight Charges</label>
-                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{$ftl->freight_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges">
+                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{($ftl->freight_charges) ? $ftl->freight_charges : $ftl->calculated_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges" data-rule-min="{{$ftl->calculated_charges}}" data-msg-min="Freight Charges can not be less than {{$ftl->calculated_charges}}">
                                                         </div>
                                                     </div>
                                                     <div class="row mb-2">
@@ -180,6 +187,8 @@
                                                             <input type="text" readonly name="total_charges" id="total_charges" class="form-control" placeholder="Total Charges">
                                                         </div>
                                                     </div>
+                                                    @endif
+
                                                     @if($ftl->status_id != 5 && (session('role_id') == 1 || in_array(514,session('permissions'))))
                                                         <button type="submit" name="btn" value="Update" class="btn btn-secondary mr-1">
                                                             <span class="d-none d-lg-block">
@@ -199,6 +208,7 @@
                                                             </span>
                                                         </button>
                                                     @endif
+                                                    
                                                 </form>
                                             </div>
                                         </div>
@@ -440,6 +450,13 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function () {
+            var calculated_charges = "{{$ftl->calculated_charges}}";
+            console.log(calculated_charges);
+            var min_charges = 0.00;
+            if(calculated_charges>0){
+            min_charges = calculated_charges;
+                
+            }
             $('#edit_shipper_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Shipper',
                 width: '100%',

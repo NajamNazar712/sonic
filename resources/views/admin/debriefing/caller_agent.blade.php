@@ -20,10 +20,11 @@
                             @if($data)
                             <div class="row mb-2 justify-content-center">
 
-                                <div class="col-6">
-                                    <fieldset class="position-relative has-icon-left">
-                                        <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;">
-                                    </fieldset>
+                                <div class="col-6 text-center border tracking_box ">
+                                    {{-- <fieldset class="position-relative has-icon-left"> --}}
+                                        <u><a href='{{route('admin.tracking.index')}}?tracking_number={{$shipment->tracking_number}}' class='tracking' target='_blank'>{{$shipment->tracking_number}}</a></u>
+                                        {{-- <input type="text" class="form-control" placeholder="Tracking Number" value="{{$shipment->tracking_number}}" readonly style="text-align: center;"> --}}
+                                    {{-- </fieldset> --}}
                                 </div>
                             </div>
 
@@ -139,6 +140,97 @@
                                             </div>
                                         </div>
                                         <div class="col-12 mb-1">
+                                            <h4><u>Order Information</u></h4>
+                                            <div class="border table-responsive">
+                                                <table class="table table-sm table-borderless mb-0">
+                                                    <tbody>
+                                                       
+                                                        @foreach ($shipment->items as $item)
+                                                            <tr>
+                                                                <td><strong>Product Type :</strong></td>
+                                                                <td>{{$item->product->product_name}}</td>
+                                                                <td><strong>Description :</strong></td>
+                                                                <td>{{$item->description}}</td>
+                                                                <td><strong>Quantity :</strong></td>
+                                                                <td>{{$item->quantity}}</td>
+                                                                <td><strong>Order ID :</strong></td>
+                                                                <td>{{(($shipment->order_id) ? $shipment->order_id : '-')}}</td>
+                                                            </tr>
+                                                        @endforeach
+
+                                                        @if($shipment->height != null)
+                                                            <tr>
+                                                                <td><strong>Weight </strong><small>(Volumetric)</small></td>
+                                                                <td>{{$shipment->weight}}kg</td>
+                                                                <td><strong>Service Type</strong></td>
+                                                                <td>{{$shipment->booking_type->booking_type}}</td>
+                                                                <td><strong>Collection Amount</strong></td>
+                                                                <td>{{number_format($shipment->amount)}}</td>
+                                                                <td><strong>Piece(s)</strong></td>
+                                                                <td>{{$shipment->pieces}}</td>
+                                                            </tr>
+                                                            
+                                                        @else
+                                                        <tr>
+                                                            <td><strong>Weight </strong><small>(Dense)</small></td>
+                                                            <td>{{$shipment->weight}}kg</td>
+                                                            <td><strong>Service Type</strong></td>
+                                                            <td>{{$shipment->booking_type->booking_type}}</td>
+                                                            <td><strong>Collection Amount</strong></td>
+                                                            <td>{{number_format($shipment->amount)}}</td>
+                                                            <td><strong>Piece(s)</strong></td>
+                                                            <td>{{$shipment->pieces}}</td>
+                                                        </tr>
+                                                        @endif
+
+                                                        <tr>
+                                                            @if ($shipment->length != null)
+                                                            <td><strong>Length</strong></td>
+                                                            <td>{{$item->length}}cm</td>
+                                                            @endif
+                                                            <td><strong>Shipping Mode</strong></td>
+                                                            <td>{{$shipment->shipping_mode->mode}}</td>
+                                                            <td><strong>Instructions</strong></td>
+                                                            <td>{{(($shipment->special_instructions) ? $shipment->special_instructions : '-')}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            @if ($shipment->breadth != null)
+                                                            <td><strong>Breadth</strong></td>
+                                                            <td>{{$shipment->breadth}}cm</td>
+                                                            @endif
+                                                            <td><strong>Business Category</strong></td>
+                                                            <td>{{$shipment->business_category->name}}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            @if ($shipment->height != null)
+                                                            <td><strong>Height</strong></td>
+                                                            <td>{{$item->height}}cm</td>
+                                                            @endif
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mb-1">
+                                            <h4><u>Other Information</u></h4>
+                                            <div class="border table-responsive spacing">
+                                                <table class="table table-sm table-borderless mb-0">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td><strong>Attempt Count :</strong></td>
+                                                            <td>{{$reattempt_count->reattempts}}</td>
+                                                            <td><strong>Rider Status :</strong></td>
+                                                            <td>{{$rider_status->shipment_status_shipper->name}}</td>
+                                                            <td><strong>Rider Status Reason :</strong></td>
+                                                            <td>{{($rider_status->status_reason_id) ? $rider_status->shipment_status_reason->name : '-'}}</td>
+                                                            <td><strong>Remarks :</strong></td>
+                                                            <td>{{($rider_status->remarks) ? $rider_status->remarks : '-'}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mb-1">
                                             <form action="{{route('admin.debriefing.caller_agent.next')}}" id="next_form" method="post" novalidate="novalidate">
                                                 @csrf
                                                 <input type="hidden" name="call_id" id="call_id" value="{{$call->id}}">
@@ -204,6 +296,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
 
     <style>
+        .tracking_box{
+            padding: 10px 2px;
+            border-radius: 5px;
+        }
         .bg-gradient-directional-total-calls {
             background-image: linear-gradient(45deg, #074077, #2FBEF5);
             background-repeat: repeat-x;
@@ -215,6 +311,11 @@
         .bg-gradient-directional-pending-calls {
             background-image: linear-gradient(45deg, #FF0C0C, #FF9191);
             background-repeat: repeat-x;
+        }
+        .spacing{
+            padding-top: 20px;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
         }
     </style>
 @endsection

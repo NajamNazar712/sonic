@@ -79,6 +79,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('get_ftl_info', 'Shippers\ShipperShipmentBookController@get_ftl_info')->name('get_ftl_info');
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
+            Route::post('check_shipment_allowed_city', 'Shippers\ShipperShipmentBookController@check_shipment_allowed_city')->name('check_shipment_allowed_city');
+
 
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
@@ -988,6 +990,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 			Route::post('request/submit','Admins\DeliveryController@request_submit')->name('request_submit');
 			Route::post('request/info','Admins\DeliveryController@delivery_note_info')->name('request.info');
 			Route::post('request/approve','Admins\DeliveryController@request_approve')->name('request.approve');
+			Route::post('otp/generate','Admins\DeliveryController@delivery_note_otp_generation')->name('otp.generate');
+			Route::post('otp/verify','Admins\DeliveryController@delivery_note_otp_verification')->name('otp.verify');
         });
         Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
             Route::prefix('pending')->name('pending.')->group(function () {
@@ -2504,6 +2508,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('ccd_booking')->name('ccd_booking.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@ccd_booking_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@ccd_booking_store')->name('store');
+        });
+
         Route::prefix('nsa_account')->name('nsa_account.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@nsa_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
@@ -3177,6 +3186,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+    });
+
+    Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
+        Route::get('', 'Admins\UserManagementController@rider_delivery_note_otp_index')->name('index');
+        Route::get('list', 'Admins\UserManagementController@rider_delivery_note_otp_list')->name('list');
     });
 
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {

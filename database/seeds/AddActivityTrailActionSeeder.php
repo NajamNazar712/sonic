@@ -249,6 +249,7 @@ class AddActivityTrailActionSeeder extends Seeder
             array('id' => 232, 'screen_name' => 'Update User', 'action'=> 'Role Updated'),
             array('id' => 394, 'screen_name' => 'Incidence Monitoring', 'action'=> 'View'),
             array('id' => 395, 'screen_name' => 'Incidence Monitoring-View Details', 'action'=> 'View'),
+            array('id' => 412, 'screen_name' => 'CCD Booking', 'action'=> 'View'),
 
         ));
     }

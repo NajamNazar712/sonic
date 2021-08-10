@@ -12,9 +12,26 @@
                     <div class="card">
                         <div class="card-content" aria-expanded="true">
                             <div class="card-body">
-                                <div class="col-10">
+                                <div class="col-6">
                                     @include('client.inc.messages')
                                 </div>
+                                <h1 class="mb-1">
+                                    Material Request
+                                </h1>
+                                <div class="col-6 align-middle text-center search_style">
+                                    <form id="search_package_type_from">
+                                        <div class="form-group mb-0">
+                                            <select name="search_package_type" id="search_package_type" class="form-control select2">
+                                                @if(isset($search_packaging_types))
+                                                @foreach($search_packaging_types as $search_packaging_type)
+                                                    <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                @endforeach
+                                                @endif
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <br>
                                 <form action="{{route('cod.packaging.requests.submit')}}" id="material_request_form" method="post">
                                     @csrf
                                     <input type="hidden" value="{{$cart_count}}" id="cart_count">
@@ -22,18 +39,10 @@
                                         <div class="col">
                                             <div class="col">
                                                 <div class="row">
-                                                    <div class="col align-middle text-center">
-                                                        <h4>Packaging Type</h4>
+                                                    <div class="col align-middle text-left">
+                                                        <h4>Products</h4>
                                                     </div>
-                                                    <div class="col align-middle text-center">
-                                                        <h4>Size</h4>
-                                                    </div>
-                                                    <div class="col align-middle text-center">
-                                                        <h4>Quantity</h4>
-                                                    </div>
-                                                    <div class="col align-middle text-center">
-                                                        <h4>Charges</h4>
-                                                    </div>
+                                                    
                                                     <div class="col align-middle text-center">
 
                                                     </div>
@@ -52,33 +61,30 @@
                                                     <input type="hidden" id="size_{{$index}}" name="size[{{$index}}]" value="{{$item->size->id}}">
                                                     <input type="hidden" id="types_{{$index}}" name="types[{{$index}}]" value="{{$item->type->id}}">
                                                     <div class="row">
-                                                        <div class="col mb-1 align-middle text-center">
-                                                            <img class="" alt="flyer" src="{{asset($pictures[$item->type_id])}}" width="100" height="100">
-                                                            <br>
-                                                            <h4 class="mt-1">{{$item->type->type}}</h4>
+                                                        <div class="col mb-1 align-middle text-center border border-2 box_padding">
+                                                            <img class="" alt="flyer" src="{{asset($pictures[$item->type_id])}}" width="120" height="120">
                                                         </div>
-                                                        <div class="col mt-2 mb-1 align-middle text-center">
-                                                            <p>{{$item->size->size}}</p>
+                                                        <div class="col mt-2 mb-1 align-middle text-left pad_left">
+                                                            <h4 class="font-weight-bold">{{ucfirst($item->type->type)}}</h4>
+                                                            <h5>Size: {{$item->size->size}}</h5>
+                                                            <h5>Rs. {{$item->size->standard_charges}}</h5>
+                                                            <h5>Quantity:</h5>
+                                                            <div class="form-group input-group item_quantity_div">
+                                                                <input type="text" class="form-control text-center number quantity" id="quantity_{{$item->id}}" placeholder="Quantity*" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                            </div>
+                                                            {{-- <p>{{$item->size->size}}</p> --}}
                                                         </div>
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <div class="row justify-content-center">
                                                                 <div class="col-10">
 
                                                                     <div class="form-group">
-                                                                        <input type="text" class="form-control text-center number" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required">
+                                                                        {{-- <input type="text" class="form-control text-center number" id="quantity_{{$index}}" name="quantity[{{$index}}]" value="{{$item->quantity}}" data-rule-min="1" data-msg-min="Quantity can not be less than 1" data-rule-required="true" data-msg-required="Quantity is required"> --}}
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <div class="col mt-2 mb-1 align-middle text-center">
-                                                            <div class="row justify-content-center">
-                                                                <div class="col-10">
-                                                                    <div class="form-group">
-                                                                        <input type="text" class="form-control text-center" readonly id="" name="" value="{{$item->size->standard_charges}}" >
-                                                                    </div>
-                                                                </div>   
-                                                            </div>
-                                                        </div>
+                                                        
                                                         <div class="col mt-2 mb-1 align-middle text-center">
                                                             <button type="button" class="btn btn-icon btn-danger remove" value="{{$item->id}}"><i class="la la-close"></i></button>
                                                         </div>
@@ -89,6 +95,16 @@
                                             @endforeach
                                         </div>
                                         <div class="col-4">
+                                            <div class="row">
+                                                <div class="col align-middle text-center">
+                                                    <h4>Consignee Details</h4>
+                                                </div>
+                                                
+                                                <div class="col align-middle text-center">
+
+                                                </div>
+                                            </div>
+                                            <hr>
                                             <div class="row justify-content-md-center">
                                                 <div class="col-12">
                                                     <div class="form-body">
@@ -168,9 +184,20 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
 
     <style>
-
+        .box_padding{
+            padding-top: 15px;
+            padding-bottom: 15px;
+            border-radius: 15px;
+        }
+        .pad_left{
+            padding-left: 50px;
+        }
+        .search_style{
+            margin:0 auto;
+        }
     </style>
 
 @endsection
@@ -185,12 +212,20 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
 
 
 
     <script type="text/javascript">
         $('document').ready(function(){
-           
+            $('#search_package_type').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder:'Search',
+                dropdownParent:$('#search_package_type_from')
+            }).bind('select2:select',function () {
+                var url = $(this).val();
+                window.location.href = url;
+            });
             var total_sizes = $('#cart_count').val();
             $('#address_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -280,7 +315,19 @@
                     toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                 }
-            })
+            });
+            $('.quantity').TouchSpin({
+                min: 1,
+                max: 10000,
+                buttondown_class: 'btn btn-primary rounded-left',
+                buttonup_class: 'btn btn-primary rounded-right',
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            }).bind('input change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
         });
     </script>
 

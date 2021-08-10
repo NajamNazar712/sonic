@@ -11,6 +11,8 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\FtlRequest;
+use App\Http\Models\Admin\FtlRequestAdditionalCost;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\http\Models\Admin\Retail\RetailShipment;
@@ -882,6 +884,7 @@ class V2AdminPickupsController extends Controller
                     }
 
                     $shipment->actual_weight = $actual_weight;
+                    
 
                     if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
                         $receiving_sheet_shipment->status = 1;
@@ -1351,6 +1354,7 @@ class V2AdminPickupsController extends Controller
                         } else {
                             $actual_weight = $request->weight;
                         }
+                        
                     }
                     if ($shipment->booking_type_id == 4) {
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment->id);
@@ -1375,6 +1379,14 @@ class V2AdminPickupsController extends Controller
                             }
                         }
                     }
+                    //here update amount
+                    // if($shipment->booking_type_id==6){
+
+                        // $ftl_request = FtlRequest::where('shipment_id',$shipment->id)->first();
+                        // $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
+                        // //amount or received_amount need to confirm
+                        // $shipment->amount= ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
+                    // }
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
 
@@ -2304,6 +2316,7 @@ class V2AdminPickupsController extends Controller
                     } else {
                         if ($request->has('weight')) {
                             $shipment->actual_weight = $request->weight;
+                            
                         }
                     }
                     $shipment->save();

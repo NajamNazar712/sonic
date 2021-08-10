@@ -44,6 +44,12 @@ use App\Http\Models\PackagingMaterialTypes;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
 use App\Http\Models\RateRemark;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
+use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Rates\RateDestinationHub;
+use App\Http\Models\Rates\RateOriginHub;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Reference;
 use App\Http\Models\ReturnCharge;
@@ -1120,7 +1126,72 @@ class ShipperDashboardController extends Controller
                     $packaging_charges[$charge->type_id][] = $charge;
                 }
             }
-            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks]);
+
+            $rate_origin_hubs = RateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $rate_destination_hubs = RateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+            $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+            $overnight_origins = [];
+            $overland_origins = [];
+            $detain_origins = [];
+            $sameday_origins = [];
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
+                foreach($rate_origin_hubs as $index => $origin){
+
+                    if($index == 1){
+                        foreach($origin as $origin_data){
+                            $overnight_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($origin as $origin_data){
+                            $overland_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($origin as $origin_data){
+                            $detain_origins[] = $origin_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($origin as $origin_data){
+                            $sameday_origins[] = $origin_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            $overnight_destinations = [];
+            $overland_destinations = [];
+            $detain_destinations = [];
+            $sameday_destinations = [];
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
+                foreach($rate_destination_hubs as $index => $destination){
+
+                    if($index == 1){
+                        foreach($destination as $destination_data){
+                            $overnight_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 2){
+                        foreach($destination as $destination_data){
+                            $overland_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 3){
+                        foreach($destination as $destination_data){
+                            $detain_destinations[] = $destination_data->city_id;
+                        }
+                    }
+                    else if($index == 4){
+                        foreach($destination as $destination_data){
+                            $sameday_destinations[] = $destination_data->city_id;
+                        }
+                    }
+
+                }
+            }
+            return view('client.rates.view')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types,  'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
         }
         else {
             if ($user->corporate_rate_type_id != 3) {
@@ -1153,7 +1224,73 @@ class ShipperDashboardController extends Controller
                         $packaging_charges[$charge->type_id][] = $charge;
                     }
                 }
-                return view('client.rates.corporate.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids]);
+
+                $rate_origin_hubs = CorporateRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $rate_destination_hubs = CorporateRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+                $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+                $overnight_origins = [];
+                $overland_origins = [];
+                $detain_origins = [];
+                $sameday_origins = [];
+                if($rate_origin_hubs || count($rate_origin_hubs) > 0){
+                    foreach($rate_origin_hubs as $index => $origin){
+
+                        if($index == 1){
+                            foreach($origin as $origin_data){
+                                $overnight_origins[] = $origin_data->city_id;
+                            }
+                        }
+                        else if($index == 2){
+                            foreach($origin as $origin_data){
+                                $overland_origins[] = $origin_data->city_id;
+                            }
+                        }
+                        else if($index == 3){
+                            foreach($origin as $origin_data){
+                                $detain_origins[] = $origin_data->city_id;
+                            }
+                        }
+                        else if($index == 4){
+                            foreach($origin as $origin_data){
+                                $sameday_origins[] = $origin_data->city_id;
+                            }
+                        }
+
+                    }
+                }
+                $overnight_destinations = [];
+                $overland_destinations = [];
+                $detain_destinations = [];
+                $sameday_destinations = [];
+                if($rate_destination_hubs || count($rate_destination_hubs) > 0){
+                    foreach($rate_destination_hubs as $index => $destination){
+
+                        if($index == 1){
+                            foreach($destination as $destination_data){
+                                $overnight_destinations[] = $destination_data->city_id;
+                            }
+                        }
+                        else if($index == 2){
+                            foreach($destination as $destination_data){
+                                $overland_destinations[] = $destination_data->city_id;
+                            }
+                        }
+                        else if($index == 3){
+                            foreach($destination as $destination_data){
+                                $detain_destinations[] = $destination_data->city_id;
+                            }
+                        }
+                        else if($index == 4){
+                            foreach($destination as $destination_data){
+                                $sameday_destinations[] = $destination_data->city_id;
+                            }
+                        }
+
+                    }
+                }
+                return view('client.rates.corporate.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'discountCharges' => $discount, 'min_weight' => $min_weight, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'packaging_material_types' => $packaging_material_types, 'rate_remarks' => $rate_remarks, 'packaging_charges' => $packaging_charges, 'packaging_type_ids' => $packaging_type_ids, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
             } else {
                 $switches = CorporateDefaultRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1185,7 +1322,72 @@ class ShipperDashboardController extends Controller
                         $packaging_charges[$charge->type_id][] = $charge;
                     }
                 }
-                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks]);
+                $rate_origin_hubs = CorporateDefaultRateOriginHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+                $rate_destination_hubs = CorporateDefaultRateDestinationHub::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+                $cities = City::where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
+
+                $overnight_origins = [];
+                $overland_origins = [];
+                $detain_origins = [];
+                $sameday_origins = [];
+                if($rate_origin_hubs || count($rate_origin_hubs) > 0){
+                    foreach($rate_origin_hubs as $index => $origin){
+
+                        if($index == 1){
+                            foreach($origin as $origin_data){
+                                $overnight_origins[] = $origin_data->city_id;
+                            }
+                        }
+                        else if($index == 2){
+                            foreach($origin as $origin_data){
+                                $overland_origins[] = $origin_data->city_id;
+                            }
+                        }
+                        else if($index == 3){
+                            foreach($origin as $origin_data){
+                                $detain_origins[] = $origin_data->city_id;
+                            }
+                        }
+                        else if($index == 4){
+                            foreach($origin as $origin_data){
+                                $sameday_origins[] = $origin_data->city_id;
+                            }
+                        }
+
+                    }
+                }
+                $overnight_destinations = [];
+                $overland_destinations = [];
+                $detain_destinations = [];
+                $sameday_destinations = [];
+                if($rate_destination_hubs || count($rate_destination_hubs) > 0){
+                    foreach($rate_destination_hubs as $index => $destination){
+
+                        if($index == 1){
+                            foreach($destination as $destination_data){
+                                $overnight_destinations[] = $destination_data->city_id;
+                            }
+                        }
+                        else if($index == 2){
+                            foreach($destination as $destination_data){
+                                $overland_destinations[] = $destination_data->city_id;
+                            }
+                        }
+                        else if($index == 3){
+                            foreach($destination as $destination_data){
+                                $detain_destinations[] = $destination_data->city_id;
+                            }
+                        }
+                        else if($index == 4){
+                            foreach($destination as $destination_data){
+                                $sameday_destinations[] = $destination_data->city_id;
+                            }
+                        }
+
+                    }
+                }
+                return view('client.rates.default.view')->with(['shipper' => $user, 'switches' => $switches, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging, 'discountCharges' => $discount, 'sale_person' => $sale_person, 'packaging_material_types' => $packaging_material_types, 'packaging_type_ids' => $packaging_type_ids, 'packaging_charges' => $packaging_charges, 'wms_user_info' => $wms_user_info, 'wms_product_charges' => $wms_product_charges, 'wms_square_foot_charges' => $wms_square_foot_charges, 'wms_packing_charges' => $wms_packing_charges, 'wms_labelling_charges' => $wms_labelling_charges, 'wms_storage_charges' => $wms_storage_charges, 'invoicing_cycles' => $invoicing_cycles, 'storage_types' => $storage_types, 'rate_remarks' => $rate_remarks, 'overnight_origins' => $overnight_origins, 'overland_origins' => $overland_origins, 'detain_origins' => $detain_origins, 'sameday_origins' => $sameday_origins,'overnight_destinations' => $overnight_destinations, 'overland_destinations' => $overland_destinations, 'detain_destinations' => $detain_destinations, 'sameday_destinations' => $sameday_destinations, 'cities' => $cities]);
 
             }
         }

@@ -23,54 +23,6 @@
                             @csrf
                             <div class="card">
 
-                              {{--  <div class="">
-                                    @if(count($packaging_material_types) > 0)
-
-                                        <div class="card-header border-primary">
-                                            <div class="row">
-                                                <div class="col-6"><h3 class="card-title lead primary">Packaging Material Charges</h3></div>
-                                                <div class="col-6"><a href="javascript:void(0);" class="pull-right" id="packaging_main_switch"><input type="checkbox" name="packaging_switch" class="switchery pull-right packagingChargesSwitch" data-color="info" data-size="sm" /></a></div>
-
-                                            </div>
-                                        </div>
-
-                                        <div id="packaging_material_charges_div" class="card border-primary p-1 hide">
-                                            @foreach($packaging_material_types as $index => $type)
-                                                <div class="card-header border-primary">
-                                                    <div class="row">
-                                                        <div class="col-6"><h4 class="card-title lead primary">{{$type->type}}</h4></div>
-                                                        <div class="col-6"><a href="javascript:void(0);" class="pull-right"><a href="javascript:void(0);" class="pull-right" id="packaging_type_{{$type->id}}"><input name="packaging_type_{{$type->id}}" type="checkbox"  class="switchery packaging_type_{{$type->id}}" data-color="info" data-size="sm" checked/></a></a></div>
-
-                                                    </div>
-                                                </div>
-
-                                                <div id="package_type_{{$type->id}}" class="card border-primary" aria-expanded="true">
-                                                    <div class="card-content">
-                                                        <div class="card-body packaging-charges-div">
-                                                            <div class="row">
-                                                                @foreach($packaging_material_type_sizes[$type->id] as $size)
-
-                                                                    @if($size->type_id == $type->id)
-                                                                        <div class="col-md-3 text-center">
-                                                                            <label class="card-title">{{$size->size}}</label>
-                                                                            <fieldset class="form-group">
-                                                                                <input name="packaging_material_size[{{$size->id}}]" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$size->standard_charges}}">
-                                                                            </fieldset>
-                                                                        </div>
-                                                                    @endif
-                                                                @endforeach
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            @endforeach
-                                        </div>
-
-
-                                    @endif
-
-                                </div>--}}
                                 <input type="hidden" id="corporate_type_id" value="{{$corporate_rate_type_id}}" name="corporate_rate_type_id">
 
                             </div>
@@ -92,6 +44,35 @@
                                  aria-expanded="true">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="on_origin_hubs[]" id="on_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="on_destination_hubs[]" id="on_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-overnight">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -632,7 +613,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Overland</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="ol_default" id="ol_default" class="switchery ol_default" data-size="xs" data-switchery="true">
                                         @endif
@@ -646,7 +627,37 @@
                             <div id="overland" class="border-success no-border-top card hide" aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="ol_origin_hubs[]" id="ol_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="ol_destination_hubs[]" id="ol_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-overland">
+
                                             <div class="row">
                                                 <div class="col-md-2">
                                                     <h3 class="card-title">Doorstep Delivery</h3>
@@ -1170,7 +1181,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Detain</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="det_default" id="det_default" class="switchery det_default" data-size="xs" data-switchery="true">
                                         @endif
@@ -1185,6 +1196,35 @@
                                  aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="detain_origin_hubs[]" id="detain_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="detain_destination_hubs[]" id="detain_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-detain">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -1712,7 +1752,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="display-inline card-title lead success">Sameday</h3>
-                                        @if($sale_person['admin_id'] == \Illuminate\Support\Facades\Auth::id() || session('role_id') == 1)
+                                        @if($sale_person['admin_id'] == Auth::id() || session('role_id') == 1)
                                             <label class="display-inline ml-1">Make Default</label>
                                             <input type="checkbox" name="sameday_default" id="sameday_default" class="switchery sameday_default" data-size="xs" data-switchery="true">
                                         @endif
@@ -1726,6 +1766,35 @@
                             <div id="sameday" class="border-success no-border-top card hide">
                                 <div class="card-content">
                                     <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Origin Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="sameday_origin_hubs[]" id="sameday_origin_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-2">
+                                                <h3>Add Destination Cities</h3>
+                                            </div>
+                                            <div class="col-8">
+                                                <div class="form-group card border-success p-2">
+                                                    <select name="sameday_destination_hubs[]" id="sameday_destination_hubs" class="form-control select2" multiple="multiple">
+                                                        @foreach($cities as $city)
+                                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="weight-addition-sameday">
                                             <div class="row">
                                                 <div class="col-md-2">
@@ -3977,11 +4046,66 @@
             $(this).parent().parent().remove();
         });
 
+
+        //Origin And Destination Hubs Start
+        $('#on_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#on_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+        $('#ol_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#ol_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+        $('#detain_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#detain_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+        $('#sameday_origin_hubs').select2({
+            width:'100%',
+            placeholder:"Origin(s)",
+            allowClear:true
+        });
+
+        $('#sameday_destination_hubs').select2({
+            width:'100%',
+            placeholder:"Destination(s)",
+            allowClear:true
+        });
+
+
+        //Origin And Destination Hubs End
+
+
         $('#ratesAdditionForm').on('keypress',function (e) {
             if(e.which == 13 || e.keyCode == 13) {
                 e.preventDefault();
             }
         });
+
 
         var overnightSwitch = document.querySelector('.switchery.on-main-switch');
         var overlandSwitch = document.querySelector('.switchery.ol-main-switch');

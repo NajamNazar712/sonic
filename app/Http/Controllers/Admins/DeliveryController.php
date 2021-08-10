@@ -752,9 +752,6 @@ class DeliveryController extends Controller
 
             }
             if ($note) {
-                $otp_pin = rand(1000, 9999);
-                $note->otp = $otp_pin;
-                $note->save();
                 if (!$order) {  //Default
                     sort($valid_shipments); //sort_valid_shipments;
                 }
@@ -851,7 +848,6 @@ class DeliveryController extends Controller
                         }
                     }
                 }
-                NotificationsController::send(137,$rider->id, $note->id);
                 NotificationsController::send(40, $note->id);
             }
 
@@ -5311,9 +5307,7 @@ class DeliveryController extends Controller
                     $upload_image .= ' <div class="col">
                                 <div class="form-group">
                                 <input type="hidden" name="shipment_ids[]" value="'. $rider_delivery->shipment_id .'">
-                                    <input type="file" name="images['. $rider_delivery->shipment_id .']" class="w-20p p-1 border-primary"
-                                           title="Select File"
-                                           data-msg-required="File is required" data-rule-maxsize="5242880">
+                                    <input type="file" name="images['. $rider_delivery->shipment_id .']" class="w-20p p-1 border-primary" title="Select File" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-maxsize="5242880">
                                 </div> 
                             </div>';
 
@@ -6465,12 +6459,6 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     if($ccd_flag == false || ($ccd_flag == true && $rider->ccd == 1)){
                         $delivery_note->rider_id = $rider_id;
                         $delivery_note->save();
-                        if ($delivery_note->otp == null) {
-                            $otp_pin = rand(1000, 9999);
-                            $delivery_note->otp = $otp_pin;
-                            $delivery_note->save();
-                        }
-                        NotificationsController::send(137, $rider_id, $delivery_note_id);
                         return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
                     }
                     else{
@@ -6947,20 +6935,59 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     public function cash_collection_upload_receipt(Request $request)
     {
         $delivery_note_id = $request->input('ccd_delivery_note_id');
-        foreach ($request->shipment_ids as $shipment_id) {
-            if(array_key_exists($shipment_id, $request->images)) {
-                $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
-                if ($rider_delivery->exists()) {
-                    $rider_delivery = $rider_delivery->first();
-
-                    $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
-                    Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
-                    $rider_delivery->ccd_image = $picture_path;
-                    $rider_delivery->save();
+        if($request->has(('shipment_ids')) && is_array($request->images)){
+            if(count($request->shipment_ids) > 0){
+                if(count($request->images) > 0) {
+                    foreach ($request->shipment_ids as $shipment_id) {
+                        if (array_key_exists($shipment_id, $request->images)) {
+                            $rider_delivery = RiderDelivery::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id);
+                            if ($rider_delivery->exists()) {
+                                $rider_delivery = $rider_delivery->first();
+                                if($rider_delivery->ccd_image != null){
+                                    Storage::disk('public')->delete('rider_delivery/' . $rider_delivery->ccd_image);
+                                }
+                                $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->images[$shipment_id]));
+                                $rider_delivery->ccd_image = $picture_path;
+                                $rider_delivery->save();
+                            }
+                        }
+                    }
                 }
             }
         }
         return redirect('/admin/delivery/cash_collection/pending');
+    }
+
+    public function delivery_note_otp_generation(Request $request){
+        $environment = config('app.env');
+
+        if ($environment == 'production' || $environment == 'staging') {
+            $rider_id = $request->get('rider');
+            $rider = Rider::find($rider_id);
+            $otp = mt_rand(100000, 999999);
+            $rider->delivery_note_otp = $otp;
+            $rider->save();
+            NotificationsController::send(144, $rider, $otp);
+        }
+        return response()->json(['status' => 1]);
+    }
+
+    public function delivery_note_otp_verification(Request $request)
+    {
+        $environment = config('app.env');
+
+        if($environment == 'production' || $environment == 'staging') {
+            $rider = Rider::find($request->rider);
+            if ($rider->delivery_note_otp == $request->otp) {
+                return response()->json(['status' => 1]);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1]);
+        }
     }
 
 }
