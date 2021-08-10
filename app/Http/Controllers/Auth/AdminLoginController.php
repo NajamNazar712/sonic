@@ -62,15 +62,20 @@ class AdminLoginController extends Controller
                 ->whereNotNull('spt.user_id')->select('spt.user_id');
             if($assigned_admins->exists()) {
                 $assigned_admins = $assigned_admins->pluck('spt.user_id')->toArray();
-                $KAE = SaleTierTag::where('kam',$id)->pluck('user_id')->toArray();
-                $shippers = array_merge($shippers, $assigned_admins,$KAE);
+                $shippers = array_merge($shippers, $assigned_admins);
             }
+            $KAE = SaleTierTag::where('kam',$id);
+            if($KAE->exists()){
+                $KAE = $KAE->pluck('user_id')->toArray();
+                $shippers = array_merge($shippers,$KAE);
+                //$shippers = array_unique($shippers);
+            }
+
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
             $sales_coordinator = SalesCommissionUser::where('user_id',$id)->whereIn('sales_commission_users.tier_id',[2,3])->exists();
 
-
-            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login,'KAE' => $KAE]);
+            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);
 
             return redirect()->intended(route('admin.dashboard.index'));
         }
