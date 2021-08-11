@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Airway Bill Journy
+                    Airway Bill Print History
                 </h1>
 
                 <div class="card">
@@ -85,7 +85,7 @@
                             });
                         }
                         if (data.empty !== undefined) {
-                            var message = 'No scanning history found of Tracking Number: ' + data.empty;
+                            var message = 'No Airway Bill Print History found of Tracking Number: ' + data.empty;
                             scan_sound(2);
                             toastr.error(message, 'Error!', {
                                 positionClass: 'toast-top-center',

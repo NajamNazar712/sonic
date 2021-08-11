@@ -2050,7 +2050,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('summary')->name('summary.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@summary_index')->name('index');
             Route::post('data', 'Admins\AdminReportsController@summary_data')->name('data');
-            Route::get('list', 'Admins\AdminReportsController@summary_listblockAccountListAjax')->name('list');
+            Route::get('list', 'Admins\AdminReportsController@summary_list')->name('list');
         });
         Route::prefix('account_activation')->name('account_activation.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@account_activation_index')->name('index');

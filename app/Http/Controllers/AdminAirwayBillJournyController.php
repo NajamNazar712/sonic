@@ -45,11 +45,12 @@ class AdminAirwayBillJournyController extends Controller
             $scanning_histories = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->get();
             if (count($scanning_histories) > 0) {
                 foreach ($scanning_histories as $index => $scanning_history) {
+//                    dd($scanning_history->user_type);
                     if ($scanning_history->user_type == 3) {
                         $account_type = 'Admin';
-                        $admin = Admin::find($scanning_history->admin_id);
-                        $scanned_by = $admin->name;
-                    } elseif ($scanning_history->user_type == 1 || $scanning_history->user_type == 4) {
+                        $admin = Admin::find($scanning_history->user_id);
+                            $scanned_by = $admin->name;
+                    } elseif ($scanning_history->user_type == 1) {
                         $account_type = 'Shipper';
                         $user = User::find($scanning_history->user_id);
                         $scanned_by = $user->name;
@@ -58,6 +59,11 @@ class AdminAirwayBillJournyController extends Controller
                         $account_type = 'Substitute Shipper';
                         $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
                         $scanned_by = $sub_user->name;
+
+                    } elseif ($scanning_history->user_type == 4) {
+                        $account_type = 'Retail User';
+                        $retail_admin = RetailUser::find($scanning_history->admin_id);
+                        $scanned_by = $retail_admin->name;
                     } else {
                         $account_type = '-';
                         $scanned_by = '-';
