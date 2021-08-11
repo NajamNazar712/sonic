@@ -27,14 +27,15 @@
     });
   </script>
 @endif
+
+@if(Session::has('agreement_signed') && session('agreement_signed') != 1)
+    <script src="{{asset('szimek-signature_pad/signature.min.js')}}" type="text/javascript"></script>
+@endif
 <script type="text/javascript">
 
     $(document).ready(function() {
       
-            $('#ShowAgreementModal').modal({
-                backdrop: 'static',
-                keyboard: false
-             });
+
         $('body #app_content').on('click', function () {
             if($('#sidebar_menu').hasClass('is-active')){
                 $.app.menu.hide();
@@ -42,24 +43,62 @@
         });
 
         @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
-            $('#ShowAgreementModal').modal('show');
 
-            // $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
-            // $('#cpeye').on('mousedown',function(){$('input[name="confirm_password"]').attr('type','text')}).on('mouseup',function(){$('input[name="confirm_password"]').attr('type','password')});
+        canvas = document.getElementById('e-sign-canvas');
+
+        var signaturePad = new SignaturePad(canvas,{
+            backgroundColor: 'rgb(248,248,248)',
+        });
+
+        $('#ShowAgreementModal').modal('show');
 
         $("#agreement-form #agreement_signed").on('click',function(){
             if($(this).prop('checked'))
             {
+                $('#SignatureModal input[type=file]').val('');
+                $('#ShowAgreementModal').modal('hide');
                 $('#SignatureModal').modal('show');
             }
         });
 
-        $("#agreement-form #save_signature_btn").on('click',function(){
-
+        $("#SignatureModal #save_signature_btn").on('click',function(){
+            if(signaturePad.isEmpty())
+            {
+                toastr.error("Signature is Required", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
+            else{
+                var preview = document.querySelector('#agreement-form #esign_image');
+                img = signaturePad.toDataURL();
+                preview.src = img;
+                $("#agreement-form #esign").val(img);
+                $('#SignatureModal').modal('hide');
+                $('#ShowAgreementModal').modal('show');
+            }
         });
 
-        $("#agreement-form #clear_signature_btn").on('click',function(){
+        $("#SignatureModal #clear_signature_btn").on('click',function(){
+            signaturePad.clear();
+        });
 
+        $("#SignatureModal #upload_img_btn").on('click',function(){
+            $("#SignatureModal #upload_e_sign").trigger('click');
+        });
+
+        $("#SignatureModal #upload_e_sign").on('change',function(){
+            var preview = document.querySelector('#agreement-form #esign_image');
+            var file = document.querySelector('#SignatureModal input[type=file]').files[0];
+            var reader = new FileReader();
+
+            reader.addEventListener("load", function () {
+                preview.src = reader.result;
+                $("#agreement-form #esign").val(reader.result);
+                $('#SignatureModal').modal('hide');
+                $('#ShowAgreementModal').modal('show');
+            }, false);
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
         });
 
         $( "#agreement-form" ).validate({

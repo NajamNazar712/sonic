@@ -1,6 +1,5 @@
 @if(Session::has('agreement_signed') && session('agreement_signed') != 1)
-    <div class="modal fade text-left" id="ShowAgreementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShowAgreementModal"
-         aria-hidden="true">
+    <div class="modal fade text-left" style="overflow-y: auto" id="ShowAgreementModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShowAgreementModal">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 @if(session('error'))
@@ -59,7 +58,7 @@
 
                             <div class="mt-5 w-25">
                                 <span class="form-group">
-                                <img id="esign_image" class="d-none" src="https://www.airforshare.com/files/cWGdXP.png" style="width: 100%;" alt="">
+                                <img id="esign_image" src="" style="width: 100%;" alt="">
                                     <textarea data-rule-required="true" data-msg-required="Signature is Required" name="esign" id="esign" class="d-none"></textarea>
                                 </span>
                                 <hr style="border-top:1px solid black;">
@@ -78,7 +77,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="SignatureModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SignatureModal"
+    <div class="modal fade" id="SignatureModal" data-keyboard="false" data-backdrop="static" role="dialog" aria-labelledby="SignatureModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -88,14 +87,16 @@
                 </div>
                 <div class="modal-body  text-center">
 
-                    <div class="row justify-content-center">
-                        <div class="form-group form-inline" id="e-signature-div">
-                        </div>
+                    <div class="w-100">
+                        <canvas id="e-sign-canvas">
+                        </canvas>
 
                     </div>
                 </div>
+                <input type="file" class="d-none" id="upload_e_sign" accept=".png">
                 <div class="modal-footer">
-                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="save_signature_btn">Save</button>
+                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="upload_img_btn" >Upload Image</button>
+                    <button tabindex="-1" type="button" class="btn btn-success ml-1" id="save_signature_btn">Save E Sign</button>
                     <button type="button" class="btn btn-danger ml-1" id="clear_signature_btn">Clear</button>
                 </div>
             </div>

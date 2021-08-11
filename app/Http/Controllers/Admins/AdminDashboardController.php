@@ -9856,6 +9856,9 @@ class AdminDashboardController extends Controller
         elseif ($check == 'blank_cheque_image'){
             $file = $user_documents->blank_cheque_image;
         }
+        elseif ($check == 'e_sign_image'){
+            $file = $user_documents->e_sign_image;
+        }
         else{
             return redirect()->back()->with('error', 'File not found!');
         }
