@@ -917,8 +917,12 @@ class ShipperShipmentBookController extends Controller
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
+        $watermark_flag = false;
         if ($user_type == 3) {
             $user_name = Admin::find($user_id)->name . ' (Admin)';
+            $admin_name = Admin::find($user_id)->name;
+            $watermark_flag = true;
+            $watermark = 'Duplicate printed by: '. $admin_name;
         }
         else if ($user_type == 1) {
             $user_name = User::find($user_id)->name . ' (Shipper)';
@@ -1037,7 +1041,7 @@ class ShipperShipmentBookController extends Controller
                         background: #c8c8c8;
                         border-radius: 25px;
                       }
-
+                         
                       .void {
                         top: 0;
                         bottom: 0;
@@ -1055,6 +1059,16 @@ class ShipperShipmentBookController extends Controller
                         }
                         .piece_number{
                             font-size: 2.5rem;
+                        }
+                        .watermark{
+                        position: fixed;
+                            margin-top: -250px;
+                            margin-right:600px ;    
+                            right: 50px;
+                            opacity: 0.4;
+                            text-align: right;
+                            color: dimgrey;
+                            transform: rotate(320deg);
                         }
                     </style>
                   </head>
@@ -2154,10 +2168,17 @@ class ShipperShipmentBookController extends Controller
                 ';
             }
 
-            $html .= '
+            if ($watermark_flag) {
+                $html .= '
                   </body>
+                  <div id="watermark" class="watermark">
+                    <h1> ' . $watermark . '  </h1>
+                    
+                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                  </div>
                 </html>
             ';
+            }
         }
 
         return $html;
