@@ -8925,6 +8925,17 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
     }
 
+    public function shipment_attempt_settings(Request $request)
+    {
+        $settings = GlobalSettings::whereIn('type', ['rider_shipment_attempt_count', 'rider_shipment_attempt_waiting_duration'])
+            ->select('type as key', 'setting_value as value');
+        if ($settings->exists()) {
+            $settings = $settings->get();
+            return response()->json(['status' => 0, 'data' => $settings]);
+        }
+        return response()->json(['status' => 1, 'message' => 'Settings not found']);
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

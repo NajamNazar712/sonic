@@ -94,6 +94,7 @@ Route::name('api.')->group(function () {
 		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
 		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
+        Route::get('shipment_settings', 'Rider\RiderAPIController@shipment_attempt_settings')->name('shipment_settings');
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
