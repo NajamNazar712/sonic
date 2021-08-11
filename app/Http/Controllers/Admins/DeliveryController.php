@@ -5768,9 +5768,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         ActivityTrailController::createActivityTrailLog(Auth::id(),324);
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
-        $intercept_rebook_request_histories = InterceptReBookRequestHistory::all();
+
 //        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
-        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type,'intercept_rebook_request_histories' => $intercept_rebook_request_histories]);
+        return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
     }
 
     public function intercept_request_list(Request $request)
@@ -5845,9 +5845,17 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('type', function ($query, $keyword) {
+
+                if ($keyword != '') {
+                    $query->where('irbr.intercept_type', $keyword);
+                } else {
+                    $query->whereRaw('false');
+                }
+            })
             ->editColumn('type', function ($shipments) {
                 if ($shipments->type == null){
-                    return '(NULL)';
+                    return '-';
                 }
                 else if ($shipments->type == 2 ) {
                     return 'Same Consignee';
