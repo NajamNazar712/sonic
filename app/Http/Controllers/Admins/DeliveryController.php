@@ -5816,6 +5816,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             })
             ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id','irbr.intercept_type as type')
             ->where('shipments.shipper_status_id', 54)
+            ->where('irbr.status','!=',1)
             ->groupBy('shipments.id');
 
 //            dd($shipments);
