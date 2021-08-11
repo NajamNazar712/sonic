@@ -442,18 +442,20 @@ class AdminNsaAccountShipmentController extends Controller
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-                        $rider_id = $settings->setting_value;
-                        $admin_id = 50;
-
-                        if (in_array($nsa_shipment->user_id, [7762, 10354])) {
-                            $rider_id = 1837;
-                            $admin_id = Auth::id();
-                        }
 
                         $valid_shipments = array();
                         $shipments_count = 0;
                         $total_cod_amount = 0;
                         foreach ($nsa_shipments as $nsa_shipment) {
+                            if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                $rider_id = 1837;
+                                $admin_id = Auth::id();
+                            }
+                            else {
+                                $rider_id = $settings->setting_value;
+                                $admin_id = 50;
+                            }
+
                             if (!in_array($nsa_shipment->id, $valid_shipments)) {
                                 if ($nsa_shipment) {
                                     $valid_shipments[] = $nsa_shipment->id;
@@ -500,6 +502,16 @@ class AdminNsaAccountShipmentController extends Controller
                             $received_refused_by = '';
 
                             $shipment_data = Shipment::find($shipment);
+
+                            if (in_array($shipment_data->user_id, [7762, 10354])) {
+                                $rider_id = 1837;
+                                $admin_id = Auth::id();
+                            }
+                            else {
+                                $rider_id = $settings->setting_value;
+                                $admin_id = 50;
+                            }
+
                             $shipment_data->shipper_status_id = 14;
                             $shipment_data->consignee_status_id = 14;
                             $shipment_data->save();
