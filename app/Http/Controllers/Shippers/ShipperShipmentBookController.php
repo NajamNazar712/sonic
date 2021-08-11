@@ -2195,6 +2195,7 @@ class ShipperShipmentBookController extends Controller
                     return $this->air_waybill_sticker_pdf($user_type, $user_id, $shipment_ids);
                 }
                 else {
+                    //dd(1);
                     return $this->air_waybill($user_type, $user_id, $request->ids);
                 }
             }
