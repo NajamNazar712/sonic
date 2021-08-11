@@ -116,6 +116,9 @@
                         @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
                         @endif
+                        @if (session('user_id') == 7306)
+                            <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

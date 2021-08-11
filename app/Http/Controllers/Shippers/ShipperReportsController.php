@@ -10,6 +10,7 @@ use App\Http\Models\ShipmentStatusReason;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -714,8 +715,6 @@ class ShipperReportsController extends Controller
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
         ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
         ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-        ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
                 ->where('sj.id','=',
@@ -726,10 +725,10 @@ class ShipperReportsController extends Controller
                 ->where('dr.id', '=',
                     DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14, 25, 30, 36, 37) AND shipments_journey.verification = 1)'));
         })
-        ->leftJoin('shipments_journey as atmp', function ($join) {
-            $join->on('atmp.shipment_id', '=', 'shipments.id')
-                ->where('atmp.id', '=',
-                    DB::connection('reports')->raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14, 25, 30, 36, 37) AND shipments_journey.verification = 1)'));
+        ->leftJoin('shipments_journey as atmpdate', function ($join) {
+            $join->on('atmpdate.shipment_id', '=', 'shipments.id')
+                ->where('atmpdate.id', '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5 AND shipments_journey.verification = 1)'));
         })
         ->leftJoin('shipments_journey as sjrr', function ($join) {
             $join->on('sjrr.shipment_id', '=', 'shipments.id')
@@ -738,34 +737,44 @@ class ShipperReportsController extends Controller
                     DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
         })
         ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
-        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight','shipments.order_id as order_id','oc.name as origin','dc.name as destination', 'dr.created_at as delivered_or_returned', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'ssr.name as return_reason', 'dr.shipper_status_id')
+
+        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id')
         ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
         $sales = $sales->where(function ($query) {
-            $query->where('shipments.user_id', session('user_id'))
+            $query->where('shipments.user_id', 7306)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
 
         $datatable = Datatables::of($sales)
-        ->addColumn('delivery_within_15_days', function($sales) {
-            if ($sales->shipper_status_id != 25) {
-                $delivered_date = Carbon::parse($sales->delivered_or_returned)->startOfDay();
-
-                $arrival_date = Carbon::parse($sales->arrival_date)->startOfDay();
-
-                $days = $delivered_date->diffInDays($arrival_date);
-
-                if ($days <= 15) {
-                    return 'YES';
+        ->addColumn('rider_remarks', function($sales) {
+            $rider_status = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('rider_id')->get()->last();
+            if($rider_status){
+                if($rider_status){
+                    return $rider_status->remarks;
+                }else{
+                    return '-';
                 }
-                else {
-                    return 'NO';
+                // ($rider_status->remarks) ? $rider_status->remarks : '-'
+            }
+
+        })
+        ->addColumn('attempts', function($sales) {
+            $reattempt_count = ShipmentsJourney::where('shipment_id', $sales->shipment_id)
+                ->where('shipper_status_id','=',5)
+                ->where('verification','=',1)
+                ->select(DB::raw('count(shipment_id) as reattempts'))
+                ->get()->first();
+                if($reattempt_count){
+                    return $reattempt_count->reattempts;
+                }else{
+                    return '-';
                 }
-            }
-            else {
-                return '';
-            }
+        })
+        ->addColumn('tracking_number_link', function ($sales) {
+            $route = route('cod.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
         });
 
         if($tracking = $request->get('search_tracking')){

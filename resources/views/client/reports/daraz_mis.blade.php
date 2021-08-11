@@ -48,6 +48,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
@@ -190,11 +191,12 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.reports.adjustments.list') }}',
+                        url: '{{ route('cod.reports.daraz_mis.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
+                            head.push('Tracking Number');
                             head.push('Arrival Date');
                             head.push('Status');
                             head.push('Actual Weight');
@@ -205,18 +207,21 @@
                             head.push('Delivered Returned Date');
                             head.push('Received Refused by');
                             head.push('Sister Account');
-                        
+                     
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.adjustment_id_padded);
                                 row.push(values.tracking_number);
+                                row.push(values.arrival_date);
+                                row.push(values.current_status);
+                                row.push(values.actual_weight);
+                                row.push(values.return_reason);
+                                row.push(values.attempts);
+                                row.push(values.rider_remarks);
+                                row.push(values.last_attempt_date);
+                                row.push(values.delivered_or_returned);
+                                row.push(values.received_or_refused_by);
                                 row.push(values.shipper_name);
-                                row.push(values.adjustment_type);
-                                row.push(values.adjustment_amount);
-                                row.push(values.done_payment_id);
-                                row.push(values.remarks);
-                                row.push(values.created_at);
                                 body.push(row);
                             });
                         },
@@ -233,7 +238,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Adjustments Report',
+                        title: 'Daraz MIS Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -247,26 +252,29 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('cod.reports.adjustments.list') }}',
+                    url: '{{ route('cod.reports.daraz_mis.list') }}',
                     data: function (d) {
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                rowId: 'done_payment_id',
+                rowId: 'shipment_id',
                 order: [[8, 'desc']],
                 columns: [
+                    
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'adjustment_id_padded' ,name: 'adjustment_logs.id', class: 'align-middle text-center adjustment_id'},
-                    { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
-                    { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
-                    { data:'adjustment_type' ,name: 'at.name', class: 'align-middle adjustment_type'},
-                    { data:'adjustment_amount' ,name: 'adjustment_logs.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    { data:'done_payment_link' ,name: 'dp.id', class: 'align-middle done_payment_id'},
-                    { data:'remarks' ,name: 'adjustment_logs.remarks', class: 'align-middle remarks'},
-                    { data:'created_at' ,name: 'adjustment_logs.created_at', class: 'align-middle created_at'},
-
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle text-center adjustment_id'},
+                    { data:'current_status' ,name: 'ss.name', class: 'align-middle text-center adjustment_id'},
+                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle shipper_name'},
+                    { data:'return_reason' ,name: 'ssr.name', class: 'align-middle adjustment_type'},
+                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts', orderable: false, searchable: false},
+                    { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle rider_remarks', orderable: false, searchable: false},
+                    { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle '},
+                    { data:'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle '},
+                    { data:'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle '},
+                    { data:'shipper_name' ,name: 'u.name', class: 'align-middle remarks'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -308,16 +316,16 @@
                         }
                     });
             }
-            $('#datatable tbody').on('click', 'tr td.done_payment_id button', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                if (id) {
-                    print(id);
-                } else {
-                    var error = "Payment Details not found!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            // $('#datatable tbody').on('click', 'tr td.done_payment_id button', function() {
+            //     var id = parseInt($(this).parents('tr').attr('id'));
+            //     if (id) {
+            //         print(id);
+            //     } else {
+            //         var error = "Payment Details not found!";
+            //         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                }
-            });
+            //     }
+            // });
 
         });
     </script>
