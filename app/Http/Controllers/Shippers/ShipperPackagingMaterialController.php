@@ -657,7 +657,7 @@ class ShipperPackagingMaterialController extends Controller
 //                $user_charges[$size_charge->size_id] = $size_charge->charges;
 //            }
 //        }
-        $size_charges = PackagingMaterialTypeSizes::get();
+        $size_charges = PackagingMaterialTypeSizes::where('id', '!=',1)->get();
         foreach ($size_charges as $size_charge){
             $standard_charges[$size_charge->id] = $size_charge->standard_charges;
         }
