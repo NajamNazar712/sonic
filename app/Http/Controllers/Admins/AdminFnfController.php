@@ -37,7 +37,15 @@ class AdminFnfController extends Controller
          ->select(['fnf.id as id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee']);
 
      $datatables = Datatables::of($employee)
-     ->editColumn('employee',)
+         ->editColumn('rate_status',function ($users) {
+             if ($users->rate_status == 0) {
+                 return "Approved";
+             } elseif ($users->rate_status == 1) {
+                 return "Requested";
+             } else {
+                 return "Rejected";
+             }
+         })
      ;
      return $datatables->make(true);
     }
