@@ -68,8 +68,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\OverallVendorPickup',
         'App\Console\Commands\NotPickedShippersSummary',
         'App\Console\Commands\Escalation',
-       	'App\Console\Commands\EscalationTagging',
-		//'App\Console\Commands\TelenorCall',
+        'App\Console\Commands\EscalationTagging',
+        //'App\Console\Commands\TelenorCall',
         //'App\Console\Commands\TelenorCallResponse',
         'App\Console\Commands\OnHoldShipmentEmail',
         'App\Console\Commands\OverlandAgingReport',
@@ -93,6 +93,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
+        'App\Console\Commands\PasswordUpdateForAdminUser',
     ];
 
     /**
@@ -270,7 +271,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
         $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
         $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
-       $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
         $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($settings->exists()) {
             $settings = $settings->first();
@@ -309,6 +310,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:emailofreturnconfirmtokams')->dailyAt('03:00')->runInBackground();
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
+        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+
     }
     /**
      * Register the commands for the application.
