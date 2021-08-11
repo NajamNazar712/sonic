@@ -158,7 +158,7 @@ class ShipperReportsController extends Controller
                 return number_format($amount);
             })
             ->editColumn('delivered_or_returned', function($sale){
-                if (in_array($sale->latest_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
                     return $sale->delivered_or_returned;
                 }
                 else {
