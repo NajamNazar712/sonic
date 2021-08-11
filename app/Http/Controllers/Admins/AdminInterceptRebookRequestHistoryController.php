@@ -111,6 +111,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $intercept_type = $request->consignee;
+
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
@@ -126,7 +127,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                     $s_amount = str_replace(",", "", "$request->amount");
                     $amount = (int)$s_amount;
 
-                   if ($intercept_type == 2){
+                   if ($intercept_type == 1){
                     InterceptReBookRequest::create([
                         'shipment_id' => $request->shipment_id,
                         'consignee_city_id' => $request->consignee_city,
