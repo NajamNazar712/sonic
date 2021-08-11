@@ -922,7 +922,7 @@ class ShipperShipmentBookController extends Controller
             $user_name = Admin::find($user_id)->name . ' (Admin)';
             $admin_name = Admin::find($user_id)->name;
             $watermark_flag = true;
-            $watermark = 'Duplicate printed by: '. $admin_name;
+            $watermark = 'DUPLICATE PRINTED BY: '. $admin_name;
         }
         else if ($user_type == 1) {
             $user_name = User::find($user_id)->name . ' (Shipper)';
@@ -1060,16 +1060,7 @@ class ShipperShipmentBookController extends Controller
                         .piece_number{
                             font-size: 2.5rem;
                         }
-                        .watermark{
-                        position: fixed;
-                            margin-top: -250px;
-                            margin-right:600px ;    
-                            right: 50px;
-                            opacity: 0.4;
-                            text-align: right;
-                            color: dimgrey;
-                            transform: rotate(320deg);
-                        }
+                      
                     </style>
                   </head>
                   <body>
@@ -2171,8 +2162,19 @@ class ShipperShipmentBookController extends Controller
             if ($watermark_flag) {
                 $html .= '
                   </body>
-                  <div id="watermark" class="watermark">
-                    <h1> ' . $watermark . '  </h1>
+                  <div id="watermark_" class="watermark_">
+                    <h1 style="
+                   text-align: center;  
+                   text-transform: uppercase;                  
+                   overflow: hidden;
+                   position: fixed;
+                   margin-top: -320px;
+                   opacity: 0.4;
+                   transform: rotate(350deg);
+                   font-size: 400%; 
+                   color: red; 
+                   font-stretch: extra-expanded;"     
+                    > ' . $watermark . '  </h1>
                     
                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                   </div>
