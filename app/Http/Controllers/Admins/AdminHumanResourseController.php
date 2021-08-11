@@ -10,6 +10,7 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -2269,20 +2270,5 @@ class AdminHumanResourseController extends Controller
 
     }
 
-    public function fnf_index(){
-        $departments = AdminDepartment::all();
-        return view('admin.human_resource.employee_clearance.index')->with(['departments' => $departments]);
-    }
-
-    public function fnf_add(){
-        
-        $departments = AdminDepartment::all();
-        $employee_statuses = EmployeeStatus::all();
-        return view('admin.human_resource.employee_clearance.add',compact('departments','employee_statuses'));
-    }
-
-    public function fnf_submit(){
-        //
-    }
 
 }

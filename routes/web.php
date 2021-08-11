@@ -3103,11 +3103,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
-        Route::prefix('employee_clearance')->name('employee_clearance.')->group(function () {
-            Route::get('', 'Admins\AdminHumanResourseController@fnf_index')->name('index');
-            Route::get('list', 'Admins\AdminHumanResourseController@fnf_list')->name('list');
-            Route::get('/add', 'Admins\AdminHumanResourseController@fnf_add')->name('add');
-            Route::post('/submit', 'Admins\AdminHumanResourseController@fnf_submit')->name('submit');
+        Route::prefix('fnf')->name('fnf.')->group(function () {
+            Route::get('', 'Admins\AdminFnfController@index')->name('index');
+            Route::get('list', 'Admins\AdminFnfController@list')->name('list');
+            Route::get('/add', 'Admins\AdminFnfController@add')->name('add');
+            Route::post('/submit', 'Admins\AdminFnfController@submit')->name('submit');
+            Route::post('/employee_data', 'Admins\AdminFnfController@employee_data')->name('employee_data');
 
         });
     });

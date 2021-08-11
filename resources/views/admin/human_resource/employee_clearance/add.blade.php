@@ -16,19 +16,23 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="employee_information_form" action="{{route('admin.human_resource.employee_clearance.submit')}}" method="post">
+                            <form id="employee_information_form" action="{{route('admin.human_resource.fnf.submit')}}" method="post"  novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
                                 <fieldset>
-                                    <div class="row">
+                                    <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="name">
                                                     Employee ID:
                                                     <span class="danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control required" name="employee_id" placeholder="Employee ID">
+                                                <select name="trax_id" id="trax_id" class="select2 form-control required" style="width: 100%">
+                                                    @foreach($employee as $data)
+                                                        <option value="{{$data->trax_id}}">{{$data->trax_id}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -37,17 +41,21 @@
                                                    Employee Name:
                                                     <span class="danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control required" placeholder="Employee Name (Alphabet Only)" name="employee_name">
+                                                <input type="text" class="form-control required" placeholder="Employee Name (Alphabet Only)" name="employee_name" id="employee_name" data-rule-required="true" data-msg-required="Name is required" disabled>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="company_address">Designation:
                                                     <span class="danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control required"  name="designation" placeholder="Designation">
+                                                <select name="designation" id="designation" class="select2 form-control required" style="width: 100%" disabled>
+                                                    @foreach($designations as $designation)
+                                                        <option value="{{$designation->id}}">{{$designation->name}}</option>
+                                                    @endforeach
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -55,7 +63,7 @@
                                                 <label for="phone">Department:
                                                     <span class="danger">*</span>
                                                 </label>
-                                                <select name="department_id" id="department_id" class="select2 form-control required" style="width: 100%">
+                                                <select name="department_id" id="department_id" class="select2 form-control required" style="width: 100%" disabled>
                                                     @foreach($departments as $department)
                                                         <option value="{{$department->id}}">{{$department->name}}</option>
                                                     @endforeach
@@ -63,141 +71,52 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="emp_status">Emp. Status:
-                                                    <span class="danger">*</span>
-                                                </label>
-                                                <select name="status" id="status" class="select2 form-control required" style="width: 100%">
-                                                    @foreach($employee_statuses as $status)
-                                                        <option value="{{$status->id}}">{{$status->name}}</option>
-                                                    @endforeach
-                                                </select>
+                                                <label for="reference">Date of Joining:</label>
+                                                <div class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                                    </div>
+                                                    <input type="text" name="joining_date" class="form-control bg-primary border-primary white rounded-right pickadate" id="joining_date" placeholder="Joining Date" data-rule-required="true" data-msg-required="Joining Date is required">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="phone2">Sub-Department</label>
-                                                <input type="text" class="form-control" placeholder="Sub-Department"  name="sub_department">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="ntn_no">Region / Grade </label>
-                                                <input type="text" class="form-control" placeholder="(e.g: 1234567-8)"  name="region">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="strn_no">Location:</label>
-                                                <input type="text" class="form-control" placeholder="(e.g: 1234567891234)" value="{{ old('strn_no') }}"  name="strn_no">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="url">CNIC No:</label>
-                                                <span class="danger">*</span>
-                                                <input type="text" class="form-control required" name="cnic" placeholder="Webiste / Facebook Page">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-
-                                                <label for="shipper_city">Date of Joining:
-                                                    <span class="danger">*</span>
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control required" name="joining_date" placeholder="Date of Joining">
+                                                <label for="reference">Date of Resign:</label>
+                                                <div class="form-group input-group">
+                                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                                    </div>
+                                                    <input type="text" name="resign_date" class="form-control bg-primary border-primary white rounded-right pickadate" id="resign_date" placeholder="Resign Date" data-rule-required="true" data-msg-required="Resign Date is required">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row mb-5">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="nature_of_account">Mobile No:
+                                                <label for="average_shipment_duration">Line Manager Email:
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="text" class="form-control required" name="mobile_number" placeholder="Mobile No">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-
-                                                <label for="shipper_product_type">Date of Resign:
-                                                    <span class="danger">*</span>
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control required" name="resign_date" placeholder="Date of Joining">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12 d-none" id="product_name_div">
-                                            <div class="form-group">
-                                                <label for="product_name">Email Address:
-                                                    <span class="danger">*</span>
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control"  name="email" placeholder="Email">
+                                                    <input type="email" class="form-control required"  name="line_manager" placeholder="Line Manager Email" data-rule-required="true" data-msg-required="Email is required">
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="average_shipment">Last Working Date:
+                                                <label for="average_shipment_duration">HOD Email:
                                                     <span class="danger">*</span>
                                                 </label>
                                                 <div>
-                                                    <input type="text" class="form-control required"  name="average_shipment" placeholder="Last Working Date">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                       <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="average_shipment_duration">Line Manager:
-                                                    <span class="danger">*</span>
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control required"  name="line_manager" placeholder="Line Manager">
-                                                </div>
-                                            </div>
-                                        </div>
-                                           <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="average_shipment_duration">HOD:
-                                                    <span class="danger">*</span>
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control required"  name="hod" placeholder="HOD">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="reference">Created By:</label>
-                                                <div>
-                                                    <input type="text" class="form-control required"  name="hod" placeholder="Created By">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6" id="sale_person_div">
-                                            <div class="form-group">
-                                                <label for="reference">Creation Date:</label>
-                                                <div>
-                                                    <input type="text" class="form-control required"  name="hod" placeholder="Creation Date">
+                                                    <input type="text" class="form-control required"  name="hod" placeholder="HOD Email" data-rule-required="true" data-msg-required="Email is required">
                                                 </div>
                                             </div>
                                         </div>
@@ -241,6 +160,98 @@
     <script>
         $(document).ready(function() {
 
+            $('#designation').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Designation*'
+            });
+            
+            $('#department_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Department*'
+            });
+
+            $('#trax_id').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Trax Id*'
+            }).bind('change',function(){
+                var id = $(this).val();
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.fnf.employee_data') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                       if(data.status == 1){
+                          $('#employee_name').val(data.data.name);
+                          $('#designation').val(data.data.designation).trigger('change');
+                          $('#department_id').val(data.data.department).trigger('change');
+                       }
+                       else{
+                           toastr.error(data.error, 'Error!', {
+                               positionClass: 'toast-top-center',
+                               containerId: 'toast-top-center'
+                           });
+                       }
+                    });
+                }
+            });
+
+            var joining_date = $('#joining_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                     //$('#to_date_root').css('top', '40px');
+                    $('.picker').css('position','relative');
+                },
+                onSet: function(context) {
+
+                }
+            });
+
+            var resign_date = $('#resign_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                     //$('#to_date_root').css('top', '40px');
+                    $('.picker').css('position','relative');
+                },
+                onSet: function(context) {
+
+                }
+            });
+
+            $('#employee_information_form').validate({
+                ignore: [],
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your request is being processed!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
+                }
+            });
         });
     </script>
 @endsection
