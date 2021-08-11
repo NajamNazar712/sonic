@@ -115,6 +115,7 @@
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Image</th>
                                 <th class="border-primary border-darken-1"></th>
+                                <th class="border-primary border-darken-1">Shipper</th>
 
                             </tr>
                             </thead>
@@ -457,6 +458,7 @@
 
             var selected_rows = [];
             var rows_count = 0;
+            var shipperdata=[];
             $('#datatable tbody').on('click', 'tr td.image a.image-popup', function () {
                var return_note_id = $(this).parents('tr').attr('id');
                if(return_note_id){
@@ -468,7 +470,9 @@
                            '_token': '{{ csrf_token() }}'
                        }
                    }).done(function (data) {
+                       debugger;
                         if(data.status == 0) {
+                            shipperdata=data.shippers;
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '';
                             $.each(data.images, function (index, image) {
@@ -485,7 +489,6 @@
                         }else if(data.status == 2){
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
-
                             $('#return_note_image_view_table tbody').append(image_html);
                             $('#uploadReturnNote').modal('show');
                         }else{
@@ -511,15 +514,17 @@
             var return_image_table;
             function add_row() {
                 rows_count++;
-
+                debugger;
+               alert(shipperdata);
                 var return_image = '<input class="form-control form-control-sm" type="file" name="return_note_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                var shipper='<select name="shipper_name" id="shipper_name" class="form-control select2">for(var i=0;i<'+shipperdata.length+';i++){<option value="1">Taha Habib</option>}</select>'
                 if(rows_count == 1){
                     var remove = '';
                 }else{
                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                 }
-                return_image_table.row.add([0, return_image,remove]).node().id = rows_count;
+                return_image_table.row.add([0, return_image,remove,shipper]).node().id = rows_count;
                 return_image_table.draw(true);
                 $('#ReturnNoteImageSubmitButton').attr('disabled', false);
                 selected_rows.push(rows_count);
@@ -540,6 +545,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {name: 'image', class: 'align-middle image form-group'},
                     {name: 'action', class: 'align-middle action'},
+                    {name: 'shipper_name', class: 'align-middle image form-group'},
                 ],
 
                 rowCallback: function(row, data, index) {

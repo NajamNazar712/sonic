@@ -3696,6 +3696,7 @@ class ReturnController extends Controller
 
     public function history_get_images(Request $request){
         $return_note_id = $request->return_note_id;
+        $shipper_name=User::select('id','name')->get();
         if($return_note_id){
             $return = ReturnNote::find($return_note_id);
             if($return){
@@ -3737,7 +3738,7 @@ class ReturnController extends Controller
                         }
                         $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
                     }
-                    return response()->json(['status' => 0, 'images' => $details]);
+                    return response()->json(['status' => 0, 'images' => $details,'shippers'=> $shipper_name]);
                 }else{
                     return response()->json(['status' => 2]);
                 }
