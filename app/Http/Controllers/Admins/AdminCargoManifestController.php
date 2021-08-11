@@ -2342,7 +2342,7 @@ class AdminCargoManifestController extends Controller
 
             if($cargo_bag->exists())
             {
-                $cargo_bag->first();
+                $cargo_bag = $cargo_bag->first();
                 $manifest_bags = ManifestBag::where('cargo_manifest_id',$cargo_bag->id)->get();
                 $bag_short_received_count = 0;
                 $cargo_short_received = array();
