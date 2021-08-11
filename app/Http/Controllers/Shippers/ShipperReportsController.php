@@ -742,7 +742,7 @@ class ShipperReportsController extends Controller
         ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
         $sales = $sales->where(function ($query) {
-            $query->where('shipments.user_id', 7306)
+            $query->where('shipments.user_id', 1091)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
