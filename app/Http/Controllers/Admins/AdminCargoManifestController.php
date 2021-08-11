@@ -1130,7 +1130,7 @@ class AdminCargoManifestController extends Controller
                 }
             }
 
-            return redirect()->route('admin.manifest.bag.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Numbers: ' . $bag_numbers]);
+            return redirect()->route('admin.cargo_manifest.bags.create.open_bag.index')->with(['success' => 'Open Bag Created with Bag Numbers: ' . $bag_numbers]);
         }
         else {
             return back()->withErrors('All Shipments have already been added to another Bag!');
