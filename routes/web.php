@@ -23,6 +23,11 @@ Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::post('track', 'TrackingController@track')->name('track');
 });
 
+Route::prefix('shipment')->name('shipment.')->group(function () {
+    Route::get('status/verify', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+    Route::get('status/{tracking_number?}/verify/{delivery_note_id?}', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+});
+
 Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('cod.login');

@@ -11,7 +11,42 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-agent_assigned_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-user text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="white">{{$agent_calls_assigned_count}}</h3>
+                                            <span>Agent Assigned Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-bot_assigned_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-envelope text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$bot_sms_count}}</h3>
+                                            <span>Bot SMS Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -101,7 +136,7 @@
 
     <!--Shipments popup -->
     <div class="modal fade" id="shipments_sms_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_sms_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="shipments_sms_modal_title">Send BOT SMS</h4>
@@ -114,6 +149,7 @@
                 <div class="modal-body text-center">
 
                         @csrf
+                    <input type="hidden" name="delivery_note_id" id="sms_delivery_note_id">
                         <div id="sms_undelivered_shipments"></div>
 
 
@@ -131,7 +167,9 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -178,6 +216,30 @@
             width: auto !important;
             text-align: left;
         }
+        .bg-gradient-bot_assigned_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-agent_assigned_shipments {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+
+
+        .div_border{
+            border-style: double;
+        }
+
+        .statusBooked{
+            background-color: #5DADE2;
+        }
+        .statusOrigin{
+            background-color: #E67E22;
+        }
+        .statusIntransit{
+            background-color: #7F8C8D;
+        }
+
     </style>
 @endsection
 
@@ -501,23 +563,28 @@
                                     html += '<thead>';
                                     html += '<tr>';
                                     html += '<th><strong>Tracking Number</strong></th>';
+                                    html += '<th><strong>Status</strong></th>';
+                                    html += '<th><strong>Reason</strong></th>';
                                     html += '<th><strong></strong></th>';
                                     html += '</tr>';
                                     html += '</thead>';
                                     html += '<tbody>';
 
 
-                                    if (data.tracking_numbers) {
-                                        $.each(data.tracking_numbers, function(index, tracking_number) {
+                                    if (data.shipments_data) {
+                                        $.each(data.shipments_data, function(index, shipment) {
                                             $row = '';
                                             $row += '<tr>';
-                                            $row += '<td><strong><u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u></strong></td>';
+                                            $row += '<td><strong><u><a href='+route+'?tracking_number='+ shipment.tracking_number+' target="_blank">'+shipment.tracking_number+'</a></u></strong></td>';
+                                            $row += '<td>'+ shipment.status +'</td>';
+                                            $row += '<td>'+ shipment.reason +'</td>';
                                             $row += '<td><input type="checkbox" name="shipment_ids['+index+']" class="form-control sms_checkbox" checked></td>';
                                             $row += '</tr>';
                                             html += $row;
                                         });
                                     }
                                     html += '</tbody></table></div></div>';
+                                    $('#sms_delivery_note_id').val(id);
                                     $('#sms_undelivered_shipments').html(html);
                                     $('#shipments_sms_modal').modal('show');
 

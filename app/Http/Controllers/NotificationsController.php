@@ -7909,7 +7909,8 @@ class NotificationsController extends Controller
                     $subject = 'Inactive Rider For 2 Days or More ';
                     $to = ['talha.motiwala@trax.pk','wasiq.edhi@trax.pk','rameel.khan@trax.pk','abdul.ahad@trax.pk','fahad.ahmed@trax.pk','fabiha.shahid@trax.pk'];
                     self::email($subject, $body_updated, $to);
-                } else if ($id == 141) {
+                }
+                else if ($id == 141) {
                     $retail_done_payment_report = RetailDonePaymentsReport::get();
                     if ($retail_done_payment_report) {
                         $date = Carbon::today()->format('Y-m-d');
@@ -7995,7 +7996,6 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
                 }
-
                 else if ($id == 142) {
 
                     $crm_request = CrmRequest::find($reference_1_id);
@@ -8040,19 +8040,6 @@ class NotificationsController extends Controller
                         }
                     }
                     
-                }    
-                else if ($id == 144) {
-                    $rider = $reference_1_id;
-                    $otp = $reference_2_id;
-
-                    if (strpos($body, '[rider_name]') !== FALSE) {
-                        $body = str_replace('[rider_name]', $rider->name, $body);
-                    }
-                    if (strpos($body, '[otp]') !== FALSE) {
-                        $body = str_replace('[otp]', $otp, $body);
-                    }
-                    $to = $rider->phone;
-                    self::delivery_note_otp_sms($body, $to);
                 }
                 else if($id == 143){
                     $shipment = Shipment::join('users as u' , 'shipments.user_id' ,'=' , 'u.id' )
@@ -8060,7 +8047,7 @@ class NotificationsController extends Controller
                             $join->on('stt.user_id','u.id');
                         })
                         ->join('admins as a','a.id','stt.kam')
-                    ->select('u.name as username','u.id as userid' ,'a.name as adminname' ,'a.email as email')
+                        ->select('u.name as username','u.id as userid' ,'a.name as adminname' ,'a.email as email')
                         ->where('shipments.shipper_status_id',20)
                         ->groupBy('userid')
                         ->get();
@@ -8092,6 +8079,59 @@ class NotificationsController extends Controller
 
 
                 }
+                else if ($id == 144) {
+                    $rider = $reference_1_id;
+                    $otp = $reference_2_id;
+
+                    if (strpos($body, '[rider_name]') !== FALSE) {
+                        $body = str_replace('[rider_name]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $otp, $body);
+                    }
+                    $to = $rider->phone;
+                    self::delivery_note_otp_sms($body, $to);
+                }
+                else if ($id == 145) {
+                    $shipment_id = $reference_1_id;
+                    $delivery_note_id = $reference_2_id;
+
+                    $shipment = Shipment::find($shipment_id);
+
+                    $tracking_number = $shipment->tracking_number;
+
+                    $link = route('shipment.status.verify', ['tracking_number' => $tracking_number, 'delivery_note_id' => $delivery_note_id]);
+                    $reason = '';
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+                    if ($shipment_journey) {
+                        $current_status = $shipment_journey->shipment_status_consignee->name;
+                        if($shipment_journey->status_reason_id){
+                            $reason = '& ' .$shipment_journey->shipment_status_reason->name;
+                        }
+                    }
+                    else {
+                        $current_status = $shipment->status_consignee->name;
+                    }
+
+
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $tracking_number, $body);
+                    }
+                    if (strpos($body, '[status]') !== FALSE) {
+                        $body = str_replace('[status]', $current_status, $body);
+                    }
+                    if (strpos($body, '[reason]') !== FALSE) {
+                        $body = str_replace('[reason]', $reason, $body);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $to = $shipment->consignee_phone_number_1;
+                    self::sms($body, $to);
+                }
+
             }
 
 

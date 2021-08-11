@@ -44,7 +44,31 @@ class LastMileDebriefingController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 233);
         $hubs = City::where('hub', 1)->get();
 
-        return view('admin.debriefing.supervisor')->with(['hubs' => $hubs]);
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time = $settings->text;
+        }
+        else {
+            $time = '00:00:00';
+        }
+        $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+        if(Carbon::now() > $time){
+            $time = $time->addDays(1);
+        }
+        $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
+
+
+        $bot_admin_id = $bot_sms->setting_value;
+
+
+        $agents_count = AgentCallMonitoring::where('agent_id', '!=', $bot_admin_id)->where('created_at','>=',Carbon::today())
+            ->where('created_at','<=',$time)->count();
+
+        $bot_sms_count = AgentCallMonitoring::where('agent_id', '=', $bot_admin_id)->where('created_at','>=',Carbon::today())
+            ->where('created_at','<=',$time)->count();
+        return view('admin.debriefing.supervisor')->with(['hubs' => $hubs, 'agent_calls_assigned_count' => $agents_count, 'bot_sms_count' => $bot_sms_count]);
     }
 
     public function supervisor_agents(Request $request){
@@ -95,6 +119,7 @@ class LastMileDebriefingController extends Controller
         if(Carbon::now() > $time){
             $time = $time->addDays(1);
         }
+
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
@@ -611,15 +636,29 @@ class LastMileDebriefingController extends Controller
         $delivery_note_id = $request->delivery_note_id;
         $delivery_note = DeliveryNote::find($delivery_note_id);
         if($delivery_note){
-            $tracking_numbers = array();
+            $shipments_data = array();
             $delivery_note_shipments = $delivery_note->delivery_note_undelivered_shipments;
 
             if(count($delivery_note_shipments) > 0){
                 foreach ($delivery_note_shipments as $delivery_note_shipment){
-                    $tracking_numbers[$delivery_note_shipment->shipment_id] = Shipment::find($delivery_note_shipment->shipment_id)->tracking_number;
+                    $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                    $shipments_data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('reference_1_id', $delivery_note_id)->latest()->first();
+
+                    $status = '';
+                    $reason = '';
+                    if ($shipment_journey) {
+                        $status = $shipment_journey->shipment_status_shipper->name;
+                        if($shipment_journey->status_reason_id){
+                            $reason = $shipment_journey->shipment_status_reason->name;
+                        }
+                    }
+                    $shipments_data[$shipment->id]['status'] = $status;
+                    $shipments_data[$shipment->id]['reason'] = $reason;
+
                 }
 
-                return response()->json(['status' => 0, 'tracking_numbers' => $tracking_numbers]);
+                return response()->json(['status' => 0, 'shipments_data' => $shipments_data]);
             }
             return response()->json(['status' => 1, 'error' => 'No undelived shipments found!']);
         }
@@ -629,12 +668,34 @@ class LastMileDebriefingController extends Controller
     }
 
     public function send_sms_to_undelivered_shipments(Request $request){
+
+        $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
         if(count($shipment_ids) > 0){
-            foreach ($shipment_ids as $shipment_id){
-                NotificationsController::send(145, $shipment_id);
+            foreach ($shipment_ids as $shipment_id => $status){
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('reference_1_id', $delivery_note_id)->latest()->first();
+                $bot_admin_id = NULL;
+                if ($shipment_journey) {
+                    $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
+
+                    if($bot_sms){
+                        $bot_admin_id = $bot_sms->setting_value;
+                    }
+                    ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);
+                }
+
+                $agent_call_monitoring = new AgentCallMonitoring();
+                $agent_call_monitoring->agent_id = $bot_admin_id;
+                $agent_call_monitoring->shipment_id = $shipment_id;
+                $agent_call_monitoring->delivery_note_id = $delivery_note_id;
+                $agent_call_monitoring->completed = 1;
+                $agent_call_monitoring->save();
+
+                NotificationsController::send(145, $shipment_id, $delivery_note_id);
             }
+            return redirect()->back()->with('success', 'SMS send successfully!');
         }
-        return $request;
+        return redirect()->back()->with('error', 'Something went wrong, try again!');
+
     }
 }
