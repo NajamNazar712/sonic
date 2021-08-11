@@ -111,6 +111,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $intercept_type = $request->consignee;
+
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
@@ -125,6 +126,8 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                     $shipment = Shipment::find($request->shipment_id);
                     $s_amount = str_replace(",", "", "$request->amount");
                     $amount = (int)$s_amount;
+
+                   if ($intercept_type == 1){
                     InterceptReBookRequest::create([
                         'shipment_id' => $request->shipment_id,
                         'consignee_city_id' => $request->consignee_city,
@@ -139,6 +142,23 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         'intercept_type' => $intercept_type,
                         'admin_id' => Auth::id()
                     ]);
+                   }
+                   else{
+                       InterceptReBookRequest::create([
+                           'shipment_id' => $request->shipment_id,
+                           'consignee_city_id' => $request->consignee_city,
+                           'consignee_name' => $request->consignee_name,
+                           'consignee_address' => $request->consignee_address,
+                           'consignee_phone_number_1' => $request->consignee_phone_number_1,
+                           'consignee_phone_number_2' => $request->consignee_phone_number_2,
+                           'consignee_email' => $request->consignee_email,
+                           'amount' => $amount,
+                           'shipper_id' => $user_id,
+                           'status' => 1,
+                           'intercept_type' => $intercept_type,
+                           'admin_id' => Auth::id()
+                       ]);
+                   }
 
                     $shipment->consignee_status_id = 54;
                     $shipment->shipper_status_id = 54;
