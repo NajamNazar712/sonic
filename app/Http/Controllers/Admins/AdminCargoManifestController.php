@@ -617,7 +617,13 @@ class AdminCargoManifestController extends Controller
 
         $origin_details = array();
 
-        $origin_details['id'] = Auth::user()->default_hub_id;
+        if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 ){
+            $origin_details['id'] = $origin->id;
+        }
+        else{
+            $origin_details['id'] = Auth::user()->default_hub_id;
+        }
+
         $origin_details['name'] = $origin->name;
 
         $destination = $shipment->consignee_city->hub_city;
@@ -1648,7 +1654,7 @@ class AdminCargoManifestController extends Controller
                               <td>' . $cargo->transport_mode->name . '</td>
                             </tr>
                           
-                            <tr>
+                         
                               ';
             /*  if($master_cargo->onward_forwarding == 1){
                   $html .= '<td class="color secondary"><strong>Onward Forwarding Cargo No.</strong></td>';
@@ -1657,8 +1663,7 @@ class AdminCargoManifestController extends Controller
                   $html .= '<td class="color secondary"><strong>Master Cargo No.</strong></td>';
               }*/
             $html .= '
-                              <td>' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '</td>
-                            </tr>
+                            
                             <tr>
                               <td class="color secondary"><strong>No. of Bags</strong></td>
                               <td>' . $cargo->bags . '</td>
