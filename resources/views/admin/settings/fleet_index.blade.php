@@ -523,7 +523,7 @@
                     dropdown.remove();
                 },
                 create: function (input) {
-                    var regex = /^[A-Za-z,]+$/;
+                    var regex = /^[a-zA-Z0-9]+$/;
 
                     if (!regex.test(input)) {
                         return false;
