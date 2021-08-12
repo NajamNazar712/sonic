@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Reporting Manager')
+@section('title', 'Customer Experience')
 
 @section('content')
     <div class="app-content content">
@@ -9,14 +9,14 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Reporting Manager
+                    Customer Experience
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="rm_form" action="{{route('admin.human_resource.fnf.rm.submit')}}" method="post"  novalidate="novalidate">
+                            <form id="cs_form" action="{{route('admin.human_resource.fnf.cs.submit')}}" method="post" novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
@@ -53,75 +53,33 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="name">
-                                                    Overtime:
+                                                    Phone Call Deduction:
                                                 </label>
-                                                <input type="text" id="overtime" name="overtime" class="form-control" placeholder="Amount/Hrs">
+                                                <input type="text" id="phone_call_deduction" name="phone_call_deduction" class="form-control" placeholder="Amount">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="shipper_poc">
-                                                    Sunday / Holiday :
+                                                    Open Parcel:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="holiday" id="holiday">
+                                                <input type="text" class="form-control" placeholder="Amount" name="open_parcel" id="open_parcel">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="company_address">Pickup Incentive Fuel:
+                                                <label for="company_address">Fake Status:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="pickup_incentive" id="pickup_incentive">
+                                                <input type="text" class="form-control" placeholder="Amount" name="fake_status" id="fake_status">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="phone">Fixed Incentive (If any):
-                                                  
+                                                <label for="phone">Month Closing:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="fixed_incentive" id="fixed_incentive">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-1">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="phone">Delivery Incentive:
-                                                  
-                                                </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="delivery_incentive" id="delivery_incentive">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="phone">Hard Route/Extra Duty:
-                                                  
-                                                </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="extra_duty" id="extra_duty">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <h3 class="text-center mb-2"><strong>Deductions</strong></h3>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="average_shipment_duration">Temporary Advance (IOU):
-                                                  
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control" name="iou"  id="iou" placeholder="Amount">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="average_shipment_duration">Penalty:
-                                                  
-                                                </label>
-                                                <div>
-                                                    <input type="text" class="form-control" name="penalty" id="penalty" placeholder="Amount">
-                                                </div>
+                                                <input type="text" class="form-control" placeholder="Amount" name="month_closing" id="month_closing">
                                             </div>
                                         </div>
                                     </div>
@@ -129,7 +87,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <div>
-                                                   <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
+                                                    <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -137,7 +95,7 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_rm_info" class="btn btn-primary">Submit</button>
+                                        <button type="submit" id="submit_cs_info" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
                             </form>
@@ -164,8 +122,8 @@
 
     <script>
         $(document).ready(function() {
-             $('#submit_rm_info').on('click',function(){
-                if($('#overtime').val() == '' || $('#overtime').val() == null  && $('#holiday').val() == '' || $('#holiday').val() == null && $('#pickup_incentive').val() == '' || $('#pickup_incentive').val() == null  &&  $('#fixed_incentive').val() == '' || $('#fixed_incentive').val() == null  &&  $('#delivery_incentive').val() == '' || $('#delivery_incentive').val() == null && $('#extra_duty').val() == '' || $('#extra_duty').val() == null && $('#iou').val() == '' || $('#iou').val() == null && $('#penalty').val() == '' || $('#penalty').val() == null &&  $('#comments').val() == '' || $('#comments').val() == null){
+            $('#submit_cs_info').on('click',function(){
+                if($('#phone_call_deduction').val() == '' || $('#phone_call_deduction').val() == null  && $('#open_parcel').val() == '' || $('#open_parcel').val() == null && $('#fake_status').val() == '' || $('#fake_status').val() == null  &&  $('#month_closing').val() == '' || $('#month_closing').val() == null  ){
 
                     var error = "At-least fill one field";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -175,7 +133,7 @@
                 else{
                     form.submit()
                 }
-             });
+            });
         });
     </script>
 @endsection

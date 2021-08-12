@@ -126,6 +126,28 @@ class AdminFnfController extends Controller
         dd($request);
     }
 
+    public function cs_index($id){
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $employee = Employee::where('id',$fnf->employee_id)->first();
+            return view('admin.human_resource.fnf.cs_index',compact('employee','fnf'));
+        }
+    }
 
+    public function cs_submit(Request $request){
+        dd($request);
+    }
+
+    public function administration_index($id){
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $employee = Employee::where('id',$fnf->employee_id)->first();
+            return view('admin.human_resource.fnf.cs_index',compact('employee','fnf'));
+        }
+    }
+
+    public function administration_submit(Request $request){
+        dd($request);
+    }
 
 }

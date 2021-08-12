@@ -3111,6 +3111,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/employee_data', 'Admins\AdminFnfController@employee_data')->name('employee_data');
             Route::get('{id}/rm', 'Admins\AdminFnfController@reporting_manager_index')->name('rm.index');
             Route::post('rm/submit', 'Admins\AdminFnfController@reporting_manager_submit')->name('rm.submit');
+            Route::get('{id}/cs', 'Admins\AdminFnfController@cs_index')->name('cs.index');
+            Route::post('cs/submit', 'Admins\AdminFnfController@cs_submit')->name('cs.submit');
+            Route::get('{id}/administration', 'Admins\AdminFnfController@administration_index')->name('administration.index');
+            Route::post('administration/submit', 'Admins\AdminFnfController@administration_submit')->name('administration.submit');
 
         });
     });
