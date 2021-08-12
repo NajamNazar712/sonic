@@ -2720,6 +2720,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\GlobalSettingsController@shipment_status_eta_edit')->name('edit');
         });
 
+        Route::prefix('last_mile_cron')->name('last_mile_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@last_mile_cron_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
+        });
+
     });
 
 

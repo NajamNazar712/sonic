@@ -312,6 +312,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
         $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
 
+        $settings = GlobalSettings::where('type', 'last_mile_cron_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $hour = $settings->setting_value;
+            $hourly = '0 */'. $hour .' * * *';
+            $schedule->command('incentive:riders')->cron($hourly)->withoutOverlapping()->runInBackground();
+        }
+
     }
     /**
      * Register the commands for the application.

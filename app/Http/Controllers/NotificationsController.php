@@ -8133,6 +8133,41 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     self::sms($body, $to);
                 }
+                else if ($id == 147){
+                    $data = $reference_1_id;
+
+                    if (strpos($subject, '[time]') !== FALSE) {
+                        $subject = str_replace('[time]', $data['time'], $subject);
+                    }
+
+                    if (strpos($body, '[time]') !== FALSE) {
+                        $body = str_replace('[time]', $data['time'], $body);
+                    }
+
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Time Slot</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Total Status Updated</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Status Updated From Bolt</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Percentage</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Status Updated From Sonic</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Percentage</strong></th></tr></thead><tbody>';
+
+                    $html .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data['time'] .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data['total_status_updated'] .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data['bolt_status_updated'] .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data['bolt_status_percentage'] .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data['sonic_status_updated'] .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $data['sonic_status_percentage'] .'</td></tr>';
+
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $admins = Admin::whereIn('role_id', [3, 19])->where('status', 1);
+
+                    if ($admins->exists()) {
+                        $to = array_merge($to, $admins->pluck('email')->toArray());
+                    }
+
+                    self::email($subject, $body, $to);
+
+
+
+
+                }
 
             }
 
