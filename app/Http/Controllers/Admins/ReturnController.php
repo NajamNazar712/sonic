@@ -3696,9 +3696,18 @@ class ReturnController extends Controller
 
     public function history_get_images(Request $request){
         $return_note_id = $request->return_note_id;
-        $shipper_name=User::select('id','name')->get();
+
+        $shipper_name=User::select('id','name')->get(); //added
+
         if($return_note_id){
             $return = ReturnNote::find($return_note_id);
+            
+            $return_note_shipment = ReturnNoteShipment::where('return_note_id',$return->id)->select('shipment_id')->distinct()->get();
+            //dd($return_note_shipment);
+            //$shipment = Shipment::find($return_note_shipment)->distinct(); Not in use
+            $shipment=Shipment::whereIn('id',$return_note_shipment)->select('user_id')->get();
+            //dd($shipment);
+
             if($return){
                 if($return->image !== null){
                     $details = array();
@@ -3720,6 +3729,13 @@ class ReturnController extends Controller
                     $return_note_images = $return_note_images->get();
                     $details = array();
                     foreach ($return_note_images as $return_note_image) {
+                        $user = User::find($return_note_image->user_id);
+                        // $shipment_count = Shipment::where('user_id', $user->id)->where('shipping_mode', 3)->count();
+
+                        $a = ReturnNoteShipment::join('shipments as s','return_note_shipments.shipment_id', '=', 's.id')
+                        ->where('return_note_shipments.return_note_id',$return_note_id)
+                        ->where('s.user_id',$user->id)->count();
+                        //dd($a);                        
                         $url = 'uploads/return_notes/' . $return_note_image->image;
                         if(file_exists($url)){
                             $img_url = asset('uploads/return_notes/' . $return_note_image->image);
@@ -3736,8 +3752,9 @@ class ReturnController extends Controller
                             }
 
                         }
-                        $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
+                        $details[] = array('id' => $return_note_image->id,'shipper'=>$user->name,'noOfshipment'=>$a,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
                     }
+                   
                     return response()->json(['status' => 0, 'images' => $details,'shippers'=> $shipper_name]);
                 }else{
                     return response()->json(['status' => 2]);

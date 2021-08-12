@@ -94,6 +94,8 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">No. of Shipments</th>
                             <th class="border-primary border-darken-1">Date Added</th>
                             <th class="border-primary border-darken-1">Image</th>
                             <th class="border-primary border-darken-1"></th>
@@ -482,7 +484,7 @@
                             @if (session('role_id') == 1 || in_array(109, session('permissions')))
                                 remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
                             @endif
-                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.shipper + '</td><td>' + image.noOfshipment + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
                             });
                             $('#return_note_image_view_table tbody').append(image_html);
                             $('#uploadReturnNote').modal('show');
