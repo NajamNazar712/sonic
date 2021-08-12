@@ -23,7 +23,7 @@ class AdminFnfController extends Controller
 
     public function index(){
         $departments = AdminDepartment::all();
-        return view('admin.human_resource.employee_clearance.index')->with(['departments' => $departments]);
+        return view('admin.human_resource.fnf.index')->with(['departments' => $departments]);
     }
 
     public function list(Request $request){
@@ -34,17 +34,12 @@ class AdminFnfController extends Controller
          ->join('admin_departments as d','d.id','=','employees.department_id')
          ->join('employee_designations as ed','ed.id','=','employees.designation_id')
          ->join('cities as c','c.id','=','employees.city_id')
-         ->select(['fnf.id as id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee']);
+         ->join('fnf_statuses as fs','fs.id','=','fnf.status_id')
+         ->select(['fnf.id as id','fnf.id as fnf_id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee','fs.name as status']);
 
      $datatables = Datatables::of($employee)
-         ->editColumn('rate_status',function ($users) {
-             if ($users->rate_status == 0) {
-                 return "Approved";
-             } elseif ($users->rate_status == 1) {
-                 return "Requested";
-             } else {
-                 return "Rejected";
-             }
+         ->editColumn('fnf_id',function ($fnf) {
+            return 'FNF'.$fnf->fnf_id;
          })
      ;
      return $datatables->make(true);
@@ -60,7 +55,7 @@ class AdminFnfController extends Controller
         }
         $designations = EmployeeDesignation::where('status',1)->get();
         $employee_statuses = EmployeeStatus::all();
-        return view('admin.human_resource.employee_clearance.add',compact('departments','employee_statuses','employee','designations'));
+        return view('admin.human_resource.fnf.add',compact('departments','employee_statuses','employee','designations'));
     }
 
     public function submit(Request $request){
@@ -116,6 +111,19 @@ class AdminFnfController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'No Data Found']);
         }
+    }
+
+    public function reporting_manager_index($id){
+
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $employee = Employee::where('id',$fnf->employee_id)->first();
+            return view('admin.human_resource.fnf.manager_index',compact('employee','fnf'));
+        }
+    }
+
+    public function reporting_manager_submit(Request $request){
+        dd($request);
     }
 
 

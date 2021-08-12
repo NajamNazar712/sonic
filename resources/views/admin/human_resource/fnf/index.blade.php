@@ -157,31 +157,43 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.human_resource.erf.list') }}',
+                        url: '{{ route('admin.human_resource.fnf.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
 
                             head.push('S.No');
-                            head.push('ERF ID');
-                            head.push('Department');
-                            head.push('Designation');
-                            head.push('Hub');
+                            head.push('FNF ID');
+                            head.push('Trax Id');
+                            head.push('Employee Name');
                             head.push('City');
+                            head.push('Designation');
+                            head.push('Department');
                             head.push('Line Manager');
+                            head.push('HOD');
                             head.push('Status');
+                            head.push('Joining Date');
+                            head.push('Resign Date');
+                            head.push('Requested Date');
+                            head.push('Requested By');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.erf_id);
-                                row.push(values.department);
-                                row.push(values.designation);
-                                row.push(values.hub);
+                                row.push(values.fnf_id);
+                                row.push(values.trax_id);
+                                row.push(values.employee_name);
                                 row.push(values.city);
-                                row.push(values.admin);
+                                row.push(values.designation);
+                                row.push(values.department);
+                                row.push(values.line_manager);
+                                row.push(values.hod);
                                 row.push(values.status);
+                                row.push(values.joining_date);
+                                row.push(values.resign_date);
+                                row.push(values.created_at);
+                                row.push(values.created_by);
                                 body.push(row);
                             });
                         },
@@ -207,10 +219,9 @@
                         }
                     },
                         @endif
-
                     {
                         extend: 'excel',
-                        title: 'ERF List',
+                        title: 'FNF List',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -245,7 +256,7 @@
                         }
                     },
 
-                    {data: 'id', name: 'fnf.id', class: 'align-middle id'},
+                    {data: 'fnf_id', name: 'fnf.id', class: 'align-middle fnf_id'},
                     {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
                     {data: 'employee_name', name: 'employee.name', class: 'align-middle employee_name'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
@@ -253,7 +264,7 @@
                     {data: 'department', name: 'd.name', class: 'align-middle department'},
                     {data: 'line_manager', name: 'a.name', class: 'align-middle line_manager'},
                     {data: 'hod', name: 'ah.name', class: 'align-middle hod'},
-                    {data: 'status_id', name: 'status_id', class: 'align-middle status_id'},
+                    {data: 'status', name: 'fs.name', class: 'align-middle status'},
                     {data: 'joining_date', name: 'joining_date', class: 'align-middle joining_date'},
                     {data: 'resign_date', name: 'resign_date', class: 'align-middle resign_date'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},

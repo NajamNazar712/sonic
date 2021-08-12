@@ -30,4 +30,12 @@ class Employee extends Model
         return $this->HasOne('App\Http\Models\HR\EmployeeAttachment');
     }
 
+    public function designation() {
+        return $this->belongsTo('App\Http\Models\HR\EmployeeDesignation','designation_id','id');
+    }
+
+    public function department() {
+        return $this->belongsTo('App\Http\Models\Admin\AdminDepartment');
+    }
+
 }

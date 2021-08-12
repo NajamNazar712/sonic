@@ -3109,6 +3109,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/add', 'Admins\AdminFnfController@add')->name('add');
             Route::post('/submit', 'Admins\AdminFnfController@submit')->name('submit');
             Route::post('/employee_data', 'Admins\AdminFnfController@employee_data')->name('employee_data');
+            Route::get('{id}/rm', 'Admins\AdminFnfController@reporting_manager_index')->name('rm.index');
+            Route::post('rm/submit', 'Admins\AdminFnfController@reporting_manager_submit')->name('rm.submit');
 
         });
     });
