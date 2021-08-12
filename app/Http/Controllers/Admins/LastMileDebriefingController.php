@@ -122,7 +122,14 @@ class LastMileDebriefingController extends Controller
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
+//            ->leftjoin('agent_call_monitorings as acm', 'acm.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('agent_call_monitorings as acm', function ($join) {
+                $join->on('acm.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('acm.id', '=',
+                        DB::raw('(select max(id) from agent_call_monitorings where agent_call_monitorings.delivery_note_id = delivery_notes.id)'));
+            })
+            ->leftjoin('admins as agent', 'agent.id', '=', 'acm.agent_id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count'), 'agent.name as assigned_agent', DB::raw('(SELECT COUNT(f.id) FROM delivery_notes AS f INNER JOIN delivery_note_shipments AS fdns ON f.id = fdns.delivery_note_id WHERE fdns.delivery_note_id = delivery_notes.id AND fdns.fake_status = 1) AS shipments_fake_status_count')])
             ->where('delivery_notes.created_at','>=',Carbon::today())
             ->where('delivery_notes.created_at','<=',$time)
             ->where('delivery_notes.status', 0);
@@ -184,6 +191,18 @@ class LastMileDebriefingController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('fake_shipments_link', function($deliveries) {
+                if ($deliveries->shipments_fake_status_count != 0) {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_fake_status_count . '</button></div><h4 class="success">'. round(($deliveries->shipments_fake_status_count / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else {
+                    return 0;
+                }
+            })
+            /*->addColumn('agent_call_ratio', function ($deliveries){
+                $call_monitor = AgentCallMonitoring::where('delivery_note_id', $deliveries->delivery_note)
+            })*/
             ->editColumn('rider', function ($rider) {
                 if($rider->special_rider){
                     return $rider->rider . ' (' . $rider->special_rider_name . ')';

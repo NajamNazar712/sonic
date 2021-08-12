@@ -1067,6 +1067,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
             Route::post('/upload_pod','Admins\DeliveryController@upload_pod')->name('upload_pod');
 
+            Route::post('fake_status_shipments','Admins\DeliveryController@fake_status_shipments')->name('fake_status_shipments');
+
+
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');

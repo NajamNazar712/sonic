@@ -62,6 +62,8 @@
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Target Cash</th>
                         <th class="border-primary border-darken-1">Pending Cash Collection</th>
+                        <th class="border-primary border-darken-1">Assigned Agent</th>
+                        <th class="border-primary border-darken-1">Fake Status Count</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -315,6 +317,8 @@
                             head.push('No. Of Pending Shipments');
                             head.push('Target Cash');
                             head.push('Pending Cash Collection');
+                            head.push('Assigned Agent');
+                            head.push('Fake Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -329,6 +333,8 @@
                                 row.push(values.shipments_pending_count);
                                 row.push(values.amount);
                                 row.push(values.pending_cash_collection);
+                                row.push(values.assigned_agent);
+                                row.push(values.shipments_fake_status_count);
                                 body.push(row);
                             });
                         },
@@ -374,6 +380,8 @@
                     { data:'pending_shipments_link' ,name: 'pending_shipments_link', class: 'align-middle pending_shipments_link',orderable: false, searchable: false},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     { data:'pending_cash_collection' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle pending_cash_collection'},
+                    { data:'assigned_agent' ,name: 'agent.name', class: 'align-middle assigned_agent'},
+                    { data:'fake_shipments_link' ,name: 'shipments_fake_status_count', class: 'align-middle fake_shipments_link', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -396,7 +404,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link')) {
+                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link') || $(header).is('.fake_shipments_link') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -530,6 +538,33 @@
             });
 
 
+            $('#datatable tbody').on('click','tr td.fake_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.fake_status_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 

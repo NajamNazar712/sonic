@@ -5228,7 +5228,25 @@ class DeliveryController extends Controller
 
     }
 
-    
+    public function fake_status_shipments(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_fake_status_shipments;
+        $shipments = array();
+        if($delivery_note_shipments->count() > 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Fake Status Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Fake Status Shipments', 'shipments' => FALSE];
+        }
+
+    }
+
     public function receive_shipments_pending(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
