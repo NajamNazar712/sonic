@@ -100,6 +100,7 @@ Route::name('api.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'Rider\RiderAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
+            Route::post('store_v2', 'Rider\RiderAPIController@rider_signup_v3')->name('store_v3');
             Route::post('attachment_store', 'Rider\RiderAPIController@rider_attachments_store')->name('attachment_store');
             Route::post('attachment_store_v2', 'Rider\RiderAPIController@rider_attachments_store_v2')->name('attachment_store_v2');
             Route::post('attachment_view', 'Rider\RiderAPIController@rider_attachments_view')->name('attachment_view');
@@ -208,6 +209,7 @@ Route::name('api.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
             Route::post('store', 'AdminAPIController@admin_signup')->name('store');
+            Route::post('store_v2', 'AdminAPIController@admin_signup_v2')->name('store');
             Route::post('attachment_store', 'AdminAPIController@admin_attachments_store')->name('attachment_store');
             Route::post('attachment_store_v2', 'AdminAPIController@admin_attachments_store_v2')->name('attachment_store_v2');
             Route::post('attachment_view', 'AdminAPIController@admin_attachments_view')->name('attachment_view');
