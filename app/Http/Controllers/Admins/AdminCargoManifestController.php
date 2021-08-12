@@ -2204,13 +2204,13 @@ class AdminCargoManifestController extends Controller
 
             if($bag->exists())
             {
-                $bag = $bag->first();
+                $bag = $bag->latest()->first();
                 $cargo_bag = CargoManifest::leftjoin('manifest_bags as mb',function ($join) use($bag) {
-                    $join->on('mb.cargo_manifest_id','cargo_manifests.id')
-                        ->where('mb.cargo_manifest_bag_id',$bag->id);
+                    $join->on('mb.cargo_manifest_id','cargo_manifests.id');
                 })
                     ->select(['cargo_manifests.*'])
-                    ->where('cargo_manifests.status_id',1);
+                    ->where('cargo_manifests.status_id',1)
+                    ->where('mb.cargo_manifest_bag_id',$bag->id);
 
                 if($cargo_bag->exists())
                 {
