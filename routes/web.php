@@ -2857,6 +2857,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details','Admins\AdminShipmentScanningHistoryController@details')->name('details');
     });
+    Route::prefix('airway_journey')->name('airway_journey.')->group(function (){
+        Route::get('','AdminAirwayBillJournyController@index')->name('index');
+        Route::post('details','AdminAirwayBillJournyController@details')->name('details');
+    });
 
     Route::prefix('coordinates')->name('coordinates.')->group(function (){
         Route::prefix('add')->name('add.')->group(function (){
