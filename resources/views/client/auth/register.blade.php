@@ -256,6 +256,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="reference">Reference:</label>
+                                                        <span class="danger">*</span>
                                                         <div>
                                                             <select name="reference" id="reference" class="select2 form-control required" style="width: 100%">
                                                                 @foreach($references as $reference)
@@ -303,7 +304,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="territory">Territory:
-{{--                                                            <span class="danger">*</span>--}}
+                                                           <span class="danger">*</span>
                                                         </label>
                                                         <div>
                                                             <select name="territory_id" id="territory" class="select2 form-control required" style="width: 100%"></select>
