@@ -142,6 +142,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         'intercept_type' => $intercept_type,
                         'admin_id' => Auth::id()
                     ]);
+                       $shipment->consignee_status_id = 54;
+                       $shipment->shipper_status_id = 54;
+                       $shipment->intercepted = 1;
+                       $shipment->save();
+
+                       ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
 
                    }
                    else{
@@ -163,14 +169,15 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                            'new_amount' => $amount,
                            'shipper_id' => $user_id,
                        ]);
+                       $shipment->consignee_status_id = 55;
+                       $shipment->shipper_status_id = 55;
+                       $shipment->intercepted = 1;
+                       $shipment->save();
+
+                       ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
+
                    }
 
-                    $shipment->consignee_status_id = 54;
-                    $shipment->shipper_status_id = 54;
-                    $shipment->intercepted = 1;
-                    $shipment->save();
-
-                    ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
 
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }
