@@ -1077,6 +1077,11 @@ class Permission
 
             'settings.air_waybill_printing.index' => 11,
             'settings.air_waybill_printing.store' => 11,
+            
+            'reports.daraz_mis.index' => 15,
+            'reports.daraz_mis.list' => 15,
+
+            
 
         ]
     ];

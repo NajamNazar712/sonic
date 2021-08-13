@@ -100,7 +100,8 @@
             @endif
 
             {{--<li class=" nav-item"><a href="https://form.jotform.me/81993400128456" target="_blank"><span class="menu-title" data-i18n="nav.dash.main">Complain Form</span></a></li>--}}
-            @if (session('user_type') == 1 || in_array(8, session('permissions')))
+            @if (session('user_type') == 1 || count(array_intersect([8, 15], session('permissions'))) !== 0)
+            
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
                     <ul class="menu-content">
                         @if (session('user_id') == 3324)
@@ -116,7 +117,8 @@
                         @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
                         @endif
-                        @if (session('user_id') == 1091)
+                        @if (session('user_id') == 1091 || in_array(15, session('permissions')))
+
                             <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                         @endif
                     </ul>
