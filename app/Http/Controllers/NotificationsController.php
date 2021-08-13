@@ -8164,9 +8164,6 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
 
-
-
-
                 }
 
             }

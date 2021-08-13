@@ -317,7 +317,7 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
             $hour = $settings->setting_value;
             $hourly = '0 */'. $hour .' * * *';
-            $schedule->command('incentive:riders')->cron($hourly)->withoutOverlapping()->runInBackground();
+            $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
         }
 
     }

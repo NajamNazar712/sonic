@@ -64,6 +64,7 @@
                         <th class="border-primary border-darken-1">Pending Cash Collection</th>
                         <th class="border-primary border-darken-1">Assigned Agent</th>
                         <th class="border-primary border-darken-1">Fake Status Count</th>
+                        <th class="border-primary border-darken-1">Caller agent Call Ratio</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -228,20 +229,6 @@
         }
 
 
-        .div_border{
-            border-style: double;
-        }
-
-        .statusBooked{
-            background-color: #5DADE2;
-        }
-        .statusOrigin{
-            background-color: #E67E22;
-        }
-        .statusIntransit{
-            background-color: #7F8C8D;
-        }
-
     </style>
 @endsection
 
@@ -319,6 +306,7 @@
                             head.push('Pending Cash Collection');
                             head.push('Assigned Agent');
                             head.push('Fake Status');
+                            head.push('Caller agent Call Ratio');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -335,6 +323,7 @@
                                 row.push(values.pending_cash_collection);
                                 row.push(values.assigned_agent);
                                 row.push(values.shipments_fake_status_count);
+                                row.push(values.call_agent_ratio);
                                 body.push(row);
                             });
                         },
@@ -382,6 +371,7 @@
                     { data:'pending_cash_collection' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle pending_cash_collection'},
                     { data:'assigned_agent' ,name: 'agent.name', class: 'align-middle assigned_agent'},
                     { data:'fake_shipments_link' ,name: 'shipments_fake_status_count', class: 'align-middle fake_shipments_link', orderable: false, searchable: false},
+                    { data:'call_agent_ratio' ,name: 'call_agent_ratio', class: 'align-middle call_agent_ratio', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
