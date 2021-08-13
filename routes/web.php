@@ -2718,6 +2718,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\GlobalSettingsController@shipment_status_eta_edit')->name('edit');
         });
 
+        Route::prefix('rider_shipment_attempt')->name('rider_shipment_attempt.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
+        });
+
     });
 
 
