@@ -419,10 +419,9 @@ class AdminPackagingMaterialController extends Controller
                         if (session('role_id') == 1 || in_array(226, session('permissions'))){
                             $dropdown .= '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
                         }
-
-                        if (session('role_id') == 1 || in_array(227, session('permissions'))) {
-                            $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
-                        }
+                    }
+                    if (session('role_id') == 1 || in_array(227, session('permissions')) || $packaging->status_id == 2) {
+                        $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                     }
                     if ($packaging->status_id == 1) {
                         $dropdown .= '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
@@ -796,7 +795,7 @@ class AdminPackagingMaterialController extends Controller
 
         $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
 
-        if($packaging_material_request->status_id > 1){
+        if($packaging_material_request->status_id > 1 ||$packaging_material_request->status_id==2){
             return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
         }
         else{
@@ -809,7 +808,7 @@ class AdminPackagingMaterialController extends Controller
             $packaging_request_history->updated_by = Auth::id();
             $packaging_request_history->save();
             return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
-        }
+         }
     }
 
     public function request_completed(Request $request){
