@@ -777,8 +777,12 @@ class ShipperReportsController extends Controller
             return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
         });
 
+        // if($tracking = $request->get('search_tracking')){
+        //     $datatable->where('shipments.tracking_number', '=', $tracking);
+        // }
         if($tracking = $request->get('search_tracking')){
-            $datatable->where('shipments.tracking_number', '=', $tracking);
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('shipments.tracking_number', $tracking_numbers);
         }
 
         if($origin = $request->get('search_origin')){

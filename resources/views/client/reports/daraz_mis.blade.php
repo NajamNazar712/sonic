@@ -14,7 +14,9 @@
                 <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+							<input type="text"  id="search_tracking_no" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+
+                            {{-- <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number"> --}}
                         </fieldset>
                     </div>
                     <div class="col-3">
@@ -76,6 +78,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}"><style>
         table.dataTable {
@@ -137,6 +140,8 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
@@ -148,11 +153,39 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_tracking_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
+            // $('#search_tracking_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
+            var select = $('.tracking_numbers').selectize({
+				placeholder: 'Tracking Number(s)*',
+				delimiter: ',',
+				createOnBlur: true,
+				persist: false,
+				plugins: ['remove_button'],
+				onDropdownOpen: function(dropdown) {
+					dropdown.remove();
+				},
+				onType: function(str) {
+					var regex = /^[0-9,]+$/;
+
+					if (!regex.test(str)) {
+						select[0].selectize.setTextboxValue('');
+					}
+				},
+				create: function(input) {
+					if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+						return {
+							value: input,
+							text: input
+						}
+					}
+					else {
+						return false;
+					}
+				}
+			});
             $('#search_type').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Adjustment Type',
                 width:'100%',
