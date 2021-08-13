@@ -16,38 +16,14 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="admin_form" action="{{route('admin.human_resource.fnf.administration.submit')}}" method="post" novalidate="novalidate">
+                            <form id="admin_form"  method="post" novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="fnf_id" value="{{$fnf->id}}">
+                                <input type="hidden" name="approval" id="approval">
                                 <fieldset>
-                                    <div class="row mb-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Name:
-                                                </label>
-                                                <input type="text" id="name" name="overtime" class="form-control" placeholder="Name" value="{{$employee->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Designation:
-                                                </label>
-                                                <input type="text" id="designation" name="overtime" class="form-control" placeholder="Designation" value="{{$employee->designation->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Department:
-                                                </label>
-                                                <input type="text" id="department" name="department" class="form-control" placeholder="Department" value="{{$employee->department->name}}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @include('admin.human_resource.fnf.employee_data')
                                     <h3 class="text-center mt-2 mb-2"><strong>Deductions</strong></h3>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
@@ -55,7 +31,7 @@
                                                 <label for="name">
                                                     Auction Sell:
                                                 </label>
-                                                <input type="text" id="auction_sell" name="auction_sell" class="form-control" placeholder="Amount">
+                                                <input type="text" id="auction_sell" name="auction_sell" class="form-control" placeholder="Amount" value="{{$admin->auction ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -63,7 +39,7 @@
                                                 <label for="shipper_poc">
                                                     T- Shirts:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="tshirts" id="tshirts">
+                                                <input type="text" class="form-control" placeholder="Amount" name="tshirts" id="tshirts" value="{{$admin->shirt ?? ''}}">
                                             </div>
                                         </div>
                                     </div>
@@ -72,13 +48,13 @@
                                             <div class="form-group">
                                                 <label for="company_address">Co'Car Maintenance/Repair (if any):
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="maintenance" id="maintenance">
+                                                <input type="text" class="form-control" placeholder="Amount" name="maintenance" id="maintenance" value="{{$admin->maintenance ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <div>
-                                                    <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
+                                                    <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments">{{$admin->comments ?? ''}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -86,7 +62,15 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_admin_info" class="btn btn-primary">Submit</button>
+                                        @if($admin == Null )
+                                            <button type="button" id="submit_admin_info" class="btn btn-primary">Submit</button>
+                                        @endif
+                                        @if($admin != Null && $admin->status_id == 1 ||  $admin->status_id == 3 )
+                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                        @endif
+                                        @if($admin != Null && $admin->status_id == 1)
+                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @endif
                                     </div>
                                 </div>
                             </form>
@@ -114,16 +98,32 @@
     <script>
         $(document).ready(function() {
             $('#submit_admin_info').on('click',function(){
-                if($('#auction_sell').val() == '' || $('#auction_sell').val() == null  && $('#maintenance').val() == '' || $('#maintenance').val() == null && $('#tshirts').val() == '' || $('#tshirts').val() == null  &&  $('#comments').val() == '' || $('#comments').val() == null  ){
+                if( $('#comments').val() == '' || $('#comments').val() == null){
 
-                    var error = "At-least fill one field";
+                    var error = "Comments cannot be empty";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     return false;
                 }
                 else{
-                    form.submit()
+                    var route = '{{route('admin.human_resource.fnf.administration.submit')}}';
+                    $('#admin_form').attr('action', route);
+                    $('#admin_form').submit()
                 }
+            });
+
+            $('#approve').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.administration_status_edit")}}';
+                $('#admin_form').attr('action', route);
+                $('#approval').val('approved');
+                $('#admin_form').submit()
+            });
+
+            $('#reject').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.administration_status_edit")}}';
+                $('#admin_form').attr('action', route);
+                $('#approval').val('rejected');
+                $('#admin_form').submit()
             });
         });
     </script>

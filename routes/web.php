@@ -3121,6 +3121,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('finance/submit', 'Admins\AdminFnfController@finance_submit')->name('finance.submit');
             Route::get('{id}/hr', 'Admins\AdminFnfController@hr_index')->name('hr.index');
             Route::post('hr/submit', 'Admins\AdminFnfController@hr_submit')->name('hr.submit');
+            Route::post('rm_status_edit', 'Admins\AdminFnfController@rm_status_edit')->name('rm_status_edit');
+            Route::post('cs_status_edit', 'Admins\AdminFnfController@cs_status_edit')->name('cs_status_edit');
+            Route::post('administration_status_edit', 'Admins\AdminFnfController@administration_status_edit')->name('administration_status_edit');
+            Route::post('it_support_status_edit', 'Admins\AdminFnfController@it_support_status_edit')->name('it_support_status_edit');
+            Route::post('finance_status_edit', 'Admins\AdminFnfController@finance_status_edit')->name('finance_status_edit');
+            Route::get('{id}/hod_approval', 'Admins\AdminFnfController@hod_approval_index')->name('hod_approval_index');
 
         });
     });

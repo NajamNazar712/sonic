@@ -16,39 +16,13 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="hr_form" action="{{route('admin.human_resource.fnf.finance.submit')}}" method="post"  novalidate="novalidate">
+                            <form id="hr_form" action="{{route('admin.human_resource.fnf.hr.submit')}}" method="post"  novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="fnf_id" value="{{$fnf->id}}">
                                 <fieldset>
-                                    <div class="row mb-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Name:
-                                                </label>
-                                                <input type="text" id="name" name="overtime" class="form-control" placeholder="Name" value="{{$employee->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Designation:
-                                                </label>
-                                                <input type="text" id="designation" name="overtime" class="form-control" placeholder="Designation" value="{{$employee->designation->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Department:
-                                                </label>
-                                                <input type="text" id="department" name="department" class="form-control" placeholder="Department" value="{{$employee->department->name}}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
-
+                                    @include('admin.human_resource.fnf.employee_data')
                                     <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">

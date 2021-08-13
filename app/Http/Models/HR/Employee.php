@@ -38,4 +38,8 @@ class Employee extends Model
         return $this->belongsTo('App\Http\Models\Admin\AdminDepartment');
     }
 
+    public function city() {
+        return $this->belongsTo('App\Http\Models\City');
+    }
+
 }

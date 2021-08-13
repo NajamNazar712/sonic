@@ -16,43 +16,18 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="admin_form" action="{{route('admin.human_resource.fnf.it_support.submit')}}" method="post" novalidate="novalidate">
-
+                            <form id="it_support_form"  method="post" novalidate="novalidate">
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="fnf_id" value="{{$fnf->id}}">
+                                <input type="hidden" name="approval" id="approval">
                                 <fieldset>
-                                    <div class="row mb-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Name:
-                                                </label>
-                                                <input type="text" id="name" name="overtime" class="form-control" placeholder="Name" value="{{$employee->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Designation:
-                                                </label>
-                                                <input type="text" id="designation" name="overtime" class="form-control" placeholder="Designation" value="{{$employee->designation->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Department:
-                                                </label>
-                                                <input type="text" id="department" name="department" class="form-control" placeholder="Department" value="{{$employee->department->name}}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @include('admin.human_resource.fnf.employee_data')
                                    <div class="row justify-content-center">
                                        <div class="col-md-6 text-center">
                                            <div class="form-group">
                                                <div>
-                                                   <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
+                                                   <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments">{{$support->comments ?? ''}}</textarea>
                                                </div>
                                            </div>
                                        </div>
@@ -61,7 +36,15 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_support_info" class="btn btn-primary">Submit</button>
+                                        @if($support == Null )
+                                            <button type="button" id="submit_support_info" class="btn btn-primary">Submit</button>
+                                        @endif
+                                        @if($support != Null && $support->status_id == 1 ||  $support->status_id == 3 )
+                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                        @endif
+                                        @if($support != Null && $support->status_id == 1)
+                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @endif
                                     </div>
                                 </div>
                             </form>
@@ -97,8 +80,24 @@
                     return false;
                 }
                 else{
-                    form.submit()
+                    var route = '{{route('admin.human_resource.fnf.it_support.submit')}}';
+                    $('#rm_form').attr('action', route);
+                    $('#rm_form').submit()
                 }
+            });
+
+            $('#approve').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.it_support_status_edit")}}';
+                $('#it_support_form').attr('action', route);
+                $('#approval').val('approved');
+                $('#it_support_form').submit()
+            });
+
+            $('#reject').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.it_support_status_edit")}}';
+                $('#it_support_form').attr('action', route);
+                $('#approval').val('rejected');
+                $('#it_support_form').submit()
             });
         });
     </script>

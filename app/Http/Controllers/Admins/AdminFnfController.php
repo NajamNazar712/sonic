@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\FnfSectionAdministration;
+use App\FnfSectionCustomerExperience;
+use App\FnfSectionFinance;
+use App\FnfSectionHr;
+use App\FnfSectionItSupport;
+use App\FnfSectionReportingManager;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
@@ -96,10 +102,10 @@ class AdminFnfController extends Controller
             $fnf->status_id = 1;
             $fnf->save();
 
-            $admins = array('Trax01099','Trax04484','Trax00043',$trax_id);
+            $admins = array('Trax01099','Trax04484','Trax00043','Trax03840','Trax02533',$trax_id);
             NotificationsController::send(146,$fnf->id,$admins);
 
-            return redirect()->route('admin.human_resource.fnf.index')->with(['success','Request Added Successfully']);
+            return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request Added Successfully']);
         }
     }
 
@@ -123,60 +129,168 @@ class AdminFnfController extends Controller
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.manager_index',compact('employee','fnf'));
+            $rm = FnfSectionReportingManager::where('fnf_id',$id);
+            if(!$rm->exists()){
+                $rm = Null;
+            }
+            else{
+                $rm = $rm->first();
+            }
+            return view('admin.human_resource.fnf.manager_index',compact('employee','fnf','rm'));
         }
     }
 
     public function reporting_manager_submit(Request $request){
-        dd($request);
+        $fnf_id = $request->fnf_id;
+        if($fnf_id){
+            $rm = new FnfSectionReportingManager();
+            $rm->fnf_id = $fnf_id;
+            $rm->overtime = $request->overtime;
+            $rm->holiday = $request->holiday;
+            $rm->pickup_incentive = $request->pickup_incentive;
+            $rm->fixed_incentive = $request->fixed_incentive;
+            $rm->delivery_incentive = $request->delivery_incentive;
+            $rm->extra_duty = $request->extra_duty;
+            $rm->iou = $request->iou;
+            $rm->penalty = $request->penalty;
+            $rm->comments = $request->comments;
+            $rm->created_by = Auth::id();
+            $rm->status_id = 1;
+            $rm->save();
+            return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Data Added Successfully']);
+        }
+
+
     }
 
     public function cs_index($id){
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.cs_index',compact('employee','fnf'));
+            $cs = FnfSectionCustomerExperience::where('fnf_id',$id);
+            if(!$cs->exists()){
+                $cs = Null;
+            }
+            else{
+                $cs = $cs->first();
+            }
+            return view('admin.human_resource.fnf.cs_index',compact('employee','fnf','cs'));
         }
     }
 
     public function cs_submit(Request $request){
-        dd($request);
+       $fnf_id = $request->fnf_id;
+       if($fnf_id){
+           $cs = new FnfSectionCustomerExperience();
+           $cs->fnf_id = $fnf_id;
+           $cs->call_deduction = $request->phone_call_deduction;
+           $cs->parcel = $request->open_parcel;
+           $cs->fake_status = $request->fake_status;
+           $cs->month_closing = $request->month_closing;
+           $cs->comments = $request->comments;
+           $cs->created_by = Auth::id();
+           $cs->status_id = 1;
+           $cs->save();
+
+           return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Data Added Successfully']);
+       }
     }
 
     public function administration_index($id){
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.admin_index',compact('employee','fnf'));
+            $admin = FnfSectionAdministration::where('fnf_id',$id);
+            if(!$admin->exists()){
+                $admin = Null;
+            }
+            else{
+                $admin = $admin->first();
+            }
+            return view('admin.human_resource.fnf.admin_index',compact('employee','fnf','admin'));
         }
     }
 
     public function administration_submit(Request $request){
-        dd($request);
+        $fnf_id = $request->fnf_id;
+        if($fnf_id){
+            $admin = new FnfSectionAdministration();
+            $admin->fnf_id = $fnf_id;
+            $admin->auction = $request->auction_sell;
+            $admin->shirt = $request->tshirts;
+            $admin->maintenance = $request->maintenance;
+            $admin->comments = $request->comments;
+            $admin->created_by = Auth::id();
+            $admin->status_id = 1;
+            $admin->save();
+
+            return redirect()->route('admin.human_resource.fnf.index')->with(['success'=>'Data Added Successfully']);
+        }
     }
 
     public function it_support_index($id){
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.it_support',compact('employee','fnf'));
+            $support = FnfSectionItSupport::where('fnf_id',$id);
+            if(!$support->exists()){
+                $support = Null;
+            }
+            else{
+                $support = $support->first();
+            }
+            return view('admin.human_resource.fnf.it_support',compact('employee','fnf','support'));
         }
     }
 
     public function it_support_submit(Request $request){
-        dd($request);
+        $fnf_id = $request->fnf_id;
+        if($fnf_id){
+            $admin = new FnfSectionItSupport();
+            $admin->fnf_id = $fnf_id;
+            $admin->comments = $request->comments;
+            $admin->created_by = Auth::id();
+            $admin->status_id = 1;
+            $admin->save();
+
+            return redirect()->route('admin.human_resource.fnf.index')->with(['success'=>'Data Added Successfully']);
+        }
     }
 
     public function finance_index($id){
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.finance',compact('employee','fnf'));
+            $finance = FnfSectionFinance::where('fnf_id',$id);
+            if(!$finance->exists()){
+                $finance = Null;
+            }
+            else{
+                $finance = $finance->first();
+            }
+            return view('admin.human_resource.fnf.finance',compact('employee','fnf','finance'));
         }
     }
 
     public function finance_submit(Request $request){
-        dd($request);
+      
+        $fnf_id = $request->fnf_id;
+        if($fnf_id){
+            $finance = new FnfSectionFinance();
+            $finance->fnf_id = $fnf_id;
+            $finance->advance_salary = $request->salary;
+            $finance->loan_outstanding = $request->loan;
+            $finance->short_cash = $request->cash;
+            $finance->cod_recovery = $request->cod;
+            $finance->iou = $request->iou;
+            $finance->tax = $request->tax;
+            $finance->comments = $request->comments;
+            $finance->created_by = Auth::id();
+            $finance->status_id = 1;
+            $finance->save();
+
+            return redirect()->route('admin.human_resource.fnf.index')->with(['success'=>'Data Added Successfully']);
+        }
     }
 
     public function hr_index($id){
@@ -188,6 +302,120 @@ class AdminFnfController extends Controller
     }
 
     public function hr_submit(Request $request){
-        dd($request);
+        $fnf_id = $request->fnf_id;
+        if($fnf_id){
+            $hr = new FnfSectionHr();
+            $hr->fnf_id = $fnf_id;
+            $hr->medical = $request->medical;
+            $hr->notice_period = $request->notice_period;
+            $hr->penalty = $request->penalty;
+            $hr->van_deduction = $request->deduction;
+            //$hr->comments = $request->comments;
+            $hr->created_by = Auth::id();
+            $hr->status_id = 1;
+            $hr->save();
+
+            return redirect()->route('admin.human_resource.fnf.index')->with(['success' =>'Data Added Successfully']);
+        }
+    }
+
+    public function rm_status_edit(Request $request){
+
+        $rm = FnfSectionReportingManager::where('fnf_id',$request->fnf_id)->first();
+        $rm->overtime = $request->overtime;
+        $rm->holiday = $request->holiday;
+        $rm->pickup_incentive = $request->pickup_incentive;
+        $rm->fixed_incentive = $request->fixed_incentive;
+        $rm->delivery_incentive = $request->delivery_incentive;
+        $rm->extra_duty = $request->extra_duty;
+        $rm->iou = $request->iou;
+        $rm->penalty = $request->penalty;
+        $rm->comments = $request->comments;
+        if($request->approval == 'approved'){
+            $rm->status_id = 2;
+        }
+        elseif ($request->approval == 'rejected'){
+            $rm->status_id = 3;
+        }
+        $rm->save();
+
+        return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
+    }
+
+    public function cs_status_edit(Request $request){
+
+        $cs = FnfSectionCustomerExperience::where('fnf_id',$request->fnf_id)->first();
+        $cs->call_deduction = $request->phone_call_deduction;
+        $cs->parcel = $request->open_parcel;
+        $cs->fake_status = $request->fake_status;
+        $cs->month_closing = $request->month_closing;
+        $cs->comments = $request->comments;
+        if($request->approval == 'approved'){
+            $cs->status_id = 2;
+        }
+        elseif ($request->approval == 'rejected'){
+            $cs->status_id = 3;
+        }
+        $cs->save();
+
+        return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
+    }
+
+    public function administration_status_edit(Request $request){
+      
+        $admin = FnfSectionAdministration::where('fnf_id',$request->fnf_id)->first();
+        $admin->auction = $request->auction_sell;
+        $admin->shirt = $request->tshirts;
+        $admin->maintenance = $request->maintenance;
+        $admin->comments = $request->comments;
+        if($request->approval == 'approved'){
+            $admin->status_id = 2;
+        }
+        elseif ($request->approval == 'rejected'){
+            $admin->status_id = 3;
+        }
+        $admin->save();
+
+        return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
+    }
+
+    public function it_support_status_edit(Request $request){
+
+        $admin = FnfSectionItSupport::where('fnf_id',$request->fnf_id)->first();
+        $admin->comments = $request->comments;
+        if($request->approval == 'approved'){
+            $admin->status_id = 2;
+        }
+        elseif ($request->approval == 'rejected'){
+            $admin->status_id = 3;
+        }
+        $admin->save();
+
+        return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
+    }
+
+    public function finance_status_edit(Request $request){
+
+        $finance = FnfSectionFinance::where('fnf_id',$request->fnf_id)->first();
+        $finance->advance_salary = $request->salary;
+        $finance->loan_outstanding = $request->loan;
+        $finance->short_cash = $request->cash;
+        $finance->cod_recovery = $request->cod;
+        $finance->iou = $request->iou;
+        $finance->tax = $request->tax;
+        $finance->comments = $request->comments;
+        if($request->approval == 'approved'){
+            $finance->status_id = 2;
+        }
+        elseif ($request->approval == 'rejected'){
+            $finance->status_id = 3;
+        }
+        $finance->save();
+
+        return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
+    }
+
+    public function hod_approval_index($id){
+      //
     }
 }

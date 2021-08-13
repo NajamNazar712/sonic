@@ -16,38 +16,14 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="cs_form" action="{{route('admin.human_resource.fnf.cs.submit')}}" method="post" novalidate="novalidate">
+                            <form id="cs_form"  method="post" novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="fnf_id" value="{{$fnf->id}}">
+                                <input type="hidden" name="approval" id="approval">
                                 <fieldset>
-                                    <div class="row mb-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Name:
-                                                </label>
-                                                <input type="text" id="name" name="overtime" class="form-control" placeholder="Name" value="{{$employee->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Designation:
-                                                </label>
-                                                <input type="text" id="designation" name="overtime" class="form-control" placeholder="Designation" value="{{$employee->designation->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Department:
-                                                </label>
-                                                <input type="text" id="department" name="department" class="form-control" placeholder="Department" value="{{$employee->department->name}}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @include('admin.human_resource.fnf.employee_data')
                                     <h3 class="text-center mt-2 mb-2"><strong>Payments</strong></h3>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
@@ -55,7 +31,7 @@
                                                 <label for="name">
                                                     Phone Call Deduction:
                                                 </label>
-                                                <input type="text" id="phone_call_deduction" name="phone_call_deduction" class="form-control" placeholder="Amount">
+                                                <input type="text" id="phone_call_deduction" name="phone_call_deduction" class="form-control" placeholder="Amount" value="{{$cs->call_deduction ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -63,7 +39,7 @@
                                                 <label for="shipper_poc">
                                                     Open Parcel:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="open_parcel" id="open_parcel">
+                                                <input type="text" class="form-control" placeholder="Amount" name="open_parcel" id="open_parcel" value="{{$cs->parcel ?? ''}}">
                                             </div>
                                         </div>
                                     </div>
@@ -72,14 +48,14 @@
                                             <div class="form-group">
                                                 <label for="company_address">Fake Status:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="fake_status" id="fake_status">
+                                                <input type="text" class="form-control" placeholder="Amount" name="fake_status" id="fake_status" value="{{$cs->fake_status ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="phone">Month Closing:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="month_closing" id="month_closing">
+                                                <input type="text" class="form-control" placeholder="Amount" name="month_closing" id="month_closing" value="{{$cs->month_closing ?? ''}}">
                                             </div>
                                         </div>
                                     </div>
@@ -87,7 +63,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <div>
-                                                    <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
+                                                    <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments">{{$cs->comments ?? ''}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -95,7 +71,15 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_cs_info" class="btn btn-primary">Submit</button>
+                                        @if($cs == Null )
+                                            <button type="button" id="submit_cs_info" class="btn btn-primary">Submit</button>
+                                        @endif
+                                        @if($cs != Null && $cs->status_id == 1 ||  $cs->status_id == 3 )
+                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                        @endif
+                                        @if($cs != Null && $cs->status_id == 1)
+                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @endif
                                     </div>
                                 </div>
                             </form>
@@ -123,16 +107,32 @@
     <script>
         $(document).ready(function() {
             $('#submit_cs_info').on('click',function(){
-                if($('#phone_call_deduction').val() == '' || $('#phone_call_deduction').val() == null  && $('#open_parcel').val() == '' || $('#open_parcel').val() == null && $('#fake_status').val() == '' || $('#fake_status').val() == null  &&  $('#month_closing').val() == '' || $('#month_closing').val() == null  ){
+                if($('#comments').val() == '' || $('#comments').val() == null){
 
-                    var error = "At-least fill one field";
+                    var error = "Comments cannot be empty";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     return false;
                 }
                 else{
-                    form.submit()
+                    var route = '{{route('admin.human_resource.fnf.cs.submit')}}';
+                    $('#cs_form').attr('action', route);
+                    $('#cs_form').submit()
                 }
+            });
+
+            $('#approve').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.cs_status_edit")}}';
+                $('#cs_form').attr('action', route);
+                $('#approval').val('approved');
+                $('#cs_form').submit()
+            });
+
+            $('#reject').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.cs_status_edit")}}';
+                $('#cs_form').attr('action', route);
+                $('#approval').val('rejected');
+                $('#cs_form').submit()
             });
         });
     </script>

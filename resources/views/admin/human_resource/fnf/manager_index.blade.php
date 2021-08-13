@@ -16,38 +16,14 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="rm_form" action="{{route('admin.human_resource.fnf.rm.submit')}}" method="post"  novalidate="novalidate">
+                            <form id="rm_form"  method="post"  novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
                                 <input type="hidden" name="fnf_id" value="{{$fnf->id}}">
+                                <input type="hidden" name="approval" id="approval">
                                 <fieldset>
-                                    <div class="row mb-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Name:
-                                                </label>
-                                                <input type="text" id="name" name="overtime" class="form-control" placeholder="Name" value="{{$employee->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Designation:
-                                                </label>
-                                                <input type="text" id="designation" name="overtime" class="form-control" placeholder="Designation" value="{{$employee->designation->name}}" disabled>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Department:
-                                                </label>
-                                                <input type="text" id="department" name="department" class="form-control" placeholder="Department" value="{{$employee->department->name}}" disabled>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    @include('admin.human_resource.fnf.employee_data')
                                     <h3 class="text-center mt-2 mb-2"><strong>Payments</strong></h3>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
@@ -55,7 +31,7 @@
                                                 <label for="name">
                                                     Overtime:
                                                 </label>
-                                                <input type="text" id="overtime" name="overtime" class="form-control" placeholder="Amount/Hrs">
+                                                <input type="text" id="overtime" name="overtime" class="form-control" placeholder="Amount/Hrs" value="{{$rm->overtime ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -63,7 +39,7 @@
                                                 <label for="shipper_poc">
                                                     Sunday / Holiday :
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="holiday" id="holiday">
+                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="holiday" id="holiday" value="{{$rm->holiday ?? ''}}">
                                             </div>
                                         </div>
                                     </div>
@@ -72,7 +48,7 @@
                                             <div class="form-group">
                                                 <label for="company_address">Pickup Incentive Fuel:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="pickup_incentive" id="pickup_incentive">
+                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="pickup_incentive" id="pickup_incentive" value="{{$rm->pickup_incentive ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -80,7 +56,7 @@
                                                 <label for="phone">Fixed Incentive (If any):
                                                   
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="fixed_incentive" id="fixed_incentive">
+                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="fixed_incentive" id="fixed_incentive" value="{{$rm->fixed_incentive ?? ''}}">
                                             </div>
                                         </div>
                                     </div>
@@ -90,7 +66,7 @@
                                                 <label for="phone">Delivery Incentive:
                                                   
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="delivery_incentive" id="delivery_incentive">
+                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="delivery_incentive" id="delivery_incentive" value="{{$rm->delivery_incentive ?? ''}}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -98,7 +74,7 @@
                                                 <label for="phone">Hard Route/Extra Duty:
                                                   
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="extra_duty" id="extra_duty">
+                                                <input type="text" class="form-control" placeholder="Amount/Hrs" name="extra_duty" id="extra_duty" value="{{$rm->extra_duty ?? ''}}">
                                             </div>
                                         </div>
                                     </div>
@@ -110,7 +86,7 @@
                                                   
                                                 </label>
                                                 <div>
-                                                    <input type="text" class="form-control" name="iou"  id="iou" placeholder="Amount">
+                                                    <input type="text" class="form-control" name="iou"  id="iou" placeholder="Amount" value="{{$rm->iou ?? ''}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -120,7 +96,7 @@
                                                   
                                                 </label>
                                                 <div>
-                                                    <input type="text" class="form-control" name="penalty" id="penalty" placeholder="Amount">
+                                                    <input type="text" class="form-control" name="penalty" id="penalty" placeholder="Amount" value="{{$rm->penalty ?? ''}}">
                                                 </div>
                                             </div>
                                         </div>
@@ -129,7 +105,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <div>
-                                                   <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
+                                                   <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments">{{$rm->comments ?? ''}}</textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -137,7 +113,15 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_rm_info" class="btn btn-primary">Submit</button>
+                                        @if($rm == Null )
+                                            <button type="button" id="submit_rm_info" class="btn btn-primary">Submit</button>
+                                        @endif
+                                        @if($rm != Null && $rm->status_id == 1 ||  $rm->status_id == 3 )
+                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                        @endif
+                                        @if($rm != Null && $rm->status_id == 1)
+                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @endif
                                     </div>
                                 </div>
                             </form>
@@ -165,16 +149,31 @@
     <script>
         $(document).ready(function() {
              $('#submit_rm_info').on('click',function(){
-                if($('#overtime').val() == '' || $('#overtime').val() == null  && $('#holiday').val() == '' || $('#holiday').val() == null && $('#pickup_incentive').val() == '' || $('#pickup_incentive').val() == null  &&  $('#fixed_incentive').val() == '' || $('#fixed_incentive').val() == null  &&  $('#delivery_incentive').val() == '' || $('#delivery_incentive').val() == null && $('#extra_duty').val() == '' || $('#extra_duty').val() == null && $('#iou').val() == '' || $('#iou').val() == null && $('#penalty').val() == '' || $('#penalty').val() == null &&  $('#comments').val() == '' || $('#comments').val() == null){
+                if($('#comments').val() == '' || $('#comments').val() == null){
 
-                    var error = "At-least fill one field";
+                    var error = "Comments cannot be empty";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     return false;
                 }
                 else{
-                    form.submit()
+                    var route = '{{route("admin.human_resource.fnf.rm.submit")}}';
+                    $('#rm_form').attr('action', route);
+                    $('#rm_form').submit()
                 }
+             });
+
+             $('#approve').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.rm_status_edit")}}';
+                 $('#rm_form').attr('action', route);
+                 $('#approval').val('approved');
+                 $('#rm_form').submit()
+             });
+             $('#reject').on('click',function(){
+                var route = '{{route("admin.human_resource.fnf.rm_status_edit")}}';
+                 $('#rm_form').attr('action', route);
+                 $('#approval').val('rejected');
+                 $('#rm_form').submit()
              });
         });
     </script>
