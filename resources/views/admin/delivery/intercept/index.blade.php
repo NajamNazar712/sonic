@@ -245,7 +245,7 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.status_date);
-                                row.push(values.intercept_type);
+                                row.push(values.type);
 
                                 body.push(row);
                             });
@@ -479,22 +479,29 @@
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
                         '</select>';
                     var consignee_drop_select = '<select name="service_select" id="consignee_select" class="select2 form-control">' +
-                        '<option value="Same Consignee">Same Consignee</option>'+
-                        '<option value="Different Consignee">Different Consignee</option>'+
+                        '<option value="2">Same Consignee</option>'+
+                        '<option value="1">Different Consignee</option>'+
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.select') ||($(header).is('.type'))) {
+                        if ($(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.shipping_mode') ){
                             $(mode_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }else if($(header).is('.service_type')){
+
+                        }else if($(header).is('.type') ) {
+                            $(consignee_drop_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
@@ -548,6 +555,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
                     $("#consignee_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Intercept Type",
                         width:'100%',
