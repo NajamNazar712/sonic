@@ -103,7 +103,7 @@ class LastMileDebriefingController extends Controller
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
-            ->where('delivery_notes.created_at','>=',Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2)))
+            ->where('delivery_notes.created_at','>=',Carbon::today())
             ->where('delivery_notes.created_at','<=',$time)
             ->where('delivery_notes.status', 0);
 
@@ -214,7 +214,7 @@ class LastMileDebriefingController extends Controller
         $data = AgentCallMonitoring::join('admins as agent','agent.id','=','agent_call_monitorings.agent_id')
             ->leftjoin('cities as hub','hub.id','=','agent.default_hub_id')
             ->select(['agent.id as agent_id','agent.name as agent_name','hub.name as hub'])
-            ->where('agent_call_monitorings.created_at','>=',Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2)))
+            ->where('agent_call_monitorings.created_at','>=',Carbon::today())
             ->where('agent_call_monitorings.created_at','<=',$time)
             ->groupBy('agent_id');
 
