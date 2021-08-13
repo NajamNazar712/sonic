@@ -998,8 +998,8 @@ class Permission
             'incidence_monitoring.add' => 536,
             'incidence_monitoring.view_report' => 539,
 
-            'rider_delivery_note_otp.index' => 553,
-            'rider_delivery_note_otp.list' => 553,
+            'rider_delivery_note_otp.index' => 563,
+            'rider_delivery_note_otp.list' => 563,
 
             'settings.ccd_booking.index' => 558,
            

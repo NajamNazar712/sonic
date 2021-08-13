@@ -2520,7 +2520,7 @@ class NotificationsController extends Controller
 
                     $cc = array();
 
-                    $cc[] = 'sarosh.tariq@trax.pk';
+                    $cc[] = 'shafay.tariq@trax.pk';
                     $sales_person = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
                     // $sales_person_admin = Admin::find($sales_person->admin_id);
                     
@@ -2615,7 +2615,7 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc);
                 } else if ($id == 31) {
                     $possible_fields = ['tracking_number', 'shipper_name', 'email', 'phone', 'destination', 'channel', 'case_nature', 'case_nature_type', 'details','status'];
-
+                    $shipment_email = false;
                     $crm_request = CrmRequest::find($reference_1_id);
                     if ($crm_request) {
                         $tagging = CrmRequestTagging::where('crm_request_id', $crm_request->id)->first();
@@ -2654,6 +2654,7 @@ class NotificationsController extends Controller
                             $shipper_phone = '';
                             $shipper_destination = '';
                             if ($shipment) {
+                                $shipment_email = true;
                                 if (strpos($subject, '[tracking_number]') !== FALSE) {
                                     $subject = str_replace('[tracking_number]', $shipment->tracking_number, $subject);
                                     $tracking_number = $shipment->tracking_number;
@@ -2779,12 +2780,16 @@ class NotificationsController extends Controller
                                 self::email($subject, $body, $to, $cc);
                             }else{
                                 self::email($subject, $body, $to);
-                                self::email($subject, $body, $shipment->user->email);
+                                if ($shipment_email) {
+                                    self::email($subject, $body, $shipment->user->email);
+                                }
                             }
                         } else {
 
                             self::email($subject, $body, $to);
-                            self::email($subject, $body, $shipment->user->email);
+                            if ($shipment_email) {
+                                self::email($subject, $body, $shipment->user->email);
+                            }
                         }
                         // $sms_body= 'Request ID: '.$crm_request->id.', Tracking Number :'.$tracking_number.' '.PHP_EOL.
                         // 'Shipper Name: '.$shipper_name.''.PHP_EOL.
@@ -4391,7 +4396,7 @@ class NotificationsController extends Controller
                                 if ($cc_admins->exists()) {
                                     $cc = array_merge($cc, $cc_admins->distinct('id')->pluck('email')->toArray());
                                 }
-                                $to[] = 'sarosh.tariq@trax.pk';
+                                $to[] = 'shafay.tariq@trax.pk';
                                 if ($check == true) {
                                     self::email($subject, $body, $to, $cc);
                                 }
@@ -5917,7 +5922,7 @@ class NotificationsController extends Controller
                     if ($finance->exists()) {
                         $to = array_merge($to, $finance->pluck('email')->toArray());
                     }
-                    $to[] = 'sarosh.tariq@trax.pk';
+                    $to[] = 'shafay.tariq@trax.pk';
 
                     self::email($subject, $body, $to);
 
@@ -7456,7 +7461,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[link]', $link, $body);
                     }
 
-                    $to = ['mohsin.qamar@trax.pk', 'sarosh.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
                 }

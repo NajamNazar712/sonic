@@ -500,7 +500,7 @@ otherwise it will be rejected</li>
                 $detain_origins = [];
                 $sameday_origins = [];
 
-                if(count($rate_origin_hubs) > 0){
+                if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                     foreach($rate_origin_hubs as $index => $origin){
 
                         if($origin->shipping_mode_id == 1){
@@ -526,7 +526,7 @@ otherwise it will be rejected</li>
                 $overland_destinations = [];
                 $detain_destinations = [];
                 $sameday_destinations = [];
-                if(count($rate_destination_hubs) > 0){
+                if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                     foreach($rate_destination_hubs as $index => $destination){
 
                         if($destination->shipping_mode_id == 1){
