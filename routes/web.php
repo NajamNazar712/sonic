@@ -1258,6 +1258,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\ReturnController@cx_sales_list')->name('list');
 
         });
+        Route::prefix('return_deliveries')->name('return_deliveries.')->group(function () {
+            Route::get('', 'Admins\ReturnController@return_deliveries_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@return_deliveries_list')->name('list');
+            Route::get('app_shipment_list', 'Admins\ReturnController@return_deliveries_app_shipments_list')->name('app_shipment_list');
+            Route::get('dbf_shipment_list', 'Admins\ReturnController@return_deliveries_dbf_shipments_list')->name('dbf_shipment_list');
+
+        });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function (){
         Route::prefix('supervisor')->name('supervisor.')->group(function (){
