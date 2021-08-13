@@ -93,7 +93,7 @@
 
                     </div>
                 </div>
-                <input type="file" class="d-none" id="upload_e_sign" accept=".png">
+                <input type="file" class="d-none" id="upload_e_sign" accept=".png,.jpeg">
                 <div class="modal-footer">
                     <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="upload_img_btn" >Upload Image</button>
                     <button tabindex="-1" type="button" class="btn btn-success ml-1" id="save_signature_btn">Save E Sign</button>

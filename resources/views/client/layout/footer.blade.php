@@ -84,20 +84,36 @@
             $("#SignatureModal #upload_e_sign").trigger('click');
         });
 
+
         $("#SignatureModal #upload_e_sign").on('change',function(){
-            var preview = document.querySelector('#agreement-form #esign_image');
-            var file = document.querySelector('#SignatureModal input[type=file]').files[0];
-            var reader = new FileReader();
+            var allowedExtension = ['jpeg', 'jpg','png'];
+            var fileExtension = document.querySelector('#SignatureModal input[type=file]').value.split('.').pop().toLowerCase();
+            var isValidFile = false;
+            for(var index in allowedExtension) {
 
-            reader.addEventListener("load", function () {
-                preview.src = reader.result;
-                $("#agreement-form #esign").val(reader.result);
-                $('#SignatureModal').modal('hide');
-                $('#ShowAgreementModal').modal('show');
-            }, false);
+                if(fileExtension === allowedExtension[index]) {
+                    isValidFile = true;
+                    break;
+                }
+            }
+            if(isValidFile) {
+                var preview = document.querySelector('#agreement-form #esign_image');
+                var file = document.querySelector('#SignatureModal input[type=file]').files[0];
+                var reader = new FileReader();
 
-            if (file) {
-                reader.readAsDataURL(file);
+                reader.addEventListener("load", function () {
+                    preview.src = reader.result;
+                    $("#agreement-form #esign").val(reader.result);
+                    $('#SignatureModal').modal('hide');
+                    $('#ShowAgreementModal').modal('show');
+                }, false);
+
+                if (file) {
+                    reader.readAsDataURL(file);
+                }
+            }
+            else{
+                toastr.error("Please select valid image", 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
         });
 
