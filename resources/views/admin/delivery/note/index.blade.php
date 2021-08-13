@@ -1249,7 +1249,11 @@
                             if(special == 1){
                                 $('#SpecialRiderModal').modal('show');
                             }else{
-                                otp_generation();
+                                if(operation_id === '2'){
+                                    create_delivery_note();
+                                }else{
+                                    otp_generation();
+                                }
                             }
                         }
                         

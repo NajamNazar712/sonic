@@ -4569,4 +4569,23 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Vendor Added!');
     }
+    public function rider_shipment_attempt_settings_index()
+    {
+        $settings = GlobalSettings::whereIn('type', ['rider_shipment_attempt_count', 'rider_shipment_attempt_waiting_duration'])->get();
+
+        return view('admin.settings.rider_shipment_attempt')->with('settings', $settings);
+    }
+
+    public function rider_shipment_attempt_settings_store(Request $request)
+    {
+        $settings = GlobalSettings::where('type', 'rider_shipment_attempt_count')->first();
+        $settings->setting_value = $request->shipment_attempt_count;
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'rider_shipment_attempt_waiting_duration')->first();
+        $settings->setting_value = $request->shipment_attempt_duration;
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

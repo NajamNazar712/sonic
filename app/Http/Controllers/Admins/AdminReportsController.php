@@ -3357,7 +3357,7 @@ class AdminReportsController extends Controller
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
@@ -3571,6 +3571,22 @@ class AdminReportsController extends Controller
                 }
 
                 return $class;
+            })
+            ->editColumn('delivered_or_returned', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->delivered_or_returned;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('received_or_refused_by', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->received_or_refused_by;
+                }
+                else {
+                    return '';
+                }
             });
 
         if($tracking = $request->get('search_tracking')){
@@ -5194,7 +5210,7 @@ class AdminReportsController extends Controller
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             });
             $sales->whereBetween('dr.created_at', [$from, $to]);
         }
@@ -5202,7 +5218,7 @@ class AdminReportsController extends Controller
             $sales->leftJoin('shipments_journey as dr', function ($join) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)'));
             });
         }
 
@@ -5390,6 +5406,14 @@ class AdminReportsController extends Controller
                 }
 
                 return $class;
+            })
+            ->editColumn('delivered_or_returned', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->delivered_or_returned;
+                }
+                else {
+                    return '';
+                }
             });
 
         if($tracking = $request->get('search_tracking')){
