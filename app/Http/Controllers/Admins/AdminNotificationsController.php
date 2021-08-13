@@ -424,6 +424,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['erf_id','admin','date','link'];
         }
+		else if ($id == 145)
+        {
+            $details['fields'] = ['tracking_number','status','reason','link'];
+        }
 
 		return $details;
     }

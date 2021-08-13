@@ -1922,6 +1922,14 @@ class V2AdminPickupsController extends Controller
                             </td>
                           </tr>
                           <tr>
+                            <td class="color secondary"><strong>Rider Trax ID</strong></td>
+                            <td>' . $rider->trax_id . '</td>
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
                             <td class="color secondary"><strong>Category</strong></td>
                             <td>' . $rider->rider_category->name . '</td>
                           </tr>
