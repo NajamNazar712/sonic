@@ -217,7 +217,7 @@
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
-                                                            <td><strong>Re-Attempt Count :</strong></td>
+                                                            <td><strong>Attempt Count :</strong></td>
                                                             <td>{{$reattempt_count->reattempts}}</td>
                                                             <td><strong>Rider Status :</strong></td>
                                                             <td>{{$rider_status->shipment_status_shipper->name}}</td>

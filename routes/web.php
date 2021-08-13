@@ -23,6 +23,11 @@ Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::post('track', 'TrackingController@track')->name('track');
 });
 
+Route::prefix('shipment')->name('shipment.')->group(function () {
+    Route::get('status/verify', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+    Route::get('status/{tracking_number?}/verify/{delivery_note_id?}', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+});
+
 Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('cod.login');
@@ -1062,6 +1067,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
             Route::post('/upload_pod','Admins\DeliveryController@upload_pod')->name('upload_pod');
 
+            Route::post('fake_status_shipments','Admins\DeliveryController@fake_status_shipments')->name('fake_status_shipments');
+
+
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
@@ -1265,7 +1273,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list','Admins\LastMileDebriefingController@supervisor_list')->name('list');
             Route::post('agents','Admins\LastMileDebriefingController@supervisor_agents')->name('agents');
             Route::post('assign_agents','Admins\LastMileDebriefingController@supervisor_assign_agents')->name('assign_agents');
-            
+            Route::post('get_undelivered_shipments','Admins\LastMileDebriefingController@get_undelivered_shipments')->name('get_undelivered_shipments');
+            Route::post('send_sms', 'Admins\LastMileDebriefingController@send_sms_to_undelivered_shipments')->name('send_sms');
             
         });
         Route::prefix('agents_call_monitoring')->name('agents_call_monitoring.')->group(function (){
@@ -2711,6 +2720,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\GlobalSettingsController@shipment_status_eta_edit')->name('edit');
         });
 
+        Route::prefix('last_mile_cron')->name('last_mile_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@last_mile_cron_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
+        });
+
     });
 
 
@@ -2847,6 +2861,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('scanning_history')->name('scanning_history.')->group(function (){
         Route::get('','Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details','Admins\AdminShipmentScanningHistoryController@details')->name('details');
+    });
+    Route::prefix('airway_journey')->name('airway_journey.')->group(function (){
+        Route::get('','AdminAirwayBillJournyController@index')->name('index');
+        Route::post('details','AdminAirwayBillJournyController@details')->name('details');
     });
 
     Route::prefix('coordinates')->name('coordinates.')->group(function (){
