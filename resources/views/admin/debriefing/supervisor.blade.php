@@ -65,6 +65,7 @@
                         <th class="border-primary border-darken-1">Assigned Agent</th>
                         <th class="border-primary border-darken-1">Fake Status Count</th>
                         <th class="border-primary border-darken-1">Caller agent Call Ratio</th>
+                        <th class="border-primary border-darken-1">Received delivery Verify Status Call Ratio</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -307,6 +308,7 @@
                             head.push('Assigned Agent');
                             head.push('Fake Status');
                             head.push('Caller agent Call Ratio');
+                            head.push('Received delivery Verify Status Call Ratio');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -324,6 +326,7 @@
                                 row.push(values.assigned_agent);
                                 row.push(values.shipments_fake_status_count);
                                 row.push(values.call_agent_ratio);
+                                row.push(values.received_verify_delivery_ratio);
                                 body.push(row);
                             });
                         },
@@ -372,6 +375,7 @@
                     { data:'assigned_agent' ,name: 'agent.name', class: 'align-middle assigned_agent'},
                     { data:'fake_shipments_link' ,name: 'shipments_fake_status_count', class: 'align-middle fake_shipments_link', orderable: false, searchable: false},
                     { data:'call_agent_ratio' ,name: 'call_agent_ratio', class: 'align-middle call_agent_ratio', orderable: false, searchable: false},
+                    { data:'received_verify_delivery_ratio' ,name: 'received_verify_delivery_ratio', class: 'align-middle received_verify_delivery_ratio', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -394,7 +398,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link') || $(header).is('.fake_shipments_link') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link') || $(header).is('.fake_shipments_link') || $(header).is('.action') || $(header).is('.received_verify_delivery_ratio') || $(header).is('.call_agent_ratio')) {
                             $(td).appendTo($(search));
                         }
                         else {

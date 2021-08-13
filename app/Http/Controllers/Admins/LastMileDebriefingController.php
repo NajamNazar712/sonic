@@ -212,6 +212,17 @@ class LastMileDebriefingController extends Controller
 
                 return $call_ratio;
             })
+            ->addColumn('received_verify_delivery_ratio', function ($deliveries){
+                $verify_shipments_count = ShipmentsJourney::where('reference_1_id', $deliveries->delivery_note)->where('verification', 1)->where('shipper_status_id', '!=', 5)->count();
+                $verify_shipments_ratio = 0;
+                $total_shipments = $deliveries->shipments_count;
+                if($total_shipments > 0){
+                    $verify_shipments_ratio = ($verify_shipments_count / $total_shipments) * 100;
+                    $verify_shipments_ratio = $verify_shipments_ratio . '%';
+                }
+
+                return $verify_shipments_ratio;
+            })
             ->editColumn('rider', function ($rider) {
                 if($rider->special_rider){
                     return $rider->rider . ' (' . $rider->special_rider_name . ')';
