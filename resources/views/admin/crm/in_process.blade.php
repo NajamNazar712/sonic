@@ -91,6 +91,14 @@
                     <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
                         <div class="col">
                             <div class="form-group">
+                                <select name="comment_type" class="form-control " id="comment_type">
+                                    <option value="0">External Comment</option>
+                                    <option value="1">Internal Comment</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
                                 <textarea class="form-control" rows="5" id="comment" placeholder="Add Comment"></textarea>
                             </div>
                             <div class="modal-footer justify-content-center">
@@ -872,11 +880,13 @@
 
             $('#commentSubmit').on('click',function () {
                 var comment = $('#BulkCommentModal #comment').val();
+                var comment_type = $('#BulkCommentModal #comment_type').val();
                 if (comment) {
                     $.ajax({
                         url: '{!! route('admin.crm.comment.bulk') !!}',
                         method: 'POST',
                         data: {
+                            'comment_type':comment_type,
                             'comment': comment,
                             'crm_request_ids': selected_rows,
                             '_token': '{{ csrf_token() }}'
