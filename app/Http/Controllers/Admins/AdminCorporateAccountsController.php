@@ -1776,7 +1776,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -1806,7 +1806,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -1942,7 +1942,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -1972,7 +1972,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -2086,7 +2086,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -2116,7 +2116,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -11140,7 +11140,7 @@ class AdminCorporateAccountsController extends Controller
         $overland_origins = [];
         $detain_origins = [];
         $sameday_origins = [];
-        if(count($rate_origin_hubs) > 0){
+        if($rate_origin_hubs || count($rate_origin_hubs) > 0){
             foreach($rate_origin_hubs as $index => $origin){
 
                 if($index == 1){
@@ -11170,7 +11170,7 @@ class AdminCorporateAccountsController extends Controller
         $overland_destinations = [];
         $detain_destinations = [];
         $sameday_destinations = [];
-        if(count($rate_destination_hubs) > 0){
+        if($rate_destination_hubs || count($rate_destination_hubs) > 0){
             foreach($rate_destination_hubs as $index => $destination){
 
                 if($index == 1){
@@ -22407,7 +22407,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -22437,7 +22437,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -22558,7 +22558,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -22588,7 +22588,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -22677,7 +22677,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -22707,7 +22707,7 @@ class AdminCorporateAccountsController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -22755,7 +22755,7 @@ class AdminCorporateAccountsController extends Controller
 
         $user = User::find($id);
         if ($user['status']!=3) {
-           // dd(1);
+            
             $messages = [
                 'on_wa_range_up.*.required' => 'The overnight range up field is required.',
                 'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -28726,7 +28726,7 @@ class AdminCorporateAccountsController extends Controller
                        'fuel_charges' => $switches['fuel_charges']
                    ]);
                }
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->get()) {
+               if ($weights = PendingCorporateDefaultWeightCharge::where('user_id', $id)->get()) {
                    foreach ($weights as $weight) {
                        CorporateDefaultWeightCharge::create([
                            'user_id' => $id,
@@ -28734,55 +28734,8 @@ class AdminCorporateAccountsController extends Controller
                            'delivery_type_id' => 1,
                            'range_up' => $weight['range_up'],
                            'range_down' => $weight['range_down'],
-                           'base' => $weight['spkg'],
-                           'local_or_6hr' => $weight['local_or_6hr'],
-                           'national_charges_class_0' => $weight['national_charges_class_0'],
-                           'national_charges_class_1' => $weight['national_charges_class_1'],
-                           'national_charges_class_2' => $weight['national_charges_class_2'],
-                           'national_charges_class_3' => $weight['national_charges_class_3'],
-                       ]);
-                   }
-               }
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->get()) {
-                   foreach ($weights as $weight) {
-                       CorporateDefaultWeightCharge::create([
-                           'user_id' => $id,
-                           'shipping_mode_id' => 2,
-                           'range_up' => $weight['range_up'],
-                           'range_down' => $weight['range_down'],
-                           'base' => $weight['spkg'],
-                           'local_or_6hr' => $weight['local_or_6hr'],
-                           'national_charges_class_0' => $weight['national_charges_class_0'],
-                           'national_charges_class_1' => $weight['national_charges_class_1'],
-                           'national_charges_class_2' => $weight['national_charges_class_2'],
-                           'national_charges_class_3' => $weight['national_charges_class_3'],
-                       ]);
-                   }
-               }
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->get()) {
-                   foreach ($weights as $weight) {
-                       CorporateDefaultWeightCharge::create([
-                           'user_id' => $id,
-                           'shipping_mode_id' => 3,
-                           'range_up' => $weight['range_up'],
-                           'range_down' => $weight['range_down'],
-                           'base' => $weight['spkg'],
-                           'local_or_6hr' => $weight['local_or_6hr'],
-                           'national_charges_class_0' => $weight['national_charges_class_0'],
-                           'national_charges_class_1' => $weight['national_charges_class_1'],
-                           'national_charges_class_2' => $weight['national_charges_class_2'],
-                           'national_charges_class_3' => $weight['national_charges_class_3'],
-                       ]);
-                   }
-               }
-               if ($weights = PendingCorporateDefaultWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->get()) {
-                   foreach ($weights as $weight) {
-                       CorporateDefaultWeightCharge::create([
-                           'user_id' => $id,
-                           'shipping_mode_id' => 4,
-                           'range_up' => $weight['range_up'],
-                           'range_down' => $weight['range_down'],
-                           'base' => $weight['spkg'],
+                           'weight_addition' => $weight['weight_addition'],
+                           'spkg' => $weight['spkg'],
                            'local_or_6hr' => $weight['local_or_6hr'],
                            'national_charges_class_0' => $weight['national_charges_class_0'],
                            'national_charges_class_1' => $weight['national_charges_class_1'],
@@ -33263,7 +33216,7 @@ class AdminCorporateAccountsController extends Controller
         $overland_origins = [];
         $detain_origins = [];
         $sameday_origins = [];
-        if(count($rate_origin_hubs) > 0){
+        if($rate_origin_hubs || count($rate_origin_hubs) > 0){
             foreach($rate_origin_hubs as $index => $origin){
 
                 if($index == 1){
@@ -33293,7 +33246,7 @@ class AdminCorporateAccountsController extends Controller
         $overland_destinations = [];
         $detain_destinations = [];
         $sameday_destinations = [];
-        if(count($rate_destination_hubs) > 0){
+        if($rate_destination_hubs || count($rate_destination_hubs) > 0){
             foreach($rate_destination_hubs as $index => $destination){
 
                 if($index == 1){

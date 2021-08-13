@@ -954,7 +954,7 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 12)->exists()) {
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                     }
                 }
@@ -976,7 +976,7 @@ class ReturnController extends Controller
                         $remarks = NULL;
                     }
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
                     if($status == 0){
                         if($shipment_details->booking_type_id == 5){
                             continue;
@@ -1006,7 +1006,7 @@ class ReturnController extends Controller
                         }
 
                     }
-                    if($status == 1){
+                    else if($status == 1){
                         $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
                         if($journey){
                             if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
