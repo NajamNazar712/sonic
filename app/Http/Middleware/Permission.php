@@ -837,6 +837,7 @@ class Permission
             'intercept.update' => 245,
 
             'scanning_history.index' => 306,
+            'airway_journey.index' => 567,
 
             'dashboard.sales.index' => 315,
 
