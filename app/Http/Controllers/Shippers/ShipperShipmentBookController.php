@@ -33,6 +33,7 @@ use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentsAirWaybillJourney;
 use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\http\Models\SubstituteUserShipment;
@@ -921,7 +922,6 @@ class ShipperShipmentBookController extends Controller
         if ($user_type == 3) {
             $user_name = Admin::find($user_id)->name . ' (Admin)';
             $admin_name = Admin::find($user_id)->name;
-            $watermark_flag = true;
             $watermark = 'DUPLICATE PRINTED BY: '. $admin_name;
         }
         else if ($user_type == 1) {
@@ -2124,6 +2124,12 @@ class ShipperShipmentBookController extends Controller
                             $shipment_details .= $distribution_delivery_performa;
                         }
                     }
+                }
+            }
+            if($user_type == 3){
+                $airwaybill_journey = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->where('user_type', 3);
+                if($airwaybill_journey->exists()){
+                    $watermark_flag = true;
                 }
             }
         }
