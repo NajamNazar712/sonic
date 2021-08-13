@@ -60,7 +60,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Mother Name<span class="text-danger">*</span></label>
-                                                <input type="text" id="mother_name" class="form-control border-primary" value="{{$employee->mother_name}}" data-rule-required="true" data-msg-required="Mother is required" name="mother_name">
+                                                <input type="text" id="mother_name" class="form-control border-primary" value="{{$employee->mother_name}}" data-rule-required="true" data-msg-required="Mother Name is required" name="mother_name">
                                             </div>
                                         </div>
                                         <div class="col-md-12">
