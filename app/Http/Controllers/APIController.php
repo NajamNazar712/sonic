@@ -3844,7 +3844,7 @@ class APIController extends Controller
                       }
                       return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
                   }
-                  return response()->json(['status' => 1, 'message' => 'Shipment is already updated, Please refresh your page!']);
+                  return response()->json(['status' => 1, 'message' => 'Shipment is already updated']);
 
               }elseif($request->type == 2){
                 
