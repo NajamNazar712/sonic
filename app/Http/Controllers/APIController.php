@@ -3891,6 +3891,9 @@ class APIController extends Controller
               }elseif ($request->type == 3) {
                   $rules = [
                       'consignee_type' => ['required', 'integer', 'digits_between:1,2'],
+                      'consignee_address' => ['required', 'between:1,255'],
+                      'consignee_phone_number_1' => ['required', 'phone_number'],
+                          
                   ];
                   $validate = Validator::make($request->all(), $rules, $this->messages);
           
