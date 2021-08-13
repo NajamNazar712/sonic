@@ -937,6 +937,7 @@
                                     shipment += '<tr role="row">';
                                     shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>Reason</strong></th>';
                                     shipment += '<th><strong>User</strong></th>';
                                     shipment += '</tr>';
                                     shipment += '</thead>';
@@ -946,6 +947,7 @@
                                         shipment += '<tr>';
                                         shipment += '<td>' + history.date_time + '</td>';
                                         shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.reason + '</td>';
                                         shipment += '<td>' + history.user + '</td>';
                                         shipment += '</tr>';
                                     });

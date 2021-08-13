@@ -11,7 +11,42 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
+                <div class="row justify-content-center">
+                    <div class="col-3">
+                        <div class="card bg-gradient-agent_assigned_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-user text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="white">{{$agent_calls_assigned_count}}</h3>
+                                            <span>Agent Assigned Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-gradient-bot_assigned_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-envelope text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white">{{$bot_sms_count}}</h3>
+                                            <span>Bot SMS Shipment(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -27,6 +62,10 @@
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Target Cash</th>
                         <th class="border-primary border-darken-1">Pending Cash Collection</th>
+                        <th class="border-primary border-darken-1">Assigned Agent</th>
+                        <th class="border-primary border-darken-1">Fake Status Count</th>
+                        <th class="border-primary border-darken-1">Caller agent Call Ratio</th>
+                        <th class="border-primary border-darken-1">Received delivery Verify Status Call Ratio</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -98,12 +137,43 @@
             </div>
         </div>
     </div>
+
+    <!--Shipments popup -->
+    <div class="modal fade" id="shipments_sms_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_sms_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_sms_modal_title">Send BOT SMS</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="send_sms_form" action="{{ route('admin.debriefing.supervisor.send_sms') }}" method="post">
+                <div class="modal-body text-center">
+
+                        @csrf
+                    <input type="hidden" name="delivery_note_id" id="sms_delivery_note_id">
+                        <div id="sms_undelivered_shipments"></div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button id="send_sms_submit" type="submit" class="btn btn-info">Send SMS</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -150,6 +220,16 @@
             width: auto !important;
             text-align: left;
         }
+        .bg-gradient-bot_assigned_shipments {
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+        .bg-gradient-agent_assigned_shipments {
+            background-image: linear-gradient(45deg, #535BE2, #9ea5ff);
+            background-repeat: repeat-x;
+        }
+
+
     </style>
 @endsection
 
@@ -157,7 +237,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
@@ -225,6 +305,10 @@
                             head.push('No. Of Pending Shipments');
                             head.push('Target Cash');
                             head.push('Pending Cash Collection');
+                            head.push('Assigned Agent');
+                            head.push('Fake Status');
+                            head.push('Caller agent Call Ratio');
+                            head.push('Received delivery Verify Status Call Ratio');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -239,6 +323,10 @@
                                 row.push(values.shipments_pending_count);
                                 row.push(values.amount);
                                 row.push(values.pending_cash_collection);
+                                row.push(values.assigned_agent);
+                                row.push(values.shipments_fake_status_count);
+                                row.push(values.call_agent_ratio);
+                                row.push(values.received_verify_delivery_ratio);
                                 body.push(row);
                             });
                         },
@@ -284,6 +372,10 @@
                     { data:'pending_shipments_link' ,name: 'pending_shipments_link', class: 'align-middle pending_shipments_link',orderable: false, searchable: false},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     { data:'pending_cash_collection' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle pending_cash_collection'},
+                    { data:'assigned_agent' ,name: 'agent.name', class: 'align-middle assigned_agent'},
+                    { data:'fake_shipments_link' ,name: 'shipments_fake_status_count', class: 'align-middle fake_shipments_link', orderable: false, searchable: false},
+                    { data:'call_agent_ratio' ,name: 'call_agent_ratio', class: 'align-middle call_agent_ratio', orderable: false, searchable: false},
+                    { data:'received_verify_delivery_ratio' ,name: 'received_verify_delivery_ratio', class: 'align-middle received_verify_delivery_ratio', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -306,7 +398,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link')) {
+                        if ($(header).is('.serial_number') || $(header).is('.undelivered_shipments_link') || $(header).is('.pending_shipments_link') || $(header).is('.fake_shipments_link') || $(header).is('.action') || $(header).is('.received_verify_delivery_ratio') || $(header).is('.call_agent_ratio')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -438,15 +530,154 @@
                     });
 
             });
+
+
+            $('#datatable tbody').on('click','tr td.fake_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.fake_status_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 
                 var id = parseInt($(this).parents('tr').attr('id'));
-                
-                $('#delivery_note_id_input').val(id);
 
-                $('#AssignAgentModal').modal('show');
-                
-               
+                if($(this).hasClass('assign_agent')){
+
+                    $('#delivery_note_id_input').val(id);
+                    $('#AssignAgentModal').modal('show');
+
+                }
+
+                if($(this).hasClass('bot_sms')){
+                    if(id){
+                        $.ajax({
+                            url: '{!! route('admin.debriefing.supervisor.get_undelivered_shipments') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'delivery_note_id': id
+                            }
+                        })
+                            .done(function(data) {
+                                $('#sms_undelivered_shipments').html('');
+                                if (data.status == 0) {
+                                    var html = '';
+                                    html += '<div class="row">';
+                                    html += '<div class="col-12">';
+                                    html += '<table class="table table-sm table-bordered mb-0">';
+
+                                    html += '<thead>';
+                                    html += '<tr>';
+                                    html += '<th><strong>Tracking Number</strong></th>';
+                                    html += '<th><strong>Status</strong></th>';
+                                    html += '<th><strong>Reason</strong></th>';
+                                    html += '<th><strong></strong></th>';
+                                    html += '</tr>';
+                                    html += '</thead>';
+                                    html += '<tbody>';
+
+
+                                    if (data.shipments_data) {
+                                        $.each(data.shipments_data, function(index, shipment) {
+                                            $row = '';
+                                            $row += '<tr>';
+                                            $row += '<td><strong><u><a href='+route+'?tracking_number='+ shipment.tracking_number+' target="_blank">'+shipment.tracking_number+'</a></u></strong></td>';
+                                            $row += '<td>'+ shipment.status +'</td>';
+                                            $row += '<td>'+ shipment.reason +'</td>';
+                                            $row += '<td><input type="checkbox" name="shipment_ids['+index+']" class="form-control sms_checkbox" checked></td>';
+                                            $row += '</tr>';
+                                            html += $row;
+                                        });
+                                    }
+                                    html += '</tbody></table></div></div>';
+                                    $('#sms_delivery_note_id').val(id);
+                                    $('#sms_undelivered_shipments').html(html);
+                                    $('#shipments_sms_modal').modal('show');
+
+                                }
+                                else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                }
+            });
+
+            $('#send_sms_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-control'));
+                },
+                submitHandler: function(form) {
+                    checked_selected_shipments = $("input:checkbox.sms_checkbox:checked").length;
+
+                    $flag = true;
+                    if(checked_selected_shipments <= 0){
+                        error = "Please select at least one Shipment";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        $flag = false;
+                    }
+                    if($flag == true){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'SMS will be sent to following consignee(s)!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                swal({
+                                    title: 'Please Wait!',
+                                    text: 'SMS are being sent!',
+                                    icon: 'info',
+                                    buttons: false,
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                form.submit();
+                            }
+                        });
+                    }
+                }
             });
             
 
