@@ -32,6 +32,7 @@ use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -8049,34 +8050,34 @@ class NotificationsController extends Controller
                     $to = $rider->phone;
                     self::delivery_note_otp_sms($body, $to);
                 }
-                else if($id == 143){
-                    $shipment = Shipment::join('users as u' , 'shipments.user_id' ,'=' , 'u.id' )
-                        ->join('sale_tier_tags as stt' ,function($join){
-                            $join->on('stt.user_id','u.id');
+                else if($id == 143) {
+                    $shipment = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+                        ->join('sale_tier_tags as stt', function ($join) {
+                            $join->on('stt.user_id', 'u.id');
                         })
-                        ->join('admins as a','a.id','stt.kam')
-                    ->select('u.name as username','u.id as userid' ,'a.name as adminname' ,'a.email as email')
-                        ->where('shipments.shipper_status_id',20)
+                        ->join('admins as a', 'a.id', 'stt.kam')
+                        ->select('u.name as username', 'u.id as userid', 'a.name as adminname', 'a.email as email')
+                        ->where('shipments.shipper_status_id', 20)
                         ->groupBy('userid')
                         ->get();
 
 
-                    foreach($shipment as $data) {
+                    foreach ($shipment as $data) {
 
-                        $getdata = Shipment::where('user_id','=',$data->userid)->where('shipments.shipper_status_id',20)->get();
-                        $html = '<b>Shipper Name is :' .$data->username . '</b>';
+                        $getdata = Shipment::where('user_id', '=', $data->userid)->where('shipments.shipper_status_id', 20)->get();
+                        $html = '<b>Shipper Name is :' . $data->username . '</b>';
                         $html .= '<table style="width:100%;">';
                         $html .= '<thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tracking Number</th>';
                         $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Data/Time</th>';
                         $html .= '</tr></thead><tbody>';
 
-                        foreach ($getdata as $value){
-                            $html .='<tr>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$value->tracking_number.'</td>';
-                            $html .='<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'.$value->updated_at.'</td>';
+                        foreach ($getdata as $value) {
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->tracking_number . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $value->updated_at . '</td>';
 
                         }
-                        $html .='</tr></tbody></table>';
+                        $html .= '</tr></tbody></table>';
                         $body_updated = $body;
                         $body_updated = str_replace('[preview]', $html, $body_updated);
                         $subject = 'Return Confirm Mail';
@@ -8085,7 +8086,49 @@ class NotificationsController extends Controller
 
                     }
 
+                }
 
+                else if($id == 146){
+
+                    $fnf_id = $reference_1_id;
+                    $admin_trax_ids = $reference_2_id;
+                    $fnf = FnfSectionEmployee::find($fnf_id);
+
+                    foreach($admin_trax_ids as $trax_id){
+
+                        $admin = Admin::where('trax_id',$trax_id)->first();
+                        if($admin) {
+                            if ($admin->trax_id == 'Trax01099') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/it_support';
+                            } else if ($admin->trax_id == 'Trax04484') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/finance';
+                            } else if ($admin->trax_id == 'Trax00043') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/cs';
+                            }
+
+                            $link = '<a href=' . $route . '>' . $route . '</a>';
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
+                            if (strpos($subject, '[emp_id]') !== FALSE) {
+                                $subject = str_replace('[emp_id]', $fnf->employee->trax_id, $subject);
+                            }
+
+                            if (strpos($body, '[emp_id]') !== FALSE) {
+                                $body = str_replace('[emp_id]', $fnf->employee->trax_id, $body);
+                            }
+                            if (strpos($body, '[name]') !== FALSE) {
+                                $body = str_replace('[name]', $fnf->employee->name, $body);
+                            }
+                            if (strpos($body, '[designation]') !== FALSE) {
+                                $body = str_replace('[designation]', $fnf->employee->designation->name, $body);
+                            }
+                            $to = $admin->email;
+                            self::email($subject, $body, $to);
+                        }
+                    }
                 }
             }
 

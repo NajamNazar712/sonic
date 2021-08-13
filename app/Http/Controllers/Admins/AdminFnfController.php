@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\FnfSectionEmployee;
@@ -94,6 +95,10 @@ class AdminFnfController extends Controller
             $fnf->created_by = Auth::id();
             $fnf->status_id = 1;
             $fnf->save();
+
+            $admins = array('Trax01099','Trax04484','Trax00043',$trax_id);
+            NotificationsController::send(146,$fnf->id,$admins);
+
             return redirect()->route('admin.human_resource.fnf.index')->with(['success','Request Added Successfully']);
         }
     }
@@ -142,7 +147,7 @@ class AdminFnfController extends Controller
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.cs_index',compact('employee','fnf'));
+            return view('admin.human_resource.fnf.admin_index',compact('employee','fnf'));
         }
     }
 
@@ -150,4 +155,39 @@ class AdminFnfController extends Controller
         dd($request);
     }
 
+    public function it_support_index($id){
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $employee = Employee::where('id',$fnf->employee_id)->first();
+            return view('admin.human_resource.fnf.it_support',compact('employee','fnf'));
+        }
+    }
+
+    public function it_support_submit(Request $request){
+        dd($request);
+    }
+
+    public function finance_index($id){
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $employee = Employee::where('id',$fnf->employee_id)->first();
+            return view('admin.human_resource.fnf.finance',compact('employee','fnf'));
+        }
+    }
+
+    public function finance_submit(Request $request){
+        dd($request);
+    }
+
+    public function hr_index($id){
+        $fnf = FnfSectionEmployee::find($id);
+        if($fnf){
+            $employee = Employee::where('id',$fnf->employee_id)->first();
+            return view('admin.human_resource.fnf.hr',compact('employee','fnf'));
+        }
+    }
+
+    public function hr_submit(Request $request){
+        dd($request);
+    }
 }

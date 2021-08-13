@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Administration')
+@section('title', 'Finance')
 
 @section('content')
     <div class="app-content content">
@@ -9,14 +9,14 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                  Administration
+                  Finance
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="admin_form" action="{{route('admin.human_resource.fnf.administration.submit')}}" method="post" novalidate="novalidate">
+                            <form id="finance_form" action="{{route('admin.human_resource.fnf.finance.submit')}}" method="post"  novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
@@ -53,28 +53,56 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="name">
-                                                    Auction Sell:
+                                                    Advance Salary :
                                                 </label>
-                                                <input type="text" id="auction_sell" name="auction_sell" class="form-control" placeholder="Amount">
+                                                <input type="text" id="salary" name="salary" class="form-control" placeholder="Amount">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="shipper_poc">
-                                                    T- Shirts:
+                                                    Loan Outstanding :
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="tshirts" id="tshirts">
+                                                <input type="text" class="form-control" placeholder="Amount" name="loan" id="loan">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="company_address">Co'Car Maintenance/Repair (if any):
+                                                <label for="company_address">Short Cash:
                                                 </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="maintenance" id="maintenance">
+                                                <input type="text" class="form-control" placeholder="Amount" name="cash" id="cash">
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="phone">COD Recovery:
+
+                                                </label>
+                                                <input type="text" class="form-control" placeholder="Amount" name="cod" id="cod">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-1">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="phone">Temporary Advance (IOU):
+
+                                                </label>
+                                                <input type="text" class="form-control" placeholder="Amount" name="iou" id="iou">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="phone">I. Tax (if any):
+
+                                                </label>
+                                                <input type="text" class="form-control" placeholder="Amount" name="tax" id="tax">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <div>
@@ -86,7 +114,7 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_admin_info" class="btn btn-primary">Submit</button>
+                                        <button type="submit" id="submit_finance_info" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
                             </form>
@@ -113,8 +141,8 @@
 
     <script>
         $(document).ready(function() {
-            $('#submit_admin_info').on('click',function(){
-                if($('#auction_sell').val() == '' || $('#auction_sell').val() == null  && $('#maintenance').val() == '' || $('#maintenance').val() == null && $('#tshirts').val() == '' || $('#tshirts').val() == null  &&  $('#comments').val() == '' || $('#comments').val() == null  ){
+            $('#submit_finance_info').on('click',function(){
+                if($('#salary').val() == '' || $('#salary').val() == null  && $('#loan').val() == '' || $('#loan').val() == null && $('#cod').val() == '' || $('#cod').val() == null  &&  $('#cash').val() == '' || $('#cash').val() == null  &&  $('#iou').val() == '' || $('#iou').val() == null && $('#tax').val() == '' || $('#tax').val() == null &&  $('#comments').val() == '' || $('#comments').val() == null){
 
                     var error = "At-least fill one field";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

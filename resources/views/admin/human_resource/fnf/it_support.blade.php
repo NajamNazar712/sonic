@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Administration')
+@section('title', ' IT Support')
 
 @section('content')
     <div class="app-content content">
@@ -9,14 +9,14 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                  Administration
+                  IT Support
                 </h1>
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-                            <form id="admin_form" action="{{route('admin.human_resource.fnf.administration.submit')}}" method="post" novalidate="novalidate">
+                            <form id="admin_form" action="{{route('admin.human_resource.fnf.it_support.submit')}}" method="post" novalidate="novalidate">
 
                                 @csrf
                                 @method('post')
@@ -48,45 +48,20 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <h3 class="text-center mt-2 mb-2"><strong>Deductions</strong></h3>
-                                    <div class="row mb-1">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="name">
-                                                    Auction Sell:
-                                                </label>
-                                                <input type="text" id="auction_sell" name="auction_sell" class="form-control" placeholder="Amount">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="shipper_poc">
-                                                    T- Shirts:
-                                                </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="tshirts" id="tshirts">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-1">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="company_address">Co'Car Maintenance/Repair (if any):
-                                                </label>
-                                                <input type="text" class="form-control" placeholder="Amount" name="maintenance" id="maintenance">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <div>
-                                                    <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                   <div class="row justify-content-center">
+                                       <div class="col-md-6 text-center">
+                                           <div class="form-group">
+                                               <div>
+                                                   <textarea cols="50"  class="form-control" rows="5" id="comments" name="comments" placeholder="Comments"></textarea>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        <button type="submit" id="submit_admin_info" class="btn btn-primary">Submit</button>
+                                        <button type="submit" id="submit_support_info" class="btn btn-primary">Submit</button>
                                     </div>
                                 </div>
                             </form>
@@ -113,10 +88,10 @@
 
     <script>
         $(document).ready(function() {
-            $('#submit_admin_info').on('click',function(){
-                if($('#auction_sell').val() == '' || $('#auction_sell').val() == null  && $('#maintenance').val() == '' || $('#maintenance').val() == null && $('#tshirts').val() == '' || $('#tshirts').val() == null  &&  $('#comments').val() == '' || $('#comments').val() == null  ){
+            $('#submit_support_info').on('click',function(){
+                if($('#comments').val() == '' || $('#comments').val() == null  ){
 
-                    var error = "At-least fill one field";
+                    var error = "Comments Section Cannot be Empty";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     return false;

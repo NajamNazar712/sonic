@@ -3115,6 +3115,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('cs/submit', 'Admins\AdminFnfController@cs_submit')->name('cs.submit');
             Route::get('{id}/administration', 'Admins\AdminFnfController@administration_index')->name('administration.index');
             Route::post('administration/submit', 'Admins\AdminFnfController@administration_submit')->name('administration.submit');
+            Route::get('{id}/it_support', 'Admins\AdminFnfController@it_support_index')->name('it_support.index');
+            Route::post('it_support/submit', 'Admins\AdminFnfController@it_support_submit')->name('it_support.submit');
+            Route::get('{id}/finance', 'Admins\AdminFnfController@finance_index')->name('finance.index');
+            Route::post('finance/submit', 'Admins\AdminFnfController@finance_submit')->name('finance.submit');
+            Route::get('{id}/hr', 'Admins\AdminFnfController@hr_index')->name('hr.index');
+            Route::post('hr/submit', 'Admins\AdminFnfController@hr_submit')->name('hr.submit');
 
         });
     });
