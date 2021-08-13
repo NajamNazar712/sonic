@@ -725,18 +725,6 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="filled_and_signed_image">
-                                                            Pdf of filled and signed document:
-                                                        </label>
-                                                        <input class="form-control form-control-sm" type="file" name="filled_and_signed_pdf" id="filled_and_signed_pdf" data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="signed_acknowledgement_image">
-                                                            Pdf of signed Acknowledgement form:
-                                                        </label>
-                                                        <input class="form-control form-control-sm" type="file" name="signed_acknowledgement_pdf" id="signed_acknowledgement_pdf"  data-rule-accept="application/pdf" data-msg-accept="Only Pdf file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5,120‬ KB).">
-                                                    </div>
-                                                    <div class="form-group">
                                                         <label for="cnic_front_image">
                                                             Picture of CNIC (Front):
                                                         </label>
