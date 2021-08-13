@@ -142,7 +142,8 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         'intercept_type' => $intercept_type,
                         'admin_id' => Auth::id()
                     ]);
-
+                       $shipment->consignee_status_id = 54;
+                       $shipment->shipper_status_id = 54;
                    }
                    else{
                        InterceptReBookRequestHistory::create([
@@ -163,10 +164,10 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                            'new_amount' => $amount,
                            'shipper_id' => $user_id,
                        ]);
+                       $shipment->consignee_status_id = 55;
+                       $shipment->shipper_status_id = 55;
                    }
 
-                    $shipment->consignee_status_id = 54;
-                    $shipment->shipper_status_id = 54;
                     $shipment->intercepted = 1;
                     $shipment->save();
 
