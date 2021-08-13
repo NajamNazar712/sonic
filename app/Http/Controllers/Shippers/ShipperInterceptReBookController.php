@@ -90,6 +90,10 @@ class ShipperInterceptReBookController extends Controller
                         ]);
                         $shipment->consignee_status_id = 54;
                         $shipment->shipper_status_id = 54;
+                        $shipment->intercepted = 1;
+                        $shipment->save();
+
+                        ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
                     }
                     else{
                         InterceptReBookRequestHistory::create([
@@ -112,13 +116,14 @@ class ShipperInterceptReBookController extends Controller
                         ]);
                         $shipment->consignee_status_id = 55;
                         $shipment->shipper_status_id = 55;
+                        $shipment->intercepted = 1;
+                        $shipment->save();
+
+                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
                     }
 
 
-                    $shipment->intercepted = 1;
-                    $shipment->save();
 
-                    ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
                     return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }
