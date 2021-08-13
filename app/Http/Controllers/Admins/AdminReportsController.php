@@ -6779,13 +6779,17 @@ class AdminReportsController extends Controller
 
     public function daily_visit_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),193);
-        return view('admin.reports.daily_visit_report');
+        $admins = Admin::get(['id', 'name']);
+        return view('admin.reports.daily_visit_report')->with(['admins' => $admins]);
     }
     public function daily_visit_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),194);
         }
+        /*yeh mene date filter k liye add kia ha */
+        $date = Carbon::createFromDate('2021','02','19')->toDateString();
+
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
@@ -6823,6 +6827,22 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+        }
+        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+            $ufrom = $request->get('search_update_date_from');
+            $uto = $request->get('search_update_date_to');
+            $datatables->whereBetween('daily_visits.updated_at', [$ufrom,$uto]);
+        }
+
+        if ($team_member = $request->get('team_member')) {
+            $datatables->where('admins.id', $team_member);
+        }
+
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
