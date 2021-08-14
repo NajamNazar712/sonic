@@ -19,6 +19,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Name</th>
                         <th class="border-primary border-darken-1">Phone No.</th>
+                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">OTP</th>
                     </tr>
                     </thead>
@@ -121,6 +122,7 @@
                         head.push('S.No');
                         head.push('Name');
                         head.push('Phone No.');
+                        head.push('Hub');
                         head.push('OTP');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -128,6 +130,7 @@
                             row.push(index + 1);
                             row.push(values.name);
                             row.push(values.phone_no);
+                            row.push(values.hub);
                             row.push(values.otp);
 
                             body.push(row);
@@ -168,9 +171,10 @@
             order: [[1, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'name', name: 'name', class: 'align-middle name'},
-                {data: 'phone_no', name: 'phone', class: 'align-middle phone_no'},
-                {data: 'otp', name: 'delivery_note_otp', class: 'align-middle otp'},
+                {data: 'name', name: 'riders.name', class: 'align-middle name'},
+                {data: 'phone_no', name: 'riders.phone', class: 'align-middle phone_no'},
+                {data: 'hub', name: 'c.name', class: 'align-middle phone_no'},
+                {data: 'otp', name: 'riders.delivery_note_otp', class: 'align-middle otp'},
 
             ],
             rowCallback: function(row, data, index) {

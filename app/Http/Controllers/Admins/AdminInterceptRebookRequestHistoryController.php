@@ -160,30 +160,42 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         'intercept_type' => $intercept_type,
                         'admin_id' => Auth::id()
                     ]);
+                       $shipment->consignee_status_id = 54;
+                       $shipment->shipper_status_id = 54;
+                       $shipment->intercepted = 1;
+                       $shipment->save();
+
+                       ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
+
                    }
                    else{
-                       InterceptReBookRequest::create([
-                           'shipment_id' => $request->shipment_id,
-                           'consignee_city_id' => $request->consignee_city,
-                           'consignee_name' => $request->consignee_name,
-                           'consignee_address' => $request->consignee_address,
-                           'consignee_phone_number_1' => $request->consignee_phone_number_1,
-                           'consignee_phone_number_2' => $request->consignee_phone_number_2,
-                           'consignee_email' => $request->consignee_email,
-                           'amount' => $amount,
+                       InterceptReBookRequestHistory::create([
+                           'shipment_id' =>$request->shipment_id,
+                           'old_consignee_city_id' => $shipment->consignee_city_id,
+                           'new_consignee_city_id' => $request->consignee_city,
+                           'old_consignee_name' => $shipment->consignee_name,
+                           'new_consignee_name' => $request->consignee_name,
+                           'old_consignee_address' => $shipment->consignee_address,
+                           'new_consignee_address' => $request->consignee_address,
+                           'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                           'new_consignee_phone_number_1' => $request->consignee_phone_number_1,
+                           'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                           'new_consignee_phone_number_2' => $request->consignee_phone_number_2,
+                           'old_consignee_email' => $shipment->consignee_email,
+                           'new_consignee_email' => $request->consignee_email,
+                           'old_amount' => $shipment->amount,
+                           'new_amount' => $amount,
                            'shipper_id' => $user_id,
-                           'status' => 1,
-                           'intercept_type' => $intercept_type,
-                           'admin_id' => Auth::id()
                        ]);
+                       $shipment->consignee_status_id = 55;
+                       $shipment->shipper_status_id = 55;
+                       $shipment->intercepted = 1;
+                       $shipment->save();
+
+                       ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
+
                    }
 
-                    $shipment->consignee_status_id = 54;
-                    $shipment->shipper_status_id = 54;
-                    $shipment->intercepted = 1;
-                    $shipment->save();
-
-                    ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
 
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                 }

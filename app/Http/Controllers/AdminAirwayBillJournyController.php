@@ -29,7 +29,7 @@ class AdminAirwayBillJournyController extends Controller
 
     public function index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 250);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 418);
         return view('admin.airwaybill_journey.index');
     }
 
@@ -42,6 +42,7 @@ class AdminAirwayBillJournyController extends Controller
         $details = array();
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+            ShipmentScanningJourneyController::add($shipment->id, 417, 1, Auth::id(), null,null);
             $scanning_histories = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->get();
             if (count($scanning_histories) > 0) {
                 foreach ($scanning_histories as $index => $scanning_history) {
