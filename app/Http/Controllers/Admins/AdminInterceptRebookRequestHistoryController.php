@@ -186,6 +186,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                            'old_amount' => $shipment->amount,
                            'new_amount' => $amount,
                            'shipper_id' => $user_id,
+                           'intercept_type' => $intercept_type,
                        ]);
                        $shipment->consignee_status_id = 55;
                        $shipment->shipper_status_id = 55;
