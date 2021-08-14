@@ -5889,7 +5889,6 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $valid = TRUE;
 
                     $intercept = InterceptReBookRequest::where('shipment_id',$shipment_id)->first();
-
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
@@ -5909,7 +5908,8 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                         'new_consignee_email' => $intercept->consignee_email,
                         'old_amount' => $shipment->amount,
                         'new_amount' => $intercept->amount,
-                        'shipper_id' => $intercept->shipper_id
+                        'shipper_id' => $intercept->shipper_id,
+                        'intercept_type' => $intercept->intercept_type
                     ]);
 
                     $shipment->consignee_city_id = $intercept['consignee_city_id'];
