@@ -6787,9 +6787,6 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),194);
         }
-        /*yeh mene date filter k liye add kia ha */
-        $date = Carbon::createFromDate('2021','02','19')->toDateString();
-
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
@@ -6828,19 +6825,8 @@ class AdminReportsController extends Controller
                 }
             });
 
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
-        }
-        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
-            $ufrom = $request->get('search_update_date_from');
-            $uto = $request->get('search_update_date_to');
-            $datatables->whereBetween('daily_visits.updated_at', [$ufrom,$uto]);
-        }
-
         if ($team_member = $request->get('team_member')) {
-            $datatables->where('admins.id', $team_member);
+            $datatables->where('a.id', $team_member);
         }
 
         return $datatables->make(true);
@@ -6886,7 +6872,6 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(s.id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(s.id)/count(sj.id) as delivery_ratio'), 'c.name as station')
             ->groupBy('riders.id');
-
 
         $datatables = Datatables::of($delivered_shipments);
 
@@ -6974,11 +6959,6 @@ class AdminReportsController extends Controller
         }
         if($destination = $request->get('search_destination')){
             $datatables = $datatables->where('c.id', '=', $destination);
-        }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
 
         return $datatables->make(true);

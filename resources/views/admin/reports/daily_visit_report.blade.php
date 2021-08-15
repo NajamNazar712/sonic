@@ -13,7 +13,7 @@
                 @include('admin.inc.messages')
                 <form id="search_form" class="form-inline mb-2 justify-content-center" novalidate="novalidate">
                     <div class="row justify-content-md-center">
-                        <div class="col-3 mb-1">
+                        <div class="col-9">
                             <fieldset class="form-group">
                                 <select name="team_member" id="team_member" class="form-control select2">
                                     @foreach($admins as $admin)
@@ -21,33 +21,6 @@
                                     @endforeach
                                 </select>
                             </fieldset>
-                        </div>
-                        <!--    Date filter                        -->
-                        <div class="col-3 mb-1">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                    <span class="la la-calendar-o"></span>
-                                </span>
-                                </div>
-                                <input type="text" name="from_date"
-                                       class="form-control bg-primary border-primary white rounded-right" id="from_date"
-                                       placeholder="Date From" data-rule-required="true"
-                                       data-msg-required="Date(From) is required">
-                            </div>
-                        </div>
-                        <div class="col-3 mb-1">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                    <span class="la la-calendar-o"></span>
-                                </span>
-                                </div>
-                                <input type="text" name="to_date"
-                                       class="form-control bg-primary border-primary white rounded-right" id="to_date"
-                                       placeholder="Date To" data-rule-required="true"
-                                       data-msg-required="Date(To) is required">
-                            </div>
                         </div>
                         <!--   end  -->
 
@@ -87,7 +60,6 @@
             </div>
         </div>
     </div>
-
 
 @endsection
 
@@ -162,51 +134,13 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-
             /*   --- dropdown  ----    */
             $('#team_member').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Team Member',
                 width:'100%',
                 allowClear:true
             });
-
-            var from_date = $('#from_date').pickadate({
-                firstDay: 1,
-                clear: 'Clear',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#from_date_root').css('top','40px');
-                },
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            var to_date = $('#to_date').pickadate({
-                firstDay: 1,
-                clear: 'Clear',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '40px');
-                },
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
             /*    end   */
-
-
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -276,8 +210,6 @@
                     url: '{{ route('admin.reports.daily_visit.list') }}',
                     data:function (d){
                         d.team_member = $('#team_member').val();
-                        d.search_date_from = $('input[name="from_date_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 order: [[2, 'desc']],
@@ -304,7 +236,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
 
             $('#search_filter_btn').on('click',function () {
                 table.draw(true);
