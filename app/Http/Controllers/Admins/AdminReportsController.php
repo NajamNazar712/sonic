@@ -6790,8 +6790,8 @@ class AdminReportsController extends Controller
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr){
@@ -6825,8 +6825,20 @@ class AdminReportsController extends Controller
                 }
             });
 
+            //AdminUser Filter
         if ($team_member = $request->get('team_member')) {
             $datatables->where('a.id', $team_member);
+        }
+                //VisitDate filter
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+        }
+        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+            $ufrom = $request->get('search_update_date_from');
+            $uto = $request->get('search_update_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$ufrom,$uto]);
         }
 
         return $datatables->make(true);
