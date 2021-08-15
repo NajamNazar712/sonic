@@ -25,7 +25,6 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\Consolidation;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CorporateDeliveryTypeStatus;
-use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\DonePayment;
 use App\Http\Models\EmployeeDeviceToken;
@@ -57,7 +56,6 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
 use SnappyPDF;
 use Validator;
@@ -3629,21 +3627,24 @@ class APIController extends Controller
         if ($substitute_user) {
             $launched_by = 2;
         }
-        if ($nature_id == 1 || $nature_id == 2) {
-            //complaints
 
-            $rules = [
-                'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                    $query->where('user_id', $user_id);
-                })],
-            ];
-            $validate = Validator::make($request->all(), $rules, $this->messages);
+        $rules = [
+            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+            'case_nature_id' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
-            $validate->setAttributeNames($this->names);
+        $validate->setAttributeNames($this->names);
 
-            if ($validate->fails()) {
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-            } else {
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            if ($nature_id == 1 || $nature_id == 2) {
+                //complaints
+
                 $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
                 if (in_array($complaint_id, $crm_request_type)) {
                     $shipment = Shipment::where('tracking_number', $request->tracking_number);
@@ -3655,26 +3656,13 @@ class APIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
                     }
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'Complaint type not found!']);
+                    return response()->json(['status' => 1, 'message' => 'complaint_id not found!']);
                 }
-            }
 
-        } elseif ($nature_id == 4) {
-            $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
-            if (in_array($complaint_id, $crm_request_type)) {
-                if ($complaint_id == 26) {
-                    $rules = [
-                        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        })],
-                    ];
-                    $validate = Validator::make($request->all(), $rules, $this->messages);
-
-                    $validate->setAttributeNames($this->names);
-
-                    if ($validate->fails()) {
-                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                    } else {
+            } elseif ($nature_id == 4) {
+                $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
+                if (in_array($complaint_id, $crm_request_type)) {
+                    if ($complaint_id == 26) {
                         $shipment = Shipment::where('tracking_number', $request->tracking_number);
                         if ($shipment->exists()) {
                             $shipment = $shipment->first();
@@ -3684,99 +3672,92 @@ class APIController extends Controller
                         } else {
                             return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
                         }
-                    }
-                } elseif ($complaint_id == 21) {
-                    $rules = [
-                        'product_picture' => ['required', 'image'],
-                        'invoice_picture' => ['required', 'image'],
-                        'damage_product_picture' => ['required', 'image'],
-                        'product_packaging_picture' => ['required', 'image'],
-                        'actual_product_picture' => ['required', 'image'],
-                        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        })],
-                    ];
-                    $validate = Validator::make($request->all(), $rules, $this->messages);
 
-                    $validate->setAttributeNames($this->names);
+                    } elseif ($complaint_id == 21) {
+                        $rules = [
+                            'product_picture' => ['required', 'image'],
+                            'invoice_picture' => ['required', 'image'],
+                            'damage_product_picture' => ['required', 'image'],
+                            'product_packaging_picture' => ['required', 'image'],
+                            'actual_product_picture' => ['required', 'image'],
+                        ];
+                        $validate = Validator::make($request->all(), $rules, $this->messages);
 
-                    if ($validate->fails()) {
-                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                    } else {
-                        $shipment = Shipment::where('tracking_number', $request->tracking_number);
-                        if ($shipment->exists()) {
-                            $shipment = $shipment->first();
+                        $validate->setAttributeNames($this->names);
 
-                            $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
-                            return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
+                        if ($validate->fails()) {
+                            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                         } else {
-                            return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+                            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+                            if ($shipment->exists()) {
+                                $shipment = $shipment->first();
+
+                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+                            }
+                        }
+
+                    } elseif ($complaint_id == 22) {
+
+                        $rules = [
+                            'product_picture' => ['required', 'image'],
+                            'invoice_picture' => ['required', 'image'],
+                            'missing_product_picture' => ['required', 'image'],
+                            'product_packaging_picture' => ['required', 'image'],
+                            'actual_product_picture' => ['required', 'image'],
+                        ];
+                        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                        $validate->setAttributeNames($this->names);
+
+                        if ($validate->fails()) {
+                            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                        } else {
+                            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+                            if ($shipment->exists()) {
+                                $shipment = $shipment->first();
+
+                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+                            }
+                        }
+
+                    } elseif ($complaint_id == 29 || $complaint_id == 25 || $complaint_id == 24 || $complaint_id == 23) {
+                        $rules = [
+                            'product_picture' => ['required', 'image'],
+                            'invoice_picture' => ['required', 'image'],
+                            'product_cost' => ['required', 'image'],
+                        ];
+                        // $request->product_cost;
+                        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                        $validate->setAttributeNames($this->names);
+
+                        if ($validate->fails()) {
+                            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                        } else {
+                            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+                            if ($shipment->exists()) {
+                                $shipment = $shipment->first();
+
+                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+                            }
                         }
                     }
-
-                } elseif ($complaint_id == 22) {
-
-                    $rules = [
-                        'product_picture' => ['required', 'image'],
-                        'invoice_picture' => ['required', 'image'],
-                        'missing_product_picture' => ['required', 'image'],
-                        'product_packaging_picture' => ['required', 'image'],
-                        'actual_product_picture' => ['required', 'image'],
-                        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        })],
-                    ];
-                    $validate = Validator::make($request->all(), $rules, $this->messages);
-
-                    $validate->setAttributeNames($this->names);
-
-                    if ($validate->fails()) {
-                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                    } else {
-                        $shipment = Shipment::where('tracking_number', $request->tracking_number);
-                        if ($shipment->exists()) {
-                            $shipment = $shipment->first();
-
-                            $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
-                            return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
-                        }
-                    }
-
-                } elseif ($complaint_id == 29 || $complaint_id == 25 || $complaint_id == 24 || $complaint_id == 23) {
-                    $rules = [
-                        'product_picture' => ['required', 'image'],
-                        'invoice_picture' => ['required', 'image'],
-                        'product_cost' => ['required', 'image'],
-                        'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                            $query->where('user_id', $user_id);
-                        })],
-                    ];
-                    // $request->product_cost;
-                    $validate = Validator::make($request->all(), $rules, $this->messages);
-
-                    $validate->setAttributeNames($this->names);
-
-                    if ($validate->fails()) {
-                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                    } else {
-                        $shipment = Shipment::where('tracking_number', $request->tracking_number);
-                        if ($shipment->exists()) {
-                            $shipment = $shipment->first();
-
-                            $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
-                            return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
-                        }
-                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'complaint_id not found!']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'Complaint type not found!']);
+                return response()->json(['status' => 1, 'message' => 'case_nature_id not found!']);
+
             }
-        } else {
-            return response()->json(['status' => 1, 'message' => 'Complaint ID not found!']);
 
         }
 
@@ -3798,232 +3779,230 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-          $shipment = Shipment::where('tracking_number', $request->tracking_number);
-          if ($shipment->exists()) {
-              $shipment = $shipment->first();
-              if ($request->type == 1) {
-                  if ($request->filled('remark')) {
-                    $remark = $request->remark;
-                  }else{
-                    $remark = null;
-                  }
-                  if(!in_array($shipment->shipper_status_id, [20, 52])){
-                      if (!$shipment->packaging_material_request) {
-                        Shipment::where('id',$shipment->id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
-                        ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, NULL);
-    //                NotificationsController::send(15, 0, $request->shipment_id);
-    //                NotificationsController::send(16, 0, $request->shipment_id);
-    
-                        ShipmentChargesController::return($shipment->id);
-                        AdminFinanceController::add_payment($shipment->id, 1);
-                      }else {
-                        Shipment::where('id',$shipment->id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                        $shipment_history = ShipmentsJourney::where('shipment_id',$shipment->id)->latest()->first();
-                        ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, $remark, $user_id,NULL);
-      //                NotificationsController::send(15, 0, $request->shipment_id);
-      //                NotificationsController::send(16, 0, $request->shipment_id);
-                      }
-                      $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
-                      if($return_assign_shipment->exists()){
-                          $return_assign_shipment = $return_assign_shipment->latest()->first();
-                          $return_assign_shipment->status = 0;
-                          $return_assign_shipment->save();
-                      }
-                      return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
-                  }
-                  return response()->json(['status' => 1, 'message' => 'Shipment is already updated']);
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if ($request->type == 1) {
+                    if ($request->filled('remark')) {
+                        $remark = $request->remark;
+                    } else {
+                        $remark = null;
+                    }
+                    if (!in_array($shipment->shipper_status_id, [20, 52])) {
+                        if (!$shipment->packaging_material_request) {
+                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                            $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                            ShipmentsJourneyController::add($shipment->id, 20, 20, $shipment_history->status_reason_id, $remark, $user_id, null);
+                            //                NotificationsController::send(15, 0, $request->shipment_id);
+                            //                NotificationsController::send(16, 0, $request->shipment_id);
 
-              }elseif($request->type == 2){
-                
-                  if ($request->filled('remark')) {
-                    $remark = $request->remark;
-                  }else{
-                    $remark = null;
-                  }
-                  if($shipment->shipper_status_id != 52){
-                      if($shipment->shipper_status_id == 12){
-                          $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                          Shipment::where('id',$shipment->id)->update(['shipper_status_id' => 52,'consignee_status_id' => 52]);
-                          
-                          $last_reason = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
-                          if($last_reason->exists()){
-                              $last_reason = $last_reason->first();
-                              $last_reason_id = $last_reason->status_reason_id;
-                          }
-                          else{
-                              $last_reason_id = NULL;
-                          }
-                          ShipmentsJourneyController::add($shipment->id, 52, 52, $last_reason_id, $remark, $user_id, NULL, Null);
-                          
-                          $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
-                        if($return_assign_shipment){
+                            ShipmentChargesController::return ($shipment->id);
+                            AdminFinanceController::add_payment($shipment->id, 1);
+                        } else {
+                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+                            $shipment_history = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                            ShipmentsJourneyController::add($shipment->id, 17, 17, $shipment_history->status_reason_id, $remark, $user_id, null);
+                            //                NotificationsController::send(15, 0, $request->shipment_id);
+                            //                NotificationsController::send(16, 0, $request->shipment_id);
+                        }
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
+                        if ($return_assign_shipment->exists()) {
+                            $return_assign_shipment = $return_assign_shipment->latest()->first();
                             $return_assign_shipment->status = 0;
                             $return_assign_shipment->save();
                         }
-                          if($journey){
-                              NotificationsController::send(33, $shipment->id);
-                          }
-                        return response()->json(['status' => 0, 'message' => 'Shipment successfully updated as ( Re-Attempt )']);
-                      
-                      }
-                  }
-                    return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
-                
-              }elseif ($request->type == 3) {
-                  $rules = [
-                      'consignee_type' => ['required', 'integer', 'between:1,2'],
-                  ];
-                  $validate = Validator::make($request->all(), $rules, $this->messages);
-          
-                  $validate->setAttributeNames($this->names);
-          
-                  if ($validate->fails()) {
-                      return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                  } else {  
-                      if ($request->consignee_type = 1) {
+                        return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
+                    }
+                    return response()->json(['status' => 1, 'message' => 'Shipment is already updated']);
 
-                        $rules = [
-                          'consignee_address' => ['required', 'between:1,255'],
-                          'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-                          'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
-                        ];
-    
-                        $validate = Validator::make($request->all(), $rules, $this->messages);
-    
-                        $validate->setAttributeNames($this->names);
-    
-                        if ($validate->fails()) {
-                            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                        } else {
-                          
-                          // if ($request->filled('consignee_phone_number_1')) {
-                          //   $phone_number = $this->phone_number($request->consignee_phone_number_2);
-                          // } else {
-                          //     $phone_number = $shipment->consignee_phone_number_1;
-                          // }
-                          // if ($request->filled('consignee_phone_number_2')) {
-                          //     $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
-                          // } else {
-                          //     $phone_number2 = $shipment->consignee_phone_number_2;
-                          // }
+                } elseif ($request->type == 2) {
 
-                          $phone_number = $this->phone_number($request->consignee_phone_number_1);
+                    if ($request->filled('remark')) {
+                        $remark = $request->remark;
+                    } else {
+                        $remark = null;
+                    }
+                    if ($shipment->shipper_status_id != 52) {
+                        if ($shipment->shipper_status_id == 12) {
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                            Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
 
-                          if ($request->filled('consignee_phone_number_2')) {
-                              $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
-                          } else {
-                            $phone_number2 = $shipment->consignee_phone_number_2;
-                          }
-                          
-                          if ($shipment->shipper_status_id == 12) {
-                            if ($shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2) {
-                              if ($shipment->intercepted == 1) {
-                                return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
-                              }else{
-                                  InterceptReBookRequest::create([
-                                    'shipment_id' => $shipment->id,
-                                    'consignee_city_id' => $shipment->consignee_city_id,
-                                    'consignee_name' => $shipment->consignee_name,
-                                    'consignee_address' => $shipment->consignee_address,
-                                    'consignee_phone_number_1' => $phone_number,
-                                    'consignee_phone_number_2' => $phone_number2,
-                                    'consignee_email' => $shipment->consignee_email,
-                                    'amount' => $shipment->amount,
-                                    'shipper_id' => $user_id,
-                                    'status' => 0,
-                                  ]);
-  
-                                  $shipment->consignee_status_id = 54;
-                                  $shipment->shipper_status_id = 54;
-                                  $shipment->intercepted = 1;
-                                  $shipment->save();
-  
-                                  ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
-                                  return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);  
-  
-                              }
-                            }else {
-                              return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
+                            $last_reason = ShipmentsJourney::where('shipment_id', $shipment->id)->orderBy('id', 'DESC');
+                            if ($last_reason->exists()) {
+                                $last_reason = $last_reason->first();
+                                $last_reason_id = $last_reason->status_reason_id;
+                            } else {
+                                $last_reason_id = null;
                             }
-                          
-                          } else {
-                            return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
-                          }
-                        }  
+                            ShipmentsJourneyController::add($shipment->id, 52, 52, $last_reason_id, $remark, $user_id, null, null);
 
-                      }else {
-                        //different consignee
-                        $rules = [
-                          'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
-                          'consignee_name' => ['required', 'between:1,100'],
-                          'consignee_address' => ['required', 'between:1,255'],
-                          'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
-                          'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
-                          'consignee_email_address' => ['nullable', 'filled', 'email'],
-                          'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
-    
-                        ];
-    
-                        $validate = Validator::make($request->all(), $rules, $this->messages);
-    
-                        $validate->setAttributeNames($this->names);
-    
-                        if ($validate->fails()) {
-                            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-                        } else {
-
-
-                          $phone_number = $this->phone_number($request->consignee_phone_number_1);
-
-                          if ($request->filled('consignee_phone_number_2')) {
-                              $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
-                          } else {
-                            $phone_number2 = $shipment->consignee_phone_number_2;
-                          }
-
-                          if ($shipment->shipper_status_id == 12 ) {
-                            if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
-                              if ($shipment->intercepted == 1) {
-                                return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
-                              } else {
-                                  $s_amount = str_replace(",", "", "$request->amount");
-                                  $amount = (int) $s_amount;
-                                  InterceptReBookRequest::create([
-                                      'shipment_id' => $shipment->id,
-                                      'consignee_city_id' => $request->consignee_city,
-                                      'consignee_name' => $request->consignee_name,
-                                      'consignee_address' => $request->consignee_address,
-                                      'consignee_phone_number_1' => $phone_number,
-                                      'consignee_phone_number_2' => $phone_number2,
-                                      'consignee_email' => $request->consignee_email,
-                                      'amount' => $amount,
-                                      'shipper_id' => $user_id,
-                                      'status' => 0,
-                                  ]);
-
-                                  $shipment->consignee_status_id = 54;
-                                  $shipment->shipper_status_id = 54;
-                                  $shipment->intercepted = 1;
-                                  $shipment->save();
-
-                                  ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
-                                  return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
-                              }
-                            }else {
-                              return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment->tracking_number]);
+                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
+                            if ($return_assign_shipment) {
+                                $return_assign_shipment->status = 0;
+                                $return_assign_shipment->save();
                             }
-                          } else {
-                            return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
-                          }
+                            if ($journey) {
+                                NotificationsController::send(33, $shipment->id);
+                            }
+                            return response()->json(['status' => 0, 'message' => 'Shipment successfully updated as ( Re-Attempt )']);
 
                         }
-                      } 
-                  }
-          }
-        }else{
-          return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+                    }
+                    return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
+
+                } elseif ($request->type == 3) {
+                    $rules = [
+                        'consignee_type' => ['required', 'integer', 'between:1,2'],
+                    ];
+                    $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                    $validate->setAttributeNames($this->names);
+
+                    if ($validate->fails()) {
+                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                    } else {
+                        if ($request->consignee_type = 1) {
+
+                            $rules = [
+                                'consignee_address' => ['required', 'between:1,255'],
+                                'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                                'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+                            ];
+
+                            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                            $validate->setAttributeNames($this->names);
+
+                            if ($validate->fails()) {
+                                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                            } else {
+
+                                // if ($request->filled('consignee_phone_number_1')) {
+                                //   $phone_number = $this->phone_number($request->consignee_phone_number_2);
+                                // } else {
+                                //     $phone_number = $shipment->consignee_phone_number_1;
+                                // }
+                                // if ($request->filled('consignee_phone_number_2')) {
+                                //     $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
+                                // } else {
+                                //     $phone_number2 = $shipment->consignee_phone_number_2;
+                                // }
+
+                                $phone_number = $this->phone_number($request->consignee_phone_number_1);
+
+                                if ($request->filled('consignee_phone_number_2')) {
+                                    $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
+                                } else {
+                                    $phone_number2 = $shipment->consignee_phone_number_2;
+                                }
+
+                                if ($shipment->shipper_status_id == 12) {
+                                    if ($shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2) {
+                                        if ($shipment->intercepted == 1) {
+                                            return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
+                                        } else {
+                                            InterceptReBookRequest::create([
+                                                'shipment_id' => $shipment->id,
+                                                'consignee_city_id' => $shipment->consignee_city_id,
+                                                'consignee_name' => $shipment->consignee_name,
+                                                'consignee_address' => $shipment->consignee_address,
+                                                'consignee_phone_number_1' => $phone_number,
+                                                'consignee_phone_number_2' => $phone_number2,
+                                                'consignee_email' => $shipment->consignee_email,
+                                                'amount' => $shipment->amount,
+                                                'shipper_id' => $user_id,
+                                                'status' => 0,
+                                            ]);
+
+                                            $shipment->consignee_status_id = 54;
+                                            $shipment->shipper_status_id = 54;
+                                            $shipment->intercepted = 1;
+                                            $shipment->save();
+
+                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
+
+                                        }
+                                    } else {
+                                        return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
+                                    }
+
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
+                                }
+                            }
+
+                        } else {
+                            //different consignee
+                            $rules = [
+                                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
+                                'consignee_name' => ['required', 'between:1,100'],
+                                'consignee_address' => ['required', 'between:1,255'],
+                                'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+                                'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+                                'consignee_email_address' => ['nullable', 'filled', 'email'],
+                                'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
+
+                            ];
+
+                            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                            $validate->setAttributeNames($this->names);
+
+                            if ($validate->fails()) {
+                                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                            } else {
+
+                                $phone_number = $this->phone_number($request->consignee_phone_number_1);
+
+                                if ($request->filled('consignee_phone_number_2')) {
+                                    $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
+                                } else {
+                                    $phone_number2 = $shipment->consignee_phone_number_2;
+                                }
+
+                                if ($shipment->shipper_status_id == 12) {
+                                    if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
+                                        if ($shipment->intercepted == 1) {
+                                            return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
+                                        } else {
+                                            $s_amount = str_replace(",", "", "$request->amount");
+                                            $amount = (int) $s_amount;
+                                            InterceptReBookRequest::create([
+                                                'shipment_id' => $shipment->id,
+                                                'consignee_city_id' => $request->consignee_city,
+                                                'consignee_name' => $request->consignee_name,
+                                                'consignee_address' => $request->consignee_address,
+                                                'consignee_phone_number_1' => $phone_number,
+                                                'consignee_phone_number_2' => $phone_number2,
+                                                'consignee_email' => $request->consignee_email,
+                                                'amount' => $amount,
+                                                'shipper_id' => $user_id,
+                                                'status' => 0,
+                                            ]);
+
+                                            $shipment->consignee_status_id = 54;
+                                            $shipment->shipper_status_id = 54;
+                                            $shipment->intercepted = 1;
+                                            $shipment->save();
+
+                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
+                                        }
+                                    } else {
+                                        return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment->tracking_number]);
+                                    }
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Shipment is already updated with Status : ' . $shipment->status_shipper->name . ' against Tracking Number: ' . $shipment->tracking_number]);
+                                }
+
+                            }
+                        }
+                    }
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+            }
         }
-        }
-      }
+    }
 }
