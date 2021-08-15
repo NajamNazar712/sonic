@@ -3645,20 +3645,31 @@ class APIController extends Controller
             if ($nature_id == 1 || $nature_id == 2) {
                 //complaints
 
-                $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
-                if (in_array($complaint_id, $crm_request_type)) {
-                    $shipment = Shipment::where('tracking_number', $request->tracking_number);
-                    if ($shipment->exists()) {
-                        $shipment = $shipment->first();
-                        $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
-                        return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
-                    } else {
-                        return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
-                    }
-                } else {
-                    return response()->json(['status' => 1, 'message' => 'complaint_id not found!']);
-                }
 
+                  $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
+                  if (in_array($complaint_id, $crm_request_type)) {
+                    $rules = [
+                      'description' => ['required'],
+                    ];
+                    $validate = Validator::make($request->all(), $rules, $this->messages);
+            
+                    $validate->setAttributeNames($this->names);
+            
+                    if ($validate->fails()) {
+                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                    } else {
+                      $shipment = Shipment::where('tracking_number', $request->tracking_number);
+                      if ($shipment->exists()) {
+                          $shipment = $shipment->first();
+                          $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                          return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
+                      } else {
+                          return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
+                      }
+                    }
+                  } else {
+                      return response()->json(['status' => 1, 'message' => 'complaint_id not found!']);
+                  }
             } elseif ($nature_id == 4) {
                 $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
                 if (in_array($complaint_id, $crm_request_type)) {
