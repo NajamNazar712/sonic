@@ -47,13 +47,18 @@ class AdminAirwayBillJournyController extends Controller
             $scanning_histories = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->orderBy('updated_at','DESC')->get();
             if (count($scanning_histories) > 0) {
                 foreach ($scanning_histories as $index => $scanning_history) {
-//                    dd($scanning_history->user_type);
                     if ($scanning_history->user_type == 3) {
                         $account_type = 'Admin';
                         $admin = Admin::find($scanning_history->user_id);
-                            $scanned_by = $admin->name;
-                        $roles = AdminRole::where('id',$admin->role_id)->get();
-                        $role = $roles->name;
+                        $scanned_by = $admin->name;
+                        $roles = AdminRole::find($admin->role_id);
+                        if($roles->name != null){
+                            $role = $roles->name;
+                        }
+                        else
+                        {
+                            $role = '-';
+                        }
                     } elseif ($scanning_history->user_type == 1) {
                         $account_type = 'Shipper';
                         $user = User::find($scanning_history->user_id);
