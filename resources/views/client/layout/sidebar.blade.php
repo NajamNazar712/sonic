@@ -121,6 +121,10 @@
                             @if (session('user_id') == 1091 || in_array(15, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
+                        @else
+                            @if (Auth::id() == 1091)
+                                <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
+                            @endif
                         @endif
 
                     </ul>
