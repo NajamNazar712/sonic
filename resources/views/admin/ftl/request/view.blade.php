@@ -174,7 +174,7 @@
                                                         </div>
                                                         <div class="col-6">
                                                             <label for="freight_charges" class="pull-left font-weight-bold">Freight Charges</label>
-                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{($ftl->freight_charges) ? $ftl->freight_charges : $ftl->calculated_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges" data-rule-min="{{$ftl->calculated_charges}}" data-msg-min="Freight Cost can not be less than {{$ftl->calculated_charges}}">
+                                                            <input type="text" name="freight_charges" id="freight_charges" value="{{($ftl->freight_charges) ? $ftl->freight_charges : $ftl->calculated_charges}}" data-rule-required="true" data-msg-required="Freight Charges is required" class="form-control" placeholder="Freight Charges" data-rule-min="{{$ftl->calculated_charges}}" data-msg-min="Freight Charges can not be less than {{$ftl->calculated_charges}}">
                                                         </div>
                                                     </div>
                                                     <div class="row mb-2">

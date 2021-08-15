@@ -16,4 +16,8 @@ class ShipmentsV2PickupJourney extends Model
     public function admin() {
     	return $this->belongsTo('App\Http\Models\Admin\Admin', 'admin_id', 'id');
     }
+
+    public function reason() {
+        return $this->belongsTo('App\Http\Models\V2Pickup\V2PickupRequestNotPickReason', 'reason_id', 'id');
+    }
 }
