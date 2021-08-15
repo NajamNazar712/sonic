@@ -293,7 +293,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[8, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

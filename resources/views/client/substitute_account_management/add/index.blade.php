@@ -61,10 +61,19 @@
 										<h4 class="form-section mb-2">Permissions</h4>
 
 										@foreach($permissions as $permission)
+											@if ($permission->id == 15)
+												@if (session('user_id')==1091)
+													<fieldset class="d-inline-block m-1">
+														<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
+														<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
+													</fieldset>
+												@endif
+											@else
 											<fieldset class="d-inline-block m-1">
 												<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}">
 												<label for="permission_{{ $permission->id }}">{{ $permission->name }}</label>
 											</fieldset>
+											@endif
 										@endforeach
 									</div>
 
