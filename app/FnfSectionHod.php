@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FnfSectionReportingManager extends Model
+class FnfSectionHod extends Model
 {
     public function fnf(){
         return $this->belongsTo('App\Http\Models\FnfSectionEmployee');

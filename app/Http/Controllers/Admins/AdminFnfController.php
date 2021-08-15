@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\FnfSectionAdministration;
 use App\FnfSectionCustomerExperience;
 use App\FnfSectionFinance;
+use App\FnfSectionHod;
 use App\FnfSectionHr;
 use App\FnfSectionItSupport;
 use App\FnfSectionReportingManager;
@@ -416,6 +417,31 @@ class AdminFnfController extends Controller
     }
 
     public function hod_approval_index($id){
-      //
+      $fnf = FnfSectionEmployee::find($id);
+      $employee = Employee::where('id',$fnf->employee_id)->first();
+      if($fnf->hod_approval){
+          $approval = $fnf->hod_approval;
+      }
+      else{
+          $approval = Null;
+      }
+      return view('admin.human_resource.fnf.hod_view',compact('fnf','employee','approval'));
     }
+
+    public function hod_approval_submit(Request $request){
+
+      $hod = FnfSectionHod::where('fnf_id',$request->fnf_id)->first();
+      $hod->comments = $request->hod_comments;
+      $hod->approved_by = Auth::id();
+      if($request->approval == 'approved'){
+          $hod->status_id = 2;
+      }
+      else{
+          $hod->status_id = 3;
+      }
+      $hod->save();
+      return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
+    }
+
+
 }

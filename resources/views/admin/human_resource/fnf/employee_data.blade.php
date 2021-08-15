@@ -1,3 +1,4 @@
+<h3 class="text-center"><strong>Employee Details</strong></h3>
 <div class="row mb-2">
     <div class="col-md-6">
         <div class="form-group">

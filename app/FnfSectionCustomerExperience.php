@@ -6,5 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FnfSectionCustomerExperience extends Model
 {
-    //
+    public function fnf(){
+        return $this->belongsTo('App\Http\Models\FnfSectionEmployee');
+    }
 }
