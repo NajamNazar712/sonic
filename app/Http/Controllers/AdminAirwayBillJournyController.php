@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminRole;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
@@ -43,7 +44,7 @@ class AdminAirwayBillJournyController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
             ShipmentScanningJourneyController::add($shipment->id, 417, 1, Auth::id(), null,null);
-            $scanning_histories = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->get();
+            $scanning_histories = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->orderBy('updated_at','DESC')->get();
             if (count($scanning_histories) > 0) {
                 foreach ($scanning_histories as $index => $scanning_history) {
 //                    dd($scanning_history->user_type);
@@ -51,20 +52,22 @@ class AdminAirwayBillJournyController extends Controller
                         $account_type = 'Admin';
                         $admin = Admin::find($scanning_history->user_id);
                             $scanned_by = $admin->name;
+                        $role = AdminRole::where('id',$admin->role_id)->get();
                     } elseif ($scanning_history->user_type == 1) {
                         $account_type = 'Shipper';
                         $user = User::find($scanning_history->user_id);
                         $scanned_by = $user->name;
-
+                        $roll = 'Shipper';
                     } elseif ($scanning_history->user_type == 2) {
                         $account_type = 'Substitute Shipper';
                         $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
                         $scanned_by = $sub_user->name;
-
+                        $role = 'Substitute Shipper';
                     } elseif ($scanning_history->user_type == 4) {
                         $account_type = 'Retail User';
                         $retail_admin = RetailUser::find($scanning_history->admin_id);
                         $scanned_by = $retail_admin->name;
+                        $role = 'Retail User';
                     } else {
                         $account_type = '-';
                         $scanned_by = '-';
@@ -74,6 +77,7 @@ class AdminAirwayBillJournyController extends Controller
                     $details[$index]['account_type'] = $account_type;
                     $details[$index]['updated_at'] = Carbon::parse($scanning_history->updated_at)->format('Y-m-d H:i:s');
                     $details[$index]['ip_address'] = $scanning_history->ip_address;
+                    $details[$index]['role_name'] = $role->name;
 
                     }
                 $data['tracking_number'] = $shipment->tracking_number;
