@@ -1278,6 +1278,10 @@ class AdminCargoManifestController extends Controller
                 {
                     $allowed = TRUE;
                 }
+                else if($bag->junction_mapping_id != null)
+                {
+                    $allowed = TRUE;
+                }
 
                 if ($allowed) {
                         $bag->actual_weight = $request->bag_weight;
@@ -1331,7 +1335,18 @@ class AdminCargoManifestController extends Controller
 //                $details[$bag->destination_hub_id]["destination_id"] = $bag->destination_hub_id;
                 $details[$bag->destination_hub_id]["destination"] = $bag->destination_hub->name;
 
-                $mapping = V2JunctionMapping::where([['origin_id',$origin_id],['destination_id',$bag->destination_hub_id],['status',1]])->first();
+                $mapping = V2JunctionMapping::where([['origin_id',$origin_id],['destination_id',$bag->destination_hub_id],['status',1]]);
+                if($mapping->exists())
+                {
+                    $mapping = $mapping->first();
+                }
+                else if($bag->junction_mapping_id != null)
+                {
+                    $mapping = V2JunctionMapping::find($bag->junction_mapping_id);
+                }
+                else{
+                    return ['status' => 1, 'error' => 'One or More Bag does not have any mapping..'];
+                }
                 $details[$bag->destination_hub_id]["junctions"] = array();
                 foreach ($mapping->junctions as $junction)
                 {
@@ -1406,8 +1421,6 @@ class AdminCargoManifestController extends Controller
 
             if(!empty($bag_ids))
             {
-                $mapping = V2JunctionMapping::where([['origin_id',Auth::user()->default_hub_id],['destination_id',$hub_id],['status',1]])->first();
-
                 $master_cargo = new CargoManifest();
 
                 $master_cargo->origin_hub_id = Auth::user()->default_hub_id;
@@ -1436,7 +1449,6 @@ class AdminCargoManifestController extends Controller
                 $master_cargo->vendor_name = $request->vendor_name;
 
                 $master_cargo->status_id = 1;
-                $master_cargo->junction_mapping_id = $mapping->id;
                 $master_cargo->save();
 
                 $master_cargo_id = $master_cargo->id;
@@ -1473,7 +1485,14 @@ class AdminCargoManifestController extends Controller
                     }
 
                     if($bag->junction_mapping_id == null) {
+                        $mapping = V2JunctionMapping::where([['origin_id',Auth::user()->default_hub_id],['destination_id',$hub_id],['status',1]])->first();
                         $bag->junction_mapping_id = $mapping->id;
+                        $master_cargo->junction_mapping_id = $mapping->id;
+                        $master_cargo->update();
+                    }
+                    else{
+                        $master_cargo->junction_mapping_id = $bag->junction_mapping_id;
+                        $master_cargo->update();
                     }
                     $bag->update();
 
