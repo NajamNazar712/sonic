@@ -18,7 +18,7 @@ class CreateFnfSectionHodsTable extends Migration
             $table->integer('fnf_id')->index();
             $table->integer('approved_by')->index();
             $table->integer('status_id')->index();
-            $table->string('comments');
+            $table->string('comments')->nullable();
             $table->timestamps();
         });
     }

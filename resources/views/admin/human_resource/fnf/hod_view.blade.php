@@ -263,7 +263,6 @@
                                         </div>
                                     @endif
 
-
                                     @if($fnf->finance)
                                         <hr>
                                         <h3 class="text-center mt-2 mb-2"><strong>Finance</strong></h3>
@@ -341,6 +340,7 @@
                                             </div>
                                         </div>
                                     @endif
+
                                     <hr>
                                     <h3 class="text-center mt-2 mb-2"><strong>HOD </strong></h3>
                                     <div class="row justify-content-center">
@@ -356,11 +356,13 @@
                                 </fieldset>
                                 <div class="row justify-content-center">
                                     <div class="col-md-6 text-center">
-                                        @if($fnf->manager->status_id == 2 && $fnf->customer_experience->status_id == 2 &&  $fnf->administration->status_id == 2 &&  $fnf->it_support->status_id == 2  && $fnf->finance->status_id == 2 && ($approval == Null || $approval->status_id == 3))
-                                         <button type="button" id="approve" class="btn btn-success">Approve</button>
-                                        @endif
-                                        @if(($approval == Null) || ($approval != Null && $approval->status_id !=2 && $approval->status_id !=3) )
-                                            <button type="button" id="reject" class="btn btn-danger">Reject</button>
+                                        @if($fnf->manager && $fnf->customer_experience &&  $fnf->administration &&  $fnf->it_support  && $fnf->finance )
+                                            @if($fnf->manager->status_id == 2 && $fnf->customer_experience->status_id == 2 &&  $fnf->administration->status_id == 2 &&  $fnf->it_support->status_id == 2  && $fnf->finance->status_id == 2 && ($approval == Null || $approval->status_id == 3))
+                                             <button type="button" id="approve" class="btn btn-success">Approve</button>
+                                            @endif
+                                            @if(($approval == Null) || ($approval != Null && $approval->status_id !=2 && $approval->status_id !=3) )
+                                                <button type="button" id="reject" class="btn btn-danger">Reject</button>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>
@@ -379,77 +381,87 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
 
     <style>
-        @if($fnf->manager->status_id == 1)
+        @if($fnf->manager)
+            @if($fnf->manager->status_id == 1)
+                   #rm_status{
+                     box-shadow: 0 0 5px steelblue;
+            }
+            @elseif($fnf->manager->status_id == 2)
                #rm_status{
-                 box-shadow: 0 0 5px steelblue;
-        }
-        @elseif($fnf->manager->status_id == 2)
-           #rm_status{
-                 box-shadow: 0 0 5px limegreen;
+                     box-shadow: 0 0 5px limegreen;
+                }
+            @elseif($fnf->manager->status_id == 3)
+               #rm_status{
+                box-shadow: 0 0 5px orangered;
             }
-        @elseif($fnf->manager->status_id == 3)
-           #rm_status{
-            box-shadow: 0 0 5px orangered;
-        }
+            @endif
         @endif
 
-        @if($fnf->customer_experience->status_id == 1)
+         @if($fnf->customer_experience)
+            @if($fnf->customer_experience->status_id == 1)
+                   #customer_status{
+                     box-shadow: 0 0 5px steelblue;
+            }
+            @elseif($fnf->customer_experience->status_id == 2)
                #customer_status{
-                 box-shadow: 0 0 5px steelblue;
-        }
-        @elseif($fnf->customer_experience->status_id == 2)
-           #customer_status{
-                 box-shadow: 0 0 5px limegreen;
+                     box-shadow: 0 0 5px limegreen;
+                }
+            @elseif($fnf->customer_experience->status_id == 3)
+               #customer_status{
+                box-shadow: 0 0 5px orangered;
             }
-        @elseif($fnf->customer_experience->status_id == 3)
-           #customer_status{
-            box-shadow: 0 0 5px orangered;
-        }
-        @endif
+            @endif
+         @endif
 
-        @if($fnf->administration->status_id == 1)
+
+         @if($fnf->administration)
+            @if($fnf->administration->status_id == 1)
+                   #admin_status{
+                box-shadow: 0 0 5px steelblue;
+            }
+            @elseif($fnf->administration->status_id == 2)
                #admin_status{
-            box-shadow: 0 0 5px steelblue;
-        }
-        @elseif($fnf->administration->status_id == 2)
-           #admin_status{
-            box-shadow: 0 0 5px limegreen;
-        }
-        @elseif($fnf->administration->status_id == 3)
-           #admin_status{
-            box-shadow: 0 0 5px orangered;
-        }
-        @endif
+                box-shadow: 0 0 5px limegreen;
+            }
+            @elseif($fnf->administration->status_id == 3)
+               #admin_status{
+                box-shadow: 0 0 5px orangered;
+            }
+            @endif
+         @endif
 
-         @if($fnf->it_support->status_id == 1)
+
+         @if($fnf->it_support)
+             @if($fnf->it_support->status_id == 1)
+                   #it_status{
+                box-shadow: 0 0 5px steelblue;
+            }
+            @elseif($fnf->it_support->status_id == 2)
                #it_status{
-            box-shadow: 0 0 5px steelblue;
-        }
-        @elseif($fnf->it_support->status_id == 2)
-           #it_status{
-            box-shadow: 0 0 5px limegreen;
-        }
-        @elseif($fnf->it_support->status_id == 3)
-           #it_status{
-            box-shadow: 0 0 5px orangered;
-        }
-        @endif
+                box-shadow: 0 0 5px limegreen;
+            }
+            @elseif($fnf->it_support->status_id == 3)
+               #it_status{
+                box-shadow: 0 0 5px orangered;
+            }
+            @endif
+         @endif
 
-        @if($fnf->finance->status_id == 1)
+         @if($fnf->finance)
+            @if($fnf->finance->status_id == 1)
+                   #finance_status{
+                box-shadow: 0 0 5px steelblue;
+            }
+            @elseif($fnf->finance->status_id == 2)
                #finance_status{
-            box-shadow: 0 0 5px steelblue;
-        }
-        @elseif($fnf->finance->status_id == 2)
-           #finance_status{
-            box-shadow: 0 0 5px limegreen;
-        }
-        @elseif($fnf->finance->status_id == 3)
-           #finance_status{
-            box-shadow: 0 0 5px orangered;
-        }
+                box-shadow: 0 0 5px limegreen;
+            }
+            @elseif($fnf->finance->status_id == 3)
+               #finance_status{
+                box-shadow: 0 0 5px orangered;
+            }
+            @endif
         @endif
-
-
          
     </style>
 @endsection

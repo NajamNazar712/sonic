@@ -20,6 +20,7 @@ class CreateFnfSectionHrsTable extends Migration
             $table->double('notice_period', 8, 2)->nullable();
             $table->double('penalty', 8, 2)->nullable();
             $table->string('van_deduction')->nullable();
+            $table->string('comments')->nullable();
             $table->integer('created_by')->nullable()->index();
             $table->integer('status_id')->index();
             $table->timestamps();

@@ -31,5 +31,15 @@ class FnfSectionEmployee extends Model
     public function hod_approval(){
         return $this->hasOne('App\FnfSectionHod','fnf_id','id');
     }
+    public function reporting_manager(){
+        return $this->belongsTo('App\Http\Models\Admin\Admin','line_manager','id');
+    }
+    public function department_head(){
+        return $this->belongsTo('App\Http\Models\Admin\Admin','hod','id');
+    }
+    public function requested_by(){
+        return $this->belongsTo('App\Http\Models\Admin\Admin','created_by','id');
+    }
+
 
 }

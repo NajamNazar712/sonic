@@ -44,7 +44,7 @@
             <input type="text" id="city" name="overtime" class="form-control" placeholder="City" value="{{$employee->city->name}}" disabled>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6 joining_date_div">
         <div class="form-group">
             <label for="name">
                 Date of Leaving:

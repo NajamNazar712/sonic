@@ -49,6 +49,61 @@ class AdminFnfController extends Controller
          ->editColumn('fnf_id',function ($fnf) {
             return 'FNF'.$fnf->fnf_id;
          })
+         ->addColumn("actions", function ($result) {
+             if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577], session('permissions'))) !== 0) {
+                 $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                 if (session('role_id') == 1 || in_array(570, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item rm_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reporting Manager View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(571, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item cs_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Customer Experience View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(572, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item admin_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Administration View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(573, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item it_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">IT Support View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(574, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item finance_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Finance View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(575, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item hod_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HOD View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(576, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item hr_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HR View</div></button>';
+
+                 }
+                 if (session('role_id') == 1 || in_array(577, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item update" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update FNF Request</div></button>';
+
+                 }
+
+
+
+
+                 $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                 return $dropdown;
+             }
+             else {
+                 return '';
+             }
+         });
      ;
      return $datatables->make(true);
     }
@@ -83,7 +138,7 @@ class AdminFnfController extends Controller
                 $hod = $hod->first();
             }
             else{
-                return redirect()->back()->with('error','No Line Manager Found for the given email');
+                return redirect()->back()->with('error','No HOD Found for the given email');
             }
 
             $employee = Employee::where('trax_id',$trax_id)->first();
@@ -175,6 +230,7 @@ class AdminFnfController extends Controller
             else{
                 $cs = $cs->first();
             }
+           // dd($cs);
             return view('admin.human_resource.fnf.cs_index',compact('employee','fnf','cs'));
         }
     }
@@ -297,14 +353,55 @@ class AdminFnfController extends Controller
     public function hr_index($id){
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
-            $employee = Employee::where('id',$fnf->employee_id)->first();
-            return view('admin.human_resource.fnf.hr',compact('employee','fnf'));
+            if($fnf->hod_approval){
+                $hod_approval = $fnf->hod_approval->status_id;
+            }
+            else{
+                $hod_approval = Null;
+            }
+            $hr = FnfSectionHr::where('fnf_id',$id);
+            if(!$hr->exists()){
+                $hr = Null;
+            }
+            else{
+                $hr = $hr->first();
+            }
+            $trax_ids = Employee::whereNotNull('trax_id')->select('trax_id')->get();
+            $designations = EmployeeDesignation::where('status',1)->get();
+            $departments = AdminDepartment::all();
+            return view('admin.human_resource.fnf.hr',compact('designations','fnf','hod_approval','departments','trax_ids','hr'));
         }
     }
 
     public function hr_submit(Request $request){
+
         $fnf_id = $request->fnf_id;
         if($fnf_id){
+            $line_manager = Admin::where('email',$request->line_manager);
+            $hod = Admin::where('email',$request->hod);
+            if($line_manager->exists()){
+                $line_manager = $line_manager->first();
+            }
+            else{
+                return redirect()->back()->with('error','No Line Manager Found for the given email');
+            }
+
+            if($hod->exists()){
+                $hod = $hod->first();
+            }
+            else{
+                return redirect()->back()->with('error','No Line Manager Found for the given email');
+            }
+
+            $fnf = FnfSectionEmployee::where('id',$fnf_id)->first();
+
+            $fnf->joining_date = $request->joining_date_formatted;
+            $fnf->resign_date = $request->resign_date_formatted;
+            $fnf->line_manager = $line_manager->id;
+            $fnf->hod = $hod->id;
+            $fnf->status_id = 1;
+            $fnf->updated_by = Auth::id();
+
             $hr = new FnfSectionHr();
             $hr->fnf_id = $fnf_id;
             $hr->medical = $request->medical;
@@ -443,5 +540,83 @@ class AdminFnfController extends Controller
       return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
 
+   public function hr_status_edit(Request $request){
 
+       $fnf_id = $request->fnf_id;
+       if($fnf_id) {
+           $line_manager = Admin::where('email', $request->line_manager);
+           $hod = Admin::where('email', $request->hod);
+           if ($line_manager->exists()) {
+               $line_manager = $line_manager->first();
+           } else {
+               return redirect()->back()->with('error', 'No Line Manager Found for the given email');
+           }
+
+           if ($hod->exists()) {
+               $hod = $hod->first();
+           } else {
+               return redirect()->back()->with('error', 'No Line Manager Found for the given email');
+           }
+
+           $hr = FnfSectionHr::where('fnf_id',$fnf_id)->first();
+           $hr->medical = $request->medical;
+           $hr->notice_period = $request->notice_period;
+           $hr->penalty = $request->penalty;
+           $hr->van_deduction = $request->deduction;
+           //$hr->comments = $request->comments;
+           $hr->save();
+
+           $fnf = FnfSectionEmployee::where('id', $fnf_id)->first();
+
+           $fnf->joining_date = $request->joining_date_formatted;
+           $fnf->resign_date = $request->resign_date_formatted;
+           $fnf->line_manager = $line_manager->id;
+           $fnf->hod = $hod->id;
+           $fnf->status_id = 4;
+           $fnf->updated_by = Auth::id();
+           $fnf->save();
+
+           return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Data Added Successfully']);
+       }
+   }
+
+   public function edit_fnf_request($id){
+        $fnf = FnfSectionEmployee::find($id);
+        $designations = EmployeeDesignation::all();
+        $departments  = AdminDepartment::all();
+        $trax_ids = Employee::select('trax_id')->get();
+        return view('admin.human_resource.fnf.edit',compact('fnf','designations','departments','trax_ids'));
+   }
+
+   public function update_fnf_request(Request $request){
+
+       $trax_id = $request->trax_id;
+       if($trax_id) {
+           $line_manager = Admin::where('email', $request->line_manager);
+           $hod = Admin::where('email', $request->hod);
+           if ($line_manager->exists()) {
+               $line_manager = $line_manager->first();
+           } else {
+               return redirect()->back()->with('error', 'No Line Manager Found for the given email');
+           }
+
+           if ($hod->exists()) {
+               $hod = $hod->first();
+           } else {
+               return redirect()->back()->with('error', 'No HOD Found for the given email');
+           }
+
+           $employee = Employee::where('trax_id', $trax_id)->first();
+
+           $fnf = FnfSectionEmployee::where('employee_id',$employee->id)->first();
+           $fnf->joining_date = $request->joining_date_formatted;
+           $fnf->resign_date = $request->resign_date_formatted;
+           $fnf->line_manager =$line_manager->id;
+           $fnf->hod = $hod->id;
+           $fnf->updated_by = Auth::id();
+           $fnf->save();
+
+           return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request Updated Successfully']);
+       }
+   }
 }

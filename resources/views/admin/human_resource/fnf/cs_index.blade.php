@@ -74,11 +74,13 @@
                                         @if($cs == Null )
                                             <button type="button" id="submit_cs_info" class="btn btn-primary">Submit</button>
                                         @endif
-                                        @if($cs != Null && $cs->status_id == 1 ||  $cs->status_id == 3 )
-                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
-                                        @endif
-                                        @if($cs != Null && $cs->status_id == 1)
-                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @if($cs != Null )
+                                            @if($cs->status_id == 1 ||  $cs->status_id == 3 )
+                                                 <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                            @endif
+                                             @if( $cs->status_id == 1)
+                                                <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                             @endif
                                         @endif
                                     </div>
                                 </div>

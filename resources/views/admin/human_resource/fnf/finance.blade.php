@@ -93,11 +93,13 @@
                                         @if($finance == Null )
                                             <button type="button" id="submit_finance_info" class="btn btn-primary">Submit</button>
                                         @endif
-                                        @if($finance != Null && $finance->status_id == 1 ||  $finance->status_id == 3 )
-                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
-                                        @endif
-                                        @if($finance != Null && $finance->status_id == 1)
-                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @if($finance != Null )
+                                            @if($finance->status_id == 1 ||  $finance->status_id == 3 )
+                                                <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                            @endif
+                                            @if($finance != Null && $finance->status_id == 1)
+                                                <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

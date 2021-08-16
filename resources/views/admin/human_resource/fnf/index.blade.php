@@ -40,7 +40,8 @@
                                     <th class="border-primary border-darken-1">Resign Date</th>
                                     <th class="border-primary border-darken-1">Requested Date</th>
                                     <th class="border-primary border-darken-1">Created By</th>
-                          
+                                    <th class="border-primary border-darken-1"></th>
+
                                 </tr>
                                 </thead>
                             </table>
@@ -208,7 +209,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if(session('role_id') == 1 ||  in_array(522, session('permissions')))
+                        @if(session('role_id') == 1 ||  in_array(569, session('permissions')))
                     {
                         title: 'Add FNF',
                         className: 'btn btn-primary',
@@ -227,7 +228,7 @@
                     },
                     'reset'
                 ],
-                scrollX: false, scrollY: '500px',
+                scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -269,6 +270,7 @@
                     {data: 'resign_date', name: 'resign_date', class: 'align-middle resign_date'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'h.name', class: 'align-middle created_by'},
+                    {data: 'actions', name: 'actions', class: 'align-middle actions'},
 
 
                 ],
@@ -307,96 +309,81 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
-                var erf_id = table.row($(this).parents('tr')).data().erf_id;
 
-                if ($(this).hasClass('admin_approve')) {
-                    $('#erf_id').val(erf_id);
-                    $('#file_modal').modal('show');
+
+
+            $('#datatable tbody').on('click', '.rm_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('rm_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.rm.index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
                 }
             });
 
-
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
-
-                var erf_id = table.row($(this).parents('tr')).data().erf_id;
-
-                if ($(this).hasClass('approve_request')) {
-                    $.ajax({
-                        url: '{!! route('admin.human_resource.erf.approve') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': erf_id,
-
-                        }
-                    }).done(function (data) {
-
-                        if (data.status == 1) {
-                            table.draw();
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-
-                    });
+            $('#datatable tbody').on('click', '.cs_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('cs_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.cs.index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
                 }
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function () {
-
-                var erf_id = table.row($(this).parents('tr')).data().erf_id;
-
-                if ($(this).hasClass('view_document')) {
-                    $.ajax({
-                        url: '{!! route('admin.human_resource.erf.documents') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': erf_id,
-
-                        }
-                    }).done(function (data) {
-
-                        if (data.status == 1) {
-
-                            var url = '{{ Storage::url('employee_requisition/') }}';
-                            var html = '';
-                            html += '<table class="table table-sm datatable text-center">';
-                            html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th><th><strong>Document</strong></th></tr></thead>';
-                            html += '<tbody>';
-                            $.each(data.documents, function (index, value) {
-
-                                var ind = index + 1;
-                                html += '<tr class=""><td>' + ind + '</td>';
-                                html += '<td>' + value.admin + '</td>';
-                                html += '<td><a class="white" href=" ' + url + value.id + '/' + value.file + '" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>';
-
-                            });
-                            html += '</tbody></table>';
-
-                            html += '<div class="form-group mt-4 text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="btn btn-primary  document_view">View Request</button></div>';
-
-                            $('#documents_modal .modal-body').html(html);
-                            $('#documents_modal').modal('show');
-                        } else {
-
-                            var html = '';
-                            html += '<div class="form-group  text-center"><input type="hidden" name="id" class="er_id" value="' + erf_id + '" ><button type="button" class="document_view btn btn-primary">View Request</button></div>';
-
-                            $('#documents_modal .modal-body').html(html);
-                            $('#documents_modal').modal('show');
-                        }
-
-                    });
+            $('#datatable tbody').on('click', '.admin_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('admin_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.administration.index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
                 }
             });
+
+            $('#datatable tbody').on('click', '.it_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('it_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.it_support.index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
+                }
+            });
+
+            $('#datatable tbody').on('click', '.finance_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('finance_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.finance.index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
+                }
+            });
+
+            $('#datatable tbody').on('click', '.hod_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('hod_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.hod_approval_index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
+                }
+            });
+
+            $('#datatable tbody').on('click', '.hr_view', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('hr_view')) {
+                    var route = '{!! route('admin.human_resource.fnf.hr.index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
+                }
+            });
+
+            $('#datatable tbody').on('click', '.update', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('update')) {
+                    var route = '{!! route('admin.human_resource.fnf.edit_fnf_request', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
+                }
+            });
+
 
             $('body').on('click','.document_view',function () {
                 var id = $('.er_id').val();
