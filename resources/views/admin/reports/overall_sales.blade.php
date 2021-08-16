@@ -144,6 +144,8 @@
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
+                        <th class="border-primary border-darken-1">Category</th>
+                        <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">International Tracking No.</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
@@ -373,6 +375,8 @@
                             head.push('Class');
                             head.push('Attempts');
                             head.push('Shipping Mode');
+                            head.push('Category');
+                            head.push('Description');
                             head.push('International Tracking No.');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
@@ -417,6 +421,8 @@
                                 row.push(values.class);
                                 row.push(values.attempts);
                                 row.push(values.shipping_mode);
+                                row.push(values.category);
+                                row.push(values.description);
                                 row.push(values.international_tracking_number);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
@@ -510,6 +516,8 @@
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
                     { data:'attempts' ,name: 'attempts', class: 'align-middle attempts',sortable:false},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
+                    { data:'description' ,name: 'si.description', class: 'align-middle description'},
                     { data:'international_tracking_number' ,name: 'ibs.international_tracking_number', class: 'align-middle international_tracking_number'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
