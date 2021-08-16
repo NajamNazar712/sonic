@@ -82,7 +82,7 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white text-center">
-                    <h4 class="modal-title white">E Signature</h4>
+                    <h4 class="modal-title white">Draw Signature here or Upload E Signature Image</h4>
 
                 </div>
                 <div class="modal-body  text-center">
