@@ -118,11 +118,11 @@
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
                         @endif
                         @if (session('permissions') != null)
-                            @if (session('user_type') == 1 || session('user_id') == 1091 || in_array(15, session('permissions')))
+                            @if (in_array(15, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
                         @else
-                            @if (session('user_type') == 1 || Auth::id() == 1091)
+                            @if (Auth::id() == 1138)
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
                         @endif

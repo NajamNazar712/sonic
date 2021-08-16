@@ -298,24 +298,49 @@
                     
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
-                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle text-center adjustment_id'},
-                    { data:'current_status' ,name: 'ss.name', class: 'align-middle text-center adjustment_id'},
-                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle shipper_name'},
-                    { data:'return_reason' ,name: 'ssr.name', class: 'align-middle adjustment_type'},
-                    { data:'attempts' ,name: 'attempts', class: 'align-middle attempts', orderable: false, searchable: false},
-                    { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle rider_remarks', orderable: false, searchable: false},
-                    { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle '},
-                    { data:'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle '},
-                    { data:'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle '},
-                    { data:'shipper_name' ,name: 'u.name', class: 'align-middle remarks'},
+                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle text-center not_search'},
+                    { data:'current_status' ,name: 'ss.name', class: 'align-middle text-center not_search'},
+                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle not_search'},
+                    { data:'return_reason' ,name: 'ssr.name', class: 'align-middle not_search'},
+                    { data:'attempts' ,name: 'attempts', class: 'align-middle not_search', orderable: false, searchable: false},
+                    { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle not_search', orderable: false, searchable: false},
+                    { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle not_search'},
+                    { data:'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle not_search'},
+                    { data:'received_or_refused_by' ,name: 'dr.received_or_refused_by', class: 'align-middle not_search'},
+                    { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    this.api().table().columns.adjust();
-                }
+                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+            
+                this.api().columns().every(function(column_id) {
+                    var column = this;
+                    var header = column.header();
+
+                    if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search') ) {
+                        $(td).appendTo($(search));
+                    }
+                    else {
+                        var current = $(input).appendTo($(search)).on('change', function() {
+                            column.search($(this).val(), false, false, true).draw();
+                        }).wrap(td).after(icon);
+
+                        if (column.search()) {
+                            current.val(column.search());
+                        }
+                    }
+                });
+                
+
+                this.api().table().columns.adjust();
+            }
             });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
