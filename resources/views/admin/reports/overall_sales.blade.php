@@ -13,8 +13,31 @@
                 @include('admin.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     @if (session('role_id') == 1 || in_array(261, session('permissions')))
-                    <div class="col-4 mb-1">
+                    <div class="col-4">
                         <div class="form-group">
                             <select name="search_sales_person" class="select2" id="sales_person_select">
                                 @foreach($sales_persons as $sales)
@@ -26,29 +49,6 @@
                         @else
                         <input type="hidden" name="search_sales_person" value="null">
                     @endif
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
-                        </fieldset>
-                    </div>
-                    {{--<div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>--}}
-                        <div class="col-4 mb-1">
-                            <fieldset class="form-group">
-                                <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                    @foreach($shippers as $shipper)
-                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
@@ -95,7 +95,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(3)}}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -106,7 +106,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
 
                     </div>
@@ -266,11 +266,11 @@
                 placeholder: 'Select Business Category',
                 allowClear:true
             });
-           /* $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+           $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
-            });*/
+            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
                 width:'100%',
@@ -291,9 +291,9 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').select2({
+            $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Shipper",
+                placeholder:"Select Multiple Shippers",
                 allowClear:true,
             });
 
@@ -478,6 +478,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax:{
                     url: '{{ route('admin.reports.overall_sales.list') }}',
                     method:'post',
@@ -488,6 +489,7 @@
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_sales_person =  $('#sales_person_select').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();

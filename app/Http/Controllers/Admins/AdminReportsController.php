@@ -3395,9 +3395,6 @@ class AdminReportsController extends Controller
 //            $yesterday = Carbon::now()->subDays(3);
 //            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
 //        }
-        if($search_shipper = $request->get('search_shipper')){
-            $sales = $sales->whereIn('shipments.user_id',$search_shipper);
-        }
 
         if (session('role_id') != 1 && session('role_id') != 4) {
             if (session('department_id') == 7) {
@@ -3598,9 +3595,12 @@ class AdminReportsController extends Controller
         if($sales_person = $request->get('search_sales_person')){
             $datatable->where('adsp.id', '=', $sales_person);
         }
-        /*if($shipper = $request->get('search_shipper')){
-            $datatable->where('u.id', '=', $shipper);
-        }*/
+        if($search_shipper = $request->get('search_shipper')){
+            $datatable->where('shipments.user_id', '=', $search_shipper);
+        }
+        if($search_shippers = $request->get('search_shippers')){
+            $datatable->whereIn('shipments.user_id',$search_shippers);
+        }
         if($origin = $request->get('search_origin')){
             $datatable->where('oc.id', '=', $origin);
         }
