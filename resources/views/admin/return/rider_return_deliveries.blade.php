@@ -470,6 +470,31 @@
                 stateLoaded: function (settings, data) {
                 },
                 initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.total_shipments_link') || $(header).is('.update_via_app') || $(header).is('.update_via_dbf')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
                     this.api().table().columns.adjust();
                 }
             });
