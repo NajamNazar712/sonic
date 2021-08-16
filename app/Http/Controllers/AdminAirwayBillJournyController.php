@@ -51,14 +51,8 @@ class AdminAirwayBillJournyController extends Controller
                         $account_type = 'Admin';
                         $admin = Admin::find($scanning_history->user_id);
                         $scanned_by = $admin->name;
-                        $roles = AdminRole::find($admin->role_id);
-                        if($roles->name != null){
-                            $role = $roles->name;
-                        }
-                        else
-                        {
-                            $role = '-';
-                        }
+                        $role = $admin->designation;
+
                     } elseif ($scanning_history->user_type == 1) {
                         $account_type = 'Shipper';
                         $user = User::find($scanning_history->user_id);
