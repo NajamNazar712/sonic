@@ -135,7 +135,6 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
-                        <th class="border-primary border-darken-1">SDN Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -367,7 +366,6 @@
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Payment ID');
-                            head.push('SDN Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Origin');
@@ -414,7 +412,6 @@
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
-                                row.push(values.sdn_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
@@ -499,7 +496,7 @@
                         d.search_business_category = $('#search_business_category').val();
                     }
                 },
-                order: [[11, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -510,7 +507,6 @@
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
-                    { data:'sdn_id' ,name: 'dnsdn.station_deposit_note_id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
