@@ -56,6 +56,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
 use SnappyPDF;
 use Validator;
@@ -3619,7 +3620,7 @@ class APIController extends Controller
     public function crm_request_create(Request $request)
     {
         $nature_id = $request->case_nature_id;
-        $complaint_id = $request->complaint_id;
+        $complaint_id = $request->case_nature_type_id;
         $description = $request->description;
         $launched_by = 1;
         $user_id = $request->user_id;
@@ -3646,7 +3647,7 @@ class APIController extends Controller
                 //complaints
 
 
-                  $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
+                  $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->where('status_id',1)->pluck('id')->toArray();
                   if (in_array($complaint_id, $crm_request_type)) {
                     $rules = [
                       'description' => ['required'],
@@ -3668,10 +3669,10 @@ class APIController extends Controller
                       }
                     }
                   } else {
-                      return response()->json(['status' => 1, 'message' => 'complaint_id not found!']);
+                      return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                   }
             } elseif ($nature_id == 4) {
-                $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->pluck('id')->toArray();
+                $crm_request_type = CrmRequestCaseNatureType::where('nature_id', $nature_id)->where('status_id',1)->pluck('id')->toArray();
                 if (in_array($complaint_id, $crm_request_type)) {
                     if ($complaint_id == 26) {
                         $shipment = Shipment::where('tracking_number', $request->tracking_number);
@@ -3686,11 +3687,15 @@ class APIController extends Controller
 
                     } elseif ($complaint_id == 21) {
                         $rules = [
+                            'product_cost' => ['required', 'integer'],
                             'product_picture' => ['required', 'image'],
                             'invoice_picture' => ['required', 'image'],
                             'damage_product_picture' => ['required', 'image'],
                             'product_packaging_picture' => ['required', 'image'],
                             'actual_product_picture' => ['required', 'image'],
+                            'damage_product_price' => ['required', 'integer'],
+                            'description' => ['required'],
+
                         ];
                         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -3703,7 +3708,7 @@ class APIController extends Controller
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
 
-                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), $request->file('damage_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture'), $request->damage_product_price );
                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
@@ -3713,11 +3718,16 @@ class APIController extends Controller
                     } elseif ($complaint_id == 22) {
 
                         $rules = [
+                            'product_cost' => ['required', 'integer'],
                             'product_picture' => ['required', 'image'],
                             'invoice_picture' => ['required', 'image'],
                             'missing_product_picture' => ['required', 'image'],
                             'product_packaging_picture' => ['required', 'image'],
                             'actual_product_picture' => ['required', 'image'],
+                            'missing_product_price' => ['required', 'integer'],
+                            'description' => ['required'],
+
+
                         ];
                         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -3729,8 +3739,9 @@ class APIController extends Controller
                             $shipment = Shipment::where('tracking_number', $request->tracking_number);
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
+                                // CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
 
-                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'), Null, Null, Null, Null, $request->file('missing_product_picture'), $request->file('product_packaging_picture'), $request->file('actual_product_picture') , $request->missing_product_price);
                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
@@ -3741,7 +3752,9 @@ class APIController extends Controller
                         $rules = [
                             'product_picture' => ['required', 'image'],
                             'invoice_picture' => ['required', 'image'],
-                            'product_cost' => ['required', 'image'],
+                            'product_cost' => ['required', 'integer'],
+                            'description' => ['required'],
+
                         ];
                         // $request->product_cost;
                         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3754,19 +3767,22 @@ class APIController extends Controller
                             $shipment = Shipment::where('tracking_number', $request->tracking_number);
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
+                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description, $request->product_cost, $request->file('product_picture'), $request->file('invoice_picture'));
 
-                                $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                                // $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
                                 return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
                             }
                         }
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                     }
                 } else {
-                    return response()->json(['status' => 1, 'message' => 'complaint_id not found!']);
+                    return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
                 }
             } else {
-                return response()->json(['status' => 1, 'message' => 'case_nature_id not found!']);
+                return response()->json(['status' => 1, 'message' => 'case_nature_id should be 1 (Complaints), 2 (Service Request) and 4 (Claims)']);
 
             }
 
@@ -3855,7 +3871,7 @@ class APIController extends Controller
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);
                             }
-                            return response()->json(['status' => 0, 'message' => 'Shipment successfully updated as ( Re-Attempt )']);
+                            return response()->json(['status' => 0, 'message' => 'Shipment successfully updated as ( Re-Attempt - Requested )']);
 
                         }
                     }
@@ -3872,7 +3888,7 @@ class APIController extends Controller
                     if ($validate->fails()) {
                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                     } else {
-                        if ($request->consignee_type = 1) {
+                        if ($request->consignee_type == 1) {
 
                             $rules = [
                                 'consignee_address' => ['required', 'between:1,255'],
@@ -3916,7 +3932,7 @@ class APIController extends Controller
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $shipment->consignee_city_id,
                                                 'consignee_name' => $shipment->consignee_name,
-                                                'consignee_address' => $shipment->consignee_address,
+                                                'consignee_address' => $request->consignee_address,
                                                 'consignee_phone_number_1' => $phone_number,
                                                 'consignee_phone_number_2' => $phone_number2,
                                                 'consignee_email' => $shipment->consignee_email,
