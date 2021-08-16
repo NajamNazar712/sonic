@@ -3767,21 +3767,21 @@ class ReturnController extends Controller
         return response()->json(['status' => 1, 'error' => 'Image not found!']);
     }
 
-    public function return_deliveries_index() {
+    public function return_deliveries_index()
+    {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 416);
         return view('admin.return.rider_return_deliveries');
     }
 
-    public function return_deliveries_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),417);
+    public function return_deliveries_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 417);
         }
-        $return_deliveries = \Illuminate\Support\Facades\DB::connection('reports')->table('return_notes')
-            ->join('cities as c', 'return_notes.hub_id', '=', 'c.id')
-            ->join('zones as z','z.id','=','c.zone_id')
+        $return_deliveries = ReturnNote::join('cities as c', 'return_notes.hub_id', '=', 'c.id')
+            ->join('zones as z', 'z.id', '=', 'c.zone_id')
             ->join('riders as r', 'return_notes.rider_id', '=', 'r.id')
-            ->select('return_notes.id as return_note_id','z.name as zone', 'return_notes.created_at as created_at', 'r.name as rider', 'return_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `adns` where `adns`.`return_note_id` = `return_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `dns` where `dns`.`return_note_id` = `return_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'));
+            ->select('return_notes.id as return_note_id', 'z.name as zone', 'return_notes.created_at as created_at', 'r.name as rider', 'return_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `adns` where `adns`.`return_note_id` = `return_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`'), DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `dns` where `dns`.`return_note_id` = `return_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'));
 
 
         $datatable = Datatables::of($return_deliveries)
@@ -3791,36 +3791,32 @@ class ReturnController extends Controller
             ->addColumn('return_note_id_padded', function ($return_deliveries) {
                 return str_pad($return_deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('total_shipments_link', function($return_deliveries) {
+            ->editColumn('total_shipments_link', function ($return_deliveries) {
                 if ($return_deliveries->total_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_deliveries->total_shipments . '</button>';
-                }
-                else {
+                } else {
                     return 0;
                 }
             })
-            ->editColumn('shipments_rider_updated', function($return_deliveries) {
+            ->editColumn('shipments_rider_updated', function ($return_deliveries) {
                 if ($return_deliveries->shipments_rider_updated != null) {
                     return $return_deliveries->shipments_rider_updated;
-                }
-                else {
+                } else {
                     return 0;
                 }
             })
-            ->addColumn('update_via_app', function($return_deliveries){
+            ->addColumn('update_via_app', function ($return_deliveries) {
                 if ($return_deliveries->shipments_rider_updated != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_deliveries->shipments_rider_updated . '</button>';
-                }
-                else {
+                } else {
                     return 0;
                 }
             })
-            ->addColumn('update_via_dbf', function($return_deliveries){
+            ->addColumn('update_via_dbf', function ($return_deliveries) {
                 $count = $return_deliveries->shipments_dbf_updated;
                 if ($count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $count . '</button>';
-                }
-                else {
+                } else {
                     return 0;
                 }
             });
@@ -3835,7 +3831,7 @@ class ReturnController extends Controller
             ->join('rider_return_deliveries', function ($join) {
                 $join->on('return_note_shipments.shipment_id', '=', 'rider_return_deliveries.shipment_id')
                     ->where('rider_return_deliveries.id', '=',
-                        \Illuminate\Support\Facades\DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)'));
+                        DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)'));
             })
             ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
