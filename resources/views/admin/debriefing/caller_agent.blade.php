@@ -264,11 +264,22 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="row justify-content-end">
-                                                    @if($call->skip == 0)
-                                                        <button type="button" id="skip_btn" class="mr-1 mb-1 btn btn-danger btn-min-width"> Skip </button>
-                                                    @endif
-                                                    <button type="submit" value="next" class="mr-1 mb-1 btn btn-success btn-min-width"> Next </button>
+                                                <div class="row">
+                                                    <div class="col justify-content-start">
+                                                        @if($rider_delivery)
+                                                            @if($shipment->amount == 0 && $rider_delivery->delivered_status == 1)
+                                                                <a href="{{asset(Storage::url($rider_delivery->cnic_image))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View CNIC</button></a>
+                                                            @elseif($rider_delivery->delivered_status == 0)
+                                                                <a href="{{asset(Storage::url($rider_delivery->picture_path))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View Image</button></a>
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                    <div class="justify-content-end">
+                                                        @if($call->skip == 0)
+                                                            <button type="button" id="skip_btn" class="mr-1 mb-1 btn btn-danger btn-min-width"> Skip </button>
+                                                        @endif
+                                                        <button type="submit" value="next" class="mr-1 mb-1 btn btn-success btn-min-width"> Next </button>
+                                                    </div>
                                                 </div>
                                             </form>
                                         </div>
