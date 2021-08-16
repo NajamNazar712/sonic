@@ -178,7 +178,10 @@ class AdminReportsController extends Controller
             $datatable->where('u.id', '=', $shipper);
         }*/
         if($search_shipper = $request->get('search_shipper')){
-            $shipments = $shipments->whereIn('shipments.user_id',$search_shipper);
+            $shipments = $shipments->where('shipments.user_id',$search_shipper);
+        }
+        if($search_shippers = $request->get('search_shippers')){
+            $shipments = $shipments->whereIn('shipments.user_id',$search_shippers);
         }
         if ($origin = $request->get('search_origin')) {
             $datatable->where('oc.id', '=', $origin);
