@@ -83,8 +83,8 @@
                 }
                 else{
                     var route = '{{route('admin.human_resource.fnf.it_support.submit')}}';
-                    $('#rm_form').attr('action', route);
-                    $('#rm_form').submit()
+                    $('#it_support_form').attr('action', route);
+                    $('#it_support_form').submit()
                 }
             });
 

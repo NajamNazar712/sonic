@@ -8100,10 +8100,24 @@ class NotificationsController extends Controller
                         if($admin) {
                             if ($admin->trax_id == 'Trax01099') {
                                 $route = 'https://sonic.test/admin/human_resource/fnf/1/it_support';
-                            } else if ($admin->trax_id == 'Trax04484') {
+                            }
+                            else if ($admin->trax_id == 'Trax04484') {
                                 $route = 'https://sonic.test/admin/human_resource/fnf/1/finance';
-                            } else if ($admin->trax_id == 'Trax00043') {
+                            }
+                            else if ($admin->trax_id == 'Trax00043') {
                                 $route = 'https://sonic.test/admin/human_resource/fnf/1/cs';
+                            }
+                            else if ($admin->trax_id == 'Trax02533') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hr';
+                            }
+                            else if ($admin->trax_id == 'Trax03840') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/administration';
+                            }
+                            else if ($admin->trax_id == $fnf->reporting_manager->trax_id) {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/rm';
+                            }
+                            else if ($admin->trax_id == $fnf->department_head->trax_id) {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hod_approval';
                             }
 
                             $link = '<a href=' . $route . '>' . $route . '</a>';

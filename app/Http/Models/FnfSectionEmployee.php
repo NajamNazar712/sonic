@@ -29,7 +29,7 @@ class FnfSectionEmployee extends Model
         return $this->hasOne('App\FnfSectionFinance','fnf_id','id');
     }
     public function hod_approval(){
-        return $this->hasOne('App\FnfSectionHod','fnf_id','id');
+        return $this->hasOne('App\FnfSectionHod','fnf_id','id')->orderBy('created_at','desc');
     }
     public function reporting_manager(){
         return $this->belongsTo('App\Http\Models\Admin\Admin','line_manager','id');

@@ -9,6 +9,7 @@ use App\FnfSectionHod;
 use App\FnfSectionHr;
 use App\FnfSectionItSupport;
 use App\FnfSectionReportingManager;
+use App\FnfStatusJourney;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
@@ -19,6 +20,7 @@ use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\HR\EmployeeStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use phpDocumentor\Reflection\Types\Nullable;
 use Yajra\Datatables\Datatables;
 
 class AdminFnfController extends Controller
@@ -89,9 +91,10 @@ class AdminFnfController extends Controller
                      $dropdown .= '<button type="button" class="dropdown-item update" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update FNF Request</div></button>';
 
                  }
+                 if (session('role_id') == 1 || in_array(578, session('permissions'))) {
+                     $dropdown .= '<button type="button" class="dropdown-item history" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">FNF Status History</div></button>';
 
-
-
+                 }
 
                  $dropdown .= '
                         </div>
@@ -158,7 +161,9 @@ class AdminFnfController extends Controller
             $fnf->status_id = 1;
             $fnf->save();
 
-            $admins = array('Trax01099','Trax04484','Trax00043','Trax03840','Trax02533',$trax_id);
+            $line_manager_trax_id = Admin::find($fnf->line_manager)->trax_id;
+            $hod_trax_id = Admin::find($fnf->hod)->trax_id;
+            $admins = array('Trax01099','Trax04484','Trax00043','Trax03840','Trax02533',$line_manager_trax_id,$hod_trax_id);
             NotificationsController::send(146,$fnf->id,$admins);
 
             return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request Added Successfully']);
@@ -213,6 +218,9 @@ class AdminFnfController extends Controller
             $rm->created_by = Auth::id();
             $rm->status_id = 1;
             $rm->save();
+
+            $this::AddFnfStatusJourney($fnf_id, 1,Auth::id(),1 );
+
             return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Data Added Successfully']);
         }
 
@@ -230,7 +238,7 @@ class AdminFnfController extends Controller
             else{
                 $cs = $cs->first();
             }
-           // dd($cs);
+
             return view('admin.human_resource.fnf.cs_index',compact('employee','fnf','cs'));
         }
     }
@@ -248,6 +256,8 @@ class AdminFnfController extends Controller
            $cs->created_by = Auth::id();
            $cs->status_id = 1;
            $cs->save();
+
+           $this::AddFnfStatusJourney($fnf_id, 1,Auth::id(),2 );
 
            return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Data Added Successfully']);
        }
@@ -281,6 +291,8 @@ class AdminFnfController extends Controller
             $admin->status_id = 1;
             $admin->save();
 
+            $this::AddFnfStatusJourney($fnf_id, 1,Auth::id(),3 );
+
             return redirect()->route('admin.human_resource.fnf.index')->with(['success'=>'Data Added Successfully']);
         }
     }
@@ -309,6 +321,8 @@ class AdminFnfController extends Controller
             $admin->created_by = Auth::id();
             $admin->status_id = 1;
             $admin->save();
+
+            $this::AddFnfStatusJourney($fnf_id, 1,Auth::id(),4);
 
             return redirect()->route('admin.human_resource.fnf.index')->with(['success'=>'Data Added Successfully']);
         }
@@ -345,6 +359,8 @@ class AdminFnfController extends Controller
             $finance->created_by = Auth::id();
             $finance->status_id = 1;
             $finance->save();
+
+            $this::AddFnfStatusJourney($fnf_id, 1,Auth::id(),5);
 
             return redirect()->route('admin.human_resource.fnf.index')->with(['success'=>'Data Added Successfully']);
         }
@@ -413,6 +429,8 @@ class AdminFnfController extends Controller
             $hr->status_id = 1;
             $hr->save();
 
+            $this::AddFnfStatusJourney($fnf_id,1,Auth::id(),7);
+
             return redirect()->route('admin.human_resource.fnf.index')->with(['success' =>'Data Added Successfully']);
         }
     }
@@ -437,6 +455,8 @@ class AdminFnfController extends Controller
         }
         $rm->save();
 
+        $this::AddFnfStatusJourney($request->fnf_id,$rm->status_id,Auth::id(),1);
+        
         return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
 
@@ -456,6 +476,8 @@ class AdminFnfController extends Controller
         }
         $cs->save();
 
+        $this::AddFnfStatusJourney($request->fnf_id,$cs->status_id,Auth::id(),2);
+
         return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
 
@@ -474,6 +496,8 @@ class AdminFnfController extends Controller
         }
         $admin->save();
 
+        $this::AddFnfStatusJourney($request->fnf_id,$admin->status_id,Auth::id(),3);
+
         return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
 
@@ -488,6 +512,8 @@ class AdminFnfController extends Controller
             $admin->status_id = 3;
         }
         $admin->save();
+
+        $this::AddFnfStatusJourney($request->fnf_id,$admin->status_id,Auth::id(),4);
 
         return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
@@ -510,6 +536,8 @@ class AdminFnfController extends Controller
         }
         $finance->save();
 
+        $this::AddFnfStatusJourney($request->fnf_id,$finance->status_id,Auth::id(),5);
+
         return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
 
@@ -526,8 +554,9 @@ class AdminFnfController extends Controller
     }
 
     public function hod_approval_submit(Request $request){
-
-      $hod = FnfSectionHod::where('fnf_id',$request->fnf_id)->first();
+     
+      $hod = new FnfSectionHod();
+      $hod->fnf_id = $request->fnf_id;
       $hod->comments = $request->hod_comments;
       $hod->approved_by = Auth::id();
       if($request->approval == 'approved'){
@@ -537,6 +566,9 @@ class AdminFnfController extends Controller
           $hod->status_id = 3;
       }
       $hod->save();
+
+      $this::AddFnfStatusJourney($request->fnf_id, $hod->status_id,Auth::id(),6);
+
       return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request has been ' . $request->approval]);
     }
 
@@ -563,7 +595,7 @@ class AdminFnfController extends Controller
            $hr->notice_period = $request->notice_period;
            $hr->penalty = $request->penalty;
            $hr->van_deduction = $request->deduction;
-           //$hr->comments = $request->comments;
+           $hr->comments = $request->comments;
            $hr->save();
 
            $fnf = FnfSectionEmployee::where('id', $fnf_id)->first();
@@ -575,6 +607,8 @@ class AdminFnfController extends Controller
            $fnf->status_id = 4;
            $fnf->updated_by = Auth::id();
            $fnf->save();
+
+           $this::AddFnfStatusJourney($fnf_id,$hr->status_id,Auth::id(),7);
 
            return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Data Added Successfully']);
        }
@@ -619,4 +653,31 @@ class AdminFnfController extends Controller
            return redirect()->route('admin.human_resource.fnf.index')->with(['success' => 'Request Updated Successfully']);
        }
    }
+
+   static public function AddFnfStatusJourney($fnf_id,$status_id,$admin_id,$section_id = NULL)
+    {
+        $history = new FnfStatusJourney();
+        $history->fnf_id = $fnf_id;
+        $history->status_id = $status_id;
+        $history->admin_id = $admin_id;
+        $history->section_id = $section_id;
+        $history->save();
+    }
+
+    public function fnf_history_index($id){
+     return view('admin.human_resource.fnf.history',compact('id'));
+    }
+
+    public function status_history_list(Request $request){
+
+        $fnf = FnfStatusJourney::join('fnf_section_employees as fnf','fnf.id','=','fnf_status_journeys.fnf_id')
+            ->join('fnf_sections as fs','fs.id','=','fnf_status_journeys.section_id')
+            ->join('fnf_statuses as fss','fss.id','=','fnf_status_journeys.status_id')
+            ->join('admins as a','a.id','=','fnf_status_journeys.admin_id')
+            ->select(['fnf.id as fnf_id','fs.name as section_name','fss.name as status_name','a.name as admin','fnf_status_journeys.created_at'])
+        ->where('fnf.id',$request->id);
+
+        $datatable = Datatables::of($fnf);
+        return $datatable->make(true);
+    }
 }

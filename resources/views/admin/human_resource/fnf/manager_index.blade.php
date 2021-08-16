@@ -116,11 +116,13 @@
                                         @if($rm == Null )
                                             <button type="button" id="submit_rm_info" class="btn btn-primary">Submit</button>
                                         @endif
-                                        @if($rm != Null && $rm->status_id == 1 ||  $rm->status_id == 3 )
-                                            <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
-                                        @endif
-                                        @if($rm != Null && $rm->status_id == 1)
-                                            <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                        @if($rm != Null )
+                                            @if($rm->status_id == 1 ||  $rm->status_id == 3 )
+                                                <button type="button" id="approve" class="btn btn-success" value="Approve">Approve</button>
+                                             @endif
+                                            @if($rm != Null && $rm->status_id == 1)
+                                                <button type="button" id="reject" class="btn btn-danger" value="Reject">Reject</button>
+                                            @endif
                                         @endif
                                     </div>
                                 </div>

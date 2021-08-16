@@ -3131,6 +3131,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('hr_status_edit', 'Admins\AdminFnfController@hr_status_edit')->name('hr_status_edit');
             Route::get('{id}/edit', 'Admins\AdminFnfController@edit_fnf_request')->name('edit_fnf_request');
             Route::post('{/update', 'Admins\AdminFnfController@update_fnf_request')->name('update_fnf_request');
+            Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
+            Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
         });
     });
 

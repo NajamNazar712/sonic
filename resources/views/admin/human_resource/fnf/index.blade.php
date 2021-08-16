@@ -52,24 +52,6 @@
         </div>
     </section>
 
-    <div class="modal fade" id="documents_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="documents_modal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header text-center">
-                    <h4 class="modal-title w-100 font-weight-bold">View Documents</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body mx-3">
-
-                </div>
-            </div>
-        </div>
-    </div>
-
 @endsection
 
 @section('css')
@@ -382,39 +364,6 @@
                     route = route.replace(':id', fnf_id);
                     window.location = route;
                 }
-            });
-
-
-            $('body').on('click','.document_view',function () {
-                var id = $('.er_id').val();
-                if (id) {
-                    $.ajax({
-                        url: '{!! route('admin.human_resource.erf.print') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id,
-                        }
-                    })
-                        .done(function (data) {
-                            var tab = window.open('', '_blank');
-
-                            if (!tab) {
-                                swal({
-                                    title: 'Popup Blocker Enabled!',
-                                    text: 'Please add this site to your exception list.',
-                                    icon: 'error',
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false
-                                });
-                            } else {
-                                tab.document.write(data);
-                                tab.document.close();
-                                tab.focus();
-                            }
-                        });
-                }
-
             });
 
         });
