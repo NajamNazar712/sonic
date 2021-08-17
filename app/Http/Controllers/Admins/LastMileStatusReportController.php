@@ -39,10 +39,8 @@ class LastMileStatusReportController extends Controller
 
         $sonic_status_percentage = 0;
         $bolt_status_percentage = 0;
-        $sonic_status_percentage = 0;
         if($total_status_updated_count > 0){
             $bolt_status_percentage = ($bolt_status_updated_count / $total_status_updated_count) * 100;
-            $sonic_status_percentage = ($sonic_status_updated_count / $total_status_updated_count) * 100;
             $sonic_status_percentage = ($sonic_status_updated_count / $total_status_updated_count) * 100;
 
         }
