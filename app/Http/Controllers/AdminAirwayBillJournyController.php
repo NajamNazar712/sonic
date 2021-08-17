@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AdminRole;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\City;
@@ -51,7 +52,9 @@ class AdminAirwayBillJournyController extends Controller
                         $account_type = 'Admin';
                         $admin = Admin::find($scanning_history->user_id);
                         $scanned_by = $admin->name;
-                        $role = $admin->designation;
+                        $roles = AdminRole::find($admin->role_id);
+                        $roles_department = AdminDepartment::find($roles->department_id);
+                        $role = $roles_department->name;
 
                     } elseif ($scanning_history->user_type == 1) {
                         $account_type = 'Shipper';
