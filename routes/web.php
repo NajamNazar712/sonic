@@ -3120,6 +3120,38 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
 
         });
+
+        Route::prefix('fnf')->name('fnf.')->group(function () {
+            Route::get('', 'Admins\AdminFnfController@index')->name('index');
+            Route::get('list', 'Admins\AdminFnfController@list')->name('list');
+            Route::get('/add', 'Admins\AdminFnfController@add')->name('add');
+            Route::post('/submit', 'Admins\AdminFnfController@submit')->name('submit');
+            Route::post('/employee_data', 'Admins\AdminFnfController@employee_data')->name('employee_data');
+            Route::get('{id}/rm', 'Admins\AdminFnfController@reporting_manager_index')->name('rm.index');
+            Route::post('rm/submit', 'Admins\AdminFnfController@reporting_manager_submit')->name('rm.submit');
+            Route::get('{id}/cs', 'Admins\AdminFnfController@cs_index')->name('cs.index');
+            Route::post('cs/submit', 'Admins\AdminFnfController@cs_submit')->name('cs.submit');
+            Route::get('{id}/administration', 'Admins\AdminFnfController@administration_index')->name('administration.index');
+            Route::post('administration/submit', 'Admins\AdminFnfController@administration_submit')->name('administration.submit');
+            Route::get('{id}/it_support', 'Admins\AdminFnfController@it_support_index')->name('it_support.index');
+            Route::post('it_support/submit', 'Admins\AdminFnfController@it_support_submit')->name('it_support.submit');
+            Route::get('{id}/finance', 'Admins\AdminFnfController@finance_index')->name('finance.index');
+            Route::post('finance/submit', 'Admins\AdminFnfController@finance_submit')->name('finance.submit');
+            Route::get('{id}/hr', 'Admins\AdminFnfController@hr_index')->name('hr.index');
+            Route::post('hr/submit', 'Admins\AdminFnfController@hr_submit')->name('hr.submit');
+            Route::post('rm_status_edit', 'Admins\AdminFnfController@rm_status_edit')->name('rm_status_edit');
+            Route::post('cs_status_edit', 'Admins\AdminFnfController@cs_status_edit')->name('cs_status_edit');
+            Route::post('administration_status_edit', 'Admins\AdminFnfController@administration_status_edit')->name('administration_status_edit');
+            Route::post('it_support_status_edit', 'Admins\AdminFnfController@it_support_status_edit')->name('it_support_status_edit');
+            Route::post('finance_status_edit', 'Admins\AdminFnfController@finance_status_edit')->name('finance_status_edit');
+            Route::get('{id}/hod_approval', 'Admins\AdminFnfController@hod_approval_index')->name('hod_approval_index');
+            Route::post('hod_approval/submit', 'Admins\AdminFnfController@hod_approval_submit')->name('hod_approval_submit');
+            Route::post('hr_status_edit', 'Admins\AdminFnfController@hr_status_edit')->name('hr_status_edit');
+            Route::get('{id}/edit', 'Admins\AdminFnfController@edit_fnf_request')->name('edit_fnf_request');
+            Route::post('{/update', 'Admins\AdminFnfController@update_fnf_request')->name('update_fnf_request');
+            Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
+            Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
