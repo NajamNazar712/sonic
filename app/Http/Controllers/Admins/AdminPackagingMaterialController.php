@@ -409,7 +409,7 @@ class AdminPackagingMaterialController extends Controller
                 return number_format($shipment->amount);
             })
             ->addColumn('action',function ($packaging) {
-                if ((session('role_id') == 1 && ($packaging->status_id == 1)) || (($packaging->status_id == 1) && (in_array(226, session('permissions')) || in_array(227, session('permissions'))))) {
+                if ((session('role_id') == 1 || in_array(226, session('permissions')) || in_array(227, session('permissions'))) && ($packaging->status_id == 1 || $packaging->status_id == 2)) {
                     $dropdown = '
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -420,7 +420,7 @@ class AdminPackagingMaterialController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item confirm"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Confirm</div></button>';
                         }
                     }
-                    if (session('role_id') == 1 || in_array(227, session('permissions')) || $packaging->status_id == 2) {
+                    if ((session('role_id') == 1 || in_array(227, session('permissions'))) && ($packaging->status_id == 1 || $packaging->status_id == 2)) {
                         $dropdown .= '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                     }
                     if ($packaging->status_id == 1) {
@@ -659,6 +659,7 @@ class AdminPackagingMaterialController extends Controller
                     return response()->json(['status' => 0, 'error'=> $invalid_products. ' does\'nt exists in requested hub!']);
                 }
                 $flag = true;
+                dd($trax_address->id);
                 foreach ($request_details->items as $item){
                     $product_barcodes = WmsProductBarcode::join('wms_store_requests as wsr', 'wsr.id', '=', 'wms_product_barcodes.store_request_id')->where('wms_product_barcodes.product_id', $item->wms_product_id)->where('wsr.warehouse_pickup_address_id', $trax_address->id)->whereNull('wms_product_barcodes.shipment_id')->where('wms_product_barcodes.status', 3)->count();
                     if($product_barcodes < $item->quantity){
@@ -795,22 +796,51 @@ class AdminPackagingMaterialController extends Controller
 
         $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
 
-        if($packaging_material_request->status_id > 1 ||$packaging_material_request->status_id==2){
+        if($packaging_material_request->status_id > 2){
             return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
         }
         else{
-            $packaging_material_request->status_id = 6;
-            $packaging_material_request->save();
+            if($packaging_material_request->status_id == 1){
+                $packaging_material_request->status_id = 6;
+                $packaging_material_request->save();
+    
+                $packaging_request_history = new PackagingMaterialRequestHistory();
+                $packaging_request_history->packaging_material_request_id = $request_id;
+                $packaging_request_history->status = 6;
+                $packaging_request_history->updated_by = Auth::id();
+                $packaging_request_history->save();
+            }
+            elseif($packaging_material_request->status_id == 2){
+                $shipment_id = $packaging_material_request->shipment_id;
+                $shipment = Shipment::find($shipment_id);
+                if($shipment){
 
-            $packaging_request_history = new PackagingMaterialRequestHistory();
-            $packaging_request_history->packaging_material_request_id = $request_id;
-            $packaging_request_history->status = 6;
-            $packaging_request_history->updated_by = Auth::id();
-            $packaging_request_history->save();
+                    $shipment->warehouse_order_status = 9;
+                    $shipment->shipper_status_id = 17;
+                    $shipment->consignee_status_id = 17;
+
+                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
+                    $shipment->save();
+
+                    $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
+                    if($shipment_products){
+                        foreach ($shipment_products as $shipment_product){
+                            $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
+                            if($current_stock_addition){
+                                $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                $current_stock_addition->save();
+                            }
+                        }
+                    }
+                    $packaging_material_request->status_id = 6;
+                    $packaging_material_request->save();
+
+                    WmsProductBarcode::where('shipment_id', $shipment_id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
+            }
             return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
          }
     }
-
+    }
     public function request_completed(Request $request){
         $request_id = $request->id;
 
