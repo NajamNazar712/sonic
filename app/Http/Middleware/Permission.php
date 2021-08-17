@@ -952,6 +952,8 @@ class Permission
             'human_resource.erf.index' => 506,
             'human_resource.erf.list' => 506,
             'human_resource.erf.add' => 522,
+
+
             'human_resource.fnf.index' => 568,
             'human_resource.fnf.list' => 568,
             'human_resource.fnf.add' => 569,
@@ -960,9 +962,10 @@ class Permission
             'human_resource.fnf.administration.index' => 572,
             'human_resource.fnf.it_support.index' => 573,
             'human_resource.fnf.finance.index' => 574,
-            'human_resource.fnf.hod.index' => 575,
+            'human_resource.fnf.hod_approval_index' => 575,
             'human_resource.fnf.hr.index' => 576,
             'human_resource.fnf.edit_fnf_request' => 577,
+            'human_resource.fnf.fnf_history_index' => 578,
 
 			'attendance.index' => 465,
             'attendance.list' => 465,

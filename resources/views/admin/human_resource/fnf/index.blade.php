@@ -366,6 +366,15 @@
                 }
             });
 
+            $('#datatable tbody').on('click', '.history', function () {
+                var fnf_id = table.row($(this).parents('tr')).data().id;
+                if ($(this).hasClass('history')) {
+                    var route = '{!! route('admin.human_resource.fnf.fnf_history_index', ':id') !!}';
+                    route = route.replace(':id', fnf_id);
+                    window.location = route;
+                }
+            });
+
         });
 
     </script>

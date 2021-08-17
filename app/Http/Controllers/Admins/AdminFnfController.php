@@ -33,10 +33,16 @@ class AdminFnfController extends Controller
 
     public function index(){
         $departments = AdminDepartment::all();
+        ActivityTrailController::createActivityTrailLog(Auth::id(),419);
         return view('admin.human_resource.fnf.index')->with(['departments' => $departments]);
     }
 
     public function list(Request $request){
+
+    if($request->get('excel') && $request->get('excel') == true)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),420);
+    }
      $employee = Employee::join('fnf_section_employees as fnf','fnf.employee_id','=','employees.id')
          ->join('admins as a','a.id','=','fnf.line_manager')
          ->join('admins as ah','ah.id','=','fnf.hod')
@@ -112,6 +118,7 @@ class AdminFnfController extends Controller
     }
 
     public function add(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),421);
         $employee = Employee::whereNotNull('trax_id')->select('trax_id')->get();
         if(session('department_id') == 1){
             $departments = AdminDepartment::get();
@@ -186,7 +193,7 @@ class AdminFnfController extends Controller
     }
 
     public function reporting_manager_index($id){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),422);
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
@@ -228,6 +235,7 @@ class AdminFnfController extends Controller
     }
 
     public function cs_index($id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),423);
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
@@ -264,6 +272,7 @@ class AdminFnfController extends Controller
     }
 
     public function administration_index($id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),424);
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
@@ -298,6 +307,7 @@ class AdminFnfController extends Controller
     }
 
     public function it_support_index($id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),425);
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
@@ -329,6 +339,7 @@ class AdminFnfController extends Controller
     }
 
     public function finance_index($id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),426);
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             $employee = Employee::where('id',$fnf->employee_id)->first();
@@ -367,6 +378,7 @@ class AdminFnfController extends Controller
     }
 
     public function hr_index($id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),428);
         $fnf = FnfSectionEmployee::find($id);
         if($fnf){
             if($fnf->hod_approval){
@@ -542,6 +554,7 @@ class AdminFnfController extends Controller
     }
 
     public function hod_approval_index($id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),4227);
       $fnf = FnfSectionEmployee::find($id);
       $employee = Employee::where('id',$fnf->employee_id)->first();
       if($fnf->hod_approval){
@@ -596,6 +609,7 @@ class AdminFnfController extends Controller
            $hr->penalty = $request->penalty;
            $hr->van_deduction = $request->deduction;
            $hr->comments = $request->comments;
+           $hr->status_id = 4;
            $hr->save();
 
            $fnf = FnfSectionEmployee::where('id', $fnf_id)->first();
@@ -615,6 +629,7 @@ class AdminFnfController extends Controller
    }
 
    public function edit_fnf_request($id){
+       ActivityTrailController::createActivityTrailLog(Auth::id(),429);
         $fnf = FnfSectionEmployee::find($id);
         $designations = EmployeeDesignation::all();
         $departments  = AdminDepartment::all();
@@ -665,11 +680,11 @@ class AdminFnfController extends Controller
     }
 
     public function fnf_history_index($id){
+    ActivityTrailController::createActivityTrailLog(Auth::id(),430);
      return view('admin.human_resource.fnf.history',compact('id'));
     }
 
     public function status_history_list(Request $request){
-
         $fnf = FnfStatusJourney::join('fnf_section_employees as fnf','fnf.id','=','fnf_status_journeys.fnf_id')
             ->join('fnf_sections as fs','fs.id','=','fnf_status_journeys.section_id')
             ->join('fnf_statuses as fss','fss.id','=','fnf_status_journeys.status_id')

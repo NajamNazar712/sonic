@@ -22,6 +22,7 @@ class UpdateModulePermissionForFnf extends Seeder
             array('id' => 575, 'name' => 'FNF HOD - View ', 'module_id' => 28),
             array('id' => 576, 'name' => 'FNF HR - View ', 'module_id' => 28),
             array('id' => 577, 'name' => 'FNF Edit - View ', 'module_id' => 28),
+            array('id' => 578, 'name' => 'FNF History - View ', 'module_id' => 28),
         ));
     }
 }
