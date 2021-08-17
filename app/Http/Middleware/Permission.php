@@ -1014,7 +1014,11 @@ class Permission
             'rider_delivery_note_otp.index' => 563,
             'rider_delivery_note_otp.list' => 563,
 
+            'settings.last_mile_cron.index' => 565,
+
             'settings.ccd_booking.index' => 558,
+
+
            
         ],
 
