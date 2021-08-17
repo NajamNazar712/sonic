@@ -14,13 +14,14 @@
                     <h4><b>Tracking Number: {{$shipment->tracking_number}}</b></h4>
                 </div>
                 <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
+
+                </div>
+                <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}">
+                @csrf
                     <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
                         <option value="1" selected>Different Consignee</option>
                         <option value="2">Same Consignee</option>
                     </select>
-                </div>
-                <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}">
-                @csrf
                     <input type="hidden" name="shipment_id" value="{{$shipment['id']}}">
                     <div class="row justify-content-center">
                         <div class="col col_custom mr-5">

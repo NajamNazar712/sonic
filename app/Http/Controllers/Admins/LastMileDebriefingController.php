@@ -44,7 +44,31 @@ class LastMileDebriefingController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 233);
         $hubs = City::where('hub', 1)->get();
 
-        return view('admin.debriefing.supervisor')->with(['hubs' => $hubs]);
+        $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time = $settings->text;
+        }
+        else {
+            $time = '00:00:00';
+        }
+        $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+        if(Carbon::now() > $time){
+            $time = $time->addDays(1);
+        }
+        $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
+
+
+        $bot_admin_id = $bot_sms->setting_value;
+
+
+        $agents_count = AgentCallMonitoring::where('agent_id', '!=', $bot_admin_id)->where('created_at','>=',Carbon::today())
+            ->where('created_at','<=',$time)->count();
+
+        $bot_sms_count = AgentCallMonitoring::where('agent_id', '=', $bot_admin_id)->where('created_at','>=',Carbon::today())
+            ->where('created_at','<=',$time)->count();
+        return view('admin.debriefing.supervisor')->with(['hubs' => $hubs, 'agent_calls_assigned_count' => $agents_count, 'bot_sms_count' => $bot_sms_count]);
     }
 
     public function supervisor_agents(Request $request){
@@ -95,9 +119,17 @@ class LastMileDebriefingController extends Controller
         if(Carbon::now() > $time){
             $time = $time->addDays(1);
         }
+
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count')])
+//            ->leftjoin('agent_call_monitorings as acm', 'acm.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('agent_call_monitorings as acm', function ($join) {
+                $join->on('acm.delivery_note_id', '=', 'delivery_notes.id')
+                    ->where('acm.id', '=',
+                        DB::raw('(select max(id) from agent_call_monitorings where agent_call_monitorings.delivery_note_id = delivery_notes.id)'));
+            })
+            ->leftjoin('admins as agent', 'agent.id', '=', 'acm.agent_id')
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.received_cod_amount as pending_cash_collection', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count', 'delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 1) AS shipments_undelivered_count'), DB::raw('(SELECT COUNT(p.id) FROM delivery_notes AS p INNER JOIN delivery_note_shipments AS pdns ON p.id = pdns.delivery_note_id WHERE pdns.delivery_note_id = delivery_notes.id AND pdns.status = 0) AS shipments_pending_count'), 'agent.name as assigned_agent', DB::raw('(SELECT COUNT(f.id) FROM delivery_notes AS f INNER JOIN delivery_note_shipments AS fdns ON f.id = fdns.delivery_note_id WHERE fdns.delivery_note_id = delivery_notes.id AND fdns.fake_status = 1) AS shipments_fake_status_count'), 'agent.id as agent_id'])
             ->where('delivery_notes.created_at','>=',Carbon::today())
             ->where('delivery_notes.created_at','<=',$time)
             ->where('delivery_notes.status', 0);
@@ -159,6 +191,38 @@ class LastMileDebriefingController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('fake_shipments_link', function($deliveries) {
+                if ($deliveries->shipments_fake_status_count != 0) {
+                    $count_cell = '<div><button class="btn btn-sm btn-outline-info align-middle mb-1">' . $deliveries->shipments_fake_status_count . '</button></div><h4 class="success">'. round(($deliveries->shipments_fake_status_count / $deliveries->shipments_count) * 100, 2) .'%</h4>';
+                    return $count_cell;
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->addColumn('call_agent_ratio', function ($deliveries){
+                $call_overall_count = AgentCallMonitoring::where('delivery_note_id', $deliveries->delivery_note)->where('agent_id', $deliveries->agent_id)->count();
+                $call_completed_count = AgentCallMonitoring::where('delivery_note_id', $deliveries->delivery_note)->where('agent_id', $deliveries->agent_id)->where('completed', 1)->count();
+
+                $call_ratio = 0;
+                if($call_overall_count > 0){
+                    $call_ratio = ($call_completed_count / $call_overall_count) * 100;
+                    $call_ratio = $call_ratio . '%';
+                }
+
+                return $call_ratio;
+            })
+            ->addColumn('received_verify_delivery_ratio', function ($deliveries){
+                $verify_shipments_count = ShipmentsJourney::where('reference_1_id', $deliveries->delivery_note)->where('verification', 1)->where('shipper_status_id', '!=', 5)->count();
+                $verify_shipments_ratio = 0;
+                $total_shipments = $deliveries->shipments_count;
+                if($total_shipments > 0){
+                    $verify_shipments_ratio = ($verify_shipments_count / $total_shipments) * 100;
+                    $verify_shipments_ratio = $verify_shipments_ratio . '%';
+                }
+
+                return $verify_shipments_ratio;
+            })
             ->editColumn('rider', function ($rider) {
                 if($rider->special_rider){
                     return $rider->rider . ' (' . $rider->special_rider_name . ')';
@@ -170,11 +234,14 @@ class LastMileDebriefingController extends Controller
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-                <button type="button" class="dropdown-item assign_agent" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign Agent</div></button>
-                </div>
-              </div>  
-                ';
+                <div class="dropdown-menu dropdown-menu-sm">';
+                    $assign_agent = '<button type="button" class="dropdown-item assign_agent" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus"></i></div><div class="col-9 offset-1">Assign Agent</div></button>';
+                    $bot_sms = '<button type="button" class="dropdown-item bot_sms" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-message-circle"></i></div><div class="col-9 offset-1">Send BOT SMS</div></button>';
+
+                    $dropdown .= $assign_agent;
+                    $dropdown .= $bot_sms;
+
+                    $dropdown .='</div></div>';
                 return $dropdown;
                 
             });
@@ -398,7 +465,7 @@ class LastMileDebriefingController extends Controller
         ->where('created_at','<=',$time)->where('completed',0)->count();
 
         $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
-                ->where('shipper_status_id','=',13)
+                ->where('shipper_status_id','=',5)
                 ->where('verification','=',1)
                 ->select(DB::raw('count(shipment_id) as reattempts'))
                 ->get()->first();
@@ -600,6 +667,84 @@ class LastMileDebriefingController extends Controller
         else{
             return redirect()->back()->with('error', 'No Data found!');
         }
+
+    }
+
+    public function get_undelivered_shipments(Request $request){
+
+        $delivery_note_id = $request->delivery_note_id;
+        $delivery_note = DeliveryNote::find($delivery_note_id);
+        if($delivery_note){
+            $shipments_data = array();
+            $delivery_note_shipments = $delivery_note->delivery_note_undelivered_shipments;
+
+            if(count($delivery_note_shipments) > 0){
+                foreach ($delivery_note_shipments as $delivery_note_shipment){
+                    $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                    $shipments_data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
+                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('reference_1_id', $delivery_note_id)->latest()->first();
+
+                    $status = '';
+                    $reason = '';
+                    if ($shipment_journey) {
+                        $status = $shipment_journey->shipment_status_shipper->name;
+                        if($shipment_journey->status_reason_id){
+                            $reason = $shipment_journey->shipment_status_reason->name;
+                        }
+                    }
+                    $shipments_data[$shipment->id]['status'] = $status;
+                    $shipments_data[$shipment->id]['reason'] = $reason;
+
+                }
+
+                return response()->json(['status' => 0, 'shipments_data' => $shipments_data]);
+            }
+            return response()->json(['status' => 1, 'error' => 'No undelived shipments found!']);
+        }
+        else{
+            return response()->json(['status' => 1, 'error' => 'Something went wrong!!']);
+        }
+    }
+
+    public function send_sms_to_undelivered_shipments(Request $request){
+
+        $delivery_note_id = $request->delivery_note_id;
+        $shipment_ids = $request->shipment_ids;
+        if(count($shipment_ids) > 0){
+            foreach ($shipment_ids as $shipment_id => $status){
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('reference_1_id', $delivery_note_id)->latest()->first();
+                $bot_admin_id = NULL;
+                if ($shipment_journey) {
+                    $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
+
+                    if($bot_sms){
+                        $bot_admin_id = $bot_sms->setting_value;
+                    }
+                    ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);
+                }
+
+                $agent_call_monitoring = AgentCallMonitoring::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
+                if($agent_call_monitoring->exists()){
+                    $agent_call_monitoring = $agent_call_monitoring->first();
+                    $agent_call_monitoring->agent_id = $bot_admin_id;
+                    $agent_call_monitoring->completed = 1;
+                    $agent_call_monitoring->save();
+                }
+                else{
+                    $agent_call_monitoring = new AgentCallMonitoring();
+                    $agent_call_monitoring->agent_id = $bot_admin_id;
+                    $agent_call_monitoring->shipment_id = $shipment_id;
+                    $agent_call_monitoring->delivery_note_id = $delivery_note_id;
+                    $agent_call_monitoring->completed = 1;
+                    $agent_call_monitoring->save();
+                }
+
+
+                NotificationsController::send(145, $shipment_id, $delivery_note_id);
+            }
+            return redirect()->back()->with('success', 'SMS send successfully!');
+        }
+        return redirect()->back()->with('error', 'Something went wrong, try again!');
 
     }
 }

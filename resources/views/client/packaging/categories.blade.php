@@ -36,7 +36,7 @@
 
                                                     <div class="col-6">
                                                         <div class="col mb-1 text-center border border-3 box_padding">
-                                                            <img class="category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
+                                                            <img class="img-thumbnail category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-dark select_category"><b>Packaging Materials</b></a>
@@ -45,7 +45,7 @@
                                                    
                                                     <div class="col-6">
                                                         <div class="col mb-1 text-center border border-3 box_padding">
-                                                            <img class="category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
+                                                            <img class="img-thumbnail category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-dark select_category"><b>Stationary Items</b></a>
@@ -113,8 +113,9 @@
             margin: 120px 20px;
         }
         .category_banner{
-            width: 500px;
-            height: 230px;
+            /* width: 500px; */
+            height: 200px;
+            border: none;
         }
         .box_padding{
             padding-top: 35px; 
