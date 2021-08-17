@@ -659,7 +659,6 @@ class AdminPackagingMaterialController extends Controller
                     return response()->json(['status' => 0, 'error'=> $invalid_products. ' does\'nt exists in requested hub!']);
                 }
                 $flag = true;
-                dd($trax_address->id);
                 foreach ($request_details->items as $item){
                     $product_barcodes = WmsProductBarcode::join('wms_store_requests as wsr', 'wsr.id', '=', 'wms_product_barcodes.store_request_id')->where('wms_product_barcodes.product_id', $item->wms_product_id)->where('wsr.warehouse_pickup_address_id', $trax_address->id)->whereNull('wms_product_barcodes.shipment_id')->where('wms_product_barcodes.status', 3)->count();
                     if($product_barcodes < $item->quantity){
