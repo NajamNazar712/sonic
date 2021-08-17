@@ -3962,7 +3962,8 @@ class APIController extends Controller
                         } else {
                             //different consignee
                             $rules = [
-                                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
+                              
+                                'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1)],
                                 'consignee_name' => ['required', 'between:1,100'],
                                 'consignee_address' => ['required', 'between:1,255'],
                                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
@@ -3989,7 +3990,7 @@ class APIController extends Controller
                                 }
 
                                 if ($shipment->shipper_status_id == 12) {
-                                    if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
+                                    if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $request->amount) {
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
