@@ -51,7 +51,7 @@ class AdminFnfController extends Controller
          ->join('employee_designations as ed','ed.id','=','employees.designation_id')
          ->join('cities as c','c.id','=','employees.city_id')
          ->join('fnf_statuses as fs','fs.id','=','fnf.status_id')
-         ->select(['fnf.id as id','fnf.id as fnf_id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee','fs.name as status']);
+         ->select(['fnf.id as id','fnf.id as fnf_id','employees.name','employees.city_id','employees.phone_number','a.name as line_manager','ah.name as hod','d.name as department','ed.name  as designation','employees.id as employee_id','employees.trax_id','c.id as city_id','c.name as city','employees.name as employee_name','fnf.status_id as status_id','fnf.joining_date','fnf.resign_date','fnf.created_at','h.name as created_by','employees.id as employee','fs.name as status','fnf.hod as hod_id','fnf.line_manager as reporting_manager']);
 
      $datatables = Datatables::of($employee)
          ->editColumn('fnf_id',function ($fnf) {
@@ -65,7 +65,7 @@ class AdminFnfController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
 
-                 if (session('role_id') == 1 || in_array(570, session('permissions'))) {
+                 if (session('role_id') == 1 || $result->reporting_manager == Auth::id() || in_array(570, session('permissions'))) {
                      $dropdown .= '<button type="button" class="dropdown-item rm_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reporting Manager View</div></button>';
 
                  }
@@ -85,7 +85,7 @@ class AdminFnfController extends Controller
                      $dropdown .= '<button type="button" class="dropdown-item finance_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Finance View</div></button>';
 
                  }
-                 if (session('role_id') == 1 || in_array(575, session('permissions'))) {
+                 if (session('role_id') == 1 || $result->hod_id == Auth::id() || in_array(575, session('permissions'))) {
                      $dropdown .= '<button type="button" class="dropdown-item hod_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HOD View</div></button>';
 
                  }
@@ -93,7 +93,7 @@ class AdminFnfController extends Controller
                      $dropdown .= '<button type="button" class="dropdown-item hr_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HR View</div></button>';
 
                  }
-                 if (session('role_id') == 1 || in_array(577, session('permissions'))) {
+                 if ((session('role_id') == 1 || in_array(577, session('permissions'))) && $result->status_id != 4 ) {
                      $dropdown .= '<button type="button" class="dropdown-item update" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update FNF Request</div></button>';
 
                  }
@@ -185,6 +185,7 @@ class AdminFnfController extends Controller
             $data['name'] =  $employee->name;
             $data['designation'] =  $employee->designation_id;
             $data['department'] =  $employee->department_id;
+            $data['city'] =  $employee->city->name;
             return response()->json(['status' => 1, 'data' => $data]);
         }
         else{

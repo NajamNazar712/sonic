@@ -241,7 +241,7 @@
 
                     {data: 'fnf_id', name: 'fnf.id', class: 'align-middle fnf_id'},
                     {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
-                    {data: 'employee_name', name: 'employee.name', class: 'align-middle employee_name'},
+                    {data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name'},
                     {data: 'city', name: 'c.name', class: 'align-middle city'},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'department', name: 'd.name', class: 'align-middle department'},

@@ -13,7 +13,7 @@
             <label for="name">
                 Name:
             </label>
-            <input type="text" id="designation" name="overtime" class="form-control" placeholder="Name" value="{{$employee->designation->name}}" disabled>
+            <input type="text" id="designation" name="overtime" class="form-control" placeholder="Name" value="{{$employee->name}}" disabled>
         </div>
     </div>
 </div>

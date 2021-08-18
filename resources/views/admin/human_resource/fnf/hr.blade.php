@@ -521,7 +521,7 @@
                                          <button type="submit" id="submit_hr_info" class="btn btn-primary">Submit</button>
                                         @endif
                                         @if($hod_approval != null && $hod_approval == 2)
-                                             <button type="submit" id="hr_confirm" class="btn btn-success">Confirm</button>
+                                             <button type="submit" id="hr_confirm" class="btn btn-success">Complete Request</button>
                                         @endif
                                     </div>
                                 </div>
