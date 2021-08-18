@@ -4032,7 +4032,7 @@ class APIController extends Controller
                                             $shipment->intercepted = 1;
                                             $shipment->save();
 
-                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
                                     } else {
