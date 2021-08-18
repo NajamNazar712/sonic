@@ -3842,7 +3842,8 @@ class APIController extends Controller
                     }
                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated']);
 
-                } elseif ($request->type == 2) {
+                }
+                elseif ($request->type == 2) {
 
                     if ($request->filled('remark')) {
                         $remark = $request->remark;
@@ -3877,7 +3878,8 @@ class APIController extends Controller
                     }
                     return response()->json(['status' => 1, 'message' => 'Shipment not found!']);
 
-                } elseif ($request->type == 3) {
+                }
+                elseif ($request->type == 3) {
                     $rules = [
                         'consignee_type' => ['required', 'integer', 'between:1,2'],
                     ];
@@ -3989,7 +3991,7 @@ class APIController extends Controller
                                 }
 
                                 if ($shipment->shipper_status_id == 12) {
-                                    if ($shipment->consignee_city_id != $request->consignee_city || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $amount) {
+                                    if ($shipment->consignee_city_id != $request->consignee_city_id || $shipment->consignee_name != $request->consignee_name || $shipment->consignee_address != $request->consignee_address || $shipment->consignee_phone_number_1 != $phone_number || $shipment->consignee_phone_number_2 != $phone_number2 || $shipment->consignee_email != $request->consignee_email || $shipment->amount != $request->amount) {
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
@@ -3997,7 +3999,7 @@ class APIController extends Controller
                                             $amount = (int) $s_amount;
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
-                                                'consignee_city_id' => $request->consignee_city,
+                                                'consignee_city_id' => $request->consignee_city_id,
                                                 'consignee_name' => $request->consignee_name,
                                                 'consignee_address' => $request->consignee_address,
                                                 'consignee_phone_number_1' => $phone_number,
