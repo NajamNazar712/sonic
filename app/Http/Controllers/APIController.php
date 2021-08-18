@@ -3793,6 +3793,8 @@ class APIController extends Controller
     public function rcp_request_create(Request $request)
     {
         $user_id = $request->user_id;
+
+
         $rules = [
             'type' => ['required', 'integer', 'digits_between:1,3'],
             'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
@@ -3805,10 +3807,24 @@ class APIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
+        }
+        else {
             $shipment = Shipment::where('tracking_number', $request->tracking_number);
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+                $shipping_mode_id = $shipment->shipping_mode_id;
+                Validator::extend('destination_check', function ($attribute, $value, $parameters, $validator) use ($user_id, $shipping_mode_id) {
+
+                    if ($value) {
+                        $result = ShipperShipmentBookController::check_destination($value, $shipping_mode_id, $user_id, 2);
+                        if ($result) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                });
+
                 if ($request->type == 1) {
                     if ($request->filled('remark')) {
                         $remark = $request->remark;
