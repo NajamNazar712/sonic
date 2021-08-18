@@ -3964,6 +3964,7 @@ class APIController extends Controller
                         } else {
                             //different consignee
                             $rules = [
+                              
                                 'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('cities', 'id')->where('business_category_id', 1), 'destination_check'],
                                 'consignee_name' => ['required', 'between:1,100'],
                                 'consignee_address' => ['required', 'between:1,255'],
