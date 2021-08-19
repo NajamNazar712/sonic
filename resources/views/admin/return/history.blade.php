@@ -94,6 +94,8 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">No. of Shipments</th>
                             <th class="border-primary border-darken-1">Date Added</th>
                             <th class="border-primary border-darken-1">Image</th>
                             <th class="border-primary border-darken-1"></th>
@@ -107,6 +109,7 @@
                     <form id="return_note_upload_form" class="form" action="{{route('admin.return.receive.upload_image')}}" method="post" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="image_return_note_id" id="image_return_note_id"/>
+                        <input type="hidden" name="shipper_id" id="shipper_id"/>
                         <input type="hidden" name="selected_ids" id="selected_ids"/>
                         <table class="table table-bordered datatable" id="return_upload_table" style="z-index: 3;">
                             <thead>
@@ -115,6 +118,7 @@
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Image</th>
                                 <th class="border-primary border-darken-1"></th>
+                                <th class="border-primary border-darken-1">Shipper</th>
 
                             </tr>
                             </thead>
@@ -456,7 +460,10 @@
             });
 
             var selected_rows = [];
+            var selected_shipper = [];
             var rows_count = 0;
+            var shipperdata=[];
+            var Sno=1;
             $('#datatable tbody').on('click', 'tr td.image a.image-popup', function () {
                var return_note_id = $(this).parents('tr').attr('id');
                if(return_note_id){
@@ -471,21 +478,31 @@
                         if(data.status == 0) {
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '';
-                            $.each(data.images, function (index, image) {
+                            shipperdata=data.shippers;
+                            $.each(data.details, function (index, detail) {
                                 index++;
-                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                                var img = '';
                                 var remove = '';
-                            @if (session('role_id') == 1 || in_array(109, session('permissions')))
+                                @if (session('role_id') == 1 || in_array(109, session('permissions')))
                                 remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
                             @endif
-                                image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                                if(Array.isArray(detail.images)){
+                                    detail.images.forEach(function(image){
+                                        img += '<div class="col mb-1"><a class="btn btn-sm btn-outline-info align-middle" href="' + image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a></div>';
+                                    });
+
+                                    image_html += '<tr id="' + detail.id + '"><td hidden>' + detail.shipperid + '</td><td>' + (Sno++) + '</td><td>' + detail.shipper + '</td><td>' + detail.noOfshipment + '</td><td>' + detail.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                                }
+                                else{
+                                    img += '<div class="col mb-1"><a class="btn btn-sm btn-outline-info align-middle" href="' + detail.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a></div>';
+                                    image_html += '<tr id="' + detail.id + '"><td hidden>' + detail.shipperid + '</td><td>' + (Sno++) + '</td><td> - </td><td> - </td><td>' + detail.date + '</td><td>' + img + '</td><td>' + remove + '</td></tr>';
+                                }
                             });
                             $('#return_note_image_view_table tbody').append(image_html);
                             $('#uploadReturnNote').modal('show');
                         }else if(data.status == 2){
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
-
                             $('#return_note_image_view_table tbody').append(image_html);
                             $('#uploadReturnNote').modal('show');
                         }else{
@@ -511,18 +528,32 @@
             var return_image_table;
             function add_row() {
                 rows_count++;
-
+                console.log(shipperdata.length);
                 var return_image = '<input class="form-control form-control-sm" type="file" name="return_note_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                var shipper='<select name="shipper_name[]" id="shipper_name_' + rows_count + '" class="form-control select2" data-rule-required="true" data-msg-required="Shipper is required"">'; 
+                    for(var c= 0;c<shipperdata.length;c++)
+                    {
+                    shipper += '<option value="' + shipperdata[c].id + '">' + shipperdata[c].name + '</option>'
+                    }
+                    shipper += '</select>';
+            
                 if(rows_count == 1){
                     var remove = '';
                 }else{
                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
                 }
-                return_image_table.row.add([0, return_image,remove]).node().id = rows_count;
+                return_image_table.row.add([0, return_image,remove,shipper]).node().id = rows_count;
                 return_image_table.draw(true);
+                
+                $('#shipper_name_' + rows_count).prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Shipper",
+                        width:'100%',
+                        allowClear:true
+                });
                 $('#ReturnNoteImageSubmitButton').attr('disabled', false);
                 selected_rows.push(rows_count);
+                selected_shipper.push(rows_count);
             }
             return_image_table = $('#return_upload_table').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -540,6 +571,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {name: 'image', class: 'align-middle image form-group'},
                     {name: 'action', class: 'align-middle action'},
+                    {name: 'shipper_name', class: 'align-middle image form-group'},
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -556,7 +588,9 @@
 
             $('#return_note_image_view_table').on('click','a.remove_row', function () {
                var row_id = $(this).parents('tr').attr('id');
+               var user_id = $(this).closest("tr").find("td:eq(0)").text();
                var return_id = $('#image_return_note_id').val();
+               alert(user_id);
                var current = $(this);
                if(row_id){
                    swal({
@@ -588,6 +622,7 @@
                                data: {
                                    'return_note_image_id': row_id,
                                    'return_note_id':return_id,
+                                   'user_id':user_id,
                                    '_token': '{{ csrf_token() }}'
                                }
                            }).done(function (data) {

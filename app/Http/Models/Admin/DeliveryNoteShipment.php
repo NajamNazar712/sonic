@@ -52,4 +52,5 @@ class DeliveryNoteShipment extends Model
 		return $this->belongsTo('App\Http\Models\Admin\Admin', 'admin_id', 'id');
 
 	}
+
 }

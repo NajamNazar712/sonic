@@ -162,6 +162,8 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">No. of Shipments</th>
                             <th class="border-primary border-darken-1">Date Added</th>
                             <th class="border-primary border-darken-1">Image</th>
 
@@ -490,6 +492,7 @@
 
             });
 
+            var Sno = 1;
             $('#datatable tbody').on('click', 'tr td.image a.image-popup', function () {
                 var return_note_id = $(this).parents('tr').attr('id');
                 if(return_note_id){
@@ -504,10 +507,20 @@
                         if(data.status == 0) {
                             $('#image_return_note_id').val(return_note_id);
                             var image_html = '';
-                            $.each(data.images, function (index, image) {
+                            $.each(data.details, function (index, detail) {
                                 index++;
-                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                                    image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td></tr>';
+                                var img = '';
+                                if(Array.isArray(detail.images)){
+                                    detail.images.forEach(function(image){
+                                        img += '<div class="col mb-1"><a class="btn btn-sm btn-outline-info align-middle" href="' + image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">Fetch</span></a></div>';
+                                    });
+
+                                    image_html += '<tr id="' + detail.id + '"><td>' + (Sno++) + '</td><td>' + detail.shipper + '</td><td>' + detail.noOfshipment + '</td><td>' + detail.date + '</td><td>' + img + '</td></tr>';
+                                }
+                                else{
+                                    img += '<div class="col mb-1"><a class="btn btn-sm btn-outline-info align-middle" href="' + detail.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">Fetch</span></a></div>';
+                                    image_html += '<tr id="' + detail.id + '"><td>' + (Sno++) + '</td><td> - </td><td> - </td><td>' + detail.date + '</td><td>' + img + '</td></tr>';
+                                }
                             });
                             $('#return_note_image_view_table tbody').append(image_html);
                             $('#uploadReturnNote').modal('show');

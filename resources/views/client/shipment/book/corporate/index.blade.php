@@ -1710,6 +1710,11 @@
                         $('#amount').val('');
                     }
                 });
+
+                var shipping_mode_id = $('#shipping_mode').val();
+                if(shipping_mode_id){
+                    check_city_booking_allow();
+                }
             });
 
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({

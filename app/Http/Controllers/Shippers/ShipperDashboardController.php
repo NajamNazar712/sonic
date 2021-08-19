@@ -61,6 +61,7 @@ use App\Http\Models\Shipper\UserOtpVerification;
 use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\WeightCharge;
@@ -94,6 +95,7 @@ use App\Http\Models\Segment;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use App\Http\Controllers\NotificationsController;
@@ -1135,7 +1137,7 @@ class ShipperDashboardController extends Controller
             $overland_origins = [];
             $detain_origins = [];
             $sameday_origins = [];
-            if(count($rate_origin_hubs) > 0){
+            if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                 foreach($rate_origin_hubs as $index => $origin){
 
                     if($index == 1){
@@ -1165,7 +1167,7 @@ class ShipperDashboardController extends Controller
             $overland_destinations = [];
             $detain_destinations = [];
             $sameday_destinations = [];
-            if(count($rate_destination_hubs) > 0){
+            if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                 foreach($rate_destination_hubs as $index => $destination){
 
                     if($index == 1){
@@ -1234,7 +1236,7 @@ class ShipperDashboardController extends Controller
                 $overland_origins = [];
                 $detain_origins = [];
                 $sameday_origins = [];
-                if(count($rate_origin_hubs) > 0){
+                if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                     foreach($rate_origin_hubs as $index => $origin){
 
                         if($index == 1){
@@ -1264,7 +1266,7 @@ class ShipperDashboardController extends Controller
                 $overland_destinations = [];
                 $detain_destinations = [];
                 $sameday_destinations = [];
-                if(count($rate_destination_hubs) > 0){
+                if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                     foreach($rate_destination_hubs as $index => $destination){
 
                         if($index == 1){
@@ -1331,7 +1333,7 @@ class ShipperDashboardController extends Controller
                 $overland_origins = [];
                 $detain_origins = [];
                 $sameday_origins = [];
-                if(count($rate_origin_hubs) > 0){
+                if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                     foreach($rate_origin_hubs as $index => $origin){
 
                         if($index == 1){
@@ -1361,7 +1363,7 @@ class ShipperDashboardController extends Controller
                 $overland_destinations = [];
                 $detain_destinations = [];
                 $sameday_destinations = [];
-                if(count($rate_destination_hubs) > 0){
+                if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                     foreach($rate_destination_hubs as $index => $destination){
 
                         if($index == 1){
@@ -1578,6 +1580,28 @@ class ShipperDashboardController extends Controller
 
     public function agreement_status(Request $request){
         if(session()->has('agreement_signed') && session('agreement_signed') != 1){
+            $encoded_image = explode(",", $request->esign)[1];
+            $decoded_image = base64_decode($encoded_image);
+
+            $user_attachment = UserDocumentAttachment::where('user_id',session('user_id'));
+            if($user_attachment->exists())
+            {
+                $user_attachment = $user_attachment->first();
+            }
+            else{
+                $user_attachment = new UserDocumentAttachment();
+                $user_attachment->user_id = session('user_id');
+
+            }
+
+            $date = Carbon::now()->format('Y_m_d');
+            if($user_attachment->e_sign_image != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->e_sign_image);
+            }
+            $filename = 'e_sign_image_' . $date . '_' . session('user_id') . '.png';
+            Storage::disk('public')->put('users_attached_documents/'. session('user_id') .'/'.$filename, $decoded_image);
+            $user_attachment->e_sign_image = $filename;
+            $user_attachment->save();
             session(['agreement_signed' => 1]);
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
         }

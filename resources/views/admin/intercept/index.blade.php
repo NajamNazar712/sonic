@@ -13,14 +13,15 @@
                 <div class="text-center mb-2">
                     <h4><b>Tracking Number: {{$shipment->tracking_number}}</b></h4>
                 </div>
-                <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
-                    <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
-                        <option value="1" selected>Different Consignee</option>
-                        <option value="2">Same Consignee</option>
-                    </select>
-                </div>
+
                 <form id="intercept_form" class="form-horizontal" method="post" action="{{route('admin.intercept.update')}}">
                 @csrf
+                    <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
+                        <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
+                            <option value="1" selected>Different Consignee</option>
+                            <option value="2">Same Consignee</option>
+                        </select>
+                    </div>
                     <input type="hidden" name="shipment_id" value="{{$shipment['id']}}">
                     <div class="row justify-content-center">
                         <div class="col col_custom mr-5">
@@ -51,6 +52,7 @@
                             <div class="form-group">
                                 <input type="text" name="consignee_phone_number_2" class="form-control phone_number" value="{{$shipment['consignee_phone_number_2']}}" placeholder="Phone Number 2">
                             </div>
+                                <input type="text" name="intercept_type" id="intercept_type" class="form-control hidden" placeholder="Phone Number 2">
 
                             <div class="form-group">
                                 <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
@@ -119,6 +121,7 @@
 
                   var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                   $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
+                  $('#intercept_type').val(2);
                   $('#consignee_city').addClass('disabled')  //disable class
                       .prop({'name' : 'new_consignee_city'  , disabled : true}); //change name and disbale
                   $( "#consignee_name" ).prop('readonly', true);
@@ -128,6 +131,7 @@
               else{
                   $( "#consignee_name" ).prop('readonly', false);
                   $( "#consignee_email" ).prop('readonly', false);
+                  $('#intercept_type').val(1);
                   $( "#amount" ).prop('readonly', false);
                   $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
                   $('#consignee_city').removeClass('disabled')  //remove disable class
