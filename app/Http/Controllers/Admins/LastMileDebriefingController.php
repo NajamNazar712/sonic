@@ -723,12 +723,22 @@ class LastMileDebriefingController extends Controller
                     ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);
                 }
 
-                $agent_call_monitoring = new AgentCallMonitoring();
-                $agent_call_monitoring->agent_id = $bot_admin_id;
-                $agent_call_monitoring->shipment_id = $shipment_id;
-                $agent_call_monitoring->delivery_note_id = $delivery_note_id;
-                $agent_call_monitoring->completed = 1;
-                $agent_call_monitoring->save();
+                $agent_call_monitoring = AgentCallMonitoring::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
+                if($agent_call_monitoring->exists()){
+                    $agent_call_monitoring = $agent_call_monitoring->first();
+                    $agent_call_monitoring->agent_id = $bot_admin_id;
+                    $agent_call_monitoring->completed = 1;
+                    $agent_call_monitoring->save();
+                }
+                else{
+                    $agent_call_monitoring = new AgentCallMonitoring();
+                    $agent_call_monitoring->agent_id = $bot_admin_id;
+                    $agent_call_monitoring->shipment_id = $shipment_id;
+                    $agent_call_monitoring->delivery_note_id = $delivery_note_id;
+                    $agent_call_monitoring->completed = 1;
+                    $agent_call_monitoring->save();
+                }
+
 
                 NotificationsController::send(145, $shipment_id, $delivery_note_id);
             }

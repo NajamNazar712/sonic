@@ -95,6 +95,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
+        'App\Console\Commands\LastMileStatusReport',
     ];
 
     /**
