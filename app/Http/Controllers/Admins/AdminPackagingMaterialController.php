@@ -813,7 +813,7 @@ class AdminPackagingMaterialController extends Controller
                 $shipment_id = $packaging_material_request->shipment_id;
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
-                    if($shipment->warehouse_order_status == 2 || $shipment->warehouse_order_status == 3){
+                    if($shipment->warehouse_order_status == 2 || $shipment->warehouse_order_status == 3 || $shipment->warehouse_order_status == 8){
                         $shipment->warehouse_order_status = 9;
                         $shipment->shipper_status_id = 17;
                         $shipment->consignee_status_id = 17;
