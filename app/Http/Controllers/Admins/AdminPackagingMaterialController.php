@@ -796,7 +796,7 @@ class AdminPackagingMaterialController extends Controller
         $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->first();
 
         if($packaging_material_request->status_id > 2){
-            return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already confirmed']);
+            return response()->json(['status' => 0, 'error' => 'Cancellation failed, Request is already processed!']);
         }
         else{
             if($packaging_material_request->status_id == 1){
@@ -813,29 +813,34 @@ class AdminPackagingMaterialController extends Controller
                 $shipment_id = $packaging_material_request->shipment_id;
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
+                    if($shipment->warehouse_order_status == 2 || $shipment->warehouse_order_status == 3){
+                        $shipment->warehouse_order_status = 9;
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
 
-                    $shipment->warehouse_order_status = 9;
-                    $shipment->shipper_status_id = 17;
-                    $shipment->consignee_status_id = 17;
+                        ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
+                        $shipment->save();
 
-                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
-                    $shipment->save();
-
-                    $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
-                    if($shipment_products){
-                        foreach ($shipment_products as $shipment_product){
-                            $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
-                            if($current_stock_addition){
-                                $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
-                                $current_stock_addition->save();
+                        $shipment_products = WmsShipmentProduct::where('shipment_id', $shipment->id)->where('courier_id', 1)->get();
+                        if($shipment_products){
+                            foreach ($shipment_products as $shipment_product){
+                                $current_stock_addition = WmsCurrentStock::where('product_id', $shipment_product->product_id)->where('warehouse_pickup_address_id', $shipment->pickup_address_id)->first();
+                                if($current_stock_addition){
+                                    $current_stock_addition->stock = $current_stock_addition->stock + $shipment_product->quantity;
+                                    $current_stock_addition->save();
+                                }
                             }
                         }
-                    }
-                    $packaging_material_request->status_id = 6;
-                    $packaging_material_request->save();
+                        $packaging_material_request->status_id = 6;
+                        $packaging_material_request->save();
 
-                    WmsProductBarcode::where('shipment_id', $shipment_id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
-            }
+                        WmsProductBarcode::where('shipment_id', $shipment_id)->where('courier_id', 1)->update(['shipment_id' => null, 'courier_id' => null, 'picklist_id' => null]);
+
+                    }
+                    else{
+                        return response()->json(['status' => 0, 'error' => 'Cancellation failed, not ready to be cancelled!']);
+                    }
+                }
             return response()->json(['status' => 1, 'success' => 'Request cancelled successfully!']);
          }
     }
