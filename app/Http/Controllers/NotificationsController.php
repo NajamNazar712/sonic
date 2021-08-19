@@ -8075,7 +8075,7 @@ class NotificationsController extends Controller
                         $body_updated = str_replace('[preview]', $html, $body_updated);
                         $subject = 'Return Confirm Mail';
                         $to = $data->email;
-                        self::email($subject, $body_updated, $to, $cc, NULL, 'return@trax.pk');
+                        self::email($subject, $body_updated, $to, NULL, NULL, 'return@trax.pk');
 
                     }
 
