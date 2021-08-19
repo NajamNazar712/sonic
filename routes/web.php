@@ -296,6 +296,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipperReportsController@confirmation_shipments_index')->name('index');
             Route::get('list', 'Shippers\ShipperReportsController@confirmation_shipments_list')->name('list');
         });
+        Route::prefix('daraz_mis')->name('daraz_mis.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@daraz_mis_index')->name('index');
+            Route::get('list','Shippers\ShipperReportsController@daraz_mis_list')->name('list');
+        });
     });
 
     Route::prefix('rates')->name('rates.')->group(function (){
