@@ -3183,7 +3183,8 @@ class NotificationsController extends Controller
 
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
+
+                                self::email($subject, $body, $to, NULL, NULL, 'return@trax.pk');
 
 
                                 $subject = $original_subject;
