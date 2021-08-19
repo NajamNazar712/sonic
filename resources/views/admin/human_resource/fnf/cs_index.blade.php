@@ -24,7 +24,7 @@
                                 <input type="hidden" name="approval" id="approval">
                                 <fieldset>
                                     @include('admin.human_resource.fnf.employee_data')
-                                    <h3 class="text-center mt-2 mb-2"><strong>Payments</strong></h3>
+                                    <h3 class="text-center mt-2 mb-2"><strong>Deductions</strong></h3>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">

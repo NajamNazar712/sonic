@@ -130,7 +130,7 @@
                                     @if($fnf->customer_experience)
                                         <hr>
                                         <h3 class="text-center mt-2 mb-2"><strong>Customer Experience</strong></h3>
-                                        <h6 class="text-center mt-2 mb-2"><strong>Payments</strong></h6>
+                                        <h6 class="text-center mt-2 mb-2"><strong>Deductions</strong></h6>
                                         <div class="row mb-1">
                                             <div class="col-md-6">
                                                 <div class="form-group">

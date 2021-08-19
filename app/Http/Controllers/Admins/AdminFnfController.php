@@ -58,7 +58,7 @@ class AdminFnfController extends Controller
             return 'FNF'.$fnf->fnf_id;
          })
          ->addColumn("actions", function ($result) {
-             if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577], session('permissions'))) !== 0) {
+             if (session('role_id') == 1 || count(array_intersect([570,571,572,573,574,575,576,577,578], session('permissions'))) !== 0) {
                  $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -93,7 +93,7 @@ class AdminFnfController extends Controller
                      $dropdown .= '<button type="button" class="dropdown-item hr_view" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">HR View</div></button>';
 
                  }
-                 if ((session('role_id') == 1 || in_array(577, session('permissions'))) && $result->status_id != 4 ) {
+                 if ((session('role_id') == 1 || $result->reporting_manager == Auth::id() || in_array(577, session('permissions'))) && $result->status_id != 4 ) {
                      $dropdown .= '<button type="button" class="dropdown-item update" data-target-id=' . $result->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update FNF Request</div></button>';
 
                  }

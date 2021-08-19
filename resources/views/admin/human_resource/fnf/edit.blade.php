@@ -71,6 +71,17 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="shipper_poc">
+                                                   City:
+                                                    <span class="danger">*</span>
+                                                </label>
+                                                <input type="text" class="form-control required" placeholder="City" name="city" id="city" data-rule-required="true" data-msg-required="Name is required" disabled value="{{$fnf->employee->city->name}}">
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="row mb-1">
                                         <div class="col-md-6">
                                             <div class="form-group">

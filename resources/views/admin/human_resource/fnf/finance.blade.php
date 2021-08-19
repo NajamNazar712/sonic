@@ -130,7 +130,7 @@
             $('#submit_finance_info').on('click',function(){
                 if($('#comments').val() == '' || $('#comments').val() == null){
 
-                    var error = "At-least fill one field";
+                    var error = "Comments Cannot be Empty";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     return false;
