@@ -1155,7 +1155,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[status]', $shipment->status_shipper->name, $body);
                         }
 
-                        self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                        self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
 
                     }
                 } else if ($id == 16) {
@@ -2097,7 +2097,7 @@ class NotificationsController extends Controller
 //                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
 //                  }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
 
                                 $subject = $original_subject;
                                 $body = $original_body;
@@ -2251,7 +2251,7 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $on_request_admin->pluck('email')->toArray());
                                 }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
 
                                 $subject = $original_subject;
                                 $body = $original_body;
@@ -3183,7 +3183,7 @@ class NotificationsController extends Controller
 
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
 
 
                                 $subject = $original_subject;
@@ -8075,7 +8075,7 @@ class NotificationsController extends Controller
                         $body_updated = str_replace('[preview]', $html, $body_updated);
                         $subject = 'Return Confirm Mail';
                         $to = $data->email;
-                        self::email($subject, $body_updated, $to, $cc, NULL, 'returns@trax.pk');
+                        self::email($subject, $body_updated, $to, $cc, NULL, 'return@trax.pk');
 
                     }
 
@@ -8161,6 +8161,8 @@ class NotificationsController extends Controller
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
                     }
+
+                    $to[] = 'muhammad.waqas@trax.pk';
 
                     self::email($subject, $body, $to);
 

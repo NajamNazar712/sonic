@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Rider;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
@@ -234,6 +235,55 @@ class ShipperTrackingController extends Controller
                                 $details['payment_history'][] = $journey_details;
                             }
                         }
+
+                        $shipment_pickup_journey = $shipment->shipments_v2_pickup_journeys;
+
+                        if ($shipment_pickup_journey) {
+                            foreach ($shipment_pickup_journey as $journey) {
+                                $journey_details = array();
+
+                                $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                                $journey_details['status'] = $journey->status->name;
+                                if($journey->reason_id != NULL){
+                                    $journey_details['reason'] = $journey->reason->name;
+                                }
+                                else{
+                                    $journey_details['reason'] = '';
+                                }
+
+                                if ($journey->reference_1_id) {
+                                    $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+
+                                    if ($journey->reference_2_id) {
+                                        if ($journey->status_id == 2) {
+                                            $rider = Rider::find($journey->reference_2_id);
+                                            if($rider){
+                                                $journey_details['status'] .= $rider->name;
+                                            }
+
+                                        }
+                                        else {
+                                            $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                        }
+                                    }
+
+                                    $journey_details['status'] .= ')';
+                                }
+
+                                $admin = $journey->admin;
+
+                                if ($admin) {
+                                    $journey_details['user'] = $admin->name;
+                                }
+                                else {
+                                    $journey_details['user'] = '';
+                                }
+
+                                $details['pickup_history'][] = $journey_details;
+                            }
+                        }
+
+
                         $user_id = null;
                         $substitute_user_id = null;
                         if (session('user_type') == 1) {

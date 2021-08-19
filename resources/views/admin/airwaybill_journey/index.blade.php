@@ -112,6 +112,7 @@
                             shipment += '<th><strong>User Type</strong></th>';
                             shipment += '<th><strong>IP Address</strong></th>';
                             shipment += '<th><strong>Date / Time</strong></th>';
+                            shipment += '<th><strong>Department</strong></th>';
                             shipment += '</tr>';
                             shipment += '</thead>';
                             shipment += '<tbody>';
@@ -122,6 +123,7 @@
                                 shipment += '<td>' + history.account_type + '</td>';
                                 shipment += '<td>' + history.ip_address + '</td>';
                                 shipment += '<td>' + history.updated_at + '</td>';
+                                shipment += '<td>' + history.role_name + '</td>';
                                 shipment += '</tr>';
                             });
 

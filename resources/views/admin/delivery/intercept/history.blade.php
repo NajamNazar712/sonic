@@ -36,7 +36,7 @@
                         <th class="border-primary border-darken-1">New Consignee Phone 2</th>
                         <th class="border-primary border-darken-1">New Consignee Email</th>
                         <th class="border-primary border-darken-1">New Amount</th>
-
+                        <th class="border-primary border-darken-1">Intercept Type </th>
                     </tr>
                     </thead>
                 </table>
@@ -94,7 +94,7 @@
                             head.push('New Consignee Phone 2');
                             head.push('New Consignee Email');
                             head.push('New Amount');
-
+                            head.push('Intercept Type');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -119,7 +119,7 @@
                                 row.push(values.new_consignee_phone_number_2);
                                 row.push(values.new_consignee_email);
                                 row.push(values.new_amount);
-
+                                row.push(values.type);
                                 body.push(row);
                             });
                         },
@@ -172,7 +172,7 @@
                     {data: 'new_consignee_phone_number_2', name: 'intercept_re_book_request_histories.new_consignee_phone_number_2', class: 'align-middle new_consignee_phone_number_2'},
                     {data: 'new_consignee_email', name: 'intercept_re_book_request_histories.new_consignee_email', class: 'align-middle new_consignee_email'},
                     {data: 'new_amount', name: 'new_amount', class: 'align-middle new_amount'},
-
+                    {data: 'type', name: 'intercept_re_book_request_histories.intercept_type', class: 'align-middle type'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -184,6 +184,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var consignee_drop_select = '<select name="service_select" id="consignee_select" class="select2 form-control">' +
+                        '<option value="2">Same Consignee</option>'+
+                        '<option value="1">Different Consignee</option>'+
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -191,6 +195,11 @@
 
                         if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.status')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.type') ) {
+                            $(consignee_drop_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -202,7 +211,12 @@
                             }
                         }
                     });
-
+                    $("#consignee_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Intercept Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });

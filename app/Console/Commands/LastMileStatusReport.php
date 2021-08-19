@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\LastMileStatusReportController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 
@@ -21,7 +22,7 @@ class LastMileStatusReport extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Last Mile Status Report';
 
     /**
      * Create a new command instance.
@@ -40,12 +41,29 @@ class LastMileStatusReport extends Command
      */
     public function handle()
     {
-        $from = Carbon::now()->subHours(2)->startOfHour()->toTimeString();
-        $to = Carbon::now()->startOfHour()->toTimeString();
+        $time = Carbon::now()->format('H:i');
+        $end_of_day = Carbon::today()->endOfDay()->format('H:i');
 
-        $response = LastMileStatusReportController::create_report($from, $to);
+        if(($time > '10:00') && ($time < $end_of_day) ){
+            $settings = GlobalSettings::where('type', 'last_mile_cron_time');
 
-        NotificationsController::send(147,$response);
+            if ($settings->exists()) {
+                $settings = $settings->first();
+
+                $time = $settings->setting_value;
+
+            }
+            else{
+                $time = 2;
+            }
+            $from = Carbon::now()->subHours($time)->startOfHour()->toTimeString();
+            $to = Carbon::now()->startOfHour()->toTimeString();
+
+            $response = LastMileStatusReportController::create_report($from, $to);
+
+            NotificationsController::send(147,$response);
+        }
+
 
     }
 }
