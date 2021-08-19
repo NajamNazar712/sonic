@@ -3922,17 +3922,6 @@ class APIController extends Controller
                                 return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                             } else {
 
-                                // if ($request->filled('consignee_phone_number_1')) {
-                                //   $phone_number = $this->phone_number($request->consignee_phone_number_2);
-                                // } else {
-                                //     $phone_number = $shipment->consignee_phone_number_1;
-                                // }
-                                // if ($request->filled('consignee_phone_number_2')) {
-                                //     $phone_number2 = $this->phone_number($request->consignee_phone_number_2);
-                                // } else {
-                                //     $phone_number2 = $shipment->consignee_phone_number_2;
-                                // }
-
                                 $phone_number = $this->phone_number($request->consignee_phone_number_1);
 
                                 if ($request->filled('consignee_phone_number_2')) {
