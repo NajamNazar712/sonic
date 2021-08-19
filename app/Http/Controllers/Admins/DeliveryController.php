@@ -1441,6 +1441,7 @@ class DeliveryController extends Controller
                 $rider_name = $rider->name. ' ( '. $delivery_note->special_rider_name. ' )';
             }else{
                 $rider_name = $rider->name;
+                $rider_id = $rider->trax_id;
             }
             $category = $rider->rider_category->name;
             $route_name = $delivery_note_details->route->code . '( ' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ' )';
@@ -1456,6 +1457,14 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
+                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Trax ID</strong></td>
+                            <td>' . $rider_id . '</td>
                             <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
@@ -5228,7 +5237,25 @@ class DeliveryController extends Controller
 
     }
 
-    
+    public function fake_status_shipments(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_fake_status_shipments;
+        $shipments = array();
+        if($delivery_note_shipments->count() > 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Fake Status Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Fake Status Shipments', 'shipments' => FALSE];
+        }
+
+    }
+
     public function receive_shipments_pending(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
@@ -5764,9 +5791,11 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         }
     }
     public function intercept_request_index()
-    {    ActivityTrailController::createActivityTrailLog(Auth::id(),324);
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),324);
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
+
 //        $city =  City::where('status', 1)->whereNotNull('zone_id')->where('pickup', 1)->orderBy('name')->get();
         return view('admin.delivery.intercept.index')->with(['shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
     }
@@ -5803,10 +5832,11 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ->where('sj.created_at', '=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id')
+            ->select('agent.name as agent','shipments.id as shId','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id','irbr.intercept_type as type')
             ->where('shipments.shipper_status_id', 54)
-        ->groupBy('shipments.id');
+            ->groupBy('shipments.id');
 
+//            dd($shipments);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
@@ -5842,14 +5872,25 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $query->whereRaw('false');
                 }
             })
-            ->filterColumn('service_type', function ($query, $keyword) {
+            ->filterColumn('type', function ($query, $keyword) {
 
                 if ($keyword != '') {
-                    $query->where('bt.id', $keyword);
+                    $query->where('irbr.intercept_type', $keyword);
                 } else {
                     $query->whereRaw('false');
                 }
             })
+            ->editColumn('type', function ($shipments) {
+                if ($shipments->type == null){
+                    return '-';
+                }
+                else if ($shipments->type == 2 ) {
+                    return 'Same Consignee';
+                } else {
+                    return 'Different Consignee';
+                }
+            })
+
             ->make(true);
     }
 
@@ -5866,7 +5907,6 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $valid = TRUE;
 
                     $intercept = InterceptReBookRequest::where('shipment_id',$shipment_id)->first();
-
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
@@ -5886,7 +5926,8 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                         'new_consignee_email' => $intercept->consignee_email,
                         'old_amount' => $shipment->amount,
                         'new_amount' => $intercept->amount,
-                        'shipper_id' => $intercept->shipper_id
+                        'shipper_id' => $intercept->shipper_id,
+                        'intercept_type' => $intercept->intercept_type
                     ]);
 
                     $shipment->consignee_city_id = $intercept['consignee_city_id'];

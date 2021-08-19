@@ -7168,6 +7168,7 @@ class AdminReportsController extends Controller
     }
 
     public function last_mile_status_index(){
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),205);
         $cities = DB::connection('reports')->table('cities')->get(['id','name']);
         $hubs = DB::connection('reports')->table('cities')->select(['id','name'])->where('hub',1)->get();
