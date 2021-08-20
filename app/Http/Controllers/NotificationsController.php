@@ -32,6 +32,7 @@ use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -8134,6 +8135,66 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     self::sms($body, $to);
                 }
+                else if($id == 146){
+
+                    $fnf_id = $reference_1_id;
+                    $admin_trax_ids = $reference_2_id;
+
+                    $fnf = FnfSectionEmployee::find($fnf_id);
+
+                    foreach($admin_trax_ids as $trax_id){
+                        $admin = Admin::where('trax_id',$trax_id);
+                        if($admin->exists()) {
+                            $route = '';
+                            $admin = $admin->first();
+                            if ($admin->trax_id == 'Trax01099') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/it_support';
+                            }
+                            else if ($admin->trax_id == 'Trax04484') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/finance';
+                            }
+                            else if ($admin->trax_id == 'Trax00043') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/cs';
+                            }
+                            else if ($admin->trax_id === 'Trax02533') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hr';
+                            }
+                            else if ($admin->trax_id === 'Trax03840') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/administration';
+                            }
+                            else if ($admin->trax_id === $fnf->reporting_manager->trax_id) {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/rm';
+                            }
+                            else if ($admin->trax_id === $fnf->department_head->trax_id) {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hod_approval';
+                            }
+
+
+                            $link = '<a href=' . $route . '>' . $route . '</a>';
+
+                            if (strpos($body, '[link]') !== FALSE) {
+                                $body = str_replace('[link]', $link, $body);
+                            }
+
+                            if (strpos($subject, '[emp_id]') !== FALSE) {
+                                $subject = str_replace('[emp_id]', $fnf->employee->trax_id, $subject);
+                            }
+
+                            if (strpos($body, '[emp_id]') !== FALSE) {
+                                $body = str_replace('[emp_id]', $fnf->employee->trax_id, $body);
+                            }
+                            if (strpos($body, '[name]') !== FALSE) {
+                                $body = str_replace('[name]', $fnf->employee->name, $body);
+                            }
+                            if (strpos($body, '[designation]') !== FALSE) {
+                                $body = str_replace('[designation]', $fnf->employee->designation->name, $body);
+                            }
+                            $to = $admin->email;
+                            self::email($subject, $body, $to);
+                        }
+                    }
+                }
+
                 else if ($id == 147){
                     $data = $reference_1_id;
 
