@@ -657,7 +657,7 @@ class ShipperPackagingMaterialController extends Controller
 //                $user_charges[$size_charge->size_id] = $size_charge->charges;
 //            }
 //        }
-        $size_charges = PackagingMaterialTypeSizes::get();
+        $size_charges = PackagingMaterialTypeSizes::where('id', '!=',1)->get();
         foreach ($size_charges as $size_charge){
             $standard_charges[$size_charge->id] = $size_charge->standard_charges;
         }
@@ -693,7 +693,7 @@ class ShipperPackagingMaterialController extends Controller
     public function product_details($id){
         
         $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
-        $size_price =PackagingMaterialTypeSizes::where('type_id',$id)->get()->last()->standard_charges;   
+        $size_price =PackagingMaterialTypeSizes::where('type_id',$id)->get()->last()->standard_charges;
         $product = PackagingMaterialTypes::find($id);
         if ($product->picture != NULL) {
             $picture = Storage::url('packaging_pictures/' . $product->picture);
