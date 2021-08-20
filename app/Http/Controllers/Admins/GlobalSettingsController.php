@@ -4532,7 +4532,7 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-    
+
 	public function last_mile_cron_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),416);
         $settings = GlobalSettings::where('type', 'last_mile_cron_time')->first();
