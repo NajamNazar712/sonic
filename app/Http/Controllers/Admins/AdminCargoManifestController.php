@@ -635,8 +635,15 @@ class AdminCargoManifestController extends Controller
 
         $details = array();
 
-        $details['origin'] = $origin_details;
-        $details['destination'] = $destination_details;
+        if ($request->bag_type == 1) {
+            $details['origin'] = $origin_details;
+            $details['destination'] = $destination_details;
+        }
+        else {
+            $details['origin'] = $destination_details;
+            $details['destination'] = $origin_details;
+        }
+
         $details['actual_weight'] = 0;
 
         foreach ($request->shipment_ids as $shipment_id){
