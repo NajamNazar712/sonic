@@ -127,8 +127,6 @@ class RegisterController extends Controller
                 'account_no.*'=>'required|string|max:255',
                 'account_title.*'=>'required|string|max:255',
                 'iban_no.*'=>'required|string|max:255',
-                'filled_and_signed_pdf' => 'mimes:pdf',
-                'signed_acknowledgement_pdf' => 'mimes:pdf',
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
@@ -170,8 +168,6 @@ class RegisterController extends Controller
                 'billing_person_phone' => 'required|string|max:255',
                 'billing_person_email' => 'required|string|email|max:255',
                 'billing_address' => 'required|string|max:255',
-                'filled_and_signed_pdf' => 'mimes:pdf',
-                'signed_acknowledgement_pdf' => 'mimes:pdf',
                 'cnic_front_image' => 'mimes:png,jpeg,jpg',
                 'cnic_back_image' => 'mimes:png,jpeg,jpg',
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
@@ -200,26 +196,7 @@ class RegisterController extends Controller
         $user_attachment = new UserDocumentAttachment();
         $user_attachment->user_id = $user->id;
         $date = Carbon::now()->format('Y_m_d');
-        if ($request->hasFile('filled_and_signed_pdf')) {
-            if($user_attachment->filled_and_signed_pdf != NULL) {
-                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
-            }
-            $filename = 'filled_and_signed_pdf_' . $date . '_' . $user->id . '.pdf';
-            $file = $request->file('filled_and_signed_pdf');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->filled_and_signed_pdf = $filename;
-        }
-        
-        if ($request->hasFile('signed_acknowledgement_pdf')) {
-            if($user_attachment->signed_acknowledgement_pdf != NULL) {
-                Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
-            }
-            $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $user->id . '.pdf';
-            $file = $request->file('signed_acknowledgement_pdf');
-            Storage::disk('public')->putFileAs('users_attached_documents/'. $user->id .'', $file, $filename);
-            $user_attachment->signed_acknowledgement_pdf = $filename;
-        }
-        
+
         if ($request->hasFile('cnic_front_image')) {
             if($user_attachment->cnic_front_image != NULL) {
                 Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
@@ -659,7 +636,7 @@ class RegisterController extends Controller
                 $sales_persons_city = $sales_persons_city->first();
                 $hub_id = $sales_persons_city->hub_id;
                 $admin_ids = AdminHub::where('hub_id', $hub_id)->pluck('admin_id')->toArray();
-                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->get();
+                $sale_persons = Admin::join('admin_roles as ar','admins.role_id', '=','ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7)->whereIn('admins.id', $admin_ids)->where('ar.id','!=' ,4)->get();
                 return response()->json(['status' => 0, 'sale_persons' => $sale_persons]);
             }else{
                 $sale_person_admin = City::find($id)->name;

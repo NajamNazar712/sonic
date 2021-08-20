@@ -23,6 +23,11 @@ Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::post('track', 'TrackingController@track')->name('track');
 });
 
+Route::prefix('shipment')->name('shipment.')->group(function () {
+    Route::get('status/verify', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+    Route::get('status/{tracking_number?}/verify/{delivery_note_id?}', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+});
+
 Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('cod.login');
@@ -290,6 +295,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
             Route::get('', 'Shippers\ShipperReportsController@confirmation_shipments_index')->name('index');
             Route::get('list', 'Shippers\ShipperReportsController@confirmation_shipments_list')->name('list');
+        });
+        Route::prefix('daraz_mis')->name('daraz_mis.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@daraz_mis_index')->name('index');
+            Route::get('list','Shippers\ShipperReportsController@daraz_mis_list')->name('list');
         });
     });
 
@@ -1062,6 +1071,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/add/tracking_number','Admins\DeliveryController@add_shipments_in_recieve_deliveries')->name('add.shipments');
             Route::post('/upload_pod','Admins\DeliveryController@upload_pod')->name('upload_pod');
 
+            Route::post('fake_status_shipments','Admins\DeliveryController@fake_status_shipments')->name('fake_status_shipments');
+
+
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
@@ -1272,7 +1284,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list','Admins\LastMileDebriefingController@supervisor_list')->name('list');
             Route::post('agents','Admins\LastMileDebriefingController@supervisor_agents')->name('agents');
             Route::post('assign_agents','Admins\LastMileDebriefingController@supervisor_assign_agents')->name('assign_agents');
-            
+            Route::post('get_undelivered_shipments','Admins\LastMileDebriefingController@get_undelivered_shipments')->name('get_undelivered_shipments');
+            Route::post('send_sms', 'Admins\LastMileDebriefingController@send_sms_to_undelivered_shipments')->name('send_sms');
             
         });
         Route::prefix('agents_call_monitoring')->name('agents_call_monitoring.')->group(function (){
@@ -2723,6 +2736,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@rider_shipment_attempt_settings_store')->name('store');
         });
 
+		Route::prefix('last_mile_cron')->name('last_mile_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@last_mile_cron_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
+        });
+
     });
 
 
@@ -2859,6 +2877,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('scanning_history')->name('scanning_history.')->group(function (){
         Route::get('','Admins\AdminShipmentScanningHistoryController@index')->name('index');
         Route::post('details','Admins\AdminShipmentScanningHistoryController@details')->name('details');
+    });
+    Route::prefix('airway_journey')->name('airway_journey.')->group(function (){
+        Route::get('','AdminAirwayBillJournyController@index')->name('index');
+        Route::post('details','AdminAirwayBillJournyController@details')->name('details');
     });
 
     Route::prefix('coordinates')->name('coordinates.')->group(function (){
@@ -3113,6 +3135,38 @@ Route::prefix('admin')->name('admin.')->group(function () {
            // Route::get('{id}/documents','Admins\AdminERFController@documents')->name('documents');
             Route::post('documents','Admins\AdminERFController@documents')->name('documents');
 
+        });
+
+        Route::prefix('fnf')->name('fnf.')->group(function () {
+            Route::get('', 'Admins\AdminFnfController@index')->name('index');
+            Route::get('list', 'Admins\AdminFnfController@list')->name('list');
+            Route::get('/add', 'Admins\AdminFnfController@add')->name('add');
+            Route::post('/submit', 'Admins\AdminFnfController@submit')->name('submit');
+            Route::post('/employee_data', 'Admins\AdminFnfController@employee_data')->name('employee_data');
+            Route::get('{id}/rm', 'Admins\AdminFnfController@reporting_manager_index')->name('rm.index');
+            Route::post('rm/submit', 'Admins\AdminFnfController@reporting_manager_submit')->name('rm.submit');
+            Route::get('{id}/cs', 'Admins\AdminFnfController@cs_index')->name('cs.index');
+            Route::post('cs/submit', 'Admins\AdminFnfController@cs_submit')->name('cs.submit');
+            Route::get('{id}/administration', 'Admins\AdminFnfController@administration_index')->name('administration.index');
+            Route::post('administration/submit', 'Admins\AdminFnfController@administration_submit')->name('administration.submit');
+            Route::get('{id}/it_support', 'Admins\AdminFnfController@it_support_index')->name('it_support.index');
+            Route::post('it_support/submit', 'Admins\AdminFnfController@it_support_submit')->name('it_support.submit');
+            Route::get('{id}/finance', 'Admins\AdminFnfController@finance_index')->name('finance.index');
+            Route::post('finance/submit', 'Admins\AdminFnfController@finance_submit')->name('finance.submit');
+            Route::get('{id}/hr', 'Admins\AdminFnfController@hr_index')->name('hr.index');
+            Route::post('hr/submit', 'Admins\AdminFnfController@hr_submit')->name('hr.submit');
+            Route::post('rm_status_edit', 'Admins\AdminFnfController@rm_status_edit')->name('rm_status_edit');
+            Route::post('cs_status_edit', 'Admins\AdminFnfController@cs_status_edit')->name('cs_status_edit');
+            Route::post('administration_status_edit', 'Admins\AdminFnfController@administration_status_edit')->name('administration_status_edit');
+            Route::post('it_support_status_edit', 'Admins\AdminFnfController@it_support_status_edit')->name('it_support_status_edit');
+            Route::post('finance_status_edit', 'Admins\AdminFnfController@finance_status_edit')->name('finance_status_edit');
+            Route::get('{id}/hod_approval', 'Admins\AdminFnfController@hod_approval_index')->name('hod_approval_index');
+            Route::post('hod_approval/submit', 'Admins\AdminFnfController@hod_approval_submit')->name('hod_approval_submit');
+            Route::post('hr_status_edit', 'Admins\AdminFnfController@hr_status_edit')->name('hr_status_edit');
+            Route::get('{id}/edit', 'Admins\AdminFnfController@edit_fnf_request')->name('edit_fnf_request');
+            Route::post('{/update', 'Admins\AdminFnfController@update_fnf_request')->name('update_fnf_request');
+            Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
+            Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
         });
     });
 

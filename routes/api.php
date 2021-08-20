@@ -52,6 +52,13 @@ Route::name('api.')->group(function () {
 
 
 		});
+		Route::prefix('request')->name('request.')->group(function() {
+			Route::post('crm', 'APIController@crm_request_create')->name('crm');
+			Route::post('rcp', 'APIController@rcp_request_create')->name('rcp');
+
+        });
+
+		Route::post('pickup_address/add', 'APIController@pickup_address_add')->name('pickup_address.add');
 
 		Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function() {
 			Route::post('create', 'APIController@receiving_sheet_create')->name('create');
