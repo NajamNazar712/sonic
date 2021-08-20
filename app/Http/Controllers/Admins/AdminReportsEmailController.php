@@ -1549,19 +1549,7 @@ class AdminReportsEmailController extends Controller
                     if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
                         $iban = $retail_done_payment->retail_done_payment->shipper_bank->iban;
                     } else {
-                        $shipper_bank = UserBankInfo::where('user_id', $retail_done_payment->retail_done_payment->shipper->id)->where('default_bank', 1);
-                        if ($shipper_bank->exists()) {
-                            $shipper_bank = $shipper_bank->first();
-                            $iban = $shipper_bank->iban;
-                        } else {
-                            $shipper_bank = UserBankInfo::where('user_id', $retail_done_payment->retail_done_payment->shipper->id);
-                            if ($shipper_bank->exists()) {
-                                $shipper_bank = $shipper_bank->first();
-                                $iban = $shipper_bank->iban;
-                            } else {
-                                $iban = '-';
-                            }
-                        }
+                        $iban = '-';
                     }
                     $retail_done_payment_report = new RetailDonePaymentsReport();
                     $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
