@@ -87,18 +87,23 @@ class LastMileDebriefingController extends Controller
     public function supervisor_assign_agents(Request $request){
         $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
-        if($delivery_note_shipments->count() != 0){
+        if(count($delivery_note_shipments) > 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $agent_call_monitoring = AgentCallMonitoring::where([
-                    ['shipment_id', '=', $delivery_note_shipment->shipment_id],
-                    ['delivery_note_id', '=', $request->delivery_note_id],
-                ])->update(['agent_id' => $request->agent_id]);
-              
-                                // $agent_call_monitoring->agent_id= $request->agent_id;
-                                // $agent_call_monitoring->save();
+                $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
+                if($agent_call_monitor->exists()){
+                    $agent_call_monitor = $agent_call_monitor->first();
+                    $agent_call_monitor->agent_id = $request->agent_id;
+                }
+                else{
+                    $agent_call_monitor = new AgentCallMonitoring;
+                    $agent_call_monitor->agent_id = $request->agent_id;
+                    $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
+                    $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                }
+                $agent_call_monitor->save();
             }
-        }
             return redirect()->back()->with('success', 'Agent Assign successfully.');
+        }
     }
 
     public function supervisor_list(Request $request)

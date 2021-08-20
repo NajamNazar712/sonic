@@ -93,6 +93,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
+		'App\Console\Commands\RetailDonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',

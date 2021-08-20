@@ -97,8 +97,10 @@
                                                                         
                                                                         <div class="radio-toolbar">
                                                                             @foreach ($product->sizes as $size)
+                                                                                @if($size->id != 1)
                                                                                 <input type="radio" id="size_btn_{{$size->id}}" name="product_size" value="{{$size->id}}" checked>
                                                                                 <label for="size_btn_{{$size->id}}">{{$size->size}}</label>
+                                                                                @endif
                                                                             @endforeach
                                                                            
                                                                         </div>

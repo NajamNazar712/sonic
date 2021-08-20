@@ -2631,10 +2631,16 @@ class NotificationsController extends Controller
                                         $to = $admin_department->pluck('email')->toArray();
                                         // $to_sms = $admin_department->pluck('phone_number');
                                     }
+                                    else {
+                                        $to = 'complaints@trax.pk';
+                                    }
                                 } else if ($tagging->crm_request_tagging_type_id == 2) {
                                     $admin_department = Admin::find($tagging->tagged_id)->email;
                                     $to = $admin_department;
                                     // $to_sms = Admin::find($tagging->tagged_id)->phone_number;
+                                }
+                                else {
+                                    $to = 'complaints@trax.pk';
                                 }
                             }else{
                                 // $to = array();
@@ -7996,6 +8002,7 @@ class NotificationsController extends Controller
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'jahanzaib.qamar@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
+                        $bcc[] = 'muhammad.waqas@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
