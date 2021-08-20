@@ -8143,9 +8143,10 @@ class NotificationsController extends Controller
                     $fnf = FnfSectionEmployee::find($fnf_id);
 
                     foreach($admin_trax_ids as $trax_id){
+                        $var_link = $body;
                         $admin = Admin::where('trax_id',$trax_id);
+                        $route = '';
                         if($admin->exists()) {
-                            $route = '';
                             $admin = $admin->first();
                             if ($admin->trax_id == 'Trax01099') {
                                 $route = 'https://sonic.test/admin/human_resource/fnf/1/it_support';
@@ -8169,28 +8170,27 @@ class NotificationsController extends Controller
                                 $route = 'https://sonic.test/admin/human_resource/fnf/1/hod_approval';
                             }
 
-
                             $link = '<a href=' . $route . '>' . $route . '</a>';
 
-                            if (strpos($body, '[link]') !== FALSE) {
-                                $body = str_replace('[link]', $link, $body);
+                            if (strpos($var_link, '[link]') !== FALSE) {
+                                $var_link = str_replace('[link]', $link, $var_link);
                             }
 
                             if (strpos($subject, '[emp_id]') !== FALSE) {
                                 $subject = str_replace('[emp_id]', $fnf->employee->trax_id, $subject);
                             }
 
-                            if (strpos($body, '[emp_id]') !== FALSE) {
-                                $body = str_replace('[emp_id]', $fnf->employee->trax_id, $body);
+                            if (strpos($var_link, '[emp_id]') !== FALSE) {
+                                $var_link = str_replace('[emp_id]', $fnf->employee->trax_id, $var_link);
                             }
-                            if (strpos($body, '[name]') !== FALSE) {
-                                $body = str_replace('[name]', $fnf->employee->name, $body);
+                            if (strpos($var_link, '[name]') !== FALSE) {
+                                $var_link = str_replace('[name]', $fnf->employee->name, $var_link);
                             }
-                            if (strpos($body, '[designation]') !== FALSE) {
-                                $body = str_replace('[designation]', $fnf->employee->designation->name, $body);
+                            if (strpos($var_link, '[designation]') !== FALSE) {
+                                $var_link = str_replace('[designation]', $fnf->employee->designation->name, $var_link);
                             }
                             $to = $admin->email;
-                            self::email($subject, $body, $to);
+                            self::email($subject, $var_link, $to);
                         }
                     }
                 }
