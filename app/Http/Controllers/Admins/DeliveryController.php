@@ -694,6 +694,18 @@ class DeliveryController extends Controller
         if($request->has('order_checkbox')){
             $order = true;
         }
+
+        if($request->hub_id == ''){
+            return redirect()->back()->with('error', 'Hub not found!');
+        }
+
+        if($request->selected_route_id == ''){
+            return redirect()->back()->with('error', 'Route not selected!');
+        }
+
+        if($request->selected_rider_id == ''){
+            return redirect()->back()->with('error', 'Rider not selected!');
+        }
         $admin = Auth::id();
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55, 59);
