@@ -5585,7 +5585,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     }
     public function misrouted_update_index(){
 
-        $cities = City::select(['id', 'name as text'])->get();
+        $cities = City::select(['id', 'name as text'])->where('status', 1)->where('business_category_id', 1)->get();
 
         return view('admin.delivery.misroute.update')->with('cities',$cities);
     }
