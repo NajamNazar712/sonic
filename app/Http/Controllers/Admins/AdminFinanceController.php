@@ -758,7 +758,7 @@ class AdminFinanceController extends Controller
             ->select('s.id', 's.tracking_number','s.tracking_number as tracking_id', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id','a.name as request_reverted_by');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($shipments)

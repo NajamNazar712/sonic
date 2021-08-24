@@ -839,6 +839,7 @@ class Permission
             'intercept.update' => 245,
 
             'scanning_history.index' => 306,
+            'airway_journey.index' => 567,
 
             'dashboard.sales.index' => 315,
 
@@ -955,6 +956,20 @@ class Permission
             'human_resource.erf.list' => 506,
             'human_resource.erf.add' => 522,
 
+
+            'human_resource.fnf.index' => 568,
+            'human_resource.fnf.list' => 568,
+            'human_resource.fnf.add' => 569,
+            'human_resource.fnf.rm.index' => 570,
+            'human_resource.fnf.cs.index' => 571,
+            'human_resource.fnf.administration.index' => 572,
+            'human_resource.fnf.it_support.index' => 573,
+            'human_resource.fnf.finance.index' => 574,
+            'human_resource.fnf.hod_approval_index' => 575,
+            'human_resource.fnf.hr.index' => 576,
+            'human_resource.fnf.edit_fnf_request' => 577,
+            'human_resource.fnf.fnf_history_index' => 578,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
@@ -1001,7 +1016,11 @@ class Permission
             'rider_delivery_note_otp.index' => 563,
             'rider_delivery_note_otp.list' => 563,
 
+            'settings.last_mile_cron.index' => 565,
+
             'settings.ccd_booking.index' => 558,
+
+
            
         ],
 
@@ -1079,6 +1098,11 @@ class Permission
 
             'settings.air_waybill_printing.index' => 11,
             'settings.air_waybill_printing.store' => 11,
+            
+            'reports.daraz_mis.index' => 15,
+            'reports.daraz_mis.list' => 15,
+
+            
 
         ]
     ];
