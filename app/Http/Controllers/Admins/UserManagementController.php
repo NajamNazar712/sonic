@@ -195,7 +195,7 @@ class UserManagementController extends Controller
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+            $roles = AdminRole::with('department')->get();
         }
         $hubs = City::where('hub', 1)->get();
 
