@@ -167,6 +167,7 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Re-Open Status Date</th>
                         <th class="border-primary border-darken-1">Request No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipment Status</th>
@@ -439,6 +440,7 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Re Open Status Date');  
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Shipment Status');
@@ -462,7 +464,7 @@
                             head.push('Launched Date');
                             head.push('Launched To Date (TAT)');
                             head.push('Assigned Date');
-                            head.push('Status');
+                            head.push('Status');                          
                             head.push('Valid/Invalid Date');
                             head.push('Resolved Date');
                             head.push('Closed Date');
@@ -478,7 +480,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.request_number);
+                                row.push(values.reopen_date);
                                 row.push(values.tracking_number);
                                 row.push(values.status);
                                 row.push(values.case_nature);
@@ -573,6 +575,7 @@
                 order: [[21, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'reopen_date', name: 'reopen_date', class: 'align-middle reopen_date'},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
