@@ -3049,6 +3049,47 @@ class GlobalSettingsController extends Controller
 
     }
 
+    public function carrefour_account_index()
+    {
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $rider_id = null;
+        $carrefour_accounts = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $carrefour_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
+        }
+        return view('admin.settings.carrefour.accounts')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'carrefour_accounts' => $carrefour_accounts]);
+    }
+
+    public function carrefour_account_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'carrefour_accounts');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'carrefour_accounts';
+
+                }
+                $settings->setting_value = $request->rider;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+
+    }
     public function restrict_cities_intercept_index()
     {
         $cities = City::where('status', 1)->select('id', 'name')->get();

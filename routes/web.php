@@ -2459,6 +2459,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
         });
 
+        Route::prefix('carrefour_account')->name('carrefour_account.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@carrefour_account_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@carrefour_account_store')->name('store');
+        });
+
         Route::prefix('restrict_cities_intercept')->name('restrict_cities_intercept.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@restrict_cities_intercept_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@restrict_cities_intercept_store')->name('store');
@@ -3014,6 +3019,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('call')->name('call.')->group(function () {
             Route::get('', 'Admins\AdminTelenorController@telenor_response')->name('index');
             Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');
+        });
+    });
+
+	Route::prefix('carrefour')->name('carrefour.')->group(function(){
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_submit')->name('submit');
         });
     });
 
