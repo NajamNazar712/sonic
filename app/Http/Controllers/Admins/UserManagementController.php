@@ -289,7 +289,7 @@ class UserManagementController extends Controller
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+            $roles = AdminRole::with('department')->get();
         }
         $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
@@ -305,7 +305,7 @@ class UserManagementController extends Controller
     }
 
     public function user_update_store(Request $request, $id) {
-        if ($request->input('role_id') != 1) {
+        
             $admin = Admin::find($id);
 
             $admin->name = $request->input('name');
@@ -350,10 +350,6 @@ class UserManagementController extends Controller
             }
 
             return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
-        }
-        else {
-            return redirect()->route('admin.access_denied');
-        }
     }
 
     public function role_index() {
