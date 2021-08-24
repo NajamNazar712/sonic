@@ -470,7 +470,7 @@
 
             $(this).find('.pieces').TouchSpin({
                 min: 1,
-                max: 10,
+                max: 50,
                 buttondown_class: 'btn btn-primary rounded-left',
                 buttonup_class: 'btn btn-primary rounded-right',
                 buttondown_txt: '<i class="ft-minus"></i>',
