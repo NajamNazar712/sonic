@@ -317,6 +317,8 @@ class Permission
             'return.history.shipments' => 126,
             'return.cx_sales.index' => 266,
             'return.cx_sales.list' => 266,
+            'return.return_deliveries.index' => 566,
+            'return.return_deliveries.list' => 566,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
@@ -996,8 +998,8 @@ class Permission
             'incidence_monitoring.add' => 536,
             'incidence_monitoring.view_report' => 539,
 
-            'rider_delivery_note_otp.index' => 553,
-            'rider_delivery_note_otp.list' => 553,
+            'rider_delivery_note_otp.index' => 563,
+            'rider_delivery_note_otp.list' => 563,
 
             'settings.ccd_booking.index' => 558,
            

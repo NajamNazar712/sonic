@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionForRiderDeliveryNoteOtpView extends Seeder
+class UpdateModulePermissionForRiderShipmentAttemptScreenSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class UpdateModulePermissionForRiderDeliveryNoteOtpView extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 563, 'name' => 'Rider Delivery Note OTP - View', 'module_id' => 6),
+            array('id' => 562, 'name' => 'Rider Shipments Attempt Setting - View', 'module_id' => 14),
         ));
     }
 }

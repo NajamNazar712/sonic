@@ -398,14 +398,20 @@ class LastMileDebriefingController extends Controller
         ->where('created_at','<=',$time)->where('completed',0)->count();
 
         $reattempt_count = ShipmentsJourney::where('shipment_id', $data->shipment_id)
-                ->where('shipper_status_id','=',13)
+                ->where('shipper_status_id','=',5)
                 ->where('verification','=',1)
                 ->select(DB::raw('count(shipment_id) as reattempts'))
                 ->get()->first();
 
         $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)->whereNotNull('rider_id')->get()->last();
 
-        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status]);
+        $rider_deliveries = NULL;
+        $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)->where('delivery_note_id', $data->delivery_note_id);
+        if ($rider_deliveries->exists()) {
+            $rider_deliveries = $rider_deliveries->latest('id')->first();
+        }
+
+        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries]);
     }
 
     public function caller_agent_skip(Request $request)
