@@ -14,7 +14,7 @@
         </select>
     </div>
 
-    @if ($retail_user->category==1)
+
     <div class="form-group" id="franchise_div">
         <select name="franchise" id="edit_franchise"  class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
                 {{--<option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>--}}
@@ -23,16 +23,16 @@
             @endforeach
         </select>
     </div>
-   @else
-        <div class="form-group" id="trax_center_div">
-            <select name="trax_center" id="edit_trax_center" class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
-             {{--   <option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>--}}
-                @foreach($trax_centers as $trax_center)
-                    <option value="{{$trax_center->id}}"> {{$trax_center->name}} </option>
-                @endforeach
-            </select>
-        </div>
-    @endif
+
+    <div class="form-group" id="trax_center_div">
+        <select name="trax_center" id="edit_trax_center" class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
+         {{--   <option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>--}}
+            @foreach($trax_centers as $trax_center)
+                <option value="{{$trax_center->id}}"> {{$trax_center->name}} </option>
+            @endforeach
+        </select>
+    </div>
+
 
         {{--  <div class="form-group">
              <select name="store" id="edit_store"  class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
@@ -92,27 +92,31 @@
 
             var store_id = @json($retail_user->store->id);
 
-             @if ($retail_user->category==1)
+             @if ($retail_user->category == 1)
+                $('#edit_user_form #trax_center_div').addClass('d-none');
                 $('#edit_franchise').val(store_id).trigger('change');
+
              @else
+                 $('#edit_user_form #franchise_div').addClass('d-none');
                  $('#edit_trax_center').val(store_id).trigger('change');
+
              @endif
 
             $('#edit_store').select2({
                 width: '100%',
-                allowClear:true
+
             }).bind('change', function () {
                 var id = parseInt($(this).val());
                 if (id == 1) {
-                    $('#trax_center_div').addClass('d-none');
-                    $('#franchise_div').removeClass('d-none');
+                    $('#edit_user_form  #trax_center_div').addClass('d-none');
+                    $('#edit_user_form  #franchise_div').removeClass('d-none');
 
                 } else if (id == 2) {
-                    $('#trax_center_div').removeClass('d-none');
-                    $('#franchise_div').addClass('d-none');
+                    $('#edit_user_form  #trax_center_div').removeClass('d-none');
+                    $('#edit_user_form  #franchise_div').addClass('d-none');
                 } else {
-                    $('#trax_center_div').addClass('d-none');
-                    $('#franchise_div').addClass('d-none');
+                    $('#edit_user_form  #trax_center_div').addClass('d-none');
+                    $('#edit_user_form  #franchise_div').addClass('d-none');
                 }
             });
 
