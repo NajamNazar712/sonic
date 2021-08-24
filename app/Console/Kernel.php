@@ -93,7 +93,10 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
+		'App\Console\Commands\RetailDonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
+        'App\Console\Commands\NotPickedShipmentsJourney',
+        'App\Console\Commands\LastMileStatusReport',
     ];
 
     /**
@@ -143,6 +146,7 @@ class Kernel extends ConsoleKernel
         }
 
         if ($arrival_cut_off_time) {
+            $schedule->command('pickup:notpickedjourney')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
@@ -311,6 +315,14 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
         $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'last_mile_cron_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $hour = $settings->setting_value;
+            $hourly = '0 */'. $hour .' * * *';
+            $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
+        }
 
     }
     /**

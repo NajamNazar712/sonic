@@ -10,6 +10,7 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -691,6 +692,7 @@ class AdminHumanResourseController extends Controller
         $employee->name = $request->employee_name;
         $employee->phone_number = $request->personal_number;
         $employee->guardian_name = $request->name;
+        $employee->mother_name = $request->mother_name;
         $employee->religion_id = $request->religion;
         $employee->nationality_id = $request->nationality;
         $employee->domicile_id = $request->domicile;
@@ -2268,5 +2270,6 @@ class AdminHumanResourseController extends Controller
 
 
     }
+
 
 }

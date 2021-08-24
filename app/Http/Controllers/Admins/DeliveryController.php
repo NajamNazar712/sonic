@@ -5237,7 +5237,25 @@ class DeliveryController extends Controller
 
     }
 
-    
+    public function fake_status_shipments(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_fake_status_shipments;
+        $shipments = array();
+        if($delivery_note_shipments->count() > 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Fake Status Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Fake Status Shipments', 'shipments' => FALSE];
+        }
+
+    }
+
     public function receive_shipments_pending(Request $request){
         $delivery_note_id = $request->input('delivery_note_id');
         $delivery_note_details = DeliveryNote::find($delivery_note_id);
@@ -5889,7 +5907,6 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $valid = TRUE;
 
                     $intercept = InterceptReBookRequest::where('shipment_id',$shipment_id)->first();
-
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
@@ -5909,7 +5926,8 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                         'new_consignee_email' => $intercept->consignee_email,
                         'old_amount' => $shipment->amount,
                         'new_amount' => $intercept->amount,
-                        'shipper_id' => $intercept->shipper_id
+                        'shipper_id' => $intercept->shipper_id,
+                        'intercept_type' => $intercept->intercept_type
                     ]);
 
                     $shipment->consignee_city_id = $intercept['consignee_city_id'];
@@ -6983,22 +7001,33 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
     }
 
     public function delivery_note_otp_generation(Request $request){
-        $rider_id = $request->get('rider');
-        $rider = Rider::find($rider_id);
-        $otp = mt_rand(100000, 999999);
-        $rider->delivery_note_otp = $otp;
-        $rider->save();
-        NotificationsController::send(144, $rider, $otp);
+        $environment = config('app.env');
+
+        if ($environment == 'production' || $environment == 'staging') {
+            $rider_id = $request->get('rider');
+            $rider = Rider::find($rider_id);
+            $otp = mt_rand(100000, 999999);
+            $rider->delivery_note_otp = $otp;
+            $rider->save();
+            NotificationsController::send(144, $rider, $otp);
+        }
         return response()->json(['status' => 1]);
     }
 
     public function delivery_note_otp_verification(Request $request)
     {
-        $rider = Rider::find($request->rider);
-        if ($rider->delivery_note_otp == $request->otp) {
+        $environment = config('app.env');
+
+        if($environment == 'production' || $environment == 'staging') {
+            $rider = Rider::find($request->rider);
+            if ($rider->delivery_note_otp == $request->otp) {
+                return response()->json(['status' => 1]);
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+            }
+        }
+        else{
             return response()->json(['status' => 1]);
-        } else {
-            return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
         }
     }
 

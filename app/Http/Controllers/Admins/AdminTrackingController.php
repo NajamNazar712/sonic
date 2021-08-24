@@ -1014,6 +1014,12 @@ class AdminTrackingController extends Controller
 
                                 $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $journey_details['status'] = $journey->status->name;
+                                if($journey->reason_id != NULL){
+                                    $journey_details['reason'] = $journey->reason->name;
+                                }
+                                else{
+                                    $journey_details['reason'] = '';
+                                }
 
                                 if ($journey->reference_1_id) {
                                     $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);

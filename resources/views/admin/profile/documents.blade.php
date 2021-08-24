@@ -62,6 +62,14 @@
                                                 <td class="align-middle">-</td>
                                             @endif
                                         </tr>
+                                        <tr style="height: 50px">
+                                            <td class="align-middle"><h6><b>Picture of E Signature:</b></h6></td>
+                                            @if($documents && $documents->e_sign_image != null)
+                                            <td class="align-middle"><a class="white" href="{{route('admin.accounts.documents.view', ['id' => $id, 'check' => 'e_sign_image', 'pdf' => 0])}}" target="_blank"><button type="button" class="btn btn-primary btn-sm">View</button></a></td>
+                                            @else
+                                                <td class="align-middle">-</td>
+                                            @endif
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
