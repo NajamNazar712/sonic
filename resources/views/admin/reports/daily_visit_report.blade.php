@@ -11,6 +11,44 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="col-12">
+                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">                        
+                        
+                        <div class="col-4 mt-1">
+                            <div class="form-group input-group ">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="search_update_date_from"
+                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                       id="search_update_date_from" placeholder="Date (From)">
+                            </div>
+                        </div>
+                        <div class="col-4 mt-1">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                </div>
+                                <input type="text" name="search_update_date_to"
+                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                       id="search_update_date_to" placeholder="Date (To)">
+                            </div>
+                        </div>
+
+                        <div class="col-2 mt-1">
+                            <div class="form-group">
+                                <button type="button" id="search_filter_btn"
+                                        class="btn btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -153,6 +191,32 @@
                     return {body: body, header:head};
                 }
             });
+            $('#search_form #search_update_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_update_date_to').pickadate('picker').set('min', $('#search_form #search_update_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_update_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_update_date_from').pickadate('picker').set('max', $('#search_form #search_update_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -171,8 +235,13 @@
                 language: {
                     processing: data_table_loader
                 },
-                serverSide: true,ajax: {
+                serverSide: true,
+                ajax: {
                     url: '{{ route('admin.reports.daily_visit.list') }}',
+                    data: function (d) {
+                    d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
+                    d.search_update_date_to = $('input[name="search_update_date_to_formatted"]').val();
+                    }
                 },
                 order: [[2, 'desc']],
                 columns: [

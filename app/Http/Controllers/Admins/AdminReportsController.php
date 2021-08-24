@@ -6836,6 +6836,12 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
+
+            if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+                $from = $request->get('search_update_date_from');
+                $to = $request->get('search_update_date_to');
+                $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+            }
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
