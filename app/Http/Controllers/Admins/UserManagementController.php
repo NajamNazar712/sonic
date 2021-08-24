@@ -33,7 +33,7 @@ class UserManagementController extends Controller
     public function user_index() {
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
-        $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+      $roles = AdminRole::with('department')->get();
       return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
     }
 
@@ -46,8 +46,7 @@ class UserManagementController extends Controller
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation')
-        ->where('ar.id', '!=', 1);
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
