@@ -227,21 +227,32 @@ class IncidenceMonitoringController extends Controller
         $tagged_user = IncidenceMonitoringTaggedPerson::where('incidence_monitoring_id',$request->request_id)->pluck('admin_id')->toArray();
             $incidence_monitoring_request = IncidenceMonitoring::find($request->request_id);
 
-        if(Auth::user()->role_id == 8 && in_array(Auth::user()->id,$tagged_user))
-        {
-            $comment_by = 1;
-        }
-        elseif(Auth::user()->role_id == 9 && in_array(Auth::user()->id,$tagged_user))
-        {
+//        if(Auth::user()->role_id == 8 && in_array(Auth::user()->id,$tagged_user))
+//        {
+//            $comment_by = 1;
+//        }
+//        elseif(Auth::user()->role_id == 9 && in_array(Auth::user()->id,$tagged_user))
+//        {
+//            $comment_by = 0;
+//        }
+//        elseif(in_array(Auth::user()->role_id,[3]) || Auth::user()->id== $incidence_monitoring_request->admin_id)
+//        {
+//            $comment_by = 2;
+//        }
+//        elseif(Auth::user()->role_id == 10 && in_array(Auth::user()->id,$tagged_user)){
+//            $comment_by = 2;
+//        }
+//        else {
+//            return response()->json(['status'=>0,'error'=>'You are not allowed to comment on the request']);
+//        }
+
+        if (in_array(Auth::user()->id,$tagged_user)){
             $comment_by = 0;
         }
-        elseif(in_array(Auth::user()->role_id,[3]) || Auth::user()->id== $incidence_monitoring_request->admin_id)
-        {
-            $comment_by = 2;
-        }elseif(Auth::user()->role_id == 10 && in_array(Auth::user()->id,$tagged_user)){
-            $comment_by = 2;
+        elseif (in_array(581,session("permissions"))){
+            $comment_by = 1;
         }
-        else {
+        else{
             return response()->json(['status'=>0,'error'=>'You are not allowed to comment on the request']);
         }
 

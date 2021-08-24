@@ -3183,7 +3183,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
-    });    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
+    });
+    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
             Route::get('/list','Admins\IncidenceMonitoringController@list')->name('list');
             Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');
