@@ -3333,7 +3333,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_deliveries = DeliveryNote::join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
-                ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'shipments.tracking_number as tracking_number')
+//                ->select('delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'shipments.tracking_number as tracking_number')
                 ->where('delivery_notes.pending_status', 1)
                 ->where('delivery_notes.rider_id', $rider_id);
 
@@ -3366,7 +3366,7 @@ class RiderAPIController extends Controller
                     $delivery_history['shipments_count'] = $delivered_shipments + $undelivered_shipments;
                     $delivery_history['delivered_shipments'] = $delivered_shipments;
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
-                    $delivery_history['created_at'] = date('Y-m-d', strtotime($rider_deliveries->created_at));
+                    $delivery_history['created_at'] = date('Y-m-d', strtotime($rider_delivery->created_at));
                     $rider_delivery_history[] = $delivery_history;
                 }
                 return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
