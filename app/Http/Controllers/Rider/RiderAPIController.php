@@ -3355,7 +3355,7 @@ class RiderAPIController extends Controller
             }
 
             if ($rider_deliveries->exists()) {
-                $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
+                $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.created_at', 'DESC')->get();
                 $rider_delivery_history = array();
                 foreach ($rider_deliveries as $rider_delivery) {
                     $undelivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', 1)->where('update_type', 1)->count();
@@ -3365,7 +3365,7 @@ class RiderAPIController extends Controller
                     $delivery_history['shipments_count'] = $delivered_shipments + $undelivered_shipments;
                     $delivery_history['delivered_shipments'] = $delivered_shipments;
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
-                    $delivery_history['created_at'] = $rider_deliveries->;
+                    $delivery_history['created_at'] = $rider_deliveries->created_at;
                     $rider_delivery_history[] = $delivery_history;
                 }
                 return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
@@ -3412,7 +3412,7 @@ class RiderAPIController extends Controller
             }
             $rider_return_history = array();
             if ($rider_return_deliveries->exists()) {
-                $rider_return_deliveries = $rider_return_deliveries->orderBy('return_notes.id', 'DESC')->get();
+                $rider_return_deliveries = $rider_return_deliveries->orderBy('return_notes.created_at', 'DESC')->get();
                 foreach ($rider_return_deliveries as $rider_return_delivery) {
                     $undelivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 1)->where('update_type', 1)->count();
                     $delivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->where('update_type', 1)->count();
@@ -3421,6 +3421,7 @@ class RiderAPIController extends Controller
                     $return_history['total_shipments'] = $delivered_shipments + $undelivered_shipments;
                     $return_history['delivered_shipments'] = $delivered_shipments;
                     $return_history['undelivered_shipments'] = $undelivered_shipments;
+                    $return_history['created_at'] = $rider_return_deliveries->created_at;
                     $rider_return_history[] = $return_history;
                 }
                 return response()->json(["status" => 0, "return_history" => $rider_return_history]);
