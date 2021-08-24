@@ -295,13 +295,9 @@ class UserManagementController extends Controller
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
 
-        if ($user->role_id != 1) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
-            return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
-        }
-        else {
-            return redirect()->route('admin.access_denied');
-        }
+        ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
+        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        
     }
 
     public function user_update_store(Request $request, $id) {
