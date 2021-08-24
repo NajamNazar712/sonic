@@ -294,7 +294,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('website:leads')->hourly()->runInBackground();
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
-        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
+//        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(24, '04:30')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
