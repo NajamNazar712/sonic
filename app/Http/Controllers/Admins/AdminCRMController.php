@@ -4273,7 +4273,7 @@ class AdminCRMController extends Controller
     }
 
     public function bulk_comment_for_shipper(Request $request){
-
+        $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
         if(count($crm_request_ids) > 0){
@@ -4283,7 +4283,7 @@ class AdminCRMController extends Controller
                     $crm_comment->crm_request_id = $request_id;
                     $crm_comment->comment_by_id = Auth::id();
                     $crm_comment->comment_by = 0;
-                    $crm_comment->comment_type = 0;
+                    $crm_comment->comment_type = $comment_type;
                     $crm_comment->comment = $comment ;
                     $crm_comment->save();
                 }
