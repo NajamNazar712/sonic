@@ -4016,6 +4016,7 @@ class ShipperShipmentBookController extends Controller
             $cities = City::where('id','!=',1244)->where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
         }
         $products = Product::all();
+        $distribution_products = DistributionProduct::all();
         $user = User::find(session('user_id'));
         $delivery_types = DeliveryType::all();
         $charges_modes = ChargesModes::whereIn('id', [3])->get();
@@ -4037,20 +4038,24 @@ class ShipperShipmentBookController extends Controller
             $shipping_mode_same_day_timings = NULL;
         }
 
-        $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
-            if($ccd_booking->exists()){
+        if(session('user_id') == 10354) {
+            $payment_modes = PaymentMode::whereIn('id', [1])->get();
+        }
+        else {
+            $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+            if ($ccd_booking->exists()) {
                 $ccd_booking = $ccd_booking->first();
                 $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
-                if(!in_array(session('user_id'),$ccd_account_tags))
-                {$payment_modes = PaymentMode::whereNotIn('id', [2])->get();}
-                else
-                {$payment_modes = PaymentMode::all();}
-            }
-            else{
+                if (!in_array(session('user_id'), $ccd_account_tags)) {
+                    $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+                } else {
+                    $payment_modes = PaymentMode::all();
+                }
+            } else {
                 $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
             }
-
-        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights]);
+        }
+        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products]);
     }
 
     public function corporate_min_chargeable_weight(Request $request){
@@ -4108,6 +4113,7 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_store(Request $request) {
 
+        return $request;
         $user_id = session('user_id');
         $rate_type_id = session('rate_type_id');
 
@@ -4151,7 +4157,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         });
-//        dd($request->all('form'));
+
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -4356,8 +4362,6 @@ class ShipperShipmentBookController extends Controller
                     $query->where('user_id', $user_id)->where('status', 1);
                 })];
             }
-//        $form= $request->shipments;
-//        dd($form);
         if($file = $request->file('shipments')) {
 
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -4369,7 +4373,8 @@ class ShipperShipmentBookController extends Controller
             $excel_type = $request->excel_type;
             $column_count = null;
 
-            if($excel_type == 1){
+            if($excel_type == 0){}
+            else if($excel_type == 1){
                 $column_count = 35;
 
                 $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'replacement_item_product_type_id', 19 => 'replacement_item_description', 20 => 'replacement_item_quantity', 21 => 'special_instructions', 22 => 'estimated_weight', 23 => 'shipping_mode_id', 24 => 'same_day_timing_id', 25 => 'amount', 26 => 'payment_mode_id', 27 => 'charges_mode_id', 28 => 'pieces_quantity', 29 => 'shipper_reference_number_1', 30 => 'shipper_reference_number_2', 31 => 'shipper_reference_number_3', 32 => 'shipper_reference_number_4', 33 => 'shipper_reference_number_5', 34 => 'open_shipment'];
