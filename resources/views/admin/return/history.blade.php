@@ -590,7 +590,7 @@
                var row_id = $(this).parents('tr').attr('id');
                var user_id = $(this).closest("tr").find("td:eq(0)").text();
                var return_id = $('#image_return_note_id').val();
-               alert(user_id);
+            //    alert(user_id);
                var current = $(this);
                if(row_id){
                    swal({
