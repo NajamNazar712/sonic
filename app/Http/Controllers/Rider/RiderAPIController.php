@@ -3288,7 +3288,7 @@ class RiderAPIController extends Controller
 
             $rider_pickups = V2PickupNote::join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
                 ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-                ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('sum(pr.booked) as total_shipments'), DB::raw('(select sum(shipments) from v2_rider_pickups where pickup_note_id = v2_pickup_notes.id and pickup_type = 1) as rider_picked'), DB::raw('sum(pr.received) as arrived'))
+                ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('sum(pr.booked) as total_shipments'), DB::raw('(select sum(shipments) from v2_rider_pickups where pickup_note_id = v2_pickup_notes.id and pickup_type = 1) as rider_picked'), DB::raw('sum(pr.received) as arrived'), 'v2_pickup_notes.created_at as created_at')
                 ->groupBy('v2_pickup_notes.id')
                 ->where('v2_pickup_notes.rider_id', '=', $rider_id)
                 ->where('v2_pickup_notes.status', 1);
@@ -3312,7 +3312,7 @@ class RiderAPIController extends Controller
             }
 
             if ($rider_pickups->exists()) {
-                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.id', 'DESC')->get();
+                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.created_at', 'DESC')->get();
                 return response()->json(["status" => 0, "pickups" => $rider_pickups]);
             } else {
                 return response()->json(["status" => 1, "message" => "No pickups found!"]);
@@ -3365,6 +3365,7 @@ class RiderAPIController extends Controller
                     $delivery_history['shipments_count'] = $delivered_shipments + $undelivered_shipments;
                     $delivery_history['delivered_shipments'] = $delivered_shipments;
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
+                    $delivery_history['created_at'] = $rider_deliveries->;
                     $rider_delivery_history[] = $delivery_history;
                 }
                 return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
