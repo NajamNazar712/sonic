@@ -95,8 +95,8 @@
                                 <textarea class="form-control" rows="5" id="bulk_comment" placeholder="Add External Comment"></textarea>
                             </div>
                             <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Save</button>
-                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Add External Comment</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -122,8 +122,8 @@
                                 <textarea class="form-control" rows="5" id="internal_comment" placeholder="Add Internal Comment"></textarea>
                             </div>
                             <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Save</button>
-                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Add Internal Comment</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -912,6 +912,15 @@
                 }
             });
 
+            $('.closebutton').on('click',function(){
+                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                });
+                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#InternalCommentModal #internal_comment").val("");
+                });
+
+            });
 
             $('#bulkcommentSubmit').on('click',function () {
                 var comment = $('#BulkExternalCommentModal #bulk_comment').val();
