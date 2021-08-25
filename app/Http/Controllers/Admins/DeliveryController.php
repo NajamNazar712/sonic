@@ -1477,10 +1477,6 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Trax ID</strong></td>
                             <td>' . $rider_id . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Category</strong></td>
@@ -6986,10 +6982,18 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         if ($environment == 'production' || $environment == 'staging') {
             $rider_id = $request->get('rider');
             $rider = Rider::find($rider_id);
-            $otp = mt_rand(100000, 999999);
-            $rider->delivery_note_otp = $otp;
-            $rider->save();
-            NotificationsController::send(144, $rider, $otp);
+            if($rider){
+                $otp = mt_rand(100000, 999999);
+                $rider->delivery_note_otp = $otp;
+                $rider->save();
+                NotificationsController::send(144, $rider, $otp);
+                return response()->json(['status' => 1]);
+
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Rider not found!']);
+            }
+
         }
         return response()->json(['status' => 1]);
     }
