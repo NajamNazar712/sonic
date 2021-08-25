@@ -956,18 +956,32 @@
             });
 
             function otp_generation(){
-                $('#OtpModal').modal('show');
                 var rider = $('#rider_name').val();
-                $.ajax({
-                    url: '{!! route('admin.delivery.note.otp.generate') !!}',
-                    method: 'POST',
-                    data: {
-                        'rider': rider,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#otp_input').focus();
-                });
+                if(rider){
+
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.otp.generate') !!}',
+                        method: 'POST',
+                        data: {
+                            'rider': rider,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 1){
+                            $('#OtpModal').modal('show');
+                            $('#otp_input').focus();
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                    });
+                }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
             }
 
             function otp_verification() {

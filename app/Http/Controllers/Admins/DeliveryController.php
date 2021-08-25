@@ -6982,10 +6982,18 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         if ($environment == 'production' || $environment == 'staging') {
             $rider_id = $request->get('rider');
             $rider = Rider::find($rider_id);
-            $otp = mt_rand(100000, 999999);
-            $rider->delivery_note_otp = $otp;
-            $rider->save();
-            NotificationsController::send(144, $rider, $otp);
+            if($rider){
+                $otp = mt_rand(100000, 999999);
+                $rider->delivery_note_otp = $otp;
+                $rider->save();
+                NotificationsController::send(144, $rider, $otp);
+                return response()->json(['status' => 1]);
+
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Rider not found!']);
+            }
+
         }
         return response()->json(['status' => 1]);
     }
