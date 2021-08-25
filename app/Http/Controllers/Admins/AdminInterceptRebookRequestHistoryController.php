@@ -190,6 +190,10 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                        ]);
                        $shipment->consignee_status_id = 55;
                        $shipment->shipper_status_id = 55;
+                       $shipment->consignee_address = $request->consignee_address;
+                       $shipment->consignee_phone_number_1 = $request->consignee_phone_number_1;
+                       $shipment->consignee_phone_number_2 = $request->consignee_phone_number_2;
+
                        $shipment->intercepted = 1;
                        $shipment->save();
 
