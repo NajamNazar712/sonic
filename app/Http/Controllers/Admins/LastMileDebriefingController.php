@@ -476,7 +476,9 @@ class LastMileDebriefingController extends Controller
                 ->get()->first();
 
         $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)->whereNotNull('rider_id')->get()->last();
-
+        if(!$rider_status){
+            $rider_status = NULL;
+        }
         $rider_deliveries = NULL;
         $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)->where('delivery_note_id', $data->delivery_note_id);
         if ($rider_deliveries->exists()) {

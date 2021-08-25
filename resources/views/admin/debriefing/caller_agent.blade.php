@@ -220,11 +220,25 @@
                                                             <td><strong>Attempt Count :</strong></td>
                                                             <td>{{$reattempt_count->reattempts}}</td>
                                                             <td><strong>Rider Status :</strong></td>
+                                                            @if($rider_status)
                                                             <td>{{$rider_status->shipment_status_shipper->name}}</td>
+                                                            @else
+                                                                <td></td>
+                                                            @endif
                                                             <td><strong>Rider Status Reason :</strong></td>
+                                                            @if($rider_status)
                                                             <td>{{($rider_status->status_reason_id) ? $rider_status->shipment_status_reason->name : '-'}}</td>
+                                                            @else
+                                                                <td></td>
+                                                            @endif
+                                                            
                                                             <td><strong>Remarks :</strong></td>
+                                                            @if($rider_status)
                                                             <td>{{($rider_status->remarks) ? $rider_status->remarks : '-'}}</td>
+                                                            @else
+                                                                <td></td>
+                                                            @endif
+                                                            
                                                         </tr>
                                                     </tbody>
                                                 </table>
