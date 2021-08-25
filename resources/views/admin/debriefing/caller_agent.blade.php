@@ -280,7 +280,7 @@
 
                                                 <div class="row">
                                                     <div class="col justify-content-start">
-                                                        @if($rider_delivery)
+                                                        @if($rider_delivery != NULL)
                                                             @if($shipment->amount == 0 && $rider_delivery->delivered_status == 1)
                                                                 <a href="{{asset(Storage::url($rider_delivery->cnic_image))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View CNIC</button></a>
                                                             @elseif($rider_delivery->delivered_status == 0)
