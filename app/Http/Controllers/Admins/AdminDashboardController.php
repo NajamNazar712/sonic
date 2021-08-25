@@ -8175,6 +8175,10 @@ class AdminDashboardController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
+                if(session('role_id') == 1 || in_array(361, session('permissions'))){
+                    $dropdown .= '<button type="button" class="dropdown-item remove_sales_tier"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Remove Sales Tier Tagging</div></button>';
+                }
+
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
@@ -10454,26 +10458,35 @@ class AdminDashboardController extends Controller
              $info = array();
              $sale_tier = SaleTierTag::where('user_id', $shipper_id);
              if($sale_tier->exists()){
+                 $flag = false;
                  $sale_tier = $sale_tier->first();
                  if($sale_tier->poc != null){
                      $info['poc'] = $sale_tier->poc_admin->name;
+                     $flag = true;
                  }
                  else{
                      $info['poc'] = '-';
                  }
                  if($sale_tier->kam != null){
                      $info['kam'] = $sale_tier->kam_admin->name;
+                     $flag = true;
                  }
                  else{
                      $info['kam'] = '-';
                  }
                  if($sale_tier->ref != null){
                      $info['ref'] = $sale_tier->ref_admin->name;
+                     $flag = true;
                  }
                  else{
                      $info['ref'] = '-';
                  }
-                 return response()->json(['status'=>1,'info'=>$info]);
+                 if($flag){
+                     return response()->json(['status'=>1,'info'=>$info]);
+                 }
+                 else{
+                     return response()->json(['status'=>0,'error'=> 'No Sales tier found!']);
+                 }
              }
              else{
                  return response()->json(['status'=>0,'error'=> 'No Sales tier found!']);
