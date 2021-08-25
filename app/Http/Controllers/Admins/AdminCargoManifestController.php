@@ -36,6 +36,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
+use SnappyPDF;
 
 class AdminCargoManifestController extends Controller
 {
@@ -1547,14 +1548,21 @@ class AdminCargoManifestController extends Controller
             $success = FALSE;
         }
 
+
+        foreach($success_cargo_ids as $cargo_id){
+            $cargo_array = array();
+            array_push($cargo_array,$cargo_id);
+            $path = self::print($cargo_array,1);
+            $manifest = CargoManifest::find($cargo_id);
+            NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_'. str_pad($manifest->id, 6, '0', STR_PAD_LEFT) .'.pdf');
+        }
+
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
     }
 
-    public static function print(Request $request) {
-
-        $type = NULL;
+    public static function print($cargo_manifest_ids,$type = NULL ) {
+        //dd($cargo_manifest_ids,$type);
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
         $html = '
                 <!doctype html>
                 <html lang="en">
@@ -1641,11 +1649,11 @@ class AdminCargoManifestController extends Controller
                     </style>
                 ';
         }
-        $cargo_ids = explode(',',$request->ids);
+        //$cargo_ids = explode(',',$cargo_manifest_ids);
        
-        foreach($cargo_ids as $id) {
+        foreach($cargo_manifest_ids as $id) {
             $cargo = CargoManifest::find($id);
-            
+
             $sender = $cargo->sender;
             $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
             $html .= '</head>
@@ -1821,40 +1829,23 @@ class AdminCargoManifestController extends Controller
                           </tbody>
                         </table>
                         <hr>';
-        }
 
+            if ($type == 1) {
 
-            $html .= '
+                $html .= '
                         
-                       
-                      </div>
-                    </div>
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-            return $html;
-
-        /*if($type == 1){
-            $html .= '
-                          </tbody>
-                        </table>
                       </div>
                     </div>
                   </body>
                 </html>
       ';
-            $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest'. str_pad($cargo->id, 6, '0', STR_PAD_LEFT) .'.pdf');
-            return $pdf;
+                $pdf = SnappyPDF::loadHTML($html)->save('reports/cargo_manifest' . str_pad($cargo->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+                return $pdf;
+            }
         }
-        else{
+
             $html .= '
-                          </tbody>
-                        </table>
+                   
                       </div>
                     </div>
                     <script>
@@ -1866,7 +1857,7 @@ class AdminCargoManifestController extends Controller
                 </html>
       ';
             return $html;
-        }*/
+      
     }
 
     public function manifest_index(){
