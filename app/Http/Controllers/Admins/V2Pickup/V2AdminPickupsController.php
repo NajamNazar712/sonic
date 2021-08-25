@@ -240,7 +240,7 @@ class V2AdminPickupsController extends Controller
                     return '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-                      <button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>
+                                                     <button type="button" class="dropdown-item edit" data-target-id=' . $pickup_request->id . ' rel="reminder  data-toggle="modal" data-target="#reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">reminder</div></button>
                     </div>
                   </div>
           ';
@@ -635,6 +635,9 @@ class V2AdminPickupsController extends Controller
         } else {
             return ['status' => 0, 'success' => 'No Pending Booked Shipments', 'booked' => false];
         }
+    }
+    public function pending_reminder(Request $request){
+        dd($request);
     }
 
     public function arrival_bulk_index(Request $request)
