@@ -37,7 +37,7 @@
                                                             @endforeach
                                                             @if (count($shipper_packaging_types)>0)
                                                                 @foreach($shipper_packaging_types as $shipper_packaging_type)
-                                                                    <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                                    <option value="{{route('cod.packaging.requests.product',['id'=>$shipper_packaging_type->id])}}">{{ $shipper_packaging_type->type }}</option>
                                                             
                                                                 @endforeach
                                                             @endif
