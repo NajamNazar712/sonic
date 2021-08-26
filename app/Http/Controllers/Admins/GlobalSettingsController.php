@@ -3053,7 +3053,7 @@ class GlobalSettingsController extends Controller
     {
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        $settings = GlobalSettings::where('type', 'nsa_accounts');
+        $settings = GlobalSettings::where('type', 'carrefour_accounts');
         $rider_id = null;
         $carrefour_accounts = array();
         if ($settings->exists()) {
@@ -3079,7 +3079,7 @@ class GlobalSettingsController extends Controller
                     $settings->type = 'carrefour_accounts';
 
                 }
-                $settings->setting_value = $request->rider;
+                $settings->setting_value = 0;
                 $settings->text = $shippers;
                 $settings->save();
             }
