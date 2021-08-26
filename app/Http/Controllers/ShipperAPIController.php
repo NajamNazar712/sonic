@@ -174,14 +174,16 @@ class ShipperAPIController extends Controller
                         } elseif ($shipment->shipper_status_id == 1) {
                             $pickup_request = V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
                                 ->select('v2_pickup_requests.pickup_in_route as pickup_in_route', 'v2_pickup_requests.id as id')
-                                ->where('prs.shipment_id', $shipment->id)
-                                ->first();
+                                ->where('prs.shipment_id', $shipment->id);
                             $shipment_info['latitude'] = $pickup_address->location_latitude;
                             $shipment_info['longitude'] = $pickup_address->location_longitude;
                             $shipment_info['pickup_address'] = $pickup_address->pickup_address;
-                            if ($pickup_request->pickup_in_route == 1) {
-                                $shipment_info['in_route'] = 2;
-                                $shipment_info['pickup_request_id'] = $pickup_request->id;
+                            if($pickup_request->exist()){
+                                $pickup_request = $pickup_request->first();
+                                if ($pickup_request->pickup_in_route == 1) {
+                                    $shipment_info['in_route'] = 2;
+                                    $shipment_info['pickup_request_id'] = $pickup_request->id;
+                                }
                             }
                         } elseif ($shipment->shipper_status_id == 3) {
                             $shipment_info['origin'] = $pickup_address->city->name;
