@@ -140,6 +140,11 @@ class V2AdminPickupsController extends Controller
         $datatables = Datatables::of($pickup_requests)
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
+
+                    if($pickup_request->reminder == 1)
+                    {
+                        return 'reminder_pending_row';
+                    }
                     if ($pickup_request->reverse_pickup == 1) {
                         return 'reverse_pickup_row';
                     }
@@ -163,9 +168,7 @@ class V2AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                 if($pickup_requests->reminder == 1)
                 {
-                    $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                    $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: white">'.$test.'</b></td>';
-                    return $test1;
+                    return  str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);;
 
                 }
                 return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
@@ -289,7 +292,11 @@ class V2AdminPickupsController extends Controller
 
             });
             if($legend_filter = $request->get('legend_filter')){
-                if($legend_filter==8){
+                if($legend_filter==9){
+                    $datatables->where('v2_pickup_requests.reminder_status',1);
+                    return $datatables->make(true);
+            }
+                elseif($legend_filter==8){
                     $datatables->where('v2_pickup_requests.reverse_pickup',1);
                     return $datatables->make(true);
                 }
@@ -329,14 +336,15 @@ class V2AdminPickupsController extends Controller
                 }
                 elseif($legend_filter==1){
                     $datatables->where('v2_pickup_requests.created_at','<=',Carbon::now()->startOfDay()->addDays(6))
-                    ->where('v2_pickup_requests.after_cut_off_time',null)
-                    ->where('v2_pickup_requests.status_id','<>',3)
-                    ->where('v2_pickup_requests.try_and_buy',null)
-                    ->where('v2_pickup_requests.vendor',null)
-                    ->where('v2_pickup_requests.reverse_pickup',null);
+                        ->where('v2_pickup_requests.after_cut_off_time',null)
+                        ->where('v2_pickup_requests.status_id','<>',3)
+                        ->where('v2_pickup_requests.try_and_buy',null)
+                        ->where('v2_pickup_requests.vendor',null)
+                        ->where('v2_pickup_requests.reverse_pickup',null);
 
                     return $datatables->make(true);
                 }
+
             }else{
                     return $datatables->make(true);
             }

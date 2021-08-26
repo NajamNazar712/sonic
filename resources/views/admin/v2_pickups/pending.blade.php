@@ -270,10 +270,14 @@
         .reverse_pickup_row{
             background-color: {{$legend->color}};
         }
-    @elseif($legend->id == 8)
+        @elseif($legend->id == 8)
         .reverse_pickup_row{
             background-color: {{$legend->color}};
         }
+        @elseif($legend->id == 9)
+        .reminder_pending_row{
+             background-color: {{$legend->color}};
+         }
     @endif
 @endforeach
     </style>
@@ -814,7 +818,7 @@
                     });
             }
 
-            for (let i = 1; i <= 8; i++) {
+            for (let i = 1; i <= 9; i++) {
                 $('#'+i+'').on('click', function () {
                 $('#legend_filter').val(i);
                 table.draw();
