@@ -22,9 +22,15 @@
                                                 <div class="form-group mb-0">
                                                     <select name="search_package_type" id="search_package_type" class="form-control select2">
                                                         @if(isset($search_packaging_types))
-                                                        @foreach($search_packaging_types as $search_packaging_type)
-                                                            <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
-                                                        @endforeach
+                                                            @foreach($search_packaging_types as $search_packaging_type)
+                                                                <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                            @endforeach
+                                                            @if (count($shipper_packaging_types)>0)
+                                                                @foreach($shipper_packaging_types as $shipper_packaging_type)
+                                                                    <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                            
+                                                                @endforeach
+                                                            @endif
                                                         @endif
                                                     </select>
                                                 </div>
