@@ -101,6 +101,7 @@ class AdminInternationalShipmentsController extends Controller
             'tracking_number' => 'Tracking Number',
             'international_tracking_number' => 'Tracking Number',
             'actual_weight' => 'Actual Weight',
+            'service_provider_id' => 'Service Provider',
         ];
 
         $messages = [
@@ -114,6 +115,7 @@ class AdminInternationalShipmentsController extends Controller
             })],
             'international_tracking_number' => ['required'],
             'actual_weight' => ['nullable', 'numeric', 'between:0.1,100000'],
+            'service_provider_id' => ['required', 'numeric', 'between:1,5', 'exists:international_shipment_service_providers,id']
         ];
 
 
@@ -122,11 +124,11 @@ class AdminInternationalShipmentsController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'International Tracking Number', 'Actual Weight'];
+            $header = ['Tracking Number', 'International Tracking Number', 'Actual Weight', 'Service Provider'];
 
             if (isset($spreadsheet)) {
-                if (count($spreadsheet[0]) == 3){
-                    $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight'];
+                if (count($spreadsheet[0]) == 4){
+                    $fields = [0 => 'tracking_number', 1 => 'international_tracking_number', 2 => 'actual_weight', 3 => 'service_provider_id'];
                 }
                 else{
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
@@ -195,6 +197,7 @@ class AdminInternationalShipmentsController extends Controller
                         $tracking = trim($row['tracking_number']);
                         $international_tracking_number = trim($row['international_tracking_number']);
                         $international_shipment_weight = $row['actual_weight'];
+                        $service_provider_id = $row['service_provider_id'];
                         $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $international_shipment = InternationalShipment::where('shipment_id', $shipment_id);
@@ -203,6 +206,7 @@ class AdminInternationalShipmentsController extends Controller
                             $international_shipment->international_tracking_number = $international_tracking_number;
                             $international_shipment->actual_weight = $international_shipment_weight;
                             $international_shipment->sync = 1;
+                            $international_shipment->service_provider_id = $service_provider_id;
                             $international_shipment->save();
 
                             if($international_shipment_weight != NULL){
@@ -267,6 +271,8 @@ class AdminInternationalShipmentsController extends Controller
         $actual_weight = $request->actual_weight;
         $tracking_number = $request->tracking_number;
         $international_tracking_number = $request->international_tracking_number;
+        $service_provider_id = $request->service_provider;
+
         if($international_shipment_id){
             $international_shipment = InternationalShipment::find($international_shipment_id);
             if($international_shipment){
@@ -278,8 +284,10 @@ class AdminInternationalShipmentsController extends Controller
                         $international_shipment->international_tracking_number = $international_tracking_number;
                         $international_shipment->actual_weight = $actual_weight;
                         $international_shipment->sync = 1;
+                        $international_shipment->service_provider_id = $service_provider_id;
                         $international_shipment->save();
-                        Shipment::where('id',$shipment_id)->update(['actual_weight'=>$actual_weight]);
+                        $shipment->actual_weight = $actual_weight;
+                        $shipment->save();
                         return redirect()->back()->with('success', 'Shipment successfully updated!');
                     }
                     return redirect()->back()->with('error', 'Shipment with this tracking number Not found!');

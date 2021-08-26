@@ -13,6 +13,42 @@
             <div class="card-body">
                 @include('client.inc.messages')
 
+                <div class="row justify-content-end">
+                    <div class="col-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="heading-elements">
+                                    <ul class="list-inline mb-0">
+                                        <li class="primary border-primary round"><a data-action="collapse">Service Providers <i class="ft-plus"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-content collapse">
+                                <div class="card-body p-1">
+                                    <h4 class=" info">Service Providers</h4>
+                                    <table class="table table-sm table-bordered border mb-0 text-center">
+                                        <thead>
+                                        <tr>
+                                            <td class="border-primary border-darken-1">ID</td>
+                                            <td class="border-primary border-darken-1">Name</td>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach($service_providers as $service_provider)
+                                                <tr>
+                                                    <td class="align-middle">{{ $service_provider->id }}</td>
+                                                    <td class="align-middle">{{ $service_provider->name }}</td>
+                                                </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                     {{ csrf_field() }}
 
@@ -80,6 +116,15 @@
                         <div class="form-group">
                             <label class="label" for="actual_weight">Actual Weight</label>
                             <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="service_provider" class="label">Service Provider</label>
+                            <select name="service_provider" id="service_provider" class="form-control select2" data-rule-required="true" data-msg-required="Service provider is required">
+                                @foreach($service_providers as $service_provider)
+                                    <option value="{{$service_provider->id}}">{{$service_provider->name}}</option>
+                                @endforeach
+                            </select>
                         </div>
                         
                     </div>
@@ -157,6 +202,12 @@
                 'allowPlus': false,
                 'min': 0.01,
                 'max':100000,
+            });
+
+            $('#EditTrackingModal #service_provider').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Provider",
+                dropdownParent:$('#EditTrackingModal')
             });
             $('body').on('change','#edit_international_tracking_number',function() {
                 $(this).val($(this).val().trim());
