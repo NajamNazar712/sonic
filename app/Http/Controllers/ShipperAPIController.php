@@ -15,6 +15,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipperShipmentsSubscription;
+use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -163,12 +164,25 @@ class ShipperAPIController extends Controller
                     $shipment_info['latitude'] = null;
                     $shipment_info['longitude'] = null;
                     $shipment_info['runner_id'] = null;
+                    $shipment_info['pickup_request_id'] = null;
                     $pickup_address = $shipment->pickup_address;
-                    if (in_array($shipment->shipper_status_id, [2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11])) {
+                    if (in_array($shipment->shipper_status_id, [1, 2, 27, 33, 4, 13, 3, 26, 32, 5, 8, 29, 35, 9, 15, 7, 54, 55, 11])) {
                         $shipment_info['track'] = 1;
                         if ($shipment->shipper_status_id == 5) {
                             $shipment_info['latitude'] = $shipment->consignee_latitude;
                             $shipment_info['longitude'] = $shipment->consignee_longitude;
+                        } elseif ($shipment->shipper_status_id == 1) {
+                            $pickup_request = V2PickupRequest::join('v2_pickup_request_shipments as prs', 'v2_pickup_requests.id', '=', 'prs.pickup_request_id')
+                                ->select('v2_pickup_requests.pickup_in_route as pickup_in_route', 'v2_pickup_requests.id as id')
+                                ->where('prs.shipment_id', $shipment->id)
+                                ->first();
+                            $shipment_info['latitude'] = $pickup_address->location_latitude;
+                            $shipment_info['longitude'] = $pickup_address->location_longitude;
+                            $shipment_info['pickup_address'] = $pickup_address->pickup_address;
+                            if ($pickup_request->pickup_in_route == 1) {
+                                $shipment_info['in_route'] = 2;
+                                $shipment_info['pickup_request_id'] = $pickup_request->id;
+                            }
                         } elseif ($shipment->shipper_status_id == 3) {
                             $shipment_info['origin'] = $pickup_address->city->name;
                             $shipment_info['destination'] = $shipment->consignee_city->name;
