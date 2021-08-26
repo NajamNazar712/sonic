@@ -165,7 +165,7 @@ class V2AdminPickupsController extends Controller
                 if($pickup_requests->reminder == 1)
                 {
                     $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                    $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: white; font-size: 17px;">'.$test.'</b></td>';
+                    $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;">'.$test.'</b></td>';
                     return $test1;
 
                 }
