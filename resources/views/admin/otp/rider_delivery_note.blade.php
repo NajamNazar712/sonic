@@ -170,7 +170,7 @@
                 url: '{{ route('admin.rider_delivery_note_otp.list') }}',
             },
             rowId: 'shId',
-            order: [[1, 'desc']],
+            order: [[5, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'riders.name', class: 'align-middle name'},
