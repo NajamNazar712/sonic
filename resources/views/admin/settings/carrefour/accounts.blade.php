@@ -30,19 +30,6 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="row mb-2 justify-content-center">
-                                            <div class="col-12 form-group">
-                                                <select name="rider" id="rider_select" class="form-control select2" data-msg-required="Rider is required" data-rule-required="true" required="required">
-                                                    @foreach($riders as $rider)
-                                                        @if($rider->id == $rider_id)
-                                                            <option value="{{$rider->id}}" selected>{{$rider->name}}</option>
-                                                        @else
-                                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
                                 </div>
