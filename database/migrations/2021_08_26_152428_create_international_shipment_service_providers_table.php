@@ -16,6 +16,7 @@ class CreateInternationalShipmentServiceProvidersTable extends Migration
         Schema::create('international_shipment_service_providers', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('code')->nullable();
             $table->timestamps();
         });
     }

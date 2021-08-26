@@ -303,7 +303,20 @@ class Kernel extends ConsoleKernel
             $cut_off_time = $settings->setting_value . ':00';
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
-        $schedule->command('dhl:shipmentstatussync')->dailyAt( '04:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_1');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time_1 = $settings->setting_value . ':00';
+            $schedule->command('dhl:shipmentstatussync')->dailyAt( $time_1)->runInBackground();
+        }
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_2');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time_2 = $settings->setting_value . ':00';
+            $schedule->command('dhl:shipmentstatussync')->dailyAt($time_2)->runInBackground();
+        }
+
         $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
         $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
 

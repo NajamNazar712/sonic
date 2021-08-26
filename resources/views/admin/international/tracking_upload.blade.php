@@ -29,8 +29,8 @@
                                     <table class="table table-sm table-bordered border mb-0 text-center">
                                         <thead>
                                         <tr>
-                                            <td class="border-primary border-darken-1">ID</td>
-                                            <td class="border-primary border-darken-1">Name</td>
+                                            <td class="border-primary border-darken-1">ID(s)</td>
+                                            <td class="border-primary border-darken-1">Name(s)</td>
                                         </tr>
                                         </thead>
                                         <tbody>

@@ -2741,6 +2741,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
         });
 
+		Route::prefix('dhl_sync_time')->name('dhl_sync_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@dhl_sync_time_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@dhl_sync_time_store')->name('store');
+        });
+
     });
 
 

@@ -4560,4 +4560,55 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
-    }}
+    }
+
+    public function dhl_sync_time_index(){
+
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_1')->first();
+
+        $default_time_1 = NULL;
+        if ($settings) {
+            $default_time_1 = $settings->setting_value;
+        }
+
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_2')->first();
+
+        $default_time_2 = NULL;
+        if ($settings) {
+            $default_time_2 = $settings->setting_value;
+        }
+        return view('admin.settings.international.dhl_sync_time')->with(['time_1' => $default_time_1, 'time_2' => $default_time_2]);
+    }
+
+    public function dhl_sync_time_store(Request $request){
+        $settings_1 = GlobalSettings::where('type', 'dhl_sync_time_1');
+
+        if ($settings_1->exists()) {
+            $settings_1 = $settings_1->first();
+        } else {
+            $settings_1 = new GlobalSettings();
+
+            $settings_1->type = 'dhl_sync_time_1';
+        }
+
+        $settings_1->setting_value = $request->shipment_sync_time_1;
+
+        $settings_1->save();
+
+        $settings_2 = GlobalSettings::where('type', 'dhl_sync_time_2');
+
+        if ($settings_2->exists()) {
+            $settings_2 = $settings_2->first();
+        } else {
+            $settings_2 = new GlobalSettings();
+
+            $settings_2->type = 'dhl_sync_time_2';
+        }
+
+        $settings_2->setting_value = $request->shipment_sync_time_2;
+
+        $settings_2->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+}
