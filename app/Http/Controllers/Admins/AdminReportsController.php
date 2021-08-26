@@ -5449,8 +5449,10 @@ class AdminReportsController extends Controller
 
     public static function revenue_excel_download(){
 
-        $from = Carbon::today()->subMonth(1)->firstOfMonth()->startOfDay()->toDateTimeString();
-        $to = Carbon::today()->subMonth(1)->endOfMonth()->endOfDay()->toDateTimeString();
+        $from = Carbon::today()->subMonth(2)->firstOfMonth()->addDays(15)->toDateTimeString();
+        $to = Carbon::today()->subMonth(2)->endOfMonth()->toDateTimeString();
+        /*$from = Carbon::today()->subMonth(1)->firstOfMonth()->startOfDay()->toDateTimeString();
+        $to = Carbon::today()->subMonth(1)->endOfMonth()->endOfDay()->toDateTimeString();*/
         $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
@@ -5510,7 +5512,7 @@ class AdminReportsController extends Controller
             ->get();
 
 
-        $filename = 'sonic_monthly_shipper_revenue_report.xlsx';
+        $filename = 'sonic_monthly_shipper_revenue_report_june_second_half.xlsx';
 
         $details = array();
 
