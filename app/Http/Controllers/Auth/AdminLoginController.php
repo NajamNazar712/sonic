@@ -75,8 +75,9 @@ class AdminLoginController extends Controller
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
             $sales_coordinator = SalesCommissionUser::where('user_id',$id)->whereIn('sales_commission_users.tier_id',[2,3])->exists();
-            if(in_array($role_id, [31, 44])){
-                $region_shippers = User::whereNotIn('id', $shippers)->whereIn('city_id', $hubs)->pluck('id')->toArray();
+            if(in_array($role_id, [44])){
+                $hub_cities = City::whereIn('hub_id', $hubs)->where('status', 1)->pluck('id')->toArray();
+                $region_shippers = User::whereNotIn('id', $shippers)->whereIn('city_id', $hub_cities)->pluck('id')->toArray();
                 if(count($region_shippers) > 0){
                     $shippers = array_merge($shippers,$region_shippers);
                 }
