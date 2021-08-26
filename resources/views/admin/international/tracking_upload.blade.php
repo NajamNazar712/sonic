@@ -42,7 +42,8 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Tracking No. Booking Date</th>
-                        <th class="border-primary border-darken-1">Third Party Tracking Number</th>
+                        <th class="border-primary border-darken-1">3PL Tracking Number</th>
+                        <th class="border-primary border-darken-1">3PL Service Provider</th>
                         <th class="border-primary border-darken-1">Postal Code</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">POD File</th>
@@ -175,7 +176,8 @@
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Tracking No. Booking Date');
-                            head.push('International Tracking No.');
+                            head.push('3PL Tracking Number');
+                            head.push('3PL Service Provider');
                             head.push('Postal Code');
                             head.push('Actual Weight');
 
@@ -187,6 +189,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.booking_date);
                                 row.push(values.international_tracking_number);
+                                row.push(values.provider);
                                 row.push(values.postal_code);
                                 row.push(values.actual_weight);
                                 body.push(row);
@@ -223,6 +226,7 @@
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
+                    {data: 'provider', name: 'issp.name', class: 'align-middle provider'},
                     {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
                     {data: 'actual_weight', name: 'international_shipments.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'pod_file', name: 'international_shipments.pod_file', class: 'align-middle pod_file', orderable: false, searchable: false},
@@ -302,7 +306,7 @@
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
-                                console.log(data.details.shipment_status);
+
                                 if(data.details.shipment_status == 1){
                                     $("#edit_actual_weight").prop("readonly", true);
                                 }
@@ -363,7 +367,7 @@
             $('body').on('click', 'button.upload_pod',  function(){
                 var id = $(this).parents('tr').attr('id');
                 $('#pod_shipment').val(id);
-                console.log(id)
+
                 $('#upload_pod_modal').modal('show');
                 // if(id){
                 //     $('#corporate_rate_type_modal').modal('show');
