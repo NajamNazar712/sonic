@@ -33,6 +33,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         return redirect()->route('cod.login');
     });
     Route::get('404', 'Auth\LoginController@not_found')->name('404');
+    Route::post('get/agreement','Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');

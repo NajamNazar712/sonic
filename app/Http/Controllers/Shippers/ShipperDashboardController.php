@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
@@ -1606,5 +1607,11 @@ class ShipperDashboardController extends Controller
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
+    }
+
+    public function get_agreement(Request $request)
+    {
+        $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
+        return $html;
     }
 }
