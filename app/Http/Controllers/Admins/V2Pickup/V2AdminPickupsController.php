@@ -141,10 +141,6 @@ class V2AdminPickupsController extends Controller
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
 
-                    if($pickup_request->reminder == 1)
-                    {
-                        return 'reminder_pending_row';
-                    }
                     if ($pickup_request->reverse_pickup == 1) {
                         return 'reverse_pickup_row';
                     }
@@ -168,7 +164,9 @@ class V2AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                 if($pickup_requests->reminder == 1)
                 {
-                    return  str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);;
+                    $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+                    $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: white; font-size: 17px;">'.$test.'</b></td>';
+                    return $test1;
 
                 }
                 return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
@@ -292,11 +290,7 @@ class V2AdminPickupsController extends Controller
 
             });
             if($legend_filter = $request->get('legend_filter')){
-                if($legend_filter==9){
-                    $datatables->where('v2_pickup_requests.reminder_status',1);
-                    return $datatables->make(true);
-            }
-                elseif($legend_filter==8){
+                if($legend_filter==8){
                     $datatables->where('v2_pickup_requests.reverse_pickup',1);
                     return $datatables->make(true);
                 }
