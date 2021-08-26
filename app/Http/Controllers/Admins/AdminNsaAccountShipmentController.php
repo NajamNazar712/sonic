@@ -1072,7 +1072,7 @@ class AdminNsaAccountShipmentController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number'];
+            $header = ['Tracking Number', 'Weight'];
 
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
