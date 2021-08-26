@@ -197,6 +197,36 @@
             </div>
         </div>
     </div>
+
+{{--   Modal Popup --}}
+    <div class="modal fade" id="ReturnConfirmReasonSingleModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonSingleModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        <input type="hidden" id="return_reason_shipment_id">
+                        <input type="hidden" id="return_reason_shipment_remarks">
+
+
+                        <div class="form-group ml-1">
+                            <button type="button" name="add" class="btn btn-primary single_update_return_confirm" id="single_reason_update_btn">Update To Return Confirm</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -790,7 +820,65 @@
                 table.draw();
             });
             }
+            $('body').on('click','.reminderMarkStatus',function () {
+                var action = $(this).data('action');
+                var row_id = $(this).parents('tr').attr('id');
+                console.log(row_id);
+               if(action === 'reattempt'){
+                   var atext = 'Select Yes to put Reminder!';
+                }
 
+                if(row_id != '' && action === 'reminder'){
+                    swal({
+                        title: 'Are You Sure?',
+                        text: atext,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.v2_pickups.pending.status.reminder.update')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+
+                            });
+                        }
+                    });
+
+
+                }
+            });
         });
     </script>
 @endsection
