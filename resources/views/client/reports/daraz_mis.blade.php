@@ -15,10 +15,18 @@
                     <div class="col-3">
                         <fieldset class="form-group">
 							<input type="text"  id="search_tracking_no" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-
-                            {{-- <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number"> --}}
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_user" id="search_user" class="form-control select2">
+                                @foreach($sister_accounts as $sister_account)
+                                    <option value="{{$sister_account->id}}">{{$sister_account->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    
                     <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -158,6 +166,10 @@
             //     'allowMinus': false,
             //     'allowPlus': false
             // });
+            $('#search_user').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Sister Account',
+                width:'100%',
+            });
             var select = $('.tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
 				delimiter: ',',
@@ -290,6 +302,8 @@
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_user = $('#search_user').val();
+                        
                     }
                 },
                 rowId: 'shipment_id',
@@ -319,20 +333,21 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                var drop_select = '<select name="shipper_name" id="shipper_name" class="select2 form-control">' +
-                        '</select>';
+                // var drop_select = '<select name="shipper_name" id="shipper_name" class="select2 form-control">' +
+                //         '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search') ) {
+                    if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search')  || $(header).is('.shipper_name')) {
                         $(td).appendTo($(search));
-                    }else if ($(header).is('.shipper_name')) {
-                            $(drop_select).appendTo($(search))
-                            .on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td);
                     }
+                    // else if ($(header).is('.shipper_name')) {
+                    //         $(drop_select).appendTo($(search))
+                    //         .on('change', function () {
+                    //             column.search($(this).val(), false, false, true).draw();
+                    //         }).wrap(td);
+                    // }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -344,25 +359,25 @@
                     }
                 });
                 
-                var data = $.map({!! $sister_accounts !!}, function (obj) {
-                        obj.id = obj.id;
+                // var data = $.map({!! $sister_accounts !!}, function (obj) {
+                //         obj.id = obj.id;
 
-                        return obj;
-                    });
+                //         return obj;
+                //     });
 
-                    var data = $.map({!! $sister_accounts !!}, function (obj) {
-                        obj.text = obj.name;
+                //     var data = $.map({!! $sister_accounts !!}, function (obj) {
+                //         obj.text = obj.name;
 
-                        return obj;
-                    });
+                //         return obj;
+                //     });
 
-                    $('#shipper_name').prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Sister Account",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    // $('#shipper_name').prepend('<option value="" selected></option>').select2({
+                    //     data:data,
+                    //     placeholder: "Select Sister Account",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
                 this.api().table().columns.adjust();
             }
             });

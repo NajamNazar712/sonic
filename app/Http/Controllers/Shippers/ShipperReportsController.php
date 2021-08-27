@@ -724,7 +724,9 @@ class ShipperReportsController extends Controller
     }
 
     public function daraz_mis_index(){
-        $sister_accounts = User::whereIn('id',session('sister_users'))->select('id', 'name')->get(); 
+        // $sister_accounts = User::whereIn('id',session('sister_users'))->select('id', 'name')->get(); 
+        $sister_accounts = DB::connection('reports')->table('merged_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'merged_sister_account_mappings.sister_user_id')->where('head_user_id', session('user_id'))->select('u.id', 'u.name')->get();
+        
         return view('client.reports.daraz_mis',compact('sister_accounts'));
 
     }
@@ -809,7 +811,10 @@ class ShipperReportsController extends Controller
             $tracking_numbers = explode(',', $tracking);
             $datatable->whereIn('shipments.tracking_number', $tracking_numbers);
         }
-
+        if($search_user = $request->get('search_user')){
+            $datatable->where('shipments.user_id', $search_user);
+        }
+        
         if($origin = $request->get('search_origin')){
             $datatable->where('oc.id', '=', $origin);
         }
