@@ -11,7 +11,7 @@
     <div class="card">
         <div class="card-content">
             <div class="card-body">
-                @include('client.inc.messages')
+                @include('admin.inc.messages')
 
                 <div class="row justify-content-end">
                     <div class="col-5">
