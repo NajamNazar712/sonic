@@ -479,10 +479,13 @@ class LastMileDebriefingController extends Controller
         if(!$rider_status){
             $rider_status = NULL;
         }
-        $rider_deliveries = NULL;
+
         $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)->where('delivery_note_id', $data->delivery_note_id);
         if ($rider_deliveries->exists()) {
             $rider_deliveries = $rider_deliveries->latest('id')->first();
+        }
+        else{
+            $rider_deliveries = NULL;
         }
 
         return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries]);
