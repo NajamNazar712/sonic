@@ -1449,6 +1449,7 @@ class DeliveryController extends Controller
             $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
             $delivery_note = $delivery_note->first();
+            $rider_id = NULL;
             if($delivery_note->special_rider){
                 $rider_name = $rider->name. ' ( '. $delivery_note->special_rider_name. ' )';
             }else{
