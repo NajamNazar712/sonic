@@ -2746,6 +2746,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@dhl_sync_time_store')->name('store');
         });
 
+		Route::prefix('international_automation_user')->name('international_automation_user.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_automation_user_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@international_automation_user_store')->name('store');
+        });
+
     });
 
 

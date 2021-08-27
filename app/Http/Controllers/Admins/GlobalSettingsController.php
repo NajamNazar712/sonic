@@ -4611,4 +4611,33 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function international_automation_user_index(){
+
+        $settings = GlobalSettings::where('type', 'dhl_user_id')->first();
+
+        $dhl_user_id = NULL;
+        if ($settings) {
+            $dhl_user_id = $settings->setting_value;
+        }
+        return view('admin.settings.international.automation_user')->with(['dhl_user_id' => $dhl_user_id]);
+    }
+
+    public function international_automation_user_store(Request $request){
+        $settings = GlobalSettings::where('type', 'dhl_user_id');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'dhl_user_id';
+        }
+
+        $settings->setting_value = $request->dhl_user_id;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
