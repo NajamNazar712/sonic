@@ -3817,8 +3817,15 @@ class ReturnController extends Controller
             }
             return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
         }else{
-            ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
-            return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            if ($return_user_id == 'undefined') {
+                ReturnNoteImage::where('id', $return_note_image_id)->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            }
+            else
+            {
+                ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);    
+            }
         }
         return response()->json(['status' => 1, 'error' => 'Image not found!']);
     }
