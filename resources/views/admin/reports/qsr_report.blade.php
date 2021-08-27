@@ -14,7 +14,7 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                   {{-- <div class="col-4">
+                   <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -22,10 +22,10 @@
                                 @endforeach
                             </select>
                         </fieldset>
-                    </div>--}}
-                    <div class="col-4 mb-1">
+                    </div>
+                    <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
@@ -84,7 +84,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -94,7 +94,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -116,6 +116,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
@@ -202,14 +203,14 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            /*$('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
-            });*/
-            $('#search_shipper').select2({
+            });
+            $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Shipper",
+                placeholder:"Select Multiple Shippers",
                 allowClear:true,
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
@@ -294,6 +295,7 @@
 
                             head.push('S.No');
                             head.push('Tracking No.');
+                            head.push('Order ID');
                             head.push('Account No.');
                             head.push('Shipper');
                             head.push('Consignee Name');
@@ -317,6 +319,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
+                                row.push(values.order_id);
                                 row.push(values.shipper);
                                 row.push(values.account_no);
                                 row.push(values.name);
@@ -367,10 +370,12 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax: {
                     url: '{{ route('admin.reports.qsr.list') }}',
                     data: function (d) {
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_qsr = $('#search_qsr').val();
@@ -382,10 +387,11 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},

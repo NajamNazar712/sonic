@@ -93,6 +93,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
+		'App\Console\Commands\RetailDonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
@@ -293,6 +294,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('website:leads')->hourly()->runInBackground();
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
+//        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
 

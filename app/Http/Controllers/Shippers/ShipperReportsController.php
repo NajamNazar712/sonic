@@ -86,14 +86,14 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
 
 
-        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+        if (!empty($request->get('dr_search_date_from')) && !empty($request->get('dr_search_date_to'))) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
 
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             });
 
             $sales->whereBetween('dr.created_at', [$from, $to]);
@@ -106,7 +106,7 @@ class ShipperReportsController extends Controller
                 });
         }
 
-        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id')
+        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
                 if(session('user_type') == 2){
@@ -158,6 +158,22 @@ class ShipperReportsController extends Controller
                     $amount = $sale->s_collection_amount;
                 }
                 return number_format($amount);
+            })
+            ->editColumn('delivered_or_returned', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->delivered_or_returned;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('received_or_refused_by', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->received_or_refused_by;
+                }
+                else {
+                    return '';
+                }
             });
 
             if($tracking = $request->get('search_tracking')){

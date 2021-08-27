@@ -32,6 +32,7 @@ use App\Http\Models\Excel_reports\HubWiseSplit;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\OvernightOverlandReportData;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\Rider;
@@ -2630,10 +2631,16 @@ class NotificationsController extends Controller
                                         $to = $admin_department->pluck('email')->toArray();
                                         // $to_sms = $admin_department->pluck('phone_number');
                                     }
+                                    else {
+                                        $to = 'complaints@trax.pk';
+                                    }
                                 } else if ($tagging->crm_request_tagging_type_id == 2) {
                                     $admin_department = Admin::find($tagging->tagged_id)->email;
                                     $to = $admin_department;
                                     // $to_sms = Admin::find($tagging->tagged_id)->phone_number;
+                                }
+                                else {
+                                    $to = 'complaints@trax.pk';
                                 }
                             }else{
                                 // $to = array();
@@ -3183,7 +3190,8 @@ class NotificationsController extends Controller
 
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
+
+                                self::email($subject, $body, $to, NULL, NULL, 'return@trax.pk');
 
 
                                 $subject = $original_subject;
@@ -7994,6 +8002,8 @@ class NotificationsController extends Controller
                         $to[] = 'wajiha.majeed@trax.pk';
                         $to[] = 'jahanzaib.qamar@trax.pk';
                         $bcc[] = 'muhammad.yousuf@trax.pk';
+                        $bcc[] = 'muhammad.waqas@trax.pk';
+                        $bcc[] = 'danish.zahidw@trax.pk';
 
                         self::email($subject, $body, $to, NULL, $bcc);
                     }
@@ -8133,6 +8143,66 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     self::sms($body, $to);
                 }
+                else if($id == 146){
+
+                    $fnf_id = $reference_1_id;
+                    $admin_trax_ids = $reference_2_id;
+
+                    $fnf = FnfSectionEmployee::find($fnf_id);
+
+                    foreach($admin_trax_ids as $trax_id){
+                        $var_link = $body;
+                        $admin = Admin::where('trax_id',$trax_id);
+                        $route = '';
+                        if($admin->exists()) {
+                            $admin = $admin->first();
+                            if ($admin->trax_id == 'Trax01099') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/it_support';
+                            }
+                            else if ($admin->trax_id == 'Trax04484') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/finance';
+                            }
+                            else if ($admin->trax_id == 'Trax00043') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/cs';
+                            }
+                            else if ($admin->trax_id === 'Trax02533') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hr';
+                            }
+                            else if ($admin->trax_id === 'Trax03840') {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/administration';
+                            }
+                            else if ($admin->trax_id === $fnf->reporting_manager->trax_id) {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/rm';
+                            }
+                            else if ($admin->trax_id === $fnf->department_head->trax_id) {
+                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hod_approval';
+                            }
+
+                            $link = '<a href=' . $route . '>' . $route . '</a>';
+
+                            if (strpos($var_link, '[link]') !== FALSE) {
+                                $var_link = str_replace('[link]', $link, $var_link);
+                            }
+
+                            if (strpos($subject, '[emp_id]') !== FALSE) {
+                                $subject = str_replace('[emp_id]', $fnf->employee->trax_id, $subject);
+                            }
+
+                            if (strpos($var_link, '[emp_id]') !== FALSE) {
+                                $var_link = str_replace('[emp_id]', $fnf->employee->trax_id, $var_link);
+                            }
+                            if (strpos($var_link, '[name]') !== FALSE) {
+                                $var_link = str_replace('[name]', $fnf->employee->name, $var_link);
+                            }
+                            if (strpos($var_link, '[designation]') !== FALSE) {
+                                $var_link = str_replace('[designation]', $fnf->employee->designation->name, $var_link);
+                            }
+                            $to = $admin->email;
+                            self::email($subject, $var_link, $to);
+                        }
+                    }
+                }
+
                 else if ($id == 147){
                     $data = $reference_1_id;
 

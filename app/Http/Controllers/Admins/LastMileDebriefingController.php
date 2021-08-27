@@ -87,18 +87,23 @@ class LastMileDebriefingController extends Controller
     public function supervisor_assign_agents(Request $request){
         $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
         $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
-        if($delivery_note_shipments->count() != 0){
+        if(count($delivery_note_shipments) > 0){
             foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $agent_call_monitoring = AgentCallMonitoring::where([
-                    ['shipment_id', '=', $delivery_note_shipment->shipment_id],
-                    ['delivery_note_id', '=', $request->delivery_note_id],
-                ])->update(['agent_id' => $request->agent_id]);
-              
-                                // $agent_call_monitoring->agent_id= $request->agent_id;
-                                // $agent_call_monitoring->save();
+                $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
+                if($agent_call_monitor->exists()){
+                    $agent_call_monitor = $agent_call_monitor->first();
+                    $agent_call_monitor->agent_id = $request->agent_id;
+                }
+                else{
+                    $agent_call_monitor = new AgentCallMonitoring;
+                    $agent_call_monitor->agent_id = $request->agent_id;
+                    $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
+                    $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                }
+                $agent_call_monitor->save();
             }
-        }
             return redirect()->back()->with('success', 'Agent Assign successfully.');
+        }
     }
 
     public function supervisor_list(Request $request)
@@ -471,8 +476,16 @@ class LastMileDebriefingController extends Controller
                 ->get()->first();
 
         $rider_status = ShipmentsJourney::where('shipment_id',$data->shipment_id)->whereNotNull('rider_id')->get()->last();
+        if(!$rider_status){
+            $rider_status = NULL;
+        }
+        $rider_deliveries = NULL;
+        $rider_deliveries = RiderDelivery::where('shipment_id', $data->shipment_id)->where('delivery_note_id', $data->delivery_note_id);
+        if ($rider_deliveries->exists()) {
+            $rider_deliveries = $rider_deliveries->latest('id')->first();
+        }
 
-        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status]);
+        return view('admin.debriefing.caller_agent')->with(['data'=>true,'statuses'=>$statuses,'shipment'=>$shipment,'delivery_note'=>$delivery_note,'total_calls'=>$total_calls,'completed_calls'=>$completed_calls,'pending_calls'=>$pending_calls,'call'=>$data , 'reattempt_count' => $reattempt_count, 'rider_status' => $rider_status, 'rider_delivery' => $rider_deliveries]);
     }
 
     public function caller_agent_skip(Request $request)

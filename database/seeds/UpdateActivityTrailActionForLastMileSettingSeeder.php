@@ -17,7 +17,7 @@ class UpdateActivityTrailActionForLastMileSettingSeeder extends Seeder
         ));
 
         DB::table('activity_trail_actions')->insert(array(
-            array('id' => 416, 'screen_name' => 'Last Mile Status Cron Time', 'action'=> 'View'),
+            array('id' => 431, 'screen_name' => 'Last Mile Status Cron Time', 'action'=> 'View'),
         ));
     }
 }

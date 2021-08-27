@@ -258,7 +258,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     $status_id = 2;
 
-                                    if ($nsa_shipment->user_id == 7762) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
                                         $admin_id = Auth::id();
                                     }
                                     else {
@@ -267,7 +267,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
 
-                                    if ($nsa_shipment->user_id != 7762) {
+                                    if (in_array($nsa_shipment->user_id, [10354])) {
                                         if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
                                             $status_id = 4;
 
@@ -278,7 +278,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $nsa_shipment->shipper_status_id = $status_id;
                                     $nsa_shipment->consignee_status_id = $status_id;
 
-                                    if ($nsa_shipment->user_id == 7762) {
+                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
                                         $nsa_shipment->actual_weight = $nsa_shipment->estimated_weight;
                                     }
                                     else {
@@ -442,11 +442,20 @@ class AdminNsaAccountShipmentController extends Controller
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
-                        $rider_id = $settings->setting_value;
+
                         $valid_shipments = array();
                         $shipments_count = 0;
                         $total_cod_amount = 0;
                         foreach ($nsa_shipments as $nsa_shipment) {
+                            if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                $rider_id = 1837;
+                                $admin_id = Auth::id();
+                            }
+                            else {
+                                $rider_id = $settings->setting_value;
+                                $admin_id = 50;
+                            }
+
                             if (!in_array($nsa_shipment->id, $valid_shipments)) {
                                 if ($nsa_shipment) {
                                     $valid_shipments[] = $nsa_shipment->id;
@@ -466,7 +475,7 @@ class AdminNsaAccountShipmentController extends Controller
                                 'rider_id' => $rider_id,
                                 'route_id' => 2,
                                 'shipments_count' => $shipments_count,
-                                'admin_id' => 50,
+                                'admin_id' => $admin_id,
                                 'total_cod_amount' => $total_cod_amount,
                                 'password' => NULL,
                                 'last_updated_at' => Carbon::now(),
@@ -493,6 +502,16 @@ class AdminNsaAccountShipmentController extends Controller
                             $received_refused_by = '';
 
                             $shipment_data = Shipment::find($shipment);
+
+                            if (in_array($shipment_data->user_id, [7762, 10354])) {
+                                $rider_id = 1837;
+                                $admin_id = Auth::id();
+                            }
+                            else {
+                                $rider_id = $settings->setting_value;
+                                $admin_id = 50;
+                            }
+
                             $shipment_data->shipper_status_id = 14;
                             $shipment_data->consignee_status_id = 14;
                             $shipment_data->save();
@@ -502,9 +521,9 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
 
-                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, 50, $note->id, $rider_id);
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 0,$received_refused_by);
-                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, 50, $note->id, NULL, 1,$received_refused_by);
+                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin_id, $note->id, $rider_id);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 0,$received_refused_by);
+                            ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, $admin_id, $note->id, NULL, 1,$received_refused_by);
                             DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                         }
                         // foreach ($valid_shipments as $index => $shipment) {
@@ -521,7 +540,7 @@ class AdminNsaAccountShipmentController extends Controller
                         //     DeliveryNoteShipment::where(['delivery_note_id' => $note->id, 'shipment_id' => $shipment_data->id])->update(['status' => 1]);
                         // }   
 
-                                DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => 50, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
+                                DeliveryNote::where('id', $note->id)->update(['delivered_shipments' => 0, 'verified_by' => $admin_id, 'received_cod_amount' => 0, 'status' => 1, 'last_updated_at' => Carbon::now(), 'status_verified_at' => Carbon::now()]);
                             }
                         }
                     }
