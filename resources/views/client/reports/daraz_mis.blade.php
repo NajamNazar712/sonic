@@ -62,7 +62,8 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
-                        <th class="border-primary border-darken-1">Return Reason</th>
+                        {{-- <th class="border-primary border-darken-1">Return Reason</th> --}}
+                        <th class="border-primary border-darken-1">Last Reason</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Last Remarks</th>
                         <th class="border-primary border-darken-1">Last Attempt Date</th>
@@ -245,7 +246,8 @@
                             head.push('Arrival Date');
                             head.push('Status');
                             head.push('Actual Weight');
-                            head.push('Return Reason');
+                            // head.push('Return Reason');
+                            head.push('Last Reason');
                             head.push('Attempts');
                             head.push('Last Remarks');
                             head.push('Last Attempt Date');
@@ -260,7 +262,8 @@
                                 row.push(values.arrival_date);
                                 row.push(values.current_status);
                                 row.push(values.actual_weight);
-                                row.push(values.return_reason);
+                                // row.push(values.return_reason);
+                                row.push(values.last_reason);
                                 row.push(values.attempts);
                                 row.push(values.rider_remarks);
                                 row.push(values.last_attempt_date);
@@ -315,7 +318,8 @@
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle text-center not_search'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle text-center not_search'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle not_search'},
-                    { data:'return_reason' ,name: 'ssr.name', class: 'align-middle not_search'},
+                    // { data:'return_reason' ,name: 'ssr.name', class: 'align-middle not_search'},
+                    { data:'last_reason' ,name: 'last_reason', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'attempts' ,name: 'attempts', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle not_search'},

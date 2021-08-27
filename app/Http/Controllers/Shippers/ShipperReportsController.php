@@ -780,6 +780,16 @@ class ShipperReportsController extends Controller
             }
 
         })
+        ->addColumn('last_reason', function($sales) {
+            $last_reason = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('status_reason_id')->get()->last();
+                if($last_reason){
+                    return $last_reason->shipment_status_reason->name;
+                }else{
+                    return '-';
+                }
+                // ($rider_status->remarks) ? $rider_status->remarks : '-'
+
+        })
         ->addColumn('attempts', function($sales) {
             $reattempt_count = ShipmentsJourney::where('shipment_id', $sales->shipment_id)
                 ->where('shipper_status_id','=',5)
@@ -787,7 +797,11 @@ class ShipperReportsController extends Controller
                 ->select(DB::raw('count(shipment_id) as reattempts'))
                 ->get()->first();
                 if($reattempt_count){
-                    return $reattempt_count->reattempts;
+                    if($reattempt_count->reattempts-1 == -1){
+                        return 0;
+                    }else{
+                        return $reattempt_count->reattempts-1;
+                    }
                 }else{
                     return '-';
                 }
