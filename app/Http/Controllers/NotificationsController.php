@@ -2252,7 +2252,7 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $on_request_admin->pluck('email')->toArray());
                                 }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                                self::email($subject, $body, $to, NULL, NULL, 'returns@trax.pk');
 
                                 $subject = $original_subject;
                                 $body = $original_body;
