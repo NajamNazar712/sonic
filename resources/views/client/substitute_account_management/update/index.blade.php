@@ -67,7 +67,7 @@
 
 										@foreach($permissions as $permission)
 										@if ($permission->id == 15)
-											@if (session('user_id')==7306)
+											@if (session('user_id')==1091)
 												<fieldset class="d-inline-block m-1">
 													@if (in_array($permission->id, $substitute_user_permissions))
 														<input type="checkbox" id="permission_{{ $permission->id }}" class="permission" name="permission_ids[]" value="{{ $permission->id }}" checked="checked">

@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -707,7 +708,8 @@ class ShipperReportsController extends Controller
     }
 
     public function daraz_mis_index(){
-        return view('client.reports.daraz_mis');
+        $sister_accounts = User::whereIn('id',session('sister_users'))->select('id', 'name')->get(); 
+        return view('client.reports.daraz_mis',compact('sister_accounts'));
 
     }
 
@@ -738,11 +740,11 @@ class ShipperReportsController extends Controller
         })
         ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id')
+        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id')
         ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
         $sales = $sales->where(function ($query) {
-            $query->where('shipments.user_id', 7306)
+            $query->where('shipments.user_id', 1091)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
@@ -775,6 +777,13 @@ class ShipperReportsController extends Controller
         ->addColumn('tracking_number_link', function ($sales) {
             $route = route('cod.tracking.index');
             return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
+        })
+        ->editColumn('shipper_name', function ($sales) {
+            if($sales->shipper_id == 1091){
+                return '-';
+            }else{
+                return $sales->shipper_name;
+            }
         });
 
         // if($tracking = $request->get('search_tracking')){
