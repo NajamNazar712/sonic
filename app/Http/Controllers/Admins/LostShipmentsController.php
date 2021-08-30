@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BookingType;
@@ -321,11 +322,13 @@ class LostShipmentsController extends Controller
                             $shipment_details->save();
                             ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
                             AdminCargoController::check_draft_shipments($shipment);
+                            NotificationsController::send(150, $shipment_details->id);
                         }
                     } else {
                         $shipment_details->shipper_status_id = 18;
                         $shipment_details->save();
                         ShipmentsJourneyController::add($shipment_details->id, 18, NULL, NULL, $remarks[$shipment], NULL, Auth::id());
+                        NotificationsController::send(150, $shipment_details->id);
                     }
                 }
             }

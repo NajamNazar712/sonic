@@ -3089,6 +3089,9 @@ class DeliveryController extends Controller
                                             }
                                             else{
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                                if($shipper_status_details->shipper_status_id == 18){
+                                                    NotificationsController::send(150, $shipment);
+                                                }
                                             }
                                         }
                                     }

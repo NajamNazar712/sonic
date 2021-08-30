@@ -8235,10 +8235,44 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
 
                 }
+                else if ($id == 150){
+                    $shipment_id = $reference_1_id;
+                    $shipment = Shipment::find($shipment_id);
+                    if($shipment){
+                        $remarks = '';
+                        $shipper_id = $shipment->user_id;
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->select('remarks')->latest()->first();
+                        if($journey){
+                            $remarks = $journey->remarks;
+                        }
 
+                        $html = '<div><table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Customer Name</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Tracking Number</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Origin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Destination</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Remarks</strong></th></tr></thead><tbody>';
+
+                        $html .= '<tr><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->user->name .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->tracking_number .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->pickup_address->city->name .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $shipment->consignee_city->name .'</td><td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'. $remarks .'</td></tr>';
+
+                        $html .= '</tbody></table></div>';
+
+                        if (strpos($body, '[preview]') !== FALSE) {
+                            $body = str_replace('[preview]', $html, $body);
+                        }
+
+                        $to = array();
+
+                        $sales_person = $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
+
+                        $to[] = Admin::find($sales_person->admin_id)->email;
+
+                        $kam = SaleTierTag::where('user_id', $shipper_id);
+                        if ($kam->exists()) {
+                            $kam = $kam->first();
+                            $to[] = Admin::find($kam->kam)->email;
+                        }
+                        $to[] = 'muhammad.waqas@teax.pk';
+
+                        self::email($subject, $body, $to);
+                    }
+                }
             }
-
-
         }
     }
 
