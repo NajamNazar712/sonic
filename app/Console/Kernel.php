@@ -206,7 +206,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
 
         $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
-        $schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:debriefingemail')->dailyAt('00:00')->runInBackground();
         $schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
         $schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
 
@@ -288,8 +288,8 @@ class Kernel extends ConsoleKernel
 //        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
         $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
 
-        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
-        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:pendingdeliveryreport')->dailyAt('00:00')->runInBackground();
+        $schedule->command('email:receivedeliveryreport')->dailyAt('00:00')->runInBackground();
 
         $schedule->command('website:leads')->hourly()->runInBackground();
 
