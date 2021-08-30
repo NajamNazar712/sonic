@@ -373,6 +373,9 @@ class AdminInternationalShipmentsController extends Controller
                         Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $shipper_status_id, NULL, NULL, NULL, Auth::id());
                         AdminFinanceController::add_payment($shipment_id, 0);
+                        $international_shipment = InternationalShipment::where('shipment_id', $shipment_id)->first();
+                        $international_shipment->sync = 0;
+                        $international_shipment->save();
 
                     }
                 }
