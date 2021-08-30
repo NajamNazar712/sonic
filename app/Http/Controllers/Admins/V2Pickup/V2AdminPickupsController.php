@@ -245,13 +245,14 @@ class V2AdminPickupsController extends Controller
             })
             ->addColumn('action', function ($reminder_request) {
                 $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
-                if(session("role_id") == 1 ) {
-                    if (session('role_id') == 1 || count(array_intersect([45, 46, 211, 212, 245], session('permissions'))) !== 0) {
+
+                    if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
                         $dropdown = "
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
-                        if ((session('role_id') == 1 || in_array(46, session('permissions'))) && !$reminder_request->consolidation_id) {
+
+                        if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
                             $dropdown .= $reminder_button;
                         }
 
@@ -264,21 +265,6 @@ class V2AdminPickupsController extends Controller
                     } else {
                         return '';
                     }
-                }
-                else{
-                    return '';
-                }
-                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
-                    return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                                                     <button type="button" class="dropdown-item edit" data-target-id=' . $pickup_request->id . ' rel="reminder" data-target="#reminder"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">reminder</div></button>
-                    </div>
-                  </div>
-          ';
-                } else {
-                    return '';
-                }
             })
             ->editColumn('brand_name', function ($pickup_requests) {
                 if($pickup_requests->brand_name==null){
