@@ -378,7 +378,9 @@ class RetailAdminUserManagementController extends Controller
     public function user_edit($id)
     {
         $retail_user = RetailUser::find($id);
-        return view('admin.retail.users.edit')->with(['retail_user' => $retail_user]);
+        $trax_centers = RetailTraxCenter::where('status', 1)->get();
+        $franchises = RetailFranchise::where('status', 1)->get();
+        return view('admin.retail.users.edit')->with(['retail_user' => $retail_user,'trax_centers' => $trax_centers , 'franchises' => $franchises]);
     }
 
     public function user_list(Request $request)
@@ -492,6 +494,13 @@ class RetailAdminUserManagementController extends Controller
     {
         $retail_user = RetailUser::find($id);
         $retail_user->name = $request->name;
+        $retail_user->category = $request->store;
+        if($request->store == 1){
+            $retail_user->category_id = $request->franchise;
+        }
+        else{
+            $retail_user->category_id = $request->trax_center;
+        }
         $retail_user->password = Hash::make($request->password);
         $retail_user->phone_no = $request->phone_number;
         $retail_user->cnic = $request->cnic;

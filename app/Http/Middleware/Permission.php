@@ -780,6 +780,9 @@ class Permission
             'settings.nsa_account.index' => 367,
             'settings.nsa_account.store' => 367,
 
+            'settings.carrefour_account.index' => 580,
+            'settings.carrefour_account.store' => 580,
+
             'settings.restrict_cities_intercept.index' => 375,
             'settings.restrict_cities_intercept.store' => 375,
 
@@ -908,6 +911,9 @@ class Permission
             'telenor.call.index' => 402,
             'telenor.call.list' => 402,
             'telenor.return.bulk_return' => 525,
+
+            'carrefour.arrival.index' => 579,
+            'carrefour.arrival.submit' => 579,
 
 
             'leads.index' => 416,
