@@ -12,7 +12,7 @@ class InsidenceCommentPermission extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 581, 'name' => 'Incidence Comment', 'module_id' => 31),
+            array('id' => 586, 'name' => 'Incidence Comment', 'module_id' => 31),
         ));
     }
 }
