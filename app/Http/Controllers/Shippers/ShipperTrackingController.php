@@ -206,7 +206,7 @@ class ShipperTrackingController extends Controller
 
                                 $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
 
-                                if(in_array($journey->shipper_status_id, [17,20,52,54])){
+                                if(in_array($journey->shipper_status_id, [8,17,20,52,54])){
                                     $journey_details['status_remarks'] = ($journey->remarks) ? $journey->remarks : '';
                                 }else{
                                     $journey_details['status_remarks'] = '';
