@@ -428,7 +428,9 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['tracking_number','status','reason','link'];
         }
-
+        else if ($id == 150){
+            $details['fields'] = ['preview'];
+        }
 		return $details;
     }
 

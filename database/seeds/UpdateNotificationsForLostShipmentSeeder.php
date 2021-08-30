@@ -14,7 +14,7 @@ class UpdateNotificationsForLostShipmentSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->toDateTimeString();
 
         DB::table('notifications')->insert(array(
-            array('id' => 107, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Lost Shipment', 'type_id' => 1, 'body'=>'Dear [shipper]'.PHP_EOL.'Shipment with Tracking Number [tracking_number] has been marked as Lost', 'updated_by'=> 6, 'status'=> 0)
+            array('id' => 150, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Lost Shipment', 'type_id' => 1, 'body'=>'Following shipment has been marked as Lost.' . PHP_EOL . '[preview]', 'updated_by'=> 6, 'status'=> 0)
         ));
     }
 }
