@@ -218,7 +218,21 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_confirmed_index')->name('index');
             Route::get('list','Shippers\ShipperReturnController@return_list')->name('list');
-
+        });
+        Route::prefix('sheet')->name('sheet.')->group(function (){
+            Route::prefix('pending')->name('pending.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_pending_index')->name('index');
+                Route::get('list','Shippers\ShipperReturnController@return_sheet_pending_list')->name('list');
+            });
+            Route::prefix('receive')->name('receive.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_receive_index')->name('index');
+                Route::post('shipment_info','Shippers\ShipperReturnController@return_sheet_receive_shipment_info')->name('shipment_info');
+                Route::post('submit','Shippers\ShipperReturnController@return_sheet_receive_submit')->name('submit');
+            });
+            Route::prefix('history')->name('history.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_history_index')->name('index');
+                Route::get('list','Shippers\ShipperReturnController@return_sheet_history_list')->name('list');
+            });
         });
     });
 
