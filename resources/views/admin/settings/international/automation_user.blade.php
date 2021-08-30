@@ -26,7 +26,7 @@
                                             <div class="input-group">
                                                 <input type="text" name="dhl_user_id" class="form-control dhl_user_id" placeholder="International User*" data-rule-required="true" data-msg-required="DHL User is required" value="{{ $dhl_user_id }}">
                                                 <div class="input-group-append">
-                                                    <span class="input-group-text">Admin ID</span>
+                                                    <span class="input-group-text">DHL Admin ID</span>
                                                 </div>
                                             </div>
                                         </div>
