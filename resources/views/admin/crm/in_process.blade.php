@@ -365,6 +365,8 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                        @if(in_array(201, session('permissions')))
+
                     {
                         text: 'Bulk Internal Comment',
                         className: 'btn btn-primary bulk_internal_comment',
@@ -381,6 +383,7 @@
                             $('#BulkExternalCommentModal').modal('show');
                         }
                     },
+                    @endif
                     {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
