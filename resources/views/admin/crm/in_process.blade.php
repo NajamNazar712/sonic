@@ -1141,8 +1141,8 @@
                     table.button('.close_request').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
-                    table.button('.bulk_external_comment').enable();
-                    table.button('.bulk_internal_comment').enable();
+                    table.button('.bulk_external_comment').disable();
+                    table.button('.bulk_internal_comment').disable();
                 }
             });
 
@@ -1311,7 +1311,6 @@
                 }).done(function (data) {
 
                     if (data.status === 1) {
-                        console.log(data);
                         var html = '';
                         html += '<table class="table table-sm datatable text-center">';
                         html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th></tr></thead>';
