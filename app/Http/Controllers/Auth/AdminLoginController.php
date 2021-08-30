@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommissionUser;
 use App\Http\Models\Commission\SalesTier;
 use App\Http\Models\MultipleSaleLead;
