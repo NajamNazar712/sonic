@@ -1605,6 +1605,8 @@ class ShipperDashboardController extends Controller
             $user_attachment->save();
             session(['agreement_signed' => 1]);
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
+
+            NotificationsController::send(149,session('user_id'));
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
     }
