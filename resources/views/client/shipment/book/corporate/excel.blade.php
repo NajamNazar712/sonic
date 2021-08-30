@@ -25,9 +25,6 @@
                                             <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                         </div>
                                     </div>
-                                    @if(session('user_id') == 10354)
-                                        <input type="radio" class="d-none" checked name="excel_type" value="0">
-                                    @else
                                     <div class="col">
                                         <div class="row p-1 border-primary">
                                             <div class="col-12">
@@ -69,7 +66,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @endif
                                     <div class="col-auto">
                                         <div class="form-group text-left">
                                             <button type="submit" name="upload" class="btn btn-primary">Upload</button>
@@ -80,13 +76,6 @@
                                         <h5 class="form-section mt-2 mb-2 text-center">Template Download</h5>
 
                                         <div class="row">
-                                            @if(session('user_id') == 10354)
-                                                <div class="col">
-                                                    <div class="form-group text-right">
-                                                        <a href="{{ asset('file/Trax Book Corporate Distribution Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Download Excel</a>
-                                                    </div>
-                                                </div>
-                                            @else
                                             <div class="col">
                                                 <div class="form-group text-right">
                                                     <a href="{{ asset('file/Trax Book Corporate Regular Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Regular</a>
@@ -112,7 +101,6 @@
                                                     <a href="{{ asset('file/Trax Book Corporate Shipment Template.xlsx') }}?v=21_01_2021" class="btn btn-primary btn-block"><i class="la la-download"></i> Overall</a>
                                                 </div>
                                             </div>
-                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -120,7 +108,6 @@
 
                             <div class="row">
                                 <div class="col">
-                                    @if(session('user_id') != 10354)
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
@@ -140,7 +127,6 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-                                    @endif
 
                                     @if(session('rate_type_id') != 3)
                                      <table class="table table-bordered">
@@ -198,7 +184,6 @@
                                         </tbody>
                                     </table>
 
-                                    @if(session('user_id') != 10354)
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
@@ -212,7 +197,6 @@
                                         </tr>
                                         </tbody>
                                     </table>
-                                    @endif
 
                                     <table class="table table-bordered">
                                         <thead>
@@ -289,7 +273,6 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-                                        @if(session('user_id') != 10354)
                                     <table class="table table-bordered">
 										<thead>
 										<tr role="row" class="bg-primary white text-center">
@@ -303,7 +286,6 @@
 										</tr>
 										</tbody>
 									</table>
-                                            @endif
                                 </div>
 
                                 <div class="col">
@@ -425,7 +407,6 @@
                                 </div>
 
                                 <div class="col">
-                                    @if(session('user_id') != 10354)
                                     <table class="table table-bordered">
                                         <thead>
                                         <tr role="row" class="bg-primary white text-center">
@@ -445,27 +426,6 @@
                                         @endforeach
                                         </tbody>
                                     </table>
-                                    @else
-                                        <table class="table table-bordered">
-                                            <thead>
-                                            <tr role="row" class="bg-primary white text-center">
-                                                <th colspan="2" class="border-primary border-darken-1">Product Types</th>
-                                            </tr>
-                                            <tr role="row" class="bg-primary bg-lighten-1 white">
-                                                <th class="text-center border-primary border-lighten-2">ID</th>
-                                                <th class="border-primary border-lighten-2">Name</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @foreach ($distribution_products as $product)
-                                                <tr role="row">
-                                                    <td class="text-center">{{ $product->id }}</td>
-                                                    <td>{{ $product->name }}</td>
-                                                </tr>
-                                            @endforeach
-                                            </tbody>
-                                        </table>
-                                    @endif
                                 </div>
 
                                 <div class="col">

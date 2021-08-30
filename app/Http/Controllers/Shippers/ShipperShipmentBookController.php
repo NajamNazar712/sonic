@@ -38,6 +38,7 @@ use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\http\Models\SubstituteUserShipment;
 use App\Http\Models\ZoneClassCity;
+use App\Jobs\ProcessShipmentBookingDistributionDB;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -4003,10 +4004,10 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_index() {
 
-        if(session('user_id') == 10354)
-        {
-            return back();
-        }
+//        if(session('user_id') == 10354)
+//        {
+//            return back();
+//        }
 		
         $booking_types = BookingType::whereNotIn('id',[4,6])->get();
         $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
@@ -4170,7 +4171,6 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_store(Request $request) {
 
-        return $request;
         $user_id = session('user_id');
         $rate_type_id = session('rate_type_id');
 
@@ -5008,7 +5008,7 @@ class ShipperShipmentBookController extends Controller
             'distribution_item_insurance_2' => 'Distribution Item Insurance 2',
             'distribution_item_price_2' => 'Distribution Product Value 2',
 
-            'distribution_product_type_id_1' => 'Distribution Item Product Type ID 3',
+            'distribution_product_type_id_3' => 'Distribution Item Product Type ID 3',
             'distribution_item_per_sku_3' => 'Distribution Item Per SKU 3',
             'distribution_unit_per_item_3' => 'Distribution Unit Per Item 3',
             'distribution_item_insurance_3' => 'Distribution Item Insurance 3',
@@ -5284,7 +5284,6 @@ class ShipperShipmentBookController extends Controller
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
-
                 if (!isset($row['charges_mode_id'])) {
                   $rows[$key]['charges_mode_id'] = 3;
                 }
@@ -5297,7 +5296,9 @@ class ShipperShipmentBookController extends Controller
                         $query->whereIn('id', [1]);
                     })];
                 }
+
                 $shipping_mode_id = $row['shipping_mode_id'];
+
                 if($service_type_check_id != 5) {
                     if ($row['delivery_type_id'] == 2) {
                         $rules['delivery_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('corporate_delivery_type_statuses', 'delivery_type_id')->where(function ($query) use ($shipping_mode_id) {
@@ -5608,22 +5609,10 @@ class ShipperShipmentBookController extends Controller
                                 $row['substitute_user_id'] = null;
                             }
                             $row['business_category_id'] = 1;
-                            if ($row['service_type_id'] == 3 && $row['payment_mode_id'] == 4) {
-                                $row['payment_mode_id'] == 1;
-                            }
-
-                            if ($row['payment_mode_id'] == 4) {
-                                $row['amount'] = 0;
-                            }
-                            if ($user_id != 3324) {
-                                dispatch(new ProcessShipmentBookingDB($row));
-                            }
-                            else {
-                                dispatch(new ProcessShipmentBookingDBPriority($row));
-                            }
+                            dispatch(new ProcessShipmentBookingDistributionDB($row));
                         }
 
-                        return redirect()->back()->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
+                        return redirect()->route('cod.shipment.book.corporate_excel_distribution')->with(['success' => 'Booking of ' . count($rows) . ' Shipment(s) is being Processed']);
                     }
                     else{
                         return view('client.shipment.book.corporate.blacklist')->with(['data' => $rows, 'blacklist_errors' => $blacklist_errors, 'blacklist_found_categories' => $blacklist_found_categories, 'service_type_check_id' => $service_type_check_id]);
@@ -5631,7 +5620,7 @@ class ShipperShipmentBookController extends Controller
 
             }
                 else{
-                    return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id]);
+                    return view('client.shipment.book.corporate.distribution.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id]);
                 }
             }
             else {
@@ -5645,7 +5634,7 @@ class ShipperShipmentBookController extends Controller
                 $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                     $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
                 })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
-                $products = Product::pluck('product_name','id');
+                $products = DistributionProduct::pluck('name','id');
                 if($rate_type_id != 3){
                     $delivery_types = DeliveryType::pluck('delivery_type','id');
                 }
@@ -5671,18 +5660,19 @@ class ShipperShipmentBookController extends Controller
                     $shipping_mode_same_day_timings = NULL;
                 }
 
-                $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
-                    if($ccd_booking->exists()){
-                        $ccd_booking = $ccd_booking->first();
-                        $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
-                        if(!in_array(session('user_id'),$ccd_account_tags))
-                        {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
-                        else
-                        {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
-                    }
-                    else{
-                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
-                    }
+//                $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
+//                    if($ccd_booking->exists()){
+//                        $ccd_booking = $ccd_booking->first();
+//                        $ccd_account_tags = array_map('intval', explode(',', $ccd_booking->text));
+//                        if(!in_array(session('user_id'),$ccd_account_tags))
+//                        {$payment_modes = PaymentMode::whereNotIn('id', [2])->pluck('mode', 'id');}
+//                        else
+//                        {$payment_modes = PaymentMode::first()->pluck('mode', 'id');;}
+//                    }
+//                    else{
+//                        $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
+//                    }
+                $payment_modes = PaymentMode::whereIn('id',[1])->pluck('mode','id');
                 $city_name = array();
                 foreach ($cities as $city){
                     $city_name[$city->name]=$city->name;
