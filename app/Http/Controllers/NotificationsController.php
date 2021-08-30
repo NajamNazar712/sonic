@@ -1156,7 +1156,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[status]', $shipment->status_shipper->name, $body);
                         }
 
-                        self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
+                        self::email($subject, $body, $to, NULL, NULL, 'returns@trax.pk');
 
                     }
                 } else if ($id == 16) {
