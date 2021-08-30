@@ -365,7 +365,7 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        @if(in_array(201, session('permissions')))
+                        @if(session('role_id') == 1 || in_array(201, session('permissions')))
 
                     {
                         text: 'Bulk Internal Comment',
