@@ -480,6 +480,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.request_number);
                                 row.push(values.tracking_number);
                                 row.push(values.status);
                                 row.push(values.case_nature);
