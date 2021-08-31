@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Webhook;
 
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\Webhook\PaymentStatusSubscription;
 use App\Jobs\ProcessPaymentStatusWebhook;
 use Carbon\Carbon;
@@ -13,7 +14,7 @@ use App\Http\Controllers\Controller;
 
 class PaymentStatusWebhookController extends Controller
 {
-    static public function webhook_subscription($shipment_id, $shipper_status_id){
+    static public function webhook_subscription($shipment_id, $payment_status_id, $done_payment_id){
 
         $date = Carbon::now()->toDateTimeString();
         $shipment = Shipment::find($shipment_id);
@@ -26,9 +27,9 @@ class PaymentStatusWebhookController extends Controller
 
             $data['user_id'] = $user_id;
             $data['tracking_number'] = $shipment->tracking_number;
-            $data['status'] = $shipment->shipment_payment_journey->status->name;
+            $data['status'] = ShipmentPaymentStatus::find($payment_status_id)->name;
             $data['date_time'] = $date;
-            $data['payment_id'] = $shipment->shipment_payment_journey->payment_id;
+            $data['payment_id'] = $done_payment_id;
             $data['url'] = $subscriber->url;
             dispatch(new ProcessPaymentStatusWebhook($data));
 
