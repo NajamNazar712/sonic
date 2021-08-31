@@ -190,7 +190,7 @@
                     url:'{{ route('cod.return.sheet.history.list') }}'
                 },
                 rowId: 'shId',
-                order: [[1, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},

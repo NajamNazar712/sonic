@@ -132,6 +132,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var shipment_ids = [];
+            var tracking_numbers = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 autoWidth : false,
@@ -159,41 +160,44 @@
                 var tracking = scan.val();
 
                 if (tracking != '') {
-                    scan.attr('disabled', true);
-                blockPagePermanently();
-                $.ajax({
-                    url: '{{route('cod.return.sheet.receive.shipment_info')}}',
-                    type: 'POST',
-                    data: {
-                        'tracking': tracking,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function (data) {
-                        if (data.status == 0) {
-                            UnblockPagePermanently();
-                            scan_sound(2);
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
+                    var index = $.inArray(tracking, tracking_numbers);
+                    if (index === -1) {
+                        scan.attr('disabled', true);
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{{route('cod.return.sheet.receive.shipment_info')}}',
+                            type: 'POST',
+                            data: {
+                                'tracking': tracking,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    UnblockPagePermanently();
+                                    scan_sound(2);
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                } else {
+                                    var rowNo = table.rows().count();
+                                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
+
+                                    var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.shipment_status, remove]).node().id = data.shId;
+                                    table.draw(false);
+                                    $('tr#' + row).attr('class', data.class);
+                                    scan_sound(1);
+                                    shipment_ids.push(data.shId);
+                                    tracking_numbers.push(tracking);
+                                    UnblockPagePermanently();
+                                }
+
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
                             });
-                        }
-                        else {
-                            var rowNo = table.rows().count();
-                            var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
-
-                            var row = table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.shipment_status, remove]).node().id = data.shId;
-                            table.draw(false);
-                            $('tr#'+row).attr('class',data.class);
-                            scan_sound(1);
-                            shipment_ids.push(data.shId);
-                            UnblockPagePermanently();
-                        }
-
-                        scan.val('');
-                        scan.attr('disabled', false);
-                        scan.focus();
-                    });
+                    }
                 }
             });
             $('body').on('click','a.returnnoterow',function () {
