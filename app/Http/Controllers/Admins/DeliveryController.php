@@ -6564,7 +6564,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                               $cod = $cod - $parcel->amount;
                           }
                           if ($count == 0) {
-                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => 0, 'status' => 4]);
                           } else {
                               DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                           }
@@ -6579,11 +6579,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
       else{
           return ['status' => 1, 'error' => 'Something went wrong'];
       }
-
-
     }
 
-    public function add_shipments_in_recieve_deliveries(Request $request){
+    public function add_shipments_in_receive_deliveries(Request $request){
 
         $shipment_id = $request->shipment_id;
 
@@ -6596,6 +6594,10 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $rider = $delivery_note->rider;
                     if($shipment->payment_mode_id == 2 && $rider->ccd == 0){
                         return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
+                    }
+
+                    if(DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment->id)->exists()){
+                        return response()->json(['status' => 1, 'error' => 'Shipment is already in this delivery note!']);
                     }
                     $total_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->count();
 
