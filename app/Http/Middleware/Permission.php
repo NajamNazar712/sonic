@@ -1027,7 +1027,8 @@ class Permission
             'settings.ccd_booking.index' => 558,
 
 
-           
+
+
         ],
 
         'shipper' => [
