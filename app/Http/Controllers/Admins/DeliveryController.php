@@ -2757,6 +2757,7 @@ class DeliveryController extends Controller
         $shipments = explode(',', $request->shipment_ids);
         $invalid_reason_shipments = array();
 //        $shipments = $request->shipment_ids;
+        $lost_shipments_array = array();
         if(count($shipments)  == $delivery_note->shipments_count){
             if($delivery_note) {
 
@@ -3090,7 +3091,7 @@ class DeliveryController extends Controller
                                             else{
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 if($shipper_status_details->shipper_status_id == 18){
-                                                    NotificationsController::send(150, $shipment);
+                                                   $lost_shipments_array[] = $shipment;
                                                 }
                                             }
                                         }
@@ -3266,6 +3267,10 @@ class DeliveryController extends Controller
                     if($delivery_note->updated_by == NULL){
                         $delivery_note->updated_by = Auth::id();
                         $delivery_note->save();
+                    }
+
+                    if(count($lost_shipments_array) > 0){
+                        NotificationsController::send(150, $lost_shipments_array);
                     }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
