@@ -762,7 +762,7 @@ class ShipperReportsController extends Controller
         ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
         $sales = $sales->where(function ($query) {
-            $query->where('shipments.user_id', 1091)
+            $query->where('shipments.user_id', 7306)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
@@ -811,7 +811,7 @@ class ShipperReportsController extends Controller
             return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
         })
         ->editColumn('shipper_name', function ($sales) {
-            if($sales->shipper_id == 1091){
+            if($sales->shipper_id == 7306){
                 return '-';
             }else{
                 return $sales->shipper_name;
