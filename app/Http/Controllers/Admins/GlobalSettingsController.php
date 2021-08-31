@@ -4588,4 +4588,32 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-}
+
+	public function last_mile_cron_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),416);
+        $settings = GlobalSettings::where('type', 'last_mile_cron_time')->first();
+
+        $default_time = NULL;
+        if ($settings) {
+            $default_time = $settings->setting_value;
+        }
+        return view('admin.settings.last_mile.last_mile_cron')->with(['value' => $default_time]);
+    }
+
+    public function last_mile_cron_store(Request $request){
+        $settings = GlobalSettings::where('type', 'last_mile_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        } else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'last_mile_cron_time';
+        }
+
+        $settings->setting_value = $request->last_mile_cron_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }}

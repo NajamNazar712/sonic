@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins\V2Pickup;
 
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -290,5 +291,45 @@ class V2PickupCronController extends Controller
 
             self::remove_riders();
         }
+    }
+
+    static public function not_picked_shipments_journey(){
+        $global_admin_id = 346;
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+        $arrival_cut_off_time = '6';
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $arrival_cut_off_time = $settings->setting_value;
+        }
+
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        $today->setTime($arrival_cut_off_time,0,0);
+        $yesterday->setTime($arrival_cut_off_time,0,1);
+
+        $shipment_ids = Shipment::where('shipper_status_id', 1)->where('created_at', '<', $today)->pluck('id')->toArray();
+
+        if(count($shipment_ids) > 0){
+            foreach ($shipment_ids as $shipment_id){
+                $pickup_request_shipment = V2PickupRequestShipment::where('shipment_id', $shipment_id)->latest()->first();
+                if($pickup_request_shipment){
+                    $pickup_request_id = $pickup_request_shipment->pickup_request_id;
+                    $pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->whereBetween('attempt_date', [$yesterday,$today]);
+                    if($pickup_request_attempt->exists()){
+                        $pickup_request_attempt = $pickup_request_attempt->latest('id')->first();
+                        $reason_id = NULL;
+                        if($pickup_request_attempt->reason_id != null){
+                            $reason_id = $pickup_request_attempt->reason_id;
+                        }
+                        ShipmentsPickupJourneyController::add($shipment_id, 3, $global_admin_id, $pickup_request_id, $reason_id);
+                    }
+                    else{
+                        ShipmentsPickupJourneyController::add($shipment_id, 3, $global_admin_id, $pickup_request_id, 7);
+                    }
+                }
+
+            }
+        }
+
     }
 }

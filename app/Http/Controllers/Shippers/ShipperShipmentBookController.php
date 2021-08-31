@@ -33,6 +33,7 @@ use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
 use App\http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentsAirWaybillJourney;
 use App\http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\http\Models\SubstituteUserShipment;
@@ -917,8 +918,11 @@ class ShipperShipmentBookController extends Controller
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
+        $watermark_flag = false;
         if ($user_type == 3) {
             $user_name = Admin::find($user_id)->name . ' (Admin)';
+            $admin_name = Admin::find($user_id)->name;
+            $watermark = 'DUPLICATE PRINTED BY: '. $admin_name;
         }
         else if ($user_type == 1) {
             $user_name = User::find($user_id)->name . ' (Shipper)';
@@ -1037,7 +1041,7 @@ class ShipperShipmentBookController extends Controller
                         background: #c8c8c8;
                         border-radius: 25px;
                       }
-
+                         
                       .void {
                         top: 0;
                         bottom: 0;
@@ -1056,6 +1060,7 @@ class ShipperShipmentBookController extends Controller
                         .piece_number{
                             font-size: 2.5rem;
                         }
+                      
                     </style>
                   </head>
                   <body>
@@ -2121,6 +2126,12 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
+            if($user_type == 3){
+                $airwaybill_journey = ShipmentsAirWaybillJourney::where('shipment_id', $shipment->id)->where('user_type', 3);
+                if($airwaybill_journey->exists()){
+                    $watermark_flag = true;
+                }
+            }
         }
 
         $html .= $shipment_details;
@@ -2154,10 +2165,28 @@ class ShipperShipmentBookController extends Controller
                 ';
             }
 
-            $html .= '
+            if ($watermark_flag) {
+                $html .= '
                   </body>
+                  <div id="watermark_" class="watermark_">
+                    <h1 style="
+                   text-align: center;  
+                   text-transform: uppercase;                  
+                   overflow: hidden;
+                   position: fixed;
+                   margin-top: -320px;
+                   opacity: 0.4;
+                   transform: rotate(350deg);
+                   font-size: 400%; 
+                   color: red; 
+                   font-stretch: extra-expanded;"     
+                    > ' . $watermark . '  </h1>
+                    
+                    <!--<p>Your trial membership will expire in 3 days!</p>-->
+                  </div>
                 </html>
             ';
+            }
         }
 
         return $html;

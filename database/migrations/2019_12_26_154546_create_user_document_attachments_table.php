@@ -16,8 +16,6 @@ class CreateUserDocumentAttachmentsTable extends Migration
         Schema::create('user_document_attachments', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
-            $table->string('filled_and_signed_pdf')->nullable();
-            $table->string('signed_acknowledgement_pdf')->nullable();
             $table->string('cnic_front_image')->nullable();
             $table->string('cnic_back_image')->nullable();
             $table->string('blank_cheque_image')->nullable();

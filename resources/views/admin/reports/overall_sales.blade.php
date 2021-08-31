@@ -13,8 +13,31 @@
                 @include('admin.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     @if (session('role_id') == 1 || in_array(261, session('permissions')))
-                    <div class="col-4 mb-1">
+                    <div class="col-4">
                         <div class="form-group">
                             <select name="search_sales_person" class="select2" id="sales_person_select">
                                 @foreach($sales_persons as $sales)
@@ -26,29 +49,6 @@
                         @else
                         <input type="hidden" name="search_sales_person" value="null">
                     @endif
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
-                        </fieldset>
-                    </div>
-                    {{--<div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>--}}
-                        <div class="col-4 mb-1">
-                            <fieldset class="form-group">
-                                <select name="search_shipper[]" id="search_shipper" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
-                                    @foreach($shippers as $shipper)
-                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                    @endforeach
-                                </select>
-                            </fieldset>
-                        </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
@@ -95,7 +95,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(3)}}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -106,7 +106,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
 
                     </div>
@@ -135,7 +135,6 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
-                        <th class="border-primary border-darken-1">SDN Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -266,11 +265,11 @@
                 placeholder: 'Select Business Category',
                 allowClear:true
             });
-           /* $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+           $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
-            });*/
+            });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
                 width:'100%',
@@ -291,9 +290,9 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').select2({
+            $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Shipper",
+                placeholder:"Select Multiple Shippers",
                 allowClear:true,
             });
 
@@ -367,7 +366,6 @@
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Payment ID');
-                            head.push('SDN Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Origin');
@@ -414,7 +412,6 @@
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
-                                row.push(values.sdn_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
@@ -478,6 +475,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax:{
                     url: '{{ route('admin.reports.overall_sales.list') }}',
                     method:'post',
@@ -488,6 +486,7 @@
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_sales_person =  $('#sales_person_select').val();
                         d.search_shipper = $('#search_shipper').val();
+                        d.search_shippers = $('#search_shippers').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
@@ -497,7 +496,7 @@
                         d.search_business_category = $('#search_business_category').val();
                     }
                 },
-                order: [[11, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -508,7 +507,6 @@
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
-                    { data:'sdn_id' ,name: 'dnsdn.station_deposit_note_id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
