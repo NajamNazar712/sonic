@@ -1449,6 +1449,7 @@ class DeliveryController extends Controller
             $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
             $city_name = $delivery_note_details->hub->name;
             $delivery_note = $delivery_note->first();
+            $rider_id = NULL;
             if($delivery_note->special_rider){
                 $rider_name = $rider->name. ' ( '. $delivery_note->special_rider_name. ' )';
             }else{
@@ -1477,10 +1478,6 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Trax ID</strong></td>
                             <td>' . $rider_id . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Category</strong></td>
@@ -6567,7 +6564,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                               $cod = $cod - $parcel->amount;
                           }
                           if ($count == 0) {
-                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
+                              DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => 0, 'status' => 4]);
                           } else {
                               DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => $count, 'total_cod_amount' => $cod]);
                           }
@@ -6582,11 +6579,9 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
       else{
           return ['status' => 1, 'error' => 'Something went wrong'];
       }
-
-
     }
 
-    public function add_shipments_in_recieve_deliveries(Request $request){
+    public function add_shipments_in_receive_deliveries(Request $request){
 
         $shipment_id = $request->shipment_id;
 
@@ -6599,6 +6594,10 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $rider = $delivery_note->rider;
                     if($shipment->payment_mode_id == 2 && $rider->ccd == 0){
                         return response()->json(['status' => 1, 'error' => 'The selected Shipment is Credit Card on Delivery shipment and rider is not allowed/trained to use POS for CCD shipments']);
+                    }
+
+                    if(DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment->id)->exists()){
+                        return response()->json(['status' => 1, 'error' => 'Shipment is already in this delivery note!']);
                     }
                     $total_shipments = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->count();
 
@@ -6986,10 +6985,18 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
         if ($environment == 'production' || $environment == 'staging') {
             $rider_id = $request->get('rider');
             $rider = Rider::find($rider_id);
-            $otp = mt_rand(100000, 999999);
-            $rider->delivery_note_otp = $otp;
-            $rider->save();
-            NotificationsController::send(144, $rider, $otp);
+            if($rider){
+                $otp = mt_rand(100000, 999999);
+                $rider->delivery_note_otp = $otp;
+                $rider->save();
+                NotificationsController::send(144, $rider, $otp);
+                return response()->json(['status' => 1]);
+
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Rider not found!']);
+            }
+
         }
         return response()->json(['status' => 1]);
     }
