@@ -8271,7 +8271,6 @@ class NotificationsController extends Controller
                         $to[] = Admin::find($kam->kam)->email;
                     }
 
-
                     self::email($subject, $body, $to);
 
                 }

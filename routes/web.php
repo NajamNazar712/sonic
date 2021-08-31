@@ -406,6 +406,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@subscription_submit')->name('store');
         });
 
+        Route::prefix('payment_subscription')->name('payment_subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@payment_subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
+        });
 
     });
 	Route::prefix('consolidation')->name('consolidation.')->group(function () {

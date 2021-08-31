@@ -162,6 +162,9 @@
                         @if(session('user_type') == 1)
                         <li><a class="menu-item" href="{{route('cod.settings.subscription.index')}}">Shipment Status Subscription</a></li>
                         @endif
+                        @if(session('user_type') == 1)
+                            <li><a class="menu-item" href="{{route('cod.settings.payment_subscription.index')}}">Payment Status Subscription</a></li>
+                        @endif
                     </ul>
 
                 </li>
