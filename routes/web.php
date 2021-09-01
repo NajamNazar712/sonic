@@ -21,6 +21,7 @@ Auth::routes();
 Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::get('{tracking_number?}', 'TrackingController@index')->name('index');
     Route::post('track', 'TrackingController@track')->name('track');
+    Route::post('add_request','TrackingController@add_request')->name('add_request');
 });
 
 Route::prefix('shipment')->name('shipment.')->group(function () {
@@ -33,6 +34,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         return redirect()->route('cod.login');
     });
     Route::get('404', 'Auth\LoginController@not_found')->name('404');
+    Route::post('get/agreement','Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
@@ -94,6 +96,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::prefix('corporate_excel')->name('corporate_excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
+                Route::get('/index', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_index')->name('distribution');
+                Route::post('/store', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_store')->name('distribution.store');
             });
             Route::prefix('international')->name('international.')->group(function () {
                 Route::get('', 'Shippers\ShipperInternationalShipmentBookController@index')->name('index');
@@ -938,6 +942,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
+            Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
+
         });
     // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
@@ -3224,7 +3230,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
-    });    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
+    });
+    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
             Route::get('/list','Admins\IncidenceMonitoringController@list')->name('list');
             Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');

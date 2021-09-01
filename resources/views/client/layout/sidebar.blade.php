@@ -14,10 +14,14 @@
                         @if (session('user_type') == 1 || in_array(1, session('permissions')))
                             @if (session('account_type') == 1 && session('rate_status') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Order Form</a></li>
-                                <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
+                                    <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Excel Sheet</a></li>
                             @elseif (session('account_type') == 2 && session('rate_status') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate.index') }}">Order Form</a></li>
-                                <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
+                                    @if(session('user_id') == 10354)
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_distribution') }}">Excel Sheet</a></li>
+                                    @else
+                                        <li><a class="menu-item" href="{{ route('cod.shipment.book.corporate_excel_index') }}">Excel Sheet</a></li>
+                                    @endif
                             @endif
                             @if(session('international_rates') == 1)
                                 <li><a class="menu-item" href="{{ route('cod.shipment.book.international.index') }}">International Order Form</a></li>

@@ -1030,7 +1030,8 @@ class Permission
             'settings.ccd_booking.index' => 558,
 
 
-           
+
+
         ],
 
         'shipper' => [
@@ -1069,6 +1070,13 @@ class Permission
             'return.pending.marked.status.single' => 9,
             'return.reattempt_history.index' => 9,
             'return.reattempt_history.list' => 9,
+            'return.sheet.pending.index' => 9,
+            'return.sheet.pending.list' => 9,
+            'return.sheet.receive.index' => 9,
+            'return.sheet.receive.shipment_info' => 9,
+            'return.sheet.receive.submit' => 9,
+            'return.sheet.history.index' => 9,
+            'return.sheet.history.list' => 9,
 
             'intercept.index' => 9,
 
