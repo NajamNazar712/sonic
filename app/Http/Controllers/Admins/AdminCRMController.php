@@ -948,7 +948,7 @@ class AdminCRMController extends Controller
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
-        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
+                return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
     }
 
     public function in_process_list(Request $request){

@@ -15,10 +15,18 @@
                     <div class="col-3">
                         <fieldset class="form-group">
 							<input type="text"  id="search_tracking_no" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-
-                            {{-- <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number"> --}}
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_user" id="search_user" class="form-control select2">
+                                @foreach($sister_accounts as $sister_account)
+                                    <option value="{{$sister_account->id}}">{{$sister_account->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    
                     <div class="col-3">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -54,7 +62,8 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
-                        <th class="border-primary border-darken-1">Return Reason</th>
+                        {{-- <th class="border-primary border-darken-1">Return Reason</th> --}}
+                        <th class="border-primary border-darken-1">Last Reason</th>
                         <th class="border-primary border-darken-1">Attempts</th>
                         <th class="border-primary border-darken-1">Last Remarks</th>
                         <th class="border-primary border-darken-1">Last Attempt Date</th>
@@ -158,6 +167,10 @@
             //     'allowMinus': false,
             //     'allowPlus': false
             // });
+            $('#search_user').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Sister Account',
+                width:'100%',
+            });
             var select = $('.tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
 				delimiter: ',',
@@ -233,7 +246,8 @@
                             head.push('Arrival Date');
                             head.push('Status');
                             head.push('Actual Weight');
-                            head.push('Return Reason');
+                            // head.push('Return Reason');
+                            head.push('Last Reason');
                             head.push('Attempts');
                             head.push('Last Remarks');
                             head.push('Last Attempt Date');
@@ -248,7 +262,8 @@
                                 row.push(values.arrival_date);
                                 row.push(values.current_status);
                                 row.push(values.actual_weight);
-                                row.push(values.return_reason);
+                                // row.push(values.return_reason);
+                                row.push(values.last_reason);
                                 row.push(values.attempts);
                                 row.push(values.rider_remarks);
                                 row.push(values.last_attempt_date);
@@ -290,6 +305,8 @@
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_user = $('#search_user').val();
+                        
                     }
                 },
                 rowId: 'shipment_id',
@@ -301,7 +318,8 @@
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle text-center not_search'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle text-center not_search'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle not_search'},
-                    { data:'return_reason' ,name: 'ssr.name', class: 'align-middle not_search'},
+                    // { data:'return_reason' ,name: 'ssr.name', class: 'align-middle not_search'},
+                    { data:'last_reason' ,name: 'last_reason', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'attempts' ,name: 'attempts', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'rider_remarks' ,name: 'rider_remarks', class: 'align-middle not_search', orderable: false, searchable: false},
                     { data:'last_attempt_date' ,name: 'atmpdate.created_at', class: 'align-middle not_search'},
@@ -319,14 +337,21 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-            
+                // var drop_select = '<select name="shipper_name" id="shipper_name" class="select2 form-control">' +
+                //         '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search') ) {
+                    if ($(header).is('.tracking_number') || $(header).is('.serial_number') || $(header).is('.not_search')  || $(header).is('.shipper_name')) {
                         $(td).appendTo($(search));
                     }
+                    // else if ($(header).is('.shipper_name')) {
+                    //         $(drop_select).appendTo($(search))
+                    //         .on('change', function () {
+                    //             column.search($(this).val(), false, false, true).draw();
+                    //         }).wrap(td);
+                    // }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -338,7 +363,25 @@
                     }
                 });
                 
+                // var data = $.map({!! $sister_accounts !!}, function (obj) {
+                //         obj.id = obj.id;
 
+                //         return obj;
+                //     });
+
+                //     var data = $.map({!! $sister_accounts !!}, function (obj) {
+                //         obj.text = obj.name;
+
+                //         return obj;
+                //     });
+
+                    // $('#shipper_name').prepend('<option value="" selected></option>').select2({
+                    //     data:data,
+                    //     placeholder: "Select Sister Account",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
                 this.api().table().columns.adjust();
             }
             });

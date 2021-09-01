@@ -1,31 +1,21 @@
 @extends('client.layout.master')
-@section('title','Return Confirmed Shipments')
+@section('title','Return Sheet History')
 
 @section('content')
     <h1 class="mb-1">
-        Return Confirmed Shipments
+        Return Sheet History
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('client.inc.messages')
-                {{--<div class="row justify-content-center">
-                    <div class="col-3">
-                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                            @foreach($shipping_mode as $mode)
-                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                            @endforeach
-                        </select>
-                    --}}</div>
-                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -35,13 +25,12 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
-                      {{--  <th class="border-primary border-darken-1">Status</th>--}}
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-
+                        <th class="border-primary border-darken-1">Received At</th>
                     </tr>
                     </thead>
                 </table>
-
             </div>
         </div>
     </div>
@@ -127,14 +116,13 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.return.confirmed.list') }}',
+                        url: '{{ route('cod.return.sheet.history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Order ID');
-                            head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -144,8 +132,9 @@
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
-                            /*head.push('Status');*/
+                            head.push('Status');
                             head.push('Remarks');
+                            head.push('Received At');
 
 
                             $.each(result.data, function(index, values) {
@@ -155,7 +144,6 @@
                                 row.push(index + 1);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
-                                row.push(values.shipper);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -165,8 +153,9 @@
                                 row.push(values.amount);
                                 row.push(values.mode);
                                 row.push(values.service_type);
-                               /* row.push(values.status);*/
-                                row.push(values.remarks);
+                                row.push(values.status);
+                                row.push(values.received_remarks);
+                                row.push(values.received_date);
 
 
                                 body.push(row);
@@ -184,7 +173,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Return Confirmed',
+                        title: 'Return Sheet History',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }
@@ -198,31 +187,26 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url:'{{ route('cod.return.confirmed.list') }}',
-                    data: function (d) {
-                        d.select_type = $('#select_type').val();
-                        d.search_shipping_mode = $('#search_shipping_mode').val()
-                    }
+                    url:'{{ route('cod.return.sheet.history.list') }}'
                 },
                 rowId: 'shId',
-                order: [[1, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'order_id', name: 's.order_id', class: 'align-middle order_id'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'consignee_name', name: 's.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_phone', name: 's.consignee_phone_number_1', class: 'align-middle consignee_phone'},
+                    {data: 'consignee_address', name: 's.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'amount', name: 's.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                  /*  {data: 'status', name: 'status', class: 'align-middle status'},*/
-                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks', orderable: false, searchable: false},
-
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'received_remarks', name: 'return_sheets.remarks', class: 'align-middle received_remarks', orderable: false, searchable: false},
+                    {data: 'received_date', name: 'return_sheets.received_at', class: 'align-middle received_date'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -312,67 +296,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-
-                if ($(this).hasClass('revert')) {
-                    swal({
-                        text: 'Are you sure, you want to revert this Shipment?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            if(id) {
-                                var remark = $.trim($('tr#' + id).find('td.remarks input').val());
-                                $.ajax({
-                                    url: '{!! route('admin.return.confirmed.revert') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        '_token': '{{ csrf_token() }}',
-                                        'id': id,
-                                        'remarks':remark
-                                    }
-                                })
-                                    .done(function (data) {
-                                        table.draw(false);
-
-                                        if (data.status == 0) {
-                                            toastr.success(data.success, 'Success!', {
-                                                positionClass: 'toast-bottom-center',
-                                                containerId: 'toast-bottom-center'
-                                            });
-                                        }
-                                        else {
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                        }
-                                    });
-                            }
-                        }
-                    });
-                }
-            });
-
         });
     </script>
 @endsection

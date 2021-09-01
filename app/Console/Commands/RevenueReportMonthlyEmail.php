@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsController;
 use App\Http\Controllers\NotificationsController;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class RevenueReportMonthlyEmail extends Command

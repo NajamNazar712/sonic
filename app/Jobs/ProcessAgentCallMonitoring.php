@@ -6,6 +6,8 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\GlobalSettings;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -47,25 +49,34 @@ class ProcessAgentCallMonitoring implements ShouldQueue
             if(count($admin_ids) > 0){
 
                 $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
-                // AgentCallMonitoring::where('completed',0)->groupBy('agent_id')->count();
+
                 $recs = array();
                 if(count($admins) > 0){
+
+                    $settings = GlobalSettings::where('type', 'debriefing_time_setting');
+
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        $time = $settings->text;
+                    }
+                    else {
+                        $time = '00:00:00';
+                    }
+
+                    $time = Carbon::today()->addHours(substr($time,0,2))->addMinutes(substr($time,3,2));
+                    if(Carbon::now() > $time){
+                        $time = $time->addDays(1);
+                    }
 
                     foreach($admins as $admin_id) {
 
                         $rec = array();
                         $rec['admin_id'] = $admin_id;
-                        $rec['count'] = AgentCallMonitoring::where('agent_id',$admin_id)->where('completed',0)->count();
+                        $rec['count'] = 0;
+                        if($calls_count = AgentCallMonitoring::where('agent_id',$admin_id)->where('completed',0)->where('created_at','>=',Carbon::today())->where('created_at','<=', $time)->exists()){
+                            $rec['count'] = $calls_count->count();
+                        }
                         $recs[] = $rec;
-
-
-                        // if((AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count())<$count){
-                        //     $agent_id=$admin->id;
-                        //     $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
-                        // }else{
-                        //     $count=AgentCallMonitoring::where('agent_id',$admin->id)->where('completed',0)->count();
-                        //     $agent_id=$admin->id;
-                        // }
                     }
 
                     if(count($recs) > 0){
