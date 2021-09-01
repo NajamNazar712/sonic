@@ -253,7 +253,7 @@ class NotificationsController extends Controller
 
                     $to = $shipment->consignee_phone_number_1;
 
-                    $link = '<a href="{{$linker}}?tracking_number='.$tracking_number.'">'.$tracking_number.'</a>';
+                    $link = '<a href="{{$linker}}?tracking_number='.$tracking_number.'">https://sonic.pk/tracking?tracking_number='.$tracking_number.'</a>';
 
                     foreach ($fields as $key => $field) {
                         if (strpos($body, '[' . $key . ']') !== FALSE) {
