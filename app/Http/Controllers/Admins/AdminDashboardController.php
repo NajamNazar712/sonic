@@ -2250,7 +2250,6 @@ class AdminDashboardController extends Controller
     }
 
     public function editRates(Request $request, $id){
-        
         $user = User::find($id);
         if ($user['status']!=3) {
             $messages = [
@@ -6220,7 +6219,7 @@ class AdminDashboardController extends Controller
                 PendingDiscountCharge::where('user_id', $id)->delete();
                 PendingRateOriginHub::where('user_id', $id)->delete();
                 PendingRateDestinationHub::where('user_id', $id)->delete();
-                User::where('id', $id)->update(['rate_status' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
+                User::where('id', $id)->update(['rate_status' => 0,'agreement_signed' => 0, 'rates_authorized_by' => Auth::id(),'rates_approved_at'=>Carbon::now()]);
                 if($request->has('rate_remarks') && $request->rate_remarks != null){
                     $rate_remark = new RateRemark();
                     $rate_remark->user_id = $id;
@@ -7833,6 +7832,10 @@ class AdminDashboardController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
 
+                    if(session('role_id') == 1 || in_array(361, session('permissions'))){
+                        $dropdown .= '<button type="button" class="dropdown-item remove_sales_tier"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Remove Sales Tier Tagging</div></button>';
+                    }
+
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                     $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
@@ -7967,7 +7970,6 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
                         }
                     }
-
 
                     $dropdown .= '
                     </div>
@@ -8171,6 +8173,10 @@ class AdminDashboardController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm accounts">
                 ';
+
+                if(session('role_id') == 1 || in_array(361, session('permissions'))){
+                    $dropdown .= '<button type="button" class="dropdown-item remove_sales_tier"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Remove Sales Tier Tagging</div></button>';
+                }
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
@@ -10443,6 +10449,78 @@ class AdminDashboardController extends Controller
                 return ['status' => 0 ,'error'=>"Select One Shipper!"];
             }
         }
+     }
+
+     public function kam_poc_ref_tag_info(Request $request){
+        $shipper_id = $request->shipper_id;
+         if($shipper_id) {
+             $info = array();
+             $sale_tier = SaleTierTag::where('user_id', $shipper_id);
+             if($sale_tier->exists()){
+                 $flag = false;
+                 $sale_tier = $sale_tier->first();
+                 if($sale_tier->poc != null){
+                     $info['poc'] = $sale_tier->poc_admin->name;
+                     $flag = true;
+                 }
+                 else{
+                     $info['poc'] = '-';
+                 }
+                 if($sale_tier->kam != null){
+                     $info['kam'] = $sale_tier->kam_admin->name;
+                     $flag = true;
+                 }
+                 else{
+                     $info['kam'] = '-';
+                 }
+                 if($sale_tier->ref != null){
+                     $info['ref'] = $sale_tier->ref_admin->name;
+                     $flag = true;
+                 }
+                 else{
+                     $info['ref'] = '-';
+                 }
+                 if($flag){
+                     return response()->json(['status'=>1,'info'=>$info]);
+                 }
+                 else{
+                     return response()->json(['status'=>0,'error'=> 'No Sales tier found!']);
+                 }
+             }
+             else{
+                 return response()->json(['status'=>0,'error'=> 'No Sales tier found!']);
+             }
+            }
+            else{
+                return ['status' => 0 ,'error'=>"Shipper not found with sales tier tagging!"];
+            }
+     }
+
+     public function kam_poc_ref_tag_remove(Request $request){
+        $shipper_id = $request->shipper_id;
+         if($shipper_id) {
+             $sale_tier = SaleTierTag::where('user_id', $shipper_id);
+             if($sale_tier->exists()){
+                 $sale_tier = $sale_tier->first();
+                 if($request->has('poc')){
+                     $sale_tier->poc = null;
+                 }
+                 if($request->has('kam')){
+                     $sale_tier->kam = null;
+                 }
+                 if($request->has('ref')){
+                     $sale_tier->ref = null;
+                 }
+                 $sale_tier->save();
+                 return redirect()->back()->with('success', 'Sales tier tag removed successfully!');
+             }
+             else{
+                 return redirect()->back()->with('error', 'No Sales tier found!');
+             }
+            }
+            else{
+                return redirect()->back()->with('error', 'Shipper not found with sales tier tagging!');
+            }
      }
 
      public function rate_history_date(Request $request){

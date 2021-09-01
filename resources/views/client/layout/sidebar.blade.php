@@ -79,6 +79,15 @@
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{route('cod.return.confirmed.index')}}">Confirmed</a></li>
                     </ul>
+                    <ul class="menu-content">
+                        <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return Sheet</span></a>
+                            <ul class="menu-content">
+                                <li><a class="menu-item" href="{{ route('cod.return.sheet.pending.index') }}">Pending</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.return.sheet.receive.index') }}">Receive</a></li>
+                                <li><a class="menu-item" href="{{ route('cod.return.sheet.history.index') }}">History</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
             @endif
 

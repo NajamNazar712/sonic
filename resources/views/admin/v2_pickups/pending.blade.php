@@ -86,6 +86,7 @@
                                     <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -196,6 +197,36 @@
             </div>
         </div>
     </div>
+
+{{--   Modal Popup --}}
+    <div class="modal fade" id="ReturnConfirmReasonSingleModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonSingleModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        <input type="hidden" id="return_reason_shipment_id">
+                        <input type="hidden" id="return_reason_shipment_remarks">
+
+
+                        <div class="form-group ml-1">
+                            <button type="button" name="add" class="btn btn-primary single_update_return_confirm" id="single_reason_update_btn">Update To Return Confirm</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -239,10 +270,14 @@
         .reverse_pickup_row{
             background-color: {{$legend->color}};
         }
-    @elseif($legend->id == 8)
+        @elseif($legend->id == 8)
         .reverse_pickup_row{
             background-color: {{$legend->color}};
         }
+        @elseif($legend->id == 9)
+        .reminder_pending_row{
+             background-color: {{$legend->color}};
+         }
     @endif
 @endforeach
     </style>
@@ -496,6 +531,7 @@
                 {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
+                {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
             ],
             rowCallback: function(row, data, index) {
@@ -519,7 +555,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name')) {
+                    if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))
@@ -782,13 +818,71 @@
                     });
             }
 
-            for (let i = 1; i <= 8; i++) {
+            for (let i = 1; i <= 9; i++) {
                 $('#'+i+'').on('click', function () {
                 $('#legend_filter').val(i);
                 table.draw();
             });
             }
+            $('body').on('click','.reminderMarkStatus',function () {
+                var action = $(this).data('action');
+                var row_id = $(this).parents('tr').attr('id');
+                console.log(row_id);
+               if(action === 'reattempt'){
+                   var atext = 'Select Yes to put Reminder!';
+                }
 
+                if(row_id != '' && action === 'reminder'){
+                    swal({
+                        title: 'Are You Sure?',
+                        text: atext,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            blockPagePermanently();
+                            $.ajax({
+                                url:"{{route('admin.v2_pickups.pending.status.reminder.update')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    UnblockPagePermanently();
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                                }
+
+                            });
+                        }
+                    });
+
+
+                }
+            });
         });
     </script>
 @endsection

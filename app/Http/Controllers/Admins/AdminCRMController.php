@@ -948,7 +948,7 @@ class AdminCRMController extends Controller
         $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
-        return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
+                return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
     }
 
     public function in_process_list(Request $request){
@@ -4273,7 +4273,7 @@ class AdminCRMController extends Controller
     }
 
     public function bulk_comment_for_shipper(Request $request){
-
+        $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
         if(count($crm_request_ids) > 0){
@@ -4283,7 +4283,7 @@ class AdminCRMController extends Controller
                     $crm_comment->crm_request_id = $request_id;
                     $crm_comment->comment_by_id = Auth::id();
                     $crm_comment->comment_by = 0;
-                    $crm_comment->comment_type = 0;
+                    $crm_comment->comment_type = $comment_type;
                     $crm_comment->comment = $comment ;
                     $crm_comment->save();
                 }

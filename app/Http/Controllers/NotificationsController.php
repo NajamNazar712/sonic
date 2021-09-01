@@ -138,7 +138,6 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
-        
         $notification = Notification::find($id);
 
         if ($notification) {
@@ -1026,7 +1025,8 @@ class NotificationsController extends Controller
                             $body = $original_body;
                         }
                     }
-                } else if ($id == 15) {
+                }
+                else if ($id == 15) {
                     if ($reference_1_id != 0) {
                         $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -1156,10 +1156,13 @@ class NotificationsController extends Controller
                             $body = str_replace('[status]', $shipment->status_shipper->name, $body);
                         }
 
-                        self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
-
+                        self::email($subject, $body, $to);
                     }
-                } else if ($id == 16) {
+                }
+
+
+
+                else if ($id == 16) {
                     if ($reference_1_id != 0) {
                         $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -1934,7 +1937,10 @@ class NotificationsController extends Controller
                     $body = str_replace('[' . $first_field . ']', $pickup_details, $body);
 
                     self::sms($body, $to);
-                } else if ($id == 23) {
+                }
+
+
+                else if ($id == 23) {
                     $shipments = Shipment::where('shipper_status_id', 12);
 
                     if ($shipments->exists()) {
@@ -2098,14 +2104,17 @@ class NotificationsController extends Controller
 //                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
 //                  }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
+                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
 
                                 $subject = $original_subject;
                                 $body = $original_body;
                             }
                         }
                     }
-                } else if ($id == 24) {
+                }
+
+
+                else if ($id == 24) {
                     $shipments = Shipment::where('shipper_status_id', 20);
 
                     if ($shipments->exists()) {
@@ -2252,14 +2261,15 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $on_request_admin->pluck('email')->toArray());
                                 }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
+                                self::email($subject, $body, $to);
 
                                 $subject = $original_subject;
                                 $body = $original_body;
                             }
                         }
                     }
-                } else if ($id == 25) {
+                }
+                else if ($id == 25) {
                     $shipments = Shipment::where('shipper_status_id', 13);
 
                     if ($shipments->exists()) {
@@ -3190,9 +3200,7 @@ class NotificationsController extends Controller
 
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-
-                                self::email($subject, $body, $to, NULL, NULL, 'return@trax.pk');
-
+                                self::email($subject, $body, $to);
 
                                 $subject = $original_subject;
                                 $body = $original_body;
@@ -8085,7 +8093,7 @@ class NotificationsController extends Controller
                         $body_updated = str_replace('[preview]', $html, $body_updated);
                         $subject = 'Return Confirm Mail';
                         $to = $data->email;
-                        self::email($subject, $body_updated, $to, NULL, NULL, 'return@trax.pk');
+                        self::email($subject, $body_updated, $to, NULL, NULL, 'returns@trax.pk');
 
                     }
 
@@ -8232,10 +8240,56 @@ class NotificationsController extends Controller
                         $to = array_merge($to, $admins->pluck('email')->toArray());
                     }
 
-                    $to[] = 'muhammad.waqas@trax.pk';
-
                     self::email($subject, $body, $to);
 
+                }
+
+                else if ($id == 149){
+                    $user_id = $reference_1_id;
+
+                    $user = User::find($user_id);
+
+                    if (strpos($subject, '[Shipper]') !== FALSE) {
+                        $subject = str_replace('[Shipper]', $user->name, $subject);
+                    }
+
+                    if (strpos($body, '[Shipper name]') !== FALSE) {
+                        $body = str_replace('[Shipper name]', $user->name, $body);
+                    }
+
+                    $shipper_body = $body;
+                    $sale_person_body = $body;
+                    $finance_body = $body;
+                    if (strpos($shipper_body, '[person_of_contact]') !== FALSE) {
+                        $shipper_body = str_replace('[person_of_contact]', $user->name, $shipper_body);
+                    }
+                    $to = $user->email;
+                    self::email($subject, $shipper_body, $to);
+
+                    $sale_person = SalePersonTag::join('admins as sale_person','sale_person.id','=','sale_person_tags.admin_id')
+                        ->where('sale_person_tags.user_id',$user_id)
+                        ->where('sale_person_tags.status',0)
+                        ->select(['sale_person.email as email','sale_person.name as name'])
+                        ->latest('sale_person_tags.created_at')
+                        ->first();
+
+                    if (strpos($sale_person_body, '[person_of_contact]') !== FALSE) {
+                        $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                    }
+
+                    $to = $sale_person->email;
+                    self::email($subject, $sale_person_body, $to);
+
+                    $finance_admin = Admin::where('role_id',2)
+                        ->where('status',1)
+                        ->first();
+
+                    if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
+                        $finance_body = str_replace('[person_of_contact]', $finance_admin->name, $finance_body);
+                    }
+
+                    $to = $finance_admin->email;
+                    self::email($subject, $finance_body, $to);
                 }
 
             }
