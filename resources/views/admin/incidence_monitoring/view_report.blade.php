@@ -207,7 +207,7 @@
                                                 </div>
                                             </section>
 
-
+                                            @if(session('role_id') == 1 || in_array(586, session('permissions')) )
                                                 <section class="chat-app-form">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
@@ -229,6 +229,7 @@
                                                         </div>
                                                     </form>
                                                 </section>
+                                            @endif
                                                 <div class="row justify-content-center mt-1">
                                                     @if(session('role_id') == 1 || in_array(540, session('permissions')) )
                                                         <div class="col-4">

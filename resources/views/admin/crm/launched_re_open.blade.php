@@ -19,6 +19,7 @@
                             @include('admin.inc.messages')
 
                             <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
                                 <div class="form-group">
                                     <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
                                            placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
@@ -94,32 +95,61 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="BulkCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkCommentModal"
+    <div class="modal fade text-left" id="BulkExternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkExternalCommentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Comment </h4>
+                    <h4 class="modal-title white">Add External Comment </h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
                     <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                        <input type="text" value="0" name="bulk_comment_type" id="bulk_comment_type" hidden>
                         <div class="col">
-                                <div class="form-group">
-                                    <textarea class="form-control" rows="5" id="comment" placeholder="Add Comment"></textarea>
-                                </div>
-                                <div class="modal-footer justify-content-center">
-                                    <button type="button" class="btn btn-success" id="commentSubmit">Save</button>
-                                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                                </div>
+                            <div class="form-group">
+                                <textarea class="form-control" rows="5" id="bulk_comment" placeholder="Add External Comment"></textarea>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Save</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
+                            </div>
                         </div>
                     </form>
+                </div>
             </div>
         </div>
     </div>
-
+    <div class="modal fade text-left" id="InternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="InternalCommentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Internal Comment </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="internal_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                        <div class="col">
+                            <div class="form-group">
+                                <input type="text" value="1" name="internal_comment_type" id="internal_comment_type" hidden>
+                                <textarea class="form-control" rows="5" id="internal_comment" placeholder="Add Internal Comment"></textarea>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Save</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{{--        --}}
 
     {{--<div class="modal fade text-left" id="UpdateRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UpdateRequestModal"--}}
          {{--aria-hidden="true">--}}
@@ -337,14 +367,24 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    @if(session('role_id') == 1 || in_array(201, session('permissions')))
                     {
-                    text: 'Bulk Comment',
-                    className: 'btn btn-primary bulk_comment',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        $('#BulkCommentModal').modal('show');
-                    }
-                },
+                        text: 'Bulk Internal Comment',
+                        className: 'btn btn-primary bulk_internal_comment',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $('#InternalCommentModal').modal('show');
+                        }
+                    },
+                    {
+                        text: 'Bulk External Comment',
+                        className: 'btn btn-primary bulk_external_comment',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $('#BulkExternalCommentModal').modal('show');
+                        }
+                    },
+                    @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(184, session('permissions')))
                     {
                         text: 'Valid',
@@ -530,7 +570,8 @@
                                                     table.button('.assign').disable();
                                                     table.button('.valid').disable();
                                                     table.button('.in_valid').disable();
-                                                    table.button('.bulk_comment').disable();
+                                                    table.button('.bulk_external_comment').disable();
+                                                    table.button('.bulk_internal_comment').disable();
                                                 });
                                         } else {
                                             var error = "Agent Not Selected!";
@@ -569,7 +610,8 @@
                                     table.button('.assign').enable();
                                     table.button('.valid').enable();
                                     table.button('.in_valid').enable();
-                                    table.button('.bulk_comment').enable();
+                                    table.button('.bulk_external_comment').enable();
+                                    table.button('.bulk_internal_comment').enable();
                                 }
                             });
                         }
@@ -598,7 +640,8 @@
                                         table.button('.assign').disable();
                                         table.button('.valid').disable();
                                         table.button('.in_valid').disable();
-                                        table.button('.bulk_comment').disable();
+                                        table.button('.bulk_external_comment').disable();
+                                        table.button('.bulk_internal_comment').disable();
                                     }
                                 }
                             });
@@ -882,14 +925,25 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('.closebutton').on('click',function(){
+                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                });
+                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#InternalCommentModal #internal_comment").val("");
+                });
 
-            $('#commentSubmit').on('click',function () {
-                var comment = $('#BulkCommentModal #comment').val();
+            });
+
+            $('#bulkcommentSubmit').on('click',function () {
+                var comment = $('#BulkExternalCommentModal #bulk_comment').val();
+                var comment_type = $('#BulkExternalCommentModal #bulk_comment_type').val();
                 if (comment) {
                     $.ajax({
                         url: '{!! route('admin.crm.comment.bulk') !!}',
                         method: 'POST',
                         data: {
+                            'comment_type':comment_type,
                             'comment': comment,
                             'crm_request_ids': selected_rows,
                             '_token': '{{ csrf_token() }}'
@@ -897,7 +951,10 @@
                     })
                         .done(function (data) {
                             if (data.status == 1) {
-                                $('#BulkCommentModal').modal('hide');
+                                $('#BulkExternalCommentModal').modal('hide');
+                                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                                });
                                 toastr.success(data.success, 'Success!', {
                                     positionClass: 'toast-bottom-center',
                                     containerId: 'toast-bottom-center'
@@ -910,16 +967,67 @@
                             }
                             selected_rows = [];
                             table.rows().deselect();
-                            $('#comment').val('').trigger('change');
-                            $('#BulkCommentModal').modal('hide');
+                            $('#bulk_comment').val('').trigger('change');
+                            $('#BulkExternalCommentModal').modal('hide');
                             table.draw('false');
                             table.button('.assign').disable();
                             table.button('.valid').disable();
                             table.button('.in_valid').disable();
-                            table.button('.bulk_comment').disable();
+                            table.button('.bulk_external_comment').disable();
+                            table.button('.bulk_internal_comment').disable();
+                        });
+                }
+                 else {
+                    var error = "Add Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+            $('#internalcommentSubmit').on('click',function () {
+                var comment = $('#InternalCommentModal #internal_comment').val();
+                var comment_type = $('#InternalCommentModal #internal_comment_type').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment_type':comment_type,
+                            'comment': comment,
+                            'crm_request_ids': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#InternalCommentModal').modal('hide');
+                                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                                    $("#InternalCommentModal #internal_comment").val("");
+                                });
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#internal_comment').val('').trigger('change');
+                            $('#InternalCommentModal').modal('hide');
+                            table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.valid').disable();
+                            table.button('.in_valid').disable();
+                            table.button('.bulk_external_comment').disable();
+                            table.button('.bulk_internal_comment').disable();
                         });
                 } else {
-                    var error = "Add Comment First!";
+                    var error = "Add Internal Comment First!";
                     toastr.error(error, 'Error!', {
                         positionClass: 'toast-top-center',
                         containerId: 'toast-top-center'
@@ -979,13 +1087,15 @@
                     table.button('.assign').enable();
                     table.button('.valid').enable();
                     table.button('.in_valid').enable();
-                    table.button('.bulk_comment').enable();
+                    table.button('.bulk_external_comment').enable();
+                    table.button('.bulk_internal_comment').enable();
                 }
                 else {
                     table.button('.assign').disable();
                     table.button('.valid').disable();
                     table.button('.in_valid').disable();
-                    table.button('.bulk_comment').disable();
+                    table.button('.bulk_external_comment').disable();
+                    table.button('.bulk_internal_comment').disable();
                 }
             });
 
