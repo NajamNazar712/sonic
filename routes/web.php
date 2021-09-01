@@ -21,6 +21,7 @@ Auth::routes();
 Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::get('{tracking_number?}', 'TrackingController@index')->name('index');
     Route::post('track', 'TrackingController@track')->name('track');
+    Route::post('add_request','TrackingController@add_request')->name('add_request');
 });
 
 Route::prefix('shipment')->name('shipment.')->group(function () {
