@@ -6699,6 +6699,8 @@ class NotificationsController extends Controller
                     $lead = $reference_1_id;
                     $route = route('cod.register', ['lead_id' => $lead->id]);
                     if($lead != null){
+                        $sales_person = Admin::find($lead->sale_person_id);
+
                         $html = '<div style="height: 100%; width: 100%; left: 0; top: 0; overflow: hidden; position: fixed;background-color: #F5F5F5">
                     <div align="center" style="overflow: hidden; display: flex; justify-content:space-around; margin-bottom: 20px;">
                         <img src="' . asset('img/sonic_logo_new.png') . '" alt="Sonic" style="display: inline-block; width: 10%;">
@@ -6708,16 +6710,25 @@ class NotificationsController extends Controller
                         if (strpos($body, '[contact_person]') !== FALSE) {
                             $body = str_replace('[contact_person]',$lead->contact_person, $body);
                         }
+
+                        if (strpos($body, '[sales_person]') !== FALSE) {
+                            $body = str_replace('[sales_person]',$sales_person->name, $body);
+                        }
+
+                        if (strpos($body, '[sales_person_contact]') !== FALSE) {
+                            $body = str_replace('[sales_person_contact]',$sales_person->phone_number, $body);
+                        }
+
                         $link = '<div style="margin-top: 20px"><a href="'.$route.'" target="_blank" style="background-color: #003399; color: white; padding: 1em 1.5em; text-decoration: none;">Continue to Registation</a></div>';
 
                         if (strpos($body, '[link]') !== FALSE) {
                             $body = str_replace('[link]',$link, $body);
                         }
-                        $html .= '<div align="center" style="margin-bottom: 0px; background-color: #ffffff"><p>';
+                        $html .= '<div style="margin-bottom: 0px; background-color: #ffffff; vertical-align: middle;"><p>';
 
                         $html .= $body . '</p>
                     </div>
-                        <p align="center" style="margin-top: 0px; margin-bottom: 0px;">Copyright © ' . now()->year. ' By Trax Logistics, All Rights Reserved.</p>
+                        <p style="margin-top: 0px; margin-bottom: 0px; vertical-align: middle;">Copyright © ' . now()->year. ' By Trax Logistics, All Rights Reserved.</p>
                     </div>';
                         $to = $lead->email_address;
                         self::email($subject, $html, $to);

@@ -3064,7 +3064,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
-        Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
