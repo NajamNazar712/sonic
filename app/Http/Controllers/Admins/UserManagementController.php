@@ -531,7 +531,7 @@ class UserManagementController extends Controller
         }
         $riders = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
-            ->select('riders.id as id', 'riders.name as name', 'riders.phone as phone_no', 'riders.delivery_note_otp as otp', 'c.name as hub')
+            ->select('riders.id as id', 'riders.name as name','riders.otp_date as otp_date', 'riders.phone as phone_no', 'riders.delivery_note_otp as otp', 'c.name as hub')
             ->where('riders.status', 1)
             ->whereNotNull('delivery_note_otp');
         $datatable = Datatables::of($riders);

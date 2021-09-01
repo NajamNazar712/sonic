@@ -21,6 +21,7 @@ use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
@@ -6836,6 +6837,12 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
+
+            if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+                $from = $request->get('search_update_date_from');
+                $to = $request->get('search_update_date_to');
+                $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+            }
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
@@ -8169,9 +8176,10 @@ class AdminReportsController extends Controller
     public function last_mile_app_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),227);
         $riders = Rider::where('status', 1)->get();
+        $riders_cat = OperationRidersCategory::all();
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $hubs = City::where('status', 1)->where('hub', 1)->where('business_category_id', 1)->get();
-        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
+        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones,'riders_cat' => $riders_cat]);
     }
     public function last_mile_app_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -8183,7 +8191,8 @@ class AdminReportsController extends Controller
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('zones as z','z.id','=','c.zone_id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->select('delivery_notes.id as delivery_note_id','z.name as zone', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
+            ->join('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
+            ->select('delivery_notes.id as delivery_note_id','z.name as zone', 'delivery_notes.created_at as created_at', 'rd.name as rider_cat','r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
             ->whereDate('delivery_notes.created_at', '>', $date);
 
 
@@ -8230,6 +8239,9 @@ class AdminReportsController extends Controller
 
         if ($search_rider = $request->get('search_rider')) {
             $datatable->where('r.id', $search_rider);
+        }
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $datatable->where('r.operation_rider_id', $search_rider_cat);
         }
         if ($search_zone = $request->get('search_zone')) {
             $datatable->where('c.zone_id', $search_zone);

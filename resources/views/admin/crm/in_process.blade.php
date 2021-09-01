@@ -95,8 +95,8 @@
                                 <textarea class="form-control" rows="5" id="bulk_comment" placeholder="Add External Comment"></textarea>
                             </div>
                             <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Save</button>
-                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Add External Comment</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -122,8 +122,8 @@
                                 <textarea class="form-control" rows="5" id="internal_comment" placeholder="Add Internal Comment"></textarea>
                             </div>
                             <div class="modal-footer justify-content-center">
-                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Save</button>
-                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Add Internal Comment</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -365,6 +365,8 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                        @if(session('role_id') == 1 || in_array(201, session('permissions')))
+
                     {
                         text: 'Bulk Internal Comment',
                         className: 'btn btn-primary bulk_internal_comment',
@@ -381,6 +383,7 @@
                             $('#BulkExternalCommentModal').modal('show');
                         }
                     },
+                    @endif
                     {
                         text: 'Tag',
                         className: 'btn btn-primary tag',
@@ -912,6 +915,15 @@
                 }
             });
 
+            $('.closebutton').on('click',function(){
+                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                });
+                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#InternalCommentModal #internal_comment").val("");
+                });
+
+            });
 
             $('#bulkcommentSubmit').on('click',function () {
                 var comment = $('#BulkExternalCommentModal #bulk_comment').val();
@@ -1132,8 +1144,8 @@
                     table.button('.close_request').disable();
                     table.button('.tag').disable();
                     table.button('.un_tag').disable();
-                    table.button('.bulk_external_comment').enable();
-                    table.button('.bulk_internal_comment').enable();
+                    table.button('.bulk_external_comment').disable();
+                    table.button('.bulk_internal_comment').disable();
                 }
             });
 
@@ -1302,7 +1314,6 @@
                 }).done(function (data) {
 
                     if (data.status === 1) {
-                        console.log(data);
                         var html = '';
                         html += '<table class="table table-sm datatable text-center">';
                         html += '<thead><tr><th>S No.</th><th><strong>Admin</strong></th></tr></thead>';
