@@ -1065,14 +1065,14 @@ class AdminNsaAccountShipmentController extends Controller
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
             'weight' => ['required', 'numeric', 'between:0.1,100000'],
         ];
-        $fields = [0 => 'tracking_number'];
+        $fields = [0 => 'tracking_number', 1 => 'weight'];
 
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number'];
+            $header = ['Tracking Number', 'Weight'];
 
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;

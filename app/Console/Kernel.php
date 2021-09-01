@@ -97,6 +97,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
+        'App\Console\Commands\ReturnSheetReceive',
     ];
 
     /**
@@ -312,6 +313,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:inactiveriderreport')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:emailofreturnconfirmtokams')->dailyAt('03:00')->runInBackground();
+        $schedule->command('returnsheet:receive')->dailyAt('05:00')->runInBackground();
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
         $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();

@@ -218,7 +218,21 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_confirmed_index')->name('index');
             Route::get('list','Shippers\ShipperReturnController@return_list')->name('list');
-
+        });
+        Route::prefix('sheet')->name('sheet.')->group(function (){
+            Route::prefix('pending')->name('pending.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_pending_index')->name('index');
+                Route::get('list','Shippers\ShipperReturnController@return_sheet_pending_list')->name('list');
+            });
+            Route::prefix('receive')->name('receive.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_receive_index')->name('index');
+                Route::post('shipment_info','Shippers\ShipperReturnController@return_sheet_receive_shipment_info')->name('shipment_info');
+                Route::post('submit','Shippers\ShipperReturnController@return_sheet_receive_submit')->name('submit');
+            });
+            Route::prefix('history')->name('history.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_history_index')->name('index');
+                Route::get('list','Shippers\ShipperReturnController@return_sheet_history_list')->name('list');
+            });
         });
     });
 
@@ -553,7 +567,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
         Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
         Route::post('active_today/ajax', 'Admins\AdminDashboardController@todayActiveAccountListAjax')->name('active.today.ajax');
-        
+        Route::get('kam_poc_ref_tag/info','Admins\AdminDashboardController@kam_poc_ref_tag_info')->name('kam_poc_ref_tag.info');
+        Route::post('kam_poc_ref_tag/remove','Admins\AdminDashboardController@kam_poc_ref_tag_remove')->name('kam_poc_ref_tag.remove');
+
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
             Route::get('info','Admins\AdminDashboardController@payment_cycle_info')->name('info');
@@ -918,6 +934,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
+            Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
+
         });
     // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
@@ -3195,7 +3213,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
-    });    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
+    });
+    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
             Route::get('/list','Admins\IncidenceMonitoringController@list')->name('list');
             Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');
