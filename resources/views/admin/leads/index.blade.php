@@ -137,6 +137,23 @@
                     </div>
 
                         <div class="col-3" id="lead_time_ratio_div">
+                            <div class="card bg-gradient-directional-return_confirm pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="ratio">{{ $leads['dead_leads_ratio']}}</h3>
+                                                <span>Dead Lead Time Ratio</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3" id="lead_time_ratio_div">
                             <div class="card bg-gradient-directional-destination pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -145,8 +162,8 @@
                                                 <i class="la la-calculator text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="ratio">{{ $leads['ratio']}}</h3>
-                                                <span>Lead Time Ratio</span>
+                                                <h3 class="text-white" id="ratio">{{ $leads['active_leads_ratio']}}</h3>
+                                                <span>Active Lead Time Ratio</span>
                                             </div>
                                         </div>
                                     </div>
