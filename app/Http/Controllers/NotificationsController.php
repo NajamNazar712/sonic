@@ -246,13 +246,15 @@ class NotificationsController extends Controller
 
                     self::sms($body, $to);
                 } else if ($id == 3) {
-                    $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
-
+                    $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number', 'link' => 'link'];
+                    $linker = route('tracking');
                     $shipment = Shipment::find($reference_1_id);
 
                     $shipper = $shipment->user;
 
                     $to = $shipment->consignee_phone_number_1;
+
+                    $link = '<a href="{{$linker}}?tracking_number='.$tracking_number.'">'.$tracking_number.'</a>';
 
                     foreach ($fields as $key => $field) {
                         if (strpos($body, '[' . $key . ']') !== FALSE) {
@@ -301,6 +303,10 @@ class NotificationsController extends Controller
 
                     if (strpos($body, '[payment_mode]') !== FALSE) {
                         $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
+                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
                     }
 
                     self::sms($body, $to);
