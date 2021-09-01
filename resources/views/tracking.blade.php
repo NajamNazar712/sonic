@@ -1,7 +1,8 @@
 @section('title', 'Tracking')
 
 @section('css')
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
@@ -13,7 +14,8 @@
 @endsection
 
 @section('js')
-	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -49,6 +51,46 @@
 					}
 				}
 			});
+            $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Case Nature",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if(id === 1){
+                    $('#request_service').addClass('d-none');
+                    $('#request_complaints').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
+                }else if(id === 2){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').removeClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
+                }
+                else if(id === 3){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#request_feedback').removeClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                    $('#request_claims').addClass('d-none');
+                }
+                else if(id === 4){
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#request_feedback').addClass('d-none');
+                    $('#request_claims').removeClass('d-none');
+                    $('#AddNewRequest').removeClass('d-none');
+                }else{
+                    $('#request_complaints').addClass('d-none');
+                    $('#request_service').addClass('d-none');
+                    $('#AddNewRequest').addClass('d-none');
+                    $('#request_claims').addClass('d-none');
+                }
+            });
 
 			@if (app('request')->has('tracking_number'))
                 track({{ app('request')->input('tracking_number') }});
@@ -81,6 +123,7 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
                                 shipment += '<div class="m-1 font-medium-3 white">' + details.tracking_number + '</div>';
+                                shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 shipment += '</div>';
 
                                 shipment += '<div class="p-1">';
@@ -170,6 +213,25 @@
                         }
                     });
 			}
+            $('.close').on('click',function(){
+
+                $('#request_complaints').addClass('d-none');
+                $('#request_service').addClass('d-none');
+                $('#request_feedback').addClass('d-none');
+                $('#request_claims').addClass('d-none');
+                $('#AddNewRequest').addClass('d-none');
+                
+
+            });
+            $('#tracking').on('click', '.add_request', function () {
+                id = $(this).attr('id');
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                $('#requested_shipment_id').val(id);
+                $('#requested_shipments').html(tracking_rows);
+                $('#AddRequestModal').modal('show');
+
+            });
 
 			$('#track_form').validate({
 				ignore: [],
@@ -184,6 +246,7 @@
 					return false;
 				}
 			});
+
 		});
 	</script>
 @endsection
@@ -250,6 +313,216 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
       </div>
     </div>
   </div>
+  <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+       aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+              <div class="modal-header bg-primary white">
+                  <h4 class="modal-title white">Add Request</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body text-center">
+                  <form id="add_request_form" method="post">
+                      @csrf
+                      <div class="container">
+                          <div class="row">
+                              <h2 class="heading">Tracking Number</h2>
+                          </div>
+
+                          <input type="hidden" id="requested_shipment_id">
+                          <div class="row old_scroll" id="requested_shipments">
+
+                          </div>
+                          <hr>
+                          <div class="row justify-content-center">
+                              <div class="col-8">
+                                  <fieldset class="form-group">
+                                      <select name="case_nature_select" id="case_nature_select" class="form-control select2">
+                                          @foreach($case_nature as $nature)
+                                              <option value="{{$nature->id}}">{{$nature->name}}</option>
+                                          @endforeach
+                                      </select>
+                                  </fieldset>
+                              </div>
+                          </div>
+                          <div class="complaints d-none" id="request_complaints">
+                              <div class="row justify-content-center">
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
+                                              @foreach($case_nature_complaints as $complaints)
+                                                  <option value="{{$complaints->id}}">{{$complaints->type}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <select name="complaint_channel" id="complaint_channels" class="form-control select2">
+                                              @foreach($case_nature_channels as $channel1)
+                                                  <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                      </fieldset>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="service d-none" id="request_service">
+                              <div class="row justify-content-center">
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <select name="case_nature_request" id="case_nature_requests" class="form-control select2">
+                                              @foreach($case_nature_service_requests as $service)
+                                                  <option value="{{$service->id}}">{{$service->type}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <select name="request_channel" id="request_channels" class="form-control select2">
+                                              @foreach($case_nature_channels as $channel2)
+                                                  <option value="{{$channel2->id}}">{{$channel2->channel}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <textarea class="form-control" name="service_description" id="service_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                      </fieldset>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="feedback d-none" id="request_feedback">
+                              <div class="row justify-content-center">
+                                  <div class="col-8">
+                                      <fieldset class="form-group">
+                                          <select name="feedback_channel_request" id="feedback_channel_request" class="form-control select2">
+                                              @foreach($case_nature_channels as $channel1)
+                                                  <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-8">
+                                      <fieldset class="form-group">
+                                          <textarea class="form-control" name="feedback_description_request" id="feedback_description_request" rows="5" placeholder="Enter Description Here..." data-rule-required="true" data-msg-required="Description is required"></textarea>
+                                      </fieldset>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="claims d-none" id="request_claims">
+                              <input type="hidden" name="shipment_ids" id="shipment_ids">
+                              <input type="hidden" name="case_nature_id" id="case_nature_id">
+                              <input type="hidden" name="complaint_id" id="complaint_id">
+                              <input type="hidden" name="channel_id" id="channel_id">
+                              <div class="row justify-content-center">
+                                  <div class="col-8">
+                                      <fieldset class="form-group">
+                                          <select name="case_nature_claim" id="case_nature_claim" class="form-control select2">
+                                              @foreach($case_nature_type_claims as $claim)
+                                                  <option value="{{$claim->id}}">{{$claim->type}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-8">
+                                      <fieldset class="form-group">
+                                          <select name="claim_channel" id="claim_channel" class="form-control select2">
+                                              @foreach($case_nature_channels as $channel1)
+                                                  <option value="{{$channel1->id}}">{{$channel1->channel}}</option>
+                                              @endforeach
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-8" id="claim_product_cost_div">
+                                      <fieldset class="form-group">
+                                          <input class="form-control" name="claim_product_cost" id="claim_product_cost" value="" placeholder="Enter Product Cost">
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-8 d-none" id="receiving_sheet_div">
+                                      <fieldset class="form-group">
+                                          <select name="receiving_sheet_id"  id="request_id" class="form-control select2" data-rule-required="true" data-msg-required="Please Select Receiving Sheet">
+                                          <select name="receiving_sheet_id"  id="request_id" class="form-control select2"></select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-8 text-left" id="claim_product_picture_div">
+                                      <fieldset class="form-group">
+                                          <label for="product_picture"><b>Product Picture:</b></label>
+                                          <input class="form-control form-control-sm" type="file" name="product_picture" id="product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-8 text-left" id="claim_invoice_picture_div">
+                                      <fieldset class="form-group">
+                                          <label for="invoice_picture"><b>Invoice Picture:</b></label>
+                                          <input class="form-control form-control-sm" type="file" name="invoice_picture" id="invoice_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                      </fieldset>
+                                  </div>
+
+                                                                      <div class="col-8 text-left d-none" id="claim_shipment_damage_div">
+                                                                          <fieldset class="form-group">
+                                                                              <label for="damage_product_picture"><b>Damage Picture:</b></label>
+                                                                              <input class="form-control form-control-sm" type="file" name="damage_product_picture" id="damage_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                                                          </fieldset>
+                                                                          <fieldset class="form-group">
+                                                                              <label for="product_packaging_picture"><b>Product Packaging Picture:</b></label>
+                                                                              <input class="form-control form-control-sm" type="file" name="product_packaging_picture" id="product_packaging_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                                                          </fieldset>
+                                                                          <fieldset class="form-group">
+                                                                              <label for="actual_product_picture"><b>Actual Product Picture:</b></label>
+                                                                              <input class="form-control form-control-sm" type="file" name="actual_product_picture" id="actual_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                                                          </fieldset>
+                                                                          <fieldset class="form-group">
+                                                                              <input class="form-control" name="damage_claim_product_cost" id="damage_claim_product_cost" value="" placeholder="Enter Actual Damaged Product Cost">
+                                                                          </fieldset>
+
+                                                                      </div>
+
+                                                                      <div class="col-8 text-left d-none" id="claim_content_short_div">
+                                                                          <fieldset class="form-group">
+                                                                              <label for="missing_product_picture"><b>Missing Product Picture:</b></label>
+                                                                              <input class="form-control form-control-sm" type="file" name="missing_product_picture" id="missing_product_picture" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                                                          </fieldset>
+                                                                          <fieldset class="form-group">
+                                                                              <label for="product_packaging_picture_content_short"><b>Product Packaging Picture:</b></label>
+                                                                              <input class="form-control form-control-sm" type="file" name="product_packaging_picture_content_short" id="product_packaging_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                                                          </fieldset>
+                                                                          <fieldset class="form-group">
+                                                                              <label for="actual_product_picture_content_short"><b>Actual Product Picture:</b></label>
+                                                                              <input class="form-control form-control-sm" type="file" name="actual_product_picture_content_short" id="actual_product_picture_content_short" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">
+                                                                          </fieldset>
+                                                                          <fieldset class="form-group">
+                                                                              <input class="form-control" name="claim_content_product_cost" id="claim_content_product_cost" value="" placeholder="Enter Actual Missing Product Cost">
+                                                                          </fieldset>
+                                                                      </div>
+
+                                  <div class="col-8">
+                                      <fieldset class="form-group">
+                                          <textarea class="form-control" name="description" id="claim_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                      </fieldset>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row justify-content-center">
+                              <div class="col-3">
+                                  <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block d-none">Submit</button>
+                              </div>
+                          </div>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
   @include('client.layout.footer')
 </body>
 </html>
+

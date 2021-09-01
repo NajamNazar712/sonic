@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\CRM\CrmRequestCaseNature;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\CRM\CrmRequestChannel;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -16,7 +19,12 @@ use Carbon\Carbon;
 class TrackingController extends Controller
 {
     public function index() {
-      return view('tracking');
+        $case_nature = CrmRequestCaseNature::get();
+        $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
+        $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
+        $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
+        $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
+        return view('tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
     }
 
     public function track(Request $request) {
