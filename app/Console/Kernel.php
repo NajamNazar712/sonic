@@ -97,6 +97,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\PasswordUpdateForAdminUser',
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
+        'App\Console\Commands\ShipperPaymentCalculation',
     ];
 
     /**
@@ -114,6 +115,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
