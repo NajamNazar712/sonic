@@ -21,6 +21,7 @@
                         <th class="border-primary border-darken-1">Phone No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">OTP</th>
+                        <th class="border-primary border-darken-1">OTP Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -124,6 +125,7 @@
                         head.push('Phone No.');
                         head.push('Hub');
                         head.push('OTP');
+                        head.push('OTP Date');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -132,7 +134,7 @@
                             row.push(values.phone_no);
                             row.push(values.hub);
                             row.push(values.otp);
-
+                            row.push(values.otp_date);
                             body.push(row);
                         });
                     },
@@ -168,14 +170,14 @@
                 url: '{{ route('admin.rider_delivery_note_otp.list') }}',
             },
             rowId: 'shId',
-            order: [[1, 'desc']],
+            order: [[5, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'riders.name', class: 'align-middle name'},
                 {data: 'phone_no', name: 'riders.phone', class: 'align-middle phone_no'},
                 {data: 'hub', name: 'c.name', class: 'align-middle phone_no'},
                 {data: 'otp', name: 'riders.delivery_note_otp', class: 'align-middle otp'},
-
+                {data: 'otp_date', name: 'riders.otp_date', class: 'align-middle otp_date'},
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -192,7 +194,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.destination_arrival')|| $(header).is('.otp_date')) {
                         $(td).appendTo($(search));
                     }
                     else {
