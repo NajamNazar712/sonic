@@ -100,18 +100,37 @@
                     <div class="modal-body text-center">
                         <div class="row justify-content-center">
                             <div class="col">
-                                <div class="form-group">
-                                    <select name="rider" id="riders" class="form-control select2">
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                <fieldset class="form-group">
+                                    <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                                        @foreach($operation_rider_category as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                    <div class="danger" id="operation_error" style="display:none;">This field is required</div>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="rider" id="riders" class="form-control select2" required>
+
+                                    </select>
+                                    <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="route" id="route" class="form-control select2" required>
+                                        @foreach($routes as $route)
+                                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="danger" id="route_error" style="display:none;">This field is required</div>
+                                </fieldset>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="reassign_button" class="btn btn-primary">Reassign</button>
+                        <button type="button" id="reassign_button" class="btn btn-primary" disabled>Reassign</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -475,6 +494,76 @@
                 }
             });
 
+            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Category*',
+                width: '100%',
+            }).bind('select2:select', function () {
+                if(this.value){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.operation_riders') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'operation_rider_id': this.value,
+                        }
+                    }).done(function(data){
+
+                        if (data.status == 1) {
+                            var html = "";
+                            $.each(data.riders, function(key,value) {
+                                html += `<option value="${value.id}">${value.name}</option>`;
+                            });
+                            $('#riders').html(html);
+                            $('#riders').val('').trigger('change');
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+            $('#route').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Route*',
+                width: '100%',
+            });
+            $('#riders').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider*',
+                width: '100%',
+            });
+            $('#riders').on('change',function () {
+                var route = $(this).find(":selected").data("id");
+                var rider_id = $(this).val();
+                if(rider_id != null){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'rider_id': rider_id,
+                        }
+                    }).done(function(data){
+                        if (data.status == 1) {
+                            ccd_rider = parseInt(data.ccd_rider);
+                            $('#route').val(route).trigger('change');
+                            $("#reassign_button").attr('disabled',false);
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $("#reassign_button").attr('disabled',true);
+                        }
+                    });
+                }
+                else{
+                    $('#route').val(route).trigger('change');
+                }
+
+            });
 
             function printTemp(id,temp = null) {
                 $.ajax({
@@ -594,7 +683,12 @@
             {{--});--}}
 
             $('#reassign_button').on('click', function(){
-                otp_generation();
+                var operation_id = $('#operation_rider_id').val();
+                if(operation_id === '2'){
+                    reassign_rider();
+                }else{
+                    otp_generation();
+                }
             });
 
             $('#otp_submit').on('click', function () {
@@ -701,6 +795,8 @@
             $('#reassign_modal').on('hide.bs.modal', function (e) {
                 $('#reassign_rider_form')[0].reset();
                 $('#riders').val('').trigger('change');
+                $('#operation_rider_id').val('').trigger('change');
+                $('#route').val('').trigger('change');
                 $('#delivery_note_id').val('');
                 $('#otp_input').val('');
                 $('#OtpModal').modal('hide');
