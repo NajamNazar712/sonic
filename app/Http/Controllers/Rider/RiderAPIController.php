@@ -3333,6 +3333,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_deliveries = DeliveryNote::join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
+                ->select('delivery_notes.created_at as created_at', 'delivery_notes.id as delivery_note_id', 'shipments.tracking_number as tracking_number')
                 ->where('delivery_notes.pending_status', 1)
                 ->where('delivery_notes.rider_id', $rider_id);
 
@@ -3390,6 +3391,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                ->select('return_notes.id as return_note_id', 'return_notes.created_at as created_at', 's.tracking_number as tracking_number')
                 ->where('return_notes.rider_id', $rider_id)
                 ->whereIn('return_notes.status', [1, 3]);
 
@@ -7458,7 +7460,7 @@ class RiderAPIController extends Controller
         $rider_default_hub = Rider::where('riders.id', $request->rider_id)
             ->join('cities as c', 'c.id', '=', 'riders.city_id')
             ->select('c.hub_id as hub_id')->first();
-        $retail_trax_centers = RetailTraxCenter::where('default_hub', $rider_default_hub->hub_id)->select('name', 'code', 'pickup_address_id')->get();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $rider_default_hub->hub_id)->where('status', 1)->select('name', 'code', 'pickup_address_id')->get();
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', '!=', 2)->get();
         $shipping_modes = RetailShippingMode::all();
