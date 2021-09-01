@@ -135,7 +135,7 @@
                                 </div>
                                 <div class="col-12 form-group">
                                     <label for="packaging_picture4">Picture 4</label>
-                                    <input type="file" name="packaging_picture4" class="form-control form-control-sm" id="packaging_picture4" data-rule-extension="png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Picture 4 is required">
+                                    <input type="file" name="packaging_picture4" class="form-control form-control-sm" id="packaging_picture4" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Picture 4 is required">
                                 </div>
                                 
                             </div>

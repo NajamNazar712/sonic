@@ -1032,7 +1032,8 @@ class NotificationsController extends Controller
                             $body = $original_body;
                         }
                     }
-                } else if ($id == 15) {
+                }
+                else if ($id == 15) {
                     if ($reference_1_id != 0) {
                         $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -1162,10 +1163,13 @@ class NotificationsController extends Controller
                             $body = str_replace('[status]', $shipment->status_shipper->name, $body);
                         }
 
-                        self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
-
+                        self::email($subject, $body, $to);
                     }
-                } else if ($id == 16) {
+                }
+
+
+
+                else if ($id == 16) {
                     if ($reference_1_id != 0) {
                         $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -1940,7 +1944,10 @@ class NotificationsController extends Controller
                     $body = str_replace('[' . $first_field . ']', $pickup_details, $body);
 
                     self::sms($body, $to);
-                } else if ($id == 23) {
+                }
+
+
+                else if ($id == 23) {
                     $shipments = Shipment::where('shipper_status_id', 12);
 
                     if ($shipments->exists()) {
@@ -2104,14 +2111,17 @@ class NotificationsController extends Controller
 //                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
 //                  }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
+                                self::email($subject, $body, $to, $cc, NULL, 'returns@trax.pk');
 
                                 $subject = $original_subject;
                                 $body = $original_body;
                             }
                         }
                     }
-                } else if ($id == 24) {
+                }
+
+
+                else if ($id == 24) {
                     $shipments = Shipment::where('shipper_status_id', 20);
 
                     if ($shipments->exists()) {
@@ -2258,14 +2268,15 @@ class NotificationsController extends Controller
                                     $to = array_merge($to, $on_request_admin->pluck('email')->toArray());
                                 }
 
-                                self::email($subject, $body, $to, $cc, NULL, 'return@trax.pk');
+                                self::email($subject, $body, $to);
 
                                 $subject = $original_subject;
                                 $body = $original_body;
                             }
                         }
                     }
-                } else if ($id == 25) {
+                }
+                else if ($id == 25) {
                     $shipments = Shipment::where('shipper_status_id', 13);
 
                     if ($shipments->exists()) {
@@ -3196,9 +3207,7 @@ class NotificationsController extends Controller
 
                                 $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-
-                                self::email($subject, $body, $to, NULL, NULL, 'return@trax.pk');
-
+                                self::email($subject, $body, $to);
 
                                 $subject = $original_subject;
                                 $body = $original_body;
@@ -8091,7 +8100,7 @@ class NotificationsController extends Controller
                         $body_updated = str_replace('[preview]', $html, $body_updated);
                         $subject = 'Return Confirm Mail';
                         $to = $data->email;
-                        self::email($subject, $body_updated, $to, NULL, NULL, 'return@trax.pk');
+                        self::email($subject, $body_updated, $to, NULL, NULL, 'returns@trax.pk');
 
                     }
 
@@ -8237,8 +8246,6 @@ class NotificationsController extends Controller
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->pluck('email')->toArray());
                     }
-
-                    $to[] = 'muhammad.waqas@trax.pk';
 
                     self::email($subject, $body, $to);
 
