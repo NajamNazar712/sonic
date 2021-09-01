@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
+use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Bus\Queueable;

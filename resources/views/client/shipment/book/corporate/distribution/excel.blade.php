@@ -276,18 +276,10 @@
                                             <td>Product Value</td>
                                             <td class="text-center">100000</td>
                                         </tr>
-                                        <tr role="row">
-                                            <td>Replacement Item Description</td>
-                                            <td class="text-center">190</td>
-                                        </tr>
-                                        <tr role="row">
-                                            <td>Replacement Item Quantity</td>
-                                            <td class="text-center">1000</td>
-                                        </tr>
-                                        <tr role="row">
-                                            <td>Special Instructions</td>
-                                            <td class="text-center">190</td>
-                                        </tr>
+{{--                                        <tr role="row">--}}
+{{--                                            <td>Special Instructions</td>--}}
+{{--                                            <td class="text-center">190</td>--}}
+{{--                                        </tr>--}}
                                         <tr role="row">
                                             <td>Estimated Weight (kg)</td>
                                             <td class="text-center">100000</td>
