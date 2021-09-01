@@ -34,6 +34,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         return redirect()->route('cod.login');
     });
     Route::get('404', 'Auth\LoginController@not_found')->name('404');
+    Route::post('get/agreement','Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
@@ -95,6 +96,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::prefix('corporate_excel')->name('corporate_excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
+                Route::get('/index', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_index')->name('distribution');
+                Route::post('/store', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_store')->name('distribution.store');
             });
             Route::prefix('international')->name('international.')->group(function () {
                 Route::get('', 'Shippers\ShipperInternationalShipmentBookController@index')->name('index');

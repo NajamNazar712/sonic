@@ -138,7 +138,6 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
-        
         $notification = Notification::find($id);
 
         if ($notification) {
@@ -8249,6 +8248,54 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
 
+                }
+
+                else if ($id == 149){
+                    $user_id = $reference_1_id;
+
+                    $user = User::find($user_id);
+
+                    if (strpos($subject, '[Shipper]') !== FALSE) {
+                        $subject = str_replace('[Shipper]', $user->name, $subject);
+                    }
+
+                    if (strpos($body, '[Shipper name]') !== FALSE) {
+                        $body = str_replace('[Shipper name]', $user->name, $body);
+                    }
+
+                    $shipper_body = $body;
+                    $sale_person_body = $body;
+                    $finance_body = $body;
+                    if (strpos($shipper_body, '[person_of_contact]') !== FALSE) {
+                        $shipper_body = str_replace('[person_of_contact]', $user->name, $shipper_body);
+                    }
+                    $to = $user->email;
+                    self::email($subject, $shipper_body, $to);
+
+                    $sale_person = SalePersonTag::join('admins as sale_person','sale_person.id','=','sale_person_tags.admin_id')
+                        ->where('sale_person_tags.user_id',$user_id)
+                        ->where('sale_person_tags.status',0)
+                        ->select(['sale_person.email as email','sale_person.name as name'])
+                        ->latest('sale_person_tags.created_at')
+                        ->first();
+
+                    if (strpos($sale_person_body, '[person_of_contact]') !== FALSE) {
+                        $sale_person_body = str_replace('[person_of_contact]', $sale_person->name, $sale_person_body);
+                    }
+
+                    $to = $sale_person->email;
+                    self::email($subject, $sale_person_body, $to);
+
+                    $finance_admin = Admin::where('role_id',2)
+                        ->where('status',1)
+                        ->first();
+
+                    if (strpos($finance_body, '[person_of_contact]') !== FALSE) {
+                        $finance_body = str_replace('[person_of_contact]', $finance_admin->name, $finance_body);
+                    }
+
+                    $to = $finance_admin->email;
+                    self::email($subject, $finance_body, $to);
                 }
 
             }
