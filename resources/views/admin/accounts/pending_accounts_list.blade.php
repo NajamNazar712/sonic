@@ -271,12 +271,34 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="RemoveSalesTierTaggingModal" data-backdrop="static" role="dialog" aria-labelledby="RemoveSalesTierTaggingModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Remove Sales Tier Tagging</h4>
+                </div>
+                <form id="remove_sales_tier_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.kam_poc_ref_tag.remove') }}">
+                    @csrf
+                    <input type="hidden" name="shipper_id" id="shipper_id">
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="payment_cycle_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 @endsection
 
 @section('js')
@@ -284,6 +306,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
@@ -1073,6 +1096,64 @@
                 }
 
             });
+        });
+
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('remove_sales_tier')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.kam_poc_ref_tag.info') !!}',
+                        data: {
+                            'shipper_id': id,
+                        }
+                    }).done(function(data){
+                        if(data.status == 1){
+                            $('#remove_sales_tier_form #shipper_id').val(id);
+                            var html = '<table class="table table-bordered">' +
+                                '<tr>' +
+                                '<td style="vertical-align: middle;"><strong>POC</strong></td><td style="vertical-align: middle;">'+ data.info.poc +'</td>';
+                            if(data.info.poc !== '-') {
+                                html += '<td><input type="checkbox" class="sales_tier_checkbox" id="poc" name="poc" value="poc"><label for="poc"> Remove</label></td>';
+                            }
+                            html += '</tr>' +
+                                '<tr>' +
+                                '<td style="vertical-align: middle;"><strong>KAM</strong></td><td style="vertical-align: middle;">'+ data.info.kam +'</td>';
+                            if(data.info.kam !== '-'){
+                                html += '<td><input type="checkbox" class="sales_tier_checkbox" id="kam" name="kam" value="kam"><label for="kam"> Remove</label></td>';
+                            }
+                            html += '</tr>' +
+                                '<tr>' +
+                                '<td style="vertical-align: middle;"><strong>REFERRAL</strong></td><td style="vertical-align: middle;">'+ data.info.ref +'</td>';
+                            if(data.info.ref !== '-') {
+                                html += '<td><input type="checkbox" class="sales_tier_checkbox" id="ref" name="ref" value="ref"><label for="ref"> Remove</label></td>';
+                            }
+                            html += '</tr>' +
+                                '</table>';
+                            $('#RemoveSalesTierTaggingModal .modal-body').html(html);
+
+                            $('#remove_sales_tier_form .sales_tier_checkbox').each(function() {
+                                var checkbox = $(this);
+                                var label = checkbox.next();
+                                var text = label.text();
+
+                                label.remove();
+
+                                checkbox.iCheck({
+                                    checkboxClass: 'icheckbox_line pt-1 pb-1',
+                                    checkedClass: 'checked bg-danger',
+                                    uncheckedClass: 'bg-secondary',
+                                    insert: '<div class="icheck_line-icon"></div>' + text
+                                });
+                            });
+                            $('#RemoveSalesTierTaggingModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            }
         });
 
         var hub_ids = [];

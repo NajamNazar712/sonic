@@ -35,6 +35,7 @@ use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
@@ -1780,7 +1781,7 @@ class ReturnController extends Controller
                             $shipment->consignee_status_id = 23;
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-                        }else
+                        }else{
                             if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                                 ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
@@ -1812,7 +1813,19 @@ class ReturnController extends Controller
                                 $shipment->save();
                                 ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
                             }
-
+                        }
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
+                        if($return_sheet->exists()){
+                            $return_sheet = $return_sheet->first();
+                            $return_sheet->return_note_id = $note->id;
+                        }
+                        else{
+                            $return_sheet = new ReturnSheet();
+                            $return_sheet->user_id = $shipment->user_id;
+                            $return_sheet->shipment_id = $shipment->id;
+                            $return_sheet->return_note_id = $note->id;
+                        }
+                        $return_sheet->save();
 
                     }
                 }
