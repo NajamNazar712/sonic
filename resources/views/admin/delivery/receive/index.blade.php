@@ -794,7 +794,8 @@
 
             $('#reassign_modal').on('hide.bs.modal', function (e) {
                 $('#reassign_rider_form')[0].reset();
-                $('#riders').val('').trigger('change');
+                $("#reassign_button").attr('disabled',true);
+                $('#riders').html("");
                 $('#operation_rider_id').val('').trigger('change');
                 $('#route').val('').trigger('change');
                 $('#delivery_note_id').val('');
