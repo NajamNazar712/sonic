@@ -435,9 +435,10 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
                                   <div class="col-6">
                                       <fieldset class="form-group">
                                           <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
-                                              @foreach($case_nature_complaints as $complaints)
-                                                  <option value="{{$complaints->id}}">{{$complaints->type}}</option>
-                                              @endforeach
+                                              <option value="2">Delay in Delivery</option>
+                                              <option value="6">Courier Misbehavior</option>
+                                              <option value="10">Fake Reason</option>
+                                              <option value="9">Other</option>
                                           </select>
                                       </fieldset>
                                   </div>
