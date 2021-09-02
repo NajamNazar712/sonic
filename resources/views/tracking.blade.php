@@ -1,7 +1,8 @@
 @section('title', 'Tracking')
 
 @section('css')
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
@@ -13,7 +14,9 @@
 @endsection
 
 @section('js')
-	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -50,6 +53,7 @@
 				}
 			});
 
+
 			@if (app('request')->has('tracking_number'))
                 track({{ app('request')->input('tracking_number') }});
 			@endif
@@ -81,6 +85,7 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
                                 shipment += '<div class="m-1 font-medium-3 white">' + details.tracking_number + '</div>';
+                                shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 shipment += '</div>';
 
                                 shipment += '<div class="p-1">';
@@ -170,6 +175,16 @@
                         }
                     });
 			}
+            $('#tracking').on('click', '.add_request', function () {
+                id = $(this).attr('id');
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                $('#requested_shipment_id').val(id);
+                $('#requested_shipments').html(tracking_rows);
+                $('#AddRequestModal').modal('show');
+
+            });
+
 
 			$('#track_form').validate({
 				ignore: [],
@@ -184,6 +199,140 @@
 					return false;
 				}
 			});
+            $('#complaint_phone').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+
+            $( "#add_request_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                        var nature_flag = true;
+                        var case_nature_complaint_id = $('#case_nature_complaints').val();
+                        var name = $('#complaint_name').val();
+                        var phone = $('#complaint_phone').val();
+                        var complaint_description = $('#complaint_description').val();
+                        if (!case_nature_complaint_id) {
+                            nature_flag = false;
+                            var error = "Please select Complaint type!";
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                    if (!complaint_description) {
+                        nature_flag = false;
+                        var error = "Please select Description!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!name) {
+                        nature_flag = false;
+                        var error = "Please Enter Your Name!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                    if (!phone) {
+                        nature_flag = false;
+                        var error = "Please Enter Your Phone Number!";
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                        if (nature_flag) {
+                            $('#AddNewRequest').attr('disabled', true);
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Launching Request.',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            $.ajax({
+                                url: '{!! route('tracking.add_request') !!}',
+                                method: 'POST',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'shipment_id': $('#requested_shipment_id').val(),
+                                    'case_nature_id': case_nature_id,
+                                    'complaint_id': case_nature_complaint_id,
+                                    'channel_id': case_nature_channel_id,
+                                    'description': complaint_description
+                                }
+                            })
+                                .done(function (data) {
+                                    swal.close();
+                                    if (data.status) {
+
+                                        if (data.flag) {
+                                            var html = '';
+
+                                            $.each(data.already_existed_shipments, function (index, tracking_number) {
+                                                html += tracking_number + '<br/>';
+                                            });
+
+                                            if (!data.cannot_change) {
+                                                html += '<br/>Request/Complaint already lodged for the above Shipment(s)!';
+                                            }
+                                            else {
+                                                html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+                                            }
+
+                                            content = document.createElement('div');
+                                            content.innerHTML = html;
+
+                                            swal({
+                                                title: 'Request / Complaint Cannot Be Lodged!',
+                                                content: content,
+                                                icon: 'warning',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'Close',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            });
+                                        } else {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        }
+                                        // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    } else {
+                                        toastr.error(data.error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+
+                                    $('#AddRequestModal').modal('hide');
+                                    $('#AddNewRequest').attr('disabled', false);
+                                });
+                        }
+
+
+                }
+            });
+            $('.close').on('click',function (){
+                $('#complaint_description').val('');
+            });
 		});
 	</script>
 @endsection
@@ -250,6 +399,78 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
       </div>
     </div>
   </div>
+  <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+       aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content">
+              <div class="modal-header bg-primary white">
+                  <h4 class="modal-title white">Add Request</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body text-center">
+                  <form id="add_request_form" method="post" action="{{Route('tracking.add_request')}}">
+                      @csrf
+                      <div class="container">
+                          <div class="row">
+                              <h2 class="heading">Tracking Number</h2>
+                          </div>
+
+                          <input type="hidden" id="requested_shipment_id" name="shipment_id">
+                          <div class="row old_scroll" id="requested_shipments">
+
+                          </div>
+                          <hr>
+                          <div class="row justify-content-center">
+                              <div class="col-8">
+                                  <fieldset class="form-group">
+                                      <h1 name="case_nature_select" class="form-control">Complaints</h1>
+
+                                  </fieldset>
+                              </div>
+                          </div>
+                          <div class="complaints" id="request_complaints">
+                              <div class="row justify-content-center">
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
+                                              <option value="2">Delay in Delivery</option>
+                                              <option value="6">Courier Misbehavior</option>
+                                              <option value="10">Fake Reason</option>
+                                              <option value="9">Other</option>
+                                          </select>
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <input type="text" id="complaint_name" name="complaint_name" placeholder="Enter Your name" class="form-control">
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <input type="text" id="complaint_phone" name="complaint_phone" placeholder="Enter Your phone no." class="form-control">
+                                      </fieldset>
+                                  </div>
+                                  <div class="col-6">
+                                      <fieldset class="form-group">
+                                          <textarea class="form-control" name="complaint_description" id="complaint_description" rows="5" placeholder="Enter Description Here..."></textarea>
+                                      </fieldset>
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="row justify-content-center">
+                              <div class="col-3">
+                                  <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit</button>
+                              </div>
+                          </div>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
   @include('client.layout.footer')
 </body>
 </html>
+

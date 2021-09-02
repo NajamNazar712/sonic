@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BookingType;
@@ -269,6 +270,7 @@ class LostShipmentsController extends Controller
         $intransit_status_array = array(3, 21, 26, 32);
         $shipments = explode(',', $request->shipment_ids);
         $remarks = $request->remarks;
+        $lost_shipments_array = array();
         if(!empty($shipments)){
             foreach ($shipments as $shipment) {
                 $shipment_details = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', $passing_status_array);
@@ -321,13 +323,18 @@ class LostShipmentsController extends Controller
                             $shipment_details->save();
                             ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL, $remarks[$shipment],NULL,Auth::id());
                             AdminCargoController::check_draft_shipments($shipment);
+                            $lost_shipments_array[] = $shipment;
                         }
                     } else {
                         $shipment_details->shipper_status_id = 18;
                         $shipment_details->save();
                         ShipmentsJourneyController::add($shipment_details->id, 18, NULL, NULL, $remarks[$shipment], NULL, Auth::id());
+                        $lost_shipments_array[] = $shipment;
                     }
                 }
+            }
+            if(count($lost_shipments_array) > 0){
+                NotificationsController::send(150, $lost_shipments_array);
             }
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
 

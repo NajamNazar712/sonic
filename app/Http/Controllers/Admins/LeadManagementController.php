@@ -36,57 +36,80 @@ class LeadManagementController extends Controller
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
 
         $leads['total'] = Lead::whereBetween('requested_date',[$thirtyDays,$today]);
-        $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$thirtyDays,$today]);
-        $leads['mature_leads'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
-        $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['received'] = Lead::whereBetween('requested_date',[$thirtyDays,$today])->where('status_id', 1);
+        $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8, 9])->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['dead_leads'] = Lead::whereIn('status_id', [3, 4, 10, 11, 13])->whereBetween('requested_date',[$thirtyDays,$today]);
+        $leads['accounts_activated'] = Lead::where('status_id', 12)->whereBetween('requested_date',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
             $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
+            $leads['received'] = $leads['received']->whereIn('city_id', session('hubs'));
             $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
-            $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
+            $leads['dead_leads'] = $leads['dead_leads']->whereIn('city_id', session('hubs'));
+            $leads['accounts_activated'] = $leads['accounts_activated']->whereIn('city_id', session('hubs'));
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
                 $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
-                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id());
-                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id());
+                $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
+                $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
             }
         }
 
         $ratio_leads = $leads['total'];
         if($ratio_leads->exists()){
             $ratio_leads = $ratio_leads->get();
-            $days = 0;
-            $count = 0;
+            $dead_days = 0;
+            $dead_count = 0;
+            $active_days = 0;
+            $active_count = 0;
             foreach ($ratio_leads as $ratio_lead){
-                if($ratio_lead->status_id == 9 || $ratio_lead->status_id == 12){
-                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [9, 12])->orderBy('id', 'DESC');
+                if(in_array($ratio_lead->status_id, [3, 4, 10, 11, 13])){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [3, 4, 10, 11, 13])->orderBy('id', 'DESC');
                     if($last_log->exists()){
                         $last_log = $last_log->first();
                         $last_date = Carbon::parse($last_log->created_at);
-                        $days = $days + $last_date->diffInDays($ratio_lead->requested_date);
+                        $dead_days = $dead_days + $last_date->diffInDays($ratio_lead->requested_date);
                     }
-                    $count++;
+                    $dead_days++;
+                }
+                if(in_array($ratio_lead->status_id, [12])){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [12])->orderBy('id', 'DESC');
+                    if($last_log->exists()){
+                        $last_log = $last_log->first();
+                        $last_date = Carbon::parse($last_log->created_at);
+                        $active_days = $active_days + $last_date->diffInDays($ratio_lead->requested_date);
+                    }
+                    $active_days++;
                 }
             }
-            if($count > 0){
-                $leads['ratio'] = round($days/$count, 2);
+            if($dead_count > 0){
+                $leads['dead_leads_ratio'] = round($active_days/$dead_count, 2);
             }
             else{
-                $leads['ratio'] = 0;
+                $leads['dead_leads_ratio'] = 0;
+            }
+
+            if($active_count > 0){
+                $leads['active_leads_ratio'] = round($active_days/$active_count, 2);
+            }
+            else{
+                $leads['active_leads_ratio'] = 0;
             }
         }
         else{
-            $leads['ratio'] = 0;
+            $leads['dead_leads_ratio'] = 0;
+            $leads['active_leads_ratio'] = 0;
         }
 
 
         $leads['total'] = number_format($leads['total']->count());
+        $leads['received'] = number_format($leads['received']->count());
         $leads['in_process'] = number_format($leads['in_process']->count());
-        $leads['mature_leads'] = number_format($leads['mature_leads']->count());
-        $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+        $leads['dead_leads'] = number_format($leads['dead_leads']->count());
+        $leads['accounts_activated'] = number_format($leads['accounts_activated']->count());
 
         $cities = City::select('id','name')->get();
 
@@ -127,19 +150,22 @@ class LeadManagementController extends Controller
         }
         if($statistics = $request->get('search_statistics')){
             if($statistics == 1){
-                $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
             }
             elseif($statistics == 2){
-                $search_statuses = [5, 6, 7, 8];
+                $search_statuses = [1];
             }
             elseif($statistics == 3){
-                $search_statuses = [9];
+                $search_statuses = [2, 5, 6, 7, 8, 9];
             }
             elseif($statistics == 4){
-                $search_statuses = [9];
+                $search_statuses = [3, 4, 10, 11, 13];
+            }
+            elseif($statistics == 5){
+                $search_statuses = [12];
             }
             else{
-                $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+                $search_statuses = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
             }
             $leads->whereIn('leads.status_id', $search_statuses);
         }
@@ -179,8 +205,6 @@ class LeadManagementController extends Controller
                     $dropdown .= '<button type="button"  class="dropdown-item update" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update</div></button>';
                 }
 
-                $dropdown .= '<button type="button"  class="dropdown-item lead_log" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Lead Log</div></button>';
-
                 if(session('role_id') == 1 || in_array(420, session('permissions')))
                 {
                     $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
@@ -198,34 +222,39 @@ class LeadManagementController extends Controller
         $to = $request->search_date_to;
 
         $leads['total'] = Lead::whereBetween('requested_date',[$from,$to]);
-        $leads['in_process'] = Lead::whereIn('status_id', [5, 6, 7, 8])->whereBetween('requested_date',[$from,$to]);
-        $leads['mature_leads'] = Lead::whereIn('status_id', [9, 12])->whereBetween('requested_date',[$from,$to]);
-        $leads['pending_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date',[$from,$to]);
+        $leads['received'] = Lead::whereBetween('requested_date',[$from,$to])->where('status_id', 1);
+        $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8, 9])->whereBetween('requested_date',[$from,$to]);
+        $leads['dead_leads'] = Lead::whereIn('status_id', [3, 4, 10, 11, 13])->whereBetween('requested_date',[$from,$to]);
+        $leads['accounts_activated'] = Lead::where('status_id', 12)->whereBetween('requested_date',[$from,$to]);
 
         if($origin = $request->get('search_origin')){
             $leads['total'] = $leads['total']->where('city_id', $origin);
+            $leads['received'] = $leads['received']->where('city_id', $origin);
             $leads['in_process'] = $leads['in_process']->where('city_id', $origin);
-            $leads['mature_leads'] = $leads['mature_leads']->where('city_id', $origin);
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('city_id', $origin);
+            $leads['dead_leads'] = $leads['dead_leads']->where('city_id', $origin);
+            $leads['accounts_activated'] = $leads['accounts_activated']->where('city_id', $origin);
         }
         if($sale_person = $request->get('search_sale_person')){
             $leads['total'] = $leads['total']->where('sale_person_id', $sale_person);
+            $leads['received'] = $leads['received']->where('sale_person_id', $sale_person);
             $leads['in_process'] = $leads['in_process']->where('sale_person_id', $sale_person);
-            $leads['mature_leads'] = $leads['mature_leads']->where('sale_person_id', $sale_person);
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->where('sale_person_id', $sale_person);
+            $leads['dead_leads'] = $leads['dead_leads']->where('sale_person_id', $sale_person);
+            $leads['accounts_activated'] = $leads['accounts_activated']->where('sale_person_id', $sale_person);
         }
         if (session('role_id') != 1) {
             $leads['total'] = $leads['total']->whereIn('city_id', session('hubs'));
+            $leads['received'] = $leads['received']->whereIn('city_id', session('hubs'));
             $leads['in_process'] = $leads['in_process']->whereIn('city_id', session('hubs'));
-            $leads['mature_leads'] = $leads['mature_leads']->whereIn('city_id', session('hubs'));
-            $leads['pending_for_activation'] = $leads['pending_for_activation']->whereIn('city_id', session('hubs'));
+            $leads['dead_leads'] = $leads['dead_leads']->whereIn('city_id', session('hubs'));
+            $leads['accounts_activated'] = $leads['accounts_activated']->whereIn('city_id', session('hubs'));
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
                 $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
                 $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
-                $leads['mature_leads'] = $leads['mature_leads']->where('leads.sale_person_id', Auth::id());
-                $leads['pending_for_activation'] = $leads['pending_for_activation']->where('leads.sale_person_id', Auth::id());
+                $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
+                $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
             }
         }
 
@@ -257,9 +286,10 @@ class LeadManagementController extends Controller
         }
 
         $leads['total'] = number_format($leads['total']->count());
+        $leads['received'] = number_format($leads['received']->count());
         $leads['in_process'] = number_format($leads['in_process']->count());
-        $leads['mature_leads'] = number_format($leads['mature_leads']->count());
-        $leads['pending_for_activation'] = number_format($leads['pending_for_activation']->count());
+        $leads['dead_leads'] = number_format($leads['dead_leads']->count());
+        $leads['accounts_activated'] = number_format($leads['accounts_activated']->count());
 
         return response()->json(['status' => 1, 'leads' => $leads]);
     }
@@ -321,47 +351,6 @@ class LeadManagementController extends Controller
         }
     }
 
-    public function lead_log_details(Request $request){
-        $lead_id = $request->lead_id;
-        $lead = Lead::find($lead_id);
-        $lead_logs = LeadLog::where('lead_id', $lead_id);
-        if($lead_logs->exists()){
-            $lead_logs = $lead_logs->get();
-            $details = array();
-            foreach ($lead_logs as $log){
-                $detail['lead_id'] = str_pad($lead->id, 3, '0', STR_PAD_LEFT);
-                $detail['contact_person'] = $lead->contact_person;
-                $detail['phone_number'] = $lead->phone_number;
-                if($log->sale_person_id != null){
-                    $detail['sales_person'] = $log->sales_person->name;
-                }
-                else{
-                    $detail['sales_person'] = '-';
-                }
-                if($log->reference_person_id != null){
-                    $detail['reference_person'] = $log->reference_person->name;
-                }
-                else{
-                    $detail['reference_person'] = '-';
-                }
-                $detail['status'] = $log->status->name;
-                if($log->updated_by == 7){
-                    $detail['updated_by'] = 'Trax.pk';
-                }
-                else{
-                    $detail['updated_by'] = $log->admin->name;
-                }
-                $detail['updated_at'] = Carbon::parse($log->updated_at)->toDateTimeString();
-
-                $details[] = $detail;
-            }
-            return response()->json(['status' => 1, 'leads' => $details]);
-        }
-        else{
-            return response()->json(['status' => 0, 'error' => 'Logs Does\'nt exist!']);
-        }
-    }
-
     public function add_remarks(Request $request){
         $lead_id = $request->lead_id;
         $lead = Lead::find($lead_id);
@@ -381,16 +370,56 @@ class LeadManagementController extends Controller
 
     public function view_remarks_index($id){
         $lead_id = $id;
-        $lead_remarks = LeadRemark::where('lead_id', $lead_id);
         $lead = Lead::find($lead_id);
-        $details = array();
-        if($lead_remarks->exists()){
-            $lead_remarks = $lead_remarks->get();
-            foreach ($lead_remarks as $remark){
-                $details[] = $remark;
+        if($lead){
+            $lead_remarks = LeadRemark::where('lead_id', $lead_id);
+            $details = array();
+            if($lead_remarks->exists()){
+                $lead_remarks = $lead_remarks->get();
+                foreach ($lead_remarks as $remark){
+                    $details[] = $remark;
+                }
             }
+            $log_history = array();
+            $lead_logs = LeadLog::where('lead_id', $lead_id);
+            if($lead_logs->exists()){
+                $lead_logs = $lead_logs->get();
+
+                foreach ($lead_logs as $log){
+                    $detail['lead_id'] = str_pad($lead->id, 3, '0', STR_PAD_LEFT);
+                    $detail['contact_person'] = $lead->contact_person;
+                    $detail['phone_number'] = $lead->phone_number;
+                    if($log->sale_person_id != null){
+                        $detail['sales_person'] = $log->sales_person->name;
+                    }
+                    else{
+                        $detail['sales_person'] = '-';
+                    }
+                    if($log->reference_person_id != null){
+                        $detail['reference_person'] = $log->reference_person->name;
+                    }
+                    else{
+                        $detail['reference_person'] = '-';
+                    }
+                    $detail['status'] = $log->status->name;
+                    if($log->updated_by == 7){
+                        $detail['updated_by'] = 'Trax.pk';
+                    }
+                    else{
+                        $detail['updated_by'] = $log->admin->name;
+                    }
+                    $detail['updated_at'] = Carbon::parse($log->updated_at)->toDateTimeString();
+
+                    $log_history[] = $detail;
+                }
+            }
+
+            return view('admin.leads.remarks')->with(['lead' => $lead, 'details' => $details, 'log_history' => $log_history]);
         }
-        return view('admin.leads.remarks')->with(['lead' => $lead, 'details' => $details]);
+        else{
+            return redirect()->back()->with('error', 'Lead not found!');
+        }
+
     }
 
     public function tag_sale_person_forward_lead(Request $request){
@@ -413,6 +442,8 @@ class LeadManagementController extends Controller
                 $lead->updated_by = Auth::id();
                 $lead->sale_person_updated_at = Carbon::now();
                 $lead->save();
+
+
             }
             NotificationsController::send(204, $leads, $sale_person);
             return response()->json(['status' => 1, 'success' => 'Lead(s) Updated Successfully!']);

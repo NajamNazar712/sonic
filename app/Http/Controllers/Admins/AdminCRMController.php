@@ -862,6 +862,10 @@ class AdminCRMController extends Controller
                 else if($requests->launched_added_by == 3){
                     return 'Consignee';
                 }
+                else if($requests->launched_added_by == 4)
+                {
+                    return 'External';
+                }
             })
             ->editColumn('last_comment_name', function($requests){
                 if($requests->last_comment_by == 0){
@@ -1097,7 +1101,8 @@ class AdminCRMController extends Controller
             ->editColumn('descr',function($request){
                 return strip_tags($request->description);
             })
-            ->editColumn('added_by', function($requests){
+            ->addColumn('added_by', function($requests){
+                return 1;
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
                 }
@@ -1107,9 +1112,11 @@ class AdminCRMController extends Controller
                 else if($requests->launched_added_by == 2) {
                     return 'Shipper Substitute User';
                 }
-                else {
+                else if($requests->launched_added_by == 3){
                     return 'Consignee';
                 }
+
+                return $requests->launched_added_by;
             })
             ->addColumn('current_tat', function ($requests){
                 if($requests->created_at){
