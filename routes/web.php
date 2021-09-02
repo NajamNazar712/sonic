@@ -934,6 +934,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
+            Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
+
         });
     // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
@@ -1279,6 +1281,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
             Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
+            Route::post('delete_lastimage', 'Admins\ReturnController@history_delete_lastimage')->name('delete_lastimage');
 
         });
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
@@ -3211,7 +3214,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
-    });    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
+    });
+    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
             Route::get('/list','Admins\IncidenceMonitoringController@list')->name('list');
             Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');

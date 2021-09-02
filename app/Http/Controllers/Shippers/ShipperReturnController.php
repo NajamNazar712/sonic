@@ -788,7 +788,7 @@ class ShipperReturnController extends Controller
     }
     public function return_sheet_pending_index()
     {
-        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25])->get();
+        $shipment_status = ShipmentStatus::all();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         return view('client.return.sheet.pending')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
@@ -869,11 +869,12 @@ class ShipperReturnController extends Controller
 
     public function return_sheet_receive_shipment_info(Request $request)
     {
+        $return_statuses = array(25, 31, 38);
         $tracking_number = $request->tracking;
-        $shipment = Shipment::where('tracking_number', $tracking_number);
+        $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', session('user_id'));
         if($shipment->exists()){
             $shipment = $shipment->first();
-            if($shipment->shipper_status_id == 25){
+            if(in_array($shipment->shipper_status_id, $return_statuses)){
                 $return_sheet = ReturnSheet::where('shipment_id', $shipment->id);
                 if($return_sheet->exists()){
                     $return_sheet = $return_sheet->first();
@@ -900,6 +901,10 @@ class ShipperReturnController extends Controller
 
     public function return_sheet_receive_submit(Request $request)
     {
+        $received_by = '';
+        if(session('user_type') == 2){
+            $received_by = ' (Substitute User)';
+        }
         $shipment_ids = explode(',', $request->shipment_ids);
         foreach($shipment_ids as $shipment_id){
             $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
@@ -907,7 +912,7 @@ class ShipperReturnController extends Controller
                 $return_sheet = $return_sheet->first();
                 $return_sheet->status_id = 1;
                 $return_sheet->received_at = Carbon::now();
-                $return_sheet->remarks = 'Received By ' . Auth::user()->name;
+                $return_sheet->remarks = 'Received By ' . Auth::user()->name . $received_by;
                 $return_sheet->save();
             }
         }

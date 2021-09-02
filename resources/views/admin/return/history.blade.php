@@ -590,9 +590,55 @@
                var row_id = $(this).parents('tr').attr('id');
                var user_id = $(this).closest("tr").find("td:eq(0)").text();
                var return_id = $('#image_return_note_id').val();
-               alert(user_id);
+               var rows_count=$(this).parents('table').find('tr').length;
+            //    alert(user_id);
                var current = $(this);
-               if(row_id){
+               if(row_id && rows_count<=2){
+                   swal({
+                       title: 'Are You Sure you want to remove the last Image?',
+                       text: 'Select Yes if you want to delete the last image and change the status to "Updated" From "Verified"',
+                       icon: 'warning',
+                       buttons: {
+                           cancel: {
+                               text: 'No',
+                               value: null,
+                               visible: true,
+                               closeModal: true,
+                           },
+                           confirm: {
+                               text: 'Yes',
+                               value: true,
+                               visible: true,
+                               closeModal: true
+                           }
+                       },
+                       closeOnClickOutside: false,
+                       closeOnEsc: false,
+                       dangerMode: true
+                   }).then(function (confirm) {
+                       if (confirm) {
+                           $.ajax({
+                               url: '{!! route('admin.return.history.delete_lastimage') !!}',
+                               method: 'POST',
+                               data: {
+                                   'return_note_image_id': row_id,
+                                   'return_note_id':return_id,
+                                   'user_id':user_id,
+                                   '_token': '{{ csrf_token() }}'
+                               }
+                           }).done(function (data) {
+                               if(data.status == 0){
+                                   toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                   current.parents('tr').remove();
+                                   location.reload();
+                               }else{
+                                   toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                               }
+                           });
+                       }
+                   });
+               }
+               if(row_id && rows_count>2){
                    swal({
                        title: 'Are You Sure?',
                        text: 'Select Yes if you want to delete this image!',

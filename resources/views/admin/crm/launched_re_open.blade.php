@@ -114,7 +114,7 @@
                             </div>
                             <div class="modal-footer justify-content-center">
                                 <button type="button" class="btn btn-success" id="bulkcommentSubmit">Save</button>
-                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -141,7 +141,7 @@
                             </div>
                             <div class="modal-footer justify-content-center">
                                 <button type="button" class="btn btn-success" id="internalcommentSubmit">Save</button>
-                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </form>
@@ -367,6 +367,7 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    @if(session('role_id') == 1 || in_array(201, session('permissions')))
                     {
                         text: 'Bulk Internal Comment',
                         className: 'btn btn-primary bulk_internal_comment',
@@ -383,6 +384,7 @@
                             $('#BulkExternalCommentModal').modal('show');
                         }
                     },
+                    @endif
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(184, session('permissions')))
                     {
                         text: 'Valid',
@@ -922,6 +924,15 @@
 
                     this.api().table().columns.adjust();
                 }
+            });
+            $('.closebutton').on('click',function(){
+                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                });
+                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#InternalCommentModal #internal_comment").val("");
+                });
+
             });
 
             $('#bulkcommentSubmit').on('click',function () {
