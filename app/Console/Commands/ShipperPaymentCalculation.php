@@ -46,44 +46,38 @@ class ShipperPaymentCalculation extends Command
     public function handle()
     {
         $users = User::where('status', 3);
-        if ($users->exists()){
+        if ($users->exists()) {
             $users = $users->get();
-            foreach ($users as $user){
-                $total_pending_payments = 0;
-                $total_paid_payments = 0;
-                $total_process_payments = 0;
+            foreach ($users as $user) {
 
                 $to_date = Carbon::now()->format('Y-m-d 23:59:59');
                 $from_date = Carbon::now()->subDays(7)->format('Y-m-d 00:00:00');
-                $shipper_id = $user->id;
 
-                $payment_ids = DonePayment::where('user_id', $shipper_id);
-                if ($payment_ids->exists()){
-                    $paid_payment_ids = $payment_ids->where('status', 1)
-                        ->whereBetween('created_at', [$from_date, $to_date])
-                        ->pluck('id')->toArray();
-                    $process_payment_ids = $payment_ids->where('status', 0)->pluck('id')->toArray();
-                    $total_process_payments = DonePaymentCalculation::whereIn('done_payment_id', $process_payment_ids)->sum('payable');
-                    $total_paid_payments = DonePaymentCalculation::whereIn('done_payment_id', $paid_payment_ids)->sum('payable');
-                }
-                $pending_payment = PendingPayment::where('user_id', $shipper_id);
-                if($pending_payment->exists()){
-                    $pending_payment_ids = $pending_payment->pluck('id')->toArray();
-                    $total_pending_payments = PendingPaymentCalculation::whereIn('pending_payment_id', $pending_payment_ids)->sum('payable');
-                }
-                $shipper_payment = ShipperPayment::where('user_id', $shipper_id);
-                if($shipper_payment->exists()){
+                $paid_payment_ids = DonePayment::where('status', 1)
+                    ->where('user_id', $user->id)
+                    ->whereBetween('created_at', [$from_date, $to_date])
+                    ->pluck('id')->toArray();
+                $process_payment_ids = DonePayment::where('user_id', $user->id)
+                    ->where('status', 0)->pluck('id')->toArray();
+
+                $total_process_payments = DonePaymentCalculation::whereIn('done_payment_id', $process_payment_ids)->sum('payable');
+                $total_paid_payments = DonePaymentCalculation::whereIn('done_payment_id', $paid_payment_ids)->sum('payable');
+
+                $pending_payment_ids = PendingPayment::where('user_id', $user->id)->pluck('id')->toArray();
+                $total_pending_payments = PendingPaymentCalculation::whereIn('pending_payment_id', $pending_payment_ids)->sum('payable');
+                $shipper_payment = ShipperPayment::where('user_id', $user->id);
+                if ($shipper_payment->exists()) {
                     $shipper_payment = $shipper_payment->first();
-                }
-                else{
+                } else {
                     $shipper_payment = new ShipperPayment();
-                    $shipper_payment->user_id = $shipper_id;
+                    $shipper_payment->user_id = $user->id;
                 }
                 $shipper_payment->total_pending = $total_pending_payments;
                 $shipper_payment->total_process = $total_process_payments;
                 $shipper_payment->total_paid = $total_paid_payments;
                 $shipper_payment->save();
             }
+
         }
     }
 }
