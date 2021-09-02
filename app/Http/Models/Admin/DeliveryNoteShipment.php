@@ -9,7 +9,7 @@ class DeliveryNoteShipment extends Model
 {
 	protected $primaryKey = ['delivery_note_id', 'shipment_id'];
 	public $incrementing = FALSE;
-	public $timestamps = FALSE;
+	protected $timestamp = false;
 	protected $fillable = [
 		'delivery_note_id','shipment_id','status','call_verification','notification','rider_information','ordering','update_type'
 	];

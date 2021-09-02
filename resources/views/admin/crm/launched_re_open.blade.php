@@ -737,6 +737,7 @@
                         '<option value="1">Shipper</option>' +
                         '<option value="2">Shipper Substitute User</option>' +
                         '<option value="3">Consignee</option>' +
+                        '<option value="4">External</option>' +
                         '</select>';
 
                     this.api().columns().every(function(column_id) {

@@ -788,7 +788,7 @@ class ShipperReturnController extends Controller
     }
     public function return_sheet_pending_index()
     {
-        $shipment_status = ShipmentStatus::all();
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25, 28, 29, 31, 34, 35, 38, 47, 48,60])->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         return view('client.return.sheet.pending')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
@@ -920,7 +920,7 @@ class ShipperReturnController extends Controller
     }
     public function return_sheet_history_index()
     {
-        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25])->get();
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25, 28, 29, 31, 34, 35, 38, 47, 48,60])->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         return view('client.return.sheet.history')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);

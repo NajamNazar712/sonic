@@ -835,7 +835,7 @@
                 if(row_id != '' && action === 'reminder'){
                     swal({
                         title: 'Are You Sure?',
-                        text: atext,
+                        text: 'Do you want to set reminder for this pickup request?',
                         icon: 'warning',
                         buttons: {
                             cancel: {
