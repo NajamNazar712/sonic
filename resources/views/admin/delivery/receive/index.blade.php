@@ -684,10 +684,31 @@
 
             $('#reassign_button').on('click', function(){
                 var operation_id = $('#operation_rider_id').val();
-                if(operation_id === '2'){
-                    reassign_rider();
-                }else{
-                    otp_generation();
+                var route = $('#route').val();
+                var rider = $('#riders').val();
+                var errors = 0;
+                if (rider !== '' && rider !== null) {
+                    $('#rider_error').css('display', 'none');
+                } else {
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#rider_error').css('display', 'block');
+                }
+                if (route !== '' && route !== null) {
+                    $('#route_error').css('display', 'none');
+                } else {
+                    var error = "Route not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#route_error').css('display', 'block');
+                }
+                if(errors == 0){
+                    if(operation_id === '2'){
+                        reassign_rider();
+                    }else{
+                        otp_generation();
+                    }
                 }
             });
 
@@ -798,6 +819,8 @@
                 $('#riders').html("");
                 $('#operation_rider_id').val('').trigger('change');
                 $('#route').val('').trigger('change');
+                $('#rider_error').css('display', 'none');
+                $('#route_error').css('display', 'none');
                 $('#delivery_note_id').val('');
                 $('#otp_input').val('');
                 $('#OtpModal').modal('hide');
