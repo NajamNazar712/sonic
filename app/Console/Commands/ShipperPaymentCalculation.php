@@ -55,7 +55,7 @@ class ShipperPaymentCalculation extends Command
 
                 $paid_payment_ids = DonePayment::where('status', 1)
                     ->where('user_id', $user->id)
-                    ->whereBetween('created_at', [$from_date, $to_date])
+                    ->whereBetween('status_updated_at', [$from_date, $to_date])
                     ->pluck('id')->toArray();
                 $process_payment_ids = DonePayment::where('user_id', $user->id)
                     ->where('status', 0)->pluck('id')->toArray();
