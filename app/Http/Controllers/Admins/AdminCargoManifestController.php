@@ -1543,8 +1543,8 @@ class AdminCargoManifestController extends Controller
 
 
         foreach($success_cargo_ids as $cargo_id){
-            $cargo_array = array();
-            array_push($cargo_array,$cargo_id);
+            $cargo_array = array($cargo_id);
+            $cargo_array = implode(',',$cargo_array);
             $path = self::print($cargo_array,1);
             $manifest = CargoManifest::find($cargo_id);
             NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_'. str_pad($manifest->id, 6, '0', STR_PAD_LEFT) .'.pdf');
@@ -1552,17 +1552,18 @@ class AdminCargoManifestController extends Controller
 
         if ($request->filled('submit_and_print_form')) {
 
-            //$print = explode(',',$success_cargo_ids);
-            $print = $success_cargo_ids;
+            $print = implode(',',$success_cargo_ids);
+
         }
         else {
             $print = FALSE;
         }
+
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html'=>$success,'error_html'=>$error,'print'=>$print]);
     }
 
-    public static function print(array $cargo_manifest_ids,$type = NULL ) {
-        //dd($cargo_manifest_ids,$type);
+    public static function print($cargo_manifest_ids,$type = NULL) {
+
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $html = '
                 <!doctype html>
@@ -1650,14 +1651,12 @@ class AdminCargoManifestController extends Controller
                     </style>
                 ';
         }
-        //$cargo_ids = explode(',',$cargo_manifest_ids);
-         if($type == 2){
-              dd($cargo_manifest_ids);
-         }
-        foreach($cargo_manifest_ids as $index => $id) {
+        $manifest_ids = explode(',',$cargo_manifest_ids);
+        
+        foreach($manifest_ids as $id) {
+
 
             $cargo = CargoManifest::find($id);
-
             $sender = $cargo->sender;
             $receiver = ($cargo->received_by) ? $cargo->receiver : NULL;
             $html .= '</head>
@@ -2849,6 +2848,11 @@ class AdminCargoManifestController extends Controller
         }
 
         return $tracking_numbers;
+    }
+
+    public function cargo_manifest_in_transit_print(Request $request) {
+        $html = self::print($request->cargo_manifest_ids,2);
+        return $html;
     }
 
 }

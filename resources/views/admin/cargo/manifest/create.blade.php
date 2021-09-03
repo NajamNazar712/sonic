@@ -183,16 +183,14 @@
     <script>
         $(document).ready(function() {
             @if (session('print'))
-            console.log({{ session('print') }}) ;
             $.ajax({
                 url: '{!! route('admin.cargo_manifest.print') !!}',
                 method: 'POST',
                 data: {
+
                     'cargo_manifest_ids': '{{ session('print') }}',
-                    'type': 2,
                     '_token': '{{ csrf_token() }}'
                 }
-
             })
                 .done(function(data) {
                     var tab = window.open('', '_blank');
@@ -497,7 +495,7 @@
                         if(confirm) {
                             swal({
                                 title: 'Please Wait!',
-                                text: 'Your Master cargo is being created!',
+                                text: 'Your Cargo Manifest is being created!',
                                 icon: 'info',
                                 buttons: false,
                                 closeOnClickOutside: false,
