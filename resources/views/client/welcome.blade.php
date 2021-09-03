@@ -89,6 +89,7 @@
                     </div>
                     @if($shipper_payments != null)
                         <div class="col-4">
+                            <h1 class="mb-2">Payments</h1>
                             <div class="card">
                                 <div id="funnel-plot" class="height-400 echart-container"></div>
                             </div>
@@ -210,7 +211,7 @@
 
                     // Add legend
                     legend: {
-                        data : ['Pending Payment','Process Payment','Paid Payment']
+                        data : ['Pending','Processed','Paid']
                     },
 
                     // Add Custom Colors
@@ -233,24 +234,18 @@
                             },
                             // width: '40%',
                             data:[
-                                {value:"{{$shipper_payments->total_pending}}", name:'Pending Payment', title:"{{number_format($shipper_payments->total_pending)}}"},
-                                {value:"{{$shipper_payments->total_process}}", name:'Process Payment'},
-                                {value:"{{$shipper_payments->total_paid}}", name:'Paid Payment'}
+                                {value:"{{$shipper_payments->total_pending}}", name:'Pending', title:"{{number_format($shipper_payments->total_pending)}}"},
+                                {value:"{{$shipper_payments->total_process}}", name:'Processed'},
+                                {value:"{{$shipper_payments->total_paid}}", name:'Paid'}
                             ]
                         }
                     ]
                 };
 
                 // Apply options
-                // ------------------------------
-
                 myChart.setOption(chartOptions);
 
-
-
                 // Resize chart
-                // ------------------------------
-
                 $(function () {
 
                     // Resize chart on menu width change and window resize
