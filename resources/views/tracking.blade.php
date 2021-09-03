@@ -21,8 +21,10 @@
 	<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
-	<script>
+
+    <script>
 		$(document).ready(function() {
 			var select = $('#track_form .tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
@@ -250,7 +252,6 @@
                         });
                     }
                         if (nature_flag) {
-                            $('#AddNewRequest').attr('disabled', true);
                             swal({
                                 title: 'Please Wait!',
                                 text: 'Launching Request.',
@@ -260,14 +261,15 @@
                                 closeOnEsc: false
                             });
                             $.ajax({
-                                url: '{!! route('tracking.add_request') !!}',
+                                url: '{!! route('tracking.add') !!}',
                                 method: 'POST',
+                                dataType: 'json',
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'shipment_id': $('#requested_shipment_id').val(),
-                                    'case_nature_id': case_nature_id,
                                     'complaint_id': case_nature_complaint_id,
-                                    'channel_id': case_nature_channel_id,
+                                    'complaint_name': name,
+                                    'complaint_phone' : phone,
                                     'description': complaint_description
                                 }
                             })
@@ -287,6 +289,7 @@
                                             }
                                             else {
                                                 html += '<br/>Request for Change cannot be opened for the above Shipment(s) at the Current Status!';
+
                                             }
 
                                             content = document.createElement('div');
@@ -313,6 +316,10 @@
                                                 positionClass: 'toast-bottom-center',
                                                 containerId: 'toast-bottom-center'
                                             });
+                                            $('#complaint_description').val('');
+                                            $('#complaint_name').val('');
+                                            $('#complaint_phone').val('');
+                                            $('#case_nature_complaints').val('').trigger('change');
                                         }
                                         // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     } else {
@@ -323,7 +330,7 @@
                                     }
 
                                     $('#AddRequestModal').modal('hide');
-                                    $('#AddNewRequest').attr('disabled', false);
+
                                 });
                         }
 
@@ -332,6 +339,15 @@
             });
             $('.close').on('click',function (){
                 $('#complaint_description').val('');
+                $('#complaint_name').val('');
+                $('#complaint_phone').val('');
+                $('#case_nature_complaints').val('').trigger('change');
+            });
+            $('#case_nature_complaints').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Complaint Type",
+                allowClear:true,
+                dropdownParent:$('#add_request_form')
             });
 		});
 	</script>
@@ -410,8 +426,7 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
                   </button>
               </div>
               <div class="modal-body text-center">
-                  <form id="add_request_form" method="post" action="{{Route('tracking.add_request')}}">
-                      @csrf
+                  <form method="POST" id="add_request_form" >
                       <div class="container">
                           <div class="row">
                               <h2 class="heading">Tracking Number</h2>
@@ -434,7 +449,7 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
                               <div class="row justify-content-center">
                                   <div class="col-6">
                                       <fieldset class="form-group">
-                                          <select name="case_nature_complaint" id="case_nature_complaints" class="form-control select2">
+                                          <select name="case_nature_complaints" id="case_nature_complaints" class="form-control select2">
                                               <option value="2">Delay in Delivery</option>
                                               <option value="6">Courier Misbehavior</option>
                                               <option value="10">Fake Reason</option>

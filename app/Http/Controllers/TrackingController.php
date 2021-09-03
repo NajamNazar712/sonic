@@ -83,9 +83,9 @@ class TrackingController extends Controller
 
     public function add_request(Request $request){
         $case_nature = 1;
-        $case_nature_type = $request->case_nature_complaint;
+        $case_nature_type = $request->complaint_id;
         $request_channel = 2;
-        $discription = $request->complaint_description;
+        $discription = $request->description;
         $crmstatus = 1;
         $reopencount = 0;
         $shipment_id = $request->shipment_id;
@@ -103,7 +103,8 @@ class TrackingController extends Controller
        $data->reopen_count = $reopencount;
 
         $data->save();
-        return redirect()->back();
+        $id = str_pad($data->id, 6, 0, STR_PAD_LEFT);
+        return ['status' => 1, 'success' => 'Request ('. $id .') successfully added'];
 
 ////        $nature_id = $request->case_nature_id;
 ////        $complaint_id = $request->complaint_id;
