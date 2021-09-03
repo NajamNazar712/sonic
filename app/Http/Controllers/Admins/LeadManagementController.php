@@ -116,10 +116,10 @@ class LeadManagementController extends Controller
         $leads['dead_leads_percentage'] = 0;
         $leads['accounts_activated_percentage'] = 0;
         if($leads['total'] > 0){
-            $leads['received_percentage'] = ($leads['received'] / $leads['total']) * 100;
-            $leads['in_process_percentage'] = ($leads['in_process'] / $leads['total']) * 100;
-            $leads['dead_leads_percentage'] = ($leads['dead_leads'] / $leads['total']) * 100;
-            $leads['accounts_activated_percentage'] = ($leads['accounts_activated'] / $leads['total']) * 100;
+            $leads['received_percentage'] = round(($leads['received'] / $leads['total']) * 100, 2);
+            $leads['in_process_percentage'] = round(($leads['in_process'] / $leads['total']) * 100, 2);
+            $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
+            $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
         }
 
         $cities = City::select('id','name')->get();
@@ -307,10 +307,10 @@ class LeadManagementController extends Controller
         $leads['dead_leads_percentage'] = 0;
         $leads['accounts_activated_percentage'] = 0;
         if($leads['total'] > 0){
-            $leads['received_percentage'] = ($leads['received'] / $leads['total']) * 100;
-            $leads['in_process_percentage'] = ($leads['in_process'] / $leads['total']) * 100;
-            $leads['dead_leads_percentage'] = ($leads['dead_leads'] / $leads['total']) * 100;
-            $leads['accounts_activated_percentage'] = ($leads['accounts_activated'] / $leads['total']) * 100;
+            $leads['received_percentage'] = round(($leads['received'] / $leads['total']) * 100, 2);
+            $leads['in_process_percentage'] = round(($leads['in_process'] / $leads['total']) * 100, 2);
+            $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
+            $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
         }
 
         return response()->json(['status' => 1, 'leads' => $leads]);
