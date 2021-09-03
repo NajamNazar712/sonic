@@ -178,7 +178,7 @@ class ShipperAPIController extends Controller
                             $shipment_info['latitude'] = $pickup_address->location_latitude;
                             $shipment_info['longitude'] = $pickup_address->location_longitude;
                             $shipment_info['pickup_address'] = $pickup_address->pickup_address;
-                            if($pickup_request->exist()){
+                            if($pickup_request->exists()){
                                 $pickup_request = $pickup_request->first();
                                 if ($pickup_request->pickup_in_route == 1) {
                                     $shipment_info['in_route'] = 2;

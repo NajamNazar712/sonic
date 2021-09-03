@@ -875,8 +875,17 @@ class DeliveryController extends Controller
     public function delivery_note_receive_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),20);
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        return view('admin.delivery.receive.index')->with(['riders' => $riders]);
+        $routes = Route::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.delivery.receive.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function receive_deliveries_list(Request $request)
