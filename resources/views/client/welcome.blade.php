@@ -89,7 +89,7 @@
                     </div>
                     @if($shipper_payments != null)
                         <div class="col-4">
-                            <h1 class="mb-2">Payments</h1>
+                            <h3 class="mb-2">Payments</h3>
                             <div class="card">
                                 <div id="funnel-plot" class="height-400 echart-container"></div>
                             </div>
