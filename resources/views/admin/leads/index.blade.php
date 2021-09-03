@@ -57,7 +57,7 @@
                                                 <i class="icon-grid text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_leads">{{$leads['total']}}</h3>
+                                                <h3 class="text-white" id="total_leads">{{$leads['total']}} (100%)</h3>
                                                 <span>Total Leads</span>
                                             </div>
                                         </div>
@@ -74,7 +74,7 @@
                                                 <i class="icon-flag text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_leads">{{$leads['received']}}</h3>
+                                                <h3 class="text-white" id="total_leads">{{$leads['received']}} ({{$leads['received_percentage']}}%)</h3>
                                                 <span>Leads Received</span>
                                             </div>
                                         </div>
@@ -91,7 +91,7 @@
                                                 <i class="icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}}</h3>
+                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}} ({{$leads['in_process_percentage']}}%)</h3>
                                                 <span>In Process</span>
                                             </div>
                                         </div>
@@ -110,7 +110,7 @@
                                             <i class="icon-close text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="pending_for_activation">{{$leads['dead_leads']}}</h3>
+                                            <h3 class="text-white" id="pending_for_activation">{{$leads['dead_leads']}} ({{$leads['dead_leads_percentage']}}%)</h3>
                                             <span>Dead Leads</span>
                                         </div>
                                     </div>
@@ -127,7 +127,7 @@
                                             <i class="icon-check text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="mature_leads">{{$leads['accounts_activated']}}</h3>
+                                            <h3 class="text-white" id="mature_leads">{{$leads['accounts_activated']}} ({{$leads['accounts_activated_percentage']}}%)</h3>
                                             <span>Accounts Activated</span>
                                         </div>
                                     </div>
@@ -193,6 +193,7 @@
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -577,6 +578,7 @@
                             head.push('Lead Status');
                             head.push('Aging');
                             head.push('Updated By');
+                            head.push('Updated At');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -599,6 +601,7 @@
                                 row.push(values.status);
                                 row.push(values.aging);
                                 row.push(values.updated_by);
+                                row.push(values.updated_at);
 
                                 body.push(row);
                             });
@@ -734,6 +737,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
+                    {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
