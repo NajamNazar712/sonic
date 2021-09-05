@@ -681,20 +681,6 @@ class DeliveryController extends Controller
     }
 
     public function create_delivery_note(Request $request){
-        $shipments = explode(',',$request->shipment_ids);
-        $open_box_ids = explode(',',$request->open_box_ids);
-        $notifications = explode(',',$request->notification_ids);
-        $rider_informations = explode(',',$request->rider_info_ids);
-        if(Notification::where('id', 40)->where('status', 1)->exists()){
-            $password = rand(10001,99999);
-        }else{
-            $password = NULL;
-        }
-        $order = false;
-        if($request->has('order_checkbox')){
-            $order = true;
-        }
-
         if($request->hub_id == ''){
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -706,31 +692,48 @@ class DeliveryController extends Controller
         if($request->selected_rider_id == ''){
             return redirect()->back()->with('error', 'Rider not selected!');
         }
-        $admin = Auth::id();
+
+        $shipments = explode(',',$request->shipment_ids);
+
+        if (count($shipments)) {
+            return redirect()->back()->with('error', 'Shipments not entered!');
+        }
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55, 59);
 
-        $valid_shipments = array();
+        $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
 
-        $shipments_count = 0;
-        $total_cod_amount = 0;
-        foreach ($shipments as $shipment) {
-            if (!in_array($shipment, $valid_shipments)) {
-                $shipment_details = Shipment::find($shipment);
-                if($shipment_details) {
-                    if (in_array($shipment_details->shipper_status_id, $pending_status)) {
-                        $valid_shipments[] = $shipment;
-                        $shipments_count++;
+        $shipments_count = count($valid_shipments);
 
-                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                            $total_cod_amount += $shipment_details->amount;
-                        }
-                    }
-                }
-            }
-        }
-        $normal_rider = TRUE;
         if ($shipments_count != 0) {
+            Shipment::whereIn('id', $valid_shipments)->whereIn(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+
+            $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function($query) {
+                $query->where('booking_type_id', '!=', 4)
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '=', 4)
+                    ->where('charges_mode_id', '=', 2);
+                });
+            })->sum('amount');
+
+            $open_box_ids = explode(',',$request->open_box_ids);
+            $notifications = explode(',',$request->notification_ids);
+            $rider_informations = explode(',',$request->rider_info_ids);
+            if(Notification::where('id', 40)->where('status', 1)->exists()){
+                $password = rand(10001,99999);
+            }else{
+                $password = NULL;
+            }
+            $order = false;
+            if($request->has('order_checkbox')){
+                $order = true;
+            }
+
+
+            $admin = Auth::id();
+
+            $normal_rider = TRUE;
+
             $rider = Rider::find($request->selected_rider_id);
             if($rider->special_rider){
                 $note = DeliveryNote::create([
@@ -780,9 +783,6 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
-                    $shipment_data = Shipment::find($shipment);
-                    $shipment_data->shipper_status_id = 5;
-                    $shipment_data->consignee_status_id = 5;
                     if(in_array($shipment, $open_box_ids)){
                         $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
                         if($shipment_detail){
@@ -790,12 +790,12 @@ class DeliveryController extends Controller
                             $shipment_detail->save();
                         }
 
+                        $shipment_data = Shipment::find($shipment);
                         $shipment_data->open_box = 1;
+                        $shipment_data->save();
+
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
                     }
-                    $shipment_data->save();
-
-                    // Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
 
                     $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
