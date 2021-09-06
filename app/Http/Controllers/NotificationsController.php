@@ -2940,9 +2940,9 @@ class NotificationsController extends Controller
                     $shipment = Shipment::find($reference_1_id);
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $reference_1_id)->where('verification', 1)->latest('id')->first();
 
-                    $link = 'https://sonic.pk/tracking?tracking_number='.$shipment->tracking_number;
+
                     if (strpos($body, '[tracking_number]') !== FALSE) {
-                        $body = str_replace('[tracking_number]', $link, $body);
+                        $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
                     }
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);

@@ -32,6 +32,7 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -2601,16 +2602,17 @@ class AdminAPIController extends Controller
 
     public function retail_index(Request $request){
         $admin_default_hub = Admin::where('id', $request->admin_id)->select('default_hub_id')->first();
-        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->select('name','code', 'pickup_address_id')->get();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->where('status', 1)->select('name','code', 'pickup_address_id')->get();
         $products = Product::all();
-        $business_categories = BusinessCategory::where('id', '!=', 2)->get();
+        $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers]);
+        return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers, 'international_cities' => $international_cities]);
     }
 
     public function retail_bank_info(Request $request){
@@ -2642,7 +2644,7 @@ class AdminAPIController extends Controller
         $order_id = $request->input('order_id');
         $package_type = FALSE;
         $special_instructions = NULL;
-
+        $charges_mode_id = ($request->has('charges_mode')) ? $request->input('charges_mode') : 1;
 
         $shipping_mode_check = $request->input('shipping_mode_id');
         $consignee_city_id = $request->input('city_id');
@@ -2666,8 +2668,14 @@ class AdminAPIController extends Controller
         if ($shipping_mode_check == 3) {
             $amount = str_replace(',', '', $request->input('cod_amount'));
             $r_amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $amount + $total_charges;
+            }
         } else {
             $amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $total_charges;
+            }
             $r_amount = 0;
         }
         $payment_mode_id = 1;
@@ -2675,8 +2683,6 @@ class AdminAPIController extends Controller
 
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category_id');
-
-        $charges_mode_id = 1;
 
         if ($request->volumetric_weight == 1) {
             $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
@@ -2691,6 +2697,14 @@ class AdminAPIController extends Controller
         }
 
         $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+        if($business_category_id == 2) {
+            $international_shipment_booking = new InternationalShipment();
+            $international_shipment_booking->shipment_id = $shipment_id;
+            $international_shipment_booking->postal_code = 00000;
+            $international_shipment_booking->save();
+        }
+
 
         $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 

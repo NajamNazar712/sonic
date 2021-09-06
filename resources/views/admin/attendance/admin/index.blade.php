@@ -44,7 +44,7 @@
                                                 </select>
                                             </fieldset>
                                         </div>
-                                        <div class="col-6 mt-1">
+                                        <div class="col-4 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_trax_id" id="search_trax_id" class="form-control select2">
                                                     @foreach($trax_ids as $trax_id)
@@ -53,11 +53,20 @@
                                                 </select>
                                             </fieldset>
                                         </div>
-                                        <div class="col-6 mt-1">
+                                        <div class="col-4 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_department" id="search_department" class="form-control select2">
                                                     @foreach($departments as $department)
                                                         <option value="{{$department->id}}">{{$department->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                        <div class="col-4 mt-1">
+                                            <fieldset class="form-group">
+                                                <select name="search_cnic" id="search_cnic" class="form-control select2">
+                                                    @foreach($cnics as $cnic)
+                                                        <option value="{{$cnic}}">{{$cnic}}</option>
                                                     @endforeach
                                                 </select>
                                             </fieldset>
@@ -106,11 +115,13 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
+                                    <th class="border-primary border-darken-1">Employee CNIC</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Designation</th>
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
+                                    <th class="border-primary border-darken-1">Day</th>
                                     <th class="border-primary border-darken-1">Clock-in Time</th>
                                     <th class="border-primary border-darken-1">Clock-in Radius</th>
                                     <th class="border-primary border-darken-1">Clock-in Location</th>
@@ -178,6 +189,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_cnic').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search CNIC',
+                width:'100%',
+                allowClear:true
+            });
             var search_date_from = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -220,11 +236,13 @@
                             head.push('S.No');
                             head.push('Employee ID');
                             head.push('Employee Name');
+                            head.push('Employee CNIC');
                             head.push('Hub');
                             head.push('Employee Type');
                             head.push('Designation');
                             head.push('Department');
                             head.push('Date');
+                            head.push('Day');
                             head.push('Clock-in Time');
                             head.push('Clock-in Radius');
                             head.push('Clock-out Time');
@@ -235,11 +253,13 @@
                                 row.push(index + 1);
                                 row.push(values.trax_id);
                                 row.push(values.name);
+                                row.push(values.cnic);
                                 row.push(values.city_name);
                                 row.push(values.employee_type);
                                 row.push(values.designation);
                                 row.push(values.department);
                                 row.push(values.attendance_date);
+                                row.push(values.attendance_day);
                                 row.push(values.clock_in);
                                 row.push(values.clock_in_status);
                                 row.push(values.clock_out);
@@ -283,12 +303,13 @@
                         d.search_city = $('#search_city').val();
                         d.search_department = $('#search_department').val();
                         d.search_trax_id = $('#search_trax_id').val();
+                        d.search_cnic = $('#search_cnic').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
                     }
                 },
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 rowId: 'id',
                 columns: [
                     {
@@ -303,11 +324,13 @@
                     },
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
                     {data: 'employee_type', name: 'c.id', class: 'align-middle employee_type'},
                     {data: 'designation', name: 'a.designation', class: 'align-middle designation'},
                     {data: 'department', name: 'ad.id', class: 'align-middle department'},
                     {data: 'attendance_date', name: 'employee_attendances.attendance_date', class: 'align-middle attendance_date'},
+                    {data: 'attendance_day', name: 'employee_attendances.attendance_date', class: 'align-middle attendance_day'},
                     {data: 'clock_in', name: 'employee_attendances.clock_in', class: 'align-middle clock_in'},
                     {data: 'clock_in_status', name: 'employee_attendances.clock_in_location', class: 'align-middle clock_in_status'},
                     {data: 'clock_in_location', name: '', class: 'align-middle clock_in_location', sortable: false},
