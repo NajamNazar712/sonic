@@ -307,6 +307,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('list', 'Shippers\ShipperReportsController@adjustments_list')->name('list');
         });
 
+        Route::prefix('weight_reconciliation')->name('weight_reconciliation.')->group(function (){
+            Route::get('', 'Shippers\ShipperReportsController@weight_reconciliation_index')->name('index');
+            Route::post('list', 'Shippers\ShipperReportsController@weight_reconciliation_list')->name('list');
+        });
+
+        
+
         Route::prefix('delivery_and_return')->name('delivery_and_return.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@delivery_and_return_index')->name('index');
         });
