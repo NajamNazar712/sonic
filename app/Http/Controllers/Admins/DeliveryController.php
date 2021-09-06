@@ -695,7 +695,7 @@ class DeliveryController extends Controller
 
         $shipments = explode(',',$request->shipment_ids);
 
-        if (count($shipments)) {
+        if (count($shipments) == 0) {
             return redirect()->back()->with('error', 'Shipments not entered!');
         }
 
