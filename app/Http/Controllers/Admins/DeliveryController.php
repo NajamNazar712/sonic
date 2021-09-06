@@ -706,6 +706,8 @@ class DeliveryController extends Controller
         $shipments_count = count($valid_shipments);
 
         if ($shipments_count != 0) {
+            $valid_shipments = $valid_shipments->toArray();
+
             Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
 
             $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function($query) {
