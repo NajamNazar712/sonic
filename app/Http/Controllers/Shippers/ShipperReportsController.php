@@ -732,7 +732,7 @@ class ShipperReportsController extends Controller
     }
 
     public function daraz_mis_list(Request $request){
-        $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+        $shipment = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
         ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
         ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
         ->leftJoin('shipments_journey as sj', function ($join) {
@@ -761,15 +761,15 @@ class ShipperReportsController extends Controller
         ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id')
         ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
-        $sales = $sales->where(function ($query) {
+        $shipment = $shipment->where(function ($query) {
             $query->where('shipments.user_id', 7306)
                 ->orWhereIn('shipments.user_id', session('sister_users'));
         });
 
 
-        $datatable = Datatables::of($sales)
-        ->addColumn('rider_remarks', function($sales) {
-            $rider_status = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('rider_id')->get()->last();
+        $datatable = Datatables::of($shipment)
+        ->addColumn('rider_remarks', function($shipment) {
+            $rider_status = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('rider_id')->get()->last();
             if($rider_status){
                 if($rider_status){
                     return $rider_status->remarks;
@@ -780,8 +780,8 @@ class ShipperReportsController extends Controller
             }
 
         })
-        ->addColumn('last_reason', function($sales) {
-            $last_reason = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('status_reason_id')->get()->last();
+        ->addColumn('last_reason', function($shipment) {
+            $last_reason = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('status_reason_id')->get()->last();
                 if($last_reason){
                     return $last_reason->shipment_status_reason->name;
                 }else{
@@ -790,8 +790,8 @@ class ShipperReportsController extends Controller
                 // ($rider_status->remarks) ? $rider_status->remarks : '-'
 
         })
-        ->addColumn('attempts', function($sales) {
-            $reattempt_count = ShipmentsJourney::where('shipment_id', $sales->shipment_id)
+        ->addColumn('attempts', function($shipment) {
+            $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
                 ->where('shipper_status_id','=',5)
                 ->where('verification','=',1)
                 ->select(DB::raw('count(shipment_id) as reattempts'))
@@ -806,15 +806,27 @@ class ShipperReportsController extends Controller
                     return '-';
                 }
         })
-        ->addColumn('tracking_number_link', function ($sales) {
-            $route = route('cod.tracking.index');
-            return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
+        ->addColumn('return_attempts', function($shipment) {
+            $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
+                ->where('shipper_status_id','=',20)
+                ->where('verification','=',1)
+                ->select(DB::raw('count(shipment_id) as return_attempts'))
+                ->get()->first();
+                if($reattempt_count){
+                    return $reattempt_count->return_attempts;
+                }else{
+                    return '-';
+                }
         })
-        ->editColumn('shipper_name', function ($sales) {
-            if($sales->shipper_id == 7306){
+        ->addColumn('tracking_number_link', function ($shipment) {
+            $route = route('cod.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
+        })
+        ->editColumn('shipper_name', function ($shipment) {
+            if($shipment->shipper_id == 7306){
                 return '-';
             }else{
-                return $sales->shipper_name;
+                return $shipment->shipper_name;
             }
         });
 
