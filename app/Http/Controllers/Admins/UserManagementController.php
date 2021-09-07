@@ -360,6 +360,9 @@ class UserManagementController extends Controller
         ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
 
         $datatables = Datatables::of($roles)
+        ->filterColumn('department', function($query, $keyword) {
+            $query->where('admin_roles.department_id', $keyword);
+        })
         ->addColumn('action', function($role) {
             if (session('role_id') == 1 || in_array(87, session('permissions'))) {
                 return '<div class="btn-group">
