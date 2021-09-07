@@ -348,7 +348,7 @@ class ShipperInternationalShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 2)->where('hub',0)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 2)->where('hub',0)->where('status', 1)],
             'postal_code' => ['required', 'between:1,10'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],

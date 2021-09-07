@@ -1547,21 +1547,9 @@ class AdminReportsEmailController extends Controller
                         $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
                     }
                     if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
-                        $iban = $retail_done_payment->retail_done_payment->shipper_bank->iban;
+                        $iban = $retail_done_payment->retail_done_payment->shipper->iban;
                     } else {
-                        $shipper_bank = UserBankInfo::where('user_id', $retail_done_payment->retail_done_payment->shipper->id)->where('default_bank', 1);
-                        if ($shipper_bank->exists()) {
-                            $shipper_bank = $shipper_bank->first();
-                            $iban = $shipper_bank->iban;
-                        } else {
-                            $shipper_bank = UserBankInfo::where('user_id', $retail_done_payment->retail_done_payment->shipper->id);
-                            if ($shipper_bank->exists()) {
-                                $shipper_bank = $shipper_bank->first();
-                                $iban = $shipper_bank->iban;
-                            } else {
-                                $iban = '-';
-                            }
-                        }
+                        $iban = '-';
                     }
                     $retail_done_payment_report = new RetailDonePaymentsReport();
                     $retail_done_payment_report->payment_id = $retail_done_payment->retail_done_payment_id;
@@ -1606,7 +1594,7 @@ class AdminReportsEmailController extends Controller
             $sheet->fromArray($retail_done_payment_array, NULL, 'A2', true);
             $sheet->getStyle("B2:C4")->applyFromArray($cell_s);
             $sheet->getStyle("A7:E7")->applyFromArray($cell_st);
-            $date_file_name = Carbon::today()->format('Y_m_d');
+            $date_file_name = $date;
             $sheet->setTitle('Retail Done Payments ' . $date_file_name);
             $writer = new Xlsx($spreadsheet);
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');

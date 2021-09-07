@@ -329,8 +329,8 @@ class AdminTrackingController extends Controller
                             $journey_details = array();
 
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                            $journey_details['old_weight'] = number_format($journey->old_weight);
-                            $journey_details['new_weight'] = number_format($journey->new_weight);
+                            $journey_details['old_weight'] = $journey->old_weight;
+                            $journey_details['new_weight'] = $journey->new_weight;
                             $journey_details['user'] = $journey->admin->name;
 
                             $details['weight_history'][] = $journey_details;
@@ -1064,6 +1064,12 @@ class AdminTrackingController extends Controller
 
                                 $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                                 $journey_details['status'] = $journey->status->name;
+                                if($journey->reason_id != NULL){
+                                    $journey_details['reason'] = $journey->reason->name;
+                                }
+                                else{
+                                    $journey_details['reason'] = '';
+                                }
 
                                 if ($journey->reference_1_id) {
                                     $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
@@ -1192,8 +1198,8 @@ class AdminTrackingController extends Controller
                                 $journey_details = array();
 
                                 $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
-                                $journey_details['old_weight'] = number_format($journey->old_weight);
-                                $journey_details['new_weight'] = number_format($journey->new_weight);
+                                $journey_details['old_weight'] = $journey->old_weight;
+                                $journey_details['new_weight'] = $journey->new_weight;
                                 $journey_details['user'] = $journey->admin->name;
 
                                 $details['weight_history'][] = $journey_details;

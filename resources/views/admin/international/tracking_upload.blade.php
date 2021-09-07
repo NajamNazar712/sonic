@@ -11,7 +11,43 @@
     <div class="card">
         <div class="card-content">
             <div class="card-body">
-                @include('client.inc.messages')
+                @include('admin.inc.messages')
+
+                <div class="row justify-content-end">
+                    <div class="col-5">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="heading-elements">
+                                    <ul class="list-inline mb-0">
+                                        <li class="primary border-primary round"><a data-action="collapse">Service Providers <i class="ft-plus"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-content collapse">
+                                <div class="card-body p-1">
+                                    <h4 class=" info">Service Providers</h4>
+                                    <table class="table table-sm table-bordered border mb-0 text-center">
+                                        <thead>
+                                        <tr>
+                                            <td class="border-primary border-darken-1">ID(s)</td>
+                                            <td class="border-primary border-darken-1">Name(s)</td>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach($service_providers as $service_provider)
+                                                <tr>
+                                                    <td class="align-middle">{{ $service_provider->id }}</td>
+                                                    <td class="align-middle">{{ $service_provider->name }}</td>
+                                                </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
 
                 <form id="tracking_form" class="form-horizontal" method="POST" action="{{ route('admin.international.tracking_upload.store') }}" novalidate="novalidate" enctype="multipart/form-data">
                     {{ csrf_field() }}
@@ -42,7 +78,8 @@
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Tracking No. Booking Date</th>
-                        <th class="border-primary border-darken-1">Third Party Tracking Number</th>
+                        <th class="border-primary border-darken-1">3PL Tracking Number</th>
+                        <th class="border-primary border-darken-1">3PL Service Provider</th>
                         <th class="border-primary border-darken-1">Postal Code</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">POD File</th>
@@ -79,6 +116,15 @@
                         <div class="form-group">
                             <label class="label" for="actual_weight">Actual Weight</label>
                             <input type="text" class="form-control" name="actual_weight" id="edit_actual_weight">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="service_provider" class="label">Service Provider</label>
+                            <select name="service_provider" id="service_provider" class="form-control select2" data-rule-required="true" data-msg-required="Service provider is required">
+                                @foreach($service_providers as $service_provider)
+                                    <option value="{{$service_provider->id}}">{{$service_provider->name}}</option>
+                                @endforeach
+                            </select>
                         </div>
                         
                     </div>
@@ -157,6 +203,12 @@
                 'min': 0.01,
                 'max':100000,
             });
+
+            $('#EditTrackingModal #service_provider').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Service Provider",
+                dropdownParent:$('#EditTrackingModal')
+            });
             $('body').on('change','#edit_international_tracking_number',function() {
                 $(this).val($(this).val().trim());
             });
@@ -175,7 +227,8 @@
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Tracking No. Booking Date');
-                            head.push('International Tracking No.');
+                            head.push('3PL Tracking Number');
+                            head.push('3PL Service Provider');
                             head.push('Postal Code');
                             head.push('Actual Weight');
 
@@ -187,6 +240,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.booking_date);
                                 row.push(values.international_tracking_number);
+                                row.push(values.provider);
                                 row.push(values.postal_code);
                                 row.push(values.actual_weight);
                                 body.push(row);
@@ -223,6 +277,7 @@
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'international_tracking_number', name: 'international_shipments.international_tracking_number', class: 'align-middle international_tracking_number'},
+                    {data: 'provider', name: 'issp.name', class: 'align-middle provider'},
                     {data: 'postal_code', name: 'international_shipments.postal_code', class: 'align-middle postal_code'},
                     {data: 'actual_weight', name: 'international_shipments.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'pod_file', name: 'international_shipments.pod_file', class: 'align-middle pod_file', orderable: false, searchable: false},
@@ -302,7 +357,7 @@
                                 $('#edit_international_tracking_number').val(data.details.international_tracking_number);
                                 $('#edit_shipment_id').val(data.details.id);
                                 $('#actual_weight').val(data.details.actual_weight);
-                                console.log(data.details.shipment_status);
+
                                 if(data.details.shipment_status == 1){
                                     $("#edit_actual_weight").prop("readonly", true);
                                 }
@@ -363,7 +418,7 @@
             $('body').on('click', 'button.upload_pod',  function(){
                 var id = $(this).parents('tr').attr('id');
                 $('#pod_shipment').val(id);
-                console.log(id)
+
                 $('#upload_pod_modal').modal('show');
                 // if(id){
                 //     $('#corporate_rate_type_modal').modal('show');

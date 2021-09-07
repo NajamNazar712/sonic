@@ -808,6 +808,9 @@ class Permission
             'settings.nsa_account.index' => 367,
             'settings.nsa_account.store' => 367,
 
+            'settings.carrefour_account.index' => 580,
+            'settings.carrefour_account.store' => 580,
+
             'settings.restrict_cities_intercept.index' => 375,
             'settings.restrict_cities_intercept.store' => 375,
 
@@ -867,6 +870,7 @@ class Permission
             'intercept.update' => 245,
 
             'scanning_history.index' => 306,
+            'airway_journey.index' => 567,
 
             'dashboard.sales.index' => 315,
 
@@ -936,6 +940,9 @@ class Permission
             'telenor.call.list' => 402,
             'telenor.return.bulk_return' => 525,
 
+            'carrefour.arrival.index' => 579,
+            'carrefour.arrival.submit' => 579,
+
 
             'leads.index' => 416,
             'leads.list' => 416,
@@ -983,6 +990,20 @@ class Permission
             'human_resource.erf.list' => 506,
             'human_resource.erf.add' => 522,
 
+
+            'human_resource.fnf.index' => 568,
+            'human_resource.fnf.list' => 568,
+            'human_resource.fnf.add' => 569,
+            'human_resource.fnf.rm.index' => 570,
+            'human_resource.fnf.cs.index' => 571,
+            'human_resource.fnf.administration.index' => 572,
+            'human_resource.fnf.it_support.index' => 573,
+            'human_resource.fnf.finance.index' => 574,
+            'human_resource.fnf.hod_approval_index' => 575,
+            'human_resource.fnf.hr.index' => 576,
+            'human_resource.fnf.edit_fnf_request' => 577,
+            'human_resource.fnf.fnf_history_index' => 578,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
@@ -1029,8 +1050,16 @@ class Permission
             'rider_delivery_note_otp.index' => 563,
             'rider_delivery_note_otp.list' => 563,
 
+            'settings.last_mile_cron.index' => 565,
+
+            'settings.dhl_sync_time.index' => 581,
+            'settings.international_automation_user.index' => 582,
+
             'settings.ccd_booking.index' => 558,
-           
+
+
+
+
         ],
 
         'shipper' => [
@@ -1069,6 +1098,13 @@ class Permission
             'return.pending.marked.status.single' => 9,
             'return.reattempt_history.index' => 9,
             'return.reattempt_history.list' => 9,
+            'return.sheet.pending.index' => 9,
+            'return.sheet.pending.list' => 9,
+            'return.sheet.receive.index' => 9,
+            'return.sheet.receive.shipment_info' => 9,
+            'return.sheet.receive.submit' => 9,
+            'return.sheet.history.index' => 9,
+            'return.sheet.history.list' => 9,
 
             'intercept.index' => 9,
 
@@ -1107,6 +1143,11 @@ class Permission
 
             'settings.air_waybill_printing.index' => 11,
             'settings.air_waybill_printing.store' => 11,
+            
+            'reports.daraz_mis.index' => 15,
+            'reports.daraz_mis.list' => 15,
+
+            
 
         ]
     ];

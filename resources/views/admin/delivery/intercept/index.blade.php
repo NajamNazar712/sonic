@@ -243,7 +243,6 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.status_date);
-
                                 body.push(row);
                             });
                         },
@@ -427,7 +426,7 @@
                 processing: true,
                 language: {
                     processing: data_table_loader
-                },
+                },//test
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.intercept.list') }}',
                 rowId: 'shId',
@@ -481,12 +480,14 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.shipping_mode')){
+                        }else if($(header).is('.shipping_mode') ){
                             $(mode_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }else if($(header).is('.service_type')){
+
+                        }
+                        else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
@@ -521,6 +522,7 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
                     var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.id = obj.id
 
@@ -535,6 +537,13 @@
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data:data2,
                         placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $("#consignee_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Intercept Type",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

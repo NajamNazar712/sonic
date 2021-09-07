@@ -6,8 +6,12 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\City;
 use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Commission\SalesTier;
 use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\SaleTierTag;
+use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -62,9 +66,25 @@ class AdminLoginController extends Controller
                 $assigned_admins = $assigned_admins->pluck('spt.user_id')->toArray();
                 $shippers = array_merge($shippers, $assigned_admins);
             }
+            $KAE = SaleTierTag::where('kam',$id);
+            if($KAE->exists()){
+                $KAE = $KAE->pluck('user_id')->toArray();
+                $shippers = array_merge($shippers,$KAE);
+                //$shippers = array_unique($shippers);
+            }
+
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
             $department = AdminRole::find($role_id)->department_id;
             $sales_coordinator = SalesCommissionUser::where('user_id',$id)->whereIn('sales_commission_users.tier_id',[2,3])->exists();
+            if(in_array($role_id, [44])){
+                if(count($hubs) > 0){
+                    $hub_cities = City::whereIn('hub_id', $hubs)->where('status', 1)->pluck('id')->toArray();
+                    $region_shippers = User::whereNotIn('id', $shippers)->whereIn('city_id', $hub_cities)->pluck('id')->toArray();
+                    if(count($region_shippers) > 0){
+                        $shippers = array_merge($shippers,$region_shippers);
+                    }
+                }
+            }
 
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);
 

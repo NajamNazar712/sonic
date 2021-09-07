@@ -106,7 +106,7 @@
 
                                     <div class="row ml-0">
                                         <div class="form-group col-6">
-                                            <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
+                                            <input type="text" name="shipper_phone_no" id="shipper_phone_no" class="form-control phone1" placeholder="Shipper Cell Number*" data-rule-required="true" data-msg-required="Shipper Cell Number is required">
                                         </div>
 
                                         <div class="form-group col-6">
@@ -390,6 +390,7 @@
                 var shipping_mode = parseInt($("#shipping_mode").val());
                 if(id == 2)
                 {
+                    $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
                     $('#domestic_overland_destination_div').addClass('d-none');
                     $('#domestic_destination_div').addClass('d-none');
                     $('#international_destination_div').removeClass('d-none');
@@ -397,11 +398,13 @@
                 else{
                     if(shipping_mode == 1)
                     {
+                        alert(1);
                         $('#domestic_overland_destination_div').removeClass('d-none');
                         $('#domestic_destination_div').addClass('d-none');
                         $('#international_destination_div').addClass('d-none');
                     }
                     else{
+                        $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
                         $('#domestic_destination_div').removeClass('d-none');
                         $('#domestic_overland_destination_div').addClass('d-none');
                         $('#international_destination_div').addClass('d-none');
@@ -467,7 +470,7 @@
 
             $(this).find('.pieces').TouchSpin({
                 min: 1,
-                max: 10,
+                max: 50,
                 buttondown_class: 'btn btn-primary rounded-left',
                 buttonup_class: 'btn btn-primary rounded-right',
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -543,7 +546,8 @@
             });
 
 
-            $(".phone").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            $(".phone1").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            $('.phone').inputmask("Regex", { regex: "[+|0][0-9]*"});
             $(".cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
 
             $('.amount').inputmask({

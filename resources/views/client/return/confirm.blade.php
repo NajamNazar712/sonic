@@ -9,7 +9,7 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('admin.inc.messages')
+                @include('client.inc.messages')
                 {{--<div class="row justify-content-center">
                     <div class="col-3">
                         <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">

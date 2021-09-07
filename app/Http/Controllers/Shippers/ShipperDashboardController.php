@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
@@ -57,10 +58,12 @@ use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\http\Models\Shipper\ShipperPayment;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\http\Models\UserDocumentAttachment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\WeightCharge;
@@ -94,6 +97,7 @@ use App\Http\Models\Segment;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use App\Http\Controllers\NotificationsController;
@@ -152,7 +156,16 @@ class ShipperDashboardController extends Controller
             ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
 
 
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);
+            $shipper_payment = ShipperPayment::where('user_id', $shipper_id);
+            if($shipper_payment->exists()){
+                $shipper_payment = $shipper_payment->first();
+            }
+            else{
+                $shipper_payment = null;
+            }
+
+
+            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
         }
     }
     public function opt_verify(Request $request){
@@ -1578,9 +1591,39 @@ class ShipperDashboardController extends Controller
 
     public function agreement_status(Request $request){
         if(session()->has('agreement_signed') && session('agreement_signed') != 1){
+            $encoded_image = explode(",", $request->esign)[1];
+            $decoded_image = base64_decode($encoded_image);
+
+            $user_attachment = UserDocumentAttachment::where('user_id',session('user_id'));
+            if($user_attachment->exists())
+            {
+                $user_attachment = $user_attachment->first();
+            }
+            else{
+                $user_attachment = new UserDocumentAttachment();
+                $user_attachment->user_id = session('user_id');
+
+            }
+
+            $date = Carbon::now()->format('Y_m_d');
+            if($user_attachment->e_sign_image != NULL) {
+                Storage::disk('public')->delete('users_attached_documents/' . session('user_id') . '/' . $user_attachment->e_sign_image);
+            }
+            $filename = 'e_sign_image_' . $date . '_' . session('user_id') . '.png';
+            Storage::disk('public')->put('users_attached_documents/'. session('user_id') .'/'.$filename, $decoded_image);
+            $user_attachment->e_sign_image = $filename;
+            $user_attachment->save();
             session(['agreement_signed' => 1]);
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
+
+            NotificationsController::send(149,session('user_id'));
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
+    }
+
+    public function get_agreement(Request $request)
+    {
+        $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
+        return $html;
     }
 }

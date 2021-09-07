@@ -126,7 +126,7 @@ class V2AdminPickupsController extends Controller
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
 
-            ->select('v2_pickup_requests.id', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name')
             ->whereNotIn('v2_pickup_requests.status_id', [2, 4]);
 
         if (session('role_id') != 1) {
@@ -140,6 +140,7 @@ class V2AdminPickupsController extends Controller
         $datatables = Datatables::of($pickup_requests)
             ->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
+
                     if ($pickup_request->reverse_pickup == 1) {
                         return 'reverse_pickup_row';
                     }
@@ -161,6 +162,13 @@ class V2AdminPickupsController extends Controller
                 },
             ])
             ->editColumn('pickup_request_id', function ($pickup_requests) {
+                if($pickup_requests->reminder == 1)
+                {
+                    $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+                    $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;">'.$test.'</b></td>';
+                    return $test1;
+
+                }
                 return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('bookings_link', function ($pickup_request) {
@@ -235,18 +243,28 @@ class V2AdminPickupsController extends Controller
                 }
                 return '';
             })
-            ->addColumn('action', function ($pickup_request) {
-                if (session('role_id') == 1 || in_array(18, session('permissions'))) {
-                    return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      <button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>
-                    </div>
-                  </div>
-          ';
-                } else {
-                    return '';
-                }
+            ->addColumn('action', function ($reminder_request) {
+                $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
+
+                    if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
+                        $dropdown = "
+                        <div class='btn-group'>
+                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
+
+                        if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
+                            $dropdown .= $reminder_button;
+                        }
+
+                        $dropdown .= "
+                            </div>
+                        </div>
+                    ";
+
+                        return $dropdown;
+                    } else {
+                        return '';
+                    }
             })
             ->editColumn('brand_name', function ($pickup_requests) {
                 if($pickup_requests->brand_name==null){
@@ -298,14 +316,15 @@ class V2AdminPickupsController extends Controller
                 }
                 elseif($legend_filter==1){
                     $datatables->where('v2_pickup_requests.created_at','<=',Carbon::now()->startOfDay()->addDays(6))
-                    ->where('v2_pickup_requests.after_cut_off_time',null)
-                    ->where('v2_pickup_requests.status_id','<>',3)
-                    ->where('v2_pickup_requests.try_and_buy',null)
-                    ->where('v2_pickup_requests.vendor',null)
-                    ->where('v2_pickup_requests.reverse_pickup',null);
+                        ->where('v2_pickup_requests.after_cut_off_time',null)
+                        ->where('v2_pickup_requests.status_id','<>',3)
+                        ->where('v2_pickup_requests.try_and_buy',null)
+                        ->where('v2_pickup_requests.vendor',null)
+                        ->where('v2_pickup_requests.reverse_pickup',null);
 
                     return $datatables->make(true);
                 }
+
             }else{
                     return $datatables->make(true);
             }
@@ -635,6 +654,15 @@ class V2AdminPickupsController extends Controller
         } else {
             return ['status' => 0, 'success' => 'No Pending Booked Shipments', 'booked' => false];
         }
+    }
+    public function pending_reminder(Request $request){
+        $id = $request->shipment_id;
+        $data = V2PickupRequest::find($id);
+        $data->reminder_status = 1;
+        $data->reminder_status = 1;
+        $data->save();
+        return ['status'=>1,'success'=>"Reminder successfully Set"];
+
     }
 
     public function arrival_bulk_index(Request $request)
@@ -1916,6 +1944,14 @@ class V2AdminPickupsController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider->name . '</td>
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Trax ID</strong></td>
+                            <td>' . $rider->trax_id . '</td>
                             <td rowspan="7" class="text-center align-middle pl-1 pr-1">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
