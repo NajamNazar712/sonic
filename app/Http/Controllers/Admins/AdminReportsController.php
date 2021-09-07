@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AdjustmentLog;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
@@ -6903,8 +6904,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->where('status', 1)->get();
         $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
         $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $riders_cat = OperationRidersCategory::all();
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
-        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders]);
+        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
     }
     public function route_distribution_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
