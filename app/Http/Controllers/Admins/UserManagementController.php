@@ -379,7 +379,7 @@ class UserManagementController extends Controller
     }
 
     public function role_add_index() {
-        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        $departments = AdminDepartment::get(['id', 'name']);
         $modules = Module::with('permissions')->get();
 
         return view('admin.user_management.role.add.index')->with(['departments' => $departments, 'modules' => $modules]);
@@ -409,7 +409,7 @@ class UserManagementController extends Controller
     }
 
     public function role_update_index($id) {
-        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        $departments = AdminDepartment::get(['id', 'name']);
         $modules = Module::with('permissions')->get();
         $role = AdminRole::find($id);
         $permissions = $role->module_permissions->pluck('permission_id')->toArray();
