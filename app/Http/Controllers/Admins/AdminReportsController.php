@@ -6915,6 +6915,7 @@ class AdminReportsController extends Controller
         }
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
@@ -6977,6 +6978,9 @@ class AdminReportsController extends Controller
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
+        }
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
 
         return $datatables->make(true);
