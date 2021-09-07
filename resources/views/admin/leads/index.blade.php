@@ -57,8 +57,25 @@
                                                 <i class="icon-grid text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_leads">{{$leads['total']}}</h3>
+                                                <h3 class="text-white" id="total_leads">{{$leads['total']}} (100%)</h3>
                                                 <span>Total Leads</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3" id="received_leads_div">
+                            <div class="card bg-gradient-directional-complaints_launched pull-up">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-flag text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_leads">{{$leads['received']}} ({{$leads['received_percentage']}}%)</h3>
+                                                <span>Leads Received</span>
                                             </div>
                                         </div>
                                     </div>
@@ -74,25 +91,8 @@
                                                 <i class="icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}}</h3>
+                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}} ({{$leads['in_process_percentage']}}%)</h3>
                                                 <span>In Process</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3" id="matured_leads_div">
-                            <div class="card bg-gradient-directional-return_delivered pull-up">
-                                <div class="card-content">
-                                    <div class="card-body">
-                                        <div class="media d-flex">
-                                            <div class="align-self-center">
-                                                <i class="icon-check text-white font-large-2 float-left"></i>
-                                            </div>
-                                            <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="mature_leads">{{$leads['mature_leads']}}</h3>
-                                                <span>Matured Leads</span>
                                             </div>
                                         </div>
                                     </div>
@@ -101,17 +101,52 @@
                         </div>
                     </div>
                 <div class="row justify-content-center">
-                        <div class="col-3" id="pending_for_activation_div">
-                            <div class="card bg-gradient-directional-pending_shipments pull-up">
+                    <div class="col-3" id="dead_leads_div">
+                        <div class="card bg-gradient-directional-pending_shipments pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-close text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white" id="pending_for_activation">{{$leads['dead_leads']}} ({{$leads['dead_leads_percentage']}}%)</h3>
+                                            <span>Dead Leads</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3" id="activated_leads_div">
+                        <div class="card bg-gradient-directional-return_delivered pull-up">
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <div class="media d-flex">
+                                        <div class="align-self-center">
+                                            <i class="icon-check text-white font-large-2 float-left"></i>
+                                        </div>
+                                        <div class="media-body text-white text-right">
+                                            <h3 class="text-white" id="mature_leads">{{$leads['accounts_activated']}} ({{$leads['accounts_activated_percentage']}}%)</h3>
+                                            <span>Accounts Activated</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="col-3" id="lead_time_ratio_div">
+                            <div class="card bg-gradient-directional-return_confirm pull-up">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
-                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                                <i class="la la-calculator text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="pending_for_activation">{{$leads['pending_for_activation']}}</h3>
-                                                <span>Request(s) Pending for Activation</span>
+                                                <h3 class="text-white" id="ratio">{{ $leads['dead_leads_ratio']}}</h3>
+                                                <span>Dead Lead Time Ratio</span>
                                             </div>
                                         </div>
                                     </div>
@@ -127,8 +162,8 @@
                                                 <i class="la la-calculator text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="ratio">{{ $leads['ratio']}}</h3>
-                                                <span>Lead Time Ratio</span>
+                                                <h3 class="text-white" id="ratio">{{ $leads['active_leads_ratio']}}</h3>
+                                                <span>Active Lead Time Ratio</span>
                                             </div>
                                         </div>
                                     </div>
@@ -158,6 +193,7 @@
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -312,7 +348,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <style type="text/css">
+    <style>
         table.dataTable {
             font-size: 12px;
         }
@@ -542,6 +578,7 @@
                             head.push('Lead Status');
                             head.push('Aging');
                             head.push('Updated By');
+                            head.push('Updated At');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -564,6 +601,7 @@
                                 row.push(values.status);
                                 row.push(values.aging);
                                 row.push(values.updated_by);
+                                row.push(values.updated_at);
 
                                 body.push(row);
                             });
@@ -581,7 +619,7 @@
                 buttons: [
                         @if (session('role_id') == 1 || in_array(361, session('permissions')))
                     {
-                        text: 'Bulk Tagging',
+                        text: 'Tag',
                         className: 'btn btn-primary bulk_tagging',
                         enabled:false,
                         action: function (e, dt, node, config) {
@@ -699,6 +737,7 @@
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
+                    {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -760,7 +799,7 @@
 
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
-                console.log(id);
+
                 var index = $.inArray(id, selected_rows);
 
                 if (index === -1) {
@@ -926,43 +965,6 @@
                 }
             });
 
-            $('body').on('click','#datatable .lead_log',function(){
-                var lead_id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url: '{!! route('admin.leads.lead_log') !!}',
-                    method: 'POST',
-                    data: {
-                        'lead_id': lead_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        var html = '<div class="col">';
-                        html += '<table class="table table-sm datatable text-center">';
-                        html += '<thead><tr><th>S No.</th><th><strong>Lead ID</strong></th><th><strong>Contact Person</strong></th><th><strong>Phone Number</strong></th><th><strong>Sales Person</strong></th><th><strong>Reference Person</strong></th><th><strong>Lead Status</strong></th><th><strong>Updated By</strong></th><th><strong>Updated At</strong></th></tr></thead>';
-                        html += '<tbody>';
-                        $.each(data.leads, function(index, value) {
-                            var ind = index+1;
-                            html += '<tr class=""><td>' + ind + '</td>';
-                            html += '<td>' + value.lead_id + '</td>';
-                            html += '<td>' + value.contact_person + '</td>';
-                            html += '<td>' + value.phone_number + '</td>';
-                            html += '<td>' + value.sales_person + '</td>';
-                            html += '<td>' + value.reference_person + '</td>';
-                            html += '<td>' + value.status + '</td>';
-                            html += '<td>' + value.updated_by + '</td>';
-                            html += '<td>' + value.updated_at + '</td></tr>';
-                        });
-                        html += '</tbody></table></div>';
-                        var header = '<h4 class="modal-title" id="">Lead Logs</h4>';
-                        $('#DetailsModal .header').html(header);
-                        $('#DetailsModal .modal-body').html(html);
-                        $('#DetailsModal').modal('show');
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                });
-            });
 
             {{--$('body').on('click','#datatable .view_remarks',function(){--}}
             {{--    var lead_id = parseInt($(this).parents('tr').attr('id'));--}}
@@ -1105,16 +1107,20 @@
                 $('#search_statistics_div').val(1);
                 table.draw();
             });
-            $('#in_process_div').on('click', function(){
+            $('#received_leads_div').on('click', function(){
                 $('#search_statistics_div').val(2);
                 table.draw();
             });
-            $('#matured_leads_div').on('click', function(){
+            $('#in_process_div').on('click', function(){
                 $('#search_statistics_div').val(3);
                 table.draw();
             });
-            $('#pending_for_activation_div').on('click', function(){
+            $('#dead_leads_div').on('click', function(){
                 $('#search_statistics_div').val(4);
+                table.draw();
+            });
+            $('#activated_leads_div').on('click', function(){
+                $('#search_statistics_div').val(5);
                 table.draw();
             });
         });

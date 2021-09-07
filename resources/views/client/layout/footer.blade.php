@@ -49,8 +49,19 @@
         var signaturePad = new SignaturePad(canvas,{
             backgroundColor: 'rgb(248,248,248)',
         });
+        $.ajax({
+            url: '{!! route('cod.get_agreement') !!}',
+            method: 'POST',
+            data: {
+                'id': '{{session('user_id')}}',
+                '_token': '{{ csrf_token() }}'
+            }
+        })
+        .done(function (data) {
+            $('#ShowAgreementModal #crf_agreement').html(data);
+            $('#ShowAgreementModal').modal('show');
+        });
 
-        $('#ShowAgreementModal').modal('show');
 
         $("#agreement-form #agreement_signed").on('click',function(){
             if($(this).prop('checked'))

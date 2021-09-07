@@ -2613,7 +2613,7 @@ class AdminAPIController extends Controller
 
     public function retail_index(Request $request){
         $admin_default_hub = Admin::where('id', $request->admin_id)->select('default_hub_id')->first();
-        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->select('name','code', 'pickup_address_id')->get();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->where('status', 1)->select('name','code', 'pickup_address_id')->get();
         $products = Product::all();
         $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();

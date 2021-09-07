@@ -21,6 +21,7 @@ Auth::routes();
 Route::prefix('tracking')->name('tracking.')->group(function () {
     Route::get('{tracking_number?}', 'TrackingController@index')->name('index');
     Route::post('track', 'TrackingController@track')->name('track');
+    Route::post('add','TrackingController@add_request')->name('add');
 });
 
 Route::prefix('shipment')->name('shipment.')->group(function () {
@@ -33,6 +34,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         return redirect()->route('cod.login');
     });
     Route::get('404', 'Auth\LoginController@not_found')->name('404');
+    Route::post('get/agreement','Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
 
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
@@ -94,6 +96,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::prefix('corporate_excel')->name('corporate_excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
                 Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
+                Route::get('/index', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_index')->name('distribution');
+                Route::post('/store', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_store')->name('distribution.store');
             });
             Route::prefix('international')->name('international.')->group(function () {
                 Route::get('', 'Shippers\ShipperInternationalShipmentBookController@index')->name('index');
@@ -218,7 +222,21 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::get('','Shippers\ShipperReturnController@return_confirmed_index')->name('index');
             Route::get('list','Shippers\ShipperReturnController@return_list')->name('list');
-
+        });
+        Route::prefix('sheet')->name('sheet.')->group(function (){
+            Route::prefix('pending')->name('pending.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_pending_index')->name('index');
+                Route::get('list','Shippers\ShipperReturnController@return_sheet_pending_list')->name('list');
+            });
+            Route::prefix('receive')->name('receive.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_receive_index')->name('index');
+                Route::post('shipment_info','Shippers\ShipperReturnController@return_sheet_receive_shipment_info')->name('shipment_info');
+                Route::post('submit','Shippers\ShipperReturnController@return_sheet_receive_submit')->name('submit');
+            });
+            Route::prefix('history')->name('history.')->group(function (){
+                Route::get('','Shippers\ShipperReturnController@return_sheet_history_index')->name('index');
+                Route::get('list','Shippers\ShipperReturnController@return_sheet_history_list')->name('list');
+            });
         });
     });
 
@@ -392,6 +410,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@subscription_submit')->name('store');
         });
 
+        Route::prefix('payment_subscription')->name('payment_subscription.')->group(function () {
+            Route::get('', 'Shippers\ShipperGlobalSettingsController@payment_subscription_index')->name('index');
+            Route::post('store', 'Shippers\ShipperGlobalSettingsController@payment_subscription_submit')->name('store');
+        });
 
     });
 	Route::prefix('consolidation')->name('consolidation.')->group(function () {
@@ -553,7 +575,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/add_territory', 'Admins\AdminDashboardController@add_territory')->name('add_territory');
         Route::get('active_today', 'Admins\AdminDashboardController@todayActiveAccountsList')->name('active.today');
         Route::post('active_today/ajax', 'Admins\AdminDashboardController@todayActiveAccountListAjax')->name('active.today.ajax');
-        
+        Route::get('kam_poc_ref_tag/info','Admins\AdminDashboardController@kam_poc_ref_tag_info')->name('kam_poc_ref_tag.info');
+        Route::post('kam_poc_ref_tag/remove','Admins\AdminDashboardController@kam_poc_ref_tag_remove')->name('kam_poc_ref_tag.remove');
+
         Route::get('duplicate/info','Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function(){
             Route::get('info','Admins\AdminDashboardController@payment_cycle_info')->name('info');
@@ -918,6 +942,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bookings/all','Admins\V2Pickup\V2AdminPickupsController@pending_all_bookings')->name('bookings.all');
             Route::post('bookings/received','Admins\V2Pickup\V2AdminPickupsController@pending_received_bookings')->name('bookings.received');
             Route::post('print', 'Admins\V2Pickup\V2AdminPickupsController@assigned_print')->name('print');
+            Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
+
         });
     // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
@@ -1263,6 +1289,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
             Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
+            Route::post('delete_lastimage', 'Admins\ReturnController@history_delete_lastimage')->name('delete_lastimage');
 
         });
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
@@ -2538,6 +2565,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@nsa_account_store')->name('store');
         });
 
+        Route::prefix('carrefour_account')->name('carrefour_account.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@carrefour_account_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@carrefour_account_store')->name('store');
+        });
+
         Route::prefix('restrict_cities_intercept')->name('restrict_cities_intercept.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@restrict_cities_intercept_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@restrict_cities_intercept_store')->name('store');
@@ -2820,6 +2852,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@last_mile_cron_store')->name('store');
         });
 
+		Route::prefix('dhl_sync_time')->name('dhl_sync_time.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@dhl_sync_time_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@dhl_sync_time_store')->name('store');
+        });
+
+		Route::prefix('international_automation_user')->name('international_automation_user.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@international_automation_user_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@international_automation_user_store')->name('store');
+        });
+
     });
 
 
@@ -3096,12 +3138,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+	Route::prefix('carrefour')->name('carrefour.')->group(function(){
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            Route::get('', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_index')->name('index');
+            Route::post('store', 'Admins\AdminNsaAccountShipmentController@carrefour_arrival_submit')->name('submit');
+        });
+    });
+
 	Route::prefix('leads')->name('leads.')->group(function(){
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
-        Route::post('lead_log', 'Admins\LeadManagementController@lead_log_details')->name('lead_log');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
@@ -3262,7 +3310,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('admin_otp')->name('admin_otp.')->group(function () {
         Route::get('', 'Admins\UserManagementController@admin_otp_index')->name('index');
         Route::get('list', 'Admins\UserManagementController@admin_otp_list')->name('list');
-    });    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
+    });
+    Route::prefix('incidence_monitoring')->name('incidence_monitoring.')->group(function (){
             Route::get('/','Admins\IncidenceMonitoringController@index')->name('index');
             Route::get('/list','Admins\IncidenceMonitoringController@list')->name('list');
             Route::post('/add','Admins\IncidenceMonitoringController@add')->name('add');

@@ -681,20 +681,6 @@ class DeliveryController extends Controller
     }
 
     public function create_delivery_note(Request $request){
-        $shipments = explode(',',$request->shipment_ids);
-        $open_box_ids = explode(',',$request->open_box_ids);
-        $notifications = explode(',',$request->notification_ids);
-        $rider_informations = explode(',',$request->rider_info_ids);
-        if(Notification::where('id', 40)->where('status', 1)->exists()){
-            $password = rand(10001,99999);
-        }else{
-            $password = NULL;
-        }
-        $order = false;
-        if($request->has('order_checkbox')){
-            $order = true;
-        }
-
         if($request->hub_id == ''){
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -706,31 +692,50 @@ class DeliveryController extends Controller
         if($request->selected_rider_id == ''){
             return redirect()->back()->with('error', 'Rider not selected!');
         }
-        $admin = Auth::id();
+
+        $shipments = explode(',',$request->shipment_ids);
+
+        if (count($shipments) == 0) {
+            return redirect()->back()->with('error', 'Shipments not entered!');
+        }
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55, 59);
 
-        $valid_shipments = array();
+        $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
 
-        $shipments_count = 0;
-        $total_cod_amount = 0;
-        foreach ($shipments as $shipment) {
-            if (!in_array($shipment, $valid_shipments)) {
-                $shipment_details = Shipment::find($shipment);
-                if($shipment_details) {
-                    if (in_array($shipment_details->shipper_status_id, $pending_status)) {
-                        $valid_shipments[] = $shipment;
-                        $shipments_count++;
+        $shipments_count = count($valid_shipments);
 
-                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                            $total_cod_amount += $shipment_details->amount;
-                        }
-                    }
-                }
-            }
-        }
-        $normal_rider = TRUE;
         if ($shipments_count != 0) {
+            $valid_shipments = $valid_shipments->toArray();
+
+            Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+
+            $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function($query) {
+                $query->where('booking_type_id', '!=', 4)
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '=', 4)
+                    ->where('charges_mode_id', '=', 2);
+                });
+            })->sum('amount');
+
+            $open_box_ids = explode(',',$request->open_box_ids);
+            $notifications = explode(',',$request->notification_ids);
+            $rider_informations = explode(',',$request->rider_info_ids);
+            if(Notification::where('id', 40)->where('status', 1)->exists()){
+                $password = rand(10001,99999);
+            }else{
+                $password = NULL;
+            }
+            $order = false;
+            if($request->has('order_checkbox')){
+                $order = true;
+            }
+
+
+            $admin = Auth::id();
+
+            $normal_rider = TRUE;
+
             $rider = Rider::find($request->selected_rider_id);
             if($rider->special_rider){
                 $note = DeliveryNote::create([
@@ -780,9 +785,6 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
-                    $shipment_data = Shipment::find($shipment);
-                    $shipment_data->shipper_status_id = 5;
-                    $shipment_data->consignee_status_id = 5;
                     if(in_array($shipment, $open_box_ids)){
                         $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
                         if($shipment_detail){
@@ -790,12 +792,12 @@ class DeliveryController extends Controller
                             $shipment_detail->save();
                         }
 
+                        $shipment_data = Shipment::find($shipment);
                         $shipment_data->open_box = 1;
+                        $shipment_data->save();
+
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
                     }
-                    $shipment_data->save();
-
-                    // Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
 
                     $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
@@ -875,8 +877,17 @@ class DeliveryController extends Controller
     public function delivery_note_receive_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),20);
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        return view('admin.delivery.receive.index')->with(['riders' => $riders]);
+        $routes = Route::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.delivery.receive.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function receive_deliveries_list(Request $request)
@@ -2757,6 +2768,7 @@ class DeliveryController extends Controller
         $shipments = explode(',', $request->shipment_ids);
         $invalid_reason_shipments = array();
 //        $shipments = $request->shipment_ids;
+        $lost_shipments_array = array();
         if(count($shipments)  == $delivery_note->shipments_count){
             if($delivery_note) {
 
@@ -3089,6 +3101,9 @@ class DeliveryController extends Controller
                                             }
                                             else{
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                                if($shipper_status_details->shipper_status_id == 18){
+                                                   $lost_shipments_array[] = $shipment;
+                                                }
                                             }
                                         }
                                     }
@@ -3263,6 +3278,10 @@ class DeliveryController extends Controller
                     if($delivery_note->updated_by == NULL){
                         $delivery_note->updated_by = Auth::id();
                         $delivery_note->save();
+                    }
+
+                    if(count($lost_shipments_array) > 0){
+                        NotificationsController::send(150, $lost_shipments_array);
                     }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
@@ -6988,15 +7007,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             if($rider){
                 $otp = mt_rand(100000, 999999);
                 $rider->delivery_note_otp = $otp;
+                $rider->otp_date = Carbon::now();
                 $rider->save();
                 NotificationsController::send(144, $rider, $otp);
                 return response()->json(['status' => 1]);
-
             }
             else{
                 return response()->json(['status' => 0, 'error' => 'Rider not found!']);
             }
-
         }
         return response()->json(['status' => 1]);
     }

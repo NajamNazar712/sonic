@@ -35,6 +35,7 @@ use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
@@ -1780,7 +1781,7 @@ class ReturnController extends Controller
                             $shipment->consignee_status_id = 23;
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-                        }else
+                        }else{
                             if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                                 ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
@@ -1812,7 +1813,19 @@ class ReturnController extends Controller
                                 $shipment->save();
                                 ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
                             }
-
+                        }
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
+                        if($return_sheet->exists()){
+                            $return_sheet = $return_sheet->first();
+                            $return_sheet->return_note_id = $note->id;
+                        }
+                        else{
+                            $return_sheet = new ReturnSheet();
+                            $return_sheet->user_id = $shipment->user_id;
+                            $return_sheet->shipment_id = $shipment->id;
+                            $return_sheet->return_note_id = $note->id;
+                        }
+                        $return_sheet->save();
 
                     }
                 }
@@ -3817,8 +3830,49 @@ class ReturnController extends Controller
             }
             return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
         }else{
-            ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
-            return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            if ($return_user_id == 'undefined') {
+                ReturnNoteImage::where('id', $return_note_image_id)->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            }
+            else
+            {
+                ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);    
+            }
+        }
+        return response()->json(['status' => 1, 'error' => 'Image not found!']);
+    }
+
+    public function history_delete_lastimage(Request $request){
+        $return_note_id = $request->return_note_id;
+        $return_note_image_id = $request->return_note_image_id;
+        $return_user_id = $request->user_id;
+        $return_note = ReturnNote::find($return_note_id);
+        if($return_note_image_id == 0){
+            if($return_note){
+                $return_note->image = NULL;
+                // $return_note->updated_by = Auth::id();
+                // $return_note->status = 3;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted and status updated successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
+        }else{
+            if ($return_user_id == 'undefined') {
+                ReturnNoteImage::where('id', $return_note_image_id)->delete();
+                $return_note->updated_by = Auth::id();
+                $return_note->status = 3;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted and status updated successfully!']);
+            }
+            else
+            {
+                ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
+                $return_note->updated_by = Auth::id();
+                $return_note->status = 3;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted and status updated successfully!']);    
+            }
         }
         return response()->json(['status' => 1, 'error' => 'Image not found!']);
     }

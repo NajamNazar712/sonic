@@ -42,8 +42,14 @@ class DHLInternationalShipmentSyncController extends Controller
         $this->middleware('auth:admin');
 
         $this->middleware('Permission');
-    }
 
+        $settings = GlobalSettings::where('type', 'dhl_user_id');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $this->admin_id = $settings->setting_value;
+        }
+
+    }
 
 
     static public function dhl_tracking(){

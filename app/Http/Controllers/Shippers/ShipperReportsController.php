@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -723,7 +724,10 @@ class ShipperReportsController extends Controller
     }
 
     public function daraz_mis_index(){
-        return view('client.reports.daraz_mis');
+        // $sister_accounts = User::whereIn('id',session('sister_users'))->select('id', 'name')->get(); 
+        $sister_accounts = DB::connection('reports')->table('merged_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'merged_sister_account_mappings.sister_user_id')->where('head_user_id', session('user_id'))->select('u.id', 'u.name')->get();
+        
+        return view('client.reports.daraz_mis',compact('sister_accounts'));
 
     }
 
@@ -754,7 +758,7 @@ class ShipperReportsController extends Controller
         })
         ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
 
-        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id')
+        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id')
         ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
         $sales = $sales->where(function ($query) {
@@ -776,6 +780,16 @@ class ShipperReportsController extends Controller
             }
 
         })
+        ->addColumn('last_reason', function($sales) {
+            $last_reason = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('status_reason_id')->get()->last();
+                if($last_reason){
+                    return $last_reason->shipment_status_reason->name;
+                }else{
+                    return '-';
+                }
+                // ($rider_status->remarks) ? $rider_status->remarks : '-'
+
+        })
         ->addColumn('attempts', function($sales) {
             $reattempt_count = ShipmentsJourney::where('shipment_id', $sales->shipment_id)
                 ->where('shipper_status_id','=',5)
@@ -783,7 +797,11 @@ class ShipperReportsController extends Controller
                 ->select(DB::raw('count(shipment_id) as reattempts'))
                 ->get()->first();
                 if($reattempt_count){
-                    return $reattempt_count->reattempts;
+                    if($reattempt_count->reattempts-1 == -1){
+                        return 0;
+                    }else{
+                        return $reattempt_count->reattempts-1;
+                    }
                 }else{
                     return '-';
                 }
@@ -791,6 +809,13 @@ class ShipperReportsController extends Controller
         ->addColumn('tracking_number_link', function ($sales) {
             $route = route('cod.tracking.index');
             return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
+        })
+        ->editColumn('shipper_name', function ($sales) {
+            if($sales->shipper_id == 7306){
+                return '-';
+            }else{
+                return $sales->shipper_name;
+            }
         });
 
         // if($tracking = $request->get('search_tracking')){
@@ -800,7 +825,10 @@ class ShipperReportsController extends Controller
             $tracking_numbers = explode(',', $tracking);
             $datatable->whereIn('shipments.tracking_number', $tracking_numbers);
         }
-
+        if($search_user = $request->get('search_user')){
+            $datatable->where('shipments.user_id', $search_user);
+        }
+        
         if($origin = $request->get('search_origin')){
             $datatable->where('oc.id', '=', $origin);
         }
