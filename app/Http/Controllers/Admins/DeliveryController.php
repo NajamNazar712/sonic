@@ -83,6 +83,8 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
 use App\Http\Models\ShipmentDetail;
 
@@ -862,6 +864,35 @@ class DeliveryController extends Controller
                 }
                 NotificationsController::send(40, $note->id);
             }
+
+            //rider attendance
+            $attendance_datetime = Carbon::now()->format('Y-m-d H:i:s');
+            $attendance_date = Carbon::now()->format('Y-m-d');
+            $attendance_time = Carbon::now()->format('H:i:s');
+
+            $rider_attendance = EmployeeAttendance::where('employee_id', $rider->id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 2);
+            if (!$rider_attendance->exists()) {
+                $rider_attendance = new EmployeeAttendance();
+                $rider_attendance->employee_id = $rider->id;
+                $rider_attendance->employee_type = 2;
+                $rider_attendance->attendance_date = $attendance_date;
+                $rider_attendance->clock_in = $attendance_time;
+                // $rider_attendance->clock_in_latitude = $request->latitude;
+                // $rider_attendance->clock_in_longitude = $request->longitude;
+                $rider_attendance->save();
+                
+                $rider_attendance_action = new EmployeeAttendanceActionLog();
+                $rider_attendance_action->employee_id = $rider->id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = 1;
+                $rider_attendance_action->action_date = $attendance_datetime;
+                // $rider_attendance_action->latitude = $request->latitude;
+                // $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->save();
+            }
+
 
             return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
         }
