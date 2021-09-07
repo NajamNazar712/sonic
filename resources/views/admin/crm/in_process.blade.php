@@ -301,6 +301,7 @@
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
+                            head.push('Tagged At');
                             head.push('Launched Date');
                             head.push('Complaint Re-Open Date');
                             head.push('Agent Assigned Date');
@@ -336,6 +337,7 @@
                                 row.push(values.added_by);
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
+                                row.push(values.tagged_date);
                                 row.push(values.created_at);
                                 row.push(values.reopen_date);
                                 row.push(values.agent_assigned_date);
