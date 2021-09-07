@@ -55,11 +55,13 @@ use Carbon\Carbon;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
 use SnappyPDF;
 use Validator;
+
 
 class APIController extends Controller
 {
@@ -4039,5 +4041,9 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Tracking Number not found!']);
             }
         }
+    }
+
+    public function test(Request $request){
+        Log::info($request);
     }
 }
