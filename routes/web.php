@@ -1624,6 +1624,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('email', 'Admins\AdminUserRequestController@user_email')->name('email');
             Route::get('trax_id', 'Admins\AdminUserRequestController@user_trax_id')->name('trax_id');
             Route::post('assign_hubs', 'Admins\AdminUserRequestController@user_assign_hub')->name('assign_hubs');
+            Route::get('cnic', 'Admins\AdminUserRequestController@user_cnic')->name('cnic');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\AdminUserRequestController@user_request_add_index')->name('index');
