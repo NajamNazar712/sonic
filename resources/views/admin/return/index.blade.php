@@ -40,6 +40,7 @@
 
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
@@ -404,6 +405,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Vendor');
                             head.push('Tracking No.');
                             head.push('Order ID');
                             head.push('Shipper Name');
@@ -437,6 +439,7 @@
 
 
                                 row.push(index + 1);
+                                row.push(values.vendor_name);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
@@ -805,6 +808,7 @@
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
