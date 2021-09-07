@@ -4042,8 +4042,4 @@ class APIController extends Controller
             }
         }
     }
-
-    public function test(Request $request){
-        Log::info($request);
-    }
 }
