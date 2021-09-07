@@ -136,8 +136,52 @@
                                     </div>
                                 </form>
                             </section>
+
+
                         </div>
-                    </div></div>
+                    </div>
+                </div>
+                @if(count($log_history) > 0)
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h3>Lead Logs</h3>
+                            <div class="table-responsive">
+                                <table class="table mb-0">
+                                    <thead>
+                                    <tr class="border-bottom-active border-custom-color">
+                                        <th>S No.</th>
+                                        <th>Lead ID</th>
+                                        <th>Contact Person</th>
+                                        <th>Phone</th>
+                                        <th>Sales Person</th>
+                                        <th>Reference Person</th>
+                                        <th>Lead Status</th>
+                                        <th>Updated By</th>
+                                        <th>Updated At</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach($log_history as $index => $history)
+                                        @php $index++; @endphp
+                                        <tr class="border-bottom-success border-custom-color">
+                                            <td>{{$index}}</td>
+                                            <td>{{$history['lead_id']}}</td>
+                                            <td>{{$history['contact_person']}}</td>
+                                            <td>{{$history['phone_number']}}</td>
+                                            <td>{{$history['sales_person']}}</td>
+                                            <td>{{$history['reference_person']}}</td>
+                                            <td>{{$history['status']}}</td>
+                                            <td>{{$history['updated_by']}}</td>
+                                            <td>{{$history['updated_at']}}</td>
+                                        </tr>
+                                    @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

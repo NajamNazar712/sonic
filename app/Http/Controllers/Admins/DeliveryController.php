@@ -877,8 +877,17 @@ class DeliveryController extends Controller
     public function delivery_note_receive_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),20);
-        $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        return view('admin.delivery.receive.index')->with(['riders' => $riders]);
+        $routes = Route::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.delivery.receive.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
     }
 
     public function receive_deliveries_list(Request $request)
@@ -2759,6 +2768,7 @@ class DeliveryController extends Controller
         $shipments = explode(',', $request->shipment_ids);
         $invalid_reason_shipments = array();
 //        $shipments = $request->shipment_ids;
+        $lost_shipments_array = array();
         if(count($shipments)  == $delivery_note->shipments_count){
             if($delivery_note) {
 
@@ -3091,6 +3101,9 @@ class DeliveryController extends Controller
                                             }
                                             else{
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, ($request->has($reasonId) ? $status_reason_id : null), $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
+                                                if($shipper_status_details->shipper_status_id == 18){
+                                                   $lost_shipments_array[] = $shipment;
+                                                }
                                             }
                                         }
                                     }
@@ -3265,6 +3278,10 @@ class DeliveryController extends Controller
                     if($delivery_note->updated_by == NULL){
                         $delivery_note->updated_by = Auth::id();
                         $delivery_note->save();
+                    }
+
+                    if(count($lost_shipments_array) > 0){
+                        NotificationsController::send(150, $lost_shipments_array);
                     }
                     if(count($invalid_reason_shipments) > 0){
                         $invalid_shipments = implode(", ", $invalid_reason_shipments);
@@ -6990,15 +7007,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             if($rider){
                 $otp = mt_rand(100000, 999999);
                 $rider->delivery_note_otp = $otp;
+                $rider->otp_date = Carbon::now();
                 $rider->save();
                 NotificationsController::send(144, $rider, $otp);
                 return response()->json(['status' => 1]);
-
             }
             else{
                 return response()->json(['status' => 0, 'error' => 'Rider not found!']);
             }
-
         }
         return response()->json(['status' => 1]);
     }

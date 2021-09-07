@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Webhook\PaymentStatusWebhookController;
 use App\http\Models\RetailShipmentsPaymentJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -25,5 +26,6 @@ class ShipmentsPaymentJourneyController extends Controller
 		$shipment_payment_journey->payment_id = $done_payment_id;
 
 		$shipment_payment_journey->save();
+		PaymentStatusWebhookController::webhook_subscription($shipment_id, $status_id,$done_payment_id);
     }
 }

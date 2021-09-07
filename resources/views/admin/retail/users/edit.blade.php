@@ -1,31 +1,46 @@
 <form id="edit_user_form" class="form-horizontal mb-1 justify-content-center" method="POST" action="{{ route('admin.retail.users.update',['id'=>$retail_user->id]) }}" novalidate="novalidate">
     {{ method_field('PUT') }}
     {{ csrf_field()  }}
-    @if ($retail_user->category==1)
+
     <div class="form-group">
-        <select name="store" id="edit_store" disabled class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
-            <option value="1" selected>Franchise</option>
+        <select name="store" id="edit_store"  class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+            @if ($retail_user->category==1)
+                <option value="1" selected>Franchise</option>
+                <option value="2" >Trax Center</option>
+            @else
+                <option value="1">Franchise</option>
+                <option value="2" selected>Trax Center</option>
+            @endif
         </select>
     </div>
+
+
     <div class="form-group" id="franchise_div">
-        <select name="franchise" id="edit_franchise" disabled class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
-            
-                <option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>
-            
+        <select name="franchise" id="edit_franchise"  class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                {{--<option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>--}}
+            @foreach($franchises as $franchise)
+                <option value="{{$franchise->id}}"> {{$franchise->name}} </option>
+            @endforeach
         </select>
     </div>
-    @else
-    <div class="form-group">
-        <select name="store" id="edit_store" disabled class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
-            <option value="2" selected>Trax Center</option>
+
+    <div class="form-group" id="trax_center_div">
+        <select name="trax_center" id="edit_trax_center" class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
+         {{--   <option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>--}}
+            @foreach($trax_centers as $trax_center)
+                <option value="{{$trax_center->id}}"> {{$trax_center->name}} </option>
+            @endforeach
         </select>
     </div>
-    <div class="form-group" id="franchise_div">
-        <select name="trax_center" id="edit_trax_center" disabled class="form-control select2" data-rule-required="true" data-msg-required="Trax Center is required">
-                <option value="{{$retail_user->store->id}}"> {{$retail_user->store->name}} </option>
-        </select>
-    </div>
-    @endif
+
+
+        {{--  <div class="form-group">
+             <select name="store" id="edit_store"  class="form-control select2" data-rule-required="true" data-msg-required="Franchise is required">
+                 <option value="2" selected>Trax Center</option>
+             </select>
+         </div>
+
+         @endif--}}
     
    
    
@@ -55,6 +70,8 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+
         $('#edit_eye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
             $("#edit_cnic").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
@@ -62,17 +79,45 @@
                 'mask': '9999-9999999',
                 'clearIncomplete': true
             });
+
+        $('#edit_franchise').select2({
+            width: '100%',
+            allowClear:true
+        });
+        $('#edit_trax_center').select2({
+            width: '100%',
+            allowClear:true
+        });
+
+
+            var store_id = @json($retail_user->store->id);
+
+             @if ($retail_user->category == 1)
+                $('#edit_user_form #trax_center_div').addClass('d-none');
+                $('#edit_franchise').val(store_id).trigger('change');
+
+             @else
+                 $('#edit_user_form #franchise_div').addClass('d-none');
+                 $('#edit_trax_center').val(store_id).trigger('change');
+
+             @endif
+
             $('#edit_store').select2({
                 width: '100%',
-                allowClear:true
-            });
-            $('#edit_franchise').select2({
-                width: '100%',
-                allowClear:true
-            });
-            $('#edit_trax_center').select2({
-                width: '100%',
-                allowClear:true
+
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if (id == 1) {
+                    $('#edit_user_form  #trax_center_div').addClass('d-none');
+                    $('#edit_user_form  #franchise_div').removeClass('d-none');
+
+                } else if (id == 2) {
+                    $('#edit_user_form  #trax_center_div').removeClass('d-none');
+                    $('#edit_user_form  #franchise_div').addClass('d-none');
+                } else {
+                    $('#edit_user_form  #trax_center_div').addClass('d-none');
+                    $('#edit_user_form  #franchise_div').addClass('d-none');
+                }
             });
 
             $('#edit_user_form').validate({

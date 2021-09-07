@@ -21,6 +21,7 @@ use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
@@ -5839,6 +5840,10 @@ class AdminReportsController extends Controller
                     ->where('crth.id','=',
                         DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
             })
+            ->leftjoin('crm_request_status_histories as crsh', function($join){
+                $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
+                    ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
+            })
             ->leftjoin('admins as crta', 'crta.id', '=', 'crt.tagged_id')
             ->leftjoin('admin_departments as crtad', 'crtad.id', '=', 'crt.tagged_id')
             ->leftjoin('cities as crtadh', 'crtadh.id', '=', 'crt.hub_id')
@@ -5855,7 +5860,7 @@ class AdminReportsController extends Controller
                     ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id AND crm_comments.comment_type = 1)')) ;
             })
             ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
-            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin')
+            ->select('crm_requests.id as request_number', 's.tracking_number as tracking_number','crsh.created_at as reopen_date','crcn.name as case_nature','crcnt.type as case_nature_type', 'crm_requests.description as description', 'u.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'crc.channel as channel', 'a.name as agent', 'al.name as name', 'us.name as shipper', 'su.name as sub_shipper', 'crm_requests.launched_by as launched_by_type', 'crm_requests.created_at as launched_date', 'crah.created_at as assigned_date', 'crshv.created_at as valid_date', 'crshiv.created_at as invalid_date', 'crshr.created_at as resolved_date', 'crshc.created_at as closed_date', 'crm_requests.status_id as current_status_id', 'crs.name as request_status', 'sj.created_at as arrival_date', 'ss.name as status', 'crta.name as tagged_to_admin', 'crtad.name as tagged_to_department', 'crtadh.name as tagged_to_hub', 'crt.crm_request_tagging_type_id as tagging_type', 'crth.created_at as tagged_at', 'z.name as zone','s.amount as cod_amount','adjustment.adjustment_amount as adjusted_amount','change_shipment_weight_logs.new_charges as weight_charges', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin')
             ->groupBy('crm_requests.id');
 
         $datatable = Datatables::of($crm)
@@ -6839,6 +6844,12 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
+
+            if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+                $from = $request->get('search_update_date_from');
+                $to = $request->get('search_update_date_to');
+                $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+            }
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
@@ -8172,9 +8183,10 @@ class AdminReportsController extends Controller
     public function last_mile_app_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),227);
         $riders = Rider::where('status', 1)->get();
+        $riders_cat = OperationRidersCategory::all();
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $hubs = City::where('status', 1)->where('hub', 1)->where('business_category_id', 1)->get();
-        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones]);
+        return view('admin.reports.last_mile_app')->with(['riders' => $riders, 'hubs' => $hubs, 'zones' => $zones,'riders_cat' => $riders_cat]);
     }
     public function last_mile_app_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -8186,7 +8198,8 @@ class AdminReportsController extends Controller
             ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
             ->join('zones as z','z.id','=','c.zone_id')
             ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->select('delivery_notes.id as delivery_note_id','z.name as zone', 'delivery_notes.created_at as created_at', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
+            ->join('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
+            ->select('delivery_notes.id as delivery_note_id','z.name as zone', 'delivery_notes.created_at as created_at', 'rd.name as rider_cat','r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`') , DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
             ->whereDate('delivery_notes.created_at', '>', $date);
 
 
@@ -8233,6 +8246,9 @@ class AdminReportsController extends Controller
 
         if ($search_rider = $request->get('search_rider')) {
             $datatable->where('r.id', $search_rider);
+        }
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $datatable->where('r.operation_rider_id', $search_rider_cat);
         }
         if ($search_zone = $request->get('search_zone')) {
             $datatable->where('c.zone_id', $search_zone);
