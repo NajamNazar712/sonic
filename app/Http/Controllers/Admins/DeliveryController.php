@@ -7005,6 +7005,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             if($rider){
                 $otp = mt_rand(100000, 999999);
                 $rider->delivery_note_otp = $otp;
+                $rider->otp_date = Carbon::now();
                 $rider->save();
                 NotificationsController::send(144, $rider, $otp);
                 return response()->json(['status' => 1]);
