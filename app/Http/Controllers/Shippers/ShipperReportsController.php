@@ -808,15 +808,20 @@ class ShipperReportsController extends Controller
         })
         ->addColumn('return_attempts', function($shipment) {
             $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
-                ->where('shipper_status_id','=',20)
+                ->where('shipper_status_id','=',23)
                 ->where('verification','=',1)
                 ->select(DB::raw('count(shipment_id) as return_attempts'))
                 ->get()->first();
                 if($reattempt_count){
-                    return $reattempt_count->return_attempts;
+                    if($reattempt_count->reattempts-1 == -1){
+                        return 0;
+                    }else{
+                        return $reattempt_count->reattempts-1;
+                    }
                 }else{
                     return '-';
                 }
+                
         })
         ->addColumn('tracking_number_link', function ($shipment) {
             $route = route('cod.tracking.index');
