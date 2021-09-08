@@ -646,7 +646,7 @@
                     },
                 'reset'],
                 select: {
-                    info: false,
+                    info: true,
                     style: 'multi',
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
