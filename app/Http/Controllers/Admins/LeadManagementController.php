@@ -73,7 +73,7 @@ class LeadManagementController extends Controller
                         $last_date = Carbon::parse($last_log->created_at);
                         $dead_days = $dead_days + $last_date->diffInDays($ratio_lead->requested_date);
                     }
-                    $dead_days++;
+                    $dead_count++;
                 }
                 if(in_array($ratio_lead->status_id, [12])){
                     $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [12])->orderBy('id', 'DESC');
@@ -82,11 +82,11 @@ class LeadManagementController extends Controller
                         $last_date = Carbon::parse($last_log->created_at);
                         $active_days = $active_days + $last_date->diffInDays($ratio_lead->requested_date);
                     }
-                    $active_days++;
+                    $active_count++;
                 }
             }
             if($dead_count > 0){
-                $leads['dead_leads_ratio'] = round($active_days/$dead_count, 2);
+                $leads['dead_leads_ratio'] = round($dead_days/$dead_count, 2);
             }
             else{
                 $leads['dead_leads_ratio'] = 0;
