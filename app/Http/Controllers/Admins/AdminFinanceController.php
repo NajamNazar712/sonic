@@ -6994,6 +6994,8 @@ class AdminFinanceController extends Controller
                 $origin_wise_print_button = '<button type="button" class="dropdown-item print_origin_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Origin Wise Print</div></button>';
                 $gst_wise_print_button = '<button type="button" class="dropdown-item print_gst_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">GST Wise Print</div></button>';
 
+                $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $invoice->id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
+
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -7013,6 +7015,9 @@ class AdminFinanceController extends Controller
                 $dropdown .= $origin_wise_print_button;
                 $dropdown .= $gst_wise_print_button;
 
+                if ((session('role_id') == 1 || in_array(589, session('permissions'))) && $invoice->status_id == 1) {
+                    $dropdown .= $email_reminder_button;
+                }
                 $dropdown .= '
                 </div>
               </div>
