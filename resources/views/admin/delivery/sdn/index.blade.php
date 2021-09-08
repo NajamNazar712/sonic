@@ -987,7 +987,6 @@
                                 },
                                 initComplete: function() {
 
-                                    // this.api().table().columns.adjust();
                                 }
                             });
 

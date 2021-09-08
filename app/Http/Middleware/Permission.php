@@ -374,6 +374,9 @@ class Permission
             'finance.outstanding_shipments.walk_in_list' => 167,
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
+
+            'finance.invoices.slip' => 589,
+
             'finance.make_payments_pickup_wise.index' => 396,
             'finance.retail.make_payments.index' => 454,
             'finance.retail.make_payments.list' => 454,
