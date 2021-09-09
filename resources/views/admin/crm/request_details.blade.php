@@ -97,6 +97,7 @@
                                                 <th scope="row">Case Nature</th>
                                                 <td class="name">
                                                     <h5 class="mb-0">{{$crm_details->nature->name}}</h5>
+                                                   
                                                 </td>
                                             </tr>
                                             @if(!empty($crm_details->case_nature_type_id))
@@ -104,6 +105,14 @@
                                                 <th scope="row">Case Nature Type</th>
                                                 <td class="name">
                                                         <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
+                                                </td>
+                                            </tr>
+                                            @endif
+                                            @if(!empty($crm_historiescount))
+                                            <tr>
+                                                <th scope="row">Case Nature History</th>
+                                                <td class="name">
+                                                    <h5 class="mb-0"><u><a id="ceditRequestModal" data-toggle="modal" data-target="#myModal">{{$crm_historiescount}}</a></u></h5>
                                                 </td>
                                             </tr>
                                             @endif
@@ -755,6 +764,47 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
                         <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade text-left" id="myModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRequestModal"
+             aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary white">
+                        <h4 class="modal-title white">Case Nature History</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <table class="table table-bordered" id="crm_image_view_table" style="z-index: 3;">
+                            <thead>
+                            <tr role="row" class="bg-primary white">
+    
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Case Nature</th>
+                                <th class="border-primary border-darken-1">Case Nature Type</th>
+    
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-bottom-success border-custom-color">
+                                    <td><b>1</b></td>
+                                    <td><b>{{$crm_details->nature->name}}</b></td>
+                                    <td><b>{{$crm_details->nature_type->type}}</b></td>
+                                </tr>
+                                @foreach($crm_histories as $index => $history)
+                                    @php $index=$index+2; @endphp
+                                    <tr class="border-bottom-success border-custom-color">
+                                        <td>{{$index}}</td>
+                                        <td>{{$history->casenature}}</td>
+                                        <td>{{$history->casenaturetype}}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
