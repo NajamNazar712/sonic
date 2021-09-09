@@ -3089,7 +3089,7 @@ class AdminAPIController extends Controller
         if($admins){
             $response = array();
             $employee_shift = EmployeeShift::where('id', $admins->shift_id);
-            $response["shift_status"] = 0;
+            $response["status"] = 0;
             if ($employee_shift->exists()){
                 $employee_shift = $employee_shift->first();
                 $response["shift_name"] = $employee_shift->name;
@@ -3103,7 +3103,7 @@ class AdminAPIController extends Controller
             }
             return response()->json($response);
         }
-        return response()->json(['status' => 1, 'message' => 'Failed']);
+        return response()->json(['status' => 1]);
     }
 
 
