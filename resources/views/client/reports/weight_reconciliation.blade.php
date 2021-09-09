@@ -14,23 +14,15 @@
 
                 <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                     <div class="col-3 mb-1">
-                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        <input type="text" class="form-control tracking_numbers" name="tracking_numbers" id="tracking_numbers" placeholder="Search Tracking Number">
+                        {{-- <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required"> --}}
                     </div>
                   
                     <div class="col-3 mb-1">
                         <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-3 mb-1">
-                        <fieldset class="form-group">
-                            <select name="search_zone" id="search_zone" class="form-control select2">
-                                @foreach($zones as $zone)
-                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                @foreach($shipping_modes as $mode)
+                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -83,7 +75,7 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
                         <th class="border-primary border-darken-1">Arrival Weight (B)</th>
-                        <th class="border-primary border-darken-1">Difference (A-B)</th>
+                        <th class="border-primary border-darken-1">Difference (B-A)</th>
                         <th class="border-primary border-darken-1">Actual Weight Charges</th>
                         <th class="border-primary border-darken-1">Weighted As</th>
                     </tr>
@@ -157,6 +149,11 @@
             width: auto !important;
             text-align: left;
         }
+
+        .tracking_numbers{
+            width: 100% !important;
+            text-align: left !important;
+        }
     </style>
 @endsection
 
@@ -175,43 +172,53 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var select = $('.tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
+            // var select = $('.tracking_numbers').selectize({
+            //     placeholder: 'Tracking Number(s)',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
 
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function(input) {
-                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                },
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     },
+            // });
+            
+            $('#tracking_numbers').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
             });
             
-            $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_form #search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Select Hub',
+                placeholder: 'Select Shipping Mode*',
             });
-            $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Zone',
-            });
+            // $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '100%',
+            //     placeholder: 'Select Hub',
+            // });
+            // $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '100%',
+            //     placeholder: 'Select Zone',
+            // });
             $('#search_form #weighted_as').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Weighted As',
@@ -294,7 +301,7 @@
                             head.push('Arrival Date');
                             head.push('Weight Input by Shipper (A)');
                             head.push('Arrival Weight (B)');
-                            head.push('Difference (A-B)');
+                            head.push('Difference (B-A)');
                             head.push('Actual Weight Charges');
                             
                             head.push('Weighted As');

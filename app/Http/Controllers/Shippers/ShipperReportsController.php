@@ -11,6 +11,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -859,9 +860,11 @@ class ShipperReportsController extends Controller
 
     public function weight_reconciliation_index()
     {
-        $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
-        $zones = Zone::where('status', 1)->get(['id', 'name']);
-        return view('client.reports.weight_reconciliation')->with(['hubs' => $hubs, 'zones' => $zones]);
+        $shipping_modes = ShippingMode::all();
+
+        // $hubs = City::where('status', 1)->where('hub', 1)->get(['id', 'name']);
+        // $zones = Zone::where('status', 1)->get(['id', 'name']);
+        return view('client.reports.weight_reconciliation')->with(['shipping_modes' => $shipping_modes]);
     }
 
     public function weight_reconciliation_list(Request $request)
@@ -894,7 +897,7 @@ class ShipperReportsController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipment->tracking_number' class='tracking' target='_blank'>$shipment->tracking_number</a></u>";
             })
             ->addColumn('difference', function ($shipment) {
-                $difference = round($shipment->estimated_weight - $shipment->actual_weight, 2);
+                $difference = round($shipment->actual_weight - $shipment->estimated_weight, 2);
                 return $difference;
             })
             ->addColumn('weighted_as', function ($shipment) {
@@ -905,8 +908,14 @@ class ShipperReportsController extends Controller
                 }
             });
        
+        // if ($tracking_numbers = $request->get('tracking_numbers')) {
+        //     $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        // }
+        if ($search_shipping_mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', $search_shipping_mode);
+        }
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            $datatable->where('shipments.tracking_number', '=', $tracking_numbers);
         }
         if ($hub = $request->get('search_hub')) {
             $datatable->where('dc.hub_id', $hub);
