@@ -6,14 +6,20 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\HR\Employee;
+use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider;
+use Carbon\Carbon;
+use Cassandra\Session;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
 use DB;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\VarDumper\Cloner\Data;
 use Yajra\Datatables\Datatables;
 
 class AdminAttendanceController extends Controller
@@ -190,5 +196,160 @@ class AdminAttendanceController extends Controller
 
         return $datatable->make(true);
     }
+
+    private function distance($origin, $destination)
+    {
+        return $this->vincenty_distance($origin, $destination);
+    }
+
+    private function vincenty_distance($origin, $destination)
+    {
+        $earth_radius = 6371;
+
+        list($origin_latitude, $origin_longitude) = explode(',', $origin);
+        list($destination_latitude, $destination_longitude) = explode(',', $destination);
+
+        $origin_latitude = deg2rad($origin_latitude);
+        $origin_longitude = deg2rad($origin_longitude);
+        $destination_latitude = deg2rad($destination_latitude);
+        $destination_longitude = deg2rad($destination_longitude);
+
+        $longitude_delta = $destination_longitude - $origin_longitude;
+
+        $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
+
+        return $distance;
+    }
+
+    public function mark_attendance_index(){
+
+        $today_date = Carbon::today()->toDateString();
+        $attendance_clock_in = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_in')->latest()->first();
+        $attendance_clock_out = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_out')->latest()->first();
+        $clock_in = 0;
+        $clock_out = 0;
+        if($attendance_clock_in){
+            $clock_in = 1;
+        }
+        if($attendance_clock_out){
+            $clock_out = 1;
+        }
+        return view('admin.attendance.mark_index',compact('clock_in','clock_out'));
+    }
+
+    public function mark_attendance_submit(Request $request){
+
+        $date_time = Carbon::now();
+        $time = $date_time->toTimeString();
+        $date = Carbon::today()->toDateString();
+        $employee_type = 0;
+        $auth_id = Auth::id();
+        $admin = Admin::where('id',$auth_id);
+        if($admin->exists()){
+            $employee_type = 1;
+        }
+        else{
+            $employee_type = 2;
+        }
+        if(session('latitude') && session('longitude')){
+
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('admins as a', 'e.id', 'a.employee_id')
+                ->where('a.id', $auth_id);
+            
+            if($reporting_location->exists()){
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
+
+             if($request->clock_in == 1){
+                $employee_attendance = EmployeeAttendance::where('employee_id',$auth_id)->where('attendance_date',$date)->whereNull('clock_out')->latest();
+                if($employee_attendance->exists()){
+                    $attendance = $employee_attendance->first();
+                    $attendance->clock_out = $time;
+                    $attendance->clock_out_latitude = session('latitude');
+                    $attendance->clock_out_longitude = session('longitude');
+                    $attendance->updated_at = Carbon::now();
+                    $attendance->employee_type = $employee_type;
+                    $attendance->clock_out_location = $location_status;
+                    $attendance->save();
+
+                    $attendance_action_log = new EmployeeAttendanceActionLog();
+                    $attendance_action_log->employee_id = $attendance->employee_id;
+                    $attendance_action_log->employee_type = $employee_type;
+                    $attendance_action_log->action_id = 2;
+                    $attendance_action_log->action_date = $date;
+                    $attendance_action_log->latitude =  $attendance->clock_out_latitude;
+                    $attendance_action_log->longitude =  $attendance->clock_out_longitude;
+                    $attendance_action_log->created_at =  Carbon::now();
+                    $attendance_action_log->location_status = $location_status;
+                    $attendance_action_log->save();
+
+                    return response()->json(['status' => 2, 'success' => 'Clock Out Successful','time' => $time,'date' => $date]);
+                }
+            }
+             else{
+                 $attendance = new EmployeeAttendance();
+                 $attendance->employee_id = $auth_id;
+                 $attendance->attendance_date = $date ;
+                 $attendance->clock_in = $time;
+                 $attendance->clock_in_latitude = session('latitude');
+                 $attendance->clock_in_longitude = session('longitude');
+                 $attendance->created_at = Carbon::now();
+                 $attendance->employee_type = $employee_type;
+                 $attendance->clock_in_location = $location_status;
+                 $attendance->save();
+
+                 $attendance_action_log = new EmployeeAttendanceActionLog();
+                 $attendance_action_log->employee_id = $attendance->employee_id;
+                 $attendance_action_log->employee_type = $employee_type;
+                 $attendance_action_log->action_id = 1;
+                 $attendance_action_log->action_date = $date;
+                 $attendance_action_log->latitude =  $attendance->clock_in_latitude;
+                 $attendance_action_log->longitude =  $attendance->clock_in_longitude;
+                 $attendance_action_log->created_at =  Carbon::now();
+                 $attendance_action_log->location_status = $location_status;
+                 $attendance_action_log->save();
+
+                 return response()->json(['status' => 1, 'success' => 'Clock In Successful','time' => $time,'date' => $date]);
+
+             }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Enable Your Location First']);
+        }
+
+    }
+
+    public function mark_attendance_list(){
+
+        $date = Carbon::today()->toDateString();
+        $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', Auth::id())
+            ->whereDate('action_date',$date)
+            ->where('employee_type', 1)
+            ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status')
+            ->orderBy('action_date', 'ASC');
+
+        $datatable = Datatables::of($admin_attendance_action)
+            ->editColumn('latitude',function($action){
+                $geolocation = $action->latitude.','.$action->longitude;
+                $request ='http://maps.googleapis.com/maps/api/geocode/json?latlng='.$geolocation.'';
+                //dd($request);
+                $json = json_decode( file_get_contents( $request ) );
+                dd($json);
+               return  $json;
+            });
+           return $datatable->make(true);
+    }
+
 
 }

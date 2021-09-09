@@ -863,6 +863,8 @@
                     @if (session('role_id') == 1 || in_array(567, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.airway_journey.index') }}">Airway Bill Print History</a></li>
                     @endif
+
+                    <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>
                 </ul>
             </li>
 

@@ -3221,6 +3221,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+        Route::get('/mark', 'Admins\Attendance\AdminAttendanceController@mark_attendance_index')->name('mark');
+        Route::post('/mark/submit', 'Admins\Attendance\AdminAttendanceController@mark_attendance_submit')->name('mark.submit');
+        Route::get('/mark/list', 'Admins\Attendance\AdminAttendanceController@mark_attendance_list')->name('mark.list');
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
@@ -3249,6 +3252,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('{id}/update', 'Admins\IncidenceMonitoringController@update')->name('update');
             
     });
+
 
 });
 
