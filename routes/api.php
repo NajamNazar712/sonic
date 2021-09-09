@@ -229,6 +229,7 @@ Route::name('api.')->group(function () {
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
+                Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');
                 Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');

@@ -26,6 +26,7 @@ use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -3080,5 +3081,31 @@ class AdminAPIController extends Controller
         $response['message'] = $message;
         return response()->json($response);
     }
+
+    public function employee_shift(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admins = Admin::find($admin_id);
+        if($admins){
+            $response = array();
+            $employee_shift = EmployeeShift::where('id', $admins->shift_id);
+            $response["shift_status"] = 0;
+            if ($employee_shift->exists()){
+                $employee_shift = $employee_shift->first();
+                $response["shift_name"] = $employee_shift->name;
+                $response["start_time"] = $employee_shift->start_time;
+                $response["end_time"] = $employee_shift->end_time;
+            }
+            else{
+                $response["shift_name"] = "default";
+                $response["start_time"] = NULL;
+                $response["end_time"] = NULL;
+            }
+            return response()->json($response);
+        }
+        return response()->json(['status' => 1, 'message' => 'Failed']);
+    }
+
+
 
 }
