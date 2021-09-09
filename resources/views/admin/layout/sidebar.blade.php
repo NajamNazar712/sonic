@@ -864,7 +864,7 @@
                         <li><a class="menu-item" href="{{ route('admin.airway_journey.index') }}">Airway Bill Print History</a></li>
                     @endif
 
-                    <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>
+                  {{--  <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>--}}
                 </ul>
             </li>
 
