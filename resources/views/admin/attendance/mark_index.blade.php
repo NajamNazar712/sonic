@@ -74,7 +74,7 @@
 
          var clock_in = @json($clock_in);
          var clock_out = @json($clock_out);
-         console.log(clock_in,clock_out);
+        
          if((clock_in == 0 && clock_out == 0 ) || (clock_in == 1 && clock_out == 1 ) ){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK IN</strong>');
@@ -83,50 +83,58 @@
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK OUT</strong>');
          }
-           $('#punch').on('click',function(){
-               $.ajax({
-                   url: '{!! route('admin.attendance.mark.submit') !!}',
-                   method: 'POST',
-                   data: {
-                       '_token': '{{ csrf_token() }}',
-                       'clock_in': clock_in,
-                       'clock_out' : clock_out
-                   }
-               })
-                   .done(function (data) {
 
-                     if(data.status == 0){
-                         toastr.error(data.error, 'Error!', {
-                             positionClass: 'toast-top-center',
-                             containerId: 'toast-top-center'
-                         });
-                     }
-                     else{
-                         table.draw();
-                         swal({
-                             title: data.success,
-                             text: data.date + data.time,
-                             icon: 'success',
-                             buttons: false,
-                             closeOnClickOutside: true,
-                             closeOnEsc: true
-                         });
-                         if(data.status == 1){
-                             $('.centered').html('');
-                             $('.centered').append('<strong>CLOCK OUT</strong>');
-                             clock_in = 1;
-                             clock_out = 0;
-                             
-                         }
-                         else if(data.status == 2){
-                             $('.centered').html('');
-                             $('.centered').append('<strong>CLOCK IN</strong>');
-                             clock_in = 0;
-                             clock_out = 0;
-                         }
-                     }
+         var flag = true;
 
-                   });
+         $('#punch').on('click',function(){
+             if(flag) {
+                 $.ajax({
+                     url: '{!! route('admin.attendance.mark.submit') !!}',
+                     method: 'POST',
+                     data: {
+                         '_token': '{{ csrf_token() }}',
+                         'clock_in': clock_in,
+                         'clock_out': clock_out
+                     }
+                 })
+                     .done(function (data) {
+
+                         if (data.status == 0) {
+                             toastr.error(data.error, 'Error!', {
+                                 positionClass: 'toast-top-center',
+                                 containerId: 'toast-top-center'
+                             });
+                         } else {
+                             table.draw();
+
+                             swal({
+                                 title: data.success,
+                                 text: data.date + '  ' + data.time,
+                                 icon: 'success',
+                                 buttons: false,
+                                 closeOnClickOutside: true,
+                                 closeOnEsc: true
+                             });
+                             if (data.status == 1) {
+                                 $('.centered').html('');
+                                 $('.centered').append('<strong>CLOCK OUT</strong>');
+                                 clock_in = 1;
+                                 clock_out = 0;
+
+                             } else if (data.status == 2) {
+                                 $('.centered').html('');
+                                 $('.centered').append('<strong>CLOCK IN</strong>');
+                                 clock_in = 0;
+                                 clock_out = 0;
+                             }
+                         }
+                     });
+                 
+                 flag = false;
+                 setTimeout(function () {
+                    flag = true;
+                 }, 30000);
+             }
            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -146,7 +154,7 @@
                 ajax: {
                     url: '{{ route('admin.attendance.mark.list') }}',
                 },
-              
+                order:['1','desc'],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

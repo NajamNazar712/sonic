@@ -222,11 +222,12 @@ class AdminAttendanceController extends Controller
     }
 
     public function mark_attendance_index(){
-        
+        $date = Carbon::now();
+        dd($date);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),432);
         $today_date = Carbon::today()->toDateString();
         $attendance_clock_in = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_in')->whereNull('clock_out')->latest()->first();
-        //$attendance_clock_out = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_out')->latest()->first();
-        $clock_in = 0;
+         $clock_in = 0;
         $clock_out = 0;
         if($attendance_clock_in){
             $clock_in = 1;
@@ -238,7 +239,7 @@ class AdminAttendanceController extends Controller
     }
 
     public function mark_attendance_submit(Request $request){
-
+        
         $date_time = Carbon::now();
         $time = $date_time->toTimeString();
         $date = Carbon::today()->toDateString();
@@ -271,8 +272,8 @@ class AdminAttendanceController extends Controller
                 }
             }
 
-             if($request->clock_in == 1){
-                $employee_attendance = EmployeeAttendance::where('employee_id',$auth_id)->where('attendance_date',$date)->whereNull('clock_out')->latest();
+             if($request->clock_in == 1 && $request->clock_out == 0){
+                $employee_attendance = EmployeeAttendance::where('employee_id',$auth_id)->where('attendance_date',$date)->latest();
                 if($employee_attendance->exists()){
                     $attendance = $employee_attendance->first();
                     $attendance->clock_out = $time;
@@ -297,6 +298,51 @@ class AdminAttendanceController extends Controller
                     return response()->json(['status' => 2, 'success' => 'Clock Out Successful','time' => $time,'date' => $date]);
                 }
             }
+             else if(EmployeeAttendance::where('employee_id', $auth_id)->where('attendance_date', $date)->exists()){
+                     $attendance_action_log = EmployeeAttendanceActionLog::where('employee_id',$auth_id)->where('action_date',$date)->latest()->first();
+                     $employee_attendance = EmployeeAttendance::where('employee_id', $auth_id)->where('attendance_date', $date)->latest();
+                     if ($employee_attendance->exists()) {
+                         $attendance = $employee_attendance->first();
+                         if($attendance_action_log->action_id == 1) {
+                         $attendance->clock_out = $time;
+                         $attendance->clock_out_latitude = session('latitude');
+                         $attendance->clock_out_longitude = session('longitude');
+                         $attendance->updated_at = Carbon::now();
+                         $attendance->employee_type = $employee_type;
+                         $attendance->clock_out_location = $location_status;
+                         $attendance->save();
+                         $msg = 'Clock Out Successful';
+                         $status = 2;
+                         $action_id = 2;
+                     }
+                     else{
+                         $attendance->attendance_date = $date ;
+                         $attendance->clock_in = $time;
+                         $attendance->clock_in_latitude = session('latitude');
+                         $attendance->clock_in_longitude = session('longitude');
+                         $attendance->updated_at = Carbon::now();
+                         $attendance->employee_type = $employee_type;
+                         $attendance->clock_in_location = $location_status;
+                         $attendance->save();
+                         $msg = 'Clock In Successful';
+                         $status = 1;
+                         $action_id = 1;
+                     }
+
+                         $attendance_action_log = new EmployeeAttendanceActionLog();
+                         $attendance_action_log->employee_id = $attendance->employee_id;
+                         $attendance_action_log->employee_type = $employee_type;
+                         $attendance_action_log->action_id = $action_id;
+                         $attendance_action_log->action_date = $date;
+                         $attendance_action_log->latitude =  $attendance->clock_out_latitude;
+                         $attendance_action_log->longitude =  $attendance->clock_out_longitude;
+                         $attendance_action_log->created_at =  Carbon::now();
+                         $attendance_action_log->location_status = $location_status;
+                         $attendance_action_log->save();
+
+                         return response()->json(['status' => $status, 'success' => $msg,'time' => $time,'date' => $date]);
+                 }
+             }
              else{
                  $attendance = new EmployeeAttendance();
                  $attendance->employee_id = $auth_id;
