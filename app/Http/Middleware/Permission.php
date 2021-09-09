@@ -1119,6 +1119,11 @@ class Permission
             'reports.daraz_mis.index' => 15,
             'reports.daraz_mis.list' => 15,
 
+            'reports.weight_reconciliation.index' => 8,
+            'reports.weight_reconciliation.list' => 8,
+
+
+
             
 
         ]
