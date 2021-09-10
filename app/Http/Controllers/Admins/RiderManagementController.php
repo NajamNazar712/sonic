@@ -9,6 +9,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
@@ -240,7 +241,8 @@ class RiderManagementController extends Controller
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
         $operation_rider_ids =  OperationRidersCategory::all();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type]);
+        $shifts =  EmployeeShift::all();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
