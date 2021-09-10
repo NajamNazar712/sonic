@@ -7025,10 +7025,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
         if($environment == 'production' || $environment == 'staging') {
             $rider = Rider::find($request->rider);
-            if ($rider->delivery_note_otp == $request->otp) {
-                return response()->json(['status' => 1]);
+            if($rider){
+                if ($rider->delivery_note_otp == $request->otp) {
+                    return response()->json(['status' => 1]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+                }
             } else {
-                return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+                return response()->json(['status' => 0, 'error' => 'Rider not found!']);
             }
         }
         else{

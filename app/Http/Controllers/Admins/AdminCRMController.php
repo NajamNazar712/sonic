@@ -4284,21 +4284,26 @@ class AdminCRMController extends Controller
         $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
-        if(count($crm_request_ids) > 0){
-            if($comment != null){
-                foreach ($crm_request_ids as $request_id){
-                    $crm_comment = new CrmComments();
-                    $crm_comment->crm_request_id = $request_id;
-                    $crm_comment->comment_by_id = Auth::id();
-                    $crm_comment->comment_by = 0;
-                    $crm_comment->comment_type = $comment_type;
-                    $crm_comment->comment = $comment ;
-                    $crm_comment->save();
+        if(is_array($crm_request_ids)){
+            if(count($crm_request_ids) > 0){
+                if($comment != null){
+                    foreach ($crm_request_ids as $request_id){
+                        $crm_comment = new CrmComments();
+                        $crm_comment->crm_request_id = $request_id;
+                        $crm_comment->comment_by_id = Auth::id();
+                        $crm_comment->comment_by = 0;
+                        $crm_comment->comment_type = $comment_type;
+                        $crm_comment->comment = $comment ;
+                        $crm_comment->save();
+                    }
+                    return response()->json(['status'=> 1,'success'=>"Comments Added"]);
                 }
-                return response()->json(['status'=> 1,'success'=>"Comments Added"]);
+                else{
+                    return response()->json(['status'=> 0,'error'=>"Add Comment First"]);
+                }
             }
             else{
-                return response()->json(['status'=> 0,'error'=>"Add Comment First"]);
+                return response()->json(['status'=> 0,'error'=>"Select Request First"]);
             }
         }
         else{

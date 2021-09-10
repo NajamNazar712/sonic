@@ -8332,16 +8332,18 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $sales_person = $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
-
-                    $to[] = Admin::find($sales_person->admin_id)->email;
+                    if($sales_person){
+                        $to[] = Admin::find($sales_person->admin_id)->email;
+                    }
 
                     $kam = SaleTierTag::where('user_id', $shipper_id);
                     if ($kam->exists()) {
                         $kam = $kam->first();
                         $to[] = Admin::find($kam->kam)->email;
                     }
-
-                    self::email($subject, $body, $to);
+                    if(count($to) > 0){
+                        self::email($subject, $body, $to);
+                    }
 
                 }
             }
