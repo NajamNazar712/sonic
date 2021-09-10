@@ -13,12 +13,12 @@
                 @include('admin.inc.messages')
 
                 <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="col-3 mb-1">
+                    <div class="col-4 mb-1">
                         <input type="text" class="form-control tracking_numbers" name="tracking_numbers" id="tracking_numbers" placeholder="Search Tracking Number">
                         {{-- <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required"> --}}
                     </div>
                   
-                    <div class="col-3 mb-1">
+                    <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $mode)
@@ -27,7 +27,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3 mb-1">
+                    <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="weighted_as" id="weighted_as" class="form-control select2">
                                 <option value="1">Dense</option>
@@ -45,6 +45,7 @@
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
                         </div>
                     </div>
+                    
                     <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
