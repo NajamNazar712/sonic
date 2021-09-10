@@ -945,6 +945,10 @@ class Permission
             'human_resource.employee_directory.rider.permanent' => 381,
             'human_resource.employee_directory.rider.blacklist' => 382,
 
+
+            'human_resource.employee_directory.staff.deactivate' => 591,
+            'human_resource.employee_directory.staff.activate' => 591,
+
             'human_resource.employee_directory.approve' => 469,
             'human_resource.employee_directory.reject' => 469,
 

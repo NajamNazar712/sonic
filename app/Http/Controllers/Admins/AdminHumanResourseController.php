@@ -310,6 +310,16 @@ class AdminHumanResourseController extends Controller
 
                         }
                     }
+                    if($result->request_status_id == 3 && $result->employee_type_id == 1)
+                    {
+                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
+                        }
+
+                        if ($result->status_id == 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
+                        }
+                    }
 
                     if($result->request_status_id == 3 && $result->employee_type_id == 2)
                     {
@@ -503,6 +513,58 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
+    }
+
+    public function employee_directory_make_staff_activate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = Admin::where('trax_id',$employee->trax_id);
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 1;
+        $staff->updated_by = Auth::id();
+        $staff->save();
+
+        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
+
+    }
+    public function employee_directory_make_staff_deactivate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = Admin::where('trax_id',$employee->trax_id);
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 0;
+        $staff->updated_by = Auth::id();
+        $staff->save();
+
+        $employee->status_id = 2;
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
 
     public function employee_directory_make_rider_update(Request $request)
