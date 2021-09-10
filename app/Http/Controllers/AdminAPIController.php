@@ -3144,10 +3144,10 @@ class AdminAPIController extends Controller
                     ->where('employee_type', 1)
                     ->whereDate('attendance_date', $date);
                 if($attendance->exists()){
-                    $datum["status"] = "present";
+                    $datum["status"] = 1;
                 }
                 else{
-                    $datum["status"] = "absent";
+                    $datum["status"] = 3;
                 }
                 $data[] = $datum;
             }

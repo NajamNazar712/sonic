@@ -9377,7 +9377,7 @@ class RiderAPIController extends Controller
             'first_day' => ['required'],
             'last_day' => ['required'],
         ];
-        $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, $this->messages);
+        $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
 
