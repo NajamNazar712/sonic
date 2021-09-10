@@ -3241,7 +3241,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->employee_id = $admin_id;
                 $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
-                $admin_attendance_action->action_date = Carbon::now();
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
                 $admin_attendance_action->attendance_date = $attendance_date;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
@@ -3259,7 +3259,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->employee_id = $admin_id;
                 $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
-                $admin_attendance_action->action_date = Carbon::now();
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
                 $admin_attendance_action->attendance_date = $attendance_date;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
