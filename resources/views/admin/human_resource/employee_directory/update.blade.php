@@ -233,8 +233,8 @@
                                         </div>
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Official Number<span class="text-danger">*</span></label>
-                                                <input type="text" id="official_number" data-rule-required="true" data-msg-required="Official Number is required" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
+                                                <label>Official Number</label>
+                                                <input type="text" id="official_number" class="form-control border-primary" value="{{$employee->official_phone_number}}" name="official_number" >
                                             </div>
                                         </div>
                                         <div class="col-md-12">
@@ -1976,6 +1976,9 @@
 
 
     <script type="text/javascript">
+        $("#cancel-button-profile").on('click',function (){
+            window.location.href = "{{route("admin.human_resource.employee_directory.index")}}";
+        });
         var today = new Date();
         today.setHours(0,0,0,0);
         $(document).ready(function() {
