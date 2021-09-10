@@ -18,7 +18,7 @@ class CreateEmployeeShiftsTable extends Migration
             $table->string('name');
             $table->time('start_time');
             $table->time('end_time');
-            $table->integer('status')->default(0)->index();
+            $table->integer('status')->default(1)->index();
             $table->timestamps();
         });
     }
