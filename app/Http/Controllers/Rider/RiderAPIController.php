@@ -9412,7 +9412,7 @@ class RiderAPIController extends Controller
                         if($attendance->clock_in_datetime){
                             $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
                         }
-                        $time_diff = $clock_in->diffInMinutes($shift->start_time);
+                        $time_diff = $clock_in->diffInMinutes(Carbon::parse($shift->start_time)->format("H:i:s"));
                         if ($time_diff > $shift->grace_time){
                             $datum["status"] = 2;//Late
                         }
