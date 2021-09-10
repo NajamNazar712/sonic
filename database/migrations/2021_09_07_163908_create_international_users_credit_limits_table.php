@@ -16,7 +16,7 @@ class CreateInternationalUsersCreditLimitsTable extends Migration
         Schema::create('international_users_credit_limits', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id')->index();
-            $table->integer('limit');
+            $table->integer('limit')->index();
             $table->integer('limit_usage')->nullable();
             $table->timestamps();
         });

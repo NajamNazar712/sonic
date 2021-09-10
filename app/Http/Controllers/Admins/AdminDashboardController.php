@@ -7962,6 +7962,9 @@ class AdminDashboardController extends Controller
                         if((session('role_id') == 1 || in_array(528, session('permissions')))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Edit Economy Rates</div></button>';
                         }
+                        if((session('role_id') == 1 || in_array(590, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item credit_limit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Credit Limit</div></button>';
+                        }
                     }
 
                     if(InternationalEconomyRate::where('user_id',$result->id)->count() > 0)
