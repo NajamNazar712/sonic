@@ -6957,19 +6957,19 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
     public function upload_pod(Request $request){
         
-                    $image = $request->file('pod_file');
-                    $extension = $image->getClientOriginalExtension();
-                    $random = rand(1000, 100000);
-                    $now = Carbon::now();
-                    $time = $now->year . '_' . $now->month;
-                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                    $image->move(public_path('uploads/pod_images'), $generated_image_name);
-                    $pod_image = new PODImage();
-                    $pod_image->pod_file = $generated_image_name;
-                    $pod_image->added_by = Auth::id();
-                    $pod_image->shipment_id = $request->shipment_id;
-                    $pod_image->save();
-                    return redirect()->back()->with('success', 'POD File Uploaded');
+        $image = $request->file('pod_file');
+        $extension = $image->getClientOriginalExtension();
+        $random = rand(1000, 100000);
+        $now = Carbon::now();
+        $time = $now->year . '_' . $now->month;
+        $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+        $image->move(public_path('uploads/pod_images'), $generated_image_name);
+        $pod_image = new PODImage();
+        $pod_image->pod_file = $generated_image_name;
+        $pod_image->added_by = Auth::id();
+        $pod_image->shipment_id = $request->shipment_id;
+        $pod_image->save();
+        return redirect()->back()->with('success', 'POD File Uploaded');
     }
     public function cash_collection_upload_receipt(Request $request)
     {
