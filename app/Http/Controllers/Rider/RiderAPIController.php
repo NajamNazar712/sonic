@@ -9385,22 +9385,46 @@ class RiderAPIController extends Controller
             $message = 'Error(s) in Input';
             return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
         } else {
-            $admin_id = $request->admin_id;
+            $rider_id = $request->rider_id;
             $dates = $this->generateDateRange($request->first_day, $request->last_day);
             $data = array();
+            $shift = EmployeeShift::join('riders as r', 'employee_shifts.id', '=', 'r.shift_id')
+                ->where('r.id', $rider_id)
+                ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
+            $shift_exists = 0;
+            if($shift->exists()){
+                $shift = $shift->first();
+                $shift_exists = 1;
+            }
+
             foreach ($dates as $date){
                 $datum = array();
                 $datum["date"] = Carbon::parse($date)->format("d");
                 $datum["month"] = Carbon::parse($date)->format("m");
                 $datum["year"] = Carbon::parse($date)->format("Y");
-                $attendance = EmployeeAttendance::where('employee_id', $admin_id)
-                    ->where('employee_type', 1)
+                $attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                    ->where('employee_type', 2)
                     ->whereDate('attendance_date', $date);
                 if($attendance->exists()){
-                    $datum["status"] = 1;
+                    if ($shift_exists == 1){
+                        $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                        if($attendance->clock_in_datetime){
+                            $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                        }
+                        $time_diff = $clock_in->diffInMinutes($shift->start_time);
+                        if ($time_diff > $shift->grace_time){
+                            $datum["status"] = 2;//Late
+                        }
+                        else{
+                            $datum["status"] = 1;//Present
+                        }
+                    }
+                    else{
+                        $datum["status"] = 1;
+                    }
                 }
                 else{
-                    $datum["status"] = 3;
+                    $datum["status"] = 3;//Absent
                 }
                 $data[] = $datum;
             }
