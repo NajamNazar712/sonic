@@ -28,12 +28,12 @@ class AdminAttendanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
         $cities = City::select('id','name')->get();
         $departments = AdminDepartment::select('id','name')->get();
-        $users = Admin::select('id','name')->get();
+        $users = Admin::where('status', 1)->select('id','name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $trax_ids = array_merge($trax_id, $rider_trax_id);
-        $admin_cnic = Admin::wherenotnull('cnic')->pluck('cnic')->toArray();
-        $rider_cnic = Rider::wherenotnull('cnic')->pluck('cnic')->toArray();
+        $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+        $rider_cnic = Rider::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
         $cnic = array_merge($admin_cnic, $rider_cnic);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
