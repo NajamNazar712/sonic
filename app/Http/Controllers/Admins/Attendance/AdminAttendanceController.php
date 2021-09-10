@@ -222,16 +222,16 @@ class AdminAttendanceController extends Controller
     }
 
     public function mark_attendance_index(){
-
+        
         $today_date = Carbon::today()->toDateString();
-        $attendance_clock_in = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_in')->latest()->first();
-        $attendance_clock_out = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_out')->latest()->first();
+        $attendance_clock_in = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_in')->whereNull('clock_out')->latest()->first();
+        //$attendance_clock_out = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_out')->latest()->first();
         $clock_in = 0;
         $clock_out = 0;
         if($attendance_clock_in){
             $clock_in = 1;
         }
-        if($attendance_clock_out){
+        if(isset($attendance_clock_in) && $attendance_clock_in->clockout != NULL){
             $clock_out = 1;
         }
         return view('admin.attendance.mark_index',compact('clock_in','clock_out'));
@@ -262,7 +262,7 @@ class AdminAttendanceController extends Controller
                 $reporting_location = $reporting_location->first();
                 $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
-                $origin = $request->latitude . ',' . $request->longitude;
+                $origin = session('latitude') . ',' . session('longitude');
                 $distance = $this->distance($origin, $destination);
                 if ($distance > $reporting_location->radius / 1000) {
                     $location_status = 1;
@@ -336,18 +336,26 @@ class AdminAttendanceController extends Controller
         $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', Auth::id())
             ->whereDate('action_date',$date)
             ->where('employee_type', 1)
-            ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status')
+            ->select('latitude', 'longitude','action_id','created_at')
             ->orderBy('action_date', 'ASC');
 
         $datatable = Datatables::of($admin_attendance_action)
             ->editColumn('latitude',function($action){
-                $geolocation = $action->latitude.','.$action->longitude;
-                $request ='http://maps.googleapis.com/maps/api/geocode/json?latlng='.$geolocation.'';
-                //dd($request);
-                $json = json_decode( file_get_contents( $request ) );
-                dd($json);
-               return  $json;
-            });
+                $api = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=true&latlng='.$action->latitude.','.$action->longitude.'&key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk';
+                $data = json_decode(file_get_contents($api));
+                $data_array = get_object_vars($data);
+                $result = $data_array['results'][0]->formatted_address;
+                return $result;
+            })
+            ->editColumn('action_id',function ($data){
+               if($data->action_id == 1){
+                   return 'Clock-In';
+               }
+               else{
+                   return 'Clock-Out';
+               }
+            })
+        ;
            return $datatable->make(true);
     }
 

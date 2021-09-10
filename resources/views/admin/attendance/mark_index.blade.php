@@ -21,6 +21,9 @@
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white text-center">
+                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">Date</th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                     <th class="border-primary border-darken-1">Location</th>
                                 </tr>
                                 </thead>
@@ -65,15 +68,14 @@
 @section('js')
 
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAIg5c-H5DaYBwF_D0HuWliQZQ6XzKj8Nk&sensor=false&libraries=geometry,places,drawing"></script>
-
+    
     <script type="text/javascript">
         $(document).ready(function () {
 
          var clock_in = @json($clock_in);
          var clock_out = @json($clock_out);
-
-         if((clock_in == 0 && clock_out == 0 ) || clock_out == 0){
+         console.log(clock_in,clock_out);
+         if((clock_in == 0 && clock_out == 0 ) || (clock_in == 1 && clock_out == 1 ) ){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK IN</strong>');
          }
@@ -100,6 +102,7 @@
                          });
                      }
                      else{
+                         table.draw();
                          swal({
                              title: data.success,
                              text: data.date + data.time,
@@ -127,6 +130,8 @@
            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                ],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -141,11 +146,13 @@
                 ajax: {
                     url: '{{ route('admin.attendance.mark.list') }}',
                 },
-               /* order: [[1, 'asc']],*/
+              
                 rowId: 'id',
                 columns: [
-
-                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at text-center'},
+                    {data: 'action_id', name: 'action_id', class: 'align-middle action_id text-center'},
+                    {data: 'latitude', name: 'latitude', class: 'align-middle latitude text-center'},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
