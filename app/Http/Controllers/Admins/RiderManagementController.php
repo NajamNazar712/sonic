@@ -146,8 +146,9 @@ class RiderManagementController extends Controller
         $category = RiderCategory::all();
         $route_types = RouteType::all();
         $operation_riders = OperationRidersCategory::all();
-        
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type]);
+        $shifts = EmployeeShift::all();
+
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -252,7 +253,8 @@ class RiderManagementController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required',
-            'rider_category'=>'required|numeric'
+            'rider_category'=>'required|numeric',
+            'rider_shift'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -271,6 +273,7 @@ class RiderManagementController extends Controller
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
+        $rider->shift_id = $request->rider_shift;
 
 
         $rider->rider_category_id = $request->rider_category;
