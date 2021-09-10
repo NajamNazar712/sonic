@@ -17,7 +17,6 @@ class CreateInvoiceUploadSlipsTable extends Migration
             $table->increments('id');
             $table->integer('invoice_id')->index();
             $table->integer('bank_id')->index();
-            $table->bigInteger('amount');
             $table->timestamp('deposit_date');
             $table->string('image');
             $table->timestamps();

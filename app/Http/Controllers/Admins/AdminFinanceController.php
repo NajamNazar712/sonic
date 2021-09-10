@@ -7051,7 +7051,6 @@ class AdminFinanceController extends Controller
             $deposit_details->invoice_id = $request->invoice_id;
             $deposit_details->deposit_date = $request->date[$row];
             $deposit_details->bank_id = $request->bank[$row];
-            $deposit_details->amount = $request->amount[$row];
             $image = $files[$row];
             $extension = 'png';
             $random = rand(1000, 100000);
@@ -7077,7 +7076,6 @@ class AdminFinanceController extends Controller
                 foreach ($slips as $slip) {
                     $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
                     $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
-                    $sorted_array[$slip->id]['amount'] = $slip->amount;
                     $img_url = 'uploads/invoices/'. $slip->image;
                     if(file_exists($img_url)){
                         $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/invoices/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';

@@ -114,7 +114,6 @@
 											<th class="border-primary border-darken-1">S. No.</th>
 											<th class="border-primary border-darken-1">Date</th>
 											<th class="border-primary border-darken-1">Bank Name</th>
-											<th class="border-primary border-darken-1">Amount</th>
 											<th class="border-primary border-darken-1">Deposit Slip</th>
 											<th class="border-primary border-darken-1"></th>
 										</tr>
@@ -151,7 +150,6 @@
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Date</th>
 										<th class="border-primary border-darken-1">Bank Name</th>
-										<th class="border-primary border-darken-1">Amount </th>
 										<th class="border-primary border-darken-1">Deposit Slip</th>
 
 									</tr>
@@ -792,7 +790,6 @@
 						{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 						{name: 'date', class: 'align-middle date date-col-width form-group', width: '20%'},
 						{name: 'bank_name', class: 'align-middle bank_name form-group'},
-						{name: 'amount', class: 'align-middle expense_amount form-group'},
 						{name: 'deposit_slip', class: 'align-middle deposit_slip form-group'},
 						{name: 'action', class: 'align-middle action'},
 					],
@@ -814,7 +811,6 @@
 					rows_count++;
 					var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="deposit_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>';
 					var bank_select = '<select class="form-control hub_select select2" name="bank['+rows_count+']" data-rule-required="true" data-msg-required="Bank is required"></select>';
-					var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">';
 					var deposit_slip = '<input class="form-control form-control-sm" accept="image/png,image/jpeg" type="file" id="deposit_slip_'+rows_count+'" name="deposit_slip['+rows_count+']" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">';
 					if(rows_count == 1){
 						var remove = '';
@@ -822,7 +818,7 @@
 						var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
 
 					}
-					deposit_table.row.add([0, date_input,bank_select,amount_input,deposit_slip,remove]).node().id = rows_count;
+					deposit_table.row.add([0, date_input,bank_select,deposit_slip,remove]).node().id = rows_count;
 					deposit_table.draw(true);
 					$('#DepositSlipButton').attr('disabled', false);
 					$('select[name="bank['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
@@ -845,15 +841,6 @@
 						onOpen: function() {
 							// $('#deposit_date_' + rows_count+'_root').css('top', '-262px');
 						},
-					});
-					$('input.amount').inputmask({
-						'alias': 'decimal',
-						'allowMinus': false,
-						'allowPlus': false,
-						'rightAlign': false,
-						'digits': 2,
-						'min': 0.00,
-						'max': 10000000.00
 					});
 				}
 			});
@@ -930,7 +917,6 @@
 									{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 									{name: 'date', class: 'align-middle date date-col-width form-group'},
 									{name: 'bank_name', class: 'align-middle bank_name form-group'},
-									{name: 'amount', class: 'align-middle expense_amount form-group'},
 									{name: 'deposit_slip', class: 'align-middle deposit_slip form-group'}
 								],
 
@@ -946,7 +932,7 @@
 							});
 
 							$.each(data.slips, function (index, value) {
-								deposit_slip_table.row.add([0, value.date, value.bank, value.amount, value.image]);
+								deposit_slip_table.row.add([0, value.date, value.bank, value.image]);
 								deposit_slip_table.draw(true);
 							});
 						}
