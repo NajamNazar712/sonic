@@ -3241,7 +3241,8 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->employee_id = $admin_id;
                 $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
-                $admin_attendance_action->action_date = $attendance_datetime;
+                $admin_attendance_action->action_date = Carbon::now();
+                $admin_attendance_action->attendance_date = $attendance_date;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->location_status = $location_status;
@@ -3258,7 +3259,8 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->employee_id = $admin_id;
                 $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
-                $admin_attendance_action->action_date = $attendance_datetime;
+                $admin_attendance_action->action_date = Carbon::now();
+                $admin_attendance_action->attendance_date = $attendance_date;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->location_status = $location_status;
@@ -3269,6 +3271,32 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Failed']);
         }
 
+    }
+
+    public function attendance_details_v2(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $request->attendance_date)
+                ->where('employee_type', 1)
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')
+                ->orderBy('action_date', 'ASC');
+            if ($admin_attendance_action->exists()) {
+                $admin_attendance_action = $admin_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $admin_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
     }
 
 

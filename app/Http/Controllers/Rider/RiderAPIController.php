@@ -9492,7 +9492,8 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
-                $rider_attendance_action->action_date = $attendance_datetime;
+                $rider_attendance_action->action_date = Carbon::now();
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
                 $rider_attendance_action->location_status = $location_status;
@@ -9509,7 +9510,8 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
-                $rider_attendance_action->action_date = $attendance_datetime;
+                $rider_attendance_action->action_date = Carbon::now();
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
                 $rider_attendance_action->location_status = $location_status;
@@ -9520,6 +9522,32 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Failed']);
         }
 
+    }
+
+    public function attendance_details_v2(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', $request->attendance_date)
+                ->where('employee_type', 2)
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')
+                ->orderBy('action_date', 'ASC');
+            if ($rider_attendance_action->exists()) {
+                $rider_attendance_action = $rider_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $rider_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
