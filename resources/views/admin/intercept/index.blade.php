@@ -18,8 +18,7 @@
                 @csrf
                     <div class="form-group col-md-3  mb-2 text-center" style="margin: auto;">
                         <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
-                            <option value="0" selected>Select Consignee</option>
-                            <option value="1">Different Consignee</option>
+                            <option value="1" selected>Different Consignee</option>
                             <option value="2">Same Consignee</option>
                         </select>
                     </div>
@@ -28,7 +27,7 @@
                         <div class="col col_custom mr-5">
                             <h4 class="form-section mb-2 text-center">Consignee Information</h4>
                             <div class="form-group">
-                                <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required" disabled>
+                                <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
                                     @foreach($consignee_cities as $city)
                                         @if($city->id == $shipment['consignee_city_id'])
                                             <option value="{{ $city->id }}" selected>{{ $city->name }}</option>
@@ -39,24 +38,24 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <input type="text" name="consignee_name" id="consignee_name" class="form-control" value="{{$shipment['consignee_name']}}" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters" readonly>
+                                <input type="text" name="consignee_name" id="consignee_name" class="form-control" value="{{$shipment['consignee_name']}}" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters">
                             </div>
 
                             <div class="form-group">
-                                <textarea id="consignee_address" name="consignee_address" class="form-control" rows="6" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters" readonly>{{$shipment['consignee_address']}}</textarea>
+                                <textarea id="consignee_address" name="consignee_address" class="form-control" rows="6" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="255" data-msg-maxlength="Address can be maximum 255 characters">{{$shipment['consignee_address']}}</textarea>
                             </div>
 
                             <div class="form-group">
-                                <input type="text" name="consignee_phone_number_1" class="form-control phone_number" id="consignee_phone_number_1" value="{{$shipment['consignee_phone_number_1']}}" placeholder="Phone Number 1*" data-rule-required="true" data-msg-required="Phone Number is required" readonly>
+                                <input type="text" name="consignee_phone_number_1" class="form-control phone_number" value="{{$shipment['consignee_phone_number_1']}}" placeholder="Phone Number 1*" data-rule-required="true" data-msg-required="Phone Number is required">
                             </div>
 
                             <div class="form-group">
-                                <input type="text" name="consignee_phone_number_2" class="form-control phone_number" id="consignee_phone_number_2" value="{{$shipment['consignee_phone_number_2']}}" placeholder="Phone Number 2" readonly>
+                                <input type="text" name="consignee_phone_number_2" class="form-control phone_number" value="{{$shipment['consignee_phone_number_2']}}" placeholder="Phone Number 2">
                             </div>
-                                <input type="text" name="intercept_type" id="intercept_type" class="form-control hidden" placeholder="Phone Number 2" readonly>
+                                <input type="text" name="intercept_type" id="intercept_type" class="form-control hidden" placeholder="Phone Number 2">
 
                             <div class="form-group">
-                                <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters" readonly>
+                                <input type="email" name="consignee_email" id="consignee_email" class="form-control" value="{{$shipment['consignee_email']}}" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
                             </div>
                         </div>
                         <div class="col col_custom">
@@ -66,14 +65,14 @@
                                     <span class="input-group-text">Rs</span>
                                 </div>
 
-                                <input type="text" name="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" id="amount"readonly>
+                                <input type="text" name="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" id="amount">
                             </div>
                         </div>
                     </div>
                     <div class="row mt-2">
                         <div class="col">
                             <div class="form-group text-center">
-                                <button type="submit" name="update" id="submitButton"  class="btn btn-primary width-10-per" value="Book" hidden>Update</button>
+                                <button type="submit" name="update" class="btn btn-primary width-10-per" value="Book">Update</button>
                             </div>
                         </div>
                     </div>
@@ -118,7 +117,7 @@
                 width: '100%',
                 placeholder: 'Consignee*'
             }).bind('change', function () {
-                if(this.value == 2){
+              if(this.value == 2){
 
                   var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                   $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
@@ -128,38 +127,16 @@
                   $( "#consignee_name" ).prop('readonly', true);
                   $( "#consignee_email" ).prop('readonly', true);
                   $( "#amount" ).prop('readonly', true);
-                  $("#submitButton").prop('hidden',false);
-                    $("#consignee_phone_number_1").prop('readonly', false);
-                    $("#consignee_phone_number_2").prop('readonly', false);
-                    $("#consignee_address").prop('readonly', false);
-
               }
-                else if(this.value == 1){
-                    $( "#consignee_name" ).prop('readonly', false);
-                    $( "#consignee_email" ).prop('readonly', false);
-                    $('#intercept_type').val(1);
-                    $( "#amount" ).prop('readonly', false);
-                    $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
-                    $('#consignee_city').removeClass('disabled')  //remove disable class
-                        .prop({name : 'consignee_city' , disabled : false}); //restore the name and enable
-                    $("#submitButton").prop('hidden',false);
-                    $("#consignee_phone_number_1").prop('readonly', false);
-                    $("#consignee_phone_number_2").prop('readonly', false);
-                    $("#consignee_address").prop('readonly', false);
-
-                }else{
-                    $( "#consignee_name" ).prop('readonly', true);
-                    $( "#consignee_email" ).prop('readonly', true);
-                    $( "#amount" ).prop('readonly', true);
-                    $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
-                    $('#consignee_city').addClass('disabled')  //disable class
-                        .prop({'name' : 'new_consignee_city'  , disabled : true});
-                    $("#submitButton").prop('hidden',true);
-                    $("#consignee_phone_number_1").prop('readonly', true);
-                    $("#consignee_phone_number_2").prop('readonly', true);
-                    $("#consignee_address").prop('readonly', true);
-
-                }
+              else{
+                  $( "#consignee_name" ).prop('readonly', false);
+                  $( "#consignee_email" ).prop('readonly', false);
+                  $('#intercept_type').val(1);
+                  $( "#amount" ).prop('readonly', false);
+                  $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
+                  $('#consignee_city').removeClass('disabled')  //remove disable class
+                      .prop({name : 'consignee_city' , disabled : false}); //restore the name and enable
+              }
             });
 
             $('.amount').inputmask({
