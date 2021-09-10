@@ -482,6 +482,18 @@ class RiderAPIController extends Controller
         }
     }
 
+    private function generateDateRange($start_date, $end_date)
+    {
+        $start_date = Carbon::parse($start_date);
+        $end_date = Carbon::parse($end_date);
+        $dates = [];
+        for($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        return $dates;
+    }
+
     public function login(Request $request)
     {
         $rules = [
@@ -9357,6 +9369,43 @@ class RiderAPIController extends Controller
             return response()->json($response);
         }
         return response()->json(['status' => 1]);
+    }
+
+    public function month_attendance_history(Request $request)
+    {
+        $rules = [
+            'first_day' => ['required'],
+            'last_day' => ['required'],
+        ];
+        $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $dates = $this->generateDateRange($request->first_day, $request->last_day);
+            $data = array();
+            foreach ($dates as $date){
+                $datum = array();
+                $datum["date"] = Carbon::parse($date)->format("d");
+                $datum["month"] = Carbon::parse($date)->format("m");
+                $datum["year"] = Carbon::parse($date)->format("Y");
+                $attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)
+                    ->whereDate('attendance_date', $date);
+                if($attendance->exists()){
+                    $datum["status"] = 1;
+                }
+                else{
+                    $datum["status"] = 3;
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
