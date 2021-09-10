@@ -9406,6 +9406,7 @@ class RiderAPIController extends Controller
                     ->where('employee_type', 2)
                     ->whereDate('attendance_date', $date);
                 if($attendance->exists()){
+                    $attendance = $attendance->first();
                     if ($shift_exists == 1){
                         $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
                         if($attendance->clock_in_datetime){
