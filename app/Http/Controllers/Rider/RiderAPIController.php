@@ -32,6 +32,7 @@ use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -9332,6 +9333,30 @@ class RiderAPIController extends Controller
         }
         $response['message'] = $message;
         return response()->json($response);
+    }
+
+    public function rider_shift(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $riders = Rider::find($rider_id);
+        if($riders){
+            $response = array();
+            $employee_shift = EmployeeShift::where('id', $riders->shift_id);
+            $response["status"] = 0;
+            if ($employee_shift->exists()){
+                $employee_shift = $employee_shift->first();
+                $response["shift_name"] = $employee_shift->name;
+                $response["start_time"] = $employee_shift->start_time;
+                $response["end_time"] = $employee_shift->end_time;
+            }
+            else{
+                $response["shift_name"] = "default";
+                $response["start_time"] = NULL;
+                $response["end_time"] = NULL;
+            }
+            return response()->json($response);
+        }
+        return response()->json(['status' => 1]);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

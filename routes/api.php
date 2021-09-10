@@ -189,6 +189,7 @@ Route::name('api.')->group(function () {
             Route::get('notification_history', 'Rider\RiderAPIController@notification_history')->name('notification_history');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
+                Route::get('shift', 'Rider\RiderAPIController@rider_shift')->name('shift');
                 Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
