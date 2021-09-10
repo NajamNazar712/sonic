@@ -20,6 +20,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Designation ID</th>
                                     <th class="border-primary border-darken-1">Designation Name</th>
+                                    <th class="border-primary border-darken-1">Department Name</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -48,6 +49,13 @@
                             <input type="text" name="name" id="name" class="form-control" placeholder="Designation Name*" data-rule-required="true" data-msg-required="Name is required">
                         </div>
                         <div class="form-group">
+                            <select name="department_id" id="department" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                                @foreach($departments as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <textarea name="description" class="form-control" id="description" placeholder="Description"></textarea>
                         </div>
                         <div class="form-group ml-1">
@@ -74,6 +82,13 @@
                         <input type="hidden" name="designation_id" id="designation_id" value="">
                         <div class="form-group">
                             <input type="text" name="name" id="edit_name" class="form-control" placeholder="Designation Name*" data-rule-required="true" data-msg-required="Name is required">
+                        </div>
+                        <div class="form-group">
+                            <select name="department_id" id="department_edit" class="select2 form-control " data-rule-required="true" data-msg-required="Department is required" style="width: 100%">
+                                @foreach($departments as $department)
+                                    <option value="{{$department->id}}">{{$department->name}}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="form-group">
                             <textarea name="description" class="form-control" id="edit_description" placeholder="Description"></textarea>
@@ -123,6 +138,7 @@
                             head.push('S.No');
                             head.push('Designation ID');
                             head.push('Designation Name');
+                            head.push('Department Name');
                             head.push('Status');
 
                             $.each(result.data, function (index, values) {
@@ -130,6 +146,7 @@
                                 row.push(index + 1);
                                 row.push(values.code);
                                 row.push(values.name);
+                                row.push(values.department);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -177,6 +194,7 @@
                     },
                     {data: 'code', name: 'employee_designations.name', class: 'align-middle code'},
                     {data: 'name', name: 'employee_designations.name', class: 'align-middle name'},
+                    {data: 'department', name: 'ad.name', class: 'align-middle department'},
                     {data: 'status', name: 'employee_designations.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -226,15 +244,18 @@
             });
             $('#addDesignationModal').on('hide.bs.modal', function () {
                 $('#name').val('');
+                $('#department').val('');
                 $('#description').val('');
             });
 
             $('body').on('click', '.edit', function (e) {
                 var id = $(this).data('target-id');
                 var name = table.row($(this).parents('tr')).data().name;
+                var department_id = table.row($(this).parents('tr')).data().department_id;
                 var description = table.row($(this).parents('tr')).data().description;
                 $('#designation_id').val(id);
                 $('#edit_name').val(name);
+                $('#department_edit').val(department_id).trigger('change');
                 $('#edit_description').val(description);
                 $('#editDesignationModal').modal('show');
             });
@@ -361,6 +382,16 @@
                             });
                     }
                 });
+            });
+
+            $("#addDesignationForm #department").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department*",
+                width:'100%'
+            });
+
+            $("#editDesignationForm #department_edit").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department*",
+                width:'100%'
             });
 
             $("#addDesignationForm").validate({

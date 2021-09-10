@@ -3121,6 +3121,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
         Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::post('pin', 'Admins\AdminHumanResourseController@employee_directory_pin')->name('pin');
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');

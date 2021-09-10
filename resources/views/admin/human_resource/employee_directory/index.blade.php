@@ -212,6 +212,32 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="UpdatePinModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="UpdatePinModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Edit Bolt & Sonic Pin</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_directory.pin')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="UpdatePinForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="form-group">
+                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -312,6 +338,16 @@
                         closeOnEsc: false
                     });
 
+                    form.submit();
+                }
+            });
+
+            $("#UpdatePinForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
                     form.submit();
                 }
             });
@@ -842,7 +878,7 @@
                     var rider_type = table.row($(this).parents('tr')).data().inactive_rider_type_id;
                     route_id = null;
                 }
-                $('#employee_id').val(id);
+                $('#editRiderModal #employee_id').val(id);
                 $('#rider_name').val(rider_name);
                 $('#rider_cnic').val(cnic);
                 $('#rider_phone').val(phone_no);
@@ -853,8 +889,21 @@
 
             });
 
+            $('#UpdatePinModal #pin').inputmask({
+                'mask': '9999',
+                'clearIncomplete': true,
+            });
+
+            $('body').on('click', '.update_pin_btn', function (e) {
+                var employee_id = table.row($(this).parents('tr')).data().employee_id;
+                var pin = table.row($(this).parents('tr')).data().pin;
+                $('#UpdatePinModal #employee_id').val(employee_id);
+                $('#UpdatePinModal #pin').val(pin);
+                $('#UpdatePinModal').modal('show');
+            });
+
             $('body').on('hidden.bs.modal', '#editRiderModal', function () {
-                $('#employee_id').val('');
+                $('#editRiderModal #employee_id').val('');
                 $('#rider_name').val('');
                 $('#rider_cnic').val('');
                 $('#rider_phone').val('');
@@ -867,6 +916,11 @@
                 $('#category').val(null).trigger('change');
 
 
+            });
+
+            $('body').on('hidden.bs.modal', '#UpdatePinModal', function () {
+                $('#UpdatePinModal #employee_id').val('');
+                $('#pin').val('');
             });
 
             $('body').on('click', '.incentive', function (e) {
