@@ -224,11 +224,8 @@
 
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>Designation</label>
-                                                <select name="designation" id="designation" class="select2 form-control " style="width: 100%">
-                                                    @foreach($designations as $designation)
-                                                        <option value="{{$designation->id}}">{{$designation->name}}</option>
-                                                    @endforeach
+                                                <label>Designation<span class="text-danger">*</span></label>
+                                                <select name="designation" id="designation" data-rule-required="true" data-msg-required="Designation is Required" class="select2 form-control " style="width: 100%">
                                                 </select>
                                             </div>
                                         </div>
@@ -2146,7 +2143,37 @@
                 placeholder: "Select Department",
                 width:'100%',
             });
+
+            $("#department").on('change',function(){
+                id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.human_resource.employee_directory.get.designation') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'department_id': id
+                    }
+                })
+                .done(function(data) {
+                    $("#designation").html('');
+                    if(data.status == 1)
+                    {
+                        $.each(data.designations,function (i,value){
+                            $("#designation").append('<option value='+value.id+'>'+value.name+'</option>');
+                        });
+                        $("#designation").val("{{$employee->designation_id}}").trigger('change');
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+
             $("#department").val("{{$employee->department_id ?? ''}}").trigger('change');
+
 
             var family_member_index = 0;
             $(".marital_status_family_member").prepend('<option value="" selected></option>').select2({

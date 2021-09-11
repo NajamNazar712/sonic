@@ -2245,6 +2245,24 @@ class AdminHumanResourseController extends Controller
         $designation->save();
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
     }
+
+    public function employee_get_designation(Request $request)
+    {
+        if($request->has('department_id'))
+        {
+            $designations = EmployeeDesignation::where('department_id',$request->department_id);
+            if($designations->exists())
+            {
+                return response()->json(['status'=>1,'designations'=>$designations->get()]);
+            }
+            else{
+                return response()->json(['status'=>0,'error'=>'Designation Not Found']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'error'=>'Department is Required']);
+        }
+    }
     public function department_index(){
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),392);
