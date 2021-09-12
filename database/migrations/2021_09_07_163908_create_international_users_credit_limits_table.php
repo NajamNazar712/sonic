@@ -18,6 +18,7 @@ class CreateInternationalUsersCreditLimitsTable extends Migration
             $table->integer('user_id')->index();
             $table->integer('limit')->index();
             $table->integer('limit_usage')->nullable();
+            $table->integer('last_updated_by')->index();
             $table->timestamps();
         });
     }

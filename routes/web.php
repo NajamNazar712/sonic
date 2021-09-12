@@ -3028,6 +3028,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@update_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@update_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
+                Route::post('get_credit','Admins\AdminInternationalRatesController@get_credit')->name('get_credit');
+                Route::post('credit','Admins\AdminInternationalRatesController@credit_update')->name('credit');
+
             });
         });
     });
