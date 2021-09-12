@@ -233,6 +233,12 @@ class AdminNotificationsController extends Controller
         else if ($id == 28) {
              $details['fields'] = ['account_id', 'company_name', 'invoice_number', 'billing_period_from_date', 'billing_period_to_date', 'due_date', 'invoice'];
         }
+        else if ($id == 29) {
+            $details['fields'] = ['pin_code'];
+        }
+        else if ($id == 30) {
+            $details['fields'] = ['poc','receiving_of_pickup','company_name','tracking_number','order_id','destination','service_type','amount','quantity','product_type','description','estimated_weight'];
+        }
 		else if($id == 31){
             $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','destination','channel','case_nature','case_nature_type','details'];
         }
@@ -462,6 +468,9 @@ class AdminNotificationsController extends Controller
         }
         else if ($id == 117){
             $details['fields'] = ['data','status'];
+        }
+        else if ($id == 118){
+            $details['fields'] = ['product','sku_id'];
         }
         else if ($id == 118){
             $details['fields'] = ['product','sku_id'];
