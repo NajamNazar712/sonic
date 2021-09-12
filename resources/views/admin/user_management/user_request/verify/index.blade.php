@@ -38,15 +38,15 @@
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <label for="cnic" class="font-weight-bold">CNIC</label>
                                         <div class="form-group">
-                                            <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required" value="{{ $user->cnic}}">
+                                            <input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-rule-remote="{{ route('admin.user_management.user_requests.cnic', ['id' => $user->id]) }}" data-msg-remote="CNIC must be unique" data-msg-required="CNIC is required" value="{{ $user->cnic}}">
                                         </div>
                                     </div>
 
-                                  {{--  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <div class="form-group">
-                                            <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}">
-                                        </div>
-                                    </div>--}}
+                                    {{--  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                          <div class="form-group">
+                                              <input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}">
+                                          </div>
+                                      </div>--}}
 
                                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
                                         <label for="department" class="font-weight-bold">Department</label>
@@ -58,7 +58,7 @@
                                                     @else
                                                         <option value="{{ $department->id }}">{{ $department->name }}</option>
                                                     @endif
-                                                    @endforeach
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -84,44 +84,44 @@
                                         </div>
                                     </div>
 
-                                   {{-- <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-                                        <div class="form-group">
-                                            <input type="password" name="password" id="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required">
-                                        </div>
-                                    </div>--}}
+                                    {{-- <div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+                                         <div class="form-group">
+                                             <input type="password" name="password" id="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required">
+                                         </div>
+                                     </div>--}}
 
                                     <div class="col-12">
                                         <h4 class="form-section mb-2">Hubs</h4>
                                         <div class=" text-center mt-2">
                                             <button type="button" id="selectAll"  class="btn btn-primary" >Select All Hubs</button>
                                             <button type="button" id="unselect" class="btn btn-primary">Unselect All Hubs</button>
-                                            </di>
                                         </div>
                                     </div>
-
-                                    @foreach($hubs as $hub)
-                                        <fieldset class="d-inline-block m-1">
-                                            @if (in_array($hub->id, $user_hubs))
-                                                <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}" checked="checked">
-                                            @else
-                                                <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
-                                            @endif
-                                            <label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
-                                        </fieldset>
-                                    @endforeach
                                 </div>
 
-                                <div class="col-12">
-                                    <div class="form-group text-center mt-2">
-                                        <button type="submit" class="btn btn-primary">Verify</button>
-                                    </div>
-                                </div>
-                            </form>
+                                @foreach($hubs as $hub)
+                                    <fieldset class="d-inline-block m-1">
+                                        @if (in_array($hub->id, $user_hubs))
+                                            <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}" checked="checked">
+                                        @else
+                                            <input type="checkbox" id="hub_{{ $hub->id }}" class="hub" name="hub_ids[]" value="{{ $hub->id }}">
+                                        @endif
+                                        <label for="hub_{{ $hub->id }}">{{ $hub->name }}</label>
+                                    </fieldset>
+                            @endforeach
                         </div>
+
+                        <div class="col-12">
+                            <div class="form-group text-center mt-2">
+                                <button type="submit" class="btn btn-primary">Verify</button>
+                            </div>
+                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 @endsection
 
@@ -217,20 +217,20 @@
                     form.submit();
                 }
             });
-           /* $('#selectAll .hub').each(function() {
-                var checkbox = $(this);
-                var label = checkbox.next();
-                var text = label.text();
+            /* $('#selectAll .hub').each(function() {
+                 var checkbox = $(this);
+                 var label = checkbox.next();
+                 var text = label.text();
 
-                label.remove();
+                 label.remove();
 
-                checkbox.iCheck({
-                    checkboxClass: 'icheckbox_line pt-1 pb-1',
-                    checkedClass: 'checked bg-success',
-                    uncheckedClass: 'bg-danger',
-                    insert: '<div class="icheck_line-icon"></div>' + text
-                });
-            });*/
+                 checkbox.iCheck({
+                     checkboxClass: 'icheckbox_line pt-1 pb-1',
+                     checkedClass: 'checked bg-success',
+                     uncheckedClass: 'bg-danger',
+                     insert: '<div class="icheck_line-icon"></div>' + text
+                 });
+             });*/
 
             $("#selectAll").click(function() {
 
