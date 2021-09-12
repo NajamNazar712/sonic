@@ -94,9 +94,9 @@
 											<select name="shift_id" class="select2" id="shift_list" data-rule-required="true" data-msg-required="Employee Shift is required">
 												@foreach($shifts as $shift)
 													@if ($shift->id == $user->shift_id)
-														<option value="{{$shift->id}}" selected="selected"> {{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
+														<option value="{{$shift->id}}" selected="selected"> {{$shift->name}}</option>
 													@else
-														<option value="{{$shift->id}}"> {{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
+														<option value="{{$shift->id}}"> {{$shift->name}}</option>
 													@endif
 												@endforeach
 											</select>

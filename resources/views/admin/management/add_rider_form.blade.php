@@ -107,7 +107,7 @@
             <fieldset class="form-group">
                 <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                     @foreach($shifts as $shift)
-                        <option value="{{$shift->id}}"> {{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
+                        <option value="{{$shift->id}}"> {{$shift->name}}</option>
                     @endforeach
                 </select>
             </fieldset>

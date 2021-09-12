@@ -85,7 +85,7 @@
 										<div class="form-group">
 											<select name="shift_id" class="select2" id="shift_list" data-rule-required="true" data-msg-required="Employee Shift is required">
 												@foreach($shifts as $shift)
-													<option value="{{$shift->id}}"> {{$shift->name}} ({{$shift->start_time}} - {{$shift->end_time}})</option>
+													<option value="{{$shift->id}}"> {{$shift->name}}</option>
 												@endforeach
 											</select>
 										</div>
