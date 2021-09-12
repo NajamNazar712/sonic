@@ -26,6 +26,7 @@ use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -86,6 +87,18 @@ class AdminAPIController extends Controller
         $distance = round($earth_radius * (atan2(sqrt(pow(cos($destination_latitude) * sin($longitude_delta), 2) + pow(cos($origin_latitude) * sin($destination_latitude) - sin($origin_latitude) * cos($destination_latitude) * cos($longitude_delta), 2)), (sin($origin_latitude) * sin($destination_latitude) + cos($origin_latitude) * cos($destination_latitude) * cos($longitude_delta)))), 2);
 
         return $distance;
+    }
+
+    private function generateDateRange($start_date, $end_date)
+    {
+        $start_date = Carbon::parse($start_date);
+        $end_date = Carbon::parse($end_date);
+        $dates = [];
+        for($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        return $dates;
     }
 
     public function verify(Request $request)
@@ -3080,5 +3093,212 @@ class AdminAPIController extends Controller
         $response['message'] = $message;
         return response()->json($response);
     }
+
+    public function employee_shift(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $admins = Admin::find($admin_id);
+        if($admins){
+            $response = array();
+            $employee_shift = EmployeeShift::where('id', $admins->shift_id);
+            $response["status"] = 0;
+            if ($employee_shift->exists()){
+                $employee_shift = $employee_shift->first();
+                $response["shift_name"] = $employee_shift->name;
+                $response["start_time"] = $employee_shift->start_time;
+                $response["end_time"] = $employee_shift->end_time;
+            }
+            else{
+                $response["shift_name"] = "default";
+                $response["start_time"] = NULL;
+                $response["end_time"] = NULL;
+            }
+            return response()->json($response);
+        }
+        return response()->json(['status' => 1]);
+    }
+
+    public function month_attendance_history(Request $request)
+    {
+        $rules = [
+            'first_day' => ['required'],
+            'last_day' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $admin_id = $request->admin_id;
+            $dates = $this->generateDateRange($request->first_day, $request->last_day);
+            $data = array();
+            $shift = EmployeeShift::join('admins as a', 'employee_shifts.id', '=', 'a.shift_id')
+                ->where('a.id', $admin_id)
+                ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
+            $shift_exists = 0;
+            if($shift->exists()){
+                $shift = $shift->first();
+                $shift_exists = 1;
+            }
+            foreach ($dates as $date){
+                $datum = array();
+                $datum["date"] = Carbon::parse($date)->format("d");
+                $datum["month"] = Carbon::parse($date)->format("m");
+                $datum["year"] = Carbon::parse($date)->format("Y");
+                $attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                    ->where('employee_type', 1)
+                    ->whereDate('attendance_date', $date);
+                if($attendance->exists()){
+                    $attendance = $attendance->first();
+                    if ($shift_exists == 1){
+                        $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                        if($attendance->clock_in_datetime){
+                            $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                        }
+                        $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                        if ($time_diff > $shift->grace_time){
+                            $datum["status"] = 2;//Late
+                        }
+                        else{
+                            $datum["status"] = 1;//Present
+                        }
+                    }
+                    else{
+                        $datum["status"] = 1;
+                    }
+                }
+                else{
+                    $datum["status"] = 3;//Absent
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+    }
+
+    public function mark_attendance_v2(Request $request)
+    {
+
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('admins as a', 'e.id', 'a.employee_id')
+                ->where('a.id', $admin_id);
+            if($reporting_location->exists()){
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
+
+            $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
+            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
+
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->first();
+            } else {
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
+                $admin_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $admin_attendance->clock_in_datetime = Carbon::now();
+                $admin_attendance->clock_in_latitude = $request->latitude;
+                $admin_attendance->clock_in_longitude = $request->longitude;
+                $admin_attendance->clock_in_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
+            } elseif ($request->action == 2) {
+                $admin_attendance->clock_out_datetime = Carbon::now();
+                $admin_attendance->clock_out_latitude = $request->latitude;
+                $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->clock_out_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function attendance_details_v2(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $request->attendance_date)
+                ->where('employee_type', 1)
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')
+                ->orderBy('action_date', 'ASC');
+            if ($admin_attendance_action->exists()) {
+                $admin_attendance_action = $admin_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $admin_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
+    }
+
+
 
 }

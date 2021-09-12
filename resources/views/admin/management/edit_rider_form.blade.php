@@ -114,6 +114,18 @@
                 </fieldset>
             </div>
         </div>
+
+        <div class="row">
+            <div class="col">
+                <fieldset class="form-group">
+                    <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                        @foreach($shifts as $shift)
+                            <option value="{{$shift->id}}"> {{$shift->name}}</option>
+                        @endforeach
+                    </select>
+                </fieldset>
+            </div>
+        </div>
         <div id="new_route_div" class="d-none">
             <div class="row mb-2">
                 <div class="col">
@@ -192,6 +204,15 @@
         @else
         $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a route',
+            dropdownParent: $("#editRiderForm")
+        });
+        @endif
+
+        @if($rider->shift_id != Null)
+        $('#shift_list').val({!! $rider->shift_id !!}).trigger('change');
+        @else
+        $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a Shift',
             dropdownParent: $("#editRiderForm")
         });
         @endif

@@ -115,6 +115,7 @@
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Employee Name</th>
+                                    <th class="border-primary border-darken-1">Employee Shift</th>
                                     <th class="border-primary border-darken-1">Employee CNIC</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
@@ -236,6 +237,7 @@
                             head.push('S.No');
                             head.push('Employee ID');
                             head.push('Employee Name');
+                            head.push('Shift');
                             head.push('Employee CNIC');
                             head.push('Hub');
                             head.push('Employee Type');
@@ -253,6 +255,7 @@
                                 row.push(index + 1);
                                 row.push(values.trax_id);
                                 row.push(values.name);
+                                row.push(values.shift);
                                 row.push(values.cnic);
                                 row.push(values.city_name);
                                 row.push(values.employee_type);
@@ -309,7 +312,7 @@
 
                     }
                 },
-                order: [[8, 'desc']],
+                order: [[9, 'desc']],
                 rowId: 'id',
                 columns: [
                     {
@@ -324,6 +327,7 @@
                     },
                     {data: 'trax_id', name: 'a.trax_id', class: 'align-middle trax_id'},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'shift', name: 'aes.name', class: 'align-middle shift'},
                     {data: 'cnic', name: 'a.cnic', class: 'align-middle cnic'},
                     {data: 'city_name', name: 'city_name', class: 'align-middle city_name'},
                     {data: 'employee_type', name: 'c.id', class: 'align-middle employee_type'},

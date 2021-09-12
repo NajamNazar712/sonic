@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Auth;
@@ -52,7 +53,9 @@ class AdminAttendanceController extends Controller
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic');
+            ->leftjoin('employee_shifts as aes', 'a.shift_id', 'aes.id')
+            ->leftjoin('employee_shifts as res', 'r.shift_id', 'res.id')
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic', 'employee_attendances.clock_in_datetime as clock_in_datetime', 'employee_attendances.clock_out_datetime as clock_out_datetime', 'aes.name as admin_shift', 'res.name as rider_shift');
 
         if (session('role_id') != 1) {
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
@@ -64,6 +67,27 @@ class AdminAttendanceController extends Controller
                     return $employee->rider_trax_id;
                 } else {
                     return $employee->trax_id;
+                }
+            })
+            ->editColumn('shift', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_shift;
+                } else {
+                    return $employee->admin_shift;
+                }
+            })
+            ->editColumn('clock_in', function ($employee) {
+                if ($employee->clock_in_datetime) {
+                    return Carbon::parse($employee->clock_in_datetime)->format("Y-m-d H:i:s");
+                } else {
+                    return $employee->clock_in;
+                }
+            })
+            ->editColumn('clock_out', function ($employee) {
+                if ($employee->clock_out_datetime) {
+                    return Carbon::parse($employee->clock_out_datetime)->format("Y-m-d H:i:s");
+                } else {
+                    return $employee->clock_out;
                 }
             })
             ->editColumn('name', function ($employee) {
