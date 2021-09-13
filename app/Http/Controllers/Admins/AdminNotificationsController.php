@@ -358,6 +358,9 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['new_rider_name','pickup_request_id','pickup_coordinator_name'];
         }
+        else if ($id == 113){
+            $details['fields'] = ['contact_person', 'sales_person', 'sales_person_contact', 'link'];
+        }
         else if ($id == 114){
             $details['fields'] = ['code'];
         }
@@ -428,7 +431,9 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['tracking_number','status','reason','link'];
         }
-
+        else if ($id == 150){
+            $details['fields'] = ['preview'];
+        }
 		return $details;
     }
 

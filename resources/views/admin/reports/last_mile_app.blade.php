@@ -25,6 +25,15 @@
                             </div>
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
+                                    <select name="search_rider_cat" id="search_rider_cat" class="form-control select2">
+                                        @foreach($riders_cat as $rider_cat)
+                                            <option value="{{$rider_cat->id}}">{{$rider_cat->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-4 mt-1">
+                                <fieldset class="form-group">
                                     <select name="search_hub" id="search_hub" class="form-control select2">
                                         @foreach($hubs as $city)
                                             <option value="{{$city->id}}">{{$city->name}}</option>
@@ -43,12 +52,12 @@
                             </div>
 
                             
-                            <div class="col-5 mt-1">
+                            <div class="col-4 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
                                 </fieldset>
                             </div>
-                            <div class="col-5 mt-1">
+                            <div class="col-4 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                                 </fieldset>
@@ -180,6 +189,7 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
+                        <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
                         <th class="border-primary border-darken-1">Update Via App</th>
                         <th class="border-primary border-darken-1">Update Via DBF</th>
@@ -404,6 +414,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider Category',
+                width:'100%',
+                allowClear:true
+            })
             $('#search_dn_no,#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -483,6 +498,7 @@
                             head.push('Zone');
                             head.push('Delivery Note Data');
                             head.push('Rider Name');
+                            head.push('Rider Category');
                             head.push('Total Shipment');
                             head.push('Update Via App');
                             head.push('Update Via DBF');
@@ -498,6 +514,7 @@
                                 row.push(values.zone);
                                 row.push(values.created_at);
                                 row.push(values.rider);
+                                row.push(values.rider_cat);
                                 row.push(values.total_shipments);
                                 row.push(values.shipments_rider_updated);
                                 row.push(values.shipments_dbf_updated);
@@ -511,6 +528,7 @@
 
                             footer.push('');
                             footer.push('Total');
+                            footer.push('-');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
@@ -531,7 +549,7 @@
             var dbf_shipments = 0;
 
 
-            $('#datatable').append("<tfoot><tr><th colspan='6'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><th colspan='7'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -556,8 +574,8 @@
                 ajax: {
                     url: '{{ route('admin.reports.last_mile_app.list') }}',
                     data: function (d) {
-
                         d.search_rider = $('#search_rider').val();
+                        d.search_rider_cat = $('#search_rider_cat').val();
                         d.search_zone = $('#search_zone').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_dn_no = $('#search_dn_no').val();
@@ -578,6 +596,7 @@
                     {data: 'zone', name: 'z.name', class: 'align-middle text-center zone'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
+                    {data: 'rider_cat', name: 'rd.name', class: 'align-middle text-center rider_cat'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
                     {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}

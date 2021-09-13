@@ -8,32 +8,32 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body text-center">
                 <h1 class="mb-5">Welcome to Sonic..</h1>
-                <div class="row justify-content-center">
-                    <div class="col-8">
+                <div class="row">
+                        <div class="col">
                         <table class="table table-bordered">
                             @if(count($sales_person_data)> 0)
                                 <thead>
-                                    <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1"><b>Sales Person Name</b></th>
-                                        <th class="border-primary border-darken-1"><b>Sales Person Phone</b></th>
-                                        <th class="border-primary border-darken-1"><b>Sales Person Email</b></th>
-                                    </tr>
+                                <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"><b>Sales Person Name</b></th>
+                                    <th class="border-primary border-darken-1"><b>Sales Person Phone</b></th>
+                                    <th class="border-primary border-darken-1"><b>Sales Person Email</b></th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td><h4>{{$sales_person_data['name']}}</h4></td>
-                                        <td><h4>{{$sales_person_data['phone']}}</h4></td>
-                                        <td><h4>{{$sales_person_data['email']}}</h4></td>
-                                    </tr>
+                                <tr>
+                                    <td><h4>{{$sales_person_data['name']}}</h4></td>
+                                    <td><h4>{{$sales_person_data['phone']}}</h4></td>
+                                    <td><h4>{{$sales_person_data['email']}}</h4></td>
+                                </tr>
                                 </tbody>
                             @endif
                             @if(count($poc)> 0)
                                 <thead>
-                                    <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1"><b>POC Name</b></th>
-                                        <th class="border-primary border-darken-1"><b>POC Phone</b></th>
-                                        <th class="border-primary border-darken-1"><b>POC Email</b></th>
-                                    </tr>
+                                <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"><b>POC Name</b></th>
+                                    <th class="border-primary border-darken-1"><b>POC Phone</b></th>
+                                    <th class="border-primary border-darken-1"><b>POC Email</b></th>
+                                </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($poc as $p)
@@ -47,11 +47,11 @@
                             @endif
                             @if(count($kam)> 0)
                                 <thead>
-                                    <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1"><b>KAM Name</b></th>
-                                        <th class="border-primary border-darken-1"><b>KAM Phone</b></th>
-                                        <th class="border-primary border-darken-1"><b>KAM Email</b></th>
-                                    </tr>
+                                <tr class="bg-primary white">
+                                    <th class="border-primary border-darken-1"><b>KAM Name</b></th>
+                                    <th class="border-primary border-darken-1"><b>KAM Phone</b></th>
+                                    <th class="border-primary border-darken-1"><b>KAM Email</b></th>
+                                </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($kam as $k)
@@ -65,8 +65,8 @@
                             @endif
                         </table>
                         @if(count($pickup_riders)> 0)
-                        <h2>Pickup Courier Details</h2>
-                        <table class="table table-bordered">
+                            <h2>Pickup Courier Details</h2>
+                            <table class="table table-bordered">
 
                                 <thead>
                                 <tr class="bg-primary white">
@@ -84,11 +84,19 @@
                                     </tr>
                                 @endforeach
                                 </tbody>
-                        </table>
+                            </table>
                         @endif
                     </div>
+                    {{--@if($shipper_payments != null)
+                        <div class="col-4">
+                            <h3 class="mb-2">Payments</h3>
+                            <div class="card">
+                                <div id="funnel-plot" class="height-400 echart-container"></div>
+                            </div>
+                        </div>
+                    @endif--}}
+                    </div>
                 </div>
-            </div>
         </div>
     </div>
 
@@ -124,7 +132,7 @@
 @endsection
 @section('js')
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
@@ -188,7 +196,73 @@
 
             });
             @endif
-        });
+            {{--@if($shipper_payments != null)
+                var myChart = echarts.init(document.getElementById('funnel-plot'));
+
+                // Chart Options
+                // ------------------------------
+                chartOptions = {
+
+                    // Add tooltip
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{b} : {c}"
+                    },
+
+                    // Add legend
+                    legend: {
+                        data : ['Pending','Processed','Paid']
+                    },
+
+                    // Add Custom Colors
+                    color: ['#00A5A8','#FF7D4D','#28D094'],
+
+                    // Add series
+                    series : [
+                        {
+                            name:'Funnel plot',
+                            type:'funnel',
+                            itemStyle: {
+                                normal: {
+                                    label: {
+                                        formatter: "{c}"
+                                    },
+                                    labelLine: {
+                                        show : false
+                                    }
+                                }
+                            },
+                            // width: '40%',
+                            data:[
+                                {value:"{{$shipper_payments->total_pending}}", name:'Pending', title:"{{number_format($shipper_payments->total_pending)}}"},
+                                {value:"{{$shipper_payments->total_process}}", name:'Processed'},
+                                {value:"{{$shipper_payments->total_paid}}", name:'Paid'}
+                            ]
+                        }
+                    ]
+                };
+
+                // Apply options
+                myChart.setOption(chartOptions);
+
+                // Resize chart
+                $(function () {
+
+                    // Resize chart on menu width change and window resize
+                    $(window).on('resize', resize);
+                    $(".menu-toggle").on('click', resize);
+
+                    // Resize function
+                    function resize() {
+                        setTimeout(function() {
+
+                            // Resize chart
+                            myChart.resize();
+                        }, 200);
+                    }
+                });
+            });
+            @endif--}}
     </script>
 
 @endsection

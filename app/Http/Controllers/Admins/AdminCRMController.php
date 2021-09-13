@@ -643,7 +643,8 @@ class AdminCRMController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date')            ->whereIn('crm_requests.status_id', [1, 5])
+			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date')
+            ->whereIn('crm_requests.status_id', [1, 5])
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -861,6 +862,10 @@ class AdminCRMController extends Controller
                 }
                 else if($requests->launched_added_by == 3){
                     return 'Consignee';
+                }
+                else if($requests->launched_added_by == 4)
+                {
+                    return 'External';
                 }
             })
             ->editColumn('last_comment_name', function($requests){
@@ -1097,7 +1102,8 @@ class AdminCRMController extends Controller
             ->editColumn('descr',function($request){
                 return strip_tags($request->description);
             })
-            ->editColumn('added_by', function($requests){
+            ->addColumn('added_by', function($requests){
+                return 1;
                 if($requests->launched_added_by == 0) {
                     return 'Admin';
                 }
@@ -1107,9 +1113,11 @@ class AdminCRMController extends Controller
                 else if($requests->launched_added_by == 2) {
                     return 'Shipper Substitute User';
                 }
-                else {
+                else if($requests->launched_added_by == 3){
                     return 'Consignee';
                 }
+
+                return $requests->launched_added_by;
             })
             ->addColumn('current_tat', function ($requests){
                 if($requests->created_at){
@@ -4276,21 +4284,26 @@ class AdminCRMController extends Controller
         $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
-        if(count($crm_request_ids) > 0){
-            if($comment != null){
-                foreach ($crm_request_ids as $request_id){
-                    $crm_comment = new CrmComments();
-                    $crm_comment->crm_request_id = $request_id;
-                    $crm_comment->comment_by_id = Auth::id();
-                    $crm_comment->comment_by = 0;
-                    $crm_comment->comment_type = $comment_type;
-                    $crm_comment->comment = $comment ;
-                    $crm_comment->save();
+        if(is_array($crm_request_ids)){
+            if(count($crm_request_ids) > 0){
+                if($comment != null){
+                    foreach ($crm_request_ids as $request_id){
+                        $crm_comment = new CrmComments();
+                        $crm_comment->crm_request_id = $request_id;
+                        $crm_comment->comment_by_id = Auth::id();
+                        $crm_comment->comment_by = 0;
+                        $crm_comment->comment_type = $comment_type;
+                        $crm_comment->comment = $comment ;
+                        $crm_comment->save();
+                    }
+                    return response()->json(['status'=> 1,'success'=>"Comments Added"]);
                 }
-                return response()->json(['status'=> 1,'success'=>"Comments Added"]);
+                else{
+                    return response()->json(['status'=> 0,'error'=>"Add Comment First"]);
+                }
             }
             else{
-                return response()->json(['status'=> 0,'error'=>"Add Comment First"]);
+                return response()->json(['status'=> 0,'error'=>"Select Request First"]);
             }
         }
         else{

@@ -28,12 +28,15 @@ class AdminAttendanceController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
         $cities = City::select('id','name')->get();
         $departments = AdminDepartment::select('id','name')->get();
-        $users = Admin::select('id','name')->get();
+        $users = Admin::where('status', 1)->select('id','name')->get();
         $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
         $trax_ids = array_merge($trax_id, $rider_trax_id);
+        $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+        $rider_cnic = Rider::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+        $cnic = array_merge($admin_cnic, $rider_cnic);
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
-        return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders]);
+        return view('admin.attendance.admin.index')->with(["departments" => $departments, "cities" => $cities, "admins" => $users, "trax_ids" => $trax_ids, "riders" => $riders, "cnics"=>$cnic]);
     }
 
     public function admin_attendance_list(Request $request)
@@ -49,11 +52,11 @@ class AdminAttendanceController extends Controller
             ->leftjoin('riders as r', 'r.id', 'employee_attendances.employee_id')
             ->leftjoin('cities as rc', 'rc.id', 'r.city_id')
             ->leftjoin('rider_types as rt', 'rt.id', 'r.rider_type_id')
-            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status');
+            ->select('a.name as admin_name', 'a.trax_id as trax_id', 'c.name as city_name', 'c.id as city_id', 'a.designation as designation', 'r.name as rider_name', 'r.trax_id as rider_trax_id', 'rc.name as rider_city_name', 'rc.id as rider_city_id', 'rt.name as rider_type', 'rt.id as rider_type_id', 'employee_attendances.attendance_date as attendance_date', 'employee_attendances.clock_in as clock_in', 'employee_attendances.clock_out as clock_out', 'employee_attendances.clock_in_latitude as clock_in_latitude', 'employee_attendances.clock_in_longitude as clock_in_longitude', 'employee_attendances.clock_out_latitude', 'employee_attendances.clock_out_longitude', 'ad.name as department', 'ad.id as department_id', 'employee_attendances.employee_type', 'employee_attendances.clock_in_location as clock_in_status', 'employee_attendances.clock_out_location as clock_out_status', 'r.cnic as rider_cnic', 'a.cnic as admin_cnic');
 
-        if (session('role_id') != 1) {
+        /*if (session('role_id') != 1) {
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-        }
+        }*/
 
         $datatable = Datatables::of($attendances)
             ->editColumn('trax_id', function ($employee) {
@@ -97,6 +100,16 @@ class AdminAttendanceController extends Controller
                 } else {
                     return $employee->department;
                 }
+            })
+            ->editColumn('cnic', function ($employee) {
+                if ($employee->employee_type == 2) {
+                    return $employee->rider_cnic;
+                } else {
+                    return $employee->admin_cnic;
+                }
+            })
+            ->addColumn('attendance_day', function ($employee) {
+                    return date('l', strtotime($employee->attendance_date));
             })
             ->addColumn("clock_in_location", function ($employee) {
                 if ($employee->clock_in_latitude && $employee->clock_in_longitude) {
@@ -159,6 +172,13 @@ class AdminAttendanceController extends Controller
             $datatable->where(function($q) use ($search_trax_id){
                 $q->where([['a.trax_id', $search_trax_id],['employee_type',1]])
                     ->orWhere([['r.trax_id', $search_trax_id],['employee_type',2]]);
+            });
+        }
+
+        if ($search_cnic = $request->get('search_cnic')) {
+            $datatable->where(function($q) use ($search_cnic){
+                $q->where([['a.cnic', $search_cnic],['employee_type',1]])
+                    ->orWhere([['r.cnic', $search_cnic],['employee_type',2]]);
             });
         }
 

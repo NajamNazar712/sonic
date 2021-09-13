@@ -100,18 +100,37 @@
                     <div class="modal-body text-center">
                         <div class="row justify-content-center">
                             <div class="col">
-                                <div class="form-group">
-                                    <select name="rider" id="riders" class="form-control select2">
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                <fieldset class="form-group">
+                                    <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" required>
+                                        @foreach($operation_rider_category as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
                                     </select>
-                                </div>
+                                    <div class="danger" id="operation_error" style="display:none;">This field is required</div>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="rider" id="riders" class="form-control select2" required>
+
+                                    </select>
+                                    <div class="danger" id="rider_error" style="display:none;">This field is required</div>
+                                </fieldset>
+                            </div>
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="route" id="route" class="form-control select2" required>
+                                        @foreach($routes as $route)
+                                            <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="danger" id="route_error" style="display:none;">This field is required</div>
+                                </fieldset>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" id="reassign_button" class="btn btn-primary">Reassign</button>
+                        <button type="button" id="reassign_button" class="btn btn-primary" disabled>Reassign</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -119,6 +138,38 @@
         </div>
     </div>
     <!--reassign popup -->
+
+    <!--otp popup -->
+    <div class="modal fade" id="OtpModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="OtpModal"
+         aria-hidden="true" style="top:30%;">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content col">
+                <div class="modal-header text-center">
+                    <div class="row align-items-center">
+                        <div class="col sonic_logo align-middle text-left">
+                            <img src="{{asset('img/sonic_logo_new.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                        </div>
+
+                        <div class="col trax_logo align-middle text-right">
+                            <img src="{{asset('img/trax_logo_new.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body  text-center">
+                    <div class="row justify-content-center">
+                        <div class="form-group form-inline">
+                            <input type="text" class="form-control otp" autofocus id="otp_input" placeholder="Enter Verification Code">
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button tabindex="-1" type="button" class="btn btn-primary ml-1" id="otp_submit" disabled>Enter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--otp popup -->
 
 @endsection
 
@@ -366,6 +417,14 @@
                 }
             });
 
+            $('#otp_input').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask': '999999'
+            });
+
             $('#search_tracking').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -426,7 +485,85 @@
                 var note_id = $(this).parents('tr').attr('id');
                 printUndelivered(note_id);
             });
+            $('body').on('keyup change','#otp_input',function() {
+                if($(this).val().length === 6){
+                    $('#otp_submit').attr('disabled', false);
+                }
+                else{
+                    $('#otp_submit').attr('disabled', true);
+                }
+            });
 
+            $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Category*',
+                width: '100%',
+            }).bind('select2:select', function () {
+                if(this.value){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.operation_riders') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'operation_rider_id': this.value,
+                        }
+                    }).done(function(data){
+
+                        if (data.status == 1) {
+                            var html = "";
+                            $.each(data.riders, function(key,value) {
+                                html += `<option value="${value.id}">${value.name}</option>`;
+                            });
+                            $('#riders').html(html);
+                            $('#riders').val('').trigger('change');
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+            $('#route').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Route*',
+                width: '100%',
+            });
+            $('#riders').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider*',
+                width: '100%',
+            });
+            $('#riders').on('change',function () {
+                var route = $(this).find(":selected").data("id");
+                var rider_id = $(this).val();
+                if(rider_id != null){
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.rider_dncc_status') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'rider_id': rider_id,
+                        }
+                    }).done(function(data){
+                        if (data.status == 1) {
+                            ccd_rider = parseInt(data.ccd_rider);
+                            $('#route').val(route).trigger('change');
+                            $("#reassign_button").attr('disabled',false);
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                            $("#reassign_button").attr('disabled',true);
+                        }
+                    });
+                }
+                else{
+                    $('#route').val(route).trigger('change');
+                }
+
+            });
 
             function printTemp(id,temp = null) {
                 $.ajax({
@@ -545,58 +682,167 @@
                 {{--}--}}
             {{--});--}}
 
-
             $('#reassign_button').on('click', function(){
-               var rider = $('#riders').val();
-               console.log(rider);
-                swal({
-                    text: 'Are you sure, you want to Reassign rider?',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.delivery.receive.reassign_rider') !!}',
-                            method: 'post',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'rider': rider,
-                                'delivery_note_id': $('#delivery_note_id').val()
-                            }
-                        })
-                            .done(function(data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                                table.draw(true);
-                                $('#reassign_modal').modal('hide');
-                            });
+                var operation_id = $('#operation_rider_id').val();
+                var route = $('#route').val();
+                var rider = $('#riders').val();
+                var errors = 0;
+                if (rider !== '' && rider !== null) {
+                    $('#rider_error').css('display', 'none');
+                } else {
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#rider_error').css('display', 'block');
+                }
+                if (route !== '' && route !== null) {
+                    $('#route_error').css('display', 'none');
+                } else {
+                    var error = "Route not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#route_error').css('display', 'block');
+                }
+                if(errors == 0){
+                    if(operation_id === '2'){
+                        reassign_rider();
+                    }else{
+                        otp_generation();
                     }
-                });
+                }
             });
+
+            $('#otp_submit').on('click', function () {
+                otp_verification();
+            });
+
+            $('#otp_input').keypress(function (event) {
+                if(event.keyCode == 13){
+                    otp_verification();
+                }
+            });
+
+            function reassign_rider(){
+                var rider = $('#riders').val();
+                if(rider){
+                    swal({
+                        text: 'Are you sure, you want to Reassign rider?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.delivery.receive.reassign_rider') !!}',
+                                method: 'post',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'rider': rider,
+                                    'delivery_note_id': $('#delivery_note_id').val()
+                                }
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    table.draw(true);
+                                    $('#reassign_modal').modal('hide');
+                                });
+                        }
+                    });
+                }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            }
+
+            function otp_generation(){
+                var rider = $('#riders').val();
+                if(rider){
+                    $('#OtpModal').modal('show');
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.otp.generate') !!}',
+                        method: 'POST',
+                        data: {
+                            'rider': rider,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        $('#otp_input').focus();
+                    });
+                }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            }
+
+            function otp_verification() {
+                var otp = $('#otp_input').val();
+                var rider = $('#riders').val();
+                if(rider){
+                    if (otp.length == 6) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.note.otp.verify') !!}',
+                            type: 'POST',
+                            data: {
+                                'rider': rider,
+                                'otp': otp,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            $('#otp_input').val('');
+                            $('#otp_submit').attr('disabled', true);
+                            if (data.status === 0) {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                $('#OtpModal').modal('hide');
+                                reassign_rider();
+                            }
+                        });
+                    }
+                }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            }
+
             $('#reassign_modal').on('hide.bs.modal', function (e) {
                 $('#reassign_rider_form')[0].reset();
-                $('#riders').val('').trigger('change');
+                $("#reassign_button").attr('disabled',true);
+                $('#riders').html("");
+                $('#operation_rider_id').val('').trigger('change');
+                $('#route').val('').trigger('change');
+                $('#rider_error').css('display', 'none');
+                $('#route_error').css('display', 'none');
                 $('#delivery_note_id').val('');
+                $('#otp_input').val('');
+                $('#OtpModal').modal('hide');
             });
 
         });

@@ -109,6 +109,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var city = @json($shipment['consignee_city_id']);
+
             $('#consignee_city').select2({
                 width: '100%',
                 placeholder: 'City*'
@@ -122,6 +124,7 @@
                   var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                   $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
                   $('#intercept_type').val(2);
+                  $('#consignee_city').val(city).trigger('change');
                   $('#consignee_city').addClass('disabled')  //disable class
                       .prop({'name' : 'new_consignee_city'  , disabled : true}); //change name and disbale
                   $( "#consignee_name" ).prop('readonly', true);

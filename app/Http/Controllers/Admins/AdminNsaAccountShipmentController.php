@@ -267,7 +267,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                                     ShipmentsJourneyController::add($nsa_shipment->id, $status_id, $status_id, NULL, NULL, NULL, $admin_id);
 
-                                    if (in_array($nsa_shipment->user_id, [7762, 10354])) {
+                                    if (in_array($nsa_shipment->user_id, [10354])) {
                                         if ($nsa_shipment->pickup_address->city_id != $nsa_shipment->consignee_city_id) {
                                             $status_id = 4;
 
@@ -1158,7 +1158,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipment_details = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $shipment_ids[] = $shipment_id;
-                        $weights['shipment_id'] = trim($row['weight']);
+                        $weights[$shipment_id] = trim($row['weight']);
 
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
@@ -1184,7 +1184,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $carrefour_shipment->shipper_status_id = $status_id;
                                     $carrefour_shipment->consignee_status_id = $status_id;
 
-                                    $carrefour_shipment->actual_weight = $weights['shipment_id'];
+                                    $carrefour_shipment->actual_weight = $weights[$carrefour_shipment->id];
 
                                     $carrefour_shipment->save();
 

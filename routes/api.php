@@ -90,7 +90,7 @@ Route::name('api.')->group(function () {
 
 	});
 
-	Route::middleware('APIThrottle:150,0.5')->prefix('shipment')->name('shipment.')->group(function() {
+	Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function() {
 		Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
 	});
 
@@ -302,5 +302,6 @@ Route::name('api.')->group(function () {
 
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
     Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
+
     
 });

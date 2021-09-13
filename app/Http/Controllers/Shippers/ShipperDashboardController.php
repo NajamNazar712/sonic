@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Controllers\ShipperAgreementController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AverageShipmentCycle;
@@ -57,6 +58,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
+use App\http\Models\Shipper\ShipperPayment;
 use App\Http\Models\Shipper\UserOtpVerification;
 use App\http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
@@ -154,7 +156,15 @@ class ShipperDashboardController extends Controller
             ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
 
 
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders]);
+            /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
+            if($shipper_payment->exists()){
+                $shipper_payment = $shipper_payment->first();
+            }
+            else{
+                $shipper_payment = null;
+            }*/
+            $shipper_payment = null;
+            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
         }
     }
     public function opt_verify(Request $request){
@@ -1604,7 +1614,15 @@ class ShipperDashboardController extends Controller
             $user_attachment->save();
             session(['agreement_signed' => 1]);
             User::where('id',session('user_id'))->update(['agreement_signed' => 1]);
+
+            NotificationsController::send(149,session('user_id'));
         }
         return redirect()->back()->with(['success'=>"Agreement Signed Successfully!"]);
+    }
+
+    public function get_agreement(Request $request)
+    {
+        $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
+        return $html;
     }
 }
