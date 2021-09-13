@@ -427,8 +427,8 @@
                         </div>
                         <div class="col-12">
                             <div class="form-group">
-                                <label for="credit_limit">Credit Limit</label>
-                                <input type="text" name="credit_limit" id="credit_limit" class="form-control" data-rule-required="true" data-msg-required="Credit is required">
+                                <label for="credit_limit">Maximum Credit Limit</label>
+                                <input type="text" name="credit_limit" id="credit_limit" class="form-control" data-rule-required="true" data-msg-required="Credit is required" placeholder="Maximum credit limit">
                             </div>
                         </div>
                     </div>
