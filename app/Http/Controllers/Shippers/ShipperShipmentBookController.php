@@ -62,6 +62,8 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
+use App\http\Models\Admin\Retail\RetailFranchise;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
@@ -552,11 +554,17 @@ class ShipperShipmentBookController extends Controller
                     if ($service_type_id == 1) {
                         if ($request->filled('self_collection')) {
                             $self_collection = TRUE;
+                            $express_center_id = $request->express_center;
+                            $express_center_type = $request->center_franchise;
                         } else {
+                            $express_center_id = 0;
+                            $express_center_type = 0;
                             $self_collection = FALSE;
                         }
                     }
                     else{
+                        $express_center_id = 0;
+                        $express_center_type = 0;
                         $self_collection = FALSE;
                     }
 
@@ -678,7 +686,10 @@ class ShipperShipmentBookController extends Controller
                     $business_category_id = 1;
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id);
-
+                    $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id)->get()->first();
+                    $shipment_detail->center_frachise_id = $express_center_id;
+                    $shipment_detail->center_frachise_type = $express_center_type;
+                    $shipment_detail->save();
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
                         $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -3210,12 +3221,24 @@ class ShipperShipmentBookController extends Controller
                 if ($service_type_id == 1) {
                     if ($request->filled('self_collection')) {
                         $self_collection = TRUE;
+
+                        $express_center_id = $request->express_center;
+                        
+                        $express_center_type = $request->center_franchise;
                     } else {
                         $self_collection = FALSE;
+                        
+
+                        $express_center_id = 0;
+                        $express_center_type = 0;
                     }
                 }
                 else{
                     $self_collection = FALSE;
+                    
+
+                    $express_center_id = 0;
+                    $express_center_type = 0;
                 }
 
                 if ($service_type_id != 5) {
@@ -3331,6 +3354,11 @@ class ShipperShipmentBookController extends Controller
                 }
                 $business_category_id = 1;
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+                $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id)->get()->first();
+                $shipment_detail->center_frachise_id = $express_center_id;
+                $shipment_detail->center_frachise_type = $express_center_type;
+                $shipment_detail->save();
+                
                 if(session('user_type') == 2){
                     $substitute_user_shipment = new SubstituteUserShipment();
                     $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -6824,5 +6852,12 @@ class ShipperShipmentBookController extends Controller
 
         }
 
+    }
+
+    public function get_express_centers(Request $request){
+        $trax_centers = RetailTraxCenter::where('default_hub', $request->hub_id)->where('status', 1)->get();
+        $trax_franchise = RetailFranchise::where('default_hub', $request->hub_id)->where('status',1)->get();
+           
+        return response()->json(['status' => 1, 'trax_centers' => $trax_centers, 'trax_franchise' => $trax_franchise]);
     }
 }
