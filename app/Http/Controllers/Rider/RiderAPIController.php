@@ -3544,22 +3544,24 @@ class RiderAPIController extends Controller
                             }
                             $rider_delivery->save();
 
-                            $picture_path = 'rider_delivery/' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
                             $environment = config('app.env');
 
                             if ($request->has('audio')) {
+                                $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
@@ -8061,7 +8063,8 @@ class RiderAPIController extends Controller
                             }
                             $rider_return_delivery->save();
                             if ($request->has('picture')) {
-                                $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '.png';
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '_' . $time . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                 $rider_return_delivery->picture_path = $picture_path;
                                 $rider_return_delivery->save();
@@ -8069,15 +8072,16 @@ class RiderAPIController extends Controller
 
                             $environment = config('app.env');
                             if ($request->has('audio')) {
+                                $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time .'.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time .'.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
@@ -8790,25 +8794,29 @@ class RiderAPIController extends Controller
                         $rider_delivery->save();
 
                         if ($request->has('picture')) {
-                            $picture_path = 'rider_delivery/picture_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/picture_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('cnic_image')) {
-                            $picture_path = 'rider_delivery/cnic_image_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/cnic_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->cnic_image));
                             $rider_delivery->cnic_image = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('house_image')) {
-                            $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->house_image));
                             $rider_delivery->house_image = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('ccd_image')) {
-                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->ccd_image));
                             $rider_delivery->ccd_image = $picture_path;
                             $rider_delivery->save();
@@ -9036,14 +9044,16 @@ class RiderAPIController extends Controller
 
 
                             if ($request->has('picture')) {
-                                $picture_path = 'rider_return_delivery/picture_' . $rider_return_delivery->id . '.png';
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_return_delivery/picture_' . $rider_return_delivery->id . '_' . $time . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                 $rider_return_delivery->picture_path = $picture_path;
                                 $rider_return_delivery->save();
                             }
 
                             if ($request->has('pod_image')) {
-                                $picture_path = 'rider_return_delivery/pod_image_' . $rider_return_delivery->id . '.png';
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_return_delivery/pod_image_' . $rider_return_delivery->id . '_' . $time . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->pod_image));
                                 $rider_return_delivery->pod_image = $picture_path;
                                 $rider_return_delivery->save();
