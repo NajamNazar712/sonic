@@ -3232,7 +3232,7 @@ class AdminAPIController extends Controller
                 $admin_attendance->attendance_date = $attendance_date;
             }
             if ($request->action == 1) {
-                $admin_attendance->clock_in_datetime = Carbon::now();
+                $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
                 $admin_attendance->clock_in_latitude = $request->latitude;
                 $admin_attendance->clock_in_longitude = $request->longitude;
                 $admin_attendance->clock_in_location = $location_status;
@@ -3250,7 +3250,7 @@ class AdminAPIController extends Controller
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
             } elseif ($request->action == 2) {
-                $admin_attendance->clock_out_datetime = Carbon::now();
+                $admin_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
                 $admin_attendance->clock_out_latitude = $request->latitude;
                 $admin_attendance->clock_out_longitude = $request->longitude;
                 $admin_attendance->clock_out_location = $location_status;

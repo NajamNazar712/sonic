@@ -976,6 +976,9 @@ class Permission
             'human_resource.fnf.edit_fnf_request' => 577,
             'human_resource.fnf.fnf_history_index' => 578,
 
+            'human_resource.employees_shift.index' => 592,
+            'human_resource.employees_shift.list' => 592,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
