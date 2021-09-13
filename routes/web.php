@@ -3153,6 +3153,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
         });
 
+        Route::prefix('employee_shifts')->name('employee_shifts.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_shift_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_shift_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@employee_shift_status')->name('status');
+            Route::post('add_shift', 'Admins\AdminHumanResourseController@employee_shift_add')->name('add_shift');
+            Route::post('edit_shift', 'Admins\AdminHumanResourseController@employee_shift_edit')->name('edit_shift');
+        });
+
         Route::prefix('designation')->name('designation.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');

@@ -162,6 +162,17 @@
                                     </select>
                                 </fieldset>
                             </div>
+
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="rider_shift" id="shift_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($shifts as $shift)
+                                            <option value="{{$shift->id}}"> {{$shift->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -222,6 +233,11 @@
             $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Rider Category',
+                dropdownParent: $('#approveRiderModal')
+            });
+            $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select a Shift',
                 dropdownParent: $('#approveRiderModal')
             });
             $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled', 'disabled');
