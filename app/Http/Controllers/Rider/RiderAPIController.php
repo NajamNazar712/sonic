@@ -9402,12 +9402,12 @@ class RiderAPIController extends Controller
                 ->where('r.id', $rider_id)
                 ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
             $shift_exists = 0;
-            if($shift->exists()){
+            if ($shift->exists()) {
                 $shift = $shift->first();
                 $shift_exists = 1;
             }
 
-            foreach ($dates as $date){
+            foreach ($dates as $date) {
                 $datum = array();
                 $datum["date"] = Carbon::parse($date)->format("d");
                 $datum["month"] = Carbon::parse($date)->format("m");
@@ -9415,26 +9415,36 @@ class RiderAPIController extends Controller
                 $attendance = EmployeeAttendance::where('employee_id', $rider_id)
                     ->where('employee_type', 2)
                     ->whereDate('attendance_date', $date);
-                if($attendance->exists()){
+                if ($attendance->exists()) {
                     $attendance = $attendance->first();
-                    if ($shift_exists == 1){
-                        $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
-                        if($attendance->clock_in_datetime){
-                            $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                    if ($shift_exists == 1) {
+                        if ($attendance->clock_in_datetime) {
+                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                            if ($attendance_date == $clock_in_date) {
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                                if ($time_diff > $shift->grace_time) {
+                                    $datum["status"] = 2;//Late
+                                } else {
+                                    $datum["status"] = 1;//Present
+                                }
+                            } else {
+                                $datum["status"] = 2;//Late
+                            }
+                        } else {
+                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                            if ($time_diff > $shift->grace_time) {
+                                $datum["status"] = 2;//Late
+                            } else {
+                                $datum["status"] = 1;//Present
+                            }
                         }
-                        $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
-                        if ($time_diff > $shift->grace_time){
-                            $datum["status"] = 2;//Late
-                        }
-                        else{
-                            $datum["status"] = 1;//Present
-                        }
-                    }
-                    else{
+                    } else {
                         $datum["status"] = 1;
                     }
-                }
-                else{
+                } else {
                     $datum["status"] = 3;//Absent
                 }
                 $data[] = $datum;
