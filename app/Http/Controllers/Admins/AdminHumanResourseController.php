@@ -706,6 +706,32 @@ class AdminHumanResourseController extends Controller
                     }
                     $employee->request_status_id = 3;
                     $employee->save();
+
+                    if($employee->employee_type_id == 1)
+                    {
+
+                        $admin = Admin::where('trax_id',$employee->trax_id);
+
+                        if($admin->doesntExist())
+                        {
+                            $admin = new Admin();
+
+                            $admin->name = $employee->name;
+                            $admin->email = $employee->official_email;
+                            $admin->phone_number = $employee->phone_number;
+                            $admin->cnic = $employee->cnic;
+//                        $admin->role_id = ; // Later
+                            $admin->default_hub_id = $employee->city_id;
+                            $admin->password = bcrypt($employee->pin);
+                            $admin->designation = $employee->designation->name;
+
+                            $admin->trax_id = $employee->trax_id;
+                            $admin->employee_id = $employee->id;
+
+                            $admin->save();
+                        }
+
+                    }
                 }
             }
 
