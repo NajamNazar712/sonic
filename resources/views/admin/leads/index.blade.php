@@ -185,6 +185,9 @@
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Message</th>
+                        <th class="border-primary border-darken-1">Service</th>
+                        <th class="border-primary border-darken-1">Brand</th>
+                        <th class="border-primary border-darken-1">Company</th>
                         <th class="border-primary border-darken-1">Lead Reference</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
@@ -570,6 +573,9 @@
                             head.push('Phone No');
                             head.push('Email Address');
                             head.push('Message');
+                            head.push('Service');
+                            head.push('Brand');
+                            head.push('Company');
                             head.push('Lead Reference');
                             head.push('Requested Date/Time');
                             head.push('Sale Person Tagged');
@@ -593,6 +599,9 @@
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
                                 row.push(values.message);
+                                row.push(values.service);
+                                row.push(values.brand);
+                                row.push(values.company);
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
                                 row.push(values.sale_person);
@@ -729,6 +738,9 @@
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
                     {data: 'message', name: 'leads.message', class: 'align-middle message'},
+                    {data: 'service', name: 'sl.name', class: 'align-middle service'},
+                    {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
+                    {data: 'company', name: 'leads.company', class: 'align-middle company'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
