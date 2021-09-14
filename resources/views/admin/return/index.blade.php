@@ -40,11 +40,11 @@
 
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Shipper Phone(s)</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -405,11 +405,11 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Vendor');
                             head.push('Tracking No.');
                             head.push('Order ID');
                             head.push('Shipper Name');
                             head.push('Shipper Phone');
+                            head.push('Vendor');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -439,11 +439,11 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.vendor_name);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
                                 row.push(values.shipper_phone);
+                                row.push(values.vendor_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -808,11 +808,11 @@
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
+                    {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
