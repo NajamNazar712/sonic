@@ -86,7 +86,6 @@ class TrackingController extends Controller
         $case_nature_type = $request->complaint_id;
         $request_channel = 2;
         $discription = $request->description;
-        $crmstatus = 1;
         $reopencount = 0;
         $shipment_id = $request->shipment_id;
         $launched_by = 4;
@@ -95,12 +94,11 @@ class TrackingController extends Controller
         $data = new CrmRequest();
         $data->case_nature_id = $case_nature;
         $data->case_nature_type_id =$case_nature_type ;
-        $data->description ='Consignee :('.$name.') | Phone Number : ('.$phoneno.') | Complain : '. $discription;
-        $data->channel_id =$request_channel ;
-        $data->status_id = $crmstatus;
-        $data->launched_by = $launched_by ;
-       $data->shipment_id = $shipment_id;
-       $data->reopen_count = $reopencount;
+        $data->description = 'Consignee :('.$name.') | Phone Number : ('.$phoneno.') | Complain : '. $discription;
+        $data->channel_id =$request_channel;
+        $data->status_id = 1;
+        $data->launched_by = $launched_by;
+        $data->shipment_id = $shipment_id;
 
         $data->save();
         $id = str_pad($data->id, 6, 0, STR_PAD_LEFT);

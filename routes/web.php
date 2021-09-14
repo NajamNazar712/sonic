@@ -3153,6 +3153,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
         });
 
+        Route::prefix('employee_shifts')->name('employee_shifts.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_shift_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_shift_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@employee_shift_status')->name('status');
+            Route::post('add_shift', 'Admins\AdminHumanResourseController@employee_shift_add')->name('add_shift');
+            Route::post('edit_shift', 'Admins\AdminHumanResourseController@employee_shift_edit')->name('edit_shift');
+        });
+
         Route::prefix('designation')->name('designation.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
@@ -3221,6 +3229,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+        Route::get('/mark', 'Admins\Attendance\AdminAttendanceController@mark_attendance_index')->name('mark');
+        Route::post('/mark/submit', 'Admins\Attendance\AdminAttendanceController@mark_attendance_submit')->name('mark.submit');
+        Route::get('/mark/list', 'Admins\Attendance\AdminAttendanceController@mark_attendance_list')->name('mark.list');
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
@@ -3249,6 +3260,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('{id}/update', 'Admins\IncidenceMonitoringController@update')->name('update');
             
     });
+
 
 });
 

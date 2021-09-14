@@ -72,9 +72,12 @@ class ProcessAgentCallMonitoring implements ShouldQueue
 
                         $rec = array();
                         $rec['admin_id'] = $admin_id;
-                        $rec['count'] = 0;
-                        if($calls_count = AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',Carbon::today())->where('created_at','<=', $time)->exists()){
-                            $rec['count'] = $calls_count->count();
+
+                        if(AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',Carbon::today())->where('created_at','<=', $time)->exists()){
+                            $rec['count'] = AgentCallMonitoring::where('agent_id',$admin_id)->where('created_at','>=',Carbon::today())->where('created_at','<=', $time)->count();
+                        }
+                        else{
+                            $rec['count'] = 0;
                         }
                         $recs[] = $rec;
                     }

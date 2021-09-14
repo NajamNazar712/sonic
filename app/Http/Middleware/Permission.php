@@ -976,6 +976,9 @@ class Permission
             'human_resource.fnf.edit_fnf_request' => 577,
             'human_resource.fnf.fnf_history_index' => 578,
 
+            'human_resource.employee_shifts.index' => 592,
+            'human_resource.employee_shifts.list' => 592,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
@@ -1025,7 +1028,7 @@ class Permission
             'settings.last_mile_cron.index' => 565,
 
             'settings.dhl_sync_time.index' => 581,
-            'settings.international_automation_user.index' => 581,
+            'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
 
