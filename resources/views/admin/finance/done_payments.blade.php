@@ -540,7 +540,7 @@
 				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
 
 					buttons: [
-						@if (session('role_id') == 1 || in_array(62, session('permissions')))
+						@if (session('role_id') == 1 || in_array(597, session('permissions')))
 					{
 						text: 'Generate Report',
 						className: 'btn btn-primary paid',
