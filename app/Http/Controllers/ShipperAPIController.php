@@ -189,11 +189,13 @@ class ShipperAPIController extends Controller
                         } elseif (in_array($shipment->shipper_status_id, [3, 49])) {
                             $shipment_info['origin'] = $pickup_address->city->name;
                             $shipment_info['destination'] = $shipment->consignee_city->name;
-                            $fleet = Fleet::join('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
-                                ->join('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
-                                ->join('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
+                            $fleet = Fleet::leftjoin('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
+                                ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
+                                ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
                                 ->select('fleets.tracking_id as runner_id')
-                                ->where('cs.shipment_id', $shipment->id);
+                                ->where('cs.shipment_id', $shipment->id)
+                                ->where('cm.status_id', 1)
+                                ->where('mb.status', 0);
                             if ($fleet->exists()) {
                                 $fleet = $fleet->first();
                                 $shipment_info['runner_id'] = $fleet->runner_id;
