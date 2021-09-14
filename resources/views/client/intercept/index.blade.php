@@ -67,6 +67,18 @@
 
                                 <input type="text" name="amount"  id="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
                             </div>
+
+                            <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
+                                <label class="d-block">Self Collection</label>
+                                <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
+                            </div>
+
+                            <div id="express_center_div" class="form-group text-center p-1 border border-light rounded d-none">
+                                <input type="hidden" name="center_franchise" id="center_franchise">
+
+                                <select name="express_center" class="select2" id="express_center" data-rule-required="true" data-msg-required="Express Center/Franchise is required">
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -110,6 +122,51 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            var con_city = $('#consignee_city').val();
+
+            $.ajax({
+                        url: '{!! route('admin.intercept.get_express_centers') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub_id': con_city,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+
+                            if(data.status){
+                                    $('#express_center').prepend('<option value="" selected="selected"></option>')
+                                $.each(data.trax_centers, function (index, trax_centers) {
+                                    $('#express_center').append('<option value="'+trax_centers.id+'" id="trax_center">'+trax_centers.name+'</option>')
+                                });
+                                $.each(data.trax_franchise, function (index, trax_franchise) {
+                                    $('#express_center').append('<option value="'+trax_franchise.id+'"  id="trax_franchise">'+trax_franchise.name+'</option>')
+                                });
+                            }else{
+                                $('#agend_input').addClass('d-none');
+
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            
+            });
+
+            $('#express_center').select2({
+                width: '100%',
+                placeholder: 'Express Center / Franchise*'
+            }).bind('change', function() {
+                    var center_franchise = 0;
+                if($(this).children(":selected").attr("id") == 'trax_center'){
+                     center_franchise = 1;
+                }else{
+                    center_franchise = 2;
+                }
+                    $('#center_franchise').val(center_franchise);
+            });
+            $('#self_collection').checkboxpicker().bind('change', function() {
+                $('#express_center_div').removeClass('d-none');
+
+            });
+
             var city = @json($shipment['consignee_city_id']);
             var name = @json($shipment['consignee_name']);
             var email = @json($shipment['consignee_email']);
@@ -118,7 +175,35 @@
             $('#consignee_city').select2({
                 width: '100%',
                 placeholder: 'City*'
-            });
+            }).bind('change', function() {
+				$(this).valid();
+
+				$.ajax({
+                        url: '{!! route('cod.shipment.book.get_express_centers') !!}',
+                        method: 'POST',
+                        data: {
+                            'hub_id': $(this).val(),
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            $('#express_center').children().remove();
+                            if(data.status){
+                                    $('#express_center').prepend('<option value="" selected="selected"></option>')
+                                $.each(data.trax_centers, function (index, trax_centers) {
+                                    $('#express_center').append('<option value="'+trax_centers.id+'" id="trax_center">'+trax_centers.name+'</option>')
+                                });
+                                $.each(data.trax_franchise, function (index, trax_franchise) {
+                                    $('#express_center').append('<option value="'+trax_franchise.id+'"  id="trax_franchise">'+trax_franchise.name+'</option>')
+                                });
+                            }else{
+                                $('#agend_input').addClass('d-none');
+
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                            
+                });
+                });
             $('#consignee').select2({
                 width: '100%',
                 placeholder: 'Consignee*'

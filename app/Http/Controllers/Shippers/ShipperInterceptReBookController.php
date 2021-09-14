@@ -12,6 +12,8 @@ use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\ShipmentDetail;
 use Illuminate\Support\Facades\Auth;
 
 class ShipperInterceptReBookController extends Controller
@@ -63,7 +65,19 @@ class ShipperInterceptReBookController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = session('user_id');
         $intercept_type = $request->consignee;
+        if ($request->filled('self_collection')) {
+            $self_collection = TRUE;
 
+            $express_center_id = $request->express_center;
+            
+            $express_center_type = $request->center_franchise;
+        } else {
+            $self_collection = FALSE;
+            
+
+            $express_center_id = 0;
+            $express_center_type = 0;
+        }
         $shipment_status = $shipment->status_shipper->name;
 
         if ($shipment['shipper_status_id'] == 12) {
@@ -122,7 +136,25 @@ class ShipperInterceptReBookController extends Controller
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
                     }
 
+                    if($self_collection == TRUE){
+                        $shipment_self_collection = new SelfCollectionShipment();
+                        $shipment_self_collection->shipment_id = $shipment->id;
+                        $shipment_self_collection->save();
 
+                        $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id);
+                        if ($shipment_detail->exists()) {
+                            $shipment_detail = $shipment_detail->first();
+                            $shipment_detail->center_frachise_id = $express_center_id;
+                            $shipment_detail->center_frachise_type = $express_center_type;
+                            $shipment_detail->save();
+                        }else{
+                            $shipment_detail = new ShipmentDetail();
+                            $shipment_detail->shipment_id = $shipment->id;
+                            $shipment_detail->center_frachise_id = $express_center_id;
+                            $shipment_detail->center_frachise_type = $express_center_type;
+                            $shipment_detail->save();
+                        }    
+                    }
 
 
                     return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);

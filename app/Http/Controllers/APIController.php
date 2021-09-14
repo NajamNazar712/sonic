@@ -37,6 +37,7 @@ use App\Http\Models\InvoiceShipment;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentDetail;
 use App\http\Models\ShipmentOrderDate;
@@ -57,6 +58,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
 use SnappyPDF;
@@ -3933,12 +3935,16 @@ class APIController extends Controller
                     if ($validate->fails()) {
                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                     } else {
+                        $self_collection = False;
                         if ($request->consignee_type == 1) {
 
                             $rules = [
                                 'consignee_address' => ['required', 'between:1,255'],
                                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
+                                'self_collection' => ['nullable', 'boolean'],
+                                'trax_center_franchise_id' => ['required_if:self_collection,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+                                'trax_center_franchise_type' => ['required_if:self_collection,1', 'integer', 'digits_between:1,2', 'between:1,10'],
                             ];
 
                             $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3981,6 +3987,54 @@ class APIController extends Controller
                                             $shipment->save();
 
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            if ($request->has('self_collection')) {
+                                                if ($request->input('self_collection') != null) {
+                                                    if ($request->input('self_collection') == 1) {
+                                                        $self_collection = true;
+                                                        if($request->trax_center_franchise_type == 1){
+                            
+                                                            $trax_center = RetailTraxCenter::find($request->trax_center_franchise_id);
+                                                            if(!$trax_center){
+                                                                return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }
+                                                        }elseif($request->trax_center_franchise_type == 2){
+                                                            $trax_franchise = RetailFranchise::find($request->trax_center_franchise_id);
+                                                            if(!$trax_franchise){
+                                                                return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }
+                                                        }else{
+                                                            return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise Type not found']);
+                                                        }
+                            
+                            
+                                                    }
+                                                }
+                                            }
+                                            if($self_collection == TRUE){
+                                                $shipment_self_collection = new SelfCollectionShipment();
+                                                $shipment_self_collection->shipment_id = $shipment->id;
+                                                $shipment_self_collection->save();
+                        
+                                                $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id);
+                                                if ($shipment_detail->exists()) {
+                                                    $shipment_detail = $shipment_detail->first();
+                                                    $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
+                                                    $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
+                                                    $shipment_detail->save();
+                                                }else{
+                                                    $shipment_detail = new ShipmentDetail();
+                                                    $shipment_detail->shipment_id = $shipment->id;
+                                                    $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
+                                                    $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
+                                                    $shipment_detail->save();
+                                                }    
+                                            }
+
+                                            // $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id)->get()->first();
+                                            // $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
+                                            // $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
+                                            // $shipment_detail->save();
+                                            
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
 
                                         }
@@ -4004,6 +4058,9 @@ class APIController extends Controller
                                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                                 'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
+                                'self_collection' => ['nullable', 'boolean'],
+                                'trax_center_franchise_id' => ['required_if:self_collection,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+                                'trax_center_franchise_type' => ['required_if:self_collection,1', 'integer', 'digits_between:1,2', 'between:1,10'],
 
                             ];
 
@@ -4049,6 +4106,48 @@ class APIController extends Controller
                                             $shipment->save();
 
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
+                                            if ($request->has('self_collection')) {
+                                                if ($request->input('self_collection') != null) {
+                                                    if ($request->input('self_collection') == 1) {
+                                                        $self_collection = true;
+                                                        if($request->trax_center_franchise_type == 1){
+                            
+                                                            $trax_center = RetailTraxCenter::find($request->trax_center_franchise_id);
+                                                            if(!$trax_center){
+                                                                return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }
+                                                        }elseif($request->trax_center_franchise_type == 2){
+                                                            $trax_franchise = RetailFranchise::find($request->trax_center_franchise_id);
+                                                            if(!$trax_franchise){
+                                                                return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }
+                                                        }else{
+                                                            return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise Type not found']);
+                                                        }
+                            
+                            
+                                                    }
+                                                }
+                                            }
+                                            if($self_collection == TRUE){
+                                                $shipment_self_collection = new SelfCollectionShipment();
+                                                $shipment_self_collection->shipment_id = $shipment->id;
+                                                $shipment_self_collection->save();
+                        
+                                                $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id);
+                                                if ($shipment_detail->exists()) {
+                                                    $shipment_detail = $shipment_detail->first();
+                                                    $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
+                                                    $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
+                                                    $shipment_detail->save();
+                                                }else{
+                                                    $shipment_detail = new ShipmentDetail();
+                                                    $shipment_detail->shipment_id = $shipment->id;
+                                                    $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
+                                                    $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
+                                                    $shipment_detail->save();
+                                                }    
+                                            }
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
                                     } else {
