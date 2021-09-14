@@ -133,6 +133,7 @@
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -399,6 +400,7 @@
                             head.push('Delivered/Returned Date');
                             head.push('Received/Refused By');
                             head.push('Sales Person');
+                            head.push('Reason');
                             head.push('Special Instructions');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -445,6 +447,7 @@
                                 row.push(values.delivered_or_returned);
                                 row.push(values.received_or_refused_by);
                                 row.push(values.sales_person);
+                                row.push(values.reason);
                                 row.push(values.special_instructions);
 
                                 body.push(row);
@@ -505,6 +508,7 @@
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data: 'reason' ,name:'reason', class: 'align-middle reason'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},

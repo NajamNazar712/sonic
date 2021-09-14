@@ -242,6 +242,7 @@
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Vendor</th>
                             <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Payment Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
@@ -447,6 +448,7 @@
                             head.push('Shipper');
                             head.push('Vendor');
                             head.push('Status');
+                            head.push('Reason');
                             head.push('Payment Status');
                             head.push('Service Type');
                             head.push('Arrival Date');
@@ -469,6 +471,7 @@
                                 row.push(values.shipper);
                                 row.push(values.vendor);
                                 row.push(values.current_status);
+                                row.push(values.reason);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
@@ -529,6 +532,7 @@
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'vendor' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data:'reason' ,name: 'reason', class: 'align-middle reason'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
