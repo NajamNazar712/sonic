@@ -808,7 +808,7 @@ class ShipperReportsController extends Controller
         })
         ->addColumn('return_attempts', function($shipment) {
             $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->shipment_id)
-                ->where('shipper_status_id','=',23)
+                ->where('shipper_status_id','=',20)
                 ->where('verification','=',1)
                 ->select(DB::raw('count(shipment_id) as return_attempts'))
                 ->get()->first();
