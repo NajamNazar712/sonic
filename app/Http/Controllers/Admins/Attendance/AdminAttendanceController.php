@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Rider;
@@ -245,9 +246,24 @@ class AdminAttendanceController extends Controller
     }
 
     public function mark_attendance_index(){
-        $date = Carbon::now();
-        dd($date);
         ActivityTrailController::createActivityTrailLog(Auth::id(),432);
+        $admin_id = Auth::id();
+        $date = Carbon::now()->format("Y-m-d");
+        dd($date);
+        $now_time = Carbon::now()->format("H:i:s");
+        $admin = Admin::find($admin_id);
+        if($admin){
+            $admin_shift = EmployeeShift::where('id', $admin->shift_id);
+            if($admin_shift->exists()){
+                $admin_shift = $admin_shift->first();
+                if($now_time < $admin_shift->start_time){
+                    $date = Carbon::now()->subDays(1)->format("Y-m-d");
+                }
+            }
+        }else{
+            return response()->json(['status' => 0, 'error' => 'User not found']);
+        }
+        $date = Carbon::now();
         $today_date = Carbon::today()->toDateString();
         $attendance_clock_in = EmployeeAttendance::where('employee_id',Auth::id())->where('attendance_date',$today_date)->whereNotNull('clock_in')->whereNull('clock_out')->latest()->first();
          $clock_in = 0;
