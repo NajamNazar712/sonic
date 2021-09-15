@@ -289,7 +289,7 @@ class ConsigneeAPIController extends Controller
                 if ($consignee_shipment->status_id == 5) {
                     $datum['latitude'] = $consignee_shipment->consignee_latitude;
                     $datum['longitude'] = $consignee_shipment->consignee_longitude;
-                } elseif (in_array($consignee_shipment->shipper_status_id, [3, 49])) {
+                } elseif (in_array($consignee_shipment->status_id, [3, 49])) {
 
                     $origin_city = City::where('id', $pickup_address->city_id);
                     if ($origin_city->exists()) {
