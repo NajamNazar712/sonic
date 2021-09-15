@@ -14,8 +14,11 @@
                             <div class="row mb-2 height-400" style=" position: relative;">
                                 <div class="col text-center">
                                      <div id="punch">
-                                         <h2 class="centered text-white"></h2>
+                                         <h2 class="centered text-white punch_msg"></h2>
                                      </div>
+                                    <div id="msg_div" class="d-none">
+                                        <h2 class="center text-danger msg">Attendance Already Marked</h2>
+                                    </div>
                                 </div>
                             </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -55,12 +58,11 @@
             left: 50%;
             margin: -70px 0 0 -170px;
         }
-        .centered{
+        .centered ,.center{
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-
         }
     </style>
 
@@ -77,17 +79,22 @@
          var clock_out = @json($clock_out);
          var date = @json($date);
 
+
          if(clock_in == 0 && clock_out == 0){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK IN</strong>');
+             $('#msg_div').addClass('d-none');
          }
          else if(clock_in == 1 && clock_out == 1 ){
-             $('.centered').html('');
-             $('.centered').append('<strong>Already Marked</strong>');
+             $('#punch').addClass('d-none');
+             $('#msg_div').removeClass('d-none');
+            /* $('#centered').html('');
+             $('.centered').append('<strong>Already Marked</strong>');*/
          }
          else{
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK OUT</strong>');
+             $('#msg_div').addClass('d-none');
          }
 
          var flag = true;
@@ -129,10 +136,13 @@
                                  clock_out = 0;
 
                              } else if (data.status == 2) {
-                                 $('.centered').html('');
-                                 $('.centered').append('<strong>Already Marked</strong>');
+                                 console.log(232);
+                                $('.centered').text('');
+                                 /*  $('.centered').append('<strong>Already Marked</strong>');*/
                                  clock_in = 1;
                                  clock_out = 1;
+                                 $('#punch').addClass('d-none');
+                                 $('#msg_div').removeClass('d-none');
                              }
                          }
                      });
@@ -160,6 +170,9 @@
 
                 ajax: {
                     url: '{{ route('admin.attendance.mark.list') }}',
+                    data: function (d) {
+                        d.attendance_date = date;
+                    }
                 },
                 order:['2','desc'],
                 rowId: 'id',
