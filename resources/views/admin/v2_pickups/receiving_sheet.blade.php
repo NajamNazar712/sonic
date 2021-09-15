@@ -262,7 +262,7 @@
                     {data: 'note_id', name: 'v2_pickup_notes.id', class: 'align-middle text_center note_id'},
                     {data: 'date', name: 'v2_pickup_notes.created_at', class: 'align-middle text_center date'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text_center rider'},
-                    {data: 'total_shipment', name: 'total_shipment', class: 'text_center text-center total_shipment'},
+                    {data: 'total_shipment', name: 'total_shipment_count', class: 'text_center text-center total_shipment'},
                     {data: 'rider_picked', name: 'rider_picked', class: 'align-middle rider_picked'},
                     {data: 'total_arrived', name: 'total_arrived', class: 'text_center text-center total_arrived'},
                 ],
