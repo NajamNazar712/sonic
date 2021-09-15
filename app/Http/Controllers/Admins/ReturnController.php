@@ -3170,7 +3170,7 @@ class ReturnController extends Controller
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
             ->join('admins as sb','sb.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at','return_notes.updated_at as submitted_at','return_notes.image']);
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at','return_notes.updated_at as submitted_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -3192,6 +3192,15 @@ class ReturnController extends Controller
                 }
                 else {
                     return 0;
+                }
+            })
+            ->editColumn('delivered_to_shipper_count', function($deliveries) {
+                if ($deliveries->delivered_to_shipper_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_to_shipper_count . '</button>';
+                }
+                else {
+
+                    return '-';
                 }
             })
             ->filterColumn('return_notes.id', function ($query, $keyword) {
@@ -3244,6 +3253,20 @@ class ReturnController extends Controller
             return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
         }
     }
+    public function history_delivered_shipments(Request $request){
+        $return_note_id = $request->input('delivered_to_shipper_count');
+        $return_note_shipments = ShipmentsJourney::where('reference_1_id', $return_note_id)->where('shipper_status_id', 25)->where('verification', 1)->pluck('shipment_id')->toArray();
+        $shipments = array();
+        if(count($return_note_shipments) > 0){
+            foreach ($return_note_shipments as $shipment_id){
+                $shipment = Shipment::find($shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Return Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
+        }
+}
 
     public function receive_return_note_image_upload(Request $request){
         

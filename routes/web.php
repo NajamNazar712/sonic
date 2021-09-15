@@ -1287,6 +1287,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@history_index')->name('index');
             Route::get('list', 'Admins\ReturnController@history_list')->name('list');
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
+            Route::post('delivered_shipments', 'Admins\ReturnController@history_delivered_shipments')->name('delivered_shipments');
             Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
 
@@ -1971,6 +1972,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_note')->name('return_note.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_note_list')->name('list');
+            Route::post('delivered_shipments', 'Admins\AdminReportsController@history_delivered_shipments')->name('delivered_shipments');
             Route::post('shipments', 'Admins\AdminReportsController@return_note_shipments')->name('shipments');
         });
         Route::prefix('pickup_note')->name('pickup_note.')->group(function (){
