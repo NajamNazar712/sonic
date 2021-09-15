@@ -2311,8 +2311,8 @@ class AdminHumanResourseController extends Controller
 
     public function payslip_excel_upload(Request $request){
 
-        $payslip_month = $request->payslip_month_formatted;
-        if(!$payslip_month){
+        $payroll_month = $request->payslip_month_formatted;
+        if(!$payroll_month){
             return redirect()->back()->with('error', 'Payslip month not selected!');
         }
 
@@ -2478,8 +2478,7 @@ class AdminHumanResourseController extends Controller
 
                 unset($spreadsheet);
                 $errors = array();
-                $rate_range_ids = array();
-                $rate_range_id_row = array();
+
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
 
@@ -2494,11 +2493,72 @@ class AdminHumanResourseController extends Controller
                 if (empty($errors)) {
                     $updated = 0;
                     $not_updated = 0;
+
+                    $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(25)->toDateString();
+
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $payslip = new EmployeePayslip();
-
-
+                        $payslip->payroll_month = $payroll_month;
+                        $payslip->payroll_cut_off_date = $payroll_cut_off_date;
+                        $payslip->trax_id = trim($row['trax_id']);
+                        $payslip->name = trim($row['name']);
+                        $payslip->designation = trim($row['designation']);
+                        $payslip->department = trim($row['department']);
+                        $payslip->hub = trim($row['hub']);
+                        $payslip->zone = trim($row['zone']);
+                        $payslip->joining_date = trim($row['joining_date']);
+                        $payslip->cnic = trim($row['cnic']);
+                        $payslip->employee_status = trim($row['employee_status']);
+                        $payslip->payroll_days = trim($row['payroll_days']);
+                        $payslip->present_days = trim($row['present_days']);
+                        $payslip->pay_cut_days = trim($row['pay_cut_days']);
+                        $payslip->absent_days = trim($row['absent_days']);
+                        $payslip->extra_paid_days = trim($row['extra_paid_days']);
+                        $payslip->fuel_days = trim($row['fuel_days']);
+                        $payslip->basic_salary = trim($row['basic_salary']);
+                        $payslip->house_rent = trim($row['house_rent']);
+                        $payslip->medical = trim($row['medical']);
+                        $payslip->gross_salary = trim($row['gross_salary']);
+                        $payslip->mobile_allowance = trim($row['mobile_allowance']);
+                        $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
+                        $payslip->fuel_allowance = trim($row['fuel_allowance']);
+                        $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
+                        $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
+                        $payslip->fixed_incentive = trim($row['fixed_incentive']);
+                        $payslip->holiday_allowance = trim($row['holiday_allowance']);
+                        $payslip->overtime = trim($row['overtime']);
+                        $payslip->bonus = trim($row['bonus']);
+                        $payslip->arrears = trim($row['arrears']);
+                        $payslip->pickup_incentive = trim($row['pickup_incentive']);
+                        $payslip->delivery_incentive = trim($row['delivery_incentive']);
+                        $payslip->operation_incentive = trim($row['operation_incentive']);
+                        $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
+                        $payslip->others_addition = trim($row['others_addition']);
+                        $payslip->total_salary = trim($row['total_salary']);
+                        $payslip->paycut = trim($row['paycut']);
+                        $payslip->absent = trim($row['absent']);
+                        $payslip->late_deduction = trim($row['late_deduction']);
+                        $payslip->income_tax = trim($row['income_tax']);
+                        $payslip->eobi = trim($row['eobi']);
+                        $payslip->advance_salary = trim($row['advance_salary']);
+                        $payslip->month_closing = trim($row['month_closing']);
+                        $payslip->loan = trim($row['loan']);
+                        $payslip->fuel_card = trim($row['fuel_card']);
+                        $payslip->open_parcel = trim($row['open_parcel']);
+                        $payslip->phone_call = trim($row['phone_call']);
+                        $payslip->recovery = trim($row['recovery']);
+                        $payslip->auction_sale = trim($row['auction_sale']);
+                        $payslip->penalty = trim($row['penalty']);
+                        $payslip->other_deductions = trim($row['other_deductions']);
+                        $payslip->van_deduction = trim($row['van_deduction']);
+                        $payslip->medical_insurance = trim($row['medical_insurance']);
+                        $payslip->total_deduction = trim($row['total_deduction']);
+                        $payslip->net_salary = trim($row['net_salary']);
+                        $payslip->iban = trim($row['iban']);
+                        $payslip->added_by = Auth::id();
+                        $payslip->save();
+                        $updated++;
                     }
                     $error_msg = '';
                     if ($not_updated > 1) {
@@ -2515,7 +2575,7 @@ class AdminHumanResourseController extends Controller
                 }
 
             } else {
-                return redirect()->back()->with('error', 'No Rates in File');
+                return redirect()->back()->with('error', 'No Records in File');
             }
 
 
