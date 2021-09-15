@@ -3976,25 +3976,6 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
-                                            InterceptReBookRequest::create([
-                                                'shipment_id' => $shipment->id,
-                                                'consignee_city_id' => $shipment->consignee_city_id,
-                                                'consignee_name' => $shipment->consignee_name,
-                                                'consignee_address' => $request->consignee_address,
-                                                'consignee_phone_number_1' => $phone_number,
-                                                'consignee_phone_number_2' => $phone_number2,
-                                                'consignee_email' => $shipment->consignee_email,
-                                                'amount' => $shipment->amount,
-                                                'shipper_id' => $user_id,
-                                                'status' => 0,
-                                            ]);
-
-                                            $shipment->consignee_status_id = 54;
-                                            $shipment->shipper_status_id = 54;
-                                            $shipment->intercepted = 1;
-                                            $shipment->save();
-
-                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
                                             if ($request->has('self_collection')) {
                                                 if ($request->input('self_collection') != null) {
                                                     if ($request->input('self_collection') == 1) {
@@ -4026,6 +4007,26 @@ class APIController extends Controller
                                                     }
                                                 }
                                             }
+                                            InterceptReBookRequest::create([
+                                                'shipment_id' => $shipment->id,
+                                                'consignee_city_id' => $shipment->consignee_city_id,
+                                                'consignee_name' => $shipment->consignee_name,
+                                                'consignee_address' => $request->consignee_address,
+                                                'consignee_phone_number_1' => $phone_number,
+                                                'consignee_phone_number_2' => $phone_number2,
+                                                'consignee_email' => $shipment->consignee_email,
+                                                'amount' => $shipment->amount,
+                                                'shipper_id' => $user_id,
+                                                'status' => 0,
+                                            ]);
+
+                                            $shipment->consignee_status_id = 54;
+                                            $shipment->shipper_status_id = 54;
+                                            $shipment->intercepted = 1;
+                                            $shipment->save();
+
+                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            
                                             if($self_collection == TRUE){
                                                 $shipment_self_collection = new SelfCollectionShipment();
                                                 $shipment_self_collection->shipment_id = $shipment->id;
@@ -4101,27 +4102,6 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
-                                            $s_amount = str_replace(",", "", "$request->amount");
-                                            $amount = (int) $s_amount;
-                                            InterceptReBookRequest::create([
-                                                'shipment_id' => $shipment->id,
-                                                'consignee_city_id' => $request->consignee_city_id,
-                                                'consignee_name' => $request->consignee_name,
-                                                'consignee_address' => $request->consignee_address,
-                                                'consignee_phone_number_1' => $phone_number,
-                                                'consignee_phone_number_2' => $phone_number2,
-                                                'consignee_email' => $request->consignee_email,
-                                                'amount' => $amount,
-                                                'shipper_id' => $user_id,
-                                                'status' => 0,
-                                            ]);
-
-                                            $shipment->consignee_status_id = 54;
-                                            $shipment->shipper_status_id = 54;
-                                            $shipment->intercepted = 1;
-                                            $shipment->save();
-
-                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
                                             if ($request->has('self_collection')) {
                                                 if ($request->input('self_collection') != null) {
                                                     if ($request->input('self_collection') == 1) {
@@ -4153,6 +4133,28 @@ class APIController extends Controller
                                                     }
                                                 }
                                             }
+                                            $s_amount = str_replace(",", "", "$request->amount");
+                                            $amount = (int) $s_amount;
+                                            InterceptReBookRequest::create([
+                                                'shipment_id' => $shipment->id,
+                                                'consignee_city_id' => $request->consignee_city_id,
+                                                'consignee_name' => $request->consignee_name,
+                                                'consignee_address' => $request->consignee_address,
+                                                'consignee_phone_number_1' => $phone_number,
+                                                'consignee_phone_number_2' => $phone_number2,
+                                                'consignee_email' => $request->consignee_email,
+                                                'amount' => $amount,
+                                                'shipper_id' => $user_id,
+                                                'status' => 0,
+                                            ]);
+
+                                            $shipment->consignee_status_id = 54;
+                                            $shipment->shipper_status_id = 54;
+                                            $shipment->intercepted = 1;
+                                            $shipment->save();
+
+                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
+                                            
                                             if($self_collection == TRUE){
                                                 $shipment_self_collection = new SelfCollectionShipment();
                                                 $shipment_self_collection->shipment_id = $shipment->id;

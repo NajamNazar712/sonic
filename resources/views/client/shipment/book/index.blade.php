@@ -1177,6 +1177,8 @@
                         .done(function (data) {
 
                             if(data.status){
+                                $('#express_center').children().remove();
+
                                     $('#express_center').prepend('<option value="" selected="selected"></option>')
                                 $.each(data.trax_centers, function (index, trax_centers) {
                                     $('#express_center').append('<option value="'+trax_centers.id+'" id="trax_center">'+trax_centers.name+'</option>')

@@ -67,18 +67,19 @@
 
                                 <input type="text" name="amount"  id="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
                             </div>
-
-                            <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
-                                <label class="d-block">Self Collection</label>
-                                <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
-                            </div>
-
-                            <div id="express_center_div" class="form-group text-center p-1 border border-light rounded d-none">
-                                <input type="hidden" name="center_franchise" id="center_franchise">
-
-                                <select name="express_center" class="select2" id="express_center" data-rule-required="true" data-msg-required="Express Center/Franchise is required">
-                                </select>
-                            </div>
+                            @if ($shipment->booking_type_id == 1)
+                                <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
+                                    <label class="d-block">Self Collection</label>
+                                    <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
+                                </div>
+                                
+                                <div id="express_center_div" class="form-group text-center p-1 border border-light rounded d-none">
+                                    <input type="hidden" name="center_franchise" id="center_franchise">
+                                    
+                                    <select name="express_center" class="select2" id="express_center" data-rule-required="true" data-msg-required="Express Center/Franchise is required">
+                                    </select>
+                                </div>
+                            @endif
                         </div>
                     </div>
                     <div class="row mt-2">

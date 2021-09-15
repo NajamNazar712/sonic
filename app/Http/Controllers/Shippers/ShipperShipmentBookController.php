@@ -2747,7 +2747,7 @@ class ShipperShipmentBookController extends Controller
                                             $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                         }
                                     }
-                                }elseif($request->trax_center_franchise_type == 2){
+                                }elseif($row['trax_center_franchise_type'] == 2){
                                     $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
                                     if(!$trax_franchise){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
@@ -2906,7 +2906,7 @@ class ShipperShipmentBookController extends Controller
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                     }
                                 }
-                            }elseif($request->trax_center_franchise_type == 2){
+                            }elseif($row['trax_center_franchise_type'] == 2){
                                 $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
                                 if(!$trax_franchise){
                                     $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
@@ -4425,7 +4425,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,10'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,3'],
 
             'order_date' => ['nullable', 'date_format:Y-m-d'],
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
@@ -4761,7 +4761,7 @@ class ShipperShipmentBookController extends Controller
                                             $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                         }
                                     }
-                                }elseif($request->trax_center_franchise_type == 2){
+                                }elseif($row['trax_center_franchise_type'] == 2){
                                     $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
                                     if(!$trax_franchise){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
@@ -4922,7 +4922,7 @@ class ShipperShipmentBookController extends Controller
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                     }
                                 }
-                            }elseif($request->trax_center_franchise_type == 2){
+                            }elseif($row['trax_center_franchise_type'] == 2){
                                 $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
                                 if(!$trax_franchise){
                                     $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
