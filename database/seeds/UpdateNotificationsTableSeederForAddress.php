@@ -26,7 +26,9 @@ For Help Dial: 021-111-118-729']);
 
         Notification::where('id',63)->update(['body' => 'Dear Shipper [shipper],' . PHP_EOL . PHP_EOL .'Please note that Pickup Request# [pickup_request_ID] is updated as Cancelled on [date].' . PHP_EOL . PHP_EOL . PHP_EOL .'Regards,'.PHP_EOL. PHP_EOL .'Trax Logistics' . PHP_EOL . PHP_EOL . '[trax_logo]' . PHP_EOL . PHP_EOL . 'Address: Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi,' . PHP_EOL . PHP_EOL . 'For Help Dial: 021-111-118-729']);
 
-        Notification::where('id',64)->update(['body' => 'Dear Concerns,' . PHP_EOL . PHP_EOL .'The rates for the account [account_id] [name] have been rejected by finance department. Please contact for resolution.' . PHP_EOL . PHP_EOL . PHP_EOL .'Regards,'.PHP_EOL. PHP_EOL .'Trax Logistics' . PHP_EOL . PHP_EOL . '[trax_logo]' . PHP_EOL . PHP_EOL . 'Address: Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi,' . PHP_EOL . PHP_EOL . 'Helpline: +92-21-3-877-22-22']);
+        Notification::where('id',64)->update(['body' => 'Dear Concerns,' . PHP_EOL . PHP_EOL .'The rates for the account [account_id] [name] have been rejected by finance department. Please contact for resolution.' . PHP_EOL . PHP_EOL . PHP_EOL .'Regards,'.PHP_EOL. PHP_EOL .'Trax Logistics' . PHP_EOL . PHP_EOL . '[trax_logo]' . PHP_EOL . PHP_EOL . 'Address: Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi,' . PHP_EOL . PHP_EOL . 'For Help Dial: 021-111-118-729']);
 
+        Notification::where('id',142)->update(['body' => 'Request ID: [request_id] , Tracking Number: [tracking_number]'. PHP_EOL .' Shipper Name: [shipper_name]'. PHP_EOL .' Shipper Email: [email]'. PHP_EOL .'Shipper Phone: [phone]'. PHP_EOL .'Destination: [destination]'. PHP_EOL .'Channel: [channel]'. PHP_EOL .'Case Nature: [case_nature]'. PHP_EOL .'Case Nature Type: [case_nature_type]'. PHP_EOL .'Status: [status]'. PHP_EOL .'Description: [details]'. PHP_EOL . PHP_EOL . PHP_EOL.'Regards,'.PHP_EOL.'TRAX Logistics'.PHP_EOL.'Address: Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi,
+For Help Dial: 021-111-118-729']);
     }
 }
