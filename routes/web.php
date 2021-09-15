@@ -1287,6 +1287,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@history_index')->name('index');
             Route::get('list', 'Admins\ReturnController@history_list')->name('list');
             Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
+            Route::post('delivered_shipments', 'Admins\ReturnController@history_delivered_shipments')->name('delivered_shipments');
             Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
 
@@ -1737,6 +1738,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
+            Route::get('generate_report_to_email', 'Admins\AdminFinanceController@done_payments_generate_report_to_email')->name('generate_report_to_email');
             Route::post('excel_store', 'Admins\AdminFinanceController@done_payments_excel_store')->name('excel_store');
         });
 
@@ -1970,6 +1972,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_note')->name('return_note.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@return_note_list')->name('list');
+            Route::post('delivered_shipments', 'Admins\AdminReportsController@history_delivered_shipments')->name('delivered_shipments');
             Route::post('shipments', 'Admins\AdminReportsController@return_note_shipments')->name('shipments');
         });
         Route::prefix('pickup_note')->name('pickup_note.')->group(function (){
@@ -3028,6 +3031,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@update_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@update_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
+                Route::post('get_credit','Admins\AdminInternationalRatesController@get_credit')->name('get_credit');
+                Route::post('credit','Admins\AdminInternationalRatesController@credit_update')->name('credit');
+
             });
         });
     });

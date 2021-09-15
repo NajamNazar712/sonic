@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AdjustmentLog;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
@@ -236,7 +237,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments','shipments.id', '=', 'rns.shipment_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
-            ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image'])->groupBy('return_notes.id');
+            ->select(['return_notes.id','return_notes.id as return_note_id','return_notes.id as return_note_link','up.name as updated_by','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.updated_at','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])->groupBy('return_notes.id');
         if (session('role_id') != 1) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
@@ -254,6 +255,15 @@ class AdminReportsController extends Controller
             })
             ->editColumn('return_note_link', function($return_note) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($return_note->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->editColumn('delivered_to_shipper_count', function($deliveries) {
+                if ($deliveries->delivered_to_shipper_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_to_shipper_count . '</button>';
+                }
+                else {
+
+                    return '-';
+                }
             })
             ->addColumn('image', function ($return_note) {
                 return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
@@ -301,6 +311,20 @@ class AdminReportsController extends Controller
         return $return->make(true);
     }
     //Return Note Print
+    public function history_delivered_shipments(Request $request){
+        $return_note_id = $request->input('delivered_to_shipper_count');
+        $return_note_shipments = ShipmentsJourney::where('reference_1_id', $return_note_id)->where('shipper_status_id', 25)->where('verification', 1)->pluck('shipment_id')->toArray();
+        $shipments = array();
+        if(count($return_note_shipments) > 0){
+            foreach ($return_note_shipments as $shipment_id){
+                $shipment = Shipment::find($shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Return Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
+        }
+    }
     public function return_note_shipments(Request $request){
         $return_note_id = $request->input('return_note_id');
         $return_note_shipments = DB::connection('reports')->table('return_note_shipments')->where('return_note_id', $return_note_id)->get();
@@ -6754,14 +6778,20 @@ class AdminReportsController extends Controller
         }
         $delivery_note = DB::connection('reports')->table('delivery_note_shipments')->join('delivery_notes as dn','dn.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->join('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.admin_id IS NOT NULL )'));
+            })
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'sj.admin_id')
             ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
-            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department')
+            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department' , 'sj.remarks as debrifer_remark', 'a.name as debrifer_name')
             ->where('delivery_note_shipments.fake_status', 1);
 
 
@@ -6795,7 +6825,8 @@ class AdminReportsController extends Controller
 
     public function daily_visit_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),193);
-        return view('admin.reports.daily_visit_report');
+        $admins = Admin::get(['id', 'name']);
+        return view('admin.reports.daily_visit_report')->with(['admins' => $admins]);
     }
     public function daily_visit_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -6805,8 +6836,8 @@ class AdminReportsController extends Controller
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr){
@@ -6839,6 +6870,23 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
+
+            //AdminUser Filter
+        if ($team_member = $request->get('team_member')) {
+            $datatables->where('a.id', $team_member);
+        }
+                //VisitDate filter
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+        }
+        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+            $ufrom = $request->get('search_update_date_from');
+            $uto = $request->get('search_update_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$ufrom,$uto]);
+        }
+
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
@@ -6883,7 +6931,6 @@ class AdminReportsController extends Controller
             ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(s.id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(s.id)/count(sj.id) as delivery_ratio'), 'c.name as station')
             ->groupBy('riders.id');
 
-
         $datatables = Datatables::of($delivered_shipments);
 
         if($rider = $request->get('search_rider')){
@@ -6903,8 +6950,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->where('status', 1)->get();
         $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
         $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $riders_cat = OperationRidersCategory::all();
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
-        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders]);
+        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
     }
     public function route_distribution_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -6913,6 +6961,7 @@ class AdminReportsController extends Controller
         }
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
@@ -6971,10 +7020,8 @@ class AdminReportsController extends Controller
         if($destination = $request->get('search_destination')){
             $datatables = $datatables->where('c.id', '=', $destination);
         }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
 
         return $datatables->make(true);

@@ -121,6 +121,7 @@
                         <th class="border-primary border-darken-1">Creation Date</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Image</th>
+                        <th class="border-primary border-darken-1">Delivered to shipper</th>
                     </tr>
                     </thead>
                 </table>
@@ -340,6 +341,7 @@
                             head.push('Created By');
                             head.push('Creation Date');
                             head.push('Aging');
+                            head.push('Delivered To Shipper');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -352,6 +354,7 @@
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.aging);
+                                row.push(values.delivered_to_shipper_count);
 
                                 body.push(row);
                             });
@@ -363,6 +366,8 @@
                     return {body: body, header: head};
                 }
             } );
+
+
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -410,7 +415,9 @@
                     {data: 'created_by', name: 'cr.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
                     {orderable: false, searchable: false,data: 'aging', name: 'aging', class: 'align-middle aging'},
-                    {orderable: false, searchable: false,data: 'image', name: 'image', class: 'align-middle image'}
+                    {orderable: false, searchable: false,data: 'image', name: 'image', class: 'align-middle image'},
+                    { data:'delivered_to_shipper_count' ,name: 'delivered_to_shipper_count', class: 'align-middle text-center delivered_to_shipper_count', orderable: false, searchable: false},
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -459,6 +466,34 @@
                     });
             }
 
+            $('#datatable tbody').on('click','tr td.delivered_to_shipper_count button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                console.log(id)
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.return_note.delivered_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivered_to_shipper_count': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
             var route = '{!! route('admin.tracking.index') !!}';
 
             $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
