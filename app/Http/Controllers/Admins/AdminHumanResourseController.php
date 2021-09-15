@@ -202,8 +202,9 @@ class AdminHumanResourseController extends Controller
         $route_types = RouteType::all();
         $employee_types = EmployeeType::all();
         $employee_statuses = EmployeeStatus::all();
+        $employee_department = AdminDepartment::all();
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department]);
     }
 
     public function employee_directory_list(Request $request){
@@ -213,6 +214,7 @@ class AdminHumanResourseController extends Controller
         }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
+            ->leftjoin('admin_departments as ads','ads.id','=','employees.department_id')
             ->leftjoin('admins as staff','staff.trax_id','=','employees.trax_id')
             ->leftjoin('riders as r','r.trax_id','=','employees.trax_id')
             ->leftjoin('rider_requests as rr','rr.id','=','employees.rider_request_id')
@@ -221,7 +223,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address'])
+            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','ads.name as department_name'])
             ->where(function ($q){
                 $q ->where('r.blacklist','=',0)
                     ->orWhere('r.blacklist','=',null);
@@ -285,6 +287,15 @@ class AdminHumanResourseController extends Controller
                         return $type;
                     }
 
+                }
+            })
+            ->filterColumn('ads.name',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ads.name',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {

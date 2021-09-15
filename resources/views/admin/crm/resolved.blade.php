@@ -31,6 +31,7 @@
                             </form>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <label class="ml-1" id="count"></label>
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
@@ -638,7 +639,16 @@
                     this.api().table().columns.adjust();
                 }
             });
-
+            table.on( 'select', function ( e, dt, type, indexes ) {
+                var count = table.rows( { selected: true } ).count();
+                var lblcount= document.getElementById('count');
+                lblcount.textContent =count +' Row(s) selected';
+            } );
+            table.on( 'deselect', function ( e, dt, type, indexes ) {
+                var count = table.rows( { selected: true } ).count();
+                var lblcount= document.getElementById('count');
+                lblcount.textContent =count +' Row(s) selected';
+            } );
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
