@@ -17,7 +17,20 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div class="row justify-content-end">
-                                <div class="col-5">
+                                <div class="col-1">
+                                    <input type="text" name="cut_off_time" class="form-control cut_off_time" value="{{$cut_off_time}}:00" disabled>
+                                </div>
+                                <div class="col-3">
+                                    <select name="search_filter" id="search_filter" class="form-control select2">
+                                        
+                                            <option value="10">Pickup Request Before Cut Off Time</option>
+                                            <option value="0">All</option>
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                                </div>
+                                <div class="col-4">
                                     <div class="card">
                                         <div class="card-header">
                                             <div class="heading-elements">
@@ -232,6 +245,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <style>
         .btn-min-width {
             min-width: 5.5rem;
@@ -288,10 +302,15 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function () {
-
+            $('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search',
+                width:'100%',
+                allowClear:false
+            });
 
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
@@ -818,7 +837,7 @@
                     });
             }
 
-            for (let i = 1; i <= 9; i++) {
+            for (let i = 1; i <= 8; i++) {
                 $('#'+i+'').on('click', function () {
                 $('#legend_filter').val(i);
                 table.draw();
@@ -879,9 +898,11 @@
                             });
                         }
                     });
-
-
                 }
+            });
+            $('#search_filter_btn').on('click',function () {
+               var a=$('#search_filter').val();
+               alert(a);
             });
         });
     </script>

@@ -324,6 +324,13 @@ class V2AdminPickupsController extends Controller
 
                     return $datatables->make(true);
                 }
+                elseif($legend_filter==10){//to be made as before cut off time
+                    $datatables->where('v2_pickup_requests.after_cut_off_time','<>',null)
+                    ->where('v2_pickup_requests.status_id','<>',3)
+                    ->where('v2_pickup_requests.try_and_buy',null)
+                    ->where('v2_pickup_requests.vendor',null);
+                    return $datatables->make(true);
+                }
 
             }else{
                     return $datatables->make(true);
