@@ -1625,6 +1625,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('email', 'Admins\AdminUserRequestController@user_email')->name('email');
             Route::get('trax_id', 'Admins\AdminUserRequestController@user_trax_id')->name('trax_id');
             Route::post('assign_hubs', 'Admins\AdminUserRequestController@user_assign_hub')->name('assign_hubs');
+            Route::get('cnic', 'Admins\AdminUserRequestController@user_cnic')->name('cnic');
 
             Route::prefix('add')->name('add.')->group(function() {
                 Route::get('', 'Admins\AdminUserRequestController@user_request_add_index')->name('index');
@@ -3028,6 +3029,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}','Admins\AdminInternationalRatesController@update_rates_index')->name('index');
                 Route::post('submit','Admins\AdminInternationalRatesController@update_rates_submit')->name('submit');
                 Route::post('reject','Admins\AdminInternationalRatesController@rejectReasonSubmit')->name('reject');
+                Route::post('get_credit','Admins\AdminInternationalRatesController@get_credit')->name('get_credit');
+                Route::post('credit','Admins\AdminInternationalRatesController@credit_update')->name('credit');
+
             });
         });
     });
@@ -3215,6 +3219,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{/update', 'Admins\AdminFnfController@update_fnf_request')->name('update_fnf_request');
             Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
             Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
+        });
+
+        Route::prefix('payslip')->name('payslip.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@payslip_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
+            Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
+
         });
     });
 
