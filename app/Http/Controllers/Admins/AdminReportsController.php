@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AdjustmentLog;
+use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\DeliveryNote;
@@ -6920,8 +6921,9 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->select('id','name')->where('hub', 1)->where('status', 1)->get();
         $destination_cities = DB::connection('reports')->table('cities')->select('id','name')->where('status', 1)->get();
         $zones =  DB::connection('reports')->table('zones')->select('id', 'name')->get();
+        $riders_cat = OperationRidersCategory::all();
         $riders = DB::connection('reports')->table('riders')->get(['id','name']);
-        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders]);
+        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
     }
     public function route_distribution_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -6930,6 +6932,7 @@ class AdminReportsController extends Controller
         }
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftJoin('shipments as s', 's.id', '=', 'dns.shipment_id')
@@ -6987,6 +6990,9 @@ class AdminReportsController extends Controller
         }
         if($destination = $request->get('search_destination')){
             $datatables = $datatables->where('c.id', '=', $destination);
+        }
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $datatables->where('r.operation_rider_id', $search_rider_cat);
         }
 
         return $datatables->make(true);
