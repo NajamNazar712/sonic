@@ -855,11 +855,19 @@ class APIController extends Controller
                                 $trax_center = RetailTraxCenter::find($request->trax_center_franchise_id);
                                 if(!$trax_center){
                                     return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                }else{
+                                    if($trax_center->default_hub != $consignee_city_id){
+                                        return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                    }
                                 }
                             }elseif($request->trax_center_franchise_type == 2){
                                 $trax_franchise = RetailFranchise::find($request->trax_center_franchise_id);
                                 if(!$trax_franchise){
                                     return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                }else{
+                                    if($trax_franchise->default_hub != $consignee_city_id){
+                                        return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                    }
                                 }
                             }else{
                                 return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise Type not found']);
@@ -3996,11 +4004,19 @@ class APIController extends Controller
                                                             $trax_center = RetailTraxCenter::find($request->trax_center_franchise_id);
                                                             if(!$trax_center){
                                                                 return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }else{
+                                                                if($trax_center->default_hub != $shipment->consignee_city_id){
+                                                                    return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                                }
                                                             }
                                                         }elseif($request->trax_center_franchise_type == 2){
                                                             $trax_franchise = RetailFranchise::find($request->trax_center_franchise_id);
                                                             if(!$trax_franchise){
                                                                 return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }else{
+                                                                if($trax_franchise->default_hub != $shipment->consignee_city_id){
+                                                                    return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                                }
                                                             }
                                                         }else{
                                                             return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise Type not found']);
@@ -4115,11 +4131,19 @@ class APIController extends Controller
                                                             $trax_center = RetailTraxCenter::find($request->trax_center_franchise_id);
                                                             if(!$trax_center){
                                                                 return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }else{
+                                                                if($trax_center->default_hub != $request->consignee_city_id){
+                                                                    return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                                }
                                                             }
                                                         }elseif($request->trax_center_franchise_type == 2){
                                                             $trax_franchise = RetailFranchise::find($request->trax_center_franchise_id);
                                                             if(!$trax_franchise){
                                                                 return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                            }else{
+                                                                if($trax_franchise->default_hub != $request->consignee_city_id){
+                                                                    return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise ID not found']);
+                                                                }
                                                             }
                                                         }else{
                                                             return response()->json(['status' => 1, 'message' => 'Express Centers/Franchise Type not found']);

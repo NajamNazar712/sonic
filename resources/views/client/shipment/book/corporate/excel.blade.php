@@ -410,6 +410,10 @@
 										<tr role="row" class="bg-primary white text-center">
 											<th colspan="2" class="border-primary border-darken-1">Express Center/Franchise</th>
 										</tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">Type</th>
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
 										</thead>
 										<tbody>
 										<tr role="row">
