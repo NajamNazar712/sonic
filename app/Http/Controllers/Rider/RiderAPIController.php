@@ -9591,7 +9591,8 @@ class RiderAPIController extends Controller
                     ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
                 if ($payslip->exists()) {
                     $payslip = $payslip->get();
-                    return response()->json(['status' => 0, 'data' => $payslip]);
+                    $month = Carbon::parse($request->date)->format("F-Y");
+                    return response()->json(['status' => 0, 'payroll_month' => $month, 'data' => $payslip]);
                 } else {
                     return response()->json(['status' => 1, 'message' => "Payslip not found"]);
                 }
