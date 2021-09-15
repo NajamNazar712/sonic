@@ -793,14 +793,14 @@
                                 @foreach($crm_histories as $index => $history)
                                     @php $index++; @endphp
                                     <tr class="border-bottom-success border-custom-color">
-                                        <td>{{$index}}</td>
+                                        <td>{{ str_pad($index,3,'0',STR_PAD_LEFT) }}</td>
                                         <td>{{$history->casenature}}</td>
                                         <td>{{$history->casenaturetype}}</td>
                                     </tr>
                                 @endforeach
                                     @php $index=$index+1; @endphp
                                     <tr class="border-bottom-success border-custom-color">
-                                        <td><b>{{$index}}</b></td>
+                                        <td><b>{{ str_pad($index,3,'0',STR_PAD_LEFT) }}</b></td>
                                         <td><b>{{$crm_details->nature->name}}</b></td>
                                         <td><b>{{$crm_details->nature_type->type}}</b></td>
                                     </tr>
