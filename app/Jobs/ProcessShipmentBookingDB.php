@@ -19,6 +19,7 @@ use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
+use App\Http\Models\ShipmentDetail;
 
 class ProcessShipmentBookingDB implements ShouldQueue
 {
@@ -212,6 +213,12 @@ class ProcessShipmentBookingDB implements ShouldQueue
 
             $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
         }
+            if($self_collection = TRUE){
+                $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id)->get()->first();
+                $shipment_detail->center_frachise_id = $this->booking['trax_center_franchise_id'];
+                $shipment_detail->center_frachise_type = $this->booking['trax_center_franchise_type'];
+                $shipment_detail->save();
+            }
             if($this->booking['substitute_user_id'] != null){
                 $substitute_user_shipment = new SubstituteUserShipment();
                 $substitute_user_shipment->substitute_user_id = $this->booking['substitute_user_id'];
