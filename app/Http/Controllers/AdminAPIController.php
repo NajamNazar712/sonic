@@ -32,6 +32,7 @@ use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\InternationalShipment;
 use App\Http\Models\Product;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -2601,16 +2602,17 @@ class AdminAPIController extends Controller
 
     public function retail_index(Request $request){
         $admin_default_hub = Admin::where('id', $request->admin_id)->select('default_hub_id')->first();
-        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->select('name','code', 'pickup_address_id')->get();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $admin_default_hub->default_hub_id)->where('status', 1)->select('name','code', 'pickup_address_id')->get();
         $products = Product::all();
-        $business_categories = BusinessCategory::where('id', '!=', 2)->get();
+        $business_categories = BusinessCategory::all();
         $shipping_modes = RetailShippingMode::all();
         $domestic_cities = City::where('business_category_id', 1)->where('status', 1)->get();
+        $international_cities = City::where('business_category_id', 2)->where('status', 1)->get();
         $domestic_overland_cities = CityDelivery::join('cities as c', 'c.id', '=', 'city_deliveries.city_id')->where('city_deliveries.booking_type_id', 1)->where('city_deliveries.shipping_mode_id', 2)->where('c.business_category_id', 1)->where('c.status', 1)->select('c.id', 'c.name')->get();
         $payment_modes = RetailPaymentMode::where('id', '=', 1)->get();
         $trax_boxes = RetailTraxBox::all();
         $banks = BanksList::all();
-        return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers]);
+        return response()->json(["status" => 0, 'products' => $products, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'domestic_cities' => $domestic_cities, 'domestic_overland_cities' => $domestic_overland_cities, 'payment_modes' => $payment_modes, 'trax_boxes' => $trax_boxes, 'banks' => $banks, 'trax_centers' => $retail_trax_centers, 'international_cities' => $international_cities]);
     }
 
     public function retail_bank_info(Request $request){
@@ -2642,7 +2644,7 @@ class AdminAPIController extends Controller
         $order_id = $request->input('order_id');
         $package_type = FALSE;
         $special_instructions = NULL;
-
+        $charges_mode_id = ($request->has('charges_mode')) ? $request->input('charges_mode') : 1;
 
         $shipping_mode_check = $request->input('shipping_mode_id');
         $consignee_city_id = $request->input('city_id');
@@ -2666,8 +2668,14 @@ class AdminAPIController extends Controller
         if ($shipping_mode_check == 3) {
             $amount = str_replace(',', '', $request->input('cod_amount'));
             $r_amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $amount + $total_charges;
+            }
         } else {
             $amount = 0;
+            if($charges_mode_id == 2){
+                $amount = $total_charges;
+            }
             $r_amount = 0;
         }
         $payment_mode_id = 1;
@@ -2675,8 +2683,6 @@ class AdminAPIController extends Controller
 
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category_id');
-
-        $charges_mode_id = 1;
 
         if ($request->volumetric_weight == 1) {
             $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
@@ -2691,6 +2697,14 @@ class AdminAPIController extends Controller
         }
 
         $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+        if($business_category_id == 2) {
+            $international_shipment_booking = new InternationalShipment();
+            $international_shipment_booking->shipment_id = $shipment_id;
+            $international_shipment_booking->postal_code = 00000;
+            $international_shipment_booking->save();
+        }
+
 
         $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
@@ -2837,6 +2851,234 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $notifiction_history]);
         }
         return response()->json(['status' => 1, 'message' => "Notification History Not Found"]);
+    }
+
+    public function admin_signup_v2(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                //Employees
+                'name' => ['nullable'],
+                'mother_name' => ['required'],
+                'employee_gender_id' => ['nullable'],
+                'city_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'cnic_no' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'guardian_name' => ['nullable'],
+                'religion_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+                'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+                'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+                'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+                'personal_email' => ['nullable', 'email'],
+                'address' => ['nullable'],
+                'emergency_contact' => ['nullable'],
+                'cnic_issue_date' => ['nullable'],
+                'cnic_expiry_date' => ['nullable'],
+                'designation_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
+                'department_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
+                'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
+                'official_email' => ['nullable', 'email'],
+                'official_phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'sonic_id' => ['nullable'],
+                'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'date_of_birth' => ['nullable'],
+                'pin' => ['nullable', 'integer', 'digits:4'],
+                'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+
+                //EducationalDetails
+                'education_details' => ['nullable'],
+
+                //BankInformation
+                'bank_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $admin = Admin::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                $employee = Employee::where('employee_type_id', 1)
+                    ->where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                $user_request = AdminUserRequest::where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                //Check Admin Already Exist
+                if ($admin->exists()) {
+                    $admin = $admin->first();
+                    if ($admin->phone_number == $request->input('phone_number') && $admin->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($admin->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($admin->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($user_request->exists()) {
+                    $user_request = $user_request->first();
+                    if ($user_request->phone_number == $request->input('phone_number') && $user_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($user_request->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($user_request->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else {
+                    try {
+                        $employee_request = new Employee();
+                        $employee_request->name = $request->name;
+                        $employee_request->employee_gender_id = $request->employee_gender_id;
+                        $employee_request->city_id = $request->city_id;
+                        $employee_request->cnic = $request->cnic_no;
+                        $employee_request->phone_number = $request->phone_number;
+                        $employee_request->employee_type_id = 1;
+                        $employee_request->status_id = 2;
+                        $employee_request->guardian_name = $request->guardian_name;
+                        $employee_request->religion_id = $request->religion_id;
+                        $employee_request->nationality_id = $request->nationality_id;
+                        $employee_request->domicile_id = $request->domicile_id;
+                        $employee_request->marital_status_id = $request->marital_status_id;
+                        $employee_request->blood_group = $request->blood_group_id;
+                        $employee_request->personal_email = $request->personal_email;
+                        $employee_request->address = $request->address;
+                        $employee_request->emergency_contact = $request->emergency_contact;
+                        $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                        $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
+                        $employee_request->designation_id = $request->designation_id;
+                        $employee_request->department_id = $request->department_id;
+                        $employee_request->zone_id = $request->zone_id;
+                        $employee_request->official_email = $request->official_email;
+                        $employee_request->official_phone_number = $request->official_phone_number;
+                        $employee_request->sonic_id = $request->sonic_id;
+                        $employee_request->place_of_birth = $request->place_of_birth;
+                        $employee_request->date_of_birth = $request->date_of_birth;
+                        $employee_request->pin = $request->pin;
+                        $employee_request->mother_name = $request->mother_name;
+                        $employee_request->save();
+
+                        if ($request->has('employment_history')) {
+                            $employment_histories = json_decode($request->employment_history, true);
+                            foreach ($employment_histories as $employment_history) {
+                                $history = new EmployeeEmployementHistory();
+                                $history->employee_id = $employee_request->id;
+                                $history->name = $employment_history['organization_company_name'];
+                                $history->designation = $employment_history['position_designation'];
+                                $history->from = $employment_history['from_date'];
+                                $history->to = $employment_history['to_date'];
+                                $history->reason = $employment_history['reason'];
+                                $history->save();
+                            }
+                        }
+
+                        if ($request->has('medical_details')) {
+                            $medical_details = json_decode($request->medical_details, true);
+                            foreach ($medical_details as $medical_detail) {
+                                $medical_info = new EmployeeMedicalInformation();
+                                $medical_info->employee_id = $employee_request->id;
+                                $medical_info->name = $medical_detail['name_of_family_member'];
+                                $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                $medical_info->marital_status = $medical_detail['marital_status'];
+                                $medical_info->save();
+                            }
+                        }
+
+                        if ($request->has('education_details')) {
+                            $education_details = json_decode($request->education_details, true);
+                            foreach ($education_details as $education_detail) {
+                                $employee_education = new EmployeeEducationalBackground();
+                                $employee_education->employee_id = $employee_request->id;
+                                $employee_education->name = $education_detail['institute'];
+                                $employee_education->degree = $education_detail['degree'];
+                                $employee_education->grade = $education_detail['position_grade'];
+                                $employee_education->passing_year = $education_detail['graduation_year'];
+                                $employee_education->save();
+                            }
+                        }
+
+                        if ($request->has('bank_details')) {
+                            $bank_details = json_decode($request->bank_details, true);
+                            foreach ($bank_details as $bank_detail) {
+                                $employee_bank_info = new EmployeeBankInformation();
+                                $employee_bank_info->employee_id = $employee_request->id;
+                                $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                $employee_bank_info->branch_code = $bank_detail['branch_code'];
+                                $employee_bank_info->account_no = $bank_detail['account_number'];
+                                $employee_bank_info->bank_id = $bank_detail['bank'];
+                                $employee_bank_info->branch_name = $bank_detail['branch'];
+                                $employee_bank_info->iban = $bank_detail['iban_no'];
+                                $employee_bank_info->save();
+                            }
+                        }
+
+                        if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
+                            $employee_id = $employee_request->id;
+                            $date = Carbon::now()->format('Y_m_d');
+                            $attachments = new EmployeeAttachment();
+                            $attachments->employee_id = $employee_id;
+                            $cnic_array = [];
+                            if ($request->hasFile('cnic_1')) {
+                                $file = $request->file('cnic_1');
+                                $filename = 'cnic_1_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_id . '';
+                                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                $cnic_array[0] = $directory . '/' . $filename;
+                            }
+                            if ($request->hasFile('cnic_2')) {
+                                $file = $request->file('cnic_2');
+                                $filename = 'cnic_2_' . $date . '.' . $file->extension();
+                                $directory = 'employee_directory/employee_' . $employee_id . '';
+                                Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                $cnic_array[1] = $directory . '/' . $filename;
+                            }
+                            $attachments->cnic = implode(',', $cnic_array);
+                            $attachments->save();
+                        }
+
+                        $response['status'] = 0;
+                        $response['employee_id'] = $employee_request->id;
+                        $message = 'Request Has Been Submitted and Pending for Approval';
+                    } catch (Exception $ex) {
+                        $response['message'] = $ex;
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
     }
 
 }

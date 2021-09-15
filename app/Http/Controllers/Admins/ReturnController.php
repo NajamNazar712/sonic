@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
@@ -34,11 +35,13 @@ use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
@@ -50,7 +53,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use function foo\func;
 
 class ReturnController extends Controller
@@ -83,7 +85,7 @@ class ReturnController extends Controller
         }
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
+            ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -954,7 +956,7 @@ class ReturnController extends Controller
                             }
                         }
                     }
-                    if (!Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 12)->exists()) {
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
                     }
                 }
@@ -976,7 +978,7 @@ class ReturnController extends Controller
                         $remarks = NULL;
                     }
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
-                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest()->first();
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
                     if($status == 0){
                         if($shipment_details->booking_type_id == 5){
                             continue;
@@ -1006,7 +1008,7 @@ class ReturnController extends Controller
                         }
 
                     }
-                    if($status == 1){
+                    else if($status == 1){
                         $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
                         if($journey){
                             if ($shipment_details->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
@@ -1779,7 +1781,7 @@ class ReturnController extends Controller
                             $shipment->consignee_status_id = 23;
                             $shipment->save();
                             ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-                        }else
+                        }else{
                             if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
                                 ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $shipment_id]);
@@ -1811,7 +1813,19 @@ class ReturnController extends Controller
                                 $shipment->save();
                                 ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
                             }
-
+                        }
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
+                        if($return_sheet->exists()){
+                            $return_sheet = $return_sheet->first();
+                            $return_sheet->return_note_id = $note->id;
+                        }
+                        else{
+                            $return_sheet = new ReturnSheet();
+                            $return_sheet->user_id = $shipment->user_id;
+                            $return_sheet->shipment_id = $shipment->id;
+                            $return_sheet->return_note_id = $note->id;
+                        }
+                        $return_sheet->save();
 
                     }
                 }
@@ -3232,6 +3246,7 @@ class ReturnController extends Controller
     }
 
     public function receive_return_note_image_upload(Request $request){
+        
         $flag = FALSE;
         $return_note_id = $request->image_return_note_id;
         $image_ids = explode(',', $request->selected_ids);
@@ -3241,7 +3256,7 @@ class ReturnController extends Controller
         $return_note = ReturnNote::find($return_note_id);
         if($return_note){
             if($return_note->status == 3 || $return_note->status == 1){
-                foreach ($image_ids as $id){
+                foreach ($image_ids as $index => $id) {
                     $file_name = 'return_note_image_'.$id;
                     $image = $request->file($file_name);
                     $imageName = $image->getClientOriginalName();
@@ -3256,6 +3271,7 @@ class ReturnController extends Controller
                     $return_note_image = new ReturnNoteImage();
                     $return_note_image->return_note_id = $return_note_id;
                     $return_note_image->image = $generated_image_name;
+                    $return_note_image->user_id = $request->shipper_name[$index];
                     $return_note_image->save();
                     $flag = TRUE;
                 }
@@ -3263,6 +3279,7 @@ class ReturnController extends Controller
                     $return_note_image = new ReturnNoteImage();
                     $return_note_image->return_note_id = $return_note_id;
                     $return_note_image->image = $return_note->image;
+                    $return_note_image->image = $request->shipper_name[$index];
                     $return_note_image->save();
                     $return_note->image = NULL;
                     $return_note->save();
@@ -3704,8 +3721,20 @@ class ReturnController extends Controller
 
     public function history_get_images(Request $request){
         $return_note_id = $request->return_note_id;
+                
         if($return_note_id){
+            $shipper_name = ReturnNoteShipment::join('shipments as s', 'return_note_shipments.shipment_id', '=', 's.id')
+            ->join('users as u','u.id','=','s.user_id')
+            ->where('return_note_shipments.return_note_id',$return_note_id)
+            ->select('u.id as id','u.name as name')->distinct()->get();//Xyedth
+
+            // SELECT DISTINCT u.name FROM return_note_shipments rs, shipments s,users u WHERE rs.shipment_id=s.id AND u.id=s.user_id  AND rs.return_note_id=66
+
             $return = ReturnNote::find($return_note_id);
+            
+            $return_note_shipment = ReturnNoteShipment::where('return_note_id',$return->id)->select('shipment_id')->distinct()->get();//Xyedth
+            $shipment=Shipment::whereIn('id',$return_note_shipment)->select('user_id')->get();//Xyedth
+
             if($return){
                 if($return->image !== null){
                     $details = array();
@@ -3726,26 +3755,58 @@ class ReturnController extends Controller
                 if($return_note_images->exists()){
                     $return_note_images = $return_note_images->get();
                     $details = array();
-                    foreach ($return_note_images as $return_note_image) {
-                        $url = 'uploads/return_notes/' . $return_note_image->image;
-                        if(file_exists($url)){
-                            $img_url = asset('uploads/return_notes/' . $return_note_image->image);
-                        }else{
-                            $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
-                            if($exists){
-                                $img_url = asset('storage/uploads/return_notes/'.$return_note_image->image);
-                            }
-                            else{
-                                $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                    foreach ($return_note_images as $index => $return_note_image) {
+                        if($return_note_image->user_id != null){
+                            $user = User::find($return_note_image->user_id);
+
+                            $return_note_shipments = ReturnNoteShipment::join('shipments as s','return_note_shipments.shipment_id', '=', 's.id')
+                                ->where('return_note_shipments.return_note_id',$return_note_id)
+                                ->where('s.user_id',$user->id)->count();
+                            $url = 'uploads/return_notes/' . $return_note_image->image;
+                            if(file_exists($url)){
+                                $img_url = asset('uploads/return_notes/' . $return_note_image->image);
+                            }else{
+                                $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
                                 if($exists){
-                                    $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                    $img_url = asset('storage/uploads/return_notes/'.$return_note_image->image);
                                 }
+                                else{
+                                    $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                                    if($exists){
+                                        $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                    }
+                                }
+
                             }
 
+                            if(!array_key_exists($return_note_image->user_id, $details)){
+                                $details[$return_note_image->user_id] = array('shipperid'=>$return_note_image->user_id, 'id' => $return_note_image->id,'shipper'=>$user->name,'noOfshipment'=>$return_note_shipments,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString());
+                            }
+
+                            $details[$return_note_image->user_id]['images'][] = $img_url;
                         }
-                        $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
+                        else{
+                            $url = 'uploads/return_notes/' . $return_note_image->image;
+                            if(file_exists($url)){
+                                $img_url = asset('uploads/return_notes/' . $return_note_image->image);
+                            }else{
+                                $exists = Storage::disk('public')->exists('uploads/return_notes/'.$return_note_image->image);
+                                if($exists){
+                                    $img_url = asset('storage/uploads/return_notes/'.$return_note_image->image);
+                                }
+                                else{
+                                    $exists = Storage::disk('s3')->exists('return_note_images/'.$return_note_image->image);
+                                    if($exists){
+                                        $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/'.$return_note_image->image, now()->addMinutes(5));
+                                    }
+                                }
+
+                            }
+                            $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
+                        }
                     }
-                    return response()->json(['status' => 0, 'images' => $details]);
+                    
+                    return response()->json(['status' => 0, 'details' => $details,'shippers'=> $shipper_name]);
                 }else{
                     return response()->json(['status' => 2]);
                 }
@@ -3755,10 +3816,11 @@ class ReturnController extends Controller
         }
         return response()->json(['status' => 1, 'error' => 'Return Note ID not selected, please try again!']);
     }
-
+    
     public function history_delete_image(Request $request){
         $return_note_id = $request->return_note_id;
         $return_note_image_id = $request->return_note_image_id;
+        $return_user_id = $request->user_id;
         if($return_note_image_id == 0){
             $return_note = ReturnNote::find($return_note_id);
             if($return_note){
@@ -3768,9 +3830,176 @@ class ReturnController extends Controller
             }
             return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
         }else{
-            ReturnNoteImage::where('id', $return_note_image_id)->delete();
+            ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
             return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
         }
         return response()->json(['status' => 1, 'error' => 'Image not found!']);
+    }
+
+    public function return_deliveries_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 416);
+        return view('admin.return.rider_return_deliveries');
+    }
+
+    public function return_deliveries_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 417);
+        }
+        $return_deliveries = ReturnNote::join('cities as c', 'return_notes.hub_id', '=', 'c.id')
+            ->join('zones as z', 'z.id', '=', 'c.zone_id')
+            ->join('riders as r', 'return_notes.rider_id', '=', 'r.id')
+            ->select('return_notes.id as return_note_id', 'z.name as zone', 'return_notes.created_at as created_at', 'r.name as rider', 'return_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `adns` where `adns`.`return_note_id` = `return_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`'), DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `dns` where `dns`.`return_note_id` = `return_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'));
+
+
+        $datatable = Datatables::of($return_deliveries)
+            ->addColumn('return_note', function ($return_deliveries) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($return_deliveries->return_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->addColumn('return_note_id_padded', function ($return_deliveries) {
+                return str_pad($return_deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('total_shipments_link', function ($return_deliveries) {
+                if ($return_deliveries->total_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_deliveries->total_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipments_rider_updated', function ($return_deliveries) {
+                if ($return_deliveries->shipments_rider_updated != null) {
+                    return $return_deliveries->shipments_rider_updated;
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('update_via_app', function ($return_deliveries) {
+                if ($return_deliveries->shipments_rider_updated != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_deliveries->shipments_rider_updated . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('update_via_dbf', function ($return_deliveries) {
+                $count = $return_deliveries->shipments_dbf_updated;
+                if ($count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $count . '</button>';
+                } else {
+                    return 0;
+                }
+            });
+        return $datatable->make(true);
+    }
+
+    public function return_deliveries_app_shipments_list(Request $request)
+    {
+        $return_note_id = $request->return_note_id;
+
+        $shipments = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
+            ->join('rider_return_deliveries', function ($join) {
+                $join->on('return_note_shipments.shipment_id', '=', 'rider_return_deliveries.shipment_id')
+                    ->where('rider_return_deliveries.id', '=',
+                        DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)'));
+            })
+            ->leftjoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 5 and rider_id is not null)'));
+            })
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_return_deliveries.picture_path', 'rider_return_deliveries.pod_image', 'rider_return_deliveries.delivered_status', 'rider_return_deliveries.audio_path')
+            ->where('return_note_shipments.update_type', 1)
+            ->where('return_note_shipments.return_note_id', $return_note_id);
+
+
+        $datatables = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('status', function ($shipments) {
+                if ($shipments->delivered_status == 1) {
+                    return 'Return - Delivered to Shipper';
+                } else {
+                    return 'Return - Delivery Unsuccessful';
+                }
+            })
+            ->addColumn('pod', function ($shipments) {
+                $image = '';
+                if ($shipments->picture_path != null) {
+                    $exists = Storage::disk('public')->exists($shipments->picture_path);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->picture_path, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn('pod_image', function ($shipments) {
+                $image = '';
+                if ($shipments->pod_image != null) {
+                    $exists = Storage::disk('public')->exists($shipments->pod_image);
+                    if ($exists) {
+                        $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->pod_image)) . '"><i class="la la-image"></i> View</button></div>';
+                    } else {
+                        $img = Storage::disk('s3')->temporaryUrl($shipments->pod_image, now()->addMinutes(5));
+                        $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }
+
+                    return $image;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('audio_path', function ($shipments) {
+                $audio = '';
+                if ($shipments->audio_path != null) {
+                    $audio .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm audio" data-link="' . asset(Storage::url($shipments->audio_path)) . '"><i class="la la-file-sound-o"></i> Listen</button></div>';
+
+                    return $audio;
+                } else {
+                    return '-';
+                }
+            });
+        return $datatables->make(true);
+    }
+
+    public function return_deliveries_dbf_shipments_list(Request $request)
+    {
+        $return_note_id = $request->return_note_id;
+
+        $shipments = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
+            ->leftjoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 5 and rider_id is null)'));
+            })
+            ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
+            ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by')
+            ->where('return_note_shipments.update_type', 0)
+            ->where('return_note_shipments.status', '>', 0)
+            ->where('return_note_shipments.return_note_id', $return_note_id);
+        $datatables = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('status', function ($shipments) {
+                if ($shipments->shipper_status_id == 25) {
+                    return 'Return - Delivered to Shipper';
+                } else {
+                    return 'Return - Delivery Unsuccessful';
+                }
+            });
+        return $datatables->make(true);
+
     }
 }

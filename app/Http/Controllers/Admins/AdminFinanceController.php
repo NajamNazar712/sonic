@@ -25,6 +25,7 @@ use App\Http\Models\DiscountCharge;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
+use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
@@ -758,7 +759,7 @@ class AdminFinanceController extends Controller
             ->select('s.id', 's.tracking_number','s.tracking_number as tracking_id', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc', 'delivery_note_shipments.status as recovery_status', 'rsr.created_at as recovery_date', 'rsrl.previous_status as previous_status', 'rsr.image as revert_requested_image', 'rsr.id as image_id','consolidations.consolidation_id','a.name as request_reverted_by');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($shipments)
@@ -4220,7 +4221,59 @@ class AdminFinanceController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),90);
         }
 
-        $count = DB::table('done_payments')->count();
+        $count = DB::table('done_payments');
+
+        $count = $count->join('users as u', 'done_payments.user_id', '=', 'u.id');
+
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $count = $count->where(function ($query) {
+                    $query->whereIn('u.id', session('tagged_shippers'));
+                });
+            }
+        }
+        else if (session('role_id') != 1) {
+            $count = $count->join('cities as c', 'u.city_id', '=', 'c.id')
+                ->whereIn('c.hub_id', session('hubs'));
+        }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $count = $count->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+                ->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+                ->whereIn('ss.tracking_number', explode(',', $tracking_numbers))
+                ->groupby('done_payments.id');
+        }
+
+        if ($payment_ids = $request->get('search_payment_ids')) {
+            $count = $count->whereIn('done_payments.id', explode(',', $payment_ids));
+        }
+
+        if ($shipper = $request->get('search_shipper')) {
+            $count = $count->where('u.id', '=', $shipper);
+        }
+
+        if ($shipper_status = $request->get('search_shipper_status')) {
+            if ($shipper_status == 1) {
+                $count = $count->where('u.status', '=', 3)->where('u.blacklist', 0);
+            }
+            else {
+                $count = $count->where('u.status', '!=', 3);
+            }
+        }
+
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $count = $count->whereBetween('done_payments.created_at', [$from,$to]);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $count = $count->whereBetween('done_payments.status_updated_at', [$from,$to]);
+        }
+
+        $count = $count->count();
 
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
@@ -5328,6 +5381,11 @@ class AdminFinanceController extends Controller
         $writer->save('php://output');
     }
 
+    public function done_payments_generate_report_to_email(){
+        $date = Carbon::today()->format('Y-m-d');
+        $response = AdminReportsEmailController::done_payment($date . ' 00:00:00');
+        return ['status' => 1, 'success' => ' Done Payment(s) Report Generated'];
+    }
     static public function generate_invoice() {
         $settings = GlobalSettings::where('type', 'due_date_days');
 
@@ -7226,6 +7284,7 @@ class AdminFinanceController extends Controller
             $invoice->status_id = 3;
 
             $invoice->save();
+            $this->international_credit_limit_reset($invoice->user_id);
         }
 
         return redirect()->route('admin.finance.invoices.index')->with('success', 'Invoice has been marked as Received');
@@ -7245,6 +7304,7 @@ class AdminFinanceController extends Controller
                 $invoice->status_id = 3;
 
                 $invoice->save();
+                $this->international_credit_limit_reset($invoice->user_id);
             }
         }
 
@@ -10300,4 +10360,12 @@ class AdminFinanceController extends Controller
         return $link;
     }
 
+    public function international_credit_limit_reset($user_id){
+        $credit_user = InternationalUsersCreditLimit::where('user_id', $user_id);
+        if($credit_user->exists()){
+            $credit_user = $credit_user->first();
+            $credit_user->limit_usage = 0;
+            $credit_user->save();
+        }
+    }
 }

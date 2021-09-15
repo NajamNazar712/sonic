@@ -10,6 +10,8 @@ use App\Http\Models\ShipmentStatusReason;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Shipper\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -84,14 +86,14 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipment_shipper_references as ssr', 'shipments.id', '=', 'ssr.shipment_id');
 
 
-        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+        if (!empty($request->get('dr_search_date_from')) && !empty($request->get('dr_search_date_to'))) {
             $from = $request->get('dr_search_date_from');
             $to = $request->get('dr_search_date_to');
 
             $sales->leftJoin('shipments_journey as dr', function ($join) use ($from, $to) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
                     ->where('dr.id','=',
-                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1 and shipments_journey.created_at between "' . $from . '" and "' . $to . '")'));
             });
 
             $sales->whereBetween('dr.created_at', [$from, $to]);
@@ -104,7 +106,7 @@ class ShipperReportsController extends Controller
                 });
         }
 
-        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id')
+        $sales->select('p.product_name as product_name', 'ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount','sm.mode as shipping_mode', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'sod.order_date as order_date', 'shipments.estimated_weight', 'ssr.reference_1 as reference_1', 'ssr.reference_2 as reference_2', 'ssr.reference_3 as reference_3', 'ssr.reference_4 as reference_4', 'ssr.reference_5 as reference_5', 'dr.shipper_status_id as dr_status_id', 'usi.vendor', 'dps.done_payment_id as payment_id', 'shipments.shipper_status_id as shipment_status')
                 ->whereNotIn('shipments.shipper_status_id',[1,17]);
 
                 if(session('user_type') == 2){
@@ -156,6 +158,22 @@ class ShipperReportsController extends Controller
                     $amount = $sale->s_collection_amount;
                 }
                 return number_format($amount);
+            })
+            ->editColumn('delivered_or_returned', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->delivered_or_returned;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('received_or_refused_by', function($sale){
+                if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $sale->received_or_refused_by;
+                }
+                else {
+                    return '';
+                }
             });
 
             if($tracking = $request->get('search_tracking')){
@@ -704,5 +722,139 @@ class ShipperReportsController extends Controller
         }
         return $datatable->make(true);
     }
+
+    public function daraz_mis_index(){
+        // $sister_accounts = User::whereIn('id',session('sister_users'))->select('id', 'name')->get(); 
+        $sister_accounts = DB::connection('reports')->table('merged_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'merged_sister_account_mappings.sister_user_id')->where('head_user_id', session('user_id'))->select('u.id', 'u.name')->get();
+        
+        return view('client.reports.daraz_mis',compact('sister_accounts'));
+
+    }
+
+    public function daraz_mis_list(Request $request){
+        $sales = DB::connection('reports')->table('shipments')->join('users as u','u.id','=','shipments.user_id')
+        ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+        ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where('sj.id','=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
+        })
+        ->leftJoin('shipments_journey as dr', function ($join) {
+            $join->on('dr.shipment_id', '=', 'shipments.id')
+                ->where('dr.id', '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In (14, 25, 30, 36, 37) AND shipments_journey.verification = 1)'));
+        })
+        ->leftJoin('shipments_journey as atmpdate', function ($join) {
+            $join->on('atmpdate.shipment_id', '=', 'shipments.id')
+                ->where('atmpdate.id', '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5 AND shipments_journey.verification = 1)'));
+        })
+        ->leftJoin('shipments_journey as sjrr', function ($join) {
+            $join->on('sjrr.shipment_id', '=', 'shipments.id')
+                ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
+                ->where('sjrr.id', '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
+        })
+        ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
+
+        ->select('shipments.tracking_number','sj.created_at as arrival_date','ss.name as current_status','shipments.actual_weight', 'ssr.name as return_reason', 'atmpdate.created_at as last_attempt_date', 'dr.created_at as delivered_or_returned', 'dr.received_or_refused_by','u.name as shipper_name','shipments.id as shipment_id','u.id as shipper_id')
+        ->whereNotIn('shipments.shipper_status_id',[1,17]);
+
+        $sales = $sales->where(function ($query) {
+            $query->where('shipments.user_id', 7306)
+                ->orWhereIn('shipments.user_id', session('sister_users'));
+        });
+
+
+        $datatable = Datatables::of($sales)
+        ->addColumn('rider_remarks', function($sales) {
+            $rider_status = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('rider_id')->get()->last();
+            if($rider_status){
+                if($rider_status){
+                    return $rider_status->remarks;
+                }else{
+                    return '-';
+                }
+                // ($rider_status->remarks) ? $rider_status->remarks : '-'
+            }
+
+        })
+        ->addColumn('last_reason', function($sales) {
+            $last_reason = ShipmentsJourney::where('shipment_id',$sales->shipment_id)->whereNotNull('status_reason_id')->get()->last();
+                if($last_reason){
+                    return $last_reason->shipment_status_reason->name;
+                }else{
+                    return '-';
+                }
+                // ($rider_status->remarks) ? $rider_status->remarks : '-'
+
+        })
+        ->addColumn('attempts', function($sales) {
+            $reattempt_count = ShipmentsJourney::where('shipment_id', $sales->shipment_id)
+                ->where('shipper_status_id','=',5)
+                ->where('verification','=',1)
+                ->select(DB::raw('count(shipment_id) as reattempts'))
+                ->get()->first();
+                if($reattempt_count){
+                    if($reattempt_count->reattempts-1 == -1){
+                        return 0;
+                    }else{
+                        return $reattempt_count->reattempts-1;
+                    }
+                }else{
+                    return '-';
+                }
+        })
+        ->addColumn('tracking_number_link', function ($sales) {
+            $route = route('cod.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$sales->tracking_number' class='tracking' target='_blank'>$sales->tracking_number</a></u>";
+        })
+        ->editColumn('shipper_name', function ($sales) {
+            if($sales->shipper_id == 7306){
+                return '-';
+            }else{
+                return $sales->shipper_name;
+            }
+        });
+
+        // if($tracking = $request->get('search_tracking')){
+        //     $datatable->where('shipments.tracking_number', '=', $tracking);
+        // }
+        if($tracking = $request->get('search_tracking')){
+            $tracking_numbers = explode(',', $tracking);
+            $datatable->whereIn('shipments.tracking_number', $tracking_numbers);
+        }
+        if($search_user = $request->get('search_user')){
+            $datatable->where('shipments.user_id', $search_user);
+        }
+        
+        if($origin = $request->get('search_origin')){
+            $datatable->where('oc.id', '=', $origin);
+        }
+
+        if($destination = $request->get('search_destination')){
+            $datatable->where('dc.id', '=', $destination);
+        }
+
+        if($status = $request->get('search_status')){
+            $datatable->where('ss.id', '=', $status);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('sj.created_at', [$from,$to]);
+        }
+
+        if ($request->get('dr_search_date_from') && $request->get('dr_search_date_to')) {
+            $from = $request->get('dr_search_date_from');
+            $to = $request->get('dr_search_date_to');
+            $datatable->whereBetween('dr.created_at', [$from, $to]);
+        }
+
+        return $datatable->make(true);
+    }
 }
+
 

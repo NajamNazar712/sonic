@@ -627,15 +627,28 @@ class ShipperPackagingMaterialController extends Controller
 
     public function select_categories(){
 
-        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
+        $shipper = User::find(session('user_id'));
+        
+        if(session('foc_account') == 1){
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
+        }
+        else{
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
+        }
 
-        return view('client.packaging.categories')->with(['search_packaging_types' => $search_packaging_type]);
+        return view('client.packaging.categories')->with(['search_packaging_types' => $search_packaging_type, 'shipper_packaging_types' => $shipper->packaging_materails]);
 
     }
 
     public function category_products($id){
-        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
-
+        $shipper = User::find(session('user_id'));
+        
+        if(session('foc_account') == 1){
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
+        }
+        else{
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
+        }
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
       
         $shipper = User::find(session('user_id'));
@@ -657,7 +670,7 @@ class ShipperPackagingMaterialController extends Controller
 //                $user_charges[$size_charge->size_id] = $size_charge->charges;
 //            }
 //        }
-        $size_charges = PackagingMaterialTypeSizes::get();
+        $size_charges = PackagingMaterialTypeSizes::where('id', '!=',1)->get();
         foreach ($size_charges as $size_charge){
             $standard_charges[$size_charge->id] = $size_charge->standard_charges;
         }
@@ -692,8 +705,16 @@ class ShipperPackagingMaterialController extends Controller
 
     public function product_details($id){
         
-        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
-        $size_price =PackagingMaterialTypeSizes::where('type_id',$id)->get()->last()->standard_charges;   
+        $shipper = User::find(session('user_id'));
+        
+        if(session('foc_account') == 1){
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
+        }
+        else{
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
+        }
+
+        $size_price =PackagingMaterialTypeSizes::where('type_id',$id)->get()->last()->standard_charges;
         $product = PackagingMaterialTypes::find($id);
         if ($product->picture != NULL) {
             $picture = Storage::url('packaging_pictures/' . $product->picture);
@@ -723,7 +744,7 @@ class ShipperPackagingMaterialController extends Controller
 
         $cart_count  = PackagingMaterialCart::where('user_id',session('user_id'))->count();
 
-        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture, 'picture1' => $picture1, 'picture2' => $picture2, 'picture3' => $picture3, 'picture4' => $picture4,'search_packaging_types' => $search_packaging_type, 'size_price' => $size_price]);
+        return view('client.packaging.details')->with(['product' => $product, 'count' => $cart_count, 'picture' => $picture, 'picture1' => $picture1, 'picture2' => $picture2, 'picture3' => $picture3, 'picture4' => $picture4,'search_packaging_types' => $search_packaging_type, 'size_price' => $size_price,'shipper_packaging_types' => $shipper->packaging_materails]);
 
 
     }
@@ -769,8 +790,15 @@ class ShipperPackagingMaterialController extends Controller
     }
 
     public function checkout(){
-        $search_packaging_type = PackagingMaterialTypes::where('status',1)->get();
 
+        $shipper = User::find(session('user_id'));
+        
+        if(session('foc_account') == 1){
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [1, 3])->get();
+        }
+        else{
+            $search_packaging_type = PackagingMaterialTypes::where('status', 1)->whereIn('packaging_type', [2, 3])->get();
+        }
         $cart = PackagingMaterialCart::where('user_id',session('user_id'));
         if($cart->count() > 0){
             $cart = $cart->get();
@@ -788,7 +816,7 @@ class ShipperPackagingMaterialController extends Controller
             $cities = City::where('status',1)->orderBy('name')->get();
             $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
             $payment_mode = PackagingPaymentMode::all();
-            return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'pictures' => $pictures, 'search_packaging_types' => $search_packaging_type]);
+            return view('client.packaging.checkout')->with(['cart_count' => $cart_count, 'cart' => $cart, 'address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode, 'pictures' => $pictures, 'search_packaging_types' => $search_packaging_type,'shipper_packaging_types' => $shipper->packaging_materails]);
         }
         else{
             return redirect()->route('cod.packaging.requests.categories')->with('success', 'Product Added');

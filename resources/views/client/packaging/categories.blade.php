@@ -24,9 +24,16 @@
                                                 <div class="form-group mb-0">
                                                     <select name="search_package_type" id="search_package_type" class="form-control select2">
                                                         @if(isset($search_packaging_types))
-                                                        @foreach($search_packaging_types as $search_packaging_type)
-                                                            <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
-                                                        @endforeach
+                                                            @foreach($search_packaging_types as $search_packaging_type)
+                                                                <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                            @endforeach
+                                                            @if (count($shipper_packaging_types)>0)
+                                                                @foreach($shipper_packaging_types as $shipper_packaging_type)
+                                                                    @if ($shipper_packaging_type->packaging_material->status != 0)
+                                                                        <option value="{{route('cod.packaging.requests.product',['id'=>$shipper_packaging_type->packaging_material->id])}}">{{ $shipper_packaging_type->packaging_material->type }}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            @endif
                                                         @endif
                                                     </select>
                                                 </div>
@@ -36,7 +43,7 @@
 
                                                     <div class="col-6">
                                                         <div class="col mb-1 text-center border border-3 box_padding">
-                                                            <img class="category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
+                                                            <img class="img-thumbnail category_banner" alt="packaging" src="{{asset('img/packages_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <a href="{{ route('cod.packaging.requests.category', ['id' => 1]) }}" class="btn btn-outline-dark select_category"><b>Packaging Materials</b></a>
@@ -45,7 +52,7 @@
                                                    
                                                     <div class="col-6">
                                                         <div class="col mb-1 text-center border border-3 box_padding">
-                                                            <img class="category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
+                                                            <img class="img-thumbnail category_banner" alt="stationary" src="{{asset('img/stationary_category.png')}}" >
                                                         </div>
                                                         <div class="col mb-1 text-center">
                                                             <a href="{{ route('cod.packaging.requests.category', ['id' => 2]) }}" class="btn btn-outline-dark select_category"><b>Stationary Items</b></a>
@@ -113,8 +120,9 @@
             margin: 120px 20px;
         }
         .category_banner{
-            width: 500px;
-            height: 230px;
+            /* width: 500px; */
+            height: 200px;
+            border: none;
         }
         .box_padding{
             padding-top: 35px; 

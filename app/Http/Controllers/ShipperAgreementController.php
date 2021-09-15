@@ -61,10 +61,11 @@ class ShipperAgreementController extends Controller
         $this->middleware('Permission');
     }
 
-    public static function view_crf_agreement($id, $file_type = null){
+    public static function view_crf_agreement($id, $file_type = null,$for_shipper_agreement_modal = false){
         $shipper_id = $id;
 
-        $html = '
+        if(!$for_shipper_agreement_modal) {
+            $html = '
                 <!doctype html>
                 <html lang="en">
                   <head>
@@ -149,6 +150,11 @@ class ShipperAgreementController extends Controller
                     <div>
                     <div class="double-border">
       ';
+        }
+        else{
+            $html =  '<div>
+                    <div class="double-border">';
+        }
         $shipper = User::find($id);
         if(!$shipper){
             return redirect(route('cod.404'));
@@ -500,7 +506,7 @@ otherwise it will be rejected</li>
                 $detain_origins = [];
                 $sameday_origins = [];
 
-                if(count($rate_origin_hubs) > 0){
+                if($rate_origin_hubs || count($rate_origin_hubs) > 0){
                     foreach($rate_origin_hubs as $index => $origin){
 
                         if($origin->shipping_mode_id == 1){
@@ -526,7 +532,7 @@ otherwise it will be rejected</li>
                 $overland_destinations = [];
                 $detain_destinations = [];
                 $sameday_destinations = [];
-                if(count($rate_destination_hubs) > 0){
+                if($rate_destination_hubs || count($rate_destination_hubs) > 0){
                     foreach($rate_destination_hubs as $index => $destination){
 
                         if($destination->shipping_mode_id == 1){
@@ -1130,28 +1136,31 @@ otherwise it will be rejected</li>
                                <li>Shipper and its consignee shall indemnify Trax Online from any legal claims arising against each other in light of such exchange.</li>
                                <li><strong>TRAX Online (Pvt) Ltd.</strong> may add new terms & conditions at any point in time.</li>
                              </ul>';
-        $terms_conditions .= '<h2 class="mt-0"><u>Acknowledgment & Signature</u></h2>';
-        $terms_conditions .= '<div class="m-2"><input class="form-check-input" type="checkbox" value="1" disabled '.$check.'> <span class="mt-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-2"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-2">'.$sales_person_name.'</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
+        if(!$for_shipper_agreement_modal) {
+            $terms_conditions .= '<h2 class="mt-0"><u>Acknowledgment & Signature</u></h2>';
+            $terms_conditions .= '<div class="m-2"><input class="form-check-input" type="checkbox" value="1" disabled ' . $check . '> <span class="mt-2">I hereby accept all the terms and conditions mention above along with the agreed upon rates mentioned within.</span> </div><div class="row mt-2"><div class="col-6"><span class="border-bottom"><strong>Rates Added By</strong></span><p class="pt-2">' . $sales_person_name . '</p></div><div class="col-6"><p><span class="border-bottom"><strong>Shipper Signature</strong></span></p><p class="pt-2"><span class="border-bottom"><strong>Company Stamp</strong></span></p></div></div>';
+        }
 
 
         $terms_conditions .= '</div>';
         $html .= $terms_conditions;
         $html .= '</div>';
         $notification = false;
-
-        if($file_type == 1){
-            $notification = true;
-        }
-        if(!$notification){
-            $html .= '<script>
+        if(!$for_shipper_agreement_modal) {
+            if ($file_type == 1) {
+                $notification = true;
+            }
+            if (!$notification) {
+                $html .= '<script>
                   window.onload = function() {
                     window.print();
                   }
                 </script>';
-        }
-        $html .='</body>
+            }
+            $html .= '</body>
                 </html>
       ';
+        }
 
         return $html;
     }

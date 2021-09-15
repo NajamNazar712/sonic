@@ -33,7 +33,6 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Intercept Type </th>
                     </tr>
                     </thead>
                 </table>
@@ -223,7 +222,6 @@
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Status Date');
-                            head.push('Intercept Type');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -245,8 +243,6 @@
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.status_date);
-                                row.push(values.type);
-
                                 body.push(row);
                             });
                         },
@@ -454,7 +450,6 @@
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'type', name: 'irbr.intercept_type', class: 'align-middle type'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -478,10 +473,6 @@
                         '</select>';
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
                         '</select>';
-                    var consignee_drop_select = '<select name="service_select" id="consignee_select" class="select2 form-control">' +
-                        '<option value="2">Same Consignee</option>'+
-                        '<option value="1">Different Consignee</option>'+
-                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -495,11 +486,6 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
 
-                        }else if($(header).is('.type') ) {
-                            $(consignee_drop_select).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
                         }
                         else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))

@@ -845,7 +845,7 @@ class RetailShipmentBookController extends Controller
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment_item->id . '</strong></span>
                             </td>
-                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="4" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
                             <tr>
@@ -900,7 +900,7 @@ class RetailShipmentBookController extends Controller
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
-                            <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                            <td rowspan="4" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE') . '" class="d-block mx-auto">
                             </td>
                     ';
@@ -1671,7 +1671,7 @@ class RetailShipmentBookController extends Controller
             'length' => ['nullable', 'numeric', 'between:0.1,100000'],
             'breadth' => ['nullable', 'numeric', 'between:0.1,100000'],
             'height' => ['nullable', 'numeric', 'between:0.1,100000'],
-            'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,10'],
+            'pieces' => ['nullable', 'integer', 'digits_between:1,10', 'between:1,50'],
             'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('retail_payment_modes', 'id')->where('id', 1)],
             'charges_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('charges_modes', 'id')->whereIn('id', [1, 2])],
             'shipper_cell_number' => ['required', 'regex:/^[0][0-9]{10}$/'],

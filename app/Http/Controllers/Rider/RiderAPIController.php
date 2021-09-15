@@ -2626,7 +2626,7 @@ class RiderAPIController extends Controller
 
 
                             if ($request->has('picture')) {
-                                $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '.png';
+                                $picture_path = 'rider_return_delivery/picture_' . $rider_return_delivery->id . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                 $rider_return_delivery->picture_path = $picture_path;
                                 $rider_return_delivery->save();
@@ -3288,7 +3288,7 @@ class RiderAPIController extends Controller
 
             $rider_pickups = V2PickupNote::join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
                 ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-                ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('sum(pr.booked) as total_shipments'), DB::raw('(select sum(shipments) from v2_rider_pickups where pickup_note_id = v2_pickup_notes.id and pickup_type = 1) as rider_picked'), DB::raw('sum(pr.received) as arrived'))
+                ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('sum(pr.booked) as total_shipments'), DB::raw('(select sum(shipments) from v2_rider_pickups where pickup_note_id = v2_pickup_notes.id and pickup_type = 1) as rider_picked'), DB::raw('sum(pr.received) as arrived'), 'v2_pickup_notes.created_at as created_at')
                 ->groupBy('v2_pickup_notes.id')
                 ->where('v2_pickup_notes.rider_id', '=', $rider_id)
                 ->where('v2_pickup_notes.status', 1);
@@ -3312,7 +3312,7 @@ class RiderAPIController extends Controller
             }
 
             if ($rider_pickups->exists()) {
-                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.id', 'DESC')->get();
+                $rider_pickups = $rider_pickups->orderBy('v2_pickup_notes.created_at', 'DESC')->get();
                 return response()->json(["status" => 0, "pickups" => $rider_pickups]);
             } else {
                 return response()->json(["status" => 1, "message" => "No pickups found!"]);
@@ -3333,6 +3333,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_deliveries = DeliveryNote::join('delivery_note_shipments', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
                 ->join('shipments', 'shipments.id', '=', 'delivery_note_shipments.shipment_id')
+                ->select('delivery_notes.created_at as created_at', 'delivery_notes.id as delivery_note_id', 'shipments.tracking_number as tracking_number')
                 ->where('delivery_notes.pending_status', 1)
                 ->where('delivery_notes.rider_id', $rider_id);
 
@@ -3355,7 +3356,7 @@ class RiderAPIController extends Controller
             }
 
             if ($rider_deliveries->exists()) {
-                $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.id', 'DESC')->get();
+                $rider_deliveries = $rider_deliveries->orderBy('delivery_notes.created_at', 'DESC')->get();
                 $rider_delivery_history = array();
                 foreach ($rider_deliveries as $rider_delivery) {
                     $undelivered_shipments = DeliveryNoteShipment::where('delivery_note_id', $rider_delivery->delivery_note_id)->where('status', 1)->where('update_type', 1)->count();
@@ -3365,6 +3366,7 @@ class RiderAPIController extends Controller
                     $delivery_history['shipments_count'] = $delivered_shipments + $undelivered_shipments;
                     $delivery_history['delivered_shipments'] = $delivered_shipments;
                     $delivery_history['undelivered_shipments'] = $undelivered_shipments;
+                    $delivery_history['created_at'] = date('Y-m-d', strtotime($rider_delivery->created_at));
                     $rider_delivery_history[] = $delivery_history;
                 }
                 return response()->json(["status" => 0, "deliveries" => $rider_delivery_history]);
@@ -3389,6 +3391,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_return_deliveries = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
                 ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                ->select('return_notes.id as return_note_id', 'return_notes.created_at as created_at', 's.tracking_number as tracking_number')
                 ->where('return_notes.rider_id', $rider_id)
                 ->whereIn('return_notes.status', [1, 3]);
 
@@ -3411,7 +3414,7 @@ class RiderAPIController extends Controller
             }
             $rider_return_history = array();
             if ($rider_return_deliveries->exists()) {
-                $rider_return_deliveries = $rider_return_deliveries->orderBy('return_notes.id', 'DESC')->get();
+                $rider_return_deliveries = $rider_return_deliveries->orderBy('return_notes.created_at', 'DESC')->get();
                 foreach ($rider_return_deliveries as $rider_return_delivery) {
                     $undelivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 1)->where('update_type', 1)->count();
                     $delivered_shipments = ReturnNoteShipment::where('return_note_id', $rider_return_delivery->return_note_id)->where('status', 2)->where('update_type', 1)->count();
@@ -3420,6 +3423,7 @@ class RiderAPIController extends Controller
                     $return_history['total_shipments'] = $delivered_shipments + $undelivered_shipments;
                     $return_history['delivered_shipments'] = $delivered_shipments;
                     $return_history['undelivered_shipments'] = $undelivered_shipments;
+                    $return_history['created_at'] = date('Y-m-d', strtotime($rider_return_delivery->created_at));
                     $rider_return_history[] = $return_history;
                 }
                 return response()->json(["status" => 0, "return_history" => $rider_return_history]);
@@ -7456,7 +7460,7 @@ class RiderAPIController extends Controller
         $rider_default_hub = Rider::where('riders.id', $request->rider_id)
             ->join('cities as c', 'c.id', '=', 'riders.city_id')
             ->select('c.hub_id as hub_id')->first();
-        $retail_trax_centers = RetailTraxCenter::where('default_hub', $rider_default_hub->hub_id)->select('name', 'code', 'pickup_address_id')->get();
+        $retail_trax_centers = RetailTraxCenter::where('default_hub', $rider_default_hub->hub_id)->where('status', 1)->select('name', 'code', 'pickup_address_id')->get();
         $products = Product::all();
         $business_categories = BusinessCategory::where('id', '!=', 2)->get();
         $shipping_modes = RetailShippingMode::all();
@@ -8923,6 +8927,411 @@ class RiderAPIController extends Controller
             }
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
+    }
+
+    public function return_shipment_delivered_v2(Request $request)
+    {
+        $rules = [
+            'added_at' => ['required'],
+            'return_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:return_notes,id'],
+            'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id'],
+            'receiver_name' => ['required', 'string', 'max:255'],
+            'cnic' => ['nullable', 'max:255'],
+            'picture' => ['nullable', 'image'],
+            'pod_image' => ['nullable', 'image']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+        $message = '';
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $rider_id = $request->rider_id;
+
+            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+            if (!Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 25)->exists()) {
+                if (!RiderReturnDelivery::where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
+                    if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) {
+                        {
+
+                            $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
+
+                            $rider_return_delivery = new RiderReturnDelivery();
+
+                            $rider_return_delivery->added_at = $added_at;
+                            $rider_return_delivery->return_note_id = $request->return_note_id;
+                            $rider_return_delivery->shipment_id = $request->shipment_id;
+                            $rider_return_delivery->rider_id = $request->rider_id;
+                            $rider_return_delivery->start_location_latitude = $request->start_location_latitude;
+                            $rider_return_delivery->start_location_longitude = $request->start_location_longitude;
+                            $rider_return_delivery->actual_location_latitude = $request->actual_location_latitude;
+                            $rider_return_delivery->actual_location_longitude = $request->actual_location_longitude;
+                            $rider_return_delivery->rider_status_id = 25;
+                            $rider_return_delivery->delivered_status = 1;
+                            $received_by = NULL;
+                            if ($request->has('receiver_name')) {
+                                $received_by = $request->receiver_name;
+                            }
+                            if ($request->has('cnic')) {
+                                $rider_return_delivery->cnic = $request->cnic;
+                                $received_by .= ' | ' . $request->cnic;
+                            }
+
+                            $shipment = Shipment::find($request->shipment_id);
+                            $shipper_data = $shipment->user;
+                            $pickup_address = $shipment->pickup_address;
+
+                            $shipper_phone_number_1 = $pickup_address->phone;
+                            $shipper_address = $pickup_address->pickup_address;
+
+                            $shipper_lat = $pickup_address->location_latitude;
+                            $shipper_long = $pickup_address->location_longitude;
+
+                            if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                                $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+
+                                $rider_return_delivery->distance_from_start_to_actual = $this->distance($origin, $destination);
+
+                                if ($shipper_lat != null && $shipper_long != null) {
+                                    $rider_return_delivery->current_location_latitude = $shipper_lat;
+                                    $rider_return_delivery->current_location_longitude = $shipper_long;
+
+                                    $origin = $shipper_lat . ',' . $shipper_long;
+
+                                    $distance = $this->distance($origin, $destination);
+
+                                    $rider_return_delivery->distance_from_current_to_actual = $distance;
+                                }
+                            } else {
+                                $rider_return_delivery->distance_from_start_to_actual = 0;
+
+                                if ($shipper_lat != null && $shipper_long != null) {
+                                    $rider_return_delivery->current_location_latitude = $shipper_lat;
+                                    $rider_return_delivery->current_location_longitude = $shipper_long;
+                                    $rider_return_delivery->distance_from_current_to_actual = 0;
+                                }
+                            }
+                            $rider_return_delivery->save();
+
+
+                            if ($request->has('picture')) {
+                                $picture_path = 'rider_return_delivery/picture_' . $rider_return_delivery->id . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                                $rider_return_delivery->picture_path = $picture_path;
+                                $rider_return_delivery->save();
+                            }
+
+                            if ($request->has('pod_image')) {
+                                $picture_path = 'rider_return_delivery/pod_image_' . $rider_return_delivery->id . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->pod_image));
+                                $rider_return_delivery->pod_image = $picture_path;
+                                $rider_return_delivery->save();
+                            }
+
+                            if (ReturnNote::where('id', $request->return_note_id)->exists()) {
+                                $shipment->shipper_status_id = 25;
+                                $shipment->consignee_status_id = 25;
+                                $shipment->save();
+                                ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
+                                ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $request->return_note_id, NULL, 1, $received_by, $rider_id);
+                            }
+                            $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
+                            if (!$rider_return_note_status->exists()) {
+                                $new_status = new RiderReturnNoteStatus();
+                                $new_status->return_note_id = $request->return_note_id;
+                                $new_status->status = 1;
+                                $new_status->save();
+                            }
+                            $return_note_data = ReturnNote::find($request->return_note_id);
+
+                            if ($return_note_data->completion_status == 0) {
+                                $return_note_data->completion_status = 1;
+                                $return_note_data->save();
+                            }
+                            $updated_shipments_count = ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('status', 0)->count();
+
+                            if ($updated_shipments_count == 0) {
+                                $return_note_data->status = 3;
+                                $return_note_data->updated_at = Carbon::now();
+                                $return_note_data->save();
+                            }
+                            $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
+                            if ($rider_return_note_status->exists()) {
+                                $rider_return_note_status = $rider_return_note_status->first();
+                                $rider_return_note_status->status = 2;
+                                $rider_return_note_status->save();
+                            }
+                            $message = 'Shipment is marked as delivered Successfully';
+                        }
+                    }
+                } else {
+                    $message = 'Shipment is marked as delivered already';
+                }
+            } else {
+                $message = 'Shipment is marked as delivered already';
+            }
+        }
+        return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
+    }
+
+    public function shipment_attempt_settings(Request $request)
+    {
+        $settings = GlobalSettings::whereIn('type', ['rider_shipment_attempt_count', 'rider_shipment_attempt_waiting_duration'])
+            ->select('type as key', 'setting_value as value');
+        if ($settings->exists()) {
+            $settings = $settings->get();
+            return response()->json(['status' => 0, 'data' => $settings]);
+        }
+        return response()->json(['status' => 1, 'message' => 'Settings not found']);
+    }
+
+    public function rider_signup_v3(Request $request)
+    {
+        if ($request->isMethod('post')) {
+            $rules = [
+                'rider_type_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:rider_types,id'],
+                //Employees
+                'name' => ['nullable'],
+                'mother_name' => ['nullable'],
+                'employee_gender_id' => ['nullable'],
+                'city_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'cnic_no' => ['nullable', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/'],
+                'phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'guardian_name' => ['nullable'],
+                'religion_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_religions,id'],
+                'nationality_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_nationalities,id'],
+                'domicile_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_domiciles,id'],
+                'marital_status_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_marital_statuses,id'],
+                'blood_group_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_blood_groups,id'],
+                'personal_email' => ['nullable', 'email'],
+                'address' => ['nullable'],
+                'emergency_contact' => ['nullable'],
+                'cnic_issue_date' => ['nullable'],
+                'cnic_expiry_date' => ['nullable'],
+                'designation_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_designations,id'],
+                'department_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:admin_departments,id'],
+                'zone_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:zones,id'],
+                'official_email' => ['nullable', 'email'],
+                'official_phone_number' => ['nullable', 'regex:/^[0][0-9]{3}-[0-9]{7}$/'],
+                'sonic_id' => ['nullable'],
+                'place_of_birth' => ['nullable', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+                'date_of_birth' => ['nullable'],
+                'pin' => ['nullable', 'integer', 'digits:4'],
+                'cnic_1' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+                'cnic_2' => ['required', 'image', 'mimes:png,jpeg,jpg,pdf,doc,docx'],
+
+                //EducationalDetails
+                'education_details' => ['nullable'],
+
+                //BankInformation
+                'bank_details' => ['nullable'],
+
+                //EmploymentHistory
+                'employment_history' => ['nullable'],
+
+                //MedicalDetails
+                'medical_details' => ['nullable'],
+            ];
+            $response = ['status' => 1];
+            $message = 'Unknown';
+
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $message = 'Error(s) in Input';
+                $response['errors'] = $validate->errors();
+            } else {
+                $rider_request = RiderRequest::where('phone_no', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                $employee = Employee::where('employee_type_id', 2)
+                    ->where('phone_number', $request->input('phone_number'))
+                    ->orWhere('cnic', $request->input('cnic_no'));
+
+                //Check RiderRequest Already Exist
+                if ($rider_request->exists()) {
+                    $rider_request = $rider_request->first();
+                    if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($rider_request->phone_no == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($rider_request->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } else if ($employee->exists()) {
+                    $employee = $employee->first();
+                    if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
+                        $message = "Phone Number & CNIC Already Exists";
+
+                    } else if ($employee->phone_number == $request->input('phone_number')) {
+                        $message = "Phone Number Already Exist";
+
+                    } else if ($employee->cnic == $request->input('cnic_no')) {
+                        $message = "CNIC Already Exist";
+                    }
+                } //Check Rider Already Exist
+                else {
+                    $rider = Rider::where('phone', $request->input('phone_number'))->orWhere('cnic', $request->input('cnic_no'));
+
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
+                            $message = "Phone Number & CNIC Already Exists";
+
+                        } else if ($rider->phone == $request->phone_number) {
+                            $message = "Phone Number Already Exist";
+
+                        } else if ($rider->cnic == $request->input('cnic_no')) {
+                            $message = "CNIC Already Exist";
+                        }
+
+                    } else {
+                        try {
+                            $rider_request = new RiderRequest();
+                            $rider_request->name = $request->name;
+                            $rider_request->cnic = $request->cnic_no;
+                            $rider_request->phone_no = $request->phone_number;
+                            $rider_request->pin = $request->pin;
+                            $rider_request->city_id = $request->city_id;
+                            $rider_request->rider_type_id = $request->rider_type_id;
+                            $rider_request->save();
+
+                            $employee_request = new Employee();
+                            $employee_request->name = $request->name;
+                            $employee_request->employee_gender_id = $request->employee_gender_id;
+                            $employee_request->city_id = $request->city_id;
+                            $employee_request->cnic = $request->cnic_no;
+                            $employee_request->phone_number = $request->phone_number;
+                            $employee_request->employee_type_id = 2;
+                            $employee_request->rider_request_id = $rider_request->id;
+                            $employee_request->status_id = 2;
+                            $employee_request->guardian_name = $request->guardian_name;
+                            $employee_request->religion_id = $request->religion_id;
+                            $employee_request->nationality_id = $request->nationality_id;
+                            $employee_request->domicile_id = $request->domicile_id;
+                            $employee_request->marital_status_id = $request->marital_status_id;
+                            $employee_request->blood_group = $request->blood_group_id;
+                            $employee_request->personal_email = $request->personal_email;
+                            $employee_request->address = $request->address;
+                            $employee_request->emergency_contact = $request->emergency_contact;
+                            $employee_request->cnic_issue_date = $request->cnic_issue_date;
+                            $employee_request->cnic_expiry_date = $request->cnic_expiry_date;
+                            $employee_request->designation_id = $request->designation_id;
+                            $employee_request->department_id = $request->department_id;
+                            $employee_request->zone_id = $request->zone_id;
+                            $employee_request->official_email = $request->official_email;
+                            $employee_request->official_phone_number = $request->official_phone_number;
+                            $employee_request->sonic_id = $request->sonic_id;
+                            $employee_request->place_of_birth = $request->place_of_birth;
+                            $employee_request->date_of_birth = $request->date_of_birth;
+                            $employee_request->pin = $request->pin;
+                            $employee_request->mother_name = $request->mother_name;
+                            $employee_request->save();
+
+                            if ($request->has('employment_history')) {
+                                $employment_histories = json_decode($request->employment_history, true);
+                                foreach ($employment_histories as $employment_history) {
+                                    $history = new EmployeeEmployementHistory();
+                                    $history->employee_id = $employee_request->id;
+                                    $history->name = $employment_history['organization_company_name'];
+                                    $history->designation = $employment_history['position_designation'];
+                                    $history->from = $employment_history['from_date'];
+                                    $history->to = $employment_history['to_date'];
+                                    $history->reason = $employment_history['reason'];
+                                    $history->save();
+                                }
+                            }
+
+                            if ($request->has('medical_details')) {
+                                $medical_details = json_decode($request->medical_details, true);
+                                foreach ($medical_details as $medical_detail) {
+                                    $medical_info = new EmployeeMedicalInformation();
+                                    $medical_info->employee_id = $employee_request->id;
+                                    $medical_info->name = $medical_detail['name_of_family_member'];
+                                    $medical_info->relationship_id = $medical_detail['relation_ship'];
+                                    $medical_info->date_of_birth = $medical_detail['date_of_birth'];
+                                    $medical_info->marital_status = $medical_detail['marital_status'];
+                                    $medical_info->save();
+                                }
+                            }
+
+                            if ($request->has('education_details')) {
+                                $education_details = json_decode($request->education_details, true);
+                                foreach ($education_details as $education_detail) {
+                                    $employee_education = new EmployeeEducationalBackground();
+                                    $employee_education->employee_id = $employee_request->id;
+                                    $employee_education->name = $education_detail['institute'];
+                                    $employee_education->degree = $education_detail['degree'];
+                                    $employee_education->grade = $education_detail['position_grade'];
+                                    $employee_education->passing_year = $education_detail['graduation_year'];
+                                    $employee_education->save();
+                                }
+                            }
+
+                            if ($request->has('bank_details')) {
+                                $bank_details = json_decode($request->bank_details, true);
+                                foreach ($bank_details as $bank_detail) {
+                                    $employee_bank_info = new EmployeeBankInformation();
+                                    $employee_bank_info->employee_id = $employee_request->id;
+                                    $employee_bank_info->account_title = $bank_detail['account_tile'];
+                                    $employee_bank_info->branch_code = $bank_detail['branch_code'];
+                                    $employee_bank_info->account_no = $bank_detail['account_number'];
+                                    $employee_bank_info->bank_id = $bank_detail['bank'];
+                                    $employee_bank_info->branch_name = $bank_detail['branch'];
+                                    $employee_bank_info->iban = $bank_detail['iban_no'];
+                                    $employee_bank_info->save();
+                                }
+                            }
+
+                            if ($request->hasFile('cnic_1') && $request->hasFile('cnic_2')) {
+                                $employee_id = $employee_request->id;
+                                $date = Carbon::now()->format('Y_m_d');
+                                $attachments = new EmployeeAttachment();
+                                $attachments->employee_id = $employee_id;
+                                $cnic_array = [];
+                                if ($request->hasFile('cnic_1')) {
+                                    $file = $request->file('cnic_1');
+                                    $filename = 'cnic_1_' . $date . '.' . $file->extension();
+                                    $directory = 'employee_directory/employee_' . $employee_id . '';
+                                    Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                    $cnic_array[0] = $directory . '/' . $filename;
+                                }
+                                if ($request->hasFile('cnic_2')) {
+                                    $file = $request->file('cnic_2');
+                                    $filename = 'cnic_2_' . $date . '.' . $file->extension();
+                                    $directory = 'employee_directory/employee_' . $employee_id . '';
+                                    Storage::disk('public')->putFileAs($directory, $file, $filename);
+                                    $cnic_array[1] = $directory . '/' . $filename;
+                                }
+                                $attachments->cnic = implode(',', $cnic_array);
+                                $attachments->save();
+                            }
+                            $response['status'] = 0;
+                            $response['employee_id'] = $employee_request->id;
+                            $message = 'Request Has Been Submitted and Pending for Approval';
+                        } catch (Exception $ex) {
+                            $response['message'] = $ex;
+                        }
+                    }
+                }
+            }
+        } else {
+            $message = 'Post Method is Required';
+        }
+        $response['message'] = $message;
+        return response()->json($response);
     }
 
     /*public function delivery_packaging_material_update($tracking_number){

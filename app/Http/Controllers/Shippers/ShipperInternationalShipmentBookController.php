@@ -12,6 +12,7 @@ use App\Http\Models\ChargesModes;
 use App\Http\Models\City;
 use App\Http\Models\InternationalRatesHub;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\PaymentMode;
 use App\Http\Models\Product;
 use App\http\Models\ShipmentOrderDate;
@@ -67,7 +68,21 @@ class ShipperInternationalShipmentBookController extends Controller
 //        $cities = City::where('business_category_id', 2)->where('status', 1)->whereNotNull('c.zone_id')->orderBy('c.name')->select('name','id')->get();
 
 //        $countries = InternationalRatesHub::join('cities as c', 'international_rates_hubs.hub_id', '=', 'c.hub_id')->groupBy('c.id')->where('international_rates_hubs.user_id', session('user_id'))->where('c.status', 1)->where('c.hub', 1)->where('c.business_category_id', 2)->whereNotNull('c.zone_id')->orderBy('c.name')->select('c.id', 'c.name', 'c.hub_id')->get();
-        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill]);
+        $credit_msg = '';
+        $allow_booking = TRUE;
+        $credit_limit = NULL;
+        if($credit_data = $this->user_credit_limit(session('user_id'))){
+            $credit_percentage = round($credit_data['percentage'], 2);
+            $credit_limit = $credit_data['limit'];
+            if($credit_percentage >= 90){
+                $allow_booking = FALSE;
+                $credit_msg = "Dear Customer, you have utilized $credit_percentage% (or the corresponding percentage) of your credit limit. Kindly clear your dues to avoid interruption in the services.";
+            }
+            else if($credit_percentage >= 70){
+                $credit_msg = "Dear Customer, you have utilized $credit_percentage% (or the corresponding percentage) of your credit limit. Kindly clear your dues to avoid interruption in the services.";
+            }
+        }
+        return view('client.shipment.book.international.index')->with(['user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'check' => $check, 'charges_modes' => $charges_modes, 'date'=> $date, 'air_waybill' => $air_waybill, 'allow_booking' => $allow_booking, 'credit_msg' => $credit_msg, 'credit_limit' => $credit_limit]);
     }
 
     public function store(Request $request) {
@@ -281,7 +296,21 @@ class ShipperInternationalShipmentBookController extends Controller
         else{
             $charges_modes = ChargesModes::where('id' , 3)->get();
         }
-        return view('client.shipment.book.international.excel')->with(['user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
+        $credit_msg = '';
+        $allow_booking = TRUE;
+        $credit_limit = NULL;
+        if($credit_data = $this->user_credit_limit(session('user_id'))){
+            $credit_percentage = round($credit_data['percentage'], 2);
+            $credit_limit = $credit_data['limit'];
+            if($credit_percentage >= 90){
+                $allow_booking = FALSE;
+                $credit_msg = "Dear Customer, you have utilized $credit_percentage% (or the corresponding percentage) of your credit limit. Kindly clear your dues to avoid interruption in the services.";
+            }
+            else if($credit_percentage >= 70){
+                $credit_msg = "Dear Customer, you have utilized $credit_percentage% (or the corresponding percentage) of your credit limit. Kindly clear your dues to avoid interruption in the services.";
+            }
+        }
+        return view('client.shipment.book.international.excel')->with(['user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes, 'allow_booking' => $allow_booking, 'credit_msg' => $credit_msg, 'credit_limit' => $credit_limit]);
     }
     public function excel_store(Request $request) {
         $user_id = session('user_id');
@@ -348,7 +377,7 @@ class ShipperInternationalShipmentBookController extends Controller
                 $query->where('user_id', $user_id);
             })->where('hidden', 0)],
             'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 2)->where('hub',0)],
+            'consignee_city_name' => ['required', 'string', 'between:1,100', Rule::exists('cities', 'name')->where('business_category_id', 2)->where('hub',0)->where('status', 1)],
             'postal_code' => ['required', 'between:1,10'],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
@@ -696,5 +725,24 @@ class ShipperInternationalShipmentBookController extends Controller
         else {
             return redirect()->back()->with('error', 'No Shipments in File');
         }
+    }
+
+    public function user_credit_limit($user_id){
+        $credit_user = InternationalUsersCreditLimit::where('user_id', $user_id);
+        if($credit_user->exists()){
+            $credit_user = $credit_user->first();
+            $limit_used = $credit_user->limit_usage;
+            $data = array();
+            if($limit_used != NULL){
+                $limit = $credit_user->limit;
+                $percentage = ($limit_used / $limit) * 100;
+                $data['limit'] = $limit;
+                $data['limit_used'] = $limit_used;
+                $data['percentage'] = $percentage;
+                return $data;
+            }
+            return FALSE;
+        }
+        return FALSE;
     }
 }

@@ -375,12 +375,80 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="RemoveSalesTierTaggingModal" data-backdrop="static" role="dialog" aria-labelledby="RemoveSalesTierTaggingModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Remove Sales Tier Tagging</h4>
+                </div>
+                <form id="remove_sales_tier_form" class="form" novalidate="novalidate" method="post" action="{{ route('admin.accounts.kam_poc_ref_tag.remove') }}">
+                    @csrf
+                    <input type="hidden" name="shipper_id" id="shipper_id">
+                    <div class="modal-body">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success" id="payment_cycle_submit">Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-left" id="CreditLimitModal" data-backdrop="static" role="dialog" aria-labelledby="CreditLimitModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Credit Limit</h4>
+                </div>
+                <form id="set_credit_limit_form" class="form" novalidate="novalidate" method="post">
+                <input type="hidden" name="shipper_id" id="credit_shipper_id">
+                <div class="modal-body">
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr class="bg-primary white">
+                                        <td class="border-primary border-darken-1">User</td>
+                                        <td class="border-primary border-darken-1">Limit Used</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="credit_user"></td>
+                                        <td id="credit_user_limit_used"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="credit_limit">Maximum Credit Limit</label>
+                                <input type="text" name="credit_limit" id="credit_limit" class="form-control" data-rule-required="true" data-msg-required="Credit is required" placeholder="Maximum credit limit">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" id="credit_limit_btn">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 
 
 @endsection
@@ -391,6 +459,7 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
 
@@ -409,6 +478,14 @@
             'rightAlign': false,
             'min': 0,
             'max': 200
+        });
+
+        $('#credit_limit').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 100,
         });
         $("#territory").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Territory",
@@ -1305,7 +1382,7 @@
             dropdownParent:$('#SalesTierTypeTagModal')
         });
         $("#ref").prepend('<option value="" selected></option>').select2({
-            placeholder: "Select REFFERAL",
+            placeholder: "Select REFERRAL",
             width:'100%',
             dropdownParent:$('#SalesTierTypeTagModal')
         });
@@ -1641,6 +1718,32 @@
 
                 });
             }
+            if($(this).hasClass('credit_limit')){
+                $.ajax({
+                    url: '{!! route('admin.international.rates.update.get_credit') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id
+                    }
+                }).done(function(data){
+                    $('#credit_user').text('');
+                    $('#credit_user_limit_used').text('');
+                    $('#credit_limit').val('');
+                    if(data.status == 0){
+                        $('#credit_shipper_id').val(user_id);
+                        $('#CreditLimitModal').modal('show');
+                        if(data.limit_set){
+                            $('#credit_limit').val(data.credit_limit);
+                            $('#credit_user_limit_used').text(data.limit_usage);
+                        }
+                        $('#credit_user').text(data.user);
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            }
         });
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
@@ -1787,6 +1890,63 @@
             }
         });
 
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            var id = $(this).parents('tr').attr('id');
+            if($(this).hasClass('remove_sales_tier')){
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.accounts.kam_poc_ref_tag.info') !!}',
+                        data: {
+                            'shipper_id': id,
+                        }
+                    }).done(function(data){
+                        if(data.status == 1){
+                            $('#remove_sales_tier_form #shipper_id').val(id);
+                            var html = '<table class="table table-bordered">' +
+                                '<tr>' +
+                                '<td style="vertical-align: middle;"><strong>POC</strong></td><td style="vertical-align: middle;">'+ data.info.poc +'</td>';
+                                if(data.info.poc !== '-') {
+                                    html += '<td><input type="checkbox" class="sales_tier_checkbox" id="poc" name="poc" value="poc"><label for="poc"> Remove</label></td>';
+                                }
+                                html += '</tr>' +
+                                '<tr>' +
+                                '<td style="vertical-align: middle;"><strong>KAM</strong></td><td style="vertical-align: middle;">'+ data.info.kam +'</td>';
+                                if(data.info.kam !== '-'){
+                                    html += '<td><input type="checkbox" class="sales_tier_checkbox" id="kam" name="kam" value="kam"><label for="kam"> Remove</label></td>';
+                                }
+                                html += '</tr>' +
+                                '<tr>' +
+                                '<td style="vertical-align: middle;"><strong>REFERRAL</strong></td><td style="vertical-align: middle;">'+ data.info.ref +'</td>';
+                                if(data.info.ref !== '-') {
+                                    html += '<td><input type="checkbox" class="sales_tier_checkbox" id="ref" name="ref" value="ref"><label for="ref"> Remove</label></td>';
+                                }
+                                html += '</tr>' +
+                                '</table>';
+                            $('#RemoveSalesTierTaggingModal .modal-body').html(html);
+
+                            $('#remove_sales_tier_form .sales_tier_checkbox').each(function() {
+                                var checkbox = $(this);
+                                var label = checkbox.next();
+                                var text = label.text();
+
+                                label.remove();
+
+                                checkbox.iCheck({
+                                    checkboxClass: 'icheckbox_line pt-1 pb-1',
+                                    checkedClass: 'checked bg-danger',
+                                    uncheckedClass: 'bg-secondary',
+                                    insert: '<div class="icheck_line-icon"></div>' + text
+                                });
+                            });
+                            $('#RemoveSalesTierTaggingModal').modal('show');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+                }
+            }
+        });
+
         $('#payment_cycle_form').validate({
             errorClass: 'danger',
             successClass: 'success',
@@ -1823,6 +1983,70 @@
             $('#corporate_rate_type').prepend('<option value="" selected="selected"></option>').trigger('change');
         });
 
+        $('#set_credit_limit_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                // var form = this;
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Update User Credit Limit!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        var shipper_id = $('#credit_shipper_id').val();
+                        var limit = $('#credit_limit').val();
+                        $.ajax({
+                            url: '{!! route('admin.international.rates.update.credit') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'user_id': shipper_id,
+                                'limit':limit
+                            }
+                        }).done(function(data){
+                            $('#credit_user').text('');
+                            $('#credit_user_limit_used').text('');
+                            $('#credit_limit').val('');
+                            $('#credit_shipper_id').val('');
+                            $('#CreditLimitModal').modal('hide');
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                });
+            }
+        });
     });
 
 </script>

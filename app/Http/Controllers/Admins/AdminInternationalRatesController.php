@@ -29,6 +29,7 @@ use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
+use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\InternationalUsersInformation;
 use App\Http\Models\PendingInternationalUserRate;
 use App\Http\Models\Rates\InternationalEconomyRate;
@@ -1398,6 +1399,63 @@ class AdminInternationalRatesController extends Controller
                     $rate->save();
                 }
             }
+        }
+    }
+
+    public function get_credit(Request $request){
+        $user_id = $request->user_id;
+        if($user_id){
+            $user = User::find($user_id);
+            if($user){
+                $credit_limit = NULL;
+                $limit_usage = NULL;
+                $limit_set = FALSE;
+                $user_credit = InternationalUsersCreditLimit::where('user_id', $user->id);
+                if($user_credit->exists()){
+                    $user_credit = $user_credit->first();
+                    $credit_limit = $user_credit->limit;
+                    $limit_usage = $user_credit->limit_usage;
+                    $limit_set = TRUE;
+                }
+                return response()->json(['status' => 0, 'limit_set' => $limit_set, 'credit_limit' => $credit_limit, 'limit_usage' => $limit_usage, 'user' => $user->name]);
+            }
+            else{
+                return response()->json(['status' => 1, 'User not found!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'Something went wrong!']);
+        }
+    }
+
+    public function credit_update(Request $request){
+        $user_id = $request->user_id;
+        if($user_id){
+            $user = User::find($user_id);
+            if($user){
+                $user_credit = InternationalUsersCreditLimit::where('user_id', $user->id);
+                if($user_credit->exists()){
+                    $user_credit = $user_credit->first();
+                    $user_credit->limit = $request->limit;
+                    $user_credit->last_updated_by = Auth::id();
+                    $user_credit->save();
+                }
+                else{
+                    $user_credit = new InternationalUsersCreditLimit();
+                    $user_credit->user_id = $user_id;
+                    $user_credit->limit = $request->limit;
+                    $user_credit->last_updated_by = Auth::id();
+                    $user_credit->save();
+
+                }
+                return response()->json(['status' => 0, 'success' => 'Credit limit updated successfully!']);
+            }
+            else{
+                return response()->json(['status' => 1, 'User not found!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 1, 'Something went wrong!']);
         }
     }
 }

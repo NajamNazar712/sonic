@@ -33,7 +33,7 @@ class UserManagementController extends Controller
     public function user_index() {
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
-        $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+      $roles = AdminRole::with('department')->get();
       return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles]);
     }
 
@@ -46,8 +46,7 @@ class UserManagementController extends Controller
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation')
-        ->where('ar.id', '!=', 1);
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','admins.designation as designation');
 
         if(!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users
@@ -196,7 +195,7 @@ class UserManagementController extends Controller
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+            $roles = AdminRole::with('department')->get();
         }
         $hubs = City::where('hub', 1)->get();
 
@@ -290,23 +289,19 @@ class UserManagementController extends Controller
             $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->get();
+            $roles = AdminRole::with('department')->get();
         }
         $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
 
-        if ($user->role_id != 1) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
-            return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
-        }
-        else {
-            return redirect()->route('admin.access_denied');
-        }
+        ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
+        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        
     }
 
     public function user_update_store(Request $request, $id) {
-        if ($request->input('role_id') != 1) {
+        
             $admin = Admin::find($id);
 
             $admin->name = $request->input('name');
@@ -351,10 +346,6 @@ class UserManagementController extends Controller
             }
 
             return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
-        }
-        else {
-            return redirect()->route('admin.access_denied');
-        }
     }
 
     public function role_index() {
@@ -529,8 +520,10 @@ class UserManagementController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),415);
         }
-        $riders = Rider::select('id as id', 'name as name', 'phone as phone_no', 'delivery_note_otp as otp')
-            ->where('status', 1)
+        $riders = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('cities as c','cities.hub_id','=','c.id')
+            ->select('riders.id as id', 'riders.name as name', 'riders.phone as phone_no', 'riders.delivery_note_otp as otp', 'c.name as hub')
+            ->where('riders.status', 1)
             ->whereNotNull('delivery_note_otp');
         $datatable = Datatables::of($riders);
         return $datatable->make(true);

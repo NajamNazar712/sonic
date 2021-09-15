@@ -217,14 +217,28 @@
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
-                                                            <td><strong>Re-Attempt Count :</strong></td>
+                                                            <td><strong>Attempt Count :</strong></td>
                                                             <td>{{$reattempt_count->reattempts}}</td>
                                                             <td><strong>Rider Status :</strong></td>
+                                                            @if($rider_status != NULL)
                                                             <td>{{$rider_status->shipment_status_shipper->name}}</td>
+                                                            @else
+                                                                <td></td>
+                                                            @endif
                                                             <td><strong>Rider Status Reason :</strong></td>
+                                                            @if($rider_status != NULL)
                                                             <td>{{($rider_status->status_reason_id) ? $rider_status->shipment_status_reason->name : '-'}}</td>
+                                                            @else
+                                                                <td></td>
+                                                            @endif
+                                                            
                                                             <td><strong>Remarks :</strong></td>
+                                                            @if($rider_status != NULL)
                                                             <td>{{($rider_status->remarks) ? $rider_status->remarks : '-'}}</td>
+                                                            @else
+                                                                <td></td>
+                                                            @endif
+                                                            
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -264,11 +278,22 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="row justify-content-end">
-                                                    @if($call->skip == 0)
-                                                        <button type="button" id="skip_btn" class="mr-1 mb-1 btn btn-danger btn-min-width"> Skip </button>
-                                                    @endif
-                                                    <button type="submit" value="next" class="mr-1 mb-1 btn btn-success btn-min-width"> Next </button>
+                                                <div class="row">
+                                                    <div class="col justify-content-start">
+                                                        @if($rider_delivery != NULL)
+                                                            @if($shipment->amount == 0 && $rider_delivery->delivered_status == 1)
+                                                                <a href="{{asset(Storage::url($rider_delivery->cnic_image))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View CNIC</button></a>
+                                                            @elseif($rider_delivery->delivered_status == 0)
+                                                                <a href="{{asset(Storage::url($rider_delivery->picture_path))}}" target="_blank"><button type="button" class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-image"></i> View Image</button></a>
+                                                            @endif
+                                                        @endif
+                                                    </div>
+                                                    <div class="justify-content-end">
+                                                        @if($call->skip == 0)
+                                                            <button type="button" id="skip_btn" class="mr-1 mb-1 btn btn-danger btn-min-width"> Skip </button>
+                                                        @endif
+                                                        <button type="submit" value="next" class="mr-1 mb-1 btn btn-success btn-min-width"> Next </button>
+                                                    </div>
                                                 </div>
                                             </form>
                                         </div>

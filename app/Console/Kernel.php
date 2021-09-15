@@ -93,7 +93,12 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RiderWisePickupEmail',
         'App\Console\Commands\InactiveRiderReport',
         'App\Console\Commands\EmailsOfReturnConfirmToKams',
+		'App\Console\Commands\RetailDonePaymentReport',
         'App\Console\Commands\PasswordUpdateForAdminUser',
+        'App\Console\Commands\NotPickedShipmentsJourney',
+        'App\Console\Commands\LastMileStatusReport',
+		'App\Console\Commands\ShipperPaymentCalculation',
+		'App\Console\Commands\ReturnSheetReceive',
     ];
 
     /**
@@ -111,6 +116,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
         $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 
@@ -143,6 +149,7 @@ class Kernel extends ConsoleKernel
         }
 
         if ($arrival_cut_off_time) {
+            $schedule->command('pickup:notpickedjourney')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
             $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
@@ -239,7 +246,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
-        $schedule->command('report:donepayment')->dailyAt('16:00')->runInBackground();
+        $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
         $schedule->command('report:retaildonepayment')->dailyAt('16:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
@@ -290,6 +297,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('website:leads')->hourly()->runInBackground();
 
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
+//        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
 
@@ -299,7 +307,20 @@ class Kernel extends ConsoleKernel
             $cut_off_time = $settings->setting_value . ':00';
             $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
         }
-        $schedule->command('dhl:shipmentstatussync')->dailyAt( '04:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_1');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time_1 = $settings->setting_value . ':00';
+            $schedule->command('dhl:shipmentstatussync')->dailyAt( $time_1)->runInBackground();
+        }
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_2');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time_2 = $settings->setting_value . ':00';
+            $schedule->command('dhl:shipmentstatussync')->dailyAt($time_2)->runInBackground();
+        }
+
         $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
         $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
 
@@ -308,9 +329,18 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:inactiveriderreport')->dailyAt('08:00')->runInBackground();
         $schedule->command('email:emailofreturnconfirmtokams')->dailyAt('03:00')->runInBackground();
+        $schedule->command('returnsheet:receive')->dailyAt('05:00')->runInBackground();
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
         $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'last_mile_cron_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $hour = $settings->setting_value;
+            $hourly = '0 */'. $hour .' * * *';
+            $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
+        }
 
     }
     /**

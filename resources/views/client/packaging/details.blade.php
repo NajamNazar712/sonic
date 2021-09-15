@@ -32,9 +32,16 @@
                                                 <div class="form-group mb-0">
                                                     <select name="search_package_type" id="search_package_type" class="form-control select2">
                                                         @if(isset($search_packaging_types))
-                                                        @foreach($search_packaging_types as $search_packaging_type)
-                                                            <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
-                                                        @endforeach
+                                                            @foreach($search_packaging_types as $search_packaging_type)
+                                                                <option value="{{route('cod.packaging.requests.product',['id'=>$search_packaging_type->id])}}">{{ $search_packaging_type->type }}</option>
+                                                            @endforeach
+                                                            @if (count($shipper_packaging_types)>0)
+                                                                @foreach($shipper_packaging_types as $shipper_packaging_type)
+                                                                    @if ($shipper_packaging_type->packaging_material->status != 0)
+                                                                        <option value="{{route('cod.packaging.requests.product',['id'=>$shipper_packaging_type->packaging_material->id])}}">{{ $shipper_packaging_type->packaging_material->type }}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            @endif
                                                         @endif
                                                     </select>
                                                 </div>
@@ -97,8 +104,10 @@
                                                                         
                                                                         <div class="radio-toolbar">
                                                                             @foreach ($product->sizes as $size)
+                                                                                @if($size->id != 1)
                                                                                 <input type="radio" id="size_btn_{{$size->id}}" name="product_size" value="{{$size->id}}" checked>
                                                                                 <label for="size_btn_{{$size->id}}">{{$size->size}}</label>
+                                                                                @endif
                                                                             @endforeach
                                                                            
                                                                         </div>

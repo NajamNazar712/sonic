@@ -20,7 +20,9 @@ use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\ShippingMode;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -783,5 +785,212 @@ class ShipperReturnController extends Controller
         }
         return $datatable->make(true);
 
+    }
+    public function return_sheet_pending_index()
+    {
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25, 28, 29, 31, 34, 35, 38, 47, 48,60])->get();
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('client.return.sheet.pending')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
+    }
+    public function return_sheet_pending_list(Request $request)
+    {
+        $shipments = ReturnSheet::join('shipments as s', 's.id', '=', 'return_sheets.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','s.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','s.shipper_status_id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 's.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and verification = 1)'));
+            })
+            ->select('s.id as shId','s.tracking_number','s.tracking_number as tracking','oc.name as origin','dc.name as destination','s.order_id','h.name as hub','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date', 'usi.poc', 'shipments_journey.remarks as shipper_remarks')
+            ->where('return_sheets.user_id', session('user_id'))
+            ->where('return_sheets.status_id', DB::raw(0));
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 's.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->addColumn('consignee_phone',function ($shipper){
+                $consignee_phone = '';
+                $consignee_phone .= $shipper->consignee_phone_number_1;
+                if($shipper->consignee_phone_number_2 != null){
+                    $consignee_phone .= "| ".$shipper->consignee_phone_number_2;
+                }
+
+                return $consignee_phone;
+
+            })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = $shipments->remarks;
+                if($remark != null){
+                    return $remark;
+                }
+                else{
+                    return '-';
+                }
+            });
+        return $datatable->make(true);
+    }
+
+    public function return_sheet_receive_index()
+    {
+        return view('client.return.sheet.receive');
+    }
+
+    public function return_sheet_receive_shipment_info(Request $request)
+    {
+        $return_statuses = array(25, 31, 38);
+        $tracking_number = $request->tracking;
+        $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', session('user_id'));
+        if($shipment->exists()){
+            $shipment = $shipment->first();
+            if(in_array($shipment->shipper_status_id, $return_statuses)){
+                $return_sheet = ReturnSheet::where('shipment_id', $shipment->id);
+                if($return_sheet->exists()){
+                    $return_sheet = $return_sheet->first();
+                    if($return_sheet->status_id == 0){
+                        return response()->json(['status' => 1, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'shipment_status' => $shipment->status_shipper->name]);
+                    }
+                    else{
+                        return response()->json(['status' => 0, 'error' => 'Shipment is already received with remarks ' . $return_sheet->remarks]);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                }
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Shipment with given Tracking Number not Found!']);
+        }
+
+    }
+
+    public function return_sheet_receive_submit(Request $request)
+    {
+        $received_by = '';
+        if(session('user_type') == 2){
+            $received_by = ' (Substitute User)';
+        }
+        $shipment_ids = explode(',', $request->shipment_ids);
+        foreach($shipment_ids as $shipment_id){
+            $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
+            if($return_sheet->exists()){
+                $return_sheet = $return_sheet->first();
+                $return_sheet->status_id = 1;
+                $return_sheet->received_at = Carbon::now();
+                $return_sheet->remarks = 'Received By ' . Auth::user()->name . $received_by;
+                $return_sheet->save();
+            }
+        }
+        return redirect()->route('cod.return.sheet.history.index')->with('success', 'Shipment Received Successfully!');
+    }
+    public function return_sheet_history_index()
+    {
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25, 28, 29, 31, 34, 35, 38, 47, 48,60])->get();
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('client.return.sheet.history')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
+    }
+    public function return_sheet_history_list(Request $request)
+    {
+        $shipments = ReturnSheet::join('shipments as s', 's.id', '=', 'return_sheets.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','s.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','s.shipper_status_id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 's.id')
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and verification = 1)'));
+            })
+            ->select('s.id as shId','s.tracking_number','s.tracking_number as tracking','oc.name as origin','dc.name as destination','s.order_id','h.name as hub','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date', 'usi.poc', 'shipments_journey.remarks as shipper_remarks', 'return_sheets.remarks as received_remarks', 'return_sheets.received_at as received_date')
+            ->where('return_sheets.user_id', session('user_id'))
+            ->whereIn('return_sheets.status_id', [DB::raw(1), DB::raw(2)]);
+        if(session('user_type') == 2){
+            if(session('restriction') == 1){
+                $shipments = $shipments->join('substitute_user_shipments as sus', function($join){
+                    $join->on('sus.shipment_id', '=', 's.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->addColumn('consignee_phone',function ($shipper){
+                $consignee_phone = '';
+                $consignee_phone .= $shipper->consignee_phone_number_1;
+                if($shipper->consignee_phone_number_2 != null){
+                    $consignee_phone .= "| ".$shipper->consignee_phone_number_2;
+                }
+
+                return $consignee_phone;
+
+            })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = $shipments->remarks;
+                if($remark != null){
+                    return $remark;
+                }
+                else{
+                    return '-';
+                }
+            });
+        return $datatable->make(true);
     }
 }
