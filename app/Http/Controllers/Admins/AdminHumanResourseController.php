@@ -2373,6 +2373,8 @@ class AdminHumanResourseController extends Controller
             'total_deduction' => 'Total Deduction',
             'net_salary' => 'Net Salary',
             'iban' => 'IBAN',
+            'employee_type' => 'Employee Type',
+            'confirmation_date' => 'Confirmation Date'
         ];
 
         $messages = [
@@ -2388,64 +2390,66 @@ class AdminHumanResourseController extends Controller
             'hub' => ['required', 'between:1,100'],
             'zone' => ['nullable', 'between:1,100'],
             'joining_date' => ['required', 'date_format:Y-m-d'],
+            'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
             'cnic' => ['required', 'between:1,100'],
-            'employee_status' => ['nullable', 'integer' ,'between:1,100'],
-            'payroll_days' => ['nullable', 'integer' ,'between:1,100'],
-            'present_days' => ['nullable', 'integer' ,'between:1,100'],
-            'pay_cut_days' => ['nullable', 'integer' ,'between:1,100'],
-            'absent_days' => ['nullable', 'integer' ,'between:1,100'],
-            'extra_paid_days' => ['nullable', 'integer' ,'between:1,100'],
-            'fuel_days' => ['nullable', 'integer' ,'between:1,100'],
-            'basic_salary' => ['required', 'integer' ,'between:1,100'],
-            'house_rent' => ['nullable', 'integer' ,'between:1,100'],
-            'medical' => ['nullable', 'integer' ,'between:1,100'],
-            'gross_salary' => ['nullable', 'integer' ,'between:1,100'],
-            'mobile_allowance' => ['nullable', 'integer' ,'between:1,100'],
-            'vehicle_allowance' => ['nullable', 'integer' ,'between:1,100'],
-            'fuel_allowance' => ['nullable', 'integer' ,'between:1,100'],
-            'conveyance_allowance' => ['nullable', 'integer' ,'between:1,100'],
-            'vehicle_maintenance' => ['nullable', 'integer' ,'between:1,100'],
-            'fixed_incentive' => ['nullable', 'integer' ,'between:1,100'],
-            'holiday_allowance' => ['nullable', 'integer' ,'between:1,100'],
-            'overtime' => ['nullable', 'integer' ,'between:1,100'],
-            'bonus' => ['nullable', 'integer' ,'between:1,100'],
-            'arrears' => ['nullable', 'integer' ,'between:1,100'],
-            'pickup_incentive' => ['nullable', 'integer' ,'between:1,100'],
-            'delivery_incentive' => ['nullable', 'integer' ,'between:1,100'],
-            'operation_incentive' => ['nullable', 'integer' ,'between:1,100'],
-            'extra_duty_allowance' => ['nullable', 'integer' ,'between:1,100'],
-            'others_addition' => ['nullable', 'integer' ,'between:1,100'],
-            'total_salary' => ['required', 'integer' ,'between:1,100'],
-            'paycut' => ['nullable', 'integer' ,'between:1,100'],
-            'absent' => ['nullable', 'integer' ,'between:1,100'],
-            'late_deduction' => ['nullable', 'integer' ,'between:1,100'],
-            'income_tax' => ['nullable', 'integer' ,'between:1,100'],
-            'eobi' => ['nullable', 'integer' ,'between:1,100'],
-            'advance_salary' => ['nullable', 'integer' ,'between:1,100'],
-            'month_closing' => ['nullable', 'integer' ,'between:1,100'],
-            'loan' => ['nullable', 'integer' ,'between:1,100'],
-            'fuel_card' => ['nullable', 'integer' ,'between:1,100'],
-            'open_parcel' => ['nullable', 'integer' ,'between:1,100'],
-            'phone_call' => ['nullable', 'integer' ,'between:1,100'],
-            'recovery' => ['nullable', 'integer' ,'between:1,100'],
-            'auction_sale' => ['nullable', 'integer' ,'between:1,100'],
-            'penalty' => ['nullable', 'integer' ,'between:1,100'],
-            'other_deductions' => ['nullable', 'integer' ,'between:1,100'],
-            'van_deduction' => ['nullable', 'integer' ,'between:1,100'],
-            'medical_insurance' => ['nullable', 'integer' ,'between:1,100'],
-            'total_deduction' => ['nullable', 'integer' ,'between:1,100'],
-            'net_salary' => ['nullable', 'integer' ,'between:1,100'],
-            'iban' => ['nullable', 'integer' ,'between:1,100']
+            'employee_status' => ['nullable', 'string','between:1,100'],
+            'employee_type' => ['nullable','string','between:1,100'],
+            'payroll_days' => ['nullable', 'integer'],
+            'present_days' => ['nullable', 'integer'],
+            'pay_cut_days' => ['nullable', 'integer'],
+            'absent_days' => ['nullable', 'integer'],
+            'extra_paid_days' => ['nullable', 'integer'],
+            'fuel_days' => ['nullable', 'integer'],
+            'basic_salary' => ['required', 'integer'],
+            'house_rent' => ['nullable', 'integer'],
+            'medical' => ['nullable', 'integer'],
+            'gross_salary' => ['nullable', 'integer'],
+            'mobile_allowance' => ['nullable', 'integer'],
+            'vehicle_allowance' => ['nullable', 'integer'],
+            'fuel_allowance' => ['nullable', 'integer'],
+            'conveyance_allowance' => ['nullable', 'integer'],
+            'vehicle_maintenance' => ['nullable', 'integer'],
+            'fixed_incentive' => ['nullable', 'integer'],
+            'holiday_allowance' => ['nullable', 'integer'],
+            'overtime' => ['nullable', 'integer'],
+            'bonus' => ['nullable', 'integer'],
+            'arrears' => ['nullable', 'integer'],
+            'pickup_incentive' => ['nullable', 'integer'],
+            'delivery_incentive' => ['nullable', 'integer'],
+            'operation_incentive' => ['nullable', 'integer'],
+            'extra_duty_allowance' => ['nullable', 'integer'],
+            'others_addition' => ['nullable', 'integer'],
+            'total_salary' => ['required', 'integer'],
+            'paycut' => ['nullable', 'integer'],
+            'absent' => ['nullable', 'integer'],
+            'late_deduction' => ['nullable', 'integer'],
+            'income_tax' => ['nullable', 'integer'],
+            'eobi' => ['nullable', 'integer'],
+            'advance_salary' => ['nullable', 'integer'],
+            'month_closing' => ['nullable', 'integer'],
+            'loan' => ['nullable', 'integer'],
+            'fuel_card' => ['nullable', 'integer'],
+            'open_parcel' => ['nullable', 'integer'],
+            'phone_call' => ['nullable', 'integer'],
+            'recovery' => ['nullable', 'integer'],
+            'auction_sale' => ['nullable', 'integer'],
+            'penalty' => ['nullable', 'integer'],
+            'other_deductions' => ['nullable', 'integer'],
+            'van_deduction' => ['nullable', 'integer'],
+            'medical_insurance' => ['nullable', 'integer'],
+            'total_deduction' => ['nullable', 'integer'],
+            'net_salary' => ['nullable', 'integer'],
+            'iban' => ['nullable','string'],
 
         ];
 
-        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'other_deductions', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban'];
+        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'other_deductions', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
         if ($file = $request->file('payslip')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Employee ID','Employee Name','Designation','Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive', 'Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN'];
+            $header = ['Employee ID','Employee Name','Designation','Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive', 'Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN', 'Confirmation Date', 'Employee Type'];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
@@ -2509,8 +2513,10 @@ class AdminHumanResourseController extends Controller
                         $payslip->hub = trim($row['hub']);
                         $payslip->zone = trim($row['zone']);
                         $payslip->joining_date = trim($row['joining_date']);
+                        $payslip->confirmation_date = trim($row['confirmation_date']);
                         $payslip->cnic = trim($row['cnic']);
                         $payslip->employee_status = trim($row['employee_status']);
+                        $payslip->employee_type = trim($row['employee_type']);
                         $payslip->payroll_days = trim($row['payroll_days']);
                         $payslip->present_days = trim($row['present_days']);
                         $payslip->pay_cut_days = trim($row['pay_cut_days']);
