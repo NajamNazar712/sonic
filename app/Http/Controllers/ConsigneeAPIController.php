@@ -312,7 +312,7 @@ class ConsigneeAPIController extends Controller
                         ->where('mb.status', 0);
                     if ($fleet->exists()) {
                         $fleet = $fleet->first();
-                        $shipment_info['runner_id'] = $fleet->runner_id;
+                        $datum['runner_id'] = $fleet->runner_id;
                     }
                 } else {
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $consignee_shipment->shipment_id)
