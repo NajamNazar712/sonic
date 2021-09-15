@@ -3219,6 +3219,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
             Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
         });
+
+        Route::prefix('payslip')->name('payslip.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@payslip_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
+            Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
+
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
