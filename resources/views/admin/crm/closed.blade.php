@@ -30,7 +30,7 @@
                             </form>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                <label class="ml-1" id="count"></label>
+                                <b><label class="ml-1" id="count"></label></b>
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
