@@ -45,6 +45,7 @@ use App\Http\Models\HR\EmployeeGender;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\PackagingMaterialRequest;
@@ -9567,6 +9568,36 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'attendance_details' => $rider_attendance_action]);
             }
             return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
+    }
+
+    public function rider_payslip(Request $request)
+    {
+        $rules = [
+            'date' => ['required']
+        ];
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $riders = Rider::find($rider_id);
+            if ($riders) {
+                $payslip = EmployeePayslip::where('trax_id', $riders->trax_id)
+                    ->whereMonth('payroll_month', Carbon::parse($request->date)->format("m"))
+                    ->whereYear('payroll_month', Carbon::parse($request->date)->format("Y"));
+                if ($payslip->exists()) {
+                    $payslip = $payslip->get();
+                    return response()->json(['status' => 0, 'data' => $payslip]);
+                } else {
+                    return response()->json(['status' => 1, 'message' => "Payslip not found"]);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => "Rider not found"]);
+            }
         }
     }
 
