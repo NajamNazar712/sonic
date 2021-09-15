@@ -72,7 +72,7 @@ class CreateEmployeePayslipsTable extends Migration
             $table->integer('medical_insurance')->nullable();
             $table->integer('total_deduction')->nullable();
             $table->integer('net_salary')->nullable();
-            $table->integer('iban')->nullable();
+            $table->string('iban')->nullable();
             $table->integer('added_by')->nullable()->index();
             $table->string('employee_type')->nullable()->index();
             $table->timestamps();
