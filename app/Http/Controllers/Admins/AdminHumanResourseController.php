@@ -2593,7 +2593,6 @@ class AdminHumanResourseController extends Controller
         return view('admin.human_resource.employee_shift');
     }
 
-
     public function employee_shift_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
