@@ -4349,8 +4349,8 @@ class DeliveryController extends Controller
                 $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
                 $difference_amount = 0;
 
-                $defference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
-                return number_format($defference_amount);
+                $difference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
+                return number_format($difference_amount);
             })
             ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
                 return $query->where('station_deposit_notes.id', '=', $keyword);

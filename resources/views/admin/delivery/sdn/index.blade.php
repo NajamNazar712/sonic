@@ -422,7 +422,7 @@
                             head.push('Adjustment Date');
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
-                            head.push('Defference Amount');
+                            head.push('Difference Amount');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
