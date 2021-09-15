@@ -6755,14 +6755,20 @@ class AdminReportsController extends Controller
         }
         $delivery_note = DB::connection('reports')->table('delivery_note_shipments')->join('delivery_notes as dn','dn.id', '=', 'delivery_note_shipments.delivery_note_id')
             ->leftjoin('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
+            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->join('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.admin_id IS NOT NULL )'));
+            })
             ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
             ->leftjoin('users as u', 'u.id', '=', 's.user_id')
-            ->leftjoin('admins as admin', 'admin.id', '=', 'delivery_note_shipments.admin_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'sj.admin_id')
             ->leftjoin('admin_roles as ar', 'ar.id', '=', 'admin.role_id')
             ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
-            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department')
+            ->select('s.tracking_number as tracking_number', 'u.name as shipper', 'r.name as rider_name', 'dc.name as destination', 'h.name as hub', 'delivery_note_shipments.fake_status_updated_at as updated_at', 'delivery_note_shipments.remarks as remarks','admin.name as raised_by','ad.name as department' , 'sj.remarks as debrifer_remark', 'a.name as debrifer_name')
             ->where('delivery_note_shipments.fake_status', 1);
 
 
