@@ -307,7 +307,7 @@ class ConsigneeAPIController extends Controller
                         ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
                         ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
                         ->select('fleets.tracking_id as runner_id')
-                        ->where('cs.shipment_id', $consignee_shipment->id)
+                        ->where('cs.shipment_id', $consignee_shipment->shipment_id)
                         ->where('cm.status_id', 1)
                         ->where('mb.status', 0);
                     if ($fleet->exists()) {
