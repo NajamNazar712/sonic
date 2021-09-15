@@ -238,7 +238,7 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.return_pending_for);
-                                row.push(values.attempt_count);
+                                row.push(values.total_attempt);
                                 row.push(values.return_confirmed_by);
                                 row.push(values.reason);
                                 row.push(values.remarks);
