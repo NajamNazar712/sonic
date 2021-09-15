@@ -22,7 +22,8 @@
                                 <thead>
                                 <tr class="bg-primary white text-center">
                                     <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">Date</th>
+                                    <th class="border-primary border-darken-1">Attendance Date</th>
+                                    <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                     <th class="border-primary border-darken-1">Location</th>
                                 </tr>
@@ -74,10 +75,15 @@
 
          var clock_in = @json($clock_in);
          var clock_out = @json($clock_out);
-        
-         if((clock_in == 0 && clock_out == 0 ) || (clock_in == 1 && clock_out == 1 ) ){
+         var date = @json($date);
+
+         if(clock_in == 0 && clock_out == 0){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK IN</strong>');
+         }
+         else if(clock_in == 1 && clock_out == 1 ){
+             $('.centered').html('');
+             $('.centered').append('<strong>Already Marked</strong>');
          }
          else{
              $('.centered').html('');
@@ -94,7 +100,8 @@
                      data: {
                          '_token': '{{ csrf_token() }}',
                          'clock_in': clock_in,
-                         'clock_out': clock_out
+                         'clock_out': clock_out,
+                         'attendance_date' : date
                      }
                  })
                      .done(function (data) {
@@ -109,7 +116,7 @@
 
                              swal({
                                  title: data.success,
-                                 text: data.date + '  ' + data.time,
+                                 text: data.date,
                                  icon: 'success',
                                  buttons: false,
                                  closeOnClickOutside: true,
@@ -123,9 +130,9 @@
 
                              } else if (data.status == 2) {
                                  $('.centered').html('');
-                                 $('.centered').append('<strong>CLOCK IN</strong>');
-                                 clock_in = 0;
-                                 clock_out = 0;
+                                 $('.centered').append('<strong>Already Marked</strong>');
+                                 clock_in = 1;
+                                 clock_out = 1;
                              }
                          }
                      });
@@ -154,11 +161,12 @@
                 ajax: {
                     url: '{{ route('admin.attendance.mark.list') }}',
                 },
-                order:['1','desc'],
+                order:['2','desc'],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at text-center'},
+                    {data: 'attendance_date', name: 'attendance_date', class: 'align-middle attendance_date text-center'},
+                    {data: 'action_date', name: 'action_date', class: 'align-middle action_date text-center'},
                     {data: 'action_id', name: 'action_id', class: 'align-middle action_id text-center'},
                     {data: 'latitude', name: 'latitude', class: 'align-middle latitude text-center'},
                 ],
