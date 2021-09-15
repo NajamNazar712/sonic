@@ -687,7 +687,13 @@
                                            href="{{ route('admin.telenor.return.bulk_return') }}">Bulk Return</a>
                                     </li>
                                 @endif
-{{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
+                                @if (session('role_id') == 1 || in_array(595, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.revert.bulk_revert') }}">Bulk Revert</a>
+                                    </li>
+                                @endif
+
+                                    {{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
 {{--                                    <li><a class="menu-item"--}}
 {{--                                           href="{{ route('admin.telenor.call.index') }}">Call(s)</a>--}}
 {{--                                    </li>--}}

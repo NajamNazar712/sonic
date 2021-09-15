@@ -5,13 +5,22 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\http\Models\Admin\NsaAccountShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\InvoiceShipment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1214,4 +1223,347 @@ class AdminNsaAccountShipmentController extends Controller
             }
         }
     }
+
+    public function bulk_revert_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),435);
+        return view('admin.telenor.bulk_revert');
+    }
+
+    public function bulk_revert_submit(Request $request){
+       
+       /* $names = [
+            'tracking_number' => 'Tracking Number',
+            'reverted_by' => 'Reverted By',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+            'reverted_by' => [],
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'reverted_by'];*/
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'reverted_by' => 'Reverted By',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
+            'reverted_by' => [],
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'reverted_by'];
+
+        if ($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Reverted By'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+
+                        break;
+                    }
+                }
+
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $tracking_ids = array();
+                $tracking_id_row = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                 
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+                    
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                    if (empty($errors['Row #' . $row_id])) {
+                        if (!empty(trim($row['tracking_number'])) || !empty(trim($row['reverted_by']))) {
+                            if (empty($tracking_ids)) {
+
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            } else {
+                                if (in_array($row['tracking_number'], $tracking_ids)) {
+                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                                } else {
+                                    $tracking_ids[] = $row['tracking_number'];
+                                    $tracking_id_row[$row['tracking_number']] = $row_id;
+                                }
+                            }
+                        }
+
+                        $settings = GlobalSettings::where('type', 'nsa_accounts');
+                        $nsa_accounts = array();
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            $nsa_accounts = array_map('intval', explode(',', $settings->text));
+                        }
+                        if (count($nsa_accounts) > 0) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
+                                $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
+                            }
+                        } else {
+                            $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
+                        }
+                    }
+                }
+                if (empty($errors)) {
+                    $tracking_numbers = array();
+                    $shipment_ids = array();
+                    $order = false;
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $tracking = trim($row['tracking_number']);
+                        $reverted_by = trim($row['reverted_by']);
+                        $shipment_details = Shipment::where('tracking_number', $tracking)->first();
+                        $shipment_id = $shipment_details->id;
+                        $shipment_ids[] = $shipment_id;
+
+
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
+                    }
+
+                    $nsa_shipments = Shipment::whereIn('id', $shipment_ids);
+
+                    if ($nsa_shipments->exists()) {
+                        $nsa_shipments = $nsa_shipments->get();
+                        $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+                        $valid_shipments = array();
+                        $now = Carbon::now()->startOfDay();
+                        foreach ($nsa_shipments as $shipment) {
+                            if (!in_array($shipment->id, $valid_shipments)) {
+                                $valid_shipments[] = $shipment->id;
+                            }
+                        }
+                    }
+
+                    if (!$order) {  //Default
+                        sort($valid_shipments); //sort_valid_shipments;
+                    }
+                    $serial = 1;
+
+                    foreach ($valid_shipments as $index => $shipment) {
+                        $reverted_by = '';
+
+                        foreach ($rows as $key => $row) {
+                            if ($row['tracking_number'] == $shipment->tracking_number) {
+                                $reverted_by = $row['reverted_by'];
+                            }
+                        }
+
+                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11]);
+                        if ($delivery_note_shipment->exists()) {
+                            $delivery_note_shipment = $delivery_note_shipment->first();
+
+                            $shipment = Shipment::find($shipment_id);
+                            if($shipment->shipment_type == 1){
+                                $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
+                                if($journey){
+                                    $start = $journey->created_at;
+                                    $difference = $start->diffInDays($now);
+                                    if($difference <= 2 || (session('role_id') == 1)){
+
+                                        $delivery_note_shipment->status = 8;
+
+                                        $delivery_note_shipment->save();
+
+                                        $delivery_note = $delivery_note_shipment->delivery_note;
+
+                                        $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
+
+                                        if ($delivery_note_amount < 0) {
+                                            $delivery_note_amount = 0;
+                                        }
+
+                                        $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
+                                        $delivery_note->received_cod_amount = $delivery_note_amount;
+
+                                        $delivery_note->save();
+
+                                        $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
+
+                                        if ($delivery_note_station_deposit_note) {
+                                            $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
+
+                                            $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+
+                                            if ($station_deposit_note_amount < 0) {
+                                                $station_deposit_note_amount = 0;
+                                            }
+
+                                            $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
+                                            $station_deposit_note->sdn_amount = $station_deposit_note_amount;
+                                            $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
+
+                                            $station_deposit_note->save();
+                                        }
+
+                                        $shipment->shipper_status_id = 13;
+                                        $shipment->consignee_status_id = 13;
+
+                                        $shipment->payment_status_id = 4;
+
+                                        $shipment->save();
+
+                                        if($shipment->booking_type_id == 3){
+                                            ShipmentItem::where('shipment_id', $shipment->id)->update(['bought' => 0]);
+                                        }
+
+                                        $account_type_id = $shipment->user->account_type_id;
+
+                                        if ($account_type_id == 1) {
+                                            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+
+                                            if ($pending_payment_shipment->exists()) {
+                                                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                                                AdminFinanceController::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 2);
+                                            }
+                                            else {
+                                                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                                                if ($done_payment_shipment->exists()) {
+                                                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                                                    AdminFinanceController::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, 2);
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            $payment_shipment_id = NULL;
+                                            $payment_type = NULL;
+                                            $invoice_shipment_id = NULL;
+                                            $invoice_type = NULL;
+
+                                            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+
+                                            if ($pending_payment_shipment->exists()) {
+                                                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                                                $payment_shipment_id = $pending_payment_shipment->id;
+                                                $payment_type = 0;
+                                            }
+                                            else {
+                                                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                                                if ($done_payment_shipment->exists()) {
+                                                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                                                    $payment_shipment_id = $done_payment_shipment->id;
+                                                    $payment_type = 1;
+                                                    $done_payment_id = $done_payment_shipment->done_payment_id;
+                                                }
+                                            }
+
+                                            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+
+                                            if ($pending_invoice_shipment->exists()) {
+                                                $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+
+                                                $invoice_shipment_id = $pending_invoice_shipment->id;
+                                                $invoice_type = 0;
+                                            }
+                                            else {
+                                                $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+
+                                                if ($done_invoice_shipment->exists()) {
+                                                    $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+
+                                                    $invoice_shipment_id = $done_invoice_shipment->id;
+                                                    $invoice_type = 1;
+                                                }
+                                            }
+
+                                            if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                                                AdminFinanceController::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 2);
+                                            }
+                                        }
+
+                                        if(isset($payment_type) && $payment_type == 1) {
+                                            ShipmentsPaymentJourneyController::add($shipment_id, 4,$reverted_by, '', $done_payment_id);
+                                        }
+                                        else{
+                                            ShipmentsPaymentJourneyController::add($shipment_id, 4, $reverted_by);
+                                        }
+
+                                        ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL,$reverted_by);
+
+                                        if($shipment->packaging_material_request == 1) {
+                                            $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                                            if ($packaging_material_shipment != null) {
+                                                $packaging_material_shipment->status_id = 3;
+                                                $packaging_material_shipment->save();
+
+                                                $packaging_request_history = new PackagingMaterialRequestHistory();
+                                                $packaging_request_history->packaging_material_request_id = $packaging_material_shipment->id;
+                                                $packaging_request_history->status = 3;
+                                                $packaging_request_history->updated_by = $reverted_by;
+                                                $packaging_request_history->save();
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+
+                        }
+
+                    }
+
+
+                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                        return $row . ': ' . $tracking_number;
+                    }, array_keys($tracking_numbers), $tracking_numbers));
+
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) marked as reverted with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+            } else {
+                return redirect()->back()->with('error', 'No Shipments in File');
+            }
+        }
+    }
+
 }
