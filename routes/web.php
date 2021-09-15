@@ -3162,6 +3162,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
             Route::post('status', 'Admins\AdminHumanResourseController@designation_status')->name('status');
+            Route::post('roles', 'Admins\AdminHumanResourseController@designation_roles')->name('roles');
             Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
         });

@@ -15,6 +15,7 @@ class UpdateEmployeeDesignationsTableAddDepartmentId extends Migration
     {
         Schema::table('employee_designations', function (Blueprint $table) {
             $table->integer('department_id')->index();
+            $table->integer('role_id')->index();
         });
     }
 
@@ -25,8 +26,9 @@ class UpdateEmployeeDesignationsTableAddDepartmentId extends Migration
      */
     public function down()
     {
-        Schema::table('shipments_journey', function (Blueprint $table) {
+        Schema::table('employee_designations', function (Blueprint $table) {
             $table->dropColumn('department_id');
+            $table->dropColumn('role_id');
         });
     }
 }

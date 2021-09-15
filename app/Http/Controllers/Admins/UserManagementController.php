@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ModulePermission;
 use App\Http\Models\HR\Employee;
+use App\Http\Models\HR\EmployeeDesignation;
 use App\Http\Models\Rider;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -198,8 +199,9 @@ class UserManagementController extends Controller
             $roles = AdminRole::with('department')->get();
         }
         $hubs = City::where('hub', 1)->get();
+        $designations = EmployeeDesignation::where('status',1)->get();
 
-        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs]);
+        return view('admin.user_management.user.add.index')->with(['roles' => $roles, 'hubs' => $hubs,'designations'=>$designations]);
     }
 
     public function user_add_store(Request $request) {
@@ -214,6 +216,7 @@ class UserManagementController extends Controller
         $admin->default_hub_id = $request->input('default_hub');
         $admin->password = bcrypt($request->input('password'));
         $admin->designation = $request->input('designation');
+        $admin->designation_id = $request->input('designation_id');
 
         if($request->trax_id != null){
             $trax_id = $request->trax_id;
@@ -294,9 +297,9 @@ class UserManagementController extends Controller
         $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
-
+        $designations = EmployeeDesignation::where('status',1)->get();
         ActivityTrailController::createActivityTrailLog(Auth::id(),231,1);
-        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs,'designations'=>$designations]);
         
     }
 
@@ -317,6 +320,7 @@ class UserManagementController extends Controller
             $admin->updated_by = Auth::id();
             $admin->trax_id = $request->trax_id;
             $admin->designation = $request->input('designation');
+            $admin->designation_id = $request->input('designation_id');
 
             if ($request->filled('password')) {
                 $admin->password = bcrypt($request->input('password'));

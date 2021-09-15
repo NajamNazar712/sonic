@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
@@ -720,10 +721,11 @@ class AdminHumanResourseController extends Controller
                             $admin->email = $employee->official_email;
                             $admin->phone_number = $employee->phone_number;
                             $admin->cnic = $employee->cnic;
-//                        $admin->role_id = ; // Later
+                            $admin->role_id = $employee->designation->role_id ?? 72;
                             $admin->default_hub_id = $employee->city_id;
                             $admin->password = bcrypt($employee->pin);
                             $admin->designation = $employee->designation->name;
+                            $admin->designation_id = $employee->designation_id;
 
                             $admin->trax_id = $employee->trax_id;
                             $admin->employee_id = $employee->id;
@@ -822,6 +824,18 @@ class AdminHumanResourseController extends Controller
         $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
+
+        if($employee->employee_type_id == 1)
+        {
+            $admin = Admin::where('trax_id',$employee->trax_id);
+            if($admin->exists())
+            {
+                $admin = $admin->first();
+
+                $admin->role_id = $employee->designation->role_id ?? 72;
+                $admin->update();
+            }
+        }
 
         return back()->with(['success'=>'Employee Profile Updated Successfully']);
     }
@@ -2195,7 +2209,8 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),391);
         }
         $designations = EmployeeDesignation::leftjoin('admin_departments as ad','ad.id','employee_designations.department_id')
-            ->select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description','employee_designations.department_id','ad.name as department']);
+            ->leftjoin('admin_roles as r','r.id','employee_designations.role_id')
+            ->select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description','employee_designations.department_id','ad.name as department','r.name as role','r.id as role_id']);
 
         return Datatables::of($designations)
             ->editColumn('status', function ($data) {
@@ -2251,10 +2266,18 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 1, 'success' => 'Designation '. $status .' successfully!']);
     }
 
+    public function designation_roles(Request $request)
+    {
+        $roles = AdminRole::where('department_id',$request->department_id)->get();
+
+        return response()->json(['status'=>1,'roles'=>$roles]);
+    }
+
     public function designation_add(Request $request){
         $designation = new EmployeeDesignation();
         $designation->name = $request->name;
         $designation->department_id = $request->department_id;
+        $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
 
@@ -2267,6 +2290,7 @@ class AdminHumanResourseController extends Controller
         $designation = EmployeeDesignation::find($request->designation_id);
         $designation->name = $request->name;
         $designation->department_id = $request->department_id;
+        $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
