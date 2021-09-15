@@ -397,6 +397,51 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="CreditLimitModal" data-backdrop="static" role="dialog" aria-labelledby="CreditLimitModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Credit Limit</h4>
+                </div>
+                <form id="set_credit_limit_form" class="form" novalidate="novalidate" method="post">
+                <input type="hidden" name="shipper_id" id="credit_shipper_id">
+                <div class="modal-body">
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr class="bg-primary white">
+                                        <td class="border-primary border-darken-1">User</td>
+                                        <td class="border-primary border-darken-1">Limit Used</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="credit_user"></td>
+                                        <td id="credit_user_limit_used"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="credit_limit">Maximum Credit Limit</label>
+                                <input type="text" name="credit_limit" id="credit_limit" class="form-control" data-rule-required="true" data-msg-required="Credit is required" placeholder="Maximum credit limit">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success" id="credit_limit_btn">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -433,6 +478,14 @@
             'rightAlign': false,
             'min': 0,
             'max': 200
+        });
+
+        $('#credit_limit').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 100,
         });
         $("#territory").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Territory",
@@ -1665,6 +1718,32 @@
 
                 });
             }
+            if($(this).hasClass('credit_limit')){
+                $.ajax({
+                    url: '{!! route('admin.international.rates.update.get_credit') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'user_id': user_id
+                    }
+                }).done(function(data){
+                    $('#credit_user').text('');
+                    $('#credit_user_limit_used').text('');
+                    $('#credit_limit').val('');
+                    if(data.status == 0){
+                        $('#credit_shipper_id').val(user_id);
+                        $('#CreditLimitModal').modal('show');
+                        if(data.limit_set){
+                            $('#credit_limit').val(data.credit_limit);
+                            $('#credit_user_limit_used').text(data.limit_usage);
+                        }
+                        $('#credit_user').text(data.user);
+                    }
+                    else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                });
+            }
         });
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
@@ -1904,6 +1983,70 @@
             $('#corporate_rate_type').prepend('<option value="" selected="selected"></option>').trigger('change');
         });
 
+        $('#set_credit_limit_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                // var form = this;
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Update User Credit Limit!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        var shipper_id = $('#credit_shipper_id').val();
+                        var limit = $('#credit_limit').val();
+                        $.ajax({
+                            url: '{!! route('admin.international.rates.update.credit') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'user_id': shipper_id,
+                                'limit':limit
+                            }
+                        }).done(function(data){
+                            $('#credit_user').text('');
+                            $('#credit_user_limit_used').text('');
+                            $('#credit_limit').val('');
+                            $('#credit_shipper_id').val('');
+                            $('#CreditLimitModal').modal('hide');
+                            if(data.status == 0){
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        });
+                    }
+                });
+            }
+        });
     });
 
 </script>

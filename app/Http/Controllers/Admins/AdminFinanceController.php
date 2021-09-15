@@ -25,6 +25,7 @@ use App\Http\Models\DiscountCharge;
 use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
+use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
@@ -5380,6 +5381,11 @@ class AdminFinanceController extends Controller
         $writer->save('php://output');
     }
 
+    public function done_payments_generate_report_to_email(){
+        $date = Carbon::today()->format('Y-m-d');
+        $response = AdminReportsEmailController::done_payment($date . ' 00:00:00');
+        return ['status' => 1, 'success' => ' Done Payment(s) Report Generated'];
+    }
     static public function generate_invoice() {
         $settings = GlobalSettings::where('type', 'due_date_days');
 
@@ -7278,6 +7284,7 @@ class AdminFinanceController extends Controller
             $invoice->status_id = 3;
 
             $invoice->save();
+            $this->international_credit_limit_reset($invoice->user_id);
         }
 
         return redirect()->route('admin.finance.invoices.index')->with('success', 'Invoice has been marked as Received');
@@ -7297,6 +7304,7 @@ class AdminFinanceController extends Controller
                 $invoice->status_id = 3;
 
                 $invoice->save();
+                $this->international_credit_limit_reset($invoice->user_id);
             }
         }
 
@@ -10352,4 +10360,12 @@ class AdminFinanceController extends Controller
         return $link;
     }
 
+    public function international_credit_limit_reset($user_id){
+        $credit_user = InternationalUsersCreditLimit::where('user_id', $user_id);
+        if($credit_user->exists()){
+            $credit_user = $credit_user->first();
+            $credit_user->limit_usage = 0;
+            $credit_user->save();
+        }
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\DailyVisit;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\DailyVisitLeadStatus;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
