@@ -6796,7 +6796,8 @@ class AdminReportsController extends Controller
 
     public function daily_visit_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),193);
-        return view('admin.reports.daily_visit_report');
+        $admins = Admin::get(['id', 'name']);
+        return view('admin.reports.daily_visit_report')->with(['admins' => $admins]);
     }
     public function daily_visit_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -6806,8 +6807,8 @@ class AdminReportsController extends Controller
         $daily_visit = DB::connection('reports')->table('daily_visits')
             ->join('daily_visit_lead_statuses as dvls','dvls.id', '=', 'daily_visits.lead_status_id')
             ->leftjoin('admins as a', 'a.id', '=', 'daily_visits.admin_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
+            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image');
 
         $datatables = Datatables::of($daily_visit)
             ->editColumn('b_c_photo', function ($dvr){
@@ -6840,6 +6841,23 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             });
+
+            //AdminUser Filter
+        if ($team_member = $request->get('team_member')) {
+            $datatables->where('a.id', $team_member);
+        }
+                //VisitDate filter
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
+        }
+        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
+            $ufrom = $request->get('search_update_date_from');
+            $uto = $request->get('search_update_date_to');
+            $datatables->whereBetween('daily_visits.created_at', [$ufrom,$uto]);
+        }
+
         return $datatables->make(true);
     }
     public function delivered_shipment_index(){
@@ -6883,7 +6901,6 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->select('riders.name as courier_name', 'rc.name as courier_type', 'rou.code as route_code', DB::raw('count(s.id) as shipments_count'), DB::raw('count(sj.id) as delivered_shipments_count'), DB::raw('count(s.id)/count(sj.id) as delivery_ratio'), 'c.name as station')
             ->groupBy('riders.id');
-
 
         $datatables = Datatables::of($delivered_shipments);
 
@@ -6973,11 +6990,6 @@ class AdminReportsController extends Controller
         }
         if($destination = $request->get('search_destination')){
             $datatables = $datatables->where('c.id', '=', $destination);
-        }
-        if ($request->get('search_from') && $request->get('search_to')) {
-            $from = $request->get('search_from');
-            $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
         if ($search_rider_cat = $request->get('search_rider_cat')) {
             $datatables->where('r.operation_rider_id', $search_rider_cat);
