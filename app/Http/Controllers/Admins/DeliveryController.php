@@ -6536,6 +6536,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                         $delivery_note->save();
 
                         //rider attendance
+                        if($request->oper_id == 1){
                             $attendance_datetime = Carbon::now()->format('Y-m-d H:i:s');
                             $attendance_date = Carbon::now()->format('Y-m-d');
                             $attendance_time = Carbon::now()->format('H:i:s');
@@ -6563,6 +6564,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                                 $rider_attendance_action->longitude = $city_id_location->hub_location_longitude;
                                 $rider_attendance_action->save();
                             }
+                        }
                         //rider attendance end
                         return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
                     }
