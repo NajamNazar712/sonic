@@ -87,7 +87,7 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">Time Slot</th>
-                            <th class="border-primary border-darken-1">Total Out of Delivery</th>
+                            <th class="border-primary border-darken-1">Total Out for Delivery</th>
                             <th class="border-primary border-darken-1">Total Statuses Updated</th>
                             <th class="border-primary border-darken-1">Percentage</th>
                             <th class="border-primary border-darken-1">Statuses Updated from Bolt</th>
