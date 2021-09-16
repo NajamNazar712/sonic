@@ -8345,28 +8345,20 @@ class NotificationsController extends Controller
 
                 }
                 else if ($id == 154){
-                    $fields = ['shipment no' => 'shipment_no', 'Sales Person' => 'Sales_Person', 'shipper name' => 'shipper_name'];
-
                     $shipment = Shipment::find($reference_1_id);
-
+                    
                     $shipper = $shipment->user;
-
+                   
                     $sales_person_data = array();
-                    $sales_person_tag = SalePersonTag::where('user_id', $shipment->id)->where('status', 0)->first();
+                    $sales_person_tag = SalePersonTag::where('user_id', $shipper->id)->where('status', 0)->first();
                     if($sales_person_tag){
                         $sales_person_tag = Admin::find($sales_person_tag->admin_id);
                         $sales_person_data['name'] = $sales_person_tag->name;
+                        $to = $sales_person_tag->email;
                     }
                     else
                     {
-                        $sales_person_data['name'] = '--';
-                    }
-
-                    foreach ($fields as $key => $field) {
-                      
-                        if (strpos($body, '[' . $key . ']') !== FALSE) {
-                            $body = str_replace('[' . $key . ']', $shipment[$field], $body);
-                        }
+                        $to = '';
                     }
 
                     if (strpos($body, '[Sales_Person]') !== FALSE) {
@@ -8378,7 +8370,7 @@ class NotificationsController extends Controller
                     }
 
                     if (strpos($body, '[shipper_name]') !== FALSE) {
-                        $body = str_replace('[shipper_name]', $shipment->name, $body);
+                        $body = str_replace('[shipper_name]', $shipment->user->name, $body);
                     }
 
                     dd($subject, $body, $to);

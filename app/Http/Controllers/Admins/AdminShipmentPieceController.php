@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
-
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
@@ -79,6 +79,7 @@ class AdminShipmentPieceController extends Controller
                     $shipment->consignee_status_id = 62;
                     $shipment->save();
                     ShipmentsJourneyController::add($shipment_id, 62, 62, NULL, NULL, NULL, Auth::id());
+                    NotificationsController::send(154, $shipment_id);
                 }
             }
 
