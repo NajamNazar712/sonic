@@ -65,7 +65,7 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Return Note Shipment(s)</h4>
+                    <h4 class="modal-title" id="shipments_modal_title"></h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -275,7 +275,7 @@
                                 row.push(values.created_at);
                                 row.push(values.submitted_by);
                                 row.push(values.submitted_at);
-                                row.push(values.delivered_to_shipper_count);
+                                row.push(values.delivered_to_shipper_count_link);
 
                                 body.push(row);
                             });
@@ -439,7 +439,7 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
-
+                $('#shipments_modal_title').html('Return Note Shipment(s)');
                 $.ajax({
                     url: '{!! route('admin.return.history.shipments') !!}',
                     method: 'POST',
@@ -466,6 +466,7 @@
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#shipments_modal .modal-body').html('');
                 $('#shipments_modal').modal('show');
+                $('#shipments_modal_title').html('Return Note Delivered Shipment(s)');
 
                 $.ajax({
                     url: '{!! route('admin.return.history.delivered_shipments') !!}',
