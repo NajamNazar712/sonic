@@ -112,7 +112,7 @@
                                             <tr>
                                                 <th scope="row">Case Nature History</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0"><u><a  href="#" id="ceditRequestModal" data-toggle="modal" data-target="#myModal">{{$crm_historiescount}}</a></u></h5>
+                                                    <h5 class="mb-0"><u><a  href="#" id="ceditRequestModal" data-toggle="modal" data-target="#myModal">{{str_pad($crm_historiescount, 4, '0', STR_PAD_LEFT)}}</a></u></h5>
                                                 </td>
                                             </tr>
                                             @endif
@@ -793,14 +793,14 @@
                                 @foreach($crm_histories as $index => $history)
                                     @php $index++; @endphp
                                     <tr class="border-bottom-success border-custom-color">
-                                        <td>{{ str_pad($index,3,'0',STR_PAD_LEFT) }}</td>
+                                        <td>{{$index}}</td>
                                         <td>{{$history->casenature}}</td>
                                         <td>{{$history->casenaturetype}}</td>
                                     </tr>
                                 @endforeach
                                     @php $index=$index+1; @endphp
                                     <tr class="border-bottom-success border-custom-color">
-                                        <td><b>{{ str_pad($index,3,'0',STR_PAD_LEFT) }}</b></td>
+                                        <td><b>{{$index}}</b></td>
                                         <td><b>{{$crm_details->nature->name}}</b></td>
                                         <td><b>{{$crm_details->nature_type->type}}</b></td>
                                     </tr>
