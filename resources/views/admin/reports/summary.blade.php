@@ -244,6 +244,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remark</th>
+                            <th class="border-primary border-darken-1">Total Attempt</th>
                             <th class="border-primary border-darken-1">Payment Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
@@ -537,6 +538,7 @@
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'reason' ,name: 'reason', class: 'align-middle reason'},
                     { data:'remark' ,name: 'remark', class: 'align-middle remark'},
+                    { data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},

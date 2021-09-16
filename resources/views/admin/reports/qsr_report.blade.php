@@ -119,6 +119,7 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remark</th>
+                        <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
@@ -403,6 +404,7 @@
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remark', name: 'sjr.remark', class: 'align-middle remark'},
+                    {data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
