@@ -8351,29 +8351,37 @@ class NotificationsController extends Controller
 
                     $shipper = $shipment->user;
 
-                    foreach ($fields as $key => $field) {
-                        if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                            $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
-                        }
+                    $sales_person_data = array();
+                    $sales_person_tag = SalePersonTag::where('user_id', $shipment->id)->where('status', 0)->first();
+                    if($sales_person_tag){
+                        $sales_person_tag = Admin::find($sales_person_tag->admin_id);
+                        $sales_person_data['name'] = $sales_person_tag->name;
+                    }
+                    else
+                    {
+                        $sales_person_data['name'] = '--';
+                    }
 
+                    foreach ($fields as $key => $field) {
+                      
                         if (strpos($body, '[' . $key . ']') !== FALSE) {
                             $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                         }
                     }
 
-                    if (strpos($subject, '[shipment_no]') !== FALSE) {
-                        $subject = str_replace('[shipment_no]', $shipment->tracking_number, $subject);
-                    }
-
                     if (strpos($body, '[Sales_Person]') !== FALSE) {
-                        $body = str_replace('[Sales_Person]', $shipment->name, $body);
+                        $body = str_replace('[Sales_Person]', $sales_person_data['name'], $body);
                     }
 
+                    if (strpos($body, '[shipment_no]') !== FALSE) {
+                        $body = str_replace('[shipment_no]', $shipment->tracking_number, $body);
+                    }
 
                     if (strpos($body, '[shipper_name]') !== FALSE) {
                         $body = str_replace('[shipper_name]', $shipment->name, $body);
                     }
 
+                    dd($subject, $body, $to);
                     self::email($subject, $body, $to);
                 }
             }

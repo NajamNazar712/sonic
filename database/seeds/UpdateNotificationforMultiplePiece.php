@@ -14,7 +14,7 @@ class UpdateNotificationforMultiplePiece extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('notifications')->where('id', 154)->delete();
         DB::table('notifications')->insert(array(
-            array('id' => 154, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Multiple Piece Update Email', 'type_id' => 1, 'subject' => '[shipment no]', 'body' => 'Dear [Sales Person], Following shipment [shipment no] of shipper [shipper name] is hold in operations.', 'updated_by' => 3, 'status' => 1),
+            array('id' => 154, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Multiple Piece Update Email', 'type_id' => 1, 'subject' => 'Multiple Pieces Hold Shipment(s)', 'body' => 'Dear [Sales Person], Following shipment [shipment no] of shipper [shipper name] is hold in operations.', 'updated_by' => 3, 'status' => 1),
         ));
     }
 }
