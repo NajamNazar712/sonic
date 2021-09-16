@@ -721,7 +721,7 @@ class AdminHumanResourseController extends Controller
                             $admin->email = $employee->official_email;
                             $admin->phone_number = $employee->phone_number;
                             $admin->cnic = $employee->cnic;
-                            $admin->role_id = $employee->designation->role_id ?? 72;
+                            $admin->role_id = $employee->designation->role_id ?? 79;
                             $admin->default_hub_id = $employee->city_id;
                             $admin->password = bcrypt($employee->pin);
                             $admin->designation = $employee->designation->name;
@@ -832,7 +832,7 @@ class AdminHumanResourseController extends Controller
             {
                 $admin = $admin->first();
 
-                $admin->role_id = $employee->designation->role_id ?? 72;
+                $admin->role_id = $employee->designation->role_id ?? 79;
                 $admin->update();
             }
         }
