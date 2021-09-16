@@ -1375,7 +1375,7 @@ class AdminNsaAccountShipmentController extends Controller
 
                         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6, 11]);
                         if ($delivery_note_shipment->exists()) {
-                            $delivery_note_shipment = $delivery_note_shipment->first();
+                            $delivery_note_shipment = $delivery_note_shipment->latest()->first();
 
                             $shipment = Shipment::find($shipment_id);
                             if($shipment->shipment_type == 1){
