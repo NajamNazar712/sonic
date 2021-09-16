@@ -8373,7 +8373,6 @@ class NotificationsController extends Controller
                         $body = str_replace('[shipper_name]', $shipment->user->name, $body);
                     }
 
-                    dd($subject, $body, $to);
                     self::email($subject, $body, $to);
                 }
             }
