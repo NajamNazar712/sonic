@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use App\http\Models\ShipmentOrderDate;
