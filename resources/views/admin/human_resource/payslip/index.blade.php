@@ -146,6 +146,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
@@ -334,26 +335,33 @@
                     this.api().table().columns.adjust();
                 }
             })
-
+            var route = '{!! url('admin') !!}';
              $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var payslip_id = parseInt($(this).parents('tr').attr('id'));
 
                 if ($(this).hasClass('print')) {
                     if(payslip_id){
                         $.ajax({
-                            url: '{!! route('admin.v2_pickups.rider_receiving.check_pickup') !!}',
+                            url: '{!! route('admin.human_resource.payslip.print') !!}',
                             method: 'POST',
                             data: {
-                                'rider_id': rider,
-                                'pickup_date': date,
+                                'payslip_id': payslip_id,
                                 '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
                             if(data.status == 0){
-                                print(data.pickup_note_id);
-                            }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }else{
 
+                                toastr.success('Payslip downloaded successfully', 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+
+                                var tab = window.open('', '_blank');
+                                tab.document.write('<iframe src="'+ data.image +'" width="100%" height="100%"></iframe>');
+                                tab.document.close();
+                                tab.focus();
                             }
                         });
                     }
