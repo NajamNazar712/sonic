@@ -8363,8 +8363,6 @@ class NotificationsController extends Controller
                     
                     $to = $shipper->email;
                     
-                    dd($subject, $body, $to);
-
                     self::email($subject, $body, $to);
 
                 } 
