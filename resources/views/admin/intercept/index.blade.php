@@ -67,6 +67,8 @@
 
                                 <input type="text" name="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" id="amount">
                             </div>
+                            @if ($shipment->booking_type_id == 1)
+
                             <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
                                 <label class="d-block">Self Collection</label>
                                 <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
@@ -78,6 +80,7 @@
                                 <select name="express_center" class="select2" id="express_center" data-rule-required="true" data-msg-required="Express Center/Franchise is required">
                                 </select>
                             </div>
+                            @endif
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -161,7 +164,13 @@
                     $('#center_franchise').val(center_franchise);
             });
             $('#self_collection').checkboxpicker().bind('change', function() {
+                if (this.checked) {
+                    $('#express_center').prepend('<option value="" selected="selected"></option>')
                 $('#express_center_div').removeClass('d-none');
+                }
+                else {
+                $('#express_center_div').addClass('d-none');
+                }
 
             });
             $('#consignee_city').select2({

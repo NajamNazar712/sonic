@@ -629,7 +629,7 @@ class OrderManagementController extends Controller
                     if($shipment_details->center_frachise_type==1){
                         $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
                         return $trax_center->name;
-                    }elseif ($shipment_details->center_frachise_type==1) {
+                    }elseif ($shipment_details->center_frachise_type==2) {
                         $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
                         return $trax_franchise->name;
                     }else{

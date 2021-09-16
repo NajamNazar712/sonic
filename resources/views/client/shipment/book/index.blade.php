@@ -1155,7 +1155,13 @@
 
 			$('#information_display').checkboxpicker();
 			$('#self_collection').checkboxpicker().bind('change', function() {
+                if (this.checked) {
+                    $('#express_center').prepend('<option value="" selected="selected"></option>')
                 $('#express_center_div').removeClass('d-none');
+                }
+                else {
+                $('#express_center_div').addClass('d-none');
+                }
 
             });
 

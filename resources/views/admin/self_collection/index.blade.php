@@ -40,6 +40,8 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Express Center</th>
+                        
                         <th class="border-primary border-darken-1">Agent</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Contact</th>
@@ -518,6 +520,7 @@
                             head.push('Hub');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Express Center');
                             head.push('Agent');
                             head.push('Consignee Name');
                             head.push('Consignee Contact');
@@ -540,6 +543,7 @@
                                 row.push(values.hub);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.express_center);
                                 row.push(values.agent);
                                 row.push(values.consignee_name);
                                 row.push(values.phone.replace('<br>', ' '));
@@ -704,6 +708,7 @@
                     {data: 'hub', name: 'h.name', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle vendor'},
+                    {data: 'express_center', name: 'express_center', class: 'align-middle express_center',orderable: false, searchable: false},
                     {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'phone', class: 'align-middle phone'},
@@ -734,7 +739,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.select')) {
+                        if ($(header).is('.serial_number') || $(header).is('.select') || $(header).is('.express_center')) {
                             $(td).appendTo($(search));
                         }
                         // else if($(header).is('.status')){
