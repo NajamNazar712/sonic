@@ -1080,8 +1080,21 @@ class DeliveryController extends Controller
 
     public function receive_delivery_update(Request $request, $id)
     {
-        $service_type = BookingType::all();
-        return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
+        $delivery_note = DeliveryNote::find($id);
+        if($delivery_note){
+            if(($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions')))){
+                if(DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', 0)->count() == 0){
+                    $service_type = BookingType::all();
+                    return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
+                }
+                else{
+                    return redirect()->route('admin.access_denied');
+                }
+
+            }
+            return redirect()->route('admin.access_denied');
+        }
+        return redirect()->route('admin.access_denied');
     }
 
     public function receive_delivery_notes_list(Request $request, $id)
