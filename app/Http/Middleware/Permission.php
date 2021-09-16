@@ -44,6 +44,11 @@ class Permission
             'accounts.sister_account.merged_account.mapping.submit' => 242,
             'accounts.receiving_sheet.index' => 364,
 
+            'corporate.reimbursement_setting.index' => 598,
+            'corporate.reimbursement_setting.store' => 598,
+            'corporate.reimbursement_setting.approve' => 599,
+            'corporate.reimbursement_setting.reject' => 599,
+
             'daily_visit.index' => 265,
             'daily_visit.store' => 265,
             'daily_visit.business_card' => 264,

@@ -61,6 +61,7 @@ use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
+use App\Http\Models\Rates\Corporate\CorporateReimbursementSetting;
 use App\Http\Models\Rates\Corporate\HistoryCorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\HistoryCorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\HistoryCorporateRateDestinationHub;
@@ -33283,4 +33284,137 @@ class AdminCorporateAccountsController extends Controller
         }
     }
 
+    public function corporate_reimbursement_setting($id)
+    {
+        return Carbon::now()->subMonth()->LastOfMonth()->toDateString();
+        ActivityTrailController::createActivityTrailLog(Auth::id(),438);
+        $user = User::find($id);
+        if(!$user)
+        {
+            return back()->with(['error'=>"User Not Found"]);
+        }
+
+        if($user->account_type_id == 1)
+        {
+            return back()->with(['error'=>"User Not Corporate User"]);
+        }
+
+        $setting = CorporateReimbursementSetting::where('user_id',$id);
+        if($setting->doesntExist())
+        {
+            $setting = new CorporateReimbursementSetting();
+            $setting->user_id = $id;
+            $setting->save();
+        }
+        else{
+            $setting = $setting->first();
+        }
+
+        return view('admin.accounts.corporate.reimbursement_setting')->with(['setting'=>$setting,'id'=>$id]);
+    }
+    
+    public function corporate_reimbursement_setting_store($id,Request $request)
+    {
+        $user = User::find($id);
+        if(!$user)
+        {
+            return back()->with(['error'=>"User Not Found"]);
+        }
+
+        if($user->account_type_id == 1)
+        {
+            return back()->with(['error'=>"User Not Corporate User"]);
+        }
+
+        $setting = CorporateReimbursementSetting::where('user_id',$id);
+        if($setting->doesntExist())
+        {
+            $setting = new CorporateReimbursementSetting();
+            $setting->user_id = $id;
+            $setting->save();
+        }
+        else{
+            $setting = $setting->first();
+        }
+        if($request->has('status_on'))
+        {
+            $setting->setting_display = 1;
+        }
+        else{
+            $setting->setting_display = 0;
+        }
+        $setting->status = 1;
+        $setting->updated_by = Auth::id();
+        $setting->starting_date = null;
+        $setting->ending_date = null;
+        $setting->update();
+
+        return back()->with(['success'=>"Setting Updated Successfully"]);
+    }
+
+    public function corporate_reimbursement_setting_approve($id,Request $request)
+    {
+        $user = User::find($id);
+        if(!$user)
+        {
+            return back()->with(['error'=>"User Not Found"]);
+        }
+
+        if($user->account_type_id == 1)
+        {
+            return back()->with(['error'=>"User Not Corporate User"]);
+        }
+
+        $setting = CorporateReimbursementSetting::where('user_id',$id);
+        if($setting->doesntExist())
+        {
+            return back()->with(['error'=>"User Settings Not Found"]);
+        }
+
+        $setting = $setting->first();
+        $setting->status = 2;
+        $setting->approved_by = Auth::id();
+        if($request->has('status_on'))
+        {
+            $setting->starting_date = Carbon::now()->firstOfMonth()->addMonth()->toDateString();
+            $setting->ending_date = null;
+        }
+        else{
+            $setting->starting_date = null;
+            $setting->ending_date = Carbon::now()->addMonth()->lastOfMonth()->toDateString();
+        }
+
+        $setting->update();
+        return back()->with(['success'=>"Setting Approved Successfully"]);
+    }
+
+    public function corporate_reimbursement_setting_reject($id,Request $request)
+    {
+        $user = User::find($id);
+        if(!$user)
+        {
+            return back()->with(['error'=>"User Not Found"]);
+        }
+
+        if($user->account_type_id == 1)
+        {
+            return back()->with(['error'=>"User Not Corporate User"]);
+        }
+
+        $setting = CorporateReimbursementSetting::where('user_id',$id);
+        if($setting->doesntExist())
+        {
+            return back()->with(['error'=>"User Settings Not Found"]);
+        }
+
+        $setting = $setting->first();
+        $setting->status = 2;
+        $setting->approved_by = Auth::id();
+        $setting->setting_display = $setting->setting_on;
+        $setting->starting_date = null;
+        $setting->ending_date = null;
+        $setting->update();
+
+        return back()->with(['success'=>"Setting Rejected Successfully"]);
+    }
 }

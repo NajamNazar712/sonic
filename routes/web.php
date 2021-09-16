@@ -670,6 +670,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{id}/add/rates/submit','Admins\AdminCorporateAccountsController@change_corporate_rate_type')->name('change_rate_type');
             Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@default_view_rates_index')->name('rates.view');
         });
+        Route::prefix('reimbursement_setting')->name('reimbursement_setting.')->group(function (){
+           Route::get('{id}','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting')->name('index');
+           Route::post('{id}','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting_store')->name('store');
+           Route::post('{id}/approve','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting_approve')->name('approve');
+           Route::post('{id}/reject','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting_reject')->name('reject');
+        });
     });
     //ajax request
 
