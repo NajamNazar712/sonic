@@ -44,6 +44,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Shipper Phone(s)</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -408,6 +409,7 @@
                             head.push('Order ID');
                             head.push('Shipper Name');
                             head.push('Shipper Phone');
+                            head.push('Vendor');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -441,6 +443,7 @@
                                 row.push(values.order_id);
                                 row.push(values.shipper);
                                 row.push(values.shipper_phone);
+                                row.push(values.vendor_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -809,6 +812,7 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
+                    {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},

@@ -90,6 +90,8 @@
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Raised By</th>
+                        <th class="border-primary border-darken-1">Remarks By Debriefer</th>
+                        <th class="border-primary border-darken-1">Raised By Debriefer</th>
                         <th class="border-primary border-darken-1">Department</th>
                     </tr>
                     </thead>
@@ -241,6 +243,8 @@
                             head.push('Rider Name');
                             head.push('Remarks');
                             head.push('Raised By');
+                            head.push('Remarks By Debriefer');
+                            head.push('Raised By Debriefer');
                             head.push('Department');
                             
                             $.each(result.data, function(index, values) {
@@ -255,6 +259,8 @@
                                 row.push(values.rider_name);
                                 row.push(values.remarks);
                                 row.push(values.raised_by);
+                                row.push(values.debrifer_remark);
+                                row.push(values.debrifer_name);
                                 row.push(values.department);
 
                                 body.push(row);
@@ -311,6 +317,8 @@
                     {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
                     {data: 'remarks', name: 'delivery_note_shipments.remarks', class: 'align-middle remarks'},
                     {data: 'raised_by', name: 'admin.name', class: 'align-middle raised_by'},
+                    {data: 'debrifer_remark', name: 'sj.remarks', class: 'align-middle debrifer_remark'},
+                    {data: 'debrifer_name', name: 'sj.remarks', class: 'align-middle debrifer_name'},
                     {data: 'department', name: 'ad.name', class: 'align-middle department'},
                 ],
                 rowCallback: function(row, data, index) {
