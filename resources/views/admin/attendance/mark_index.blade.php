@@ -88,8 +88,6 @@
          else if(clock_in == 1 && clock_out == 1 ){
              $('#punch').addClass('d-none');
              $('#msg_div').removeClass('d-none');
-            /* $('#centered').html('');
-             $('.centered').append('<strong>Already Marked</strong>');*/
          }
          else{
              $('.centered').html('');
@@ -120,15 +118,26 @@
                              });
                          } else {
                              table.draw();
+                             if(data.error == 0){
+                                 swal({
+                                     title: data.success,
+                                     text: data.date,
+                                     icon: 'success',
+                                     buttons: false,
+                                     closeOnClickOutside: true,
+                                     closeOnEsc: true
+                                 });
+                             }else{
+                                 swal({
+                                     title: "Already Marked",
+                                     text: data.message,
+                                     icon: 'error',
+                                     buttons: false,
+                                     closeOnClickOutside: true,
+                                     closeOnEsc: true
+                                 });
+                             }
 
-                             swal({
-                                 title: data.success,
-                                 text: data.date,
-                                 icon: 'success',
-                                 buttons: false,
-                                 closeOnClickOutside: true,
-                                 closeOnEsc: true
-                             });
                              if (data.status == 1) {
                                  $('.centered').html('');
                                  $('.centered').append('<strong>CLOCK OUT</strong>');
@@ -138,7 +147,6 @@
                              } else if (data.status == 2) {
                                  console.log(232);
                                 $('.centered').text('');
-                                 /*  $('.centered').append('<strong>Already Marked</strong>');*/
                                  clock_in = 1;
                                  clock_out = 1;
                                  $('#punch').addClass('d-none');

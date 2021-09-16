@@ -316,41 +316,49 @@ class AdminAttendanceController extends Controller
                     $attendance->attendance_date = $attendance_date;
                 }
                 if ($request->clock_in == 1 && $request->clock_out == 0) {
-                    $attendance->clock_out_datetime = $attendance_mark;
-                    $attendance->clock_out_latitude = session('latitude');
-                    $attendance->clock_out_longitude = session('longitude');
-                    $attendance->clock_out_location = $location_status;
-                    $attendance->save();
+                    if ($attendance->clock_out_datetime == NULL){
+                        $attendance->clock_out_datetime = $attendance_mark;
+                        $attendance->clock_out_latitude = session('latitude');
+                        $attendance->clock_out_longitude = session('longitude');
+                        $attendance->clock_out_location = $location_status;
+                        $attendance->save();
 
-                    $attendance_action_log = new EmployeeAttendanceActionLog();
-                    $attendance_action_log->employee_id = $admin_id;
-                    $attendance_action_log->employee_type = 1;
-                    $attendance_action_log->action_id = 2;
-                    $attendance_action_log->action_date = $attendance_mark;
-                    $attendance_action_log->attendance_date = $attendance_date;
-                    $attendance_action_log->latitude = $attendance->clock_out_latitude;
-                    $attendance_action_log->longitude = $attendance->clock_out_longitude;
-                    $attendance_action_log->location_status = $location_status;
-                    $attendance_action_log->save();
-                    return response()->json(['status' => 2, 'success' => 'Clock Out Successful', 'date' => $attendance_mark]);
+                        $attendance_action_log = new EmployeeAttendanceActionLog();
+                        $attendance_action_log->employee_id = $admin_id;
+                        $attendance_action_log->employee_type = 1;
+                        $attendance_action_log->action_id = 2;
+                        $attendance_action_log->action_date = $attendance_mark;
+                        $attendance_action_log->attendance_date = $attendance_date;
+                        $attendance_action_log->latitude = $attendance->clock_out_latitude;
+                        $attendance_action_log->longitude = $attendance->clock_out_longitude;
+                        $attendance_action_log->location_status = $location_status;
+                        $attendance_action_log->save();
+                        return response()->json(['status' => 2, 'success' => 'Clock Out Successful', 'date' => $attendance_mark, 'error' => 0]);
+                    }else{
+                        return response()->json(['status' => 2, 'message' => 'You have already marked Clock Out', 'error' => 1]);
+                    }
                 } elseif ($request->clock_in == 0 && $request->clock_out == 0) {
-                    $attendance->clock_in_datetime = $attendance_mark;
-                    $attendance->clock_in_latitude = session('latitude');
-                    $attendance->clock_in_longitude = session('longitude');
-                    $attendance->clock_in_location = $location_status;
-                    $attendance->save();
+                    if($attendance->clock_in_datetime == NULL){
+                        $attendance->clock_in_datetime = $attendance_mark;
+                        $attendance->clock_in_latitude = session('latitude');
+                        $attendance->clock_in_longitude = session('longitude');
+                        $attendance->clock_in_location = $location_status;
+                        $attendance->save();
 
-                    $attendance_action_log = new EmployeeAttendanceActionLog();
-                    $attendance_action_log->employee_id = $admin_id;
-                    $attendance_action_log->employee_type = 1;
-                    $attendance_action_log->action_id = 1;
-                    $attendance_action_log->action_date = $attendance_mark;
-                    $attendance_action_log->attendance_date = $attendance_date;
-                    $attendance_action_log->latitude = $attendance->clock_in_latitude;
-                    $attendance_action_log->longitude = $attendance->clock_in_longitude;
-                    $attendance_action_log->location_status = $location_status;
-                    $attendance_action_log->save();
-                    return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark]);
+                        $attendance_action_log = new EmployeeAttendanceActionLog();
+                        $attendance_action_log->employee_id = $admin_id;
+                        $attendance_action_log->employee_type = 1;
+                        $attendance_action_log->action_id = 1;
+                        $attendance_action_log->action_date = $attendance_mark;
+                        $attendance_action_log->attendance_date = $attendance_date;
+                        $attendance_action_log->latitude = $attendance->clock_in_latitude;
+                        $attendance_action_log->longitude = $attendance->clock_in_longitude;
+                        $attendance_action_log->location_status = $location_status;
+                        $attendance_action_log->save();
+                        return response()->json(['status' => 1, 'success' => 'Clock In Successful', 'date' => $attendance_mark, 'error' => 0]);
+                    }else{
+                        return response()->json(['status' => 1, 'message' => 'You have already marked Clock In', 'error' => 1]);
+                    }
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Unable to mark attendance']);
                 }

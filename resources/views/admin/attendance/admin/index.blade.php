@@ -123,10 +123,10 @@
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Date</th>
                                     <th class="border-primary border-darken-1">Day</th>
-                                    <th class="border-primary border-darken-1">Clock-in Time</th>
+                                    <th class="border-primary border-darken-1">Clock-in Datetime</th>
                                     <th class="border-primary border-darken-1">Clock-in Radius</th>
                                     <th class="border-primary border-darken-1">Clock-in Location</th>
-                                    <th class="border-primary border-darken-1">Clock-out Time</th>
+                                    <th class="border-primary border-darken-1">Clock-out Datetime</th>
                                     <th class="border-primary border-darken-1">Clock-out Radius</th>
                                     <th class="border-primary border-darken-1">Clock-out Location</th>
                                 </tr>
