@@ -518,6 +518,7 @@
                     url: '{{ route('admin.v2_pickups.pending.list') }}',
                     data: function (d) {
                         d.legend_filter = $('#legend_filter').val();
+                        d.before_cut_off_time = $('#search_filter').val();
                     }
                 },
             rowId: 'id',
@@ -901,8 +902,7 @@
                 }
             });
             $('#search_filter_btn').on('click',function () {
-               var a=$('#search_filter').val();
-               alert(a);
+               table.draw(true);
             });
         });
     </script>
