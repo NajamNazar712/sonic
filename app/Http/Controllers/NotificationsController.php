@@ -8344,6 +8344,38 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to);
 
                 }
+                else if ($id == 154){
+                    $fields = ['shipment no' => 'shipment_no', 'Sales Person' => 'Sales_Person', 'shipper name' => 'shipper_name'];
+
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+
+                    foreach ($fields as $key => $field) {
+                        if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                            $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
+                        }
+
+                        if (strpos($body, '[' . $key . ']') !== FALSE) {
+                            $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                        }
+                    }
+
+                    if (strpos($subject, '[shipment_no]') !== FALSE) {
+                        $subject = str_replace('[shipment_no]', $shipment->tracking_number, $subject);
+                    }
+
+                    if (strpos($body, '[Sales_Person]') !== FALSE) {
+                        $body = str_replace('[Sales_Person]', $shipment->name, $body);
+                    }
+
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipment->name, $body);
+                    }
+
+                    self::email($subject, $body, $to);
+                }
             }
         }
     }
