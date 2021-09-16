@@ -204,135 +204,163 @@
                     form.submit();
                 }
             });
-        });
-
-        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-            if ( this.context.length ) {
-                body = [];
-                var params = table.ajax.params();
-                params.start = 0;
-                params.length = -1;
-                params.excel = true;
-                var jsonResult = $.ajax({
-                    url: '{{ route('admin.human_resource.payslip.list') }}',
-                    data: params,
-                    success: function (result) {
-                        head = [];
-
-                        head.push('S.No');
-                        head.push('Payroll Month');
-                        head.push('Employee ID');
-                        head.push('Employee Name');
-                        head.push('Designation');
-                        head.push('Department');
-                        head.push('Hub');
-                        head.push('Zone');
-                        head.push('Date of Joining');
-                        head.push('CNIC');
-                        head.push('Total Deduction');
-                        head.push('Net Salary');
-                        head.push('IBAN');
-                        $.each(result.data, function(index, values) {
-                            row = [];
 
 
-                            row.push(index + 1);
-                            row.push(values.payroll_month);
-                            row.push(values.trax_id);
-                            row.push(values.name);
-                            row.push(values.designation);
-                            row.push(values.department);
-                            row.push(values.hub);
-                            row.push(values.zone);
-                            row.push(values.joining_date);
-                            row.push(values.cnic);
-                            row.push(values.total_deduction);
-                            row.push(values.net_salary);
-                            row.push(values.iban);
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var params = table.ajax.params();
+                    params.start = 0;
+                    params.length = -1;
+                    params.excel = true;
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.human_resource.payslip.list') }}',
+                        data: params,
+                        success: function (result) {
+                            head = [];
 
-                            body.push(row);
-                        });
+                            head.push('S.No');
+                            head.push('Payroll Month');
+                            head.push('Employee ID');
+                            head.push('Employee Name');
+                            head.push('Designation');
+                            head.push('Department');
+                            head.push('Hub');
+                            head.push('Zone');
+                            head.push('Date of Joining');
+                            head.push('CNIC');
+                            head.push('Total Deduction');
+                            head.push('Net Salary');
+                            head.push('IBAN');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.payroll_month);
+                                row.push(values.trax_id);
+                                row.push(values.name);
+                                row.push(values.designation);
+                                row.push(values.department);
+                                row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.joining_date);
+                                row.push(values.cnic);
+                                row.push(values.total_deduction);
+                                row.push(values.net_salary);
+                                row.push(values.iban);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
+            var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '500px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'International Standard DHL Rates',
+                        className:'btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
-                    async: false
-                });
 
-                return {body: body, header: head};
-            }
-        } );
-
-        var table = $('#datatable').DataTable({
-            dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            scrollX: true, scrollY: '500px',
-            buttons: [
-                {
-                    extend: 'excel',
-                    title: 'International Standard DHL Rates',
-                    className:'btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
+                    'reset'
+                ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                processing: true,
+                language: {
+                    processing: data_table_loader
                 },
+                serverSide: true,
+                rowId: 'id',
+                order: [[1, 'asc']],
+                ajax: '{{ route('admin.human_resource.payslip.list') }}',
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'payroll_month', name: 'employee_payslips.payroll_month', class: 'align-middle payroll_month'},
+                    {data: 'trax_id', name: 'employee_payslips.trax_id', class: 'align-middle trax_id'},
+                    {data: 'name', name: 'employee_payslips.name', class: 'align-middle name'},
+                    {data: 'designation', name: 'employee_payslips.designation', class: 'align-middle designation'},
+                    {data: 'department', name: 'employee_payslips.department', class: 'align-middle department'},
+                    {data: 'hub', name: 'employee_payslips.hub', class: 'align-middle hub'},
+                    {data: 'zone', name: 'employee_payslips.zone', class: 'align-middle zone'},
+                    {data: 'joining_date', name: 'employee_payslips.joining_date', class: 'align-middle joining_date'},
+                    {data: 'cnic', name: 'employee_payslips.cnic', class: 'align-middle cnic'},
+                    {data: 'iban', name: 'employee_payslips.iban', class: 'align-middle iban'},
+                    {data: 'total_deduction', name: 'employee_payslips.total_deduction', class: 'align-middle total_deduction'},
+                    {data: 'net_salary', name: 'employee_payslips.net_salary', class: 'align-middle net_salary'},
+                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
+                ],
+                rowCallback: function(row, data, index) {
 
-                'reset'
-            ],
-            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-            pageLength: 50,
-            pagingType: 'full_numbers',
-            processing: true,
-            language: {
-                processing: data_table_loader
-            },
-            serverSide: true,
-            rowId: 'id',
-            order: [[1, 'asc']],
-            ajax: '{{ route('admin.human_resource.payslip.list') }}',
-            columns: [
-                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'payroll_month', name: 'employee_payslips.payroll_month', class: 'align-middle payroll_month'},
-                {data: 'trax_id', name: 'employee_payslips.trax_id', class: 'align-middle trax_id'},
-                {data: 'name', name: 'employee_payslips.name', class: 'align-middle name'},
-                {data: 'designation', name: 'employee_payslips.designation', class: 'align-middle designation'},
-                {data: 'department', name: 'employee_payslips.department', class: 'align-middle department'},
-                {data: 'hub', name: 'employee_payslips.hub', class: 'align-middle hub'},
-                {data: 'zone', name: 'employee_payslips.zone', class: 'align-middle zone'},
-                {data: 'joining_date', name: 'employee_payslips.joining_date', class: 'align-middle joining_date'},
-                {data: 'cnic', name: 'employee_payslips.cnic', class: 'align-middle cnic'},
-                {data: 'iban', name: 'employee_payslips.iban', class: 'align-middle iban'},
-                {data: 'total_deduction', name: 'employee_payslips.total_deduction', class: 'align-middle total_deduction'},
-                {data: 'net_salary', name: 'employee_payslips.net_salary', class: 'align-middle net_salary'},
-                {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
-            ],
-            rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                var info = table.page.info();
-                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-            },
-            initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
 
-                this.api().columns().every(function(column_id) {
-                    var column = this;
-                    var header = column.header();
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
 
-                    if ($(header).is('.serial_number') || $(header).is('.action')) {
-                        $(td).appendTo($(search));
-                    }
-                    else {
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
-
-                        if (column.search()) {
-                            current.val(column.search());
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
                         }
-                    }
-                });
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                this.api().table().columns.adjust();
-            }
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+
+                    this.api().table().columns.adjust();
+                }
+            })
+
+             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                var payslip_id = parseInt($(this).parents('tr').attr('id'));
+
+                if ($(this).hasClass('print')) {
+                    if(payslip_id){
+                        $.ajax({
+                            url: '{!! route('admin.v2_pickups.rider_receiving.check_pickup') !!}',
+                            method: 'POST',
+                            data: {
+                                'rider_id': rider,
+                                'pickup_date': date,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 0){
+                                print(data.pickup_note_id);
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                            }
+                        });
+                    }
+                }
+            });
+
+
         });
     </script>
 @endsection

@@ -2284,7 +2284,7 @@ class AdminHumanResourseController extends Controller
 
     }
 
-    public function payslip_index(Request $request){
+    public function payslip_index1(Request $request){
 //        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
         return view('admin.human_resource.payslip.index');
     }
@@ -2501,7 +2501,6 @@ class AdminHumanResourseController extends Controller
                     $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(25)->toDateString();
 
                     foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
                         $payslip = new EmployeePayslip();
                         $payslip->payroll_month = $payroll_month;
                         $payslip->payroll_cut_off_date = $payroll_cut_off_date;
@@ -2587,8 +2586,101 @@ class AdminHumanResourseController extends Controller
 
         }
 
+    }
+
+    public function payslip_index(Request $request){
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $payslip = EmployeePayslip::find(2);
+
+        $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
+        $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
+        $html = '<!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Employee Requisition Form</title>
+
+                     <style>
+                      body {
+                        font-size: 0.95rem !important;
+                        font-weight: bold !important;
+                      }
+
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
+                      
+                      .table-borderless td, .table th {
+                        border: none;
+                     }
+                     td{
+                        color: #000;
+                     }
+                    </style>';
+
+        $html .= '</head>
+                  <body>
+                   
+                      <div class="table-responsive">
+                          <table class="table table-borderless mb-0">
+                          
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                       
+                                 <td class="text-right align-middle color secondary"><h1 class="d-block">SALARY SLIP</h1></td>
+                             </tr>
+                             <tr>
+                                <td class="text-left align-middle">Head Office (Karachi): </td>
+                                <td class="text-right align-middle"><b>Payroll Month: </b><u>'. $payroll_month .'</u></td>
+                             </tr>
+                             <tr>
+                                <td class="text-left align-middle">Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi.</td>
+                                <td class="text-right align-middle"><b>Payroll Cut Off Date: </b> <u>'. $payroll_cut_off_date .'</u></td>
+                                
+                             </tr>
+                             </tbody>
+                         </table>';
+
+        $html .= '<table class="table border">
+                    <tbody>
+                        <tr class="text-center color primary">
+                            <td class="border twice">Employee Information</td>
+                        </tr>
+                   </tbody>
+                         </table>';
 
 
+        $html .=  ' 
+                      </div>
+                      </body>
+                      </html>';
 
+        return $html;
     }
 }
