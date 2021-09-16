@@ -35,7 +35,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Telenor Bulk Revert.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            <a href="{{ asset('file/Bulk Revert.xlsx') }}?v=21_10_2020" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>
