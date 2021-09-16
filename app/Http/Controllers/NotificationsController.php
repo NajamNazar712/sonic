@@ -8353,6 +8353,10 @@ class NotificationsController extends Controller
                     
                     $to = $shipper->phone;
 
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    
                     self::sms($body, $to);
                 } 
                 else if ($id == 153)
@@ -8362,7 +8366,11 @@ class NotificationsController extends Controller
                     $shipper = $shipment->user;
                     
                     $to = $shipper->email;
-                    
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+
                     self::email($subject, $body, $to);
 
                 } 

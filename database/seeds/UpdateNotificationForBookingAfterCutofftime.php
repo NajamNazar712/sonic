@@ -12,9 +12,9 @@ class UpdateNotificationForBookingAfterCutofftime extends Seeder
     public function run()
     {
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-
+        DB::table('notifications')->where('id', 152)->delete();
         DB::table('notifications')->insert(array(
-            array('id' => 152, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booking After Cut Off Time', 'type_id' => 2, 'subject' => NULL , 'body' => 'You have booked shipment after cut off time so we cannot commit pick up today but will try to arrange it or it will be done tomorrow. Thanks', 'updated_by' => 3, 'status' => 1)
+            array('id' => 152, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Booking After Cut Off Time', 'type_id' => 2, 'subject' => NULL , 'body' => 'Dear [shipper_name], You have booked shipment after cut off time so we cannot commit pick up today but will try to arrange it or it will be done tomorrow. Thanks and Regards, Team TRAX', 'updated_by' => 3, 'status' => 1)
         ));
     }
 }
