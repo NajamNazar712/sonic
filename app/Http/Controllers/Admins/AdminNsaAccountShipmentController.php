@@ -1350,6 +1350,7 @@ class AdminNsaAccountShipmentController extends Controller
                     if ($nsa_shipments->exists()) {
                         $nsa_shipments = $nsa_shipments->get();
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
+                        $rider_id = $settings->setting_value;
                         $valid_shipments = array();
                         $now = Carbon::now()->startOfDay();
                         foreach ($nsa_shipments as $shipment) {
@@ -1508,7 +1509,7 @@ class AdminNsaAccountShipmentController extends Controller
                                             ShipmentsPaymentJourneyController::add($shipment_id, 4, 50);
                                         }
 
-                                        ShipmentsJourneyController::add($shipment_id, 12, 12, NULL, NULL, NULL,50);
+                                        ShipmentsJourneyController::add($shipment_id, 12, 12, NULL, NULL, NULL,50,NULL,NULL,0,$reverted_by,NULL);
 
                                         if($shipment->packaging_material_request == 1) {
                                             $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
@@ -1528,6 +1529,9 @@ class AdminNsaAccountShipmentController extends Controller
                                 }
                             }
 
+                        }
+                        else{
+                            return redirect()->back()->with('error', 'Status not allowed');
                         }
 
                     }
