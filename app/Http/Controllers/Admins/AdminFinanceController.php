@@ -5381,6 +5381,11 @@ class AdminFinanceController extends Controller
         $writer->save('php://output');
     }
 
+    public function done_payments_generate_report_to_email(){
+        $date = Carbon::today()->format('Y-m-d');
+        $response = AdminReportsEmailController::done_payment($date . ' 00:00:00');
+        return ['status' => 1, 'success' => ' Done Payment(s) Report Generated'];
+    }
     static public function generate_invoice() {
         $settings = GlobalSettings::where('type', 'due_date_days');
 
