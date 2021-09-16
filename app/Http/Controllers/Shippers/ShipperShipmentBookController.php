@@ -824,8 +824,9 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     NotificationsController::send(2, $shipment_id);
+                    $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
                     $now = Carbon::now()->format('H:i:s');
-                    $cutofftime = '13:00:00';
+                    $cutofftime = $settingsfortime->setting_value.":00:00";
                     if($now>$cutofftime)
                     {
                         NotificationsController::send(152, $shipment_id);
@@ -857,8 +858,9 @@ class ShipperShipmentBookController extends Controller
 
                     if ($msg_string != null) {
                         NotificationsController::send(32, $shipment_id, $msg_string);
+                        $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
                         $now = Carbon::now()->format('H:i:s');
-                        $cutofftime = '13:00:00';
+                        $cutofftime = $settingsfortime->setting_value.":00:00";
                         if($now>$cutofftime)
                         {
                             NotificationsController::send(152, $shipment_id);
@@ -3571,8 +3573,9 @@ class ShipperShipmentBookController extends Controller
             }
 
                 NotificationsController::send(2, $shipment_id);
+                $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
                 $now = Carbon::now()->format('H:i:s');
-                $cutofftime = '13:00:00';
+                $cutofftime = $settingsfortime->setting_value.":00:00";
                 if($now>$cutofftime)
                 {
                     NotificationsController::send(152, $shipment_id);
@@ -3604,8 +3607,9 @@ class ShipperShipmentBookController extends Controller
 
             if ($msg_string != null) {
                 NotificationsController::send(32, $shipment_id, $msg_string);
+                $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
                 $now = Carbon::now()->format('H:i:s');
-                $cutofftime = '13:00:00';
+                $cutofftime = $settingsfortime->setting_value.":00:00";
                 if($now>$cutofftime)
                 {
                     NotificationsController::send(152, $shipment_id);
