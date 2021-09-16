@@ -134,6 +134,7 @@
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
+                        <th class="border-primary border-darken-1">Remark</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -365,6 +366,8 @@
                             head.push('Vendor');
                             head.push('Order ID');
                             head.push('Status');
+                            head.push('Reason');
+                            head.push('Remark');
                             head.push('Payment Status');
                             head.push('Payment ID');
                             head.push('Service Type');
@@ -412,6 +415,8 @@
                                 row.push(values.vendor);
                                 row.push(values.order_id);
                                 row.push(values.current_status);
+                                row.push(values.reason);
+                                row.push(values.remark);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
                                 row.push(values.service_type);
@@ -509,6 +514,7 @@
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason' ,name:'reason', class: 'align-middle reason'},
+                    { data: 'remark' ,name:'remark', class: 'align-middle remark'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
