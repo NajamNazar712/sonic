@@ -136,6 +136,7 @@ class AdminTrackingController extends Controller
                     $details['order_information']['order_id'] = $shipment->order_id;
                     $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                     $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                    $details['order_information']['shipping_mode_id'] = $shipment->shipping_mode->id;
 
                     $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                     $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
@@ -865,6 +866,7 @@ class AdminTrackingController extends Controller
                             $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                         }
                         $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                        $details['order_information']['shipping_mode_id'] = $shipment->shipping_mode->id;
 
                         $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                         $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
@@ -1354,5 +1356,108 @@ class AdminTrackingController extends Controller
         }
 
         return $tracking;
+    }
+
+    public function pieces_print(Request $request){
+
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '<!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+                <title>Shipment Pieces Sticker Barcode</title>
+                <style type="text/css">
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
+                  body {
+                    background: none !important;
+                    color: #000 !important;
+                  }
+                  .pwrapper {margin: auto; page-break-inside: avoid;}
+                  .logo {margin-bottom:5px;}
+                  .logo img {margin-bottom:2.5px; filter: brightness(0);}
+                  .logo span {font-size: 8px;}
+                  .barcode span {font-size: 12px;}
+                  @media print {
+                   html, body {min-width:auto!important; min-height:auto!important;}
+                   @page {margin:0 !important; size: landscape;}
+                   .pwrapper {margin: auto; page-break-inside: avoid;}
+                   .logo span {font-size: 8px;}
+                   .barcode span {font-size: 12px;}
+                  }
+                </style>
+              </head>
+              <body>
+        ';
+
+        $barcodes = '';
+
+
+        $shipment = Shipment::find($request->shipment_id);
+
+        if($shipment->shipping_mode_id == 2 && $shipment->pieces > 1){
+            $total_pieces = $shipment->pieces;
+            $count = 1;
+            foreach ($shipment->shipment_pieces as $piece){
+                $barcodes .= '
+            <div class="pwrapper p-1">
+                <div class="row mb-2">
+                    <div class="col-5 logo text-left">
+                        <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline">
+                    </div>
+                    <div class="col-7 text-left">
+                        <span class="d-block"><strong>' . $shipment->tracking_number . '</strong></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                    
+                        <div class="col mb-1">
+                            <span class="label text-left">Origin: </span><span class="label text-right"><u>'. $shipment->pickup_address->city->name .'</u></span>
+                        </div>
+                        <div class="col">
+                            <span class="label text-left">Destination: </span> <span class="label text-right"><u>'. $shipment->consignee_city->name . '</u></span>
+                        </div>
+                      
+                    </div>
+                    <div class="col-6">
+                        <div class="barcode text-center">
+                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
+                        <span class="d-block "><strong>' . $piece->tracking_number . '</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row text-left">
+                    <div class="col">
+                        <label class="label"><strong>'. $count . '/' . $total_pieces .'</strong></label>
+                    </div>
+                </div>
+             
+            </div>
+        ';
+                $count++;
+            }
+        }
+
+
+
+        $html .= $barcodes;
+
+        $html .= '
+                <script>
+                  window.onload = function() {
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+        ';
+
+        return $html;
     }
 }

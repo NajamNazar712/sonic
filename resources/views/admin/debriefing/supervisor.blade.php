@@ -594,6 +594,7 @@
                                     html += '<th><strong>Tracking Number</strong></th>';
                                     html += '<th><strong>Status</strong></th>';
                                     html += '<th><strong>Reason</strong></th>';
+                                    html += '<th><strong>Number of Attempt(s)</strong></th>';
                                     html += '<th><strong></strong></th>';
                                     html += '</tr>';
                                     html += '</thead>';
@@ -607,6 +608,7 @@
                                             $row += '<td><strong><u><a href='+route+'?tracking_number='+ shipment.tracking_number+' target="_blank">'+shipment.tracking_number+'</a></u></strong></td>';
                                             $row += '<td>'+ shipment.status +'</td>';
                                             $row += '<td>'+ shipment.reason +'</td>';
+                                            $row += '<td>'+ shipment.reattempt +'</td>';
                                             $row += '<td><input type="checkbox" name="shipment_ids['+index+']" class="form-control sms_checkbox" checked></td>';
                                             $row += '</tr>';
                                             html += $row;
