@@ -113,6 +113,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
@@ -231,6 +232,7 @@
 														<th class="border-primary border-darken-1">Amount</th>
 														<th class="border-primary border-darken-1">Charges</th>
 														<th class="border-primary border-darken-1">GST</th>
+														<th class="border-primary border-darken-1">WHT</th>
 														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
 													</tr>
@@ -275,6 +277,13 @@
 												</div>
 
 												<div class="w-100 mt-2"></div>
+
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">WHT(3%)</label>
+														<input type="text" name="wht" class="form-control text-center wht" placeholder="With Holding Tax" readonly="readonly">
+													</div>
+												</div>
 
 												<div class="col-2">
 													<div class="form-group">
@@ -497,6 +506,7 @@
 							$('#make_payments #make_payments_form .total_deductable').val(0);
 							$('#make_payments #make_payments_form .total_payable').val(0);
 							$('#make_payments #make_payments_form .total_hold').val(0);
+							$('#make_payments #make_payments_form .wht').val(0);
 
 
 							$('#make_payments #make_payments_form button.make').prop('disabled', true);
@@ -624,6 +634,7 @@
 					{data:'total_amount', name: 'ppc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'ppc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'ppc.gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_wht', name: 'ppc.wht', class: 'align-middle text-center total_wht', orderable: false},
 					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
@@ -840,6 +851,7 @@
 					{data:'amount', name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
 					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
+					{data:'wht', name: 'pending_payment_shipments.wht', class: 'align-middle wht'},
 					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
 					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
 				],
@@ -1141,6 +1153,7 @@
 					$('#make_payments #make_payments_form .total_deductable').val(0);
 					$('#make_payments #make_payments_form .total_payable').val(0);
 					$('#make_payments #make_payments_form .total_hold').val(0);
+					$('#make_payments #make_payments_form .wht').val(0);
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
@@ -1173,6 +1186,7 @@
 				var total_deductable_selector = $('#make_payments #make_payments_form .total_deductable');
 				var total_payable_selector = $('#make_payments #make_payments_form .total_payable');
 				var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
+				var total_wht_selector = $('#make_payments #make_payments_form .wht');
 
 				if (index === -1) {
 					selected_rows_shipments.push(id);
@@ -1181,6 +1195,7 @@
 					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html().replace(/,/g, '')) : 0);
 					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html().replace(/,/g, '')) : 0);
 					var total_deductable = ((total_deductable_selector.val() != '') ? parseFloat(total_deductable_selector.val()) : 0) + ((parent.children('td.deductable').html() != '') ? parseFloat(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
+					var total_wht = ((total_wht_selector.val() != '') ? parseFloat(total_wht_selector.val()) : 0) + ((parent.children('td.wht').html() != '') ? parseFloat(parent.children('td.wht').html().replace(/,/g, '')) : 0);
 					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
@@ -1200,6 +1215,7 @@
 					total_charges_selector.val(parseFloat(total_charges).toFixed(2));
 					total_gst_selector.val(parseFloat(total_gst).toFixed(2));
 					total_deductable_selector.val(parseFloat(total_deductable).toFixed(2));
+					total_wht_selector.val(parseFloat(total_wht).toFixed(2));
 					total_payable_selector.val(parseFloat(total_payable).toFixed(2));
 					total_hold_selector.val(parseFloat(total_hold).toFixed(2));
 
@@ -1211,6 +1227,7 @@
 					total_charges_selector.val(0);
 					total_gst_selector.val(0);
 					total_deductable_selector.val(0);
+					total_wht_selector.val(0);
 					total_payable_selector.val(0);
 					total_hold_selector.val(parseFloat(initial_total_hold).toFixed(2));
 
