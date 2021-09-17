@@ -7411,7 +7411,8 @@ class NotificationsController extends Controller
                     }
                     $to = $retail_user->phone_no;
                     self::sms($body, $to, 1);
-                } else if ($id == 130) {
+                }
+                else if ($id == 130) {
                     $now = Carbon::now();
                     $month = $now->subMonth()->format('F');
 
@@ -7433,7 +7434,8 @@ class NotificationsController extends Controller
                     $to = ['mohsin.qamar@trax.pk', 'shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     self::email($subject, $body, $to);
-                } else if ($id == 133) {
+                }
+                else if ($id == 133) {
 
                     $data = $reference_1_id;
                     $erf = EmployeeRequisition::find($data['id']);
@@ -8310,6 +8312,29 @@ class NotificationsController extends Controller
                     $subject = ' Rider deactivation';
                     $to = ['Hasnain.saleem@trax.pk', 'Adnan.ahmed@trax.pk', 'rameel.khan@trax.pk', 'abdul.ahad@trax.pk', 'fabiha.shahid@trax.pk'];
                     self::email($subject, $body_updated, $to);
+                }
+                else if ($id == 156) {
+                    $now = Carbon::now();
+                    $month = $now->subMonth()->format('F');
+
+                    if (strpos($subject, '[month]') !== FALSE) {
+                        $subject = str_replace('[month]', $month, $subject);
+                    }
+
+                    if (strpos($subject, '[year]') !== FALSE) {
+                        $subject = str_replace('[year]', $now->year, $subject);
+                    }
+
+                    $file = Storage::disk('public')->url('/reports/revenue/sonic_monthly_revenue_by_delivery_return_report.xlsx');
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['mohsin.qamar@trax.pk', 'shafay.tariq@trax.pk', 'wajiha.majeed@trax.pk', 'fawad.ahmed@trax.pk'];
+
+                    self::email($subject, $body, $to);
                 }
             }
         }
