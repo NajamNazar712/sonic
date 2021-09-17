@@ -609,19 +609,22 @@
                                         shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
 
                                     }
+                                    if(details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1){
+                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
+                                    }
                                 }
                                 else {
                                     if(details.pod_file){
-                              
+
                                         shipment += '<button class="btn btn-secondary mr-sm-1 d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                         shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.pod_file + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> POD File</a>';
 
                                     }else{
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
-                                       if(details.order_information.shipping_mode == 2 && details.order_information.pieces > 1){
-                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print_pieces ml-1" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
-                                       }
-                                       }
+                                    }
+                                    if(details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1){
+                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
+                                    }
                                 }
 
                                 shipment += '</div>';
@@ -1283,6 +1286,43 @@
 
                 print(id, booking_type_id,shipment_type);
             });
+
+            $('#tracking').on('click', '.print_pieces', function () {
+                id = $(this).attr('id');
+                if(id){
+                    pieces_print(id);
+                }
+            });
+            function pieces_print(id) {
+
+                $.ajax({
+                    url: '{!! route('admin.tracking.pieces_print') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        var tab = window.open('', '_blank');
+
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
 
             $('#tracking').on('click', '.add_request', function () {
                 id = $(this).attr('id');
