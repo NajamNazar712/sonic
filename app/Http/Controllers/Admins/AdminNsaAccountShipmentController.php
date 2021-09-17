@@ -919,7 +919,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
                         if (count($nsa_accounts) > 0) {
-                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4, 13])->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                             }
                         } else {
@@ -1321,7 +1321,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
                         if (count($nsa_accounts) > 0) {
-                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id',20)->exists()) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->where('shipper_status_id',14)->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                             }
                         } else {
