@@ -296,9 +296,9 @@
                     {data: 'zone', name: 'employee_payslips.zone', class: 'align-middle zone'},
                     {data: 'joining_date', name: 'employee_payslips.joining_date', class: 'align-middle joining_date'},
                     {data: 'cnic', name: 'employee_payslips.cnic', class: 'align-middle cnic'},
-                    {data: 'iban', name: 'employee_payslips.iban', class: 'align-middle iban'},
                     {data: 'total_deduction', name: 'employee_payslips.total_deduction', class: 'align-middle total_deduction'},
                     {data: 'net_salary', name: 'employee_payslips.net_salary', class: 'align-middle net_salary'},
+                    {data: 'iban', name: 'employee_payslips.iban', class: 'align-middle iban'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {

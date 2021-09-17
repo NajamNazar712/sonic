@@ -2286,8 +2286,8 @@ class AdminHumanResourseController extends Controller
 
     }
 
-    public function payslip_index1(Request $request){
-//        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
+    public function payslip_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
         return view('admin.human_resource.payslip.index');
     }
 
