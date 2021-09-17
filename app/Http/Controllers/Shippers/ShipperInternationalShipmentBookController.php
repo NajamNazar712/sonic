@@ -272,6 +272,14 @@ class ShipperInternationalShipmentBookController extends Controller
 
         if ($msg_string != null) {
             NotificationsController::send(32, $shipment_id, $msg_string);
+            $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+            $now = Carbon::now()->format('H:i:s');
+            $cutofftime = $settingsfortime->setting_value.":00:00";
+            if($now>$cutofftime)
+            {
+                NotificationsController::send(152, $shipment_id);
+                NotificationsController::send(153, $shipment_id);
+            }
         }
         return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
     }
