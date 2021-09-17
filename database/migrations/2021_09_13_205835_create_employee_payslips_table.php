@@ -26,7 +26,7 @@ class CreateEmployeePayslipsTable extends Migration
             $table->date('joining_date');
             $table->date('confirmation_date')->nullable();
             $table->string('cnic');
-            $table->string('employee_status')->nullable();
+            $table->string('employee_status')->nullable()->index();
             $table->integer('payroll_days')->nullable();
             $table->integer('present_days')->nullable();
             $table->integer('pay_cut_days')->nullable();
@@ -72,7 +72,7 @@ class CreateEmployeePayslipsTable extends Migration
             $table->integer('medical_insurance')->nullable();
             $table->integer('total_deduction')->nullable();
             $table->integer('net_salary')->nullable();
-            $table->integer('iban')->nullable();
+            $table->string('iban')->nullable();
             $table->integer('added_by')->nullable()->index();
             $table->string('employee_type')->nullable()->index();
             $table->timestamps();
