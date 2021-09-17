@@ -100,6 +100,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\ShipperPaymentCalculation',
         'App\Console\Commands\ReturnSheetReceive',
         'App\Console\Commands\RiderDeactivateAutomatically',
+        'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
     ];
 
     /**
@@ -300,6 +301,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:report:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
