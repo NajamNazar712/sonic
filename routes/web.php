@@ -1555,6 +1555,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('track_v2', 'Admins\AdminTrackingController@track_v2')->name('track_v2');
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
+        Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
+
     });
 
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function() {
