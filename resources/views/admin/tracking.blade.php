@@ -588,6 +588,7 @@
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
 
@@ -617,7 +618,10 @@
 
                                     }else{
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
-                                    }
+                                       if(details.order_information.shipping_mode == 2 && details.order_information.pieces > 1){
+                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print_pieces ml-1" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
+                                       }
+                                       }
                                 }
 
                                 shipment += '</div>';
