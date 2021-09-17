@@ -700,7 +700,7 @@ class LastMileDebriefingController extends Controller
                     $shipments_data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('reference_1_id', $delivery_note_id)->latest()->first();
                     $reattempt = 0;
-                    $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 13)->count();
+                    $reattempt_count = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 5)->count();
                     if($reattempt_count > 0){
                         $reattempt = $reattempt_count;
                     }
