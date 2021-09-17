@@ -20,6 +20,7 @@ use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
+use Carbon\Carbon;
 
 class ProcessShipmentBookingDBPriority implements ShouldQueue
 {
