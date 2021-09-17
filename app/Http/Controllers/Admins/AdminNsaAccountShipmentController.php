@@ -1321,7 +1321,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
                         if (count($nsa_accounts) > 0) {
-                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)/*->whereIn('shipper_status_id', [2, 4])*/->exists()) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4])->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                             }
                         } else {
@@ -1421,8 +1421,8 @@ class AdminNsaAccountShipmentController extends Controller
                                             $station_deposit_note->save();
                                         }
 
-                                        $shipment->shipper_status_id = 12;
-                                        $shipment->consignee_status_id = 12;
+                                        $shipment->shipper_status_id = 13;
+                                        $shipment->consignee_status_id = 13;
 
                                         $shipment->payment_status_id = 4;
 
@@ -1509,7 +1509,7 @@ class AdminNsaAccountShipmentController extends Controller
                                             ShipmentsPaymentJourneyController::add($shipment_id, 4, 50);
                                         }
 
-                                        ShipmentsJourneyController::add($shipment_id, 12, 12, NULL, NULL, NULL,50,NULL,NULL,0,$reverted_by,NULL);
+                                        ShipmentsJourneyController::add($shipment_id, 13, 12, NULL, NULL, NULL,50,NULL,NULL,1,$reverted_by,NULL);
 
                                         if($shipment->packaging_material_request == 1) {
                                             $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
