@@ -16,7 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-
+use DB;
 class LeadManagementController extends Controller
 {
     public function __construct()
@@ -31,7 +31,7 @@ class LeadManagementController extends Controller
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $statuses = LeadStatus::all();
         $lead_statuses = LeadStatus::where('id', '!=', 1)->get();
-
+        $services = DB::table('service_list')->get();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
 
@@ -126,7 +126,7 @@ class LeadManagementController extends Controller
 
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(29);
-        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
+        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
     }
 
     public function list(Request $request){
