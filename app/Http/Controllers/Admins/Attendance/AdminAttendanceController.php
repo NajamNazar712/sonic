@@ -30,12 +30,12 @@ class AdminAttendanceController extends Controller
         if(session('role_id') == 1 && session('role_id') == 17){
             $cities = City::select('id','name')->get();
             $departments = AdminDepartment::select('id','name')->get();
-            $users = Admin::select('id','name')->get();
-            $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
-            $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
+            $users = Admin::where('status', 1)->select('id','name')->get();
+            $trax_id = Admin::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
+            $rider_trax_id = Rider::where('status', 1)->wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
-            $admin_cnic = Admin::wherenotnull('cnic')->pluck('cnic')->toArray();
-            $rider_cnic = Rider::wherenotnull('cnic')->pluck('cnic')->toArray();
+            $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+            $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
             $cnic = array_merge($admin_cnic, $rider_cnic);
             $riders = Rider::where('status', 1)->select('id', 'name')->get();
         }
@@ -49,8 +49,8 @@ class AdminAttendanceController extends Controller
             $trax_id = Admin::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $rider_trax_id = Rider::wherenotnull('trax_id')->pluck('trax_id')->toArray();
             $trax_ids = array_merge($trax_id, $rider_trax_id);
-            $admin_cnic = Admin::wherenotnull('cnic')->pluck('cnic')->toArray();
-            $rider_cnic = Rider::wherenotnull('cnic')->pluck('cnic')->toArray();
+            $admin_cnic = Admin::wherenotnull('cnic')->where('status', 1)->pluck('cnic')->toArray();
+            $rider_cnic = Rider::where('status', 1)->wherenotnull('cnic')->pluck('cnic')->toArray();
             $cnic = array_merge($admin_cnic, $rider_cnic);
             $riders = Rider::where('status', 1)->select('id', 'name')->get();
         }
@@ -76,7 +76,7 @@ class AdminAttendanceController extends Controller
         if(session('role_id') != 1 && session('role_id') != 17){
             $attendances->where('ad.id', session('department_id'));
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-        }
+        }*/
 
         $datatable = Datatables::of($attendances)
             ->editColumn('trax_id', function ($employee) {

@@ -1111,7 +1111,7 @@
                                         shipment += '<tr>';
                                         shipment += '<td>' + $count + '</td>';
                                         if (crm_request.status_id === 1 || crm_request.status_id === 5) {
-                                            shipment += '<td>' + crm_request.status + ' (' + crm_request.id + ')</td>';
+                                            shipment += '<td>' + crm_request.status + '(<a class="btn btn-sm btn-outline-info align-middle" href="' + complain_route + crm_request.id + '" target="_blank">(' + crm_request.id + ')</a>)</td>';
                                         }
                                         else {
                                             shipment += '<td>' + crm_request.status + '</td>';

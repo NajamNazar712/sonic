@@ -8098,19 +8098,19 @@ class NotificationsController extends Controller
                         if ($admin->exists()) {
                             $admin = $admin->first();
                             if ($admin->trax_id == 'Trax01099') {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/it_support';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/it_support';
                             } else if ($admin->trax_id == 'Trax04484') {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/finance';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/finance';
                             } else if ($admin->trax_id == 'Trax00043') {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/cs';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/cs';
                             } else if ($admin->trax_id === 'Trax02533') {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hr';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/hr';
                             } else if ($admin->trax_id === 'Trax03840') {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/administration';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/administration';
                             } else if ($admin->trax_id === $fnf->reporting_manager->trax_id) {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/rm';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/rm';
                             } else if ($admin->trax_id === $fnf->department_head->trax_id) {
-                                $route = 'https://sonic.test/admin/human_resource/fnf/1/hod_approval';
+                                $route = 'https://sonic.pk/admin/human_resource/fnf/'. $fnf_id .'/hod_approval';
                             }
 
                             $link = '<a href=' . $route . '>' . $route . '</a>';
@@ -8240,16 +8240,18 @@ class NotificationsController extends Controller
                     $to = array();
 
                     $sales_person = $sales_person = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
-
-                    $to[] = Admin::find($sales_person->admin_id)->email;
+                    if($sales_person){
+                        $to[] = Admin::find($sales_person->admin_id)->email;
+                    }
 
                     $kam = SaleTierTag::where('user_id', $shipper_id);
                     if ($kam->exists()) {
                         $kam = $kam->first();
                         $to[] = Admin::find($kam->kam)->email;
                     }
-
-                    self::email($subject, $body, $to);
+                    if(count($to) > 0){
+                        self::email($subject, $body, $to);
+                    }
 
                 }
                 else if ($id == 155) {

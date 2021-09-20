@@ -1028,7 +1028,7 @@ class Permission
             'settings.last_mile_cron.index' => 565,
 
             'settings.dhl_sync_time.index' => 581,
-            'settings.international_automation_user.index' => 581,
+            'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
 
