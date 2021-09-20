@@ -156,15 +156,14 @@ class ShipperDashboardController extends Controller
             ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
 
 
-            $shipper_payment = ShipperPayment::where('user_id', $shipper_id);
+            /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
             if($shipper_payment->exists()){
                 $shipper_payment = $shipper_payment->first();
             }
             else{
                 $shipper_payment = null;
-            }
-
-
+            }*/
+            $shipper_payment = null;
             return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
         }
     }

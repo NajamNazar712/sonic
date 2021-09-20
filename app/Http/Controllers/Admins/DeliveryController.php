@@ -681,20 +681,6 @@ class DeliveryController extends Controller
     }
 
     public function create_delivery_note(Request $request){
-        $shipments = explode(',',$request->shipment_ids);
-        $open_box_ids = explode(',',$request->open_box_ids);
-        $notifications = explode(',',$request->notification_ids);
-        $rider_informations = explode(',',$request->rider_info_ids);
-        if(Notification::where('id', 40)->where('status', 1)->exists()){
-            $password = rand(10001,99999);
-        }else{
-            $password = NULL;
-        }
-        $order = false;
-        if($request->has('order_checkbox')){
-            $order = true;
-        }
-
         if($request->hub_id == ''){
             return redirect()->back()->with('error', 'Hub not found!');
         }
@@ -706,31 +692,50 @@ class DeliveryController extends Controller
         if($request->selected_rider_id == ''){
             return redirect()->back()->with('error', 'Rider not selected!');
         }
-        $admin = Auth::id();
+
+        $shipments = explode(',',$request->shipment_ids);
+
+        if (count($shipments) == 0) {
+            return redirect()->back()->with('error', 'Shipments not entered!');
+        }
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15, 49, 55, 59);
 
-        $valid_shipments = array();
+        $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
 
-        $shipments_count = 0;
-        $total_cod_amount = 0;
-        foreach ($shipments as $shipment) {
-            if (!in_array($shipment, $valid_shipments)) {
-                $shipment_details = Shipment::find($shipment);
-                if($shipment_details) {
-                    if (in_array($shipment_details->shipper_status_id, $pending_status)) {
-                        $valid_shipments[] = $shipment;
-                        $shipments_count++;
+        $shipments_count = count($valid_shipments);
 
-                        if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
-                            $total_cod_amount += $shipment_details->amount;
-                        }
-                    }
-                }
-            }
-        }
-        $normal_rider = TRUE;
         if ($shipments_count != 0) {
+            $valid_shipments = $valid_shipments->toArray();
+
+            Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+
+            $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function($query) {
+                $query->where('booking_type_id', '!=', 4)
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '=', 4)
+                    ->where('charges_mode_id', '=', 2);
+                });
+            })->sum('amount');
+
+            $open_box_ids = explode(',',$request->open_box_ids);
+            $notifications = explode(',',$request->notification_ids);
+            $rider_informations = explode(',',$request->rider_info_ids);
+            if(Notification::where('id', 40)->where('status', 1)->exists()){
+                $password = rand(10001,99999);
+            }else{
+                $password = NULL;
+            }
+            $order = false;
+            if($request->has('order_checkbox')){
+                $order = true;
+            }
+
+
+            $admin = Auth::id();
+
+            $normal_rider = TRUE;
+
             $rider = Rider::find($request->selected_rider_id);
             if($rider->special_rider){
                 $note = DeliveryNote::create([
@@ -780,9 +785,6 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
-                    $shipment_data = Shipment::find($shipment);
-                    $shipment_data->shipper_status_id = 5;
-                    $shipment_data->consignee_status_id = 5;
                     if(in_array($shipment, $open_box_ids)){
                         $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
                         if($shipment_detail){
@@ -790,12 +792,12 @@ class DeliveryController extends Controller
                             $shipment_detail->save();
                         }
 
+                        $shipment_data = Shipment::find($shipment);
                         $shipment_data->open_box = 1;
+                        $shipment_data->save();
+
                         ShipmentOpenBoxJourneyController::add($shipment,3,Auth::id());
                     }
-                    $shipment_data->save();
-
-                    // Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
 
                     $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
@@ -1078,8 +1080,21 @@ class DeliveryController extends Controller
 
     public function receive_delivery_update(Request $request, $id)
     {
-        $service_type = BookingType::all();
-        return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
+        $delivery_note = DeliveryNote::find($id);
+        if($delivery_note){
+            if(($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions')))){
+                if(DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count() == 0){
+                    $service_type = BookingType::all();
+                    return view('admin.delivery.receive.update')->with(['delivery_note_id' => $id, 'service_type' => $service_type]);
+                }
+                else{
+                    return redirect()->route('admin.access_denied');
+                }
+
+            }
+            return redirect()->route('admin.access_denied');
+        }
+        return redirect()->route('admin.access_denied');
     }
 
     public function receive_delivery_notes_list(Request $request, $id)
@@ -4347,8 +4362,8 @@ class DeliveryController extends Controller
                 $deposit_adjustment_amount = $sdn->sdn_deposit_amount + $sdn->adjustment_amount;
                 $difference_amount = 0;
 
-                $defference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
-                return number_format($defference_amount);
+                $difference_amount = $sdn->sdn_amount - $deposit_adjustment_amount;
+                return number_format($difference_amount);
             })
             ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
                 return $query->where('station_deposit_notes.id', '=', $keyword);
@@ -6955,19 +6970,19 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
     public function upload_pod(Request $request){
         
-                    $image = $request->file('pod_file');
-                    $extension = $image->getClientOriginalExtension();
-                    $random = rand(1000, 100000);
-                    $now = Carbon::now();
-                    $time = $now->year . '_' . $now->month;
-                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                    $image->move(public_path('uploads/pod_images'), $generated_image_name);
-                    $pod_image = new PODImage();
-                    $pod_image->pod_file = $generated_image_name;
-                    $pod_image->added_by = Auth::id();
-                    $pod_image->shipment_id = $request->shipment_id;
-                    $pod_image->save();
-                    return redirect()->back()->with('success', 'POD File Uploaded');
+        $image = $request->file('pod_file');
+        $extension = $image->getClientOriginalExtension();
+        $random = rand(1000, 100000);
+        $now = Carbon::now();
+        $time = $now->year . '_' . $now->month;
+        $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
+        $image->move(public_path('uploads/pod_images'), $generated_image_name);
+        $pod_image = new PODImage();
+        $pod_image->pod_file = $generated_image_name;
+        $pod_image->added_by = Auth::id();
+        $pod_image->shipment_id = $request->shipment_id;
+        $pod_image->save();
+        return redirect()->back()->with('success', 'POD File Uploaded');
     }
     public function cash_collection_upload_receipt(Request $request)
     {
@@ -7005,15 +7020,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             if($rider){
                 $otp = mt_rand(100000, 999999);
                 $rider->delivery_note_otp = $otp;
+                $rider->otp_date = Carbon::now();
                 $rider->save();
                 NotificationsController::send(144, $rider, $otp);
                 return response()->json(['status' => 1]);
-
             }
             else{
                 return response()->json(['status' => 0, 'error' => 'Rider not found!']);
             }
-
         }
         return response()->json(['status' => 1]);
     }
@@ -7024,10 +7038,16 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
 
         if($environment == 'production' || $environment == 'staging') {
             $rider = Rider::find($request->rider);
-            if ($rider->delivery_note_otp == $request->otp) {
-                return response()->json(['status' => 1]);
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+            if($rider){
+                if ($rider->delivery_note_otp == $request->otp) {
+                    return response()->json(['status' => 1]);
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Invalid OTP']);
+                }
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Rider not selected!']);
+
             }
         }
         else{

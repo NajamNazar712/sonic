@@ -357,8 +357,7 @@ class UserManagementController extends Controller
     public function role_list(Request $request) {
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
         ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-        ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by')
-        ->where('admin_roles.id', '!=', 1);
+        ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
 
         $datatables = Datatables::of($roles)
         ->addColumn('action', function($role) {
@@ -380,52 +379,42 @@ class UserManagementController extends Controller
     }
 
     public function role_add_index() {
-        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        $departments = AdminDepartment::get(['id', 'name']);
         $modules = Module::with('permissions')->get();
 
         return view('admin.user_management.role.add.index')->with(['departments' => $departments, 'modules' => $modules]);
     }
 
     public function role_add_store(Request $request) {
-        if ($request->input('department_id') != 1) {
-            $admin_role = new AdminRole();
+        $admin_role = new AdminRole();
 
-            $admin_role->name = $request->input('name');
-            $admin_role->department_id = $request->input('department_id');
-            $admin_role->updated_by = Auth::id();
+        $admin_role->name = $request->input('name');
+        $admin_role->department_id = $request->input('department_id');
+        $admin_role->updated_by = Auth::id();
 
-            $admin_role->save();
+        $admin_role->save();
 
-            if ($request->has('permission_ids')) {
-                foreach($request->input('permission_ids') as $permission_id) {
-                    $admin_role_module_permission = new AdminRoleModulePermission();
+        if ($request->has('permission_ids')) {
+            foreach($request->input('permission_ids') as $permission_id) {
+                $admin_role_module_permission = new AdminRoleModulePermission();
 
-                    $admin_role_module_permission->role_id = $admin_role->id;
-                    $admin_role_module_permission->permission_id = $permission_id;
+                $admin_role_module_permission->role_id = $admin_role->id;
+                $admin_role_module_permission->permission_id = $permission_id;
 
-                    $admin_role_module_permission->save();
-                }
+                $admin_role_module_permission->save();
             }
+        }
 
-            return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been added!']);
-        }
-        else {
-            return redirect()->route('admin.access_denied');
-        }
+        return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been added!']);
     }
 
     public function role_update_index($id) {
-        $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
+        $departments = AdminDepartment::get(['id', 'name']);
         $modules = Module::with('permissions')->get();
         $role = AdminRole::find($id);
         $permissions = $role->module_permissions->pluck('permission_id')->toArray();
-        if ($role->id != 1) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),229,1);
-            return view('admin.user_management.role.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
-        }
-        else {
-            return redirect()->route('admin.access_denied');
-        }
+        ActivityTrailController::createActivityTrailLog(Auth::id(),229,1);
+        return view('admin.user_management.role.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
     }
 
     public function role_update_store(Request $request, $id) {
@@ -522,7 +511,7 @@ class UserManagementController extends Controller
         }
         $riders = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('cities as c','cities.hub_id','=','c.id')
-            ->select('riders.id as id', 'riders.name as name', 'riders.phone as phone_no', 'riders.delivery_note_otp as otp', 'c.name as hub')
+            ->select('riders.id as id', 'riders.name as name','riders.otp_date as otp_date', 'riders.phone as phone_no', 'riders.delivery_note_otp as otp', 'c.name as hub')
             ->where('riders.status', 1)
             ->whereNotNull('delivery_note_otp');
         $datatable = Datatables::of($riders);
