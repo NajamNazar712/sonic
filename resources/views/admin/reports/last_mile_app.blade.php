@@ -23,6 +23,7 @@
                                     </select>
                                 </fieldset>
                             </div>
+
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
                                     <select name="search_rider_cat" id="search_rider_cat" class="form-control select2">
@@ -51,7 +52,6 @@
                                 </fieldset>
                             </div>
 
-                            
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">

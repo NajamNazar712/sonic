@@ -29,6 +29,7 @@ use App\Http\Models\InternationalRatesStatus;
 use App\Http\Models\InternationalRatesWeightCharges;
 use App\Http\Models\InternationalStandardDhlRate;
 use App\Http\Models\InternationalUserRate;
+use App\Http\Models\InternationalUsersCreditLimit;
 use App\Http\Models\Rates\InternationalEconomyRate;
 use App\Http\Models\Rates\InternationalEconomyRateStatus;
 use App\Http\Models\Shipment;
@@ -738,6 +739,10 @@ class ShipmentChargesController extends Controller
                 $international_economy_rate = $international_economy_rate->first();
                 $result = self::calculate_international_economic_weight($shipment->actual_weight,$international_economy_rate);
                 $dhl_check = false;
+
+                if($result){
+                    self::international_credit_usage($shipment->user_id, $result['weight_charges']);
+                }
             }
 
 
@@ -790,6 +795,10 @@ class ShipmentChargesController extends Controller
                                 break;
                         }
                         $result = self::calculate_international_weight($margin, $shipment->actual_weight, $international_zone->zone_name);
+
+                        if($result){
+                            self::international_credit_usage($shipment->user_id, $result['weight_charges']);
+                        }
                     } else {
                         $result = false;
                     }
@@ -2539,8 +2548,18 @@ class ShipmentChargesController extends Controller
                 $shipment->fuel_surcharge = $result['fuel_surcharge'];
 
                 $shipment->save();
+                self::international_credit_usage($shipment->user_id, $result['fuel_surcharge']);
             }
         }
 
+    }
+
+    static public function international_credit_usage($user_id, $amount){
+        $credit_user = InternationalUsersCreditLimit::where('user_id', $user_id);
+        if($credit_user->exists()){
+            $credit_user = $credit_user->first();
+            $credit_user->limit_usage = $credit_user->limit_usage + $amount;
+            $credit_user->save();
+        }
     }
 }

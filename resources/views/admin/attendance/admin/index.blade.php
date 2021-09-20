@@ -62,6 +62,7 @@
                                                 </select>
                                             </fieldset>
                                         </div>
+                                        @if(session('role_id') == 1)
                                         <div class="col-4 mt-1">
                                             <fieldset class="form-group">
                                                 <select name="search_cnic" id="search_cnic" class="form-control select2">
@@ -71,7 +72,7 @@
                                                 </select>
                                             </fieldset>
                                         </div>
-
+                                        @endif
                                         <div class="col-5 mt-1">
                                             <div class="form-group input-group ">
                                                 <div class="input-group-prepend">
