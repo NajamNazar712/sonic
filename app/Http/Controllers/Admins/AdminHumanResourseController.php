@@ -724,7 +724,7 @@ class AdminHumanResourseController extends Controller
                             $admin->role_id = $employee->designation->role_id ?? 79;
                             $admin->default_hub_id = $employee->city_id;
                             $admin->password = bcrypt($employee->pin);
-                            $admin->designation = $employee->designation->name;
+                            $admin->designation = $employee->designation->name ?? '';
                             $admin->designation_id = $employee->designation_id;
 
                             if($employee->status_id == 2)
