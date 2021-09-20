@@ -2489,7 +2489,7 @@ class AdminHumanResourseController extends Controller
             'recovery' => 'Recovery',
             'auction_sale' => 'Auction Sale',
             'penalty' => 'Penalty',
-            'other_deductions' => 'Others Deduction',
+            'others_deduction' => 'Others Deduction',
             'van_deduction' => 'Van Deduction',
             'medical_insurance' => 'Medical Insurance',
             'total_deduction' => 'Total Deduction',
@@ -2558,7 +2558,7 @@ class AdminHumanResourseController extends Controller
             'recovery' => ['nullable', 'integer'],
             'auction_sale' => ['nullable', 'integer'],
             'penalty' => ['nullable', 'integer'],
-            'other_deductions' => ['nullable', 'integer'],
+            'others_deduction' => ['nullable', 'integer'],
             'van_deduction' => ['nullable', 'integer'],
             'medical_insurance' => ['nullable', 'integer'],
             'total_deduction' => ['nullable', 'integer'],
@@ -2568,7 +2568,7 @@ class AdminHumanResourseController extends Controller
         ];
 
 
-        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'other_deductions', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
+        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'others_deduction', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
         if ($file = $request->file('payslip')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -2681,7 +2681,7 @@ class AdminHumanResourseController extends Controller
                         $payslip->recovery = trim($row['recovery']);
                         $payslip->auction_sale = trim($row['auction_sale']);
                         $payslip->penalty = trim($row['penalty']);
-                        $payslip->other_deductions = trim($row['other_deductions']);
+                        $payslip->others_deduction = trim($row['others_deduction']);
                         $payslip->van_deduction = trim($row['van_deduction']);
                         $payslip->medical_insurance = trim($row['medical_insurance']);
                         $payslip->total_deduction = trim($row['total_deduction']);
