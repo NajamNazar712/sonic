@@ -726,39 +726,53 @@ class LastMileDebriefingController extends Controller
 
         $delivery_note_id = $request->delivery_note_id;
         $shipment_ids = $request->shipment_ids;
+        $updated_shipments = FALSE;
         if(count($shipment_ids) > 0){
             foreach ($shipment_ids as $shipment_id => $status){
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('reference_1_id', $delivery_note_id)->latest()->first();
+
+
                 $bot_admin_id = NULL;
                 if ($shipment_journey) {
+                    $shipment_status = Shipment::find($shipment_id)->shipper_status_id;
+
+                    if($shipment_status != $shipment_journey->shipper_status_id){
+                        continue;
+                    }
+
                     $bot_sms = GlobalSettings::where('type', 'bot_sms_id')->first();
 
                     if($bot_sms){
                         $bot_admin_id = $bot_sms->setting_value;
                     }
                     ShipmentsJourneyController::add($shipment_id, $shipment_journey->shipper_status_id, $shipment_journey->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, $bot_admin_id, $delivery_note_id, NULL,1);
+
+                    $agent_call_monitoring = AgentCallMonitoring::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
+                    if($agent_call_monitoring->exists()){
+                        $agent_call_monitoring = $agent_call_monitoring->first();
+                        $agent_call_monitoring->agent_id = $bot_admin_id;
+                        $agent_call_monitoring->completed = 1;
+                        $agent_call_monitoring->save();
+                    }
+                    else{
+                        $agent_call_monitoring = new AgentCallMonitoring();
+                        $agent_call_monitoring->agent_id = $bot_admin_id;
+                        $agent_call_monitoring->shipment_id = $shipment_id;
+                        $agent_call_monitoring->delivery_note_id = $delivery_note_id;
+                        $agent_call_monitoring->completed = 1;
+                        $agent_call_monitoring->save();
+                    }
+                    $updated_shipments = TRUE;
+                    NotificationsController::send(145, $shipment_id, $delivery_note_id);
                 }
 
-                $agent_call_monitoring = AgentCallMonitoring::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note_id);
-                if($agent_call_monitoring->exists()){
-                    $agent_call_monitoring = $agent_call_monitoring->first();
-                    $agent_call_monitoring->agent_id = $bot_admin_id;
-                    $agent_call_monitoring->completed = 1;
-                    $agent_call_monitoring->save();
-                }
-                else{
-                    $agent_call_monitoring = new AgentCallMonitoring();
-                    $agent_call_monitoring->agent_id = $bot_admin_id;
-                    $agent_call_monitoring->shipment_id = $shipment_id;
-                    $agent_call_monitoring->delivery_note_id = $delivery_note_id;
-                    $agent_call_monitoring->completed = 1;
-                    $agent_call_monitoring->save();
-                }
-
-
-                NotificationsController::send(145, $shipment_id, $delivery_note_id);
             }
-            return redirect()->back()->with('success', 'SMS send successfully!');
+            if($updated_shipments){
+                return redirect()->back()->with('success', 'SMS send successfully!');
+            }
+            else{
+                return redirect()->back()->with('error', 'SMS could not send!');
+            }
         }
         return redirect()->back()->with('error', 'Something went wrong, try again!');
 
