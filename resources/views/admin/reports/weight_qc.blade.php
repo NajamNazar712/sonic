@@ -101,7 +101,7 @@
                             <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
                             <th class="border-primary border-darken-1">Arrival Weight (B)</th>
-                            <th class="border-primary border-darken-1">Difference (A-B)</th>
+                            <th class="border-primary border-darken-1">Difference (B-A)</th>
                             <th class="border-primary border-darken-1">Weighted As</th>
                         </tr>
                         </thead>
@@ -257,7 +257,7 @@
                             head.push('Arrival Date');
                             head.push('Weight Input by Shipper (A)');
                             head.push('Arrival Weight (B)');
-                            head.push('Difference (A-B)');
+                            head.push('Difference (B-A)');
                             head.push('Weighted As');
 
 

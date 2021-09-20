@@ -102,6 +102,20 @@
 										</div>
 									</div>
 
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="shift_id" class="select2" id="shift_list" data-rule-required="true" data-msg-required="Employee Shift is required">
+												@foreach($shifts as $shift)
+													@if ($shift->id == $user->shift_id)
+														<option value="{{$shift->id}}" selected="selected"> {{$shift->name}}</option>
+													@else
+														<option value="{{$shift->id}}"> {{$shift->name}}</option>
+													@endif
+												@endforeach
+											</select>
+										</div>
+									</div>
+
 									<div class="col-12">
 										<h4 class="form-section mb-2">Hubs</h4>
 										<div class=" text-center mt-2">
@@ -166,7 +180,19 @@
 				});
 			@endif
 
-			@if ($user->designation_id === null)
+			@if ($user->shift_id === null)
+			$('#user_form #shift_list').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Working Shift*'
+			});
+			@else
+			$('#user_form #shift_list').select2({
+				width: '100%',
+				placeholder: 'Working Shift*'
+			});
+			@endif
+
+@if ($user->designation_id === null)
 				$('#user_form #designation_id').prepend('<option value="" selected="selected"></option>').select2({
 					width: '100%',
 					placeholder: 'Select Designation'
