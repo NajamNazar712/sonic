@@ -374,6 +374,9 @@ class Permission
             'finance.outstanding_shipments.walk_in_list' => 167,
             'finance.outstanding_shipments.walk_in_resolved' => 168,
 
+
+            'finance.invoices.slip' => 589,
+
             'finance.make_payments_pickup_wise.index' => 396,
             'finance.retail.make_payments.index' => 454,
             'finance.retail.make_payments.list' => 454,
@@ -1025,11 +1028,11 @@ class Permission
             'settings.last_mile_cron.index' => 565,
 
             'settings.dhl_sync_time.index' => 581,
-            'settings.international_automation_user.index' => 581,
+            'settings.international_automation_user.index' => 582,
 
             'settings.ccd_booking.index' => 558,
 
-
+            'human_resource.payslip.index' => 596,
 
 
         ],

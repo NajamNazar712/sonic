@@ -724,93 +724,112 @@
 
             function reassign_rider(){
                 var rider = $('#riders').val();
-                console.log(rider);
-                swal({
-                    text: 'Are you sure, you want to Reassign rider?',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '{!! route('admin.delivery.receive.reassign_rider') !!}',
-                            method: 'post',
-                            data: {
-                                '_token': '{{ csrf_token() }}',
-                                'rider': rider,
-                                'delivery_note_id': $('#delivery_note_id').val()
+                if(rider){
+                    swal({
+                        text: 'Are you sure, you want to Reassign rider?',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        })
-                            .done(function(data) {
-                                if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function(confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url: '{!! route('admin.delivery.receive.reassign_rider') !!}',
+                                method: 'post',
+                                data: {
+                                    '_token': '{{ csrf_token() }}',
+                                    'rider': rider,
+                                    'delivery_note_id': $('#delivery_note_id').val()
                                 }
-                                else {
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                                table.draw(true);
-                                $('#reassign_modal').modal('hide');
-                            });
-                    }
-                });
+                            })
+                                .done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    table.draw(true);
+                                    $('#reassign_modal').modal('hide');
+                                });
+                        }
+                    });
+                }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
             }
 
             function otp_generation(){
-                $('#OtpModal').modal('show');
                 var rider = $('#riders').val();
-                $.ajax({
-                    url: '{!! route('admin.delivery.note.otp.generate') !!}',
-                    method: 'POST',
-                    data: {
-                        'rider': rider,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#otp_input').focus();
-                });
+                if(rider){
+                    $('#OtpModal').modal('show');
+                    $.ajax({
+                        url: '{!! route('admin.delivery.note.otp.generate') !!}',
+                        method: 'POST',
+                        data: {
+                            'rider': rider,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        $('#otp_input').focus();
+                    });
+                }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
             }
 
             function otp_verification() {
                 var otp = $('#otp_input').val();
                 var rider = $('#riders').val();
-                if (otp.length == 6) {
-                    $.ajax({
-                        url: '{!! route('admin.delivery.note.otp.verify') !!}',
-                        type: 'POST',
-                        data: {
-                            'rider': rider,
-                            'otp': otp,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        $('#otp_input').val('');
-                        $('#otp_submit').attr('disabled', true);
-                        if (data.status === 0) {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        } else {
-                            $('#OtpModal').modal('hide');
-                            reassign_rider();
-                        }
-                    });
+                if(rider){
+                    if (otp.length == 6) {
+                        $.ajax({
+                            url: '{!! route('admin.delivery.note.otp.verify') !!}',
+                            type: 'POST',
+                            data: {
+                                'rider': rider,
+                                'otp': otp,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            $('#otp_input').val('');
+                            $('#otp_submit').attr('disabled', true);
+                            if (data.status === 0) {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } else {
+                                $('#OtpModal').modal('hide');
+                                reassign_rider();
+                            }
+                        });
+                    }
                 }
+                else{
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
             }
 
             $('#reassign_modal').on('hide.bs.modal', function (e) {
