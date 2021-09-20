@@ -727,6 +727,14 @@ class AdminHumanResourseController extends Controller
                             $admin->designation = $employee->designation->name;
                             $admin->designation_id = $employee->designation_id;
 
+                            if($employee->status_id == 2)
+                            {
+                                $admin->status = 0;
+                            }
+                            else{
+                                $admin->status = 1;
+                            }
+
                             $admin->trax_id = $employee->trax_id;
                             $admin->employee_id = $employee->id;
 
