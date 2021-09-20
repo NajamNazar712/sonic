@@ -452,6 +452,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
+                            head.push('Total Attempt');
                             head.push('Payment Status');
                             head.push('Service Type');
                             head.push('Arrival Date');
@@ -476,6 +477,7 @@
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
+                                row.push(values.total_attempt);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);

@@ -369,6 +369,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
+                            head.push('Total Attempt');
                             head.push('Payment Status');
                             head.push('Payment ID');
                             head.push('Service Type');
@@ -418,6 +419,7 @@
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
+                                row.push(values.total_attempt);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
                                 row.push(values.service_type);

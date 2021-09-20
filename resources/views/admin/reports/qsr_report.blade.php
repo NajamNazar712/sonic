@@ -302,6 +302,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
+                            head.push('Total Attempt');
                             head.push('Order ID');
                             head.push('Account No.');
                             head.push('Shipper');
@@ -329,6 +330,7 @@
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remark);
+                                row.push(values.total_attempt);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
                                 row.push(values.account_no);
