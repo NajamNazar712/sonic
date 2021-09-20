@@ -313,7 +313,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'International Standard DHL Rates',
+                        title: 'Employee Payslips',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
