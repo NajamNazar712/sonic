@@ -2840,7 +2840,7 @@ class AdminFinanceController extends Controller
 
     }
 
-    public static function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
+    private static function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
         if ($payment_type == 0) {
             $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
 
@@ -2939,7 +2939,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    public static function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL) {
+    private static function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL) {
         if ($payment_shipment_id) {
             if ($payment_type == 0) {
                 $payment_shipment = PendingPaymentShipment::find($payment_shipment_id);
