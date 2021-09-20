@@ -57,7 +57,7 @@
                                                 <i class="icon-grid text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_leads">{{$leads['total']}} (100%)</h3>
+                                                <h3 class="text-white"><p id="total_leads" class="d-inline">{{$leads['total']}}</p> (100%)</h3>
                                                 <span>Total Leads</span>
                                             </div>
                                         </div>
@@ -74,7 +74,7 @@
                                                 <i class="icon-flag text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_leads">{{$leads['received']}} ({{$leads['received_percentage']}}%)</h3>
+                                                <h3 class="text-white"><p id="received_leads" class="d-inline">{{$leads['received']}}</p> (<p id="received_percentage" class="d-inline">{{$leads['received_percentage']}}</p>%)</h3>
                                                 <span>Leads Received</span>
                                             </div>
                                         </div>
@@ -91,7 +91,7 @@
                                                 <i class="icon-clock text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="in_process">{{$leads['in_process']}} ({{$leads['in_process_percentage']}}%)</h3>
+                                                <h3 class="text-white"><p id="in_process" class="d-inline">{{$leads['in_process']}}</p> (<p id="in_process_percentage" class="d-inline">{{$leads['in_process_percentage']}}</p>%)</h3>
                                                 <span>In Process</span>
                                             </div>
                                         </div>
@@ -110,7 +110,7 @@
                                             <i class="icon-close text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="pending_for_activation">{{$leads['dead_leads']}} ({{$leads['dead_leads_percentage']}}%)</h3>
+                                            <h3 class="text-white"><p id="dead_leads" class="d-inline">{{$leads['dead_leads']}}</p> (<p id="dead_percentage" class="d-inline">{{$leads['dead_leads_percentage']}}</p>%)</h3>
                                             <span>Dead Leads</span>
                                         </div>
                                     </div>
@@ -127,7 +127,7 @@
                                             <i class="icon-check text-white font-large-2 float-left"></i>
                                         </div>
                                         <div class="media-body text-white text-right">
-                                            <h3 class="text-white" id="mature_leads">{{$leads['accounts_activated']}} ({{$leads['accounts_activated_percentage']}}%)</h3>
+                                            <h3 class="text-white"><p id="active_leads" class="d-inline">{{$leads['accounts_activated']}}</p> (<p id="active_percentage" class="d-inline">{{$leads['accounts_activated_percentage']}}</p>%)</h3>
                                             <span>Accounts Activated</span>
                                         </div>
                                     </div>
@@ -145,7 +145,7 @@
                                                 <i class="la la-calculator text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="ratio">{{ $leads['dead_leads_ratio']}}</h3>
+                                                <h3 class="text-white" id="dead_ratio">{{ $leads['dead_leads_ratio']}}</h3>
                                                 <span>Dead Lead Time Ratio</span>
                                             </div>
                                         </div>
@@ -162,7 +162,7 @@
                                                 <i class="la la-calculator text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="ratio">{{ $leads['active_leads_ratio']}}</h3>
+                                                <h3 class="text-white" id="active_ratio">{{ $leads['active_leads_ratio']}}</h3>
                                                 <span>Active Lead Time Ratio</span>
                                             </div>
                                         </div>
@@ -1124,10 +1124,16 @@
                     }).done(function (data) {
                         if(data.status === 1){
                             $('#total_leads').text(data.leads.total);
+                            $('#received_leads').text(data.leads.received);
                             $('#in_process').text(data.leads.in_process);
-                            $('#mature_leads').text(data.leads.mature_leads);
-                            $('#pending_for_activation').text(data.leads.pending_for_activation);
-                            $('#ratio').text(data.leads.ratio);
+                            $('#dead_leads').text(data.leads.dead_leads);
+                            $('#active_leads').text(data.leads.accounts_activated);
+                            $('#dead_ratio').text(data.leads.dead_leads_ratio);
+                            $('#active_ratio').text(data.leads.active_leads_ratio);
+                            $('p#received_percentage').text(data.leads.received_percentage);
+                            $('p#in_process_percentage').text(data.leads.in_process_percentage);
+                            $('p#dead_percentage').text(data.leads.dead_leads_percentage);
+                            $('p#active_percentage').text(data.leads.accounts_activated_percentage);
                         }
                     });
                     $('#search_statistics_div').val(null);

@@ -240,7 +240,7 @@
             $.validator.addMethod(
                 "seal_number",
                 function(value,element){
-                    if(element.value.length == 6 || element.value.length == 11 ||  element.value.length == 12 ||  element.value.length == 13){
+                    if(element.value.length == 6 || element.value.length == 11 ||  element.value.length == 12 ||  element.value.length == 13 || element.value.length == 7){
                         return true;
                     } else {
                         return false;

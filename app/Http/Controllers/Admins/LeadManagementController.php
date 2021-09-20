@@ -73,7 +73,7 @@ class LeadManagementController extends Controller
                         $last_date = Carbon::parse($last_log->created_at);
                         $dead_days = $dead_days + $last_date->diffInDays($ratio_lead->requested_date);
                     }
-                    $dead_days++;
+                    $dead_count++;
                 }
                 if(in_array($ratio_lead->status_id, [12])){
                     $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [12])->orderBy('id', 'DESC');
@@ -82,11 +82,11 @@ class LeadManagementController extends Controller
                         $last_date = Carbon::parse($last_log->created_at);
                         $active_days = $active_days + $last_date->diffInDays($ratio_lead->requested_date);
                     }
-                    $active_days++;
+                    $active_count++;
                 }
             }
             if($dead_count > 0){
-                $leads['dead_leads_ratio'] = round($active_days/$dead_count, 2);
+                $leads['dead_leads_ratio'] = round($dead_days/$dead_count, 2);
             }
             else{
                 $leads['dead_leads_ratio'] = 0;
@@ -273,29 +273,49 @@ class LeadManagementController extends Controller
         $ratio_leads = $leads['total'];
         if($ratio_leads->exists()){
             $ratio_leads = $ratio_leads->get();
-            $days = 0;
-            $count = 0;
+            $dead_days = 0;
+            $dead_count = 0;
+            $active_days = 0;
+            $active_count = 0;
             foreach ($ratio_leads as $ratio_lead){
-                if($ratio_lead->status_id == 9 || $ratio_lead->status_id == 12){
-                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [9, 12])->orderBy('id', 'DESC');
+                if(in_array($ratio_lead->status_id, [3, 4, 10, 11, 13])){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [3, 4, 10, 11, 13])->orderBy('id', 'DESC');
                     if($last_log->exists()){
                         $last_log = $last_log->first();
                         $last_date = Carbon::parse($last_log->created_at);
-                        $days = $days + $last_date->diffInDays($ratio_lead->requested_date);
+                        $dead_days = $dead_days + $last_date->diffInDays($ratio_lead->requested_date);
                     }
-                    $count++;
+                    $dead_count++;
+                }
+                if(in_array($ratio_lead->status_id, [12])){
+                    $last_log = LeadLog::where('lead_id', $ratio_lead->id)->whereIn('status_id', [12])->orderBy('id', 'DESC');
+                    if($last_log->exists()){
+                        $last_log = $last_log->first();
+                        $last_date = Carbon::parse($last_log->created_at);
+                        $active_days = $active_days + $last_date->diffInDays($ratio_lead->requested_date);
+                    }
+                    $active_count++;
                 }
             }
-            if($count > 0){
-                $leads['ratio'] = round($days/$count, 2);
+            if($dead_count > 0){
+                $leads['dead_leads_ratio'] = round($dead_days/$dead_count, 2);
             }
             else{
-                $leads['ratio'] = 0;
+                $leads['dead_leads_ratio'] = 0;
+            }
+
+            if($active_count > 0){
+                $leads['active_leads_ratio'] = round($active_days/$active_count, 2);
+            }
+            else{
+                $leads['active_leads_ratio'] = 0;
             }
         }
         else{
-            $leads['ratio'] = 0;
+            $leads['dead_leads_ratio'] = 0;
+            $leads['active_leads_ratio'] = 0;
         }
+
 
         $leads['total'] = number_format($leads['total']->count());
         $leads['received'] = number_format($leads['received']->count());
@@ -308,10 +328,18 @@ class LeadManagementController extends Controller
         $leads['dead_leads_percentage'] = 0;
         $leads['accounts_activated_percentage'] = 0;
         if($leads['total'] > 0){
-            $leads['received_percentage'] = round(($leads['received'] / $leads['total']) * 100, 2);
-            $leads['in_process_percentage'] = round(($leads['in_process'] / $leads['total']) * 100, 2);
-            $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
-            $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
+            if(is_numeric($leads['received'])){
+                $leads['received_percentage'] = round(($leads['received'] / $leads['total']) * 100, 2);
+            }
+            if(is_numeric($leads['in_process'])){
+                $leads['in_process_percentage'] = round(($leads['in_process'] / $leads['total']) * 100, 2);
+            }
+            if(is_numeric($leads['dead_leads'])){
+                $leads['dead_leads_percentage'] = round(($leads['dead_leads'] / $leads['total']) * 100, 2);
+            }
+            if(is_numeric($leads['accounts_activated'])){
+                $leads['accounts_activated_percentage'] = round(($leads['accounts_activated'] / $leads['total']) * 100,2);
+            }
         }
 
         return response()->json(['status' => 1, 'leads' => $leads]);

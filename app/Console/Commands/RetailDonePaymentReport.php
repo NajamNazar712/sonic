@@ -41,6 +41,6 @@ class RetailDonePaymentReport extends Command
     public function handle()
     {
         $date = Carbon::today()->toDateString();
-        $response = AdminReportsEmailController::retail_done_payment($date);
+        AdminReportsEmailController::retail_done_payment($date);
     }
 }

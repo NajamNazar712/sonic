@@ -30,6 +30,7 @@
                             </form>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <b><label class="ml-1" id="count"></label></b>
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
@@ -301,6 +302,7 @@
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
                             head.push('Tagged To');
+                            head.push('Tagged At');
                             head.push('Launched Date');
                             head.push('Complaint Re-Open Date');
                             head.push('Agent Assigned Date');
@@ -336,6 +338,7 @@
                                 row.push(values.added_by);
                                 row.push(values.tagged);
                                 row.push(values.tagged_to);
+                                row.push(values.tagged_date);
                                 row.push(values.created_at);
                                 row.push(values.reopen_date);
                                 row.push(values.agent_assigned_date);
@@ -914,7 +917,16 @@
                     this.api().table().columns.adjust();
                 }
             });
-
+            table.on( 'select', function ( e, dt, type, indexes ) {
+                var count = table.rows( { selected: true } ).count();
+                var lblcount= document.getElementById('count');
+                lblcount.textContent =count +' Row(s) selected';
+            } );
+            table.on( 'deselect', function ( e, dt, type, indexes ) {
+                var count = table.rows( { selected: true } ).count();
+                var lblcount= document.getElementById('count');
+                lblcount.textContent =count +' Row(s) selected';
+            } );
             $('.closebutton').on('click',function(){
                 $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
                     $("#BulkExternalCommentModal #bulk_comment").val("");

@@ -35,6 +35,7 @@
 							<th class="border-primary border-darken-1">Tax Amount</th>
 							<th class="border-primary border-darken-1">Deposit Date</th>--}}
 							<th class="border-primary border-darken-1">Status</th>
+							<th class="border-primary border-darken-1">Deposit Slip</th>
 							<th class="border-primary border-darken-1"></th>
 						</tr>
 					</thead>
@@ -91,9 +92,84 @@
 						</div>
 					</div>
 				</div>
+
+				<!--Deposit Slip Modal -->
+				<div class="modal fade text-left" id="uploadDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="uploadDepositSlip"
+					 aria-hidden="true">
+					<div class="modal-dialog modal-xl" role="document">
+						<div class="modal-content">
+							<div class="modal-header bg-primary white">
+								<h4 class="modal-title white">Deposit Slip Upload</h4>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+								<form id="invoice_upload_form" class="form" action="{{route('admin.finance.invoices.slip')}}" method="post" enctype="multipart/form-data">
+									@csrf
+									<input type="hidden" name="invoice_id" id="invoice_id"/>
+									<table class="table table-bordered datatable" id="invoice_upload_table" style="z-index: 3;">
+										<thead>
+										<tr role="row" class="bg-primary white">
+											<th class="border-primary border-darken-1">S. No.</th>
+											<th class="border-primary border-darken-1">Date</th>
+											<th class="border-primary border-darken-1">Bank Name</th>
+											<th class="border-primary border-darken-1">Deposit Slip</th>
+											<th class="border-primary border-darken-1"></th>
+										</tr>
+										</thead>
+									</table>
+									<hr>
+									<div class="row justify-content-center">
+										<div class="col-3">
+											<button id="DepositSlipButton" type="submit" class="btn btn-primary btn-block" disabled>Upload</button>
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="modal fade text-left" id="ViewDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDepositSlip"
+					 aria-hidden="true">
+					<div class="modal-dialog modal-lg" role="document">
+						<div class="modal-content">
+							<div class="modal-header bg-primary white">
+								<h4 class="modal-title white">Deposit Slips View</h4>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+								<table class="table table-bordered datatable" id="deposit_slip_table" style="z-index: 3;">
+									<thead>
+									<tr role="row" class="bg-primary white">
+
+										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Date</th>
+										<th class="border-primary border-darken-1">Bank Name</th>
+										<th class="border-primary border-darken-1">Deposit Slip</th>
+
+									</tr>
+									</thead>
+								</table>
+
+								<hr>
+								<div class="row justify-content-center">
+									<div class="col-3">
+										<button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
+
 @endsection
 
 @section('css')
@@ -387,6 +463,7 @@
 					{data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
 					{data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},*/
 					{data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},
+					{data:'upload_slip', name: '', class: 'align-middle text-center upload_slip',orderable:false,searchable:false},
 					{data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -414,7 +491,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip')) {
 							$(td).appendTo($(search));
 						}
 						else if ($(header).is('.company_bank')) {
@@ -680,6 +757,192 @@
 						}
 					});
 				}
+			});
+
+			var banks_list = $.map({!! $company_banks !!}, function (obj) {
+				obj.id = obj.id;
+				obj.text = obj.name;
+				return obj;
+			});
+			var deposit_table;
+
+			var rows_count = 0;
+			$('#uploadDepositSlip').on('shown.bs.modal', function (event) {
+				var id = event.relatedTarget;
+				var invoice_id = $(id).data('target-id');
+				$('#invoice_id').val($(id).data('target-id'));
+
+
+
+				deposit_table = $('#invoice_upload_table').DataTable({
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons:[{
+						title: 'Add Row',
+						className: 'btn btn-primary mb-1',
+						text: '<i class="la la-plus"></i> Add Row',
+						action:function (e) {
+							add_row();
+						}
+					}],
+					ordering:false,
+					paging:false,
+					columns: [
+						{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+						{name: 'date', class: 'align-middle date date-col-width form-group', width: '20%'},
+						{name: 'bank_name', class: 'align-middle bank_name form-group'},
+						{name: 'deposit_slip', class: 'align-middle deposit_slip form-group'},
+						{name: 'action', class: 'align-middle action'},
+					],
+
+					rowCallback: function(row, data, index) {
+						var info = deposit_table.page.info();
+
+						$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+					},
+					initComplete: function() {
+
+						// this.api().table().columns.adjust();
+					}
+				});
+
+
+				function add_row() {
+					rows_count++;
+					var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="deposit_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>';
+					var bank_select = '<select class="form-control hub_select select2" name="bank['+rows_count+']" data-rule-required="true" data-msg-required="Bank is required"></select>';
+					var deposit_slip = '<input class="form-control form-control-sm" accept="image/png,image/jpeg" type="file" id="deposit_slip_'+rows_count+'" name="deposit_slip['+rows_count+']" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Deposit Slip is required">';
+					if(rows_count == 1){
+						var remove = '';
+					}else{
+						var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
+
+					}
+					deposit_table.row.add([0, date_input,bank_select,deposit_slip,remove]).node().id = rows_count;
+					deposit_table.draw(true);
+					$('#DepositSlipButton').attr('disabled', false);
+					$('select[name="bank['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+						data:banks_list,
+						placeholder:'Select Bank',
+						allowClear:true,
+						width:'100%',
+						dropdownCssClass: 'form-control-sm p-0'
+					});
+					$('#deposit_date_' + rows_count).pickadate({
+						firstDay: 1,
+						today: '',
+						clear: '',
+						close: '',
+						max: new Date(),
+						weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
+						showMonthsShort: true,
+						formatSubmit: 'yyyy-mm-dd 00:00:00',
+						hiddenSuffix: '_formatted',
+						onOpen: function() {
+							// $('#deposit_date_' + rows_count+'_root').css('top', '-262px');
+						},
+					});
+				}
+			});
+
+			$('body').on('click', '#invoice_upload_table a.remove_row',function () {
+				var rid = parseInt($(this).parents('tr').attr('id'));
+				deposit_table.row( $(this).parents('tr') ).remove().draw();
+			});
+
+			$('#uploadDepositSlip').on('hidden.bs.modal', function () {
+				deposit_table.clear();
+				deposit_table.destroy();
+			});
+
+			$('#invoice_upload_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					var pressed_button = $(this.submitButton);
+					swal({
+						title: 'Are You Sure?',
+						text: 'Select Yes to upload Deposit Slips!',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function (confirm) {
+						if (confirm) {
+							form.submit();
+						}
+					});
+
+				}
+			});
+
+			var deposit_slip_table;
+			$('body').on('click','.deposit_slip_view', function () {
+				var id = $(this).parents('tr').attr('id');
+				if(id){
+					$.ajax({
+						url:'{!! route('admin.finance.invoices.slip_view') !!}',
+						type:'POST',
+						data: {
+							'invoice_id':id,
+							'_token': '{{ csrf_token() }}'
+						}
+					}).done(function (data) {
+						if(data.status){
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+						}else{
+							$('#ViewDepositSlip').modal('show');
+							deposit_slip_table = $('#deposit_slip_table').DataTable({
+								dom: 'ltipr',
+								ordering:false,
+								paging:false,
+								columns: [
+									{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+									{name: 'date', class: 'align-middle date date-col-width form-group'},
+									{name: 'bank_name', class: 'align-middle bank_name form-group'},
+									{name: 'deposit_slip', class: 'align-middle deposit_slip form-group'}
+								],
+
+								rowCallback: function(row, data, index) {
+									var info = deposit_slip_table.page.info();
+
+									$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+								},
+								initComplete: function() {
+
+								}
+							});
+
+							$.each(data.slips, function (index, value) {
+								deposit_slip_table.row.add([0, value.date, value.bank, value.image]);
+								deposit_slip_table.draw(true);
+							});
+						}
+					});
+				}
+			});
+
+			$('#ViewDepositSlip').on('hidden.bs.modal', function () {
+				deposit_slip_table.clear();
+				deposit_slip_table.destroy();
 			});
 		});
 	</script>
