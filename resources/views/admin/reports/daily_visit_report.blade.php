@@ -11,6 +11,52 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <form id="search_form" class="form-inline mb-2 justify-content-center" novalidate="novalidate">
+                    <div class="row justify-content-center">
+                        <div class="col-4 mb-1">
+                            <fieldset class="form-group">
+                                <select name="team_member" id="team_member" class="form-control select2">
+                                    @foreach($admins as $admin)
+                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+
+                        <!--  Date wise Div  -->
+                        <div class="col-4 mb-1">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                            </div>
+                        </div>
+
+                        <div class="col-4 mb-1">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                            </div>
+                        </div>
+
+                        <!--    Search Button  -->
+                        <div class="col-2 justify-content-center">
+                            <div class="form-group ">
+                                <button type="button" class="btn btn-outline-info btn-min-width search_filter_btn" id="search_filter_btn"><i class="la la-search"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                        <!--   end  -->
+                    </div>
+                </form>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -34,7 +80,6 @@
             </div>
         </div>
     </div>
-
 
 @endsection
 
@@ -108,6 +153,50 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            /*   --- dropdown  ----    */
+            $('#team_member').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Team Member',
+                width:'100%',
+                allowClear:true
+            });
+
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            /*    end   */
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -153,6 +242,32 @@
                     return {body: body, header:head};
                 }
             });
+            $('#search_form #search_update_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_update_date_to').pickadate('picker').set('min', $('#search_form #search_update_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_update_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_update_date_from').pickadate('picker').set('max', $('#search_form #search_update_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -171,8 +286,14 @@
                 language: {
                     processing: data_table_loader
                 },
-                serverSide: true,ajax: {
+                serverSide: true,
+                ajax: {
                     url: '{{ route('admin.reports.daily_visit.list') }}',
+                    data:function (d){
+                        d.team_member = $('#team_member').val();
+                        d.search_date_from = $('input[name="from_date_formatted"]').val();
+                        d.search_date_to = $('input[name="to_date_formatted"]').val();
+                    }
                 },
                 order: [[2, 'desc']],
                 columns: [
@@ -189,7 +310,6 @@
                     { data:'location' ,name: 'location', class: 'align-middle location', sortable: false, orderable: false, searchable: false},
                     { data:'l_photo' ,name: 'l_photo', class: 'align-middle l_photo', sortable: false, orderable: false, searchable: false},
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
-
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -199,10 +319,10 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('#search_filter_btn').on('click',function () {
-                table.draw();
-            });
 
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
+            });
         });
     </script>
 @endsection

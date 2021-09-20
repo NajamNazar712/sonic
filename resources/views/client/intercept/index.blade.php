@@ -18,12 +18,16 @@
                 </div>
                 <form id="intercept_form" class="form-horizontal" method="post" action="{{route('cod.intercept.update')}}">
                 @csrf
-                    <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
-                        <option value="1" selected>Different Consignee</option>
-                        <option value="2">Same Consignee</option>
-                    </select>
+
+                    <div class="form-group col-5  mb-2 text-center" style="margin: auto;">
+                        <select name="consignee" class="select2" id="consignee" data-rule-required="true" data-msg-required="Consignee is required">
+                            <option value="1" selected>Different Consignee</option>
+                            <option value="2">Same Consignee</option>
+                        </select>
+                    </div>
                     <input type="hidden" name="shipment_id" value="{{$shipment['id']}}">
                     <div class="row justify-content-center">
+
                         <div class="col col_custom mr-5">
                             <h4 class="form-section mb-2 text-center">Consignee Information</h4>
                             <div class="form-group">
@@ -125,7 +129,6 @@
             }).bind('change', function () {
                 if(this.value == 2){
 
-                    console.log(city,name,email,amount);
                     var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                     $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
                     $('#consignee_city').val(city).trigger('change');

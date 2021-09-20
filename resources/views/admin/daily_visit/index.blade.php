@@ -12,6 +12,7 @@
                 @include('admin.inc.messages')
                 <form id="daily_visit_form" class="form-horizontal" method="post" action="{{route('admin.daily_visit.store')}}" enctype="multipart/form-data">
                 @csrf
+
                     <div class="col justify-content-center">
                         <input type="hidden" name="latitude" id="latitude">
                         <input type="hidden" name="longitude" id="longitude">
@@ -59,6 +60,7 @@
                         </div>
                     </div>
 
+
                 </form>
 
             </div>
@@ -94,6 +96,8 @@
         $(document).ready(function () {
             var latitude = null;
             var longitude = null;
+
+
             $('#lead_status').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Lead Status*'

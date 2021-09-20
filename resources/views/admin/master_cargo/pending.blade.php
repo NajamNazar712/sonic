@@ -422,7 +422,7 @@
 
             $('#edit_seal_number').on('change', function(){
                 var seal = this.value;
-                if(seal.length != 12 && seal.length != 13 && seal.length != 6){
+                if(seal.length != 12 && seal.length != 13 && seal.length != 6 && seal.length != 7){
                     this.value = '';
                 }
             });

@@ -87,7 +87,9 @@
                         <tr role="row" class="bg-primary white">
 
                             <th class="border-primary border-darken-1">Time Slot</th>
+                            <th class="border-primary border-darken-1">Total Out for Delivery</th>
                             <th class="border-primary border-darken-1">Total Statuses Updated</th>
+                            <th class="border-primary border-darken-1">Percentage</th>
                             <th class="border-primary border-darken-1">Statuses Updated from Bolt</th>
                             <th class="border-primary border-darken-1">Percentage</th>
                             <th class="border-primary border-darken-1">Statuses Updated from Sonic</th>
@@ -236,7 +238,7 @@
                 ordering: false,
             });
 
-            var types = ['time', 'total_status_updated', 'bolt_status_updated', 'bolt_status_percentage', 'sonic_status_updated', 'sonic_status_percentage'];
+            var types = ['time','out_for_delivery_count', 'total_status_updated','out_for_delivery_percentage', 'bolt_status_updated', 'bolt_status_percentage', 'sonic_status_updated', 'sonic_status_percentage'];
             function list() {
                 blockPagePermanently();
                 $('#search_filter_btn').prop('disabled', true);
