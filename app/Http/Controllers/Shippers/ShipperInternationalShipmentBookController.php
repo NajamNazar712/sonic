@@ -750,15 +750,17 @@ class ShipperInternationalShipmentBookController extends Controller
             $credit_user = $credit_user->first();
             $limit_used = $credit_user->limit_usage;
             $data = array();
-            if($limit_used != NULL){
-                $limit = $credit_user->limit;
+            $limit = $credit_user->limit;
+            $data['limit'] = $limit;
+            $data['limit_used'] = $limit_used;
+            if($limit_used != NULL && $limit != 0){
                 $percentage = ($limit_used / $limit) * 100;
-                $data['limit'] = $limit;
-                $data['limit_used'] = $limit_used;
                 $data['percentage'] = $percentage;
-                return $data;
             }
-            return FALSE;
+            else{
+                $data['percentage'] = 0;
+            }
+            return $data;
         }
         return FALSE;
     }

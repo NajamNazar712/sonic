@@ -1158,7 +1158,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $shipment_details = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $shipment_ids[] = $shipment_id;
-                        $weights['shipment_id'] = trim($row['weight']);
+                        $weights[$shipment_id] = trim($row['weight']);
 
 
                         $tracking_numbers['Row #' . $row_id] = $tracking;
@@ -1184,7 +1184,7 @@ class AdminNsaAccountShipmentController extends Controller
                                     $carrefour_shipment->shipper_status_id = $status_id;
                                     $carrefour_shipment->consignee_status_id = $status_id;
 
-                                    $carrefour_shipment->actual_weight = $weights['shipment_id'];
+                                    $carrefour_shipment->actual_weight = $weights[$carrefour_shipment->id];
 
                                     $carrefour_shipment->save();
 

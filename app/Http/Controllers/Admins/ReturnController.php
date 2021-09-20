@@ -3170,7 +3170,7 @@ class ReturnController extends Controller
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
             ->join('admins as sb','sb.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at','return_notes.updated_at as submitted_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')]);
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at','return_notes.updated_at as submitted_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'),DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count_link')]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -3853,8 +3853,49 @@ class ReturnController extends Controller
             }
             return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
         }else{
-            ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
-            return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            if ($return_user_id == 'undefined') {
+                ReturnNoteImage::where('id', $return_note_image_id)->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);
+            }
+            else
+            {
+                ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
+                return response()->json(['status' => 0, 'success' => 'Image deleted successfully!']);    
+            }
+        }
+        return response()->json(['status' => 1, 'error' => 'Image not found!']);
+    }
+
+    public function history_delete_lastimage(Request $request){
+        $return_note_id = $request->return_note_id;
+        $return_note_image_id = $request->return_note_image_id;
+        $return_user_id = $request->user_id;
+        $return_note = ReturnNote::find($return_note_id);
+        if($return_note_image_id == 0){
+            if($return_note){
+                $return_note->image = NULL;
+                // $return_note->updated_by = Auth::id();
+                // $return_note->status = 3;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted and status updated successfully!']);
+            }
+            return response()->json(['status' => 1, 'error' => 'Return Note not found!']);
+        }else{
+            if ($return_user_id == 'undefined') {
+                ReturnNoteImage::where('id', $return_note_image_id)->delete();
+                $return_note->updated_by = Auth::id();
+                $return_note->status = 3;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted and status updated successfully!']);
+            }
+            else
+            {
+                ReturnNoteImage::where('return_note_id', $return_note_id)->where('user_id',$return_user_id)->delete();
+                $return_note->updated_by = Auth::id();
+                $return_note->status = 3;
+                $return_note->save();
+                return response()->json(['status' => 0, 'success' => 'Image deleted and status updated successfully!']);    
+            }
         }
         return response()->json(['status' => 1, 'error' => 'Image not found!']);
     }
