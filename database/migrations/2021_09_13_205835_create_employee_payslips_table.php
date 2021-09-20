@@ -67,7 +67,7 @@ class CreateEmployeePayslipsTable extends Migration
             $table->integer('recovery')->nullable();
             $table->integer('auction_sale')->nullable();
             $table->integer('penalty')->nullable();
-            $table->integer('other_deductions')->nullable();
+            $table->integer('others_deduction')->nullable();
             $table->integer('van_deduction')->nullable();
             $table->integer('medical_insurance')->nullable();
             $table->integer('total_deduction')->nullable();
