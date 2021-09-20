@@ -437,6 +437,7 @@
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
+                            head.push('Total WHT');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
                             head.push('Total Payable');
@@ -470,6 +471,7 @@
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
+                                row.push(values.total_wht);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
@@ -683,7 +685,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments') || $(header).is('.packaging_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.total_adjustments') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.total_pending_shipments') || $(header).is('.packaging_charges') || $(header).is('.total_wht')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))

@@ -154,6 +154,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
@@ -487,6 +488,7 @@
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
+                            head.push('Total WHT');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
 							head.push('Adjustment Charges');
@@ -514,6 +516,7 @@
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
+                                row.push(values.total_wht);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
 								row.push(values.adjustment_charges);
@@ -725,6 +728,7 @@
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
@@ -766,7 +770,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
