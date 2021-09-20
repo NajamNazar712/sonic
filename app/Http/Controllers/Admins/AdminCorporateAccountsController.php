@@ -33381,7 +33381,7 @@ class AdminCorporateAccountsController extends Controller
         }
         else{
             $setting->starting_date = null;
-            $setting->ending_date = Carbon::now()->addMonth()->lastOfMonth()->toDateString();
+            $setting->ending_date = Carbon::now()->lastOfMonth()->toDateString();
         }
 
         $setting->update();
