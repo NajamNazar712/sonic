@@ -2343,53 +2343,6 @@ class AdminHumanResourseController extends Controller
             })
             ->make(true);
     }
-    public function payslip_index(Request $request){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
-        return view('admin.human_resource.payslip.index');
-    }
-
-    public function payslip_list(Request $request){
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
-        }
-        $payslips = EmployeePayslip::all();
-        return Datatables::of($payslips)
-            ->addColumn('action', function ($types) {
-                $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-
-    public function payslip_list(Request $request){
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
-        }
-        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
-        $datatable = Datatables::of($payslips)
-            ->addColumn('action', function () {
-                $dropdown = '
-                <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-            $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
-
-                return $dropdown;
-            });
-
-        if ($request->get('search_payslip_month')) {
-            $month = $request->get('search_payslip_month');
-            $from = Carbon::parse($month)->startOfMonth()->toDateString();
-            $to = Carbon::parse($month)->endOfMonth()->toDateString();
-            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
-        }
-        return $datatable->make(true);
-
-    }
-              
-                   
-      
 
     public function employee_shift_status(Request $request)
     {
@@ -2425,6 +2378,38 @@ class AdminHumanResourseController extends Controller
         $shift->extension_minutes = $request->extension_minutes;
         $shift->save();
         return redirect()->back()->with('success', 'Shift Updated Successfully!');
+    }
+
+    public function payslip_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
+        return view('admin.human_resource.payslip.index');
+    }
+
+    public function payslip_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
+        }
+        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
+        $datatable = Datatables::of($payslips)
+            ->addColumn('action', function () {
+                $dropdown = '
+                <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
+
+                return $dropdown;
+            });
+
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
+        }
+        return $datatable->make(true);
+
     }
     public function payslip_excel_upload(Request $request){
 
@@ -3087,97 +3072,5 @@ class AdminHumanResourseController extends Controller
         $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
         return array('status' => 1, 'image' => $pdf_file);
 
-    }
-
-    public function employee_shift_index()
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),433);
-        return view('admin.human_resource.employee_shift');
-    }
-
-    public function employee_shift_list(Request $request)
-    {
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),434);
-        }
-
-        $shifts = EmployeeShift::all();
-        return Datatables::of($shifts)
-            ->editColumn('status', function ($data) {
-                if ($data->status == 0) {
-                    return 'In-Active';
-                } else {
-                    return 'Active';
-                }
-            })
-            ->editColumn('start_time_formatted', function ($data) {
-                return Carbon::parse($data->start_time)->format("g:i A");
-            })
-            ->editColumn('end_time_formatted', function ($data) {
-                return Carbon::parse($data->end_time)->format("g:i A");
-            })
-            ->addColumn("action", function ($data) {
-                if (session('role_id') == 1 || in_array(593, session('permissions')) || in_array(594, session('permissions'))) {
-                    $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-                    if (session('role_id') == 1 || in_array(593, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                    }
-                    if (session('role_id') == 1 || in_array(594, session('permissions'))) {
-                        if ($data->status == 0) {
-                            $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                        } else {
-                            $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                        }
-                    }
-                    $dropdown .= '
-                </div>
-              </div>
-            ';
-                    return $dropdown;
-                } else {
-                    return '';
-                }
-            })
-            ->make(true);
-    }
-
-    public function employee_shift_status(Request $request)
-    {
-        $id = $request->id;
-        $shift = EmployeeShift::find($id);
-        if ($request->status == 0) {
-            $status = 'Disabled';
-        } else {
-            $status = 'Enabled';
-        }
-        $shift->status = $request->status;
-        $shift->save();
-        return response()->json(['status' => 1, 'success' => 'Shift ' . $status . ' successfully!']);
-    }
-
-    public function employee_shift_add(Request $request)
-    {
-        $shift = new EmployeeShift();
-        $shift->name = $request->name;
-        $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
-        $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
-        $shift->extension_minutes = $request->extension_minutes;
-        $shift->save();
-        return redirect()->back()->with('success', 'Shift Added Successfully!');
-    }
-
-    public function employee_shift_edit(Request $request)
-    {
-        $shift = EmployeeShift::find($request->shift_id);
-        $shift->name = $request->name;
-        $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
-        $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
-        $shift->extension_minutes = $request->extension_minutes;
-        $shift->save();
-        return redirect()->back()->with('success', 'Shift Updated Successfully!');
     }
 }
