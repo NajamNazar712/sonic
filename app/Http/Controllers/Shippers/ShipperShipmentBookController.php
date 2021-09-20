@@ -1415,7 +1415,21 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>
                                 ';
                                 }
-
+                                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                                if ($express_details->exists()) {
+                                    $express_details = $express_details->first();
+                                    if($express_details->center_frachise_type==1){
+                                        $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                        $express_center =  '('. $trax_center->name. ')';
+                                    }elseif ($express_details->center_frachise_type==2) {
+                                        $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                        $express_center = '('. $trax_franchise->name . ')';
+                                    }else{
+                                        $express_center = '';
+                                    }
+                                }else{
+                                    $express_center = '';
+                                }
                         $origin = $return_address_id == NULL ? 'Origin':'Return';
                         $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important; color: white;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
 
@@ -1428,7 +1442,7 @@ class ShipperShipmentBookController extends Controller
                                 '.$originstyle.'
                                 <td class="border twice-bottom"><strong>' . $origin_data . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name.' '.$express_center .'</strong></td>
                               </tr>';
 
                                     $table_start .='
@@ -1457,7 +1471,21 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>';
                                 }
 
-
+                                $shipment_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                                if ($shipment_details->exists()) {
+                                    $shipment_details = $shipment_details->first();
+                                    if($shipment_details->center_frachise_type==1){
+                                        $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
+                                        $express_center =  '('. $trax_center->name. ')';
+                                    }elseif ($shipment_details->center_frachise_type==2) {
+                                        $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
+                                        $express_center = '('. $trax_franchise->name . ')';
+                                    }else{
+                                        $express_center = '';
+                                    }
+                                }else{
+                                    $express_center = '';
+                                }
                         $table_start .= '
                                 <td class="color primary"><strong>Date</strong></td>
                                 <td>' . $shipment->created_at->format('Y-m-d') . '</td>
@@ -1466,7 +1494,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .' '.$express_center . '</strong></td>
                               </tr>';
 
                             $table_start .='
@@ -1852,7 +1880,21 @@ class ShipperShipmentBookController extends Controller
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
-
+                        $shipment_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                        if ($shipment_details->exists()) {
+                            $shipment_details = $shipment_details->first();
+                            if($shipment_details->center_frachise_type==1){
+                                $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
+                                $express_center =  '('. $trax_center->name. ')';
+                            }elseif ($shipment_details->center_frachise_type==2) {
+                                $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
+                                $express_center = '('. $trax_franchise->name . ')';
+                            }else{
+                                $express_center = '';
+                            }
+                        }else{
+                            $express_center = '';
+                        }
                         foreach ($shipment->shipment_pieces as $piece){
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
@@ -1867,7 +1909,7 @@ class ShipperShipmentBookController extends Controller
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
                                 <td rowspan="1" class="color primary border "><strong>Destination</strong></td>
-                                <td rowspan="1" class="border">' . $shipment->consignee_city->name . '</td>
+                                <td rowspan="1" class="border">' . $shipment->consignee_city->name .' ('.$express_center. '</td>
                                 
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
