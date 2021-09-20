@@ -2764,7 +2764,7 @@ class AdminHumanResourseController extends Controller
 
         $total_addition = 0;
 
-        $total_addition = $mobile_allowance + $vehicle_allowance + $fuel_allowance + $conveyance_allowance + $vehicle_allowance + $fixed_incentive + $holiday_allowance + $overtime + $arrears + $pickup_incentive + $delivery_incentive + $operations_incentive + $extra_duty_allowance + $others_addition;
+        $total_addition = $mobile_allowance + $vehicle_allowance + $fuel_allowance + $conveyance_allowance + $vehicle_maintenance + $fixed_incentive + $holiday_allowance + $overtime + $bonus + $arrears + $pickup_incentive + $delivery_incentive + $operations_incentive + $extra_duty_allowance + $others_addition;
 
         if($mobile_allowance == 0){
             $mobile_allowance = '-';
@@ -2778,6 +2778,9 @@ class AdminHumanResourseController extends Controller
         if($conveyance_allowance == 0){
             $conveyance_allowance = '-';
         }
+        if($vehicle_maintenance == 0){
+            $vehicle_maintenance = '-';
+        }
         if($fixed_incentive == 0){
             $fixed_incentive = '-';
         }
@@ -2786,6 +2789,9 @@ class AdminHumanResourseController extends Controller
         }
         if($overtime == 0){
             $overtime = '-';
+        }
+        if($bonus == 0){
+            $bonus = '-';
         }
         if($arrears == 0){
             $arrears = '-';
