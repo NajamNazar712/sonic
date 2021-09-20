@@ -52,6 +52,9 @@ class AdminMonthClosingController extends Controller
                     if($parcel){
                         $month_closing = MonthClosing::where('shipment_id', $parcel->id)->where('status_id', 3);
                         if($month_closing->exists()){
+                            $month_closing = $month_closing->first();
+                            MonthClosingResponsible::where('month_closing_id', $month_closing->id)->delete();
+                            $month_closing->delete();
                             if (!$parcel->packaging_material_request) {
                                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                                 ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
