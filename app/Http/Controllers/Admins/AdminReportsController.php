@@ -1,42 +1,28 @@
 <?php
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\BagStatus;
-use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
-use App\Http\Models\Blacklist\BlacklistSetting;
-use App\Http\Models\BookingType;
-use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\Rider;
-use App\Http\Models\Admin\OperationRidersCategory;
-use App\Http\Models\RiderDelivery;
-use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\StationRecoveryReportDeposit;
 use App\Http\Models\Shipment;
 use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2RiderPickupShipment;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
-use function foo\func;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -7093,7 +7079,7 @@ class AdminReportsController extends Controller
 
     public function daily_visit_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),193);
-        $admins = Admin::get(['id', 'name']);
+        $admins = Admin::where('status', 1)->get(['id', 'name']);
         return view('admin.reports.daily_visit_report')->with(['admins' => $admins]);
     }
     public function daily_visit_list(Request $request){
@@ -7148,11 +7134,6 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatables->whereBetween('daily_visits.created_at', [$from,$to]);
-        }
-        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
-            $ufrom = $request->get('search_update_date_from');
-            $uto = $request->get('search_update_date_to');
-            $datatables->whereBetween('daily_visits.created_at', [$ufrom,$uto]);
         }
 
         return $datatables->make(true);
