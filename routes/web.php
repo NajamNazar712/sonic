@@ -307,6 +307,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('list', 'Shippers\ShipperReportsController@adjustments_list')->name('list');
         });
 
+        Route::prefix('weight_reconciliation')->name('weight_reconciliation.')->group(function (){
+            Route::get('', 'Shippers\ShipperReportsController@weight_reconciliation_index')->name('index');
+            Route::post('list', 'Shippers\ShipperReportsController@weight_reconciliation_list')->name('list');
+        });
+
+        
+
         Route::prefix('delivery_and_return')->name('delivery_and_return.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@delivery_and_return_index')->name('index');
         });
@@ -1290,6 +1297,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delivered_shipments', 'Admins\ReturnController@history_delivered_shipments')->name('delivered_shipments');
             Route::post('get_images', 'Admins\ReturnController@history_get_images')->name('get_images');
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
+            Route::post('delete_lastimage', 'Admins\ReturnController@history_delete_lastimage')->name('delete_lastimage');
 
         });
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
@@ -1555,6 +1563,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('track_v2', 'Admins\AdminTrackingController@track_v2')->name('track_v2');
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
+        Route::post('pieces_print', 'Admins\AdminTrackingController@pieces_print')->name('pieces_print');
+
     });
 
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function() {
@@ -1745,6 +1755,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('invoices')->name('invoices.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@invoices_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@invoices_list')->name('list');
+            Route::post('slip', 'Admins\AdminFinanceController@invoices_slip')->name('slip');
+            Route::post('slip/view', 'Admins\AdminFinanceController@invoices_slip_view')->name('slip_view');
             Route::post('print', 'Admins\AdminFinanceController@invoices_print')->name('print');
             Route::post('print_origin_wise', 'Admins\AdminFinanceController@invoices_print_origin_wise')->name('print_origin_wise');
             Route::post('print_gst_wise', 'Admins\AdminFinanceController@invoices_print_gst_wise')->name('print_gst_wise');
@@ -3159,6 +3171,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit_location', 'Admins\AdminHumanResourseController@reporting_location_edit')->name('edit_location');
         });
 
+        Route::prefix('employee_shifts')->name('employee_shifts.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_shift_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@employee_shift_list')->name('list');
+            Route::post('status', 'Admins\AdminHumanResourseController@employee_shift_status')->name('status');
+            Route::post('add_shift', 'Admins\AdminHumanResourseController@employee_shift_add')->name('add_shift');
+            Route::post('edit_shift', 'Admins\AdminHumanResourseController@employee_shift_edit')->name('edit_shift');
+        });
+
         Route::prefix('designation')->name('designation.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
@@ -3222,11 +3242,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/history', 'Admins\AdminFnfController@fnf_history_index')->name('fnf_history_index');
             Route::get('{id}/history/list', 'Admins\AdminFnfController@status_history_list')->name('status_history_list');
         });
+
+        Route::prefix('payslip')->name('payslip.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@payslip_index')->name('index');
+            Route::get('list', 'Admins\AdminHumanResourseController@payslip_list')->name('list');
+            Route::post('excel', 'Admins\AdminHumanResourseController@payslip_excel_upload')->name('excel');
+            Route::post('generate_payslip', 'Admins\AdminHumanResourseController@payslip_print')->name('print');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('', 'Admins\Attendance\AdminAttendanceController@admin_attendance_index')->name('index');
         Route::get('list', 'Admins\Attendance\AdminAttendanceController@admin_attendance_list')->name('list');
+        Route::get('/mark', 'Admins\Attendance\AdminAttendanceController@mark_attendance_index')->name('mark');
+        Route::post('/mark/submit', 'Admins\Attendance\AdminAttendanceController@mark_attendance_submit')->name('mark.submit');
+        Route::get('/mark/list', 'Admins\Attendance\AdminAttendanceController@mark_attendance_list')->name('mark.list');
     });
 
     Route::prefix('rider_delivery_note_otp')->name('rider_delivery_note_otp.')->group(function () {
@@ -3255,6 +3285,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('{id}/update', 'Admins\IncidenceMonitoringController@update')->name('update');
             
     });
+
 
 });
 

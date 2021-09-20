@@ -101,7 +101,17 @@
                 <div class="danger" id="rider_error" style="display:none;">This field is required</div>
             </fieldset>
         </div>
-
+    </div>
+    <div class="row">
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    @foreach($shifts as $shift)
+                        <option value="{{$shift->id}}"> {{$shift->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
     </div>
     <div id="new_route_div" class="d-none">
         <div class="row mb-2">
@@ -175,6 +185,10 @@
         });                          
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a rider category',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a Shift',
             dropdownParent: $("#addRiderForm")
         });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});

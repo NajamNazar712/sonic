@@ -516,7 +516,7 @@ class AdminCRMController extends Controller
                 $approvers[] = $admin_request->admin;
             }
             
-            return view('admin.crm.request_details')->with(['crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count(), 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
+            return view('admin.crm.request_details')->with(['crm_histories' => $crm_histories,'crm_historiescount' => $crm_histories->count()+1, 'crm_details' => $crm_request, 'launched_by' => $launched_by, 'comments' => $crm_comments, 'last_comment_id' => $last_comment, 'admins' => $admins, 'types' => $types, 'departments' => $departments, 'tagged_name' => $tagged_name,'crm_tagging' => $crm_tagging, 'crm_agent_history' => $crm_agent_history, 'crm_status_history' => $crm_status_history, 'crm_tagging_history' => $crm_tagging_history, 'agent' => $agent_name, 'tag_check' => $tagged, 'tag_permission' => $tag_permission, 'shipment_status' => $shipment_status, 'shipper' => $shipper,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'arrival_date' => $arrival_date, 'shipment_status_date' => $shipment_status_date, 'sale_person' => $sale_person, 'case_nature_type_claims' => $case_nature_type_claims, 'hubs' => $hubs, 'escalation_tagged_check' => $escalation_tagged_check, 'crm_escalation_tagging_history' => $crm_escalation_tagging_history, 'escalation_status_flag' => $escalation_status_flag, 'escalation_log_flag' => $escalation_log_flag, 'escalation_tagging_id' => $escalation_tagging_id, 'crm_escalation_levels' => $crm_escalation_levels, 'crm_images_count' => $crm_images_count,'insurance' => $insurance,'approvers' => $approvers]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
         }
@@ -647,7 +647,8 @@ class AdminCRMController extends Controller
                 $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
-			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date')            ->whereIn('crm_requests.status_id', [1, 5])
+			->select('crm_requests.id as id', 's.tracking_number as tracking_number','crcn.id as nature_id', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as status', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr', 'ss.name as shipment_status', 'user.name as shipper_name', 'oc.name as origin', 'dc.name as destination', 'res.created_at as agent_assigned_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'dh.name as hub', 'z.name as zone', 'resby.name as agent_assigned_by', 'crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude' ,'crsh.created_at as reopen_date')
+            ->whereIn('crm_requests.status_id', [1, 5])
             ->groupBy('crm_requests.id');
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
@@ -4287,21 +4288,26 @@ class AdminCRMController extends Controller
         $comment_type= $request->comment_type;
         $comment = $request->comment;
         $crm_request_ids = $request->crm_request_ids;
-        if(count($crm_request_ids) > 0){
-            if($comment != null){
-                foreach ($crm_request_ids as $request_id){
-                    $crm_comment = new CrmComments();
-                    $crm_comment->crm_request_id = $request_id;
-                    $crm_comment->comment_by_id = Auth::id();
-                    $crm_comment->comment_by = 0;
-                    $crm_comment->comment_type = $comment_type;
-                    $crm_comment->comment = $comment ;
-                    $crm_comment->save();
+        if(is_array($crm_request_ids)){
+            if(count($crm_request_ids) > 0){
+                if($comment != null){
+                    foreach ($crm_request_ids as $request_id){
+                        $crm_comment = new CrmComments();
+                        $crm_comment->crm_request_id = $request_id;
+                        $crm_comment->comment_by_id = Auth::id();
+                        $crm_comment->comment_by = 0;
+                        $crm_comment->comment_type = $comment_type;
+                        $crm_comment->comment = $comment ;
+                        $crm_comment->save();
+                    }
+                    return response()->json(['status'=> 1,'success'=>"Comments Added"]);
                 }
-                return response()->json(['status'=> 1,'success'=>"Comments Added"]);
+                else{
+                    return response()->json(['status'=> 0,'error'=>"Add Comment First"]);
+                }
             }
             else{
-                return response()->json(['status'=> 0,'error'=>"Add Comment First"]);
+                return response()->json(['status'=> 0,'error'=>"Select Request First"]);
             }
         }
         else{

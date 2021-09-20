@@ -26,6 +26,7 @@ use App\Http\Models\DonePaymentCalculation;
 use App\Http\Models\InternationalDhlZone;
 use App\Http\Models\InternationalUserRate;
 use App\Http\Models\InternationalUsersCreditLimit;
+use App\http\models\InvoiceUploadSlip;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestHistory;
 use App\Http\Models\PendingPaymentCalculation;
@@ -6978,6 +6979,15 @@ class AdminFinanceController extends Controller
             ->editColumn('due_date', function($invoice) {
                 return Carbon::parse($invoice->due_date)->format('Y-m-d');
             })
+            ->addColumn('upload_slip', function($invoice) {
+                $invoice_slip_count = InvoiceUploadSlip::where('invoice_id',$invoice->id)->count();
+                if($invoice_slip_count > 0)
+                {
+                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }
+
+                return "-";
+            })
             ->addColumn('overdue_by', function($invoice) {
                 if ($invoice->status_id == 1) {
                     $days = Carbon::now()->diffInDays($invoice->due_date);
@@ -7000,6 +7010,8 @@ class AdminFinanceController extends Controller
                 $origin_wise_print_button = '<button type="button" class="dropdown-item print_origin_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Origin Wise Print</div></button>';
                 $gst_wise_print_button = '<button type="button" class="dropdown-item print_gst_wise"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">GST Wise Print</div></button>';
 
+                $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $invoice->id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
+
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -7019,6 +7031,9 @@ class AdminFinanceController extends Controller
                 $dropdown .= $origin_wise_print_button;
                 $dropdown .= $gst_wise_print_button;
 
+                if ((session('role_id') == 1 || in_array(589, session('permissions')))) {
+                    $dropdown .= $upload_deposit_slip_button;
+                }
                 $dropdown .= '
                 </div>
               </div>
@@ -7028,6 +7043,61 @@ class AdminFinanceController extends Controller
             });
 
         return $datatables->make(true);
+    }
+
+    public function invoices_slip (Request $request)
+    {
+        $request->validate([
+           'deposit_slip.*' => 'mimes:jpg,jpeg,png',
+        ]);
+
+        $files = $request->file('deposit_slip');
+        foreach ($request->date as $row => $date) {
+            $deposit_details = new InvoiceUploadSlip();
+            $deposit_details->invoice_id = $request->invoice_id;
+            $deposit_details->deposit_date = $request->date[$row];
+            $deposit_details->bank_id = $request->bank[$row];
+            $image = $files[$row];
+            $extension = 'png';
+            $random = rand(1000, 100000);
+            $now = Carbon::now();
+            $time = $now->year . '_' . $now->month;
+            $slip = $time . $random . Auth::id() . '.' . $extension;
+            $image->move(public_path('uploads/invoices'), $slip);
+
+            $deposit_details->image = $slip;
+            $deposit_details->save();
+        }
+
+        return redirect()->back()->with(['success' => 'Deposit Slips uploaded successfully!']);
+    }
+
+    public function invoices_slip_view(Request $request){
+        $invoice_id = $request->invoice_id;
+        if($invoice_id){
+            $slips = InvoiceUploadSlip::where('invoice_id', $invoice_id)->get();
+            if(count($slips) > 0){
+                $sorted_array = array();
+                $now = Carbon::now();
+                foreach ($slips as $slip) {
+                    $sorted_array[$slip->id]['date'] = Carbon::parse($slip->deposit_date)->toDateString();
+                    $sorted_array[$slip->id]['bank'] = BanksList::find($slip->bank_id)->name;
+                    $img_url = 'uploads/invoices/'. $slip->image;
+                    if(file_exists($img_url)){
+                        $sorted_array[$slip->id]['image'] = '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/invoices/' . $slip->image) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                    }else{
+                        $sorted_array[$slip->id]['image'] = "-";
+                    }
+                }
+
+                return ['status' => 0, 'slips' => $sorted_array];
+            }else{
+                return ['status' => 1, 'error' => 'No invoice slips found!'];
+            }
+        }else{
+            return ['status' => 1, 'error' => 'No Invoice Selected!'];
+
+        }
     }
 
     public function received_invoices_list(Request $request) {
@@ -7113,6 +7183,15 @@ class AdminFinanceController extends Controller
                 else {
                     return '-';
                 }
+            })
+            ->addColumn('upload_slip', function($invoice) {
+                $invoice_slip_count = InvoiceUploadSlip::where('invoice_id',$invoice->id)->count();
+                if($invoice_slip_count > 0)
+                {
+                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="#"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+                }
+
+                return "-";
             })
             ->addColumn('action', function($invoice) {
                 $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';

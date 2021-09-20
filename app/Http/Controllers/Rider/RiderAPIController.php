@@ -32,6 +32,7 @@ use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
@@ -479,6 +480,18 @@ class RiderAPIController extends Controller
                 }
             }
         }
+    }
+
+    private function generateDateRange($start_date, $end_date)
+    {
+        $start_date = Carbon::parse($start_date);
+        $end_date = Carbon::parse($end_date);
+        $dates = [];
+        for($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+            $dates[] = $date->format('Y-m-d');
+        }
+
+        return $dates;
     }
 
     public function login(Request $request)
@@ -3531,22 +3544,24 @@ class RiderAPIController extends Controller
                             }
                             $rider_delivery->save();
 
-                            $picture_path = 'rider_delivery/' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
                             $environment = config('app.env');
 
                             if ($request->has('audio')) {
+                                $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
@@ -8048,7 +8063,8 @@ class RiderAPIController extends Controller
                             }
                             $rider_return_delivery->save();
                             if ($request->has('picture')) {
-                                $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '.png';
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_return_delivery/' . $rider_return_delivery->id . '_' . $time . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                 $rider_return_delivery->picture_path = $picture_path;
                                 $rider_return_delivery->save();
@@ -8056,15 +8072,16 @@ class RiderAPIController extends Controller
 
                             $environment = config('app.env');
                             if ($request->has('audio')) {
+                                $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time .'.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '.' . $extension;
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time .'.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
@@ -8777,25 +8794,29 @@ class RiderAPIController extends Controller
                         $rider_delivery->save();
 
                         if ($request->has('picture')) {
-                            $picture_path = 'rider_delivery/picture_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/picture_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                             $rider_delivery->picture_path = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('cnic_image')) {
-                            $picture_path = 'rider_delivery/cnic_image_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/cnic_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->cnic_image));
                             $rider_delivery->cnic_image = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('house_image')) {
-                            $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->house_image));
                             $rider_delivery->house_image = $picture_path;
                             $rider_delivery->save();
                         }
                         if ($request->has('ccd_image')) {
-                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '.png';
+                            $time = Carbon::now()->toDateString();
+                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '_' . $time . '.png';
                             Storage::disk('public')->put($picture_path, file_get_contents($request->ccd_image));
                             $rider_delivery->ccd_image = $picture_path;
                             $rider_delivery->save();
@@ -9023,14 +9044,16 @@ class RiderAPIController extends Controller
 
 
                             if ($request->has('picture')) {
-                                $picture_path = 'rider_return_delivery/picture_' . $rider_return_delivery->id . '.png';
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_return_delivery/picture_' . $rider_return_delivery->id . '_' . $time . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
                                 $rider_return_delivery->picture_path = $picture_path;
                                 $rider_return_delivery->save();
                             }
 
                             if ($request->has('pod_image')) {
-                                $picture_path = 'rider_return_delivery/pod_image_' . $rider_return_delivery->id . '.png';
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_return_delivery/pod_image_' . $rider_return_delivery->id . '_' . $time . '.png';
                                 Storage::disk('public')->put($picture_path, file_get_contents($request->pod_image));
                                 $rider_return_delivery->pod_image = $picture_path;
                                 $rider_return_delivery->save();
@@ -9332,6 +9355,219 @@ class RiderAPIController extends Controller
         }
         $response['message'] = $message;
         return response()->json($response);
+    }
+
+    public function rider_shift(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $riders = Rider::find($rider_id);
+        if($riders){
+            $response = array();
+            $employee_shift = EmployeeShift::where('id', $riders->shift_id);
+            $response["status"] = 0;
+            if ($employee_shift->exists()){
+                $employee_shift = $employee_shift->first();
+                $response["shift_name"] = $employee_shift->name;
+                $response["start_time"] = $employee_shift->start_time;
+                $response["end_time"] = $employee_shift->end_time;
+            }
+            else{
+                $response["shift_name"] = "default";
+                $response["start_time"] = NULL;
+                $response["end_time"] = NULL;
+            }
+            return response()->json($response);
+        }
+        return response()->json(['status' => 1]);
+    }
+
+    public function month_attendance_history(Request $request)
+    {
+        $rules = [
+            'first_day' => ['required'],
+            'last_day' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            $message = 'Error(s) in Input';
+            return response()->json(['status' => 1, 'message' => $message, 'errors' => $validate->errors()]);
+        } else {
+            $rider_id = $request->rider_id;
+            $dates = $this->generateDateRange($request->first_day, $request->last_day);
+            $data = array();
+            $shift = EmployeeShift::join('riders as r', 'employee_shifts.id', '=', 'r.shift_id')
+                ->where('r.id', $rider_id)
+                ->select('employee_shifts.start_time as start_time', 'employee_shifts.extension_minutes as grace_time');
+            $shift_exists = 0;
+            if ($shift->exists()) {
+                $shift = $shift->first();
+                $shift_exists = 1;
+            }
+
+            foreach ($dates as $date) {
+                $datum = array();
+                $datum["date"] = Carbon::parse($date)->format("d");
+                $datum["month"] = Carbon::parse($date)->format("m");
+                $datum["year"] = Carbon::parse($date)->format("Y");
+                $attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                    ->where('employee_type', 2)
+                    ->whereDate('attendance_date', $date);
+                if ($attendance->exists()) {
+                    $attendance = $attendance->first();
+                    if ($shift_exists == 1) {
+                        if ($attendance->clock_in_datetime) {
+                            $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
+                            $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
+                            if ($attendance_date == $clock_in_date) {
+                                $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
+                                $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                                if ($time_diff > $shift->grace_time) {
+                                    $datum["status"] = 2;//Late
+                                } else {
+                                    $datum["status"] = 1;//Present
+                                }
+                            } else {
+                                $datum["status"] = 2;//Late
+                            }
+                        } else {
+                            $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
+                            $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
+                            if ($time_diff > $shift->grace_time) {
+                                $datum["status"] = 2;//Late
+                            } else {
+                                $datum["status"] = 1;//Present
+                            }
+                        }
+                    } else {
+                        $datum["status"] = 1;
+                    }
+                } else {
+                    $datum["status"] = 3;//Absent
+                }
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+    }
+
+    public function mark_attendance_v2(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('riders as r', 'e.id', 'r.employee_id')
+                ->where('r.id', $rider_id);
+            if ($reporting_location->exists()) {
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
+            $attendance_datetime = Carbon::parse($request->attendance_date)->format('Y-m-d H:i:s');
+            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $attendance_time = Carbon::parse($request->attendance_date)->format('H:i:s');
+
+            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 2);
+            $rider_attendance_action = new EmployeeAttendanceActionLog();
+            if ($rider_attendance->exists()) {
+                $rider_attendance = $rider_attendance->first();
+            } else {
+                $rider_attendance = new EmployeeAttendance();
+                $rider_attendance->employee_id = $rider_id;
+                $rider_attendance->employee_type = 2;
+                $rider_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $rider_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance->clock_in_latitude = $request->latitude;
+                $rider_attendance->clock_in_longitude = $request->longitude;
+                $rider_attendance->clock_in_location = $location_status;
+                $rider_attendance->save();
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance_action->attendance_date = $attendance_date;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
+                $rider_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
+            } elseif ($request->action == 2) {
+                $rider_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance->clock_out_latitude = $request->latitude;
+                $rider_attendance->clock_out_longitude = $request->longitude;
+                $rider_attendance->clock_out_location = $location_status;
+                $rider_attendance->save();
+
+                $rider_attendance_action->employee_id = $rider_id;
+                $rider_attendance_action->employee_type = 2;
+                $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->action_date = Carbon::now()->format("Y-m-d H:i:s");
+                $rider_attendance_action->attendance_date = $attendance_date;
+                $rider_attendance_action->latitude = $request->latitude;
+                $rider_attendance_action->longitude = $request->longitude;
+                $rider_attendance_action->location_status = $location_status;
+                $rider_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $rider_attendance_action]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
+    }
+
+    public function attendance_details_v2(Request $request)
+    {
+        $rules = [
+            'attendance_date' => ['required']
+        ];
+        $rider_id = $request->rider_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_attendance_action = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
+                ->whereDate('attendance_date', $request->attendance_date)
+                ->where('employee_type', 2)
+                ->select('action_id', 'action_date', 'latitude', 'longitude', 'location_status', 'attendance_date')
+                ->orderBy('action_date', 'ASC');
+            if ($rider_attendance_action->exists()) {
+                $rider_attendance_action = $rider_attendance_action->get();
+                return response()->json(['status' => 0, 'attendance_details' => $rider_attendance_action]);
+            }
+            return response()->json(['status' => 0, 'attendance_details' => []]);
+        }
     }
 
     /*public function delivery_packaging_material_update($tracking_number){
