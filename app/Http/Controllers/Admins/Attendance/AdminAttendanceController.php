@@ -76,7 +76,7 @@ class AdminAttendanceController extends Controller
         if(session('role_id') != 1 && session('role_id') != 17){
             $attendances->where('ad.id', session('department_id'));
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
-        }*/
+        }
 
         $datatable = Datatables::of($attendances)
             ->editColumn('trax_id', function ($employee) {
