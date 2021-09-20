@@ -753,6 +753,7 @@
                                 data: {
                                     '_token': '{{ csrf_token() }}',
                                     'rider': rider,
+                                    'oper_id' : $('#operation_rider_id').val(),
                                     'delivery_note_id': $('#delivery_note_id').val()
                                 }
                             })

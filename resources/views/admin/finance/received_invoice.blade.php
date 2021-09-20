@@ -33,6 +33,7 @@
                         <th class="border-primary border-darken-1">Received Amount</th>
                         <th class="border-primary border-darken-1">Tax Amount</th>
                         <th class="border-primary border-darken-1">Deposit Date</th>
+                        <th class="border-primary border-darken-1">Deposit Slip</th>
                       {{--  <th class="border-primary border-darken-1">Status</th>--}}
                         <th class="border-primary border-darken-1"></th>
                     </tr>
@@ -87,6 +88,41 @@
                                     <button type="submit" class="btn btn-primary ml-auto">Mark as Received</button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade text-left" id="ViewDepositSlip" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ViewDepositSlip"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary white">
+                                <h4 class="modal-title white">Deposit Slips View</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <table class="table table-bordered datatable" id="deposit_slip_table" style="z-index: 3;">
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Date</th>
+                                        <th class="border-primary border-darken-1">Bank Name</th>
+                                        <th class="border-primary border-darken-1">Deposit Slip</th>
+
+                                    </tr>
+                                    </thead>
+                                </table>
+
+                                <hr>
+                                <div class="row justify-content-center">
+                                    <div class="col-3">
+                                        <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -255,6 +291,7 @@
                     {data:'received_amount', name: 'invoices.received_amount', class: 'align-middle text-center received_amount'},
                     {data:'tax_amount', name: 'invoices.tax_amount', class: 'align-middle text-center tax_amount'},
                     {data:'deposit_date', name: 'invoices.deposit_date', class: 'align-middle text-center deposit_date'},
+                    {data:'upload_slip', name: 'invoices.deposit_date', class: 'align-middle text-center upload_slip', orderable: false, searchable: false},
                  /*   {data:'status', name: 'invoices.status_id', class: 'align-middle text-center status'},*/
                     {data:'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -276,7 +313,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.company_bank')) {
@@ -508,6 +545,58 @@
                         }
                     });
                 }
+            });
+
+            var deposit_slip_table;
+            $('body').on('click','.deposit_slip_view', function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url:'{!! route('admin.finance.invoices.slip_view') !!}',
+                        type:'POST',
+                        data: {
+                            'invoice_id':id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status){
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }else{
+                            $('#ViewDepositSlip').modal('show');
+                            deposit_slip_table = $('#deposit_slip_table').DataTable({
+                                dom: 'ltipr',
+                                ordering:false,
+                                paging:false,
+                                columns: [
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'date', class: 'align-middle date date-col-width form-group'},
+                                    {name: 'bank_name', class: 'align-middle bank_name form-group'},
+                                    {name: 'deposit_slip', class: 'align-middle deposit_slip form-group'}
+                                ],
+
+                                rowCallback: function(row, data, index) {
+                                    var info = deposit_slip_table.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                },
+                                initComplete: function() {
+
+                                }
+                            });
+
+                            $.each(data.slips, function (index, value) {
+                                deposit_slip_table.row.add([0, value.date, value.bank,  value.image]);
+                                deposit_slip_table.draw(true);
+                            });
+                        }
+                    });
+                }
+            });
+
+            $('#ViewDepositSlip').on('hidden.bs.modal', function () {
+                deposit_slip_table.clear();
+                deposit_slip_table.destroy();
             });
         });
     </script>
