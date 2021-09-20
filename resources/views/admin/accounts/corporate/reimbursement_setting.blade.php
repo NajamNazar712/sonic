@@ -31,7 +31,7 @@
                                         </div>
                                     </div>
                                     <div class="col-3 mt-2">
-                                        @if($setting->status == 1 && session('role_id') == 1 || in_array(599, session('permissions')))
+                                        @if($setting->status == 1 && (session('role_id') == 1 || in_array(599, session('permissions'))))
                                             <button type="button" class="btn btn-success approve">Approve</button>
                                             <button type="button" class="btn btn-danger reject">Reject</button>
                                         @endif

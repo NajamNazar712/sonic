@@ -33303,6 +33303,7 @@ class AdminCorporateAccountsController extends Controller
         {
             $setting = new CorporateReimbursementSetting();
             $setting->user_id = $id;
+            $setting->status = 2;
             $setting->save();
         }
         else{
