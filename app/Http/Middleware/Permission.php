@@ -979,6 +979,9 @@ class Permission
             'human_resource.fnf.edit_fnf_request' => 577,
             'human_resource.fnf.fnf_history_index' => 578,
 
+            'human_resource.employee_shifts.index' => 592,
+            'human_resource.employee_shifts.list' => 592,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'accounts.active.today' => 470,
@@ -1121,6 +1124,11 @@ class Permission
             
             'reports.daraz_mis.index' => 15,
             'reports.daraz_mis.list' => 15,
+
+            'reports.weight_reconciliation.index' => 8,
+            'reports.weight_reconciliation.list' => 8,
+
+
 
             
 

@@ -9,6 +9,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderRequest;
@@ -145,8 +146,9 @@ class RiderManagementController extends Controller
         $category = RiderCategory::all();
         $route_types = RouteType::all();
         $operation_riders = OperationRidersCategory::all();
-        
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type]);
+        $shifts = EmployeeShift::where('status', 1)->get();
+
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -160,6 +162,7 @@ class RiderManagementController extends Controller
             'operation_rider_id'=>'required',
             'rider_category'=>'required|numeric',
             'pin' => 'required|numeric',
+            'rider_shift' => 'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
         if ($validate->fails()) {
@@ -212,7 +215,8 @@ class RiderManagementController extends Controller
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),
             'trax_id' => $trax_id,
-            'rider_type_id' => $type
+            'rider_type_id' => $type,
+            'shift_id' => $request->rider_shift
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
@@ -240,7 +244,8 @@ class RiderManagementController extends Controller
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
         $operation_rider_ids =  OperationRidersCategory::all();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type]);
+        $shifts =  EmployeeShift::where('status', 1)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -250,7 +255,8 @@ class RiderManagementController extends Controller
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required',
-            'rider_category'=>'required|numeric'
+            'rider_category'=>'required|numeric',
+            'rider_shift'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -269,6 +275,7 @@ class RiderManagementController extends Controller
         $rider->cnic = $request->cnic;
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
+        $rider->shift_id = $request->rider_shift;
 
 
         $rider->rider_category_id = $request->rider_category;
@@ -670,7 +677,8 @@ class RiderManagementController extends Controller
         $category = RiderCategory::all();
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
-        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category]);
+        $shifts = EmployeeShift::where('status', 1)->get();
+        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category, 'shifts' => $shifts]);
     }
 
     public function rider_request_list(Request $request)
@@ -730,7 +738,8 @@ class RiderManagementController extends Controller
             'pin' => 'required|integer|digits:4',
             'rider_request_id' => 'required',
             'rider_type' => "required|numeric",
-            'category' => "required|numeric"
+            'category' => "required|numeric",
+            'rider_shift' => "required|numeric"
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -776,7 +785,8 @@ class RiderManagementController extends Controller
             'trax_id' => $trax_id,
             'employee_id' => $employee_id,
             'rider_type_id'  => $request->rider_type,
-            'operation_rider_id'  => $request->category
+            'operation_rider_id'  => $request->category,
+            'shift_id'  => $request->rider_shift
         ]);
         if($rider){
             NotificationsController::send(61, $rider->id, $request->pin);
