@@ -2724,8 +2724,9 @@ class AdminHumanResourseController extends Controller
         $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
         $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
         $personal_contact = '';
-        if($user = Admin::where('trax_id', $payslip->trax_id)->exists()){
-            $user = $user->first();
+
+        if(Admin::where('trax_id', $payslip->trax_id)->exists()){
+            $user = Admin::where('trax_id', $payslip->trax_id)->first();
             $personal_contact = $user->phone_number;
         }else{
             $rider = Rider::where('trax_id', $payslip->trax_id);
@@ -2759,13 +2760,13 @@ class AdminHumanResourseController extends Controller
         $arrears = ($payslip->arrears != NULL) ? $payslip->arrears:'-';
         $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:'-';
         $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:'-';
-        $operations_incentive = ($payslip->operations_incentive != NULL) ? $payslip->operations_incentive:'-';
+        $operations_incentive = ($payslip->operation_incentive != NULL) ? $payslip->operation_incentive:'-';
         $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:'-';
         $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition:'-';
 
         $total_addition = 0;
 
-        $total_addition = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance: 0 + ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:0 + ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:0 + ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:0 + ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:0 + ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:0 + ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:0 + ($payslip->overtime != NULL) ? $payslip->overtime:0 + ($payslip->bonus != NULL) ? $payslip->bonus:0 + ($payslip->arrears != NULL) ? $payslip->arrears:0 + ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:0 + ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:0 + ($payslip->operations_incentive != NULL) ? $payslip->operations_incentive:0 + ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:0 + ($payslip->others_addition != NULL) ? $payslip->others_addition:0;
+        $total_addition = (($payslip->mobile_allowance != NULL) ? (int)$payslip->mobile_allowance: 0) + (($payslip->vehicle_allowance != NULL) ? (int)$payslip->vehicle_allowance:0) + (($payslip->fuel_allowance != NULL) ? (int)$payslip->fuel_allowance:0) + (($payslip->conveyance_allowance != NULL) ? (int)$payslip->conveyance_allowance:0) + (($payslip->vehicle_maintenance != NULL) ? (int)$payslip->vehicle_maintenance:0) + (($payslip->fixed_incentive != NULL) ? (int)$payslip->fixed_incentive:0) + (($payslip->holiday_allowance != NULL) ? (int)$payslip->holiday_allowance:0) + (($payslip->overtime != NULL) ? (int)$payslip->overtime:0) + (($payslip->bonus != NULL) ? (int)$payslip->bonus:0) + (($payslip->arrears != NULL) ? (int)$payslip->arrears:0) + (($payslip->pickup_incentive != NULL) ? (int)$payslip->pickup_incentive:0) + (($payslip->delivery_incentive != NULL) ? (int)$payslip->delivery_incentive:0) + (($payslip->operations_incentive != NULL) ? (int)$payslip->operations_incentive:0) + (($payslip->extra_duty_allowance != NULL) ? (int)$payslip->extra_duty_allowance:0) + (($payslip->others_addition != NULL) ? (int)$payslip->others_addition:0);
 
 
         $paycut = ($payslip->paycut != NULL) ? $payslip->paycut : '-';
@@ -3046,13 +3047,13 @@ class AdminHumanResourseController extends Controller
                         
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="2">Total Addition</td>
-                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
+                            <td class="color primary border twice" colspan="2">'. number_format($total_addition) .'</td>
                             <td class="color primary border twice" colspan="2">Total Deduction</td>
-                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
+                            <td class="color primary border twice" colspan="2">'. number_format($total_deduction) .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="color primary border twice" colspan="6">Net Salary</td>
-                            <td class="color primary border twice" colspan="2">'. $net_salary .'</td>
+                            <td class="color primary border twice" colspan="2">'. number_format($net_salary) .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>
