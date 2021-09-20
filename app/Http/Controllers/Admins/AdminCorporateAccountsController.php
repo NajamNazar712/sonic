@@ -33286,7 +33286,6 @@ class AdminCorporateAccountsController extends Controller
 
     public function corporate_reimbursement_setting($id)
     {
-        return Carbon::now()->subMonth()->LastOfMonth()->toDateString();
         ActivityTrailController::createActivityTrailLog(Auth::id(),438);
         $user = User::find($id);
         if(!$user)
