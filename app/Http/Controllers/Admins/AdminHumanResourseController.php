@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
@@ -2286,6 +2288,61 @@ class AdminHumanResourseController extends Controller
 
     }
 
+    public function employee_shift_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),433);
+        return view('admin.human_resource.employee_shift');
+    }
+
+    public function employee_shift_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),434);
+        }
+
+        $shifts = EmployeeShift::all();
+        return Datatables::of($shifts)
+            ->editColumn('status', function ($data) {
+                if ($data->status == 0) {
+                    return 'In-Active';
+                } else {
+                    return 'Active';
+                }
+            })
+            ->editColumn('start_time_formatted', function ($data) {
+                return Carbon::parse($data->start_time)->format("g:i A");
+            })
+            ->editColumn('end_time_formatted', function ($data) {
+                return Carbon::parse($data->end_time)->format("g:i A");
+            })
+            ->addColumn("action", function ($data) {
+                if (session('role_id') == 1 || in_array(593, session('permissions')) || in_array(594, session('permissions'))) {
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(593, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(594, session('permissions'))) {
+                        if ($data->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        } else {
+                            $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }
+                    }
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
     public function payslip_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),436);
         return view('admin.human_resource.payslip.index');
@@ -2295,22 +2352,67 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
-        $payslips = EmployeePayslip::all();
-        return Datatables::of($payslips)
-            ->addColumn('action', function ($types) {
+        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
+        $datatable = Datatables::of($payslips)
+            ->addColumn('action', function () {
                 $dropdown = '
-              <div class="btn-group">
+                <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-
-                $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
+            $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
 
                 return $dropdown;
-            })
-            ->make(true);
+            });
+
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
+        }
+        return $datatable->make(true);
+
+    }
+              
+                   
+      
+
+    public function employee_shift_status(Request $request)
+    {
+        $id = $request->id;
+        $shift = EmployeeShift::find($id);
+        if ($request->status == 0) {
+            $status = 'Disabled';
+        } else {
+            $status = 'Enabled';
+        }
+        $shift->status = $request->status;
+        $shift->save();
+        return response()->json(['status' => 1, 'success' => 'Shift ' . $status . ' successfully!']);
     }
 
+    public function employee_shift_add(Request $request)
+    {
+        $shift = new EmployeeShift();
+        $shift->name = $request->name;
+        $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
+        $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
+        $shift->extension_minutes = $request->extension_minutes;
+        $shift->save();
+        return redirect()->back()->with('success', 'Shift Added Successfully!');
+    }
+
+    public function employee_shift_edit(Request $request)
+    {
+        $shift = EmployeeShift::find($request->shift_id);
+        $shift->name = $request->name;
+        $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
+        $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
+        $shift->extension_minutes = $request->extension_minutes;
+        $shift->save();
+        return redirect()->back()->with('success', 'Shift Updated Successfully!');
+    }
     public function payslip_excel_upload(Request $request){
 
         $payroll_month = $request->payslip_month_formatted;
@@ -2318,6 +2420,25 @@ class AdminHumanResourseController extends Controller
             return redirect()->back()->with('error', 'Payslip month not selected!');
         }
 
+        Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
+
+            if ($value) {
+                $result = false;
+                if(Admin::where('trax_id', $value)->exists()){
+                    $result = true;
+                }
+                else{
+                    if(Rider::where('trax_id', $value)->exists()){
+                        $result = true;
+                    }
+                }
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
         $names = [
             'trax_id' => 'Employee ID',
             'name' => 'Employee Name',
@@ -2382,9 +2503,11 @@ class AdminHumanResourseController extends Controller
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
             'exists' => 'Given :attribute is Invalid.',
+            'check_trax_id' => 'Employee id not found!',
+
         ];
         $rules = [
-            'trax_id' => ['required', 'between:1,100'],
+            'trax_id' => ['required', 'between:1,100','check_trax_id'],
             'name' => ['required', 'between:1,100'],
             'designation' => ['required', 'between:1,100'],
             'department' => ['required', 'between:1,100'],
@@ -2443,6 +2566,7 @@ class AdminHumanResourseController extends Controller
             'iban' => ['nullable','string'],
 
         ];
+
 
         $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'other_deductions', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
         if ($file = $request->file('payslip')) {
