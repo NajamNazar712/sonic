@@ -2532,7 +2532,7 @@ class AdminFinanceController extends Controller
                     }
 
                     if($crs) {
-                        $wht = (($charges + gst) * 3) / 100;
+                        $wht = (($charges + $gst) * 3) / 100;
                     }
                     else{
                         $wht = 0;
@@ -2550,7 +2550,7 @@ class AdminFinanceController extends Controller
                     }
 
                     if($crs) {
-                        $wht = (($charges + gst) * 3) / 100;
+                        $wht = (($charges + $gst) * 3) / 100;
                     }
                     else{
                         $wht = 0;
@@ -2563,7 +2563,7 @@ class AdminFinanceController extends Controller
                 $gst = 0;
 
                 if($crs) {
-                    $wht = (($charges + gst) * 3) / 100;
+                    $wht = (($charges + $gst) * 3) / 100;
                 }
                 else{
                     $wht = 0;
