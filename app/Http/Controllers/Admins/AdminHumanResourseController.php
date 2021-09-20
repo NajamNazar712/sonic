@@ -735,6 +735,7 @@ class AdminHumanResourseController extends Controller
                                 $admin->status = 1;
                             }
 
+                            $admin->updated_by = Auth::id();
                             $admin->trax_id = $employee->trax_id;
                             $admin->employee_id = $employee->id;
 
