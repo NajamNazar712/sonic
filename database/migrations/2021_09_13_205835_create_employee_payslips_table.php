@@ -26,7 +26,7 @@ class CreateEmployeePayslipsTable extends Migration
             $table->date('joining_date');
             $table->date('confirmation_date')->nullable();
             $table->string('cnic');
-            $table->string('employee_status')->nullable();
+            $table->string('employee_status')->nullable()->index();
             $table->integer('payroll_days')->nullable();
             $table->integer('present_days')->nullable();
             $table->integer('pay_cut_days')->nullable();

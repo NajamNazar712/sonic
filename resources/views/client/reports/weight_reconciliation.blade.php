@@ -1,21 +1,24 @@
-@extends('admin.layout.master')
+@extends('client.layout.master')
 
-@section('title', 'Weight QC')
+@section('title', 'Report - Weight Reconciliation')
 
 @section('content')
     <h1 class="mb-1">
-        Weight QC
+        Report - Weight Reconciliation
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+
                 <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="col-3 mb-1">
-                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                    <div class="col-4 mb-1">
+                        <input type="text" class="form-control tracking_numbers" name="tracking_numbers" id="tracking_numbers" placeholder="Search Tracking Number">
+                        {{-- <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required"> --}}
                     </div>
-                    <div class="col-3 mb-1">
+                  
+                    <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $mode)
@@ -24,34 +27,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3 mb-1">
-                        <fieldset class="form-group">
-                            <select name="search_user" id="search_user" class="form-control select2">
-                                @foreach($users as $user)
-                                    <option value="{{$user->id}}">{{$user->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-3 mb-1">
-                        <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-3 mb-1">
-                        <fieldset class="form-group">
-                            <select name="search_zone" id="search_zone" class="form-control select2">
-                                @foreach($zones as $zone)
-                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-3 mb-1">
+                    <div class="col-4 mb-1">
                         <fieldset class="form-group">
                             <select name="weighted_as" id="weighted_as" class="form-control select2">
                                 <option value="1">Dense</option>
@@ -66,9 +42,10 @@
                                     <span class="la la-calendar-o"></span>
                                 </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
                         </div>
                     </div>
+                    
                     <div class="col-3 mb-1">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -76,7 +53,7 @@
                                     <span class="la la-calendar-o"></span>
                                 </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To">
                         </div>
                     </div>
 
@@ -86,30 +63,30 @@
                         </div>
                     </div>
                 </form>
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <thead>
+                    <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
+                        <th class="border-primary border-darken-1">Shipper Name</th>
+                        <th class="border-primary border-darken-1">Shipping Mode</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Booking Date</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
+                        <th class="border-primary border-darken-1">Arrival Weight (B)</th>
+                        <th class="border-primary border-darken-1">Difference (B-A)</th>
+                        <th class="border-primary border-darken-1">Actual Weight Charges</th>
+                        <th class="border-primary border-darken-1">Weighted As</th>
+                    </tr>
+                    </thead>
+                </table>
 
-                <div class="d-none" id="table">
-                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                        <thead>
-                        <tr role="row" class="bg-primary white">
-                            <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Tracking Number</th>
-                            <th class="border-primary border-darken-1">Shipper Name</th>
-                            <th class="border-primary border-darken-1">Shipping Mode</th>
-                            <th class="border-primary border-darken-1">Origin</th>
-                            <th class="border-primary border-darken-1">Destination</th>
-                            <th class="border-primary border-darken-1">Booking Date</th>
-                            <th class="border-primary border-darken-1">Arrival Date</th>
-                            <th class="border-primary border-darken-1">Weight Input by Shipper (A)</th>
-                            <th class="border-primary border-darken-1">Arrival Weight (B)</th>
-                            <th class="border-primary border-darken-1">Difference (B-A)</th>
-                            <th class="border-primary border-darken-1">Weighted As</th>
-                        </tr>
-                        </thead>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
+
 
 @endsection
 
@@ -120,66 +97,129 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <style>
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        a.btn.btn-secondary {
+            border-radius: 20px;
+            background: #64a0d2;
+        }
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+
+        .tracking_numbers{
+            width: 100% !important;
+            text-align: left !important;
+        }
+    </style>
 @endsection
+
 @section('js')
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            // var select = $('.tracking_numbers').selectize({
+            //     placeholder: 'Tracking Number(s)',
+            //     delimiter: ',',
+            //     createOnBlur: true,
+            //     persist: false,
+            //     plugins: ['remove_button'],
+            //     onDropdownOpen: function(dropdown) {
+            //         dropdown.remove();
+            //     },
+            //     onType: function(str) {
+            //         var regex = /^[0-9,]+$/;
 
-            var select = $('.tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function(dropdown) {
-                    dropdown.remove();
-                },
-                onType: function(str) {
-                    var regex = /^[0-9,]+$/;
-
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function(input) {
-                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                },
+            //         if (!regex.test(str)) {
+            //             select[0].selectize.setTextboxValue('');
+            //         }
+            //     },
+            //     create: function(input) {
+            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+            //             return {
+            //                 value: input,
+            //                 text: input
+            //             }
+            //         }
+            //         else {
+            //             return false;
+            //         }
+            //     },
+            // });
+            
+            $('#tracking_numbers').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
             });
+            
             $('#search_form #search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Shipping Mode*',
             });
-            $('#search_form #search_user').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Shipper',
-            });
-            $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Hub',
-            });
-            $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Select Zone',
-            });
+            // $('#search_form #search_hub').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '100%',
+            //     placeholder: 'Select Hub',
+            // });
+            // $('#search_form #search_zone').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '100%',
+            //     placeholder: 'Select Zone',
+            // });
             $('#search_form #weighted_as').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Weighted As',
@@ -221,6 +261,8 @@
                     }
                 }
             });
+
+
             $('#search_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -241,10 +283,13 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.weight_qc.list') }}',
+                        url: '{{ route('cod.reports.weight_reconciliation.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
-
                             head = [];
 
                             head.push('S. No.');
@@ -258,6 +303,8 @@
                             head.push('Weight Input by Shipper (A)');
                             head.push('Arrival Weight (B)');
                             head.push('Difference (B-A)');
+                            head.push('Actual Weight Charges');
+                            
                             head.push('Weighted As');
 
 
@@ -275,7 +322,9 @@
                                 row.push(values.estimated_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.difference);
+                                row.push(values.weight_charges);
                                 row.push(values.weighted_as);
+
                                 body.push(row);
                             });
                         },
@@ -291,8 +340,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        className: 'btn btn-primary',
-                        title: 'Weight QC Report',
+                        title: 'Weight Reconciliation',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -300,14 +348,16 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
-                autoWidth: false,
                 language: {
                     processing: data_table_loader
                 },
                 serverSide: true,
-                deferLoading: [50, 0],
                 ajax:{
-                    url: '{{ route('admin.reports.weight_qc.list') }}',
+                    url: '{{ route('cod.reports.weight_reconciliation.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#search_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
@@ -332,7 +382,9 @@
                     { data:'estimated_weight' ,name: 'shipments.estimated_weight', class: 'align-middle text-center estimated_weight'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle text-center actual_weight'},
                     { data:'difference' ,name: 'difference', class: 'align-middle text-center difference', orderable: false, searchable: false},
+                    { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle text-center weight_charges', orderable: false, searchable: false},
                     { data:'weighted_as' ,name: 'weighted_as', class: 'align-middle text-center weighted_as', orderable: false, searchable: false},
+                    
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -342,8 +394,10 @@
                     this.api().table().columns.adjust();
                 }
             });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
 
         });
-
     </script>
 @endsection

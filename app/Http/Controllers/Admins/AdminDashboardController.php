@@ -7952,7 +7952,7 @@ class AdminDashboardController extends Controller
                         if(session('role_id') == 1 || in_array(440, session('permissions'))){
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                         }
-                        if(session('role_id') == 1 || in_array(590, session('permissions'))) {
+                        if((session('role_id') == 1 || in_array(590, session('permissions'))) && $result->account_type_id == 2) {
                             $dropdown .= '<button type="button" class="dropdown-item credit_limit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Credit Limit</div></button>';
                         }
                     }
