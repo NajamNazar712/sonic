@@ -52,6 +52,26 @@
                                 </div>
                             </form>
 
+                            <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                                <div class="col-3">
+                                    <div class="form-group input-group ml-1">
+
+                                        <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                                </span>
+                                        </div>
+                                        <input type="text" name="search_payslip_month" class="form-control bg-primary border-primary white rounded-right" id="search_payslip_month" placeholder="Search Payslip Month" data-rule-required="true" data-msg-required="Payslip Month is required">
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-2 mt-2 justify-content-center">
+                                    <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
@@ -133,7 +153,7 @@
             width: auto !important;
             text-align: left;
         }
-        #payslip_month_table{
+        #payslip_month_table , #search_payslip_month_table {
             display:none;
         }
 
@@ -153,7 +173,7 @@
         $(document).ready(function() {
             var max = '{{ Carbon\Carbon::now() }}';
 
-            var payslip_month = $('#payslip_month').pickadate({
+            var payslip_month = $('#payslip_upload_form #payslip_month').pickadate({
                 firstDay: 1,
                 disable:[true,1],
                 clear: '',
@@ -180,6 +200,32 @@
 
             });
 
+            var search_payslip_month = $('#search_form #search_payslip_month').pickadate({
+                firstDay: 1,
+                disable:[true,1],
+                clear: '',
+                today:'Select Current Month',
+                max: max,
+                format:'mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#search_payslip_month_root').css('top','40px');
+                    $('#search_payslip_month_root button.picker__button--today').removeAttr('disabled');
+                },
+                onSet: function(context) {
+
+                    var from_month = $('#search_payslip_month_root .picker__select--month').val();
+                    var from_year = $('#search_payslip_month_root .picker__select--year').val();
+                    var payslip_month_selected = new Date(from_year,from_month, 1);
+
+                    search_payslip_month.pickadate('picker').set('select', payslip_month_selected,{muted:true});
+
+                }
+
+            });
 
             $('#payslip_upload_form').validate({
                 errorClass: 'danger',
@@ -284,7 +330,12 @@
                 serverSide: true,
                 rowId: 'id',
                 order: [[1, 'asc']],
-                ajax: '{{ route('admin.human_resource.payslip.list') }}',
+                ajax: {
+                    url: '{{ route('admin.human_resource.payslip.list') }}',
+                    data: function (d) {
+                        d.search_payslip_month = $('input[name="search_payslip_month_formatted"]').val();
+                    }
+                },
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'payroll_month', name: 'employee_payslips.payroll_month', class: 'align-middle payroll_month'},
@@ -368,6 +419,13 @@
                 }
             });
 
+            $('#search_form').bind('submit',function (e) {
+                e.preventDefault();
+
+                table.draw();
+
+
+            });
 
         });
     </script>

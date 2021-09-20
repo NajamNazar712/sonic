@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
@@ -2295,9 +2296,9 @@ class AdminHumanResourseController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
-        $payslips = EmployeePayslip::all();
-        return Datatables::of($payslips)
-            ->addColumn('action', function ($types) {
+        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
+        $datatable = Datatables::of($payslips)
+            ->addColumn('action', function () {
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -2307,8 +2308,16 @@ class AdminHumanResourseController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
 
                 return $dropdown;
-            })
-            ->make(true);
+            });
+
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
+        }
+        return $datatable->make(true);
+
     }
 
     public function payslip_excel_upload(Request $request){
@@ -2318,6 +2327,25 @@ class AdminHumanResourseController extends Controller
             return redirect()->back()->with('error', 'Payslip month not selected!');
         }
 
+        Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
+
+            if ($value) {
+                $result = false;
+                if(Admin::where('trax_id', $value)->exists()){
+                    $result = true;
+                }
+                else{
+                    if(Rider::where('trax_id', $value)->exists()){
+                        $result = true;
+                    }
+                }
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
         $names = [
             'trax_id' => 'Employee ID',
             'name' => 'Employee Name',
@@ -2382,9 +2410,11 @@ class AdminHumanResourseController extends Controller
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
             'exists' => 'Given :attribute is Invalid.',
+            'check_trax_id' => 'Employee id not found!',
+
         ];
         $rules = [
-            'trax_id' => ['required', 'between:1,100'],
+            'trax_id' => ['required', 'between:1,100','check_trax_id'],
             'name' => ['required', 'between:1,100'],
             'designation' => ['required', 'between:1,100'],
             'department' => ['required', 'between:1,100'],
