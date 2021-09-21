@@ -5964,7 +5964,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
                     if($self_collection){
                         ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
-                        $shipment = Shipment::find($request->shipment_id);
+                        $shipment = Shipment::find($shipment_id);
                         $shipment->shipper_status_id = 15;
                         $shipment->consignee_status_id = 15;
                         $shipment->save();
