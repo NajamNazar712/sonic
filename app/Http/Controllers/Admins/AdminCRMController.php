@@ -1389,7 +1389,15 @@ class AdminCRMController extends Controller
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status]);
+        $admins = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id' )
+            ->select('a.id as id', 'a.name as name')
+            ->whereNotIn('admin_roles.department_id', [1,3])->get();
+        $types = CrmRequestTaggingTypes::get();
+        $departments = AdminDepartment::whereNotIn('id', [1,3])->get();
+        $hubs = City::where('hub', 1)->get();
+        //return view('admin.crm.in_process')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones]);
+
+        return view('admin.crm.resolved')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status,'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs]);
     }
 
     public function resolved_list(Request $request){
