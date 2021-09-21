@@ -1417,13 +1417,17 @@ class ShipperShipmentBookController extends Controller
                                 }
                                 $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
                                 if ($express_details->exists()) {
-                                    $express_details = $express_details->first();
-                                    if($express_details->center_frachise_type==1){
-                                        $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                                        $express_center =  '('. $trax_center->name. ')';
-                                    }elseif ($express_details->center_frachise_type==2) {
-                                        $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                                        $express_center = '('. $trax_franchise->name . ')';
+                                    if($shipment->shipper_status_id != 54){
+                                        $express_details = $express_details->first();
+                                        if($express_details->center_frachise_type==1){
+                                            $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                            $express_center =  '('. $trax_center->name. ')';
+                                        }elseif ($express_details->center_frachise_type==2) {
+                                            $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                            $express_center = '('. $trax_franchise->name . ')';
+                                        }else{
+                                            $express_center = '';
+                                        }
                                     }else{
                                         $express_center = '';
                                     }
@@ -1473,13 +1477,18 @@ class ShipperShipmentBookController extends Controller
 
                                 $shipment_details = ShipmentDetail::where('shipment_id',$shipment->id);
                                 if ($shipment_details->exists()) {
-                                    $shipment_details = $shipment_details->first();
-                                    if($shipment_details->center_frachise_type==1){
-                                        $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
-                                        $express_center =  '('. $trax_center->name. ')';
-                                    }elseif ($shipment_details->center_frachise_type==2) {
-                                        $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
-                                        $express_center = '('. $trax_franchise->name . ')';
+                                    if($shipment->shipper_status_id != 54){
+
+                                        $shipment_details = $shipment_details->first();
+                                        if($shipment_details->center_frachise_type==1){
+                                            $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
+                                            $express_center =  '('. $trax_center->name. ')';
+                                        }elseif ($shipment_details->center_frachise_type==2) {
+                                            $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
+                                            $express_center = '('. $trax_franchise->name . ')';
+                                        }else{
+                                            $express_center = '';
+                                        }
                                     }else{
                                         $express_center = '';
                                     }
@@ -1882,13 +1891,17 @@ class ShipperShipmentBookController extends Controller
                         $shipment_pieces = '';
                         $shipment_details = ShipmentDetail::where('shipment_id',$shipment->id);
                         if ($shipment_details->exists()) {
-                            $shipment_details = $shipment_details->first();
-                            if($shipment_details->center_frachise_type==1){
-                                $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
-                                $express_center =  '('. $trax_center->name. ')';
-                            }elseif ($shipment_details->center_frachise_type==2) {
-                                $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
-                                $express_center = '('. $trax_franchise->name . ')';
+                            if($shipment->shipper_status_id != 54){
+                                $shipment_details = $shipment_details->first();
+                                if($shipment_details->center_frachise_type==1){
+                                    $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
+                                    $express_center =  '('. $trax_center->name. ')';
+                                }elseif ($shipment_details->center_frachise_type==2) {
+                                    $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
+                                    $express_center = '('. $trax_franchise->name . ')';
+                                }else{
+                                    $express_center = '';
+                                }
                             }else{
                                 $express_center = '';
                             }
@@ -2489,8 +2502,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,2'],
+            'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,2', 'between:1,2'],
 
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
@@ -4474,8 +4487,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
         'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-            'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,2'],
+            'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,2', 'between:1,2'],
 
             'order_date' => ['nullable', 'date_format:Y-m-d'],
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],

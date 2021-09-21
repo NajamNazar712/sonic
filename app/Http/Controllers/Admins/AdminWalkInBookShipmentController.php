@@ -727,16 +727,21 @@ class AdminWalkInBookShipmentController extends Controller
                 ';
                 $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
                         if ($express_details->exists()) {
-                            $express_details = $express_details->first();
-                            if($express_details->center_frachise_type==1){
-                                $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                                $express_center =  '('. $trax_center->name. ')';
-                            }elseif ($express_details->center_frachise_type==2) {
-                                $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                                $express_center = '('. $trax_franchise->name . ')';
+                            if($shipment->shipper_status_id != 54){
+                                $express_details = $express_details->first();
+                                if($express_details->center_frachise_type==1){
+                                    $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                    $express_center =  '('. $trax_center->name. ')';
+                                }elseif ($express_details->center_frachise_type==2) {
+                                    $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                    $express_center = '('. $trax_franchise->name . ')';
+                                }else{
+                                    $express_center = '';
+                                }
                             }else{
                                 $express_center = '';
                             }
+                    
                         }else{
                             $express_center = '';
                         }
@@ -853,13 +858,18 @@ class AdminWalkInBookShipmentController extends Controller
             $html .= $shipment_details;
             $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
                         if ($express_details->exists()) {
-                            $express_details = $express_details->first();
-                            if($express_details->center_frachise_type==1){
-                                $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
-                                $express_center =  '('. $trax_center->name. ')';
-                            }elseif ($express_details->center_frachise_type==2) {
-                                $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
-                                $express_center = '('. $trax_franchise->name . ')';
+                            if($shipment->shipper_status_id != 54){
+
+                                $express_details = $express_details->first();
+                                if($express_details->center_frachise_type==1){
+                                    $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                    $express_center =  '('. $trax_center->name. ')';
+                                }elseif ($express_details->center_frachise_type==2) {
+                                    $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                    $express_center = '('. $trax_franchise->name . ')';
+                                }else{
+                                    $express_center = '';
+                                }
                             }else{
                                 $express_center = '';
                             }
