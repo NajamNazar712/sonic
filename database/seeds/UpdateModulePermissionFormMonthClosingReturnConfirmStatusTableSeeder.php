@@ -12,7 +12,7 @@ class UpdateModulePermissionFormMonthClosingReturnConfirmStatusTableSeeder exten
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 587, 'name' => 'Month Closing Resolved - Reattempt', 'module_id' => 16)
+            array('id' => 587, 'name' => 'Month Closing Resolved - Return Confirm', 'module_id' => 16)
         ));
     }
 }
