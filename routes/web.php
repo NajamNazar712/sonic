@@ -1312,6 +1312,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('dbf_shipment_list', 'Admins\ReturnController@return_deliveries_dbf_shipments_list')->name('dbf_shipment_list');
 
         });
+
+        Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
+            Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
+
+        });
     });
     Route::prefix('debriefing')->name('debriefing.')->group(function (){
         Route::prefix('supervisor')->name('supervisor.')->group(function (){

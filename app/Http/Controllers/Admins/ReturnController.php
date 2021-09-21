@@ -4066,4 +4066,12 @@ class ReturnController extends Controller
         return $datatables->make(true);
 
     }
+
+    public function rcp_agent_index(){
+        return view('admin.return.rcp_agent');
+    }
+
+    public function rcp_agent_list(Request $request){
+
+    }
 }
