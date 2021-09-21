@@ -8255,16 +8255,9 @@ class NotificationsController extends Controller
 
                 }
                 else if ($id == 155) {
-                    $date_week_age = Carbon::now()->subDays(7)->format('Y-m-d 00:00:00');
-                    $deliveries = Rider::join('delivery_notes', function ($join) {
-                        $join->on('delivery_notes.rider_id', '=', 'riders.id')
-                            ->where('delivery_notes.created_at', '=', DB::raw('(select max(created_at) from delivery_notes where delivery_notes.rider_id= riders.id)'));
-                    })
-                        ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as phone_no', 'riders.cnic as cnic_no')
-                        ->whereDate('delivery_notes.created_at', '<=', $date_week_age)
-                        ->where('riders.status', 1)
-                        ->groupBy('rider_id')
-                        ->get();
+                    $getdata = $reference_1_id;
+
+                    $datas = Rider::wherein("id",$getdata)->get();
 
                     $html = '<p>Dear (HR / It support),
                     The Rider(s)  have been deactivated from system,
@@ -8276,34 +8269,17 @@ class NotificationsController extends Controller
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone Number</th>';
                     $html .= '<th style="padding:5px; border: 1px solid black; border-collapse: collapse;">CNIC Number</th>';
                     $html .= '</tr></thead><tbody>';
-                    foreach($deliveries as $delivery){
-                        $data = Rider::find($delivery->rider_id);
-                        $data->status = 0;
-                        $data->save();
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $delivery->rider_id . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $delivery->rider_name . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $delivery->phone_no . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $delivery->cnic_no . '</td>';
-                    }
-                    $pickups = Rider::join('v2_pickup_notes', function ($join) {
-                        $join->on('v2_pickup_notes.rider_id', '=', 'riders.id')
-                            ->where('v2_pickup_notes.created_at', '=', DB::raw('(select max(created_at) from v2_pickup_notes where v2_pickup_notes.rider_id= riders.id)'));
-                    })
-                        ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as phone_no', 'riders.cnic as cnic_no')
-                        ->whereDate('v2_pickup_notes.created_at', '<=', $date_week_age)
-                        ->where('riders.status', 1)
-                        ->groupBy('rider_id')
-                        ->get();
-                    foreach($pickups as $pickup){
-                        $data = Rider::find($pickup->rider_id);
-                        $data->status = 0;
-                        $data->save();
+
+                    foreach($datas as $data){
+                        $data_set = Rider::find($data->id);
+
+                        $data_set->status = 0;
+                        $data_set->save();
                                 $html .= '<tr>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->rider_id . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->rider_name . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->phone_no . '</td>';
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $pickup->cnic_no . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->id . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->name . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->phone . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $data->cnic . '</td>';
 
 
 
