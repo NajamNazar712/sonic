@@ -217,9 +217,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                    }
                     if($self_collection == TRUE){
-                        $shipment_self_collection = new SelfCollectionShipment();
-                        $shipment_self_collection->shipment_id = $shipment->id;
-                        $shipment_self_collection->save();
+                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
+                        if (!$shipment_self_collection->exists()) {
+                            $shipment_self_collection = new SelfCollectionShipment();
+                            $shipment_self_collection->shipment_id = $shipment->id;
+                            $shipment_self_collection->save();
+                        }
 
                         $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id);
                         if ($shipment_detail->exists()) {
@@ -238,6 +241,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                             ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, NULL, Auth::id());
                             $shipment = Shipment::find($request->shipment_id);
                             $shipment->shipper_status_id = 15;
+                            $shipment->consignee_status_id = 15;
                             $shipment->save();
                         }    
                     }
