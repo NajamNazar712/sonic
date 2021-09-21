@@ -86,6 +86,7 @@
                                     <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempt(s)</th>
+                                    <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -531,6 +532,7 @@
                 {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
+                {data: 'aging', name: 'aging', class: 'align-middle aging'},
                 {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
             ],
