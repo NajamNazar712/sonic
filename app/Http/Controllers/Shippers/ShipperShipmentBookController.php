@@ -2490,7 +2490,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,10'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'in:1,2'],
 
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
