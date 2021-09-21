@@ -159,6 +159,9 @@ class ShipperInterceptReBookController extends Controller
                         
                         if($intercept_type == 2){
                             ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, NULL,$user_id,NULL);
+                            $shipment = Shipment::find($request->shipment_id);
+                            $shipment->shipper_status_id = 15;
+                            $shipment->save();
                         }
                     }
 

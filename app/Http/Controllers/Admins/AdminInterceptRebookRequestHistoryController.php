@@ -236,7 +236,9 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                         }
                         if ($intercept_type == 2){
                             ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, NULL, Auth::id());
-
+                            $shipment = Shipment::find($request->shipment_id);
+                            $shipment->shipper_status_id = 15;
+                            $shipment->save();
                         }    
                     }
 
