@@ -50,23 +50,32 @@ class AdminMonthClosingController extends Controller
                 foreach ($shipment_ids as $shipment){
                     $parcel = Shipment::find($shipment);
                     if($parcel){
-                        if (!$parcel->packaging_material_request) {
-                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                            ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+                        $month_closing = MonthClosing::where('shipment_id', $parcel->id)->where('status_id', 3);
+                        if($month_closing->exists()){
+                            $month_closing = $month_closing->first();
+                            MonthClosingResponsible::where('month_closing_id', $month_closing->id)->delete();
+                            $month_closing->delete();
+                            if (!$parcel->packaging_material_request) {
+                                Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                                ShipmentsJourneyController::add($shipment, 20, 20, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+    
+                                NotificationsController::send(15, 0, $shipment);
+                                NotificationsController::send(16, 0, $shipment);
+    
+                                ShipmentChargesController::return($shipment);
+    
+                                AdminFinanceController::add_payment($shipment, 1);
+                            }
+                            else {
+                                Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+                                ShipmentsJourneyController::add($shipment, 17, 17, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
+    
+                                NotificationsController::send(15, 0, $shipment);
+                                NotificationsController::send(16, 0, $shipment);
+                            }
+                        }else{
+                            $not_updated_shipments[] = $shipment;
 
-                            NotificationsController::send(15, 0, $shipment);
-                            NotificationsController::send(16, 0, $shipment);
-
-                            ShipmentChargesController::return($shipment);
-
-                            AdminFinanceController::add_payment($shipment, 1);
-                        }
-                        else {
-                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                            ShipmentsJourneyController::add($shipment, 17, 17, NULL, $shipment_remarks[$shipment], NULL, Auth::id());
-
-                            NotificationsController::send(15, 0, $shipment);
-                            NotificationsController::send(16, 0, $shipment);
                         }
                     }else{
                         $not_updated_shipments[] = $shipment;
@@ -543,5 +552,9 @@ class AdminMonthClosingController extends Controller
         return response()->json(['status' => 1, 'error' => 'No shipment(s) selected!']);
     }
 
+
+    public function return_confirm_shipment_status(){
+
+    }
 
 }

@@ -914,6 +914,7 @@ class Permission
             'telenor.call.index' => 402,
             'telenor.call.list' => 402,
             'telenor.return.bulk_return' => 525,
+            'telenor.revert.bulk_revert' => 595,
 
             'carrefour.arrival.index' => 579,
             'carrefour.arrival.submit' => 579,
