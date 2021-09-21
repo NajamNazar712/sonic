@@ -2785,7 +2785,9 @@ class ShipperShipmentBookController extends Controller
                                     if(!$trax_center){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                     }else{
-                                        if($trax_center->default_hub != $consignee_city->id){
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
                                             $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                         }
                                     }
@@ -2794,7 +2796,9 @@ class ShipperShipmentBookController extends Controller
                                     if(!$trax_franchise){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                     }else{
-                                        if($trax_franchise->default_hub != $consignee_city->id){
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
                                             $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                         }
                                     }
@@ -2944,7 +2948,9 @@ class ShipperShipmentBookController extends Controller
                                 if(!$trax_center){
                                     $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                 }else{
-                                    if($trax_center->default_hub != $consignee_city->id){
+                                    if($trax_center->status == 0){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }elseif($trax_center->default_hub != $consignee_city->id){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                     }
                                 }
@@ -2953,7 +2959,9 @@ class ShipperShipmentBookController extends Controller
                                 if(!$trax_franchise){
                                     $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                 }else{
-                                    if($trax_franchise->default_hub != $consignee_city->id){
+                                    if($trax_franchise->status == 0){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }elseif($trax_franchise->default_hub != $consignee_city->id){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                     }
                                 }
@@ -4799,7 +4807,9 @@ class ShipperShipmentBookController extends Controller
                                     if(!$trax_center){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                     }else{
-                                        if($trax_center->default_hub != $consignee_city->id){
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
                                             $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                         }
                                     }
@@ -4808,7 +4818,9 @@ class ShipperShipmentBookController extends Controller
                                     if(!$trax_franchise){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                     }else{
-                                        if($trax_franchise->default_hub != $consignee_city->id){
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
                                             $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                         }
                                     }
@@ -4960,7 +4972,9 @@ class ShipperShipmentBookController extends Controller
                                 if(!$trax_center){
                                     $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                 }else{
-                                    if($trax_center->default_hub != $consignee_city->id){
+                                    if($trax_center->status == 0){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }elseif($trax_center->default_hub != $consignee_city->id){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                     }
                                 }
@@ -4969,7 +4983,9 @@ class ShipperShipmentBookController extends Controller
                                 if(!$trax_franchise){
                                     $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
                                 }else{
-                                    if($trax_franchise->default_hub != $consignee_city->id){
+                                    if($trax_franchise->status == 0){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }elseif($trax_franchise->default_hub != $consignee_city->id){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
                                     }
                                 }
