@@ -188,7 +188,13 @@ class ShipperAPIController extends Controller
                             }
                         } elseif (in_array($shipment->shipper_status_id, [3, 49])) {
                             $shipment_info['origin'] = $pickup_address->city->name;
-                            $shipment_info['destination'] = $shipment->consignee_city->name;
+                            $destination_city = City::where('id', $shipment->consignee_city_id);
+                            if ($destination_city->exists()) {
+                                $destination_city = $destination_city->first();
+                                $shipment_info['destination'] = $destination_city->name;
+                                $shipment_info['latitude'] = $destination_city->location_latitude;
+                                $shipment_info['longitude'] = $destination_city->location_longitude;
+                            }
                             $fleet = Fleet::leftjoin('cargo_manifests as cm', 'fleets.id', '=', 'cm.vehicle_id')
                                 ->leftjoin('manifest_bags as mb', 'cm.id', '=', 'mb.cargo_manifest_id')
                                 ->leftjoin('cargo_manifest_bag_shipments as cs', 'mb.cargo_manifest_bag_id', '=', 'cs.cargo_manifest_bag_id')
