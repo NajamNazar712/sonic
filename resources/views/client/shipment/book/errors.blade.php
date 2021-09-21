@@ -450,6 +450,8 @@
                                         @else
                                             <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                         @endif
+                                    @else
+                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_type]', $ro['trax_center_franchise_type'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                     @endif
                                 @endif
                                 @if($service_type_check_id == 1 || $service_type_check_id == null)
@@ -460,6 +462,8 @@
                                         @else
                                             <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                         @endif
+                                    @else
+                                        <td>{!! Form::text('form[' . $no . '][trax_center_franchise_id]', $ro['trax_center_franchise_id'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                     @endif
                                 @endif
                                
