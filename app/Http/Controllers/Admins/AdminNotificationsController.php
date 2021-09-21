@@ -607,6 +607,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['month','year','link'];
         }
+        else if ($id == 157)
+        {
+            $details['fields'] = ['date', 'link'];
+        }
 		return $details;
     }
 
