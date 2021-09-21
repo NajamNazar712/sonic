@@ -331,6 +331,7 @@
                         head.push('Rider Status');
                         head.push('Assigned Date');
                         head.push('Attempt Date');
+                        head.push('Aging');
                         head.push('Attempt(s)');
 
 
@@ -361,6 +362,7 @@
                             row.push(values.rider_status);
                             row.push(values.assigned_date);
                             row.push(values.attempted_date);
+                            row.push(values.aging);
                             row.push(values.attempts);
 
 
