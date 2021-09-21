@@ -34,7 +34,6 @@
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Consignee Name</th>
                                     <th class="border-primary border-darken-1">Reattempt By</th>
-                                    <th class="border-primary border-darken-1">Phone</th>
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Collection Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -159,7 +158,6 @@
                         head.push('Hub');
                         head.push('Consignee Name');
                         head.push('Reattempted By');
-                        head.push('Phone');
                         head.push('Address');
                         head.push('Collection Amount');
                         head.push('Shipping Mode');
@@ -181,7 +179,6 @@
                             row.push(values.hub);
                             row.push(values.consignee_name);
                             row.push(values.agent);
-                            row.push(values.phone);
                             row.push(values.consignee_address);
                             row.push(values.amount);
                             row.push(values.shipping_mode);
@@ -240,7 +237,6 @@
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
-                {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
