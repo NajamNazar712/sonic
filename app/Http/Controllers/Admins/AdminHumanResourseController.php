@@ -2746,72 +2746,23 @@ class AdminHumanResourseController extends Controller
         $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days:'-';
 
 
-        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance:0;
-        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:0;
-        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:0;
-        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:0;
-        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:0;
-        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:0;
-        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:0;
-        $overtime = ($payslip->overtime != NULL) ? $payslip->overtime:0;
-        $bonus = ($payslip->bonus != NULL) ? $payslip->bonus:0;
-        $arrears = ($payslip->arrears != NULL) ? $payslip->arrears:0;
-        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:0;
-        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:0;
-        $operations_incentive = ($payslip->operation_incentive != NULL) ? $payslip->operation_incentive:0;
-        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:0;
-        $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition:0;
+        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance : '-';
+        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance : '-';
+        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance : '-';
+        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance : '-';
+        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance : '-';
+        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive : '-';
+        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance : '-';
+        $overtime = ($payslip->overtime != NULL) ? $payslip->overtime : '-';
+        $bonus = ($payslip->bonus != NULL) ? $payslip->bonus : '-';
+        $arrears = ($payslip->arrears != NULL) ? $payslip->arrears : '-';
+        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive : '-';
+        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive : '-';
+        $operations_incentive = ($payslip->operation_incentive != NULL) ? $payslip->operation_incentive : '-';
+        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance : '-';
+        $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition : '-';
 
-        $total_addition = 0;
-
-        $total_addition = $mobile_allowance + $vehicle_allowance + $fuel_allowance + $conveyance_allowance + $vehicle_maintenance + $fixed_incentive + $holiday_allowance + $overtime + $bonus + $arrears + $pickup_incentive + $delivery_incentive + $operations_incentive + $extra_duty_allowance + $others_addition;
-
-        if($mobile_allowance == 0){
-            $mobile_allowance = '-';
-        }
-        if($vehicle_allowance == 0){
-            $vehicle_allowance = '-';
-        }
-        if($fuel_allowance == 0){
-            $fuel_allowance = '-';
-        }
-        if($conveyance_allowance == 0){
-            $conveyance_allowance = '-';
-        }
-        if($vehicle_maintenance == 0){
-            $vehicle_maintenance = '-';
-        }
-        if($fixed_incentive == 0){
-            $fixed_incentive = '-';
-        }
-        if($holiday_allowance == 0){
-            $holiday_allowance = '-';
-        }
-        if($overtime == 0){
-            $overtime = '-';
-        }
-        if($bonus == 0){
-            $bonus = '-';
-        }
-        if($arrears == 0){
-            $arrears = '-';
-        }
-        if($pickup_incentive == 0){
-            $pickup_incentive = '-';
-        }
-        if($delivery_incentive == 0){
-            $delivery_incentive = '-';
-        }
-        if($operations_incentive == 0){
-            $operations_incentive = '-';
-        }
-        if($extra_duty_allowance == 0){
-            $extra_duty_allowance = '-';
-        }
-        if($others_addition == 0){
-            $others_addition = '-';
-        }
-
+        $total_addition = $payslip->total_salary;
 
         $paycut = ($payslip->paycut != NULL) ? $payslip->paycut : '-';
         $absent = ($payslip->absent != NULL) ? $payslip->absent : '-';
