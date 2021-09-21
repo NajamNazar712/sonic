@@ -2490,7 +2490,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'in:1,2'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,2'],
 
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
@@ -4473,9 +4473,9 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'phone_number'],
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
-            'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+        'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,20', 'between:1,100000'],
-            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,3'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'integer', 'digits_between:1,2', 'between:1,2'],
 
             'order_date' => ['nullable', 'date_format:Y-m-d'],
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
