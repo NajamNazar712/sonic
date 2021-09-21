@@ -110,6 +110,14 @@ class ShipperInterceptReBookController extends Controller
                         ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
                     }
                     else{
+                        $self_collection = false;
+
+                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
+                        if ($shipment_self_collection->exists()) {
+                            if($shipment->consignee_city_id == $request->consignee_city){
+                                $self_collection = true;
+                            }
+                        }
                         InterceptReBookRequestHistory::create([
                             'shipment_id' =>$request->shipment_id,
                             'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -134,6 +142,9 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+                        if($self_collection){
+                            ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                        }
                     }
 
                     if($self_collection == TRUE){
