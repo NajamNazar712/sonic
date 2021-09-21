@@ -8,15 +8,22 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
-                <h1 class="mb-1">
+                <h1 class="d-inline mb-1">
                     Book Excel International Shipment(s)
                 </h1>
-
+                @if($credit_limit != null)
+                    <h4 class="d-inline pull-right">Credit Limit Rs. {{number_format($credit_limit)}}</h4>
+                @endif
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('client.inc.messages')
-
+                            @if($credit_msg != '')
+                                <div class="alert alert-warning">
+                                    {{ $credit_msg }}
+                                </div>
+                            @endif
+                            @if($allow_booking)
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.international.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
                                 {{ csrf_field() }}
 
@@ -40,7 +47,7 @@
                                     </div>
                                 </div>
                             </form>
-
+                            @endif
                             <div class="row">
                                 <div class="col">
                                     <table class="table table-bordered">

@@ -537,9 +537,35 @@
 			var table = $('#datatable').DataTable({
 				scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
+				@if (session('role_id') == 1 || count(array_intersect([62, 63, 597], session('permissions'))) !== 0)
 
 					buttons: [
+						@if (session('role_id') == 1 || in_array(597, session('permissions')))
+					{
+						text: 'Generate Report',
+						className: 'btn btn-primary paid',
+						enabled: true,
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.finance.done_payments.generate_report_to_email') !!}',
+								method: 'GET',
+							})
+									.done(function(data) {
+										if (data.status) {
+											toastr.success(data.success, 'Success!', {
+												positionClass: 'toast-bottom-center',
+												containerId: 'toast-bottom-center'
+											});
+										}
+										else {
+											toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+										}
+
+									});
+
+						}
+					},
+						@endif
 						@if (session('role_id') == 1 || in_array(62, session('permissions')))
 							{
 							text: 'Paid',
@@ -1241,29 +1267,29 @@
 							'payment_request' : 1
 						}
 					})
-						.done(function(data) {
-							if (data.status) {
-								toastr.success(data.success, 'Success!', {
-									positionClass: 'toast-bottom-center',
-									containerId: 'toast-bottom-center'
-								});
-							}
-							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							}
+							.done(function(data) {
+								if (data.status) {
+									toastr.success(data.success, 'Success!', {
+										positionClass: 'toast-bottom-center',
+										containerId: 'toast-bottom-center'
+									});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
 
-							table.button('.paid').disable();
-							table.button('.reverted').disable();
+								table.button('.paid').disable();
+								table.button('.reverted').disable();
 
-							selected_rows = [];
+								selected_rows = [];
 
-							table.rows().deselect();
+								table.rows().deselect();
 
-							table.draw('false');
+								table.draw('false');
 
-							$('#AddRequestModal').modal('hide');
-							$('#AddNewRequest').attr('disabled',false);
-						});
+								$('#AddRequestModal').modal('hide');
+								$('#AddNewRequest').attr('disabled',false);
+							});
 
                 }
             });
