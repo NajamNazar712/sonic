@@ -919,7 +919,7 @@ class AdminNsaAccountShipmentController extends Controller
                             $nsa_accounts = array_map('intval', explode(',', $settings->text));
                         }
                         if (count($nsa_accounts) > 0) {
-                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4, 20])->exists()) {
+                            if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4, 13])->exists()) {
                                 $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
                             }
                         } else {
@@ -1348,7 +1348,6 @@ class AdminNsaAccountShipmentController extends Controller
                         $settings = GlobalSettings::where('type', 'nsa_accounts')->first();
                         $rider_id = $settings->setting_value;
                         $valid_shipments = array();
-                        $now = Carbon::now()->startOfDay();
                         foreach ($nsa_shipments as $shipment) {
                             if (!in_array($shipment->id, $valid_shipments)) {
                                 $valid_shipments[] = $shipment->id;
@@ -1386,12 +1385,12 @@ class AdminNsaAccountShipmentController extends Controller
 
                                 $delivery_note->save();*/
 
-                                $shipment->shipper_status_id = 20;
-                                $shipment->consignee_status_id = 20;
+                                $shipment->shipper_status_id = 13;
+                                $shipment->consignee_status_id = 13;
 
                                 $shipment->save();
 
-                                ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL,50);
+                                ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, NULL, NULL,50);
                                     }
                         else{
                             return redirect()->back()->with('error','\'Shipment can\'t be updated');
