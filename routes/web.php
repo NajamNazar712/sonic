@@ -1882,6 +1882,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
         Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
         Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
+        
 
         Route::prefix('pending')->name('pending.')->group(function(){
             Route::get('','Admins\AdminMonthClosingController@pending_index')->name('index');
@@ -3077,6 +3078,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('bulk_return/submit', 'Admins\AdminNsaAccountShipmentController@bulk_return_submit')->name('bulk_return_submit');
         });
 
+
+        Route::prefix('revert')->name('revert.')->group(function () {
+            Route::get('bulk_revert', 'Admins\AdminNsaAccountShipmentController@bulk_revert_index')->name('bulk_revert');
+            Route::post('bulk_revert_submit', 'Admins\AdminNsaAccountShipmentController@bulk_revert_submit')->name('bulk_revert_submit');
+        });
+        
         Route::prefix('call')->name('call.')->group(function () {
             Route::get('', 'Admins\AdminTelenorController@telenor_response')->name('index');
             Route::get('store', 'Admins\AdminTelenorController@telenor_response_list')->name('list');

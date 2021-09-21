@@ -1317,7 +1317,7 @@ class AdminFinanceController extends Controller
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
 
-                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0,14);
+                    self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 14);
                 }
                 else {
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
@@ -1325,7 +1325,7 @@ class AdminFinanceController extends Controller
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,14);
+                        self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, 14);
                     }
                 }
             }
@@ -1375,7 +1375,7 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,3);
+                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 3);
                 }
             }
             if(isset($payment_type) && $payment_type == 1){
@@ -1466,7 +1466,7 @@ class AdminFinanceController extends Controller
                                     if ($done_payment_shipment->exists()) {
                                         $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                                        $this->adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1,2);
+                                        $this->adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, 2);
                                     }
                                 }
                             }
@@ -1516,7 +1516,7 @@ class AdminFinanceController extends Controller
                                 }
 
                                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
+                                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 2);
                                 }
                             }
 
@@ -1633,7 +1633,7 @@ class AdminFinanceController extends Controller
                                 if ($done_payment_shipment->exists()) {
                                     $done_payment_shipment = $done_payment_shipment->latest()->first();
 
-                                    $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1,2);
+                                    $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1, 2);
                                 }
                             }
                         }
@@ -1683,7 +1683,7 @@ class AdminFinanceController extends Controller
                             }
 
                             if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                                self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type,2);
+                                self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, 2);
                             }
                         }
 
@@ -2901,7 +2901,7 @@ class AdminFinanceController extends Controller
 
     }
 
-    static private function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
+    private static function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type = NULL) {
         if ($payment_type == 0) {
             $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
 
@@ -3000,7 +3000,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static private function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL) {
+    private static function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type, $adjustment_type = NULL) {
         if ($payment_shipment_id) {
             if ($payment_type == 0) {
                 $payment_shipment = PendingPaymentShipment::find($payment_shipment_id);
