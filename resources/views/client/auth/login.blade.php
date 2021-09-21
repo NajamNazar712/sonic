@@ -47,7 +47,7 @@
                 <div class="col-12 d-flex align-items-center justify-content-end">
                     <div class="col-md-4 col-10 p-0">
                         <div class="mb-2 text-center">
-                            <p class="white bold" style="font-size: 17px !important;">For Help Dial : 021-111-118-729 or email us info@trax.pk</p>
+                            <p class="white bold" style="font-size: 17px !important;">For Help Dial : <a href="tel:021-111-118-729" style="color:#ffffff;text-decoration:underline;">021-111-118-729</a>  or email us <a href="mailto:info@trax.pk" style="color:#ffffff;text-decoration:underline;">info@trax.pk</a></p>
                         </div>
                         <div class="card box-shadow-1 border-grey border-lighten-3 px-1 py-1 m-0">
                             <div class="card-header border-0">
@@ -116,6 +116,17 @@
         </div>
     </div>
 </div>
+<script type="text/javascript">
+	var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+	(function(){
+		var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+		s1.async=true;
+		s1.src='https://embed.tawk.to/5d8323ab9f6b7a4457e2756b/default';
+		s1.charset='UTF-8';
+		s1.setAttribute('crossorigin','*');
+		s0.parentNode.insertBefore(s1,s0);
+	})();
+</script>
 <!-- ////////////////////////////////////////////////////////////////////////////-->
 <!-- BEGIN VENDOR JS-->
 <script src="{{asset('app-assets/vendors/js/vendors.min.js')}}" ></script>

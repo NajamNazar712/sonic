@@ -189,9 +189,13 @@ Route::name('api.')->group(function () {
             Route::get('notification_history', 'Rider\RiderAPIController@notification_history')->name('notification_history');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
+                Route::get('shift', 'Rider\RiderAPIController@rider_shift')->name('shift');
+                Route::post('month_history', 'Rider\RiderAPIController@month_attendance_history')->name('month_history');
                 Route::post('detail', 'Rider\RiderAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'Rider\RiderAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'Rider\RiderAPIController@attendance_history')->name('history');
+                Route::post('mark_v2', 'Rider\RiderAPIController@mark_attendance_v2')->name('mark_v2');
+                Route::post('detail_v2', 'Rider\RiderAPIController@attendance_details_v2')->name('detail_v2');
             });
 
             Route::post('rider_incentives', 'Rider\RiderAPIController@rider_incentive')->name('rider_incentives');
@@ -229,9 +233,13 @@ Route::name('api.')->group(function () {
             Route::post('history_update_image', 'AdminAPIController@history_update_image')->name('history_update_image');
 
             Route::prefix('attendance')->name('attendance.')->group(function() {
+                Route::get('shift', 'AdminAPIController@employee_shift')->name('shift');
+                Route::post('month_history', 'AdminAPIController@month_attendance_history')->name('month_history');
                 Route::post('detail', 'AdminAPIController@attendance_details')->name('detail');
                 Route::post('mark', 'AdminAPIController@mark_attendance')->name('mark');
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
+                Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
+                Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {
@@ -302,5 +310,6 @@ Route::name('api.')->group(function () {
 
     Route::post('track/google', 'APIController@shipment_google_track')->name('track.google');
     Route::post('live_tracking', 'APIController@live_tracking')->name('live_tracking');
+
     
 });

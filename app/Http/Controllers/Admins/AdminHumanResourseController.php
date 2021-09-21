@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\FnfSectionEmployee;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeAttachment;
@@ -22,6 +25,7 @@ use App\Http\Models\HR\EmployeeEmployementHistory;
 use App\Http\Models\HR\EmployeeMaritalStatus;
 use App\Http\Models\HR\EmployeeMedicalInformation;
 use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\HR\EmployeePayslip;
 use App\Http\Models\HR\EmployeeReference;
 use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
@@ -34,15 +38,18 @@ use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\Zone;
+use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Rider;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use Yajra\Datatables\Datatables;
 use Auth;
 
@@ -202,8 +209,9 @@ class AdminHumanResourseController extends Controller
         $route_types = RouteType::all();
         $employee_types = EmployeeType::all();
         $employee_statuses = EmployeeStatus::all();
+        $employee_department = AdminDepartment::all();
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department]);
     }
 
     public function employee_directory_list(Request $request){
@@ -213,6 +221,7 @@ class AdminHumanResourseController extends Controller
         }
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->join('employee_genders as eg','eg.id','=','employees.employee_gender_id')
+            ->leftjoin('admin_departments as ads','ads.id','=','employees.department_id')
             ->leftjoin('admins as staff','staff.trax_id','=','employees.trax_id')
             ->leftjoin('riders as r','r.trax_id','=','employees.trax_id')
             ->leftjoin('rider_requests as rr','rr.id','=','employees.rider_request_id')
@@ -221,7 +230,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address'])
+            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.guardian_name as father_name','ads.name as department_name'])
             ->where(function ($q){
                 $q ->where('r.blacklist','=',0)
                     ->orWhere('r.blacklist','=',null);
@@ -287,6 +296,18 @@ class AdminHumanResourseController extends Controller
 
                 }
             })
+->editColumn('employee_name',function ($user){
+                return $user->employee_name.' '.$user->father_name;
+            })
+            ->filterColumn('ads.name',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ads.name',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn("action", function ($result) {
                 if(session('role_id') == 1 || in_array(468, session('permissions')) || in_array(469, session('permissions'))  || in_array(98, session('permissions')) || in_array(381, session('permissions'))){
                     $dropdown = '
@@ -296,7 +317,7 @@ class AdminHumanResourseController extends Controller
             ';
                     if (session('role_id') == 1 || in_array(468, session('permissions'))) {
                         $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                        $dropdown .= '<a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
+                        $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                     }
                     if($result->request_status_id == 1 || $result->request_status_id == 2){
                         if (session('role_id') == 1 || in_array(469, session('permissions'))) {
@@ -305,6 +326,16 @@ class AdminHumanResourseController extends Controller
 
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
+                        }
+                    }
+                    if($result->request_status_id == 3 && $result->employee_type_id == 1)
+                    {
+                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
+                        }
+
+                        if ($result->status_id == 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
                         }
                     }
 
@@ -359,6 +390,19 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->make(true);
+    }
+
+    public function employee_directory_pin(Request $request)
+    {
+        $employee = Employee::find($request->employee_id);
+        if($employee)
+        {
+            $employee->pin = $request->pin;
+            $employee->update();
+
+            return back()->with(['success'=>'Employee Pin Updated Successfully']);
+        }
+        return back()->with(['error'=>'Employee Not Found']);
     }
 
     public function employee_directory_make_rider_incentive(Request $request)
@@ -487,6 +531,58 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
+    }
+
+    public function employee_directory_make_staff_activate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = Admin::where('trax_id',$employee->trax_id);
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 1;
+        $staff->updated_by = Auth::id();
+        $staff->save();
+
+        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
+
+    }
+    public function employee_directory_make_staff_deactivate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = Admin::where('trax_id',$employee->trax_id);
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 0;
+        $staff->updated_by = Auth::id();
+        $staff->save();
+
+        $employee->status_id = 2;
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
 
     public function employee_directory_make_rider_update(Request $request)
@@ -628,6 +724,42 @@ class AdminHumanResourseController extends Controller
                     }
                     $employee->request_status_id = 3;
                     $employee->save();
+
+                    if($employee->employee_type_id == 1)
+                    {
+
+                        $admin = Admin::where('trax_id',$employee->trax_id);
+
+                        if($admin->doesntExist())
+                        {
+                            $admin = new Admin();
+
+                            $admin->name = $employee->name;
+                            $admin->email = $employee->official_email;
+                            $admin->phone_number = $employee->phone_number;
+                            $admin->cnic = $employee->cnic;
+                            $admin->role_id = $employee->designation->role_id ?? 79;
+                            $admin->default_hub_id = $employee->city_id;
+                            $admin->password = bcrypt($employee->pin);
+                            $admin->designation = $employee->designation->name ?? '';
+                            $admin->designation_id = $employee->designation_id;
+
+                            if($employee->status_id == 2)
+                            {
+                                $admin->status = 0;
+                            }
+                            else{
+                                $admin->status = 1;
+                            }
+
+                            $admin->updated_by = Auth::id();
+                            $admin->trax_id = $employee->trax_id;
+                            $admin->employee_id = $employee->id;
+
+                            $admin->save();
+                        }
+
+                    }
                 }
             }
 
@@ -686,6 +818,7 @@ class AdminHumanResourseController extends Controller
     {
         $request->validate([
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id)],
+            'cnic'=> [Rule::unique('employees', 'cnic')->ignore($employee->id)],
         ]);
 
         $employee->request_status_id = 2;
@@ -701,6 +834,7 @@ class AdminHumanResourseController extends Controller
         $employee->personal_email = $request->personal_email;
         $employee->address = $request->address;
         $employee->emergency_contact = $request->emergency_contact;
+        $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
         $employee->designation_id = $request->designation;
@@ -709,13 +843,25 @@ class AdminHumanResourseController extends Controller
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
-        $employee->sonic_id = $request->sonic_id;
+//        $employee->sonic_id = $request->sonic_id;
         $employee->pin = $request->bolt_pin;
         $employee->place_of_birth = $request->place_of_birth;
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
+
+        if($employee->employee_type_id == 1)
+        {
+            $admin = Admin::where('trax_id',$employee->trax_id);
+            if($admin->exists())
+            {
+                $admin = $admin->first();
+
+                $admin->role_id = $employee->designation->role_id ?? 79;
+                $admin->update();
+            }
+        }
 
         return back()->with(['success'=>'Employee Profile Updated Successfully']);
     }
@@ -2079,7 +2225,8 @@ class AdminHumanResourseController extends Controller
     }
     public function designation_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),390);
-        return view('admin.human_resource.designation');
+        $departments = AdminDepartment::all();
+        return view('admin.human_resource.designation',compact('departments'));
     }
 
     public function designation_list(Request $request){
@@ -2087,7 +2234,9 @@ class AdminHumanResourseController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),391);
         }
-        $designations = EmployeeDesignation::select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description']);
+        $designations = EmployeeDesignation::leftjoin('admin_departments as ad','ad.id','employee_designations.department_id')
+            ->leftjoin('admin_roles as r','r.id','employee_designations.role_id')
+            ->select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description','employee_designations.department_id','ad.name as department','r.name as role','r.id as role_id']);
 
         return Datatables::of($designations)
             ->editColumn('status', function ($data) {
@@ -2143,9 +2292,18 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 1, 'success' => 'Designation '. $status .' successfully!']);
     }
 
+    public function designation_roles(Request $request)
+    {
+        $roles = AdminRole::where('department_id',$request->department_id)->get();
+
+        return response()->json(['status'=>1,'roles'=>$roles]);
+    }
+
     public function designation_add(Request $request){
         $designation = new EmployeeDesignation();
         $designation->name = $request->name;
+        $designation->department_id = $request->department_id;
+        $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
 
@@ -2157,9 +2315,29 @@ class AdminHumanResourseController extends Controller
     public function designation_edit(Request $request){
         $designation = EmployeeDesignation::find($request->designation_id);
         $designation->name = $request->name;
+        $designation->department_id = $request->department_id;
+        $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
+    }
+
+    public function employee_get_designation(Request $request)
+    {
+        if($request->has('department_id'))
+        {
+            $designations = EmployeeDesignation::where('department_id',$request->department_id);
+            if($designations->exists())
+            {
+                return response()->json(['status'=>1,'designations'=>$designations->get()]);
+            }
+            else{
+                return response()->json(['status'=>0,'error'=>'Designation Not Found']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'error'=>'Department is Required']);
+        }
     }
     public function department_index(){
 
@@ -2172,8 +2350,7 @@ class AdminHumanResourseController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),393);
         }
-        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description'])
-        ->where('id', '!=', 1);
+        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description']);
 
         return Datatables::of($departments)
             ->addColumn("action", function ($data) {
@@ -2271,5 +2448,791 @@ class AdminHumanResourseController extends Controller
 
     }
 
+    public function employee_shift_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),433);
+        return view('admin.human_resource.employee_shift');
+    }
 
+    public function employee_shift_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),434);
+        }
+
+        $shifts = EmployeeShift::all();
+        return Datatables::of($shifts)
+            ->editColumn('status', function ($data) {
+                if ($data->status == 0) {
+                    return 'In-Active';
+                } else {
+                    return 'Active';
+                }
+            })
+            ->editColumn('start_time_formatted', function ($data) {
+                return Carbon::parse($data->start_time)->format("g:i A");
+            })
+            ->editColumn('end_time_formatted', function ($data) {
+                return Carbon::parse($data->end_time)->format("g:i A");
+            })
+            ->addColumn("action", function ($data) {
+                if (session('role_id') == 1 || in_array(593, session('permissions')) || in_array(594, session('permissions'))) {
+                    $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(593, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    if (session('role_id') == 1 || in_array(594, session('permissions'))) {
+                        if ($data->status == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        } else {
+                            $dropdown .= '<button type="button" class="dropdown-item disable" data-target-id=' . $data->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        }
+                    }
+                    $dropdown .= '
+                </div>
+              </div>
+            ';
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+    public function payslip_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
+        return view('admin.human_resource.payslip.index');
+    }
+
+    public function payslip_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
+        }
+        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
+        $datatable = Datatables::of($payslips)
+            ->addColumn('action', function () {
+                $dropdown = '
+                <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+            $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
+
+                return $dropdown;
+            });
+
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
+        }
+        return $datatable->make(true);
+
+    }
+              
+                   
+      
+
+    public function employee_shift_status(Request $request)
+    {
+        $id = $request->id;
+        $shift = EmployeeShift::find($id);
+        if ($request->status == 0) {
+            $status = 'Disabled';
+        } else {
+            $status = 'Enabled';
+        }
+        $shift->status = $request->status;
+        $shift->save();
+        return response()->json(['status' => 1, 'success' => 'Shift ' . $status . ' successfully!']);
+    }
+
+    public function employee_shift_add(Request $request)
+    {
+        $shift = new EmployeeShift();
+        $shift->name = $request->name;
+        $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
+        $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
+        $shift->extension_minutes = $request->extension_minutes;
+        $shift->save();
+        return redirect()->back()->with('success', 'Shift Added Successfully!');
+    }
+
+    public function employee_shift_edit(Request $request)
+    {
+        $shift = EmployeeShift::find($request->shift_id);
+        $shift->name = $request->name;
+        $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
+        $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
+        $shift->extension_minutes = $request->extension_minutes;
+        $shift->save();
+        return redirect()->back()->with('success', 'Shift Updated Successfully!');
+    }
+    public function payslip_excel_upload(Request $request){
+
+        $payroll_month = $request->payslip_month_formatted;
+        if(!$payroll_month){
+            return redirect()->back()->with('error', 'Payslip month not selected!');
+        }
+
+        Validator::extend('check_trax_id', function ($attribute, $value, $parameters, $validator) {
+
+            if ($value) {
+                $result = false;
+                if(Admin::where('trax_id', $value)->exists()){
+                    $result = true;
+                }
+                else{
+                    if(Rider::where('trax_id', $value)->exists()){
+                        $result = true;
+                    }
+                }
+                if ($result) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
+        $names = [
+            'trax_id' => 'Employee ID',
+            'name' => 'Employee Name',
+            'designation' => 'Designation',
+            'department' => 'Department',
+            'hub' => 'Hub',
+            'zone' => 'Zone',
+            'joining_date' => 'Date of Joining',
+            'cnic' => 'Cnic',
+            'employee_status' => 'Employee Status',
+            'payroll_days' => 'Payroll Days',
+            'present_days' => 'Present Days',
+            'pay_cut_days' => 'Pay Cut Days',
+            'absent_days' => 'Absent Days',
+            'extra_paid_days' => 'Extra Paid Days',
+            'fuel_days' => 'Fuel Days',
+            'basic_salary' => 'Basic Salary',
+            'house_rent' => 'House Rent',
+            'medical' => 'Medical',
+            'gross_salary' => 'Gross Salary',
+            'mobile_allowance' => 'Mobile Allowance',
+            'vehicle_allowance' => 'Vehicle Allowance',
+            'fuel_allowance' => 'Fuel Allowance',
+            'conveyance_allowance' => 'Conveyance Allowance',
+            'vehicle_maintenance' => 'Vehicle Maintenance',
+            'fixed_incentive' => 'Fixed Incentive',
+            'holiday_allowance' => 'Sunday / Holiday Allowance',
+            'overtime' => 'Overtime',
+            'bonus' => 'Bonus',
+            'arrears' => 'Arrears',
+            'pickup_incentive' => 'Pickup Incentive',
+            'delivery_incentive' => 'Delivery Incentive',
+            'operation_incentive' => 'Operations Incentive',
+            'extra_duty_allowance' => 'Extra Duty Allowance',
+            'others_addition' => 'Others Addition',
+            'total_salary' => 'Total Salary',
+            'paycut' => 'Pay Cut',
+            'absent' => 'Absent',
+            'late_deduction' => 'Late Deduction',
+            'income_tax' => 'Income Tax',
+            'eobi' => 'EOBI',
+            'advance_salary' => 'Advance Salary',
+            'month_closing' => 'Month Closing',
+            'loan' => 'Loan',
+            'fuel_card' => 'Fuel Card',
+            'open_parcel' => 'Open Parcel',
+            'phone_call' => 'Phone Call',
+            'recovery' => 'Recovery',
+            'auction_sale' => 'Auction Sale',
+            'penalty' => 'Penalty',
+            'other_deductions' => 'Others Deduction',
+            'van_deduction' => 'Van Deduction',
+            'medical_insurance' => 'Medical Insurance',
+            'total_deduction' => 'Total Deduction',
+            'net_salary' => 'Net Salary',
+            'iban' => 'IBAN',
+            'employee_type' => 'Employee Type',
+            'confirmation_date' => 'Confirmation Date'
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'exists' => 'Given :attribute is Invalid.',
+            'check_trax_id' => 'Employee id not found!',
+
+        ];
+        $rules = [
+            'trax_id' => ['required', 'between:1,100','check_trax_id'],
+            'name' => ['required', 'between:1,100'],
+            'designation' => ['required', 'between:1,100'],
+            'department' => ['required', 'between:1,100'],
+            'hub' => ['required', 'between:1,100'],
+            'zone' => ['nullable', 'between:1,100'],
+            'joining_date' => ['required', 'date_format:Y-m-d'],
+            'confirmation_date' => ['nullable', 'date_format:Y-m-d'],
+            'cnic' => ['required', 'between:1,100'],
+            'employee_status' => ['nullable', 'string','between:1,100'],
+            'employee_type' => ['nullable','string','between:1,100'],
+            'payroll_days' => ['nullable', 'integer'],
+            'present_days' => ['nullable', 'integer'],
+            'pay_cut_days' => ['nullable', 'integer'],
+            'absent_days' => ['nullable', 'integer'],
+            'extra_paid_days' => ['nullable', 'integer'],
+            'fuel_days' => ['nullable', 'integer'],
+            'basic_salary' => ['required', 'integer'],
+            'house_rent' => ['nullable', 'integer'],
+            'medical' => ['nullable', 'integer'],
+            'gross_salary' => ['nullable', 'integer'],
+            'mobile_allowance' => ['nullable', 'integer'],
+            'vehicle_allowance' => ['nullable', 'integer'],
+            'fuel_allowance' => ['nullable', 'integer'],
+            'conveyance_allowance' => ['nullable', 'integer'],
+            'vehicle_maintenance' => ['nullable', 'integer'],
+            'fixed_incentive' => ['nullable', 'integer'],
+            'holiday_allowance' => ['nullable', 'integer'],
+            'overtime' => ['nullable', 'integer'],
+            'bonus' => ['nullable', 'integer'],
+            'arrears' => ['nullable', 'integer'],
+            'pickup_incentive' => ['nullable', 'integer'],
+            'delivery_incentive' => ['nullable', 'integer'],
+            'operation_incentive' => ['nullable', 'integer'],
+            'extra_duty_allowance' => ['nullable', 'integer'],
+            'others_addition' => ['nullable', 'integer'],
+            'total_salary' => ['required', 'integer'],
+            'paycut' => ['nullable', 'integer'],
+            'absent' => ['nullable', 'integer'],
+            'late_deduction' => ['nullable', 'integer'],
+            'income_tax' => ['nullable', 'integer'],
+            'eobi' => ['nullable', 'integer'],
+            'advance_salary' => ['nullable', 'integer'],
+            'month_closing' => ['nullable', 'integer'],
+            'loan' => ['nullable', 'integer'],
+            'fuel_card' => ['nullable', 'integer'],
+            'open_parcel' => ['nullable', 'integer'],
+            'phone_call' => ['nullable', 'integer'],
+            'recovery' => ['nullable', 'integer'],
+            'auction_sale' => ['nullable', 'integer'],
+            'penalty' => ['nullable', 'integer'],
+            'other_deductions' => ['nullable', 'integer'],
+            'van_deduction' => ['nullable', 'integer'],
+            'medical_insurance' => ['nullable', 'integer'],
+            'total_deduction' => ['nullable', 'integer'],
+            'net_salary' => ['nullable', 'integer'],
+            'iban' => ['nullable','string'],
+
+        ];
+
+
+        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'other_deductions', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
+        if ($file = $request->file('payslip')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Employee ID','Employee Name','Designation','Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive', 'Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN', 'Confirmation Date', 'Employee Type'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = true;
+
+                foreach ($spreadsheet[0] as $index => $header_value) {
+                    if ($index == 54) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = false;
+                        break;
+                    }
+                }
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                }
+                if (empty($errors)) {
+                    $updated = 0;
+                    $not_updated = 0;
+
+                    $payroll_cut_off_date = Carbon::parse($payroll_month)->startOfMonth()->addDays(25)->toDateString();
+
+                    foreach ($rows as $key => $row) {
+                        $payslip = new EmployeePayslip();
+                        $payslip->payroll_month = $payroll_month;
+                        $payslip->payroll_cut_off_date = $payroll_cut_off_date;
+                        $payslip->trax_id = trim($row['trax_id']);
+                        $payslip->name = trim($row['name']);
+                        $payslip->designation = trim($row['designation']);
+                        $payslip->department = trim($row['department']);
+                        $payslip->hub = trim($row['hub']);
+                        $payslip->zone = trim($row['zone']);
+                        $payslip->joining_date = trim($row['joining_date']);
+                        $payslip->confirmation_date = trim($row['confirmation_date']);
+                        $payslip->cnic = trim($row['cnic']);
+                        $payslip->employee_status = trim($row['employee_status']);
+                        $payslip->employee_type = trim($row['employee_type']);
+                        $payslip->payroll_days = trim($row['payroll_days']);
+                        $payslip->present_days = trim($row['present_days']);
+                        $payslip->pay_cut_days = trim($row['pay_cut_days']);
+                        $payslip->absent_days = trim($row['absent_days']);
+                        $payslip->extra_paid_days = trim($row['extra_paid_days']);
+                        $payslip->fuel_days = trim($row['fuel_days']);
+                        $payslip->basic_salary = trim($row['basic_salary']);
+                        $payslip->house_rent = trim($row['house_rent']);
+                        $payslip->medical = trim($row['medical']);
+                        $payslip->gross_salary = trim($row['gross_salary']);
+                        $payslip->mobile_allowance = trim($row['mobile_allowance']);
+                        $payslip->vehicle_allowance = trim($row['vehicle_allowance']);
+                        $payslip->fuel_allowance = trim($row['fuel_allowance']);
+                        $payslip->conveyance_allowance = trim($row['conveyance_allowance']);
+                        $payslip->vehicle_maintenance = trim($row['vehicle_maintenance']);
+                        $payslip->fixed_incentive = trim($row['fixed_incentive']);
+                        $payslip->holiday_allowance = trim($row['holiday_allowance']);
+                        $payslip->overtime = trim($row['overtime']);
+                        $payslip->bonus = trim($row['bonus']);
+                        $payslip->arrears = trim($row['arrears']);
+                        $payslip->pickup_incentive = trim($row['pickup_incentive']);
+                        $payslip->delivery_incentive = trim($row['delivery_incentive']);
+                        $payslip->operation_incentive = trim($row['operation_incentive']);
+                        $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
+                        $payslip->others_addition = trim($row['others_addition']);
+                        $payslip->total_salary = trim($row['total_salary']);
+                        $payslip->paycut = trim($row['paycut']);
+                        $payslip->absent = trim($row['absent']);
+                        $payslip->late_deduction = trim($row['late_deduction']);
+                        $payslip->income_tax = trim($row['income_tax']);
+                        $payslip->eobi = trim($row['eobi']);
+                        $payslip->advance_salary = trim($row['advance_salary']);
+                        $payslip->month_closing = trim($row['month_closing']);
+                        $payslip->loan = trim($row['loan']);
+                        $payslip->fuel_card = trim($row['fuel_card']);
+                        $payslip->open_parcel = trim($row['open_parcel']);
+                        $payslip->phone_call = trim($row['phone_call']);
+                        $payslip->recovery = trim($row['recovery']);
+                        $payslip->auction_sale = trim($row['auction_sale']);
+                        $payslip->penalty = trim($row['penalty']);
+                        $payslip->other_deductions = trim($row['other_deductions']);
+                        $payslip->van_deduction = trim($row['van_deduction']);
+                        $payslip->medical_insurance = trim($row['medical_insurance']);
+                        $payslip->total_deduction = trim($row['total_deduction']);
+                        $payslip->net_salary = trim($row['net_salary']);
+                        $payslip->iban = trim($row['iban']);
+                        $payslip->added_by = Auth::id();
+                        $payslip->save();
+                        $updated++;
+                    }
+                    $error_msg = '';
+                    if ($not_updated > 1) {
+                        $error_msg = 'Total ' . $not_updated . ' rows could not updated!';
+                    }
+
+                    return redirect()->back()->with(['success' => 'Total ' . $updated . ' rows updated', 'error' => $error_msg]);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+
+            } else {
+                return redirect()->back()->with('error', 'No Records in File');
+            }
+
+
+        }
+
+    }
+
+    public function payslip_print(Request $request){
+
+        $payslip = EmployeePayslip::find($request->payslip_id);
+
+        if(!$payslip){
+            return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
+        }
+        $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
+        $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
+        $personal_contact = '';
+        if($user = Admin::where('trax_id', $payslip->trax_id)->exists()){
+            $user = $user->first();
+            $personal_contact = $user->phone_number;
+        }else{
+            $rider = Rider::where('trax_id', $payslip->trax_id);
+            if($rider->exists()){
+                $rider = $rider->first();
+                $personal_contact = $rider->phone;
+            }
+        }
+
+        $basic_salary = ($payslip->basic_salary != NULL) ? $payslip->basic_salary:'-';
+        $house_rent = ($payslip->house_rent != NULL) ? $payslip->house_rent:'-';
+        $medical = ($payslip->medical != NULL) ? $payslip->medical:'-';
+        $gross_salary = ($payslip->gross_salary != NULL) ? $payslip->gross_salary:'-';
+        $payroll_days = ($payslip->payroll_days != NULL) ? $payslip->payroll_days:'-';
+        $present_days = ($payslip->present_days != NULL) ? $payslip->present_days:'-';
+        $absent_days = ($payslip->absent_days != NULL) ? $payslip->absent_days:'-';
+        $pay_cut_days = ($payslip->pay_cut_days != NULL) ? $payslip->pay_cut_days:'-';
+        $extra_paid_days = ($payslip->extra_paid_days != NULL) ? $payslip->extra_paid_days:'-';
+        $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days:'-';
+
+
+        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance:'-';
+        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:'-';
+        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:'-';
+        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:'-';
+        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:'-';
+        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:'-';
+        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:'-';
+        $overtime = ($payslip->overtime != NULL) ? $payslip->overtime:'-';
+        $bonus = ($payslip->bonus != NULL) ? $payslip->bonus:'-';
+        $arrears = ($payslip->arrears != NULL) ? $payslip->arrears:'-';
+        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:'-';
+        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:'-';
+        $operations_incentive = ($payslip->operations_incentive != NULL) ? $payslip->operations_incentive:'-';
+        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:'-';
+        $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition:'-';
+
+        $total_addition = 0;
+
+        $total_addition = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance: 0 + ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:0 + ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:0 + ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:0 + ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:0 + ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:0 + ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:0 + ($payslip->overtime != NULL) ? $payslip->overtime:0 + ($payslip->bonus != NULL) ? $payslip->bonus:0 + ($payslip->arrears != NULL) ? $payslip->arrears:0 + ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:0 + ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:0 + ($payslip->operations_incentive != NULL) ? $payslip->operations_incentive:0 + ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:0 + ($payslip->others_addition != NULL) ? $payslip->others_addition:0;
+
+
+        $paycut = ($payslip->paycut != NULL) ? $payslip->paycut : '-';
+        $absent = ($payslip->absent != NULL) ? $payslip->absent : '-';
+        $late_deduction = ($payslip->late_deduction != NULL) ? $payslip->late_deduction : '-';
+        $income_tax = ($payslip->income_tax != NULL) ? $payslip->income_tax : '-';
+        $eobi = ($payslip->eobi != NULL) ? $payslip->eobi : '-';
+        $advance_salary = ($payslip->advance_salary != NULL) ? $payslip->advance_salary : '-';
+        $month_closing = ($payslip->month_closing != NULL) ? $payslip->month_closing : '-';
+        $loan = ($payslip->loan != NULL) ? $payslip->loan : '-';
+        $fuel_card = ($payslip->fuel_card != NULL) ? $payslip->fuel_card : '-';
+        $open_parcel = ($payslip->open_parcel != NULL) ? $payslip->open_parcel : '-';
+        $phone_call = ($payslip->phone_call != NULL) ? $payslip->phone_call : '-';
+        $recovery = ($payslip->recovery != NULL) ? $payslip->recovery : '-';
+        $auction_sale = ($payslip->auction_sale != NULL) ? $payslip->auction_sale : '-';
+        $penalty = ($payslip->penalty != NULL) ? $payslip->penalty : '-';
+        $van_deduction = ($payslip->van_deduction != NULL) ? $payslip->van_deduction : '-';
+        $others_deduction = ($payslip->others_deduction != NULL) ? $payslip->others_deduction : '-';
+
+        $total_deduction = ($payslip->total_deduction != NULL) ? $payslip->total_deduction : '-';
+        $net_salary = ($payslip->net_salary != NULL) ? $payslip->net_salary : '-';
+
+        $html = '<!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Payslip</title>
+
+                     <style>
+                     @page {
+                        size: A4 portrait;
+                      }
+                      body {
+                        font-size: 0.95rem !important;
+                        
+                      }
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+                      .border.twice {
+                        border-width: 1px !important;
+                      }
+
+                      .border.twice-top {
+                        border-top-width: 1px !important;
+                      }
+
+                      .border.twice-bottom {
+                        border-bottom-width: 1px !important;
+                      }
+
+                      .border.twice-left {
+                        border-left-width: 1px !important;
+                      }
+
+                      .border.twice-right {
+                        border-right-width: 1px !important;
+                      }
+
+                      .font-small {
+                        font-size: 0.65rem !important;
+                      }
+                      
+                      .table-borderless td, .table th {
+                        border: none;
+                     }
+                     td{
+                        color: #000;
+                     }
+                    </style>';
+
+        $html .= '</head>
+                  <body>
+                   
+                      <div class="table-responsive">
+                          <table class="table table-borderless mb-0">
+                          
+                          <tbody>
+                            <tr>
+                              <td class="text-left align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class=""></td>
+                       
+                                 <td class="text-right align-middle"><h1 class="d-block">SALARY SLIP</h1></td>
+                             </tr>
+                             <tr>
+                                <td class="text-left align-middle">Head Office (Karachi): </td>
+                                <td class="text-right align-middle"><b>Payroll Month: </b><u>'. $payroll_month .'</u></td>
+                             </tr>
+                             <tr>
+                                <td class="text-left align-middle">Plot 105, Sector 7-A, Mehran Town, Korangi, Karachi.</td>
+                                <td class="text-right align-middle"><b>Payroll Cut Off Date: </b> <u>'. $payroll_cut_off_date .'</u></td>
+                                
+                             </tr>
+                             </tbody>
+                         </table>';
+
+        $html .= '<table class="table border table-sm">
+                    
+                    <tbody>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="8">Employee Information</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee ID</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->trax_id .'</td>
+                            <td colspan="2"  class="border twice-right">Date of Joining</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->joining_date .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Employee Name</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->name .'</td>
+                            <td colspan="2"  class="border twice-right">Date of Confirmation</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->confirmation_date .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Designation</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->designation .'</td>
+                            <td colspan="2"  class="border twice-right">Employee Type</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->employee_type .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Department</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->department .'</td>
+                            <td colspan="2"  class="border twice-right">Employee Status</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->employee_status .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Location</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->hub .'</td>
+                            <td colspan="2"  class="border twice-right">Personal Contact #</td>
+                            <td colspan="2"  class="border twice-right">'. $personal_contact .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">CNIC No.</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->cnic .'</td>
+                            <td colspan="2"  class="border twice-right">Bank Account No.</td>
+                            <td colspan="2"  class="border twice-right">'. $payslip->iban .'</td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="8">Salary Breakup</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Basic Salary</td>
+                            <td colspan="2"  class="border twice-right">'. $basic_salary .'</td>
+                            <td colspan="1"  class="border twice-right">Payroll Days</td>
+                            <td colspan="1"  class="border twice-right">'. $payroll_days .'</td>
+                            <td colspan="1"  class="border twice-right">Absent Days</td>
+                            <td colspan="1"  class="border twice-right">'. $absent_days .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">House Rent</td>
+                            <td colspan="2"  class="border twice-right">'. $house_rent .'</td>
+                            <td colspan="1"  class="border twice-right">Present Days</td>
+                            <td colspan="1"  class="border twice-right">'. $present_days .'</td>
+                            <td colspan="1"  class="border twice-right">Extra Paid Days</td>
+                            <td colspan="1"  class="border twice-right">'. $extra_paid_days .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Medical</td>
+                            <td colspan="2"  class="border twice-right">'. $medical .'</td>
+                            <td colspan="1"  class="border twice-right">Pay Cut Days</td>
+                            <td colspan="1"  class="border twice-right">'. $pay_cut_days .'</td>
+                            <td colspan="1"  class="border twice-right">Fuel Days</td>
+                            <td colspan="1"  class="border twice-right">'. $fuel_days .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right"><b>Gross Salary</b></td>
+                            <td colspan="2"  class="border twice-right">'. $gross_salary .'</td>
+                            <td colspan="4"  class="border twice-right"></td>
+                        </tr>
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="4">Addition</td>
+                            <td class="color primary border twice" colspan="4">Deduction</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Mobile Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $mobile_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">Pay Cut</td>
+                            <td colspan="2"  class="border twice-right">'. $paycut .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Vehicle Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $vehicle_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">Absent</td>
+                            <td colspan="2"  class="border twice-right">'. $absent .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Fuel Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $fuel_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">Late Deduction</td>
+                            <td colspan="2"  class="border twice-right">'. $late_deduction .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Conveyance Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $conveyance_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">Income Tax</td>
+                            <td colspan="2"  class="border twice-right">'. $income_tax .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Vehicle Maintenance</td>
+                            <td colspan="2"  class="border twice-right">'. $vehicle_maintenance .'</td>
+                            <td colspan="2"  class="border twice-right">EOBI</td>
+                            <td colspan="2"  class="border twice-right">'. $eobi .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Fixed Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $fixed_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">Advance Salary</td>
+                            <td colspan="2"  class="border twice-right">'. $advance_salary .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Sunday / Holiday Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $holiday_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">Month Closing</td>
+                            <td colspan="2"  class="border twice-right">'. $month_closing .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Overtime</td>
+                            <td colspan="2"  class="border twice-right">'. $overtime .'</td>
+                            <td colspan="2"  class="border twice-right">Loan</td>
+                            <td colspan="2"  class="border twice-right">'. $loan .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Bonus</td>
+                            <td colspan="2"  class="border twice-right">'. $bonus .'</td>
+                            <td colspan="2"  class="border twice-right">Fuel Card</td>
+                            <td colspan="2"  class="border twice-right">'. $fuel_card .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Arrears</td>
+                            <td colspan="2"  class="border twice-right">'. $arrears .'</td>
+                            <td colspan="2"  class="border twice-right">Open Parcel</td>
+                            <td colspan="2"  class="border twice-right">'. $open_parcel .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Pickup Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $pickup_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">Phone Call</td>
+                            <td colspan="2"  class="border twice-right">'. $phone_call .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Delivery Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $delivery_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">Recovery</td>
+                            <td colspan="2"  class="border twice-right">'. $recovery .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Operations Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $operations_incentive .'</td>
+                            <td colspan="2"  class="border twice-right">Auction Sale</td>
+                            <td colspan="2"  class="border twice-right">'. $auction_sale .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $extra_duty_allowance .'</td>
+                            <td colspan="2"  class="border twice-right">Penalty</td>
+                            <td colspan="2"  class="border twice-right">'. $penalty .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Others Addition</td>
+                            <td colspan="2"  class="border twice-right">'. $others_addition .'</td>
+                            <td colspan="2"  class="border twice-right">Van Deduction</td>
+                            <td colspan="2"  class="border twice-right">'. $van_deduction .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right">Others Deduction</td>
+                            <td colspan="2"  class="border twice-right">'. $others_deduction .'</td>
+                        </tr>
+                        
+                        <tr class="text-center">
+                            <td class="color primary border twice" colspan="2">Total Addition</td>
+                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
+                            <td class="color primary border twice" colspan="2">Total Deduction</td>
+                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td class="color primary border twice" colspan="6">Net Salary</td>
+                            <td class="color primary border twice" colspan="2">'. $net_salary .'</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>
+                        </tr>
+                   </tbody>
+                         </table>';
+
+
+        $html .=  ' 
+                      </div>
+                      </body>
+                      </html>';
+
+        $pdf = SnappyPDF::loadHTML($html);
+
+        $filename = 'payslip_' . $payslip->id . '.pdf';
+
+        $result = $pdf->download($filename);
+        $pdf_file = 'data:application/pdf;base64,' . base64_encode($result);
+        return array('status' => 1, 'image' => $pdf_file);
+
+    }
 }

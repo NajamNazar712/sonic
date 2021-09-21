@@ -8,15 +8,22 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
-                <h1 class="mb-1">
+                <h1 class="d-inline mb-1">
                     Book an International Shipment
                 </h1>
-
+                @if($credit_limit != null)
+                    <h4 class="d-inline pull-right">Credit Limit Rs. {{number_format($credit_limit)}}</h4>
+                @endif
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('client.inc.messages')
 
+                            @if($credit_msg != '')
+                                <div class="alert alert-warning">
+                                    {{ $credit_msg }}
+                                </div>
+                            @endif
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.international.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
@@ -280,7 +287,7 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                @if($allow_booking)
                                 <div class="row mt-2">
                                     <div class="col">
                                         <div class="form-group text-center">
@@ -289,6 +296,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endif
                             </form>
                         </div>
                     </div>

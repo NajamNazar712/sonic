@@ -69,7 +69,12 @@ class AdminAirwayBillJournyController extends Controller
                     } elseif ($scanning_history->user_type == 4) {
                         $account_type = 'Retail User';
                         $retail_admin = RetailUser::find($scanning_history->admin_id);
-                        $scanned_by = $retail_admin->name;
+                        if($retail_admin){
+                            $scanned_by = $retail_admin->name;
+                        }
+                        else{
+                            $scanned_by = '';
+                        }
                         $role = '-';
                     } else {
                         $account_type = '-';
