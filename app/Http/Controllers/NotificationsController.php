@@ -8287,11 +8287,11 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $delivery->cnic_no . '</td>';
                     }
                     $pickups = Rider::join('v2_pickup_notes', function ($join) {
-                        $join->on('pickup_notes.rider_id', '=', 'riders.id')
-                            ->where('pickup_notes.created_at', '=', DB::raw('(select max(created_at) from pickup_notes where pickup_notes.rider_id= riders.id)'));
+                        $join->on('v2_pickup_notes.rider_id', '=', 'riders.id')
+                            ->where('v2_pickup_notes.created_at', '=', DB::raw('(select max(created_at) from v2_pickup_notes where v2_pickup_notes.rider_id= riders.id)'));
                     })
                         ->select('riders.id as rider_id', 'riders.name as rider_name', 'riders.phone as phone_no', 'riders.cnic as cnic_no')
-                        ->whereDate('pickup_notes.created_at', '<=', $date_week_age)
+                        ->whereDate('v2_pickup_notes.created_at', '<=', $date_week_age)
                         ->where('riders.status', 1)
                         ->groupBy('rider_id')
                         ->get();
