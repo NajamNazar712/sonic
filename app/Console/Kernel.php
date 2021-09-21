@@ -98,7 +98,9 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\NotPickedShipmentsJourney',
         'App\Console\Commands\LastMileStatusReport',
 		'App\Console\Commands\ShipperPaymentCalculation',
-		'App\Console\Commands\ReturnSheetReceive',
+        'App\Console\Commands\ReturnSheetReceive',
+        'App\Console\Commands\RiderDeactivateAutomatically',
+        'App\Console\Commands\RevenueReportMonthlyByDeliveryDate',
     ];
 
     /**
@@ -246,7 +248,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
 
-        $schedule->command('report:donepayment')->dailyAt('16:00')->runInBackground();
+        $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
         $schedule->command('report:retaildonepayment')->dailyAt('16:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'completed_aging_report_time');
@@ -299,6 +301,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
 //        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
         $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:report:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
 //        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
@@ -333,6 +336,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
         $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+        $schedule->command('email:RiderDeactivateAutomaticallyAndGenerateEmail')->dailyAt('03:30')->runInBackground();
 
         $settings = GlobalSettings::where('type', 'last_mile_cron_time');
         if ($settings->exists()) {

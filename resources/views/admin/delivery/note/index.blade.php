@@ -101,6 +101,7 @@
                     <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
+                        <input type="hidden" name="operation_rider_type_for_attendance" id="operation_rider_type_for_attendance">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
                         <input type="hidden" name="open_box_ids" id="open_box_ids">
                         <input type="hidden" name="notification_ids" id="notification_ids">
@@ -1272,6 +1273,8 @@
                 if (operation_id !== '' && operation_id !== null) {
 
                     $('#operation_error').css('display', 'none');
+                    $('#operation_rider_type_for_attendance').val(operation_id);
+                    
                 } else {
                     var error = "Category not selected!";
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

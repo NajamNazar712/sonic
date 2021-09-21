@@ -185,6 +185,7 @@
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
                         <th class="border-primary border-darken-1">Weight Adjusted Amount</th>
                         <th class="border-primary border-darken-1">Request Status</th>
+                        <th class="border-primary border-darken-1">Re-Open Status Date</th>
                         <th class="border-primary border-darken-1">Launched By</th>
                         <th class="border-primary border-darken-1">Launched By User Type</th>
                         <th class="border-primary border-darken-1">Launched Date</th>
@@ -438,7 +439,7 @@
                         success: function (result) {
                             head = [];
 
-                            head.push('S.No');
+                            head.push('S.No');  
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Shipment Status');
@@ -457,12 +458,13 @@
                             head.push('Adjusted Amount');
                             head.push('Weight Adjusted Amount');
                             head.push('Request Status');
+                            head.push('Re Open Status Date');
                             head.push('Launched By');
                             head.push('Launched By User Type');
                             head.push('Launched Date');
                             head.push('Launched To Date (TAT)');
                             head.push('Assigned Date');
-                            head.push('Status');
+                            head.push('Status');                          
                             head.push('Valid/Invalid Date');
                             head.push('Resolved Date');
                             head.push('Closed Date');
@@ -496,6 +498,7 @@
                                 row.push(values.adjusted_amount);
                                 row.push(values.weight_charges);
                                 row.push(values.request_status);
+                                row.push(values.reopen_date);
                                 row.push(values.launched_by_name);
                                 row.push(values.launched_by_type);
                                 row.push(values.launched_date);
@@ -570,7 +573,7 @@
                     }
                 },
                 // rowId: 'shipment_id',
-                order: [[21, 'desc']],
+                order: [[22, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
@@ -591,6 +594,7 @@
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
                     {data: 'weight_charges', name: 'change_shipment_weight_logs.new_charges', class: 'align-middle weight_charges'},
                     {data: 'request_status', name: 'crs.name', class: 'align-middle request_status'},
+                    {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle launched_by_name'},
                     {data: 'launched_by_type', name: 'crm_requests.launched_by', class: 'align-middle launched_by_type'},
                     {data: 'launched_date', name: 'crm_requests.created_at', class: 'align-middle launched_date'},

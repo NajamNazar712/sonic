@@ -13,7 +13,7 @@
                 @include('admin.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_zone" id="search_zone" class="form-control select2">
                                 @foreach($zones as $zone)
@@ -22,7 +22,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -31,7 +31,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($destination_cities as $destination_city)
@@ -40,7 +40,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-5">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
@@ -49,7 +49,15 @@
                             </select>
                         </fieldset>
                     </div>
-
+                    <div class="col-5">
+                        <fieldset class="form-group">
+                            <select name="search_rider_cat" id="search_rider_cat" class="form-control select2">
+                                @foreach($riders_cat as $rider_cat)
+                                    <option value="{{$rider_cat->id}}">{{$rider_cat->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-3 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -170,6 +178,11 @@
 
             $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Rider Category',
                 width:'100%',
                 allowClear:true
             });
@@ -316,6 +329,7 @@
                         d.search_rider = $('#search_rider').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_rider_cat = $('#search_rider_cat').val();
                     }
                 },
                 order: [[1, 'desc']],
