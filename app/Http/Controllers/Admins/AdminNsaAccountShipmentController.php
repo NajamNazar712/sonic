@@ -1233,7 +1233,6 @@ class AdminNsaAccountShipmentController extends Controller
 
         $names = [
             'tracking_number' => 'Tracking Number',
-            'reverted_by' => 'Reverted By',
         ];
 
         $messages = [
@@ -1242,29 +1241,26 @@ class AdminNsaAccountShipmentController extends Controller
         ];
         $rules = [
             'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')],
-            'reverted_by' => [],
         ];
-        $fields = [0 => 'tracking_number', 1 => 'reverted_by'];
+        $fields = [0 => 'tracking_number'];
 
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Tracking Number', 'Reverted By'];
+            $header = ['Tracking Number'];
 
             if (isset($spreadsheet)) {
                 $header_correct = TRUE;
+
                 foreach ($spreadsheet[0] as $index => $header_value) {
-
-                    if ($index == 1) {
-                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    if (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = FALSE;
-
                         break;
                     }
                 }
-                
+
                 if (!$header_correct) {
                     return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
@@ -1299,7 +1295,7 @@ class AdminNsaAccountShipmentController extends Controller
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
                     if (empty($errors['Row #' . $row_id])) {
-                        if (!empty(trim($row['tracking_number'])) || !empty(trim($row['reverted_by']))) {
+                        if (!empty(trim($row['tracking_number'])) /*|| !empty(trim($row['reverted_by']*/) {
                             if (empty($tracking_ids)) {
 
                                 $tracking_ids[] = $row['tracking_number'];
@@ -1336,7 +1332,7 @@ class AdminNsaAccountShipmentController extends Controller
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
-                        $reverted_by = trim($row['reverted_by']);
+                      /*  $reverted_by = trim($row['reverted_by']);*/
                         $shipment_details = Shipment::where('tracking_number', $tracking)->first();
                         $shipment_id = $shipment_details->id;
                         $shipment_ids[] = $shipment_id;
@@ -1366,13 +1362,13 @@ class AdminNsaAccountShipmentController extends Controller
                     $serial = 1;
 
                     foreach ($valid_shipments as $index => $shipment_id) {
-                        $reverted_by = '';
+                       /* $reverted_by = '';
                         $shipment = Shipment::find($shipment_id);
                         foreach ($rows as $key => $row) {
                             if ($row['tracking_number'] == $shipment->tracking_number) {
                                 $reverted_by = $row['reverted_by'];
                             }
-                        }
+                        }*/
 
                         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->where('status', 1)->latest()->first();
                         if ($delivery_note_shipment) {
@@ -1383,19 +1379,19 @@ class AdminNsaAccountShipmentController extends Controller
 
                                 $delivery_note_shipment->save();
 
-                                $delivery_note = $delivery_note_shipment->delivery_note;
+                              /*  $delivery_note = $delivery_note_shipment->delivery_note;
 
                                 $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
-                                //$delivery_note->received_cod_amount = $delivery_note_amount;
+                                $delivery_note->received_cod_amount = $delivery_note_amount;
 
-                                $delivery_note->save();
+                                $delivery_note->save();*/
 
                                 $shipment->shipper_status_id = 20;
                                 $shipment->consignee_status_id = 20;
 
                                 $shipment->save();
 
-                                ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL,50,NULL,NULL,1,$reverted_by,NULL);
+                                ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL,50);
                                     }
                         else{
                             return redirect()->back()->with('error','\'Shipment can\'t be updated');
