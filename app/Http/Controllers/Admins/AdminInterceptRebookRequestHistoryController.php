@@ -233,6 +233,10 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                             $shipment_detail->center_frachise_id = $express_center_id;
                             $shipment_detail->center_frachise_type = $express_center_type;
                             $shipment_detail->save();
+                        }
+                        if ($intercept_type == 2){
+                            ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, NULL, Auth::id());
+
                         }    
                     }
 

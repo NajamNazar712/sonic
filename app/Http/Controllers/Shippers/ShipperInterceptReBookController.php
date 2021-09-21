@@ -110,14 +110,7 @@ class ShipperInterceptReBookController extends Controller
                         ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
                     }
                     else{
-                        $self_collection = false;
-
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if ($shipment_self_collection->exists()) {
-                            if($shipment->consignee_city_id == $request->consignee_city){
-                                $self_collection = true;
-                            }
-                        }
+                        
                         InterceptReBookRequestHistory::create([
                             'shipment_id' =>$request->shipment_id,
                             'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -142,9 +135,7 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
-                        if($self_collection){
-                            ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
-                        }
+                        
                     }
 
                     if($self_collection == TRUE){
@@ -164,7 +155,11 @@ class ShipperInterceptReBookController extends Controller
                             $shipment_detail->center_frachise_id = $express_center_id;
                             $shipment_detail->center_frachise_type = $express_center_type;
                             $shipment_detail->save();
-                        }    
+                        }   
+                        
+                        if($intercept_type == 2){
+                            ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, NULL,$user_id,NULL);
+                        }
                     }
 
 
