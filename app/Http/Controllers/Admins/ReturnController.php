@@ -46,6 +46,7 @@ use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\AgentReturnConfirmation;
 use Illuminate\Support\Facades\Auth;
 use DB;
 use Illuminate\Support\Facades\File;
@@ -4072,6 +4073,71 @@ class ReturnController extends Controller
     }
 
     public function rcp_agent_list(Request $request){
+        
+        $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+                    ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date');
+        $datatable = Datatables::of($agent_productivity)
+            ->addColumn('total_assigning', function ($agent_productivity){
+               return ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)->count();
+            })
+            ->addColumn('actual_productivity', function ($agent_productivity){
+                return ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->count();
+             })
+             ->addColumn('reattempt', function ($agent_productivity){
+                 $counter = 0;
+                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->get();
+                foreach ($return_assign_shipments as $return_assign_shipment) {
+                    $shipment = Shipment::find($return_assign_shipment->shipment_id);
+                    if($shipment->shipper_status_id == 13){
+                        $counter++;
+                    }
+                }
+                return $counter;
+             })
+             ->addColumn('return', function ($agent_productivity){
+                $counter = 0;
+                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->get();
+                foreach ($return_assign_shipments as $return_assign_shipment) {
+                    $shipment = Shipment::find($return_assign_shipment->shipment_id);
+                    if($shipment->shipper_status_id == 20){
+                        $counter++;
+                    }
+                }
+                return $counter;
+            })
+             ->addColumn('intercept', function ($agent_productivity){
+                $counter = 0;
+                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->get();
+                foreach ($return_assign_shipments as $return_assign_shipment) {
+                    $shipment = Shipment::find($return_assign_shipment->shipment_id);
+                    if($shipment->shipper_status_id == 55){
+                        $counter++;
+                    }
+                }
+                return $counter;
+             })
+             ->addColumn('pending', function ($agent_productivity){
+                return ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->count();
+             })
+             ->addColumn('productivity', function ($agent_productivity){
 
+                $total =  ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)->count();
+                $achive =  ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->count();
+                return ($achive/$total)*100;
+             });
+       
+             return $datatable->make(true);
     }
 }

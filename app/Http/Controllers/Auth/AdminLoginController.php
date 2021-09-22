@@ -89,11 +89,15 @@ class AdminLoginController extends Controller
 //mark login start
             $check_login = AgentReturnConfirmation::where('admin_id',$id)->where('current_date',Carbon::now()->format("Y-m-d"));
             if(!$check_login->exists()){
-                $agent_login = new AgentReturnConfirmation;
-                $agent_login->login_time = Carbon::now();
-                $agent_login->admin_id = $id;
-                $agent_login->current_date = Carbon::now()->format("Y-m-d");
-                $agent_login->save();
+               $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                ->where('admin_roles.department_id',3)->where('a.id',$id);
+                if($agent_role->exists()){
+                    $agent_login = new AgentReturnConfirmation;
+                    $agent_login->login_time = Carbon::now();
+                    $agent_login->admin_id = $id;
+                    $agent_login->current_date = Carbon::now()->format("Y-m-d");
+                    $agent_login->save();
+                }
             }
 //mark login end
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);
@@ -119,9 +123,13 @@ class AdminLoginController extends Controller
             $admin = Auth::guard('admin');
             $check_logout = AgentReturnConfirmation::where('admin_id',$admin->id())->where('current_date',Carbon::now()->format("Y-m-d"));
             if($check_logout->exists()){
-                $agent_logout = $check_logout->first();
-                $agent_logout->logout_time = Carbon::now();
-                $agent_logout->save();
+                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                ->where('admin_roles.department_id',3)->where('a.id',$admin->id());
+                if($agent_role->exists()){
+                    $agent_logout = $check_logout->first();
+                    $agent_logout->logout_time = Carbon::now();
+                    $agent_logout->save();
+                }
             }
             //mark logout end
             Auth::guard('admin')->logout();

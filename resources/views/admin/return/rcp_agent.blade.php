@@ -44,6 +44,78 @@
                         </form>
                     </div>
                 </div>
+                <div id="report_data">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="card pull-up">
+                                <div class="card-content border rounded" id="total_shipments">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-right">
+                                                <h3 id="total"></h3>
+                                                <span>Total Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-primary pull-up">
+                                <div class="card-content" id="total_pending">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="booked"></h3>
+                                                <span>Booked Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-info pull-up">
+                                <div class="card-content" id="total_received">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-layers text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="received"></h3>
+                                                <span class="font-13">Received / In-Transit Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-success pull-up">
+                                <div class="card-content" id="total_delivered">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-check text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="delivered"></h3>
+                                                <span>Delivered Shipment(s)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -181,7 +253,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.month_closing.resolved.list') }}',
+                        url: '{{ route('admin.return.rcp_agent.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -203,16 +275,16 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.current_status);
-                                row.push(values.cod_amount);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hub);
-                                row.push(values.shipper);
-                                row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
-                                row.push(values.claim_id);
+                                row.push(values.agent_name);
+                                row.push(values.start_time);
+                                row.push(values.end_time);
+                                row.push(values.total_assigning);
+                                row.push(values.actual_productivity);
+                                row.push(values.reattempt);
+                                row.push(values.return);
+                                row.push(values.intercept);
+                                row.push(values.pending);
+                                row.push(values.productivity);
 
 
                                 body.push(row);
@@ -246,36 +318,32 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.month_closing.resolved.list') }}',
+                    url: '{{ route('admin.return.rcp_agent.list') }}',
                     data: function (d) {
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                rowId: 'shipment_id',
                 order: [[1, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
-                    {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
-                    {data: 'cod_amount', name: 'shipments.amount', class: 'align-middle cod_amount'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
-                    {data: 'claim_id_link', name: 'cr.id', class: 'align-middle claim_id_link'},
+                    {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
+                    {data: 'start_time', name: 'start_time', class: 'align-middle start_time'},
+                    {data: 'end_time', name: 'end_time', class: 'align-middle end_time'},
+                    {data: 'total_assigning', name: 'total_assigning', class: 'align-middle total_assigning'},
+                    {data: 'actual_productivity', name: 'actual_productivity', class: 'align-middle actual_productivity'},
+                    {data: 'reattempt', name: 'reattempt', class: 'align-middle reattempt'},
+                    {data: 'return', name: 'return', class: 'align-middle return'},
+                    {data: 'intercept', name: 'shipments.intercept', class: 'align-middle intercept'},
+                    {data: 'pending', name: 'pending', class: 'align-middle pending'},
+                    {data: 'productivity', name: 'productivity', class: 'align-middle productivity'},
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    $('td:eq(0)', row).addClass('select-checkbox');
-                    if ($.inArray(data.shipment_id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                   
 
                 },
                 initComplete: function() {
@@ -291,7 +359,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ( $(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.shipment_remarks') ) {
+                        if ($(header).is('.serial_number') ) {
                             $(td).appendTo($(search));
                         }
                         // else if($(header).is('.status')){
@@ -386,59 +454,6 @@
 
             });
 
-            // var deduct_amount_switch = document.querySelector('.switchery.deduct_switch');
-            $('#deduct_switch').on('change',function(){
-                deduct_amount_switch_change = document.querySelector('#deduct_switch');
-                var users_count = $('#responsible_persons').val().length;
-                if(users_count > 0){
-                    if(deduct_amount_switch_change.checked === true){
-                        var html = '';
-                        var responsible_ids = $('#responsible_persons').val();
-                        $.each(responsible_ids, function (index, value) {
-                            var name = $('#responsible_persons').find('option[value="'+value+'"]').attr('rel');
-                            html += '<div class="form-group row justify-content-center">\n' +
-                                '                                 <div class="col-3">\n' +
-                                '                                     <label for="deduct_amount" class="mb-0 align-middle">'+ name +'</label>\n' +
-                                '                                 </div>\n' +
-                                '                                 <div class="form-group mb-0 col-6">\n' +
-                                '                                     <input type="text" id="deduct_amount_'+ value +'" name="deduct_amount_individual['+ value +']" class="form-control deduct_amount validated" placeholder="Deduct Amount" data-rule-required="true" data-msg-required="Deduct Amount is required">\n' +
-                                '                                 </div>\n' +
-                                '                             </div>';
-
-                        });
-                        $('#deduct_individual_div').html(html);
-                        $('.deduct_amount').inputmask({
-                            'alias': 'integer',
-                            'allowMinus': false,
-                            'allowPlus': false,
-                            'rightAlign': false,
-                            'min': 0,
-                            'max': 10000000
-                        });
-                        $(".deduct_amount .validated").each(function(){
-                            $( this ).rules( "add", {
-                                required: true,
-                            });
-                        });
-                        $('#deduct_individual_div').slideDown();
-                        $('#deduct_all_div').slideUp();
-
-                    }
-                    else{
-                        $('#deduct_all_div').slideDown();
-                        $('#deduct_individual_div').slideUp();
-                    }
-                }
-                else{
-                    if(deduct_amount_switch_change.checked === true){
-                        var error = 'Select atleast one responsible person!';
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        $('#deduct_switch').trigger('click');
-                    }
-
-                }
-
-            });
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var shipment_id = parseInt($(this).parents('tr').attr('id'));
                 if(shipment_id){
