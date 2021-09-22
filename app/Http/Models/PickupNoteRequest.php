@@ -9,7 +9,7 @@ class PickupNoteRequest extends Model
 {
 	protected $primaryKey = ['pickup_note_id', 'pickup_request_id'];
 	public $incrementing = FALSE;
-	public $timestamps = FALSE;
+//	public $timestamps = FALSE;
 
 	protected function setKeysForSaveQuery(Builder $query) {
 		$keys = $this->getKeyName();

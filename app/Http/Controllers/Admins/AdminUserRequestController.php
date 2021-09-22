@@ -297,6 +297,25 @@ class AdminUserRequestController extends Controller
         }
     }
 
+    public function user_cnic(Request $request) {
+        if ($request->filled('cnic')) {
+            $cnic = AdminUserRequest::where('cnic', $request->input('cnic'));
+
+            if ($request->has('id')) {
+                $cnic = $cnic->where('id', '!=', $request->input('id'));
+            }
+
+            if (!$cnic->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+            return 'false';
+        }
+    }
     public function user_save_index($id) {
         if(session('role_id') == 1) {
             if(session('role_id') != 1) {

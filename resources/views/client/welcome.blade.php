@@ -87,14 +87,14 @@
                             </table>
                         @endif
                     </div>
-                    @if($shipper_payments != null)
+                    {{--@if($shipper_payments != null)
                         <div class="col-4">
                             <h3 class="mb-2">Payments</h3>
                             <div class="card">
                                 <div id="funnel-plot" class="height-400 echart-container"></div>
                             </div>
                         </div>
-                    @endif
+                    @endif--}}
                     </div>
                 </div>
         </div>
@@ -196,7 +196,7 @@
 
             });
             @endif
-            @if($shipper_payments != null)
+            {{--@if($shipper_payments != null)
                 var myChart = echarts.init(document.getElementById('funnel-plot'));
 
                 // Chart Options
@@ -262,7 +262,7 @@
                     }
                 });
             });
-            @endif
+            @endif--}}
     </script>
 
 @endsection

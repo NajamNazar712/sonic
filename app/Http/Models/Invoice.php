@@ -13,4 +13,9 @@ class Invoice extends Model
 	public function shipper() {
 		return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
 	}
+
+    public function invoice_slips()
+    {
+        return $this->hasMany('App\Http\Models\InvoiceUploadSlip');
+    }
 }
