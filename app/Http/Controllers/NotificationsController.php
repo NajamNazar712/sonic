@@ -8345,6 +8345,20 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
+
+                else if ($id == 158){
+                    $rider = Rider::find($reference_1_id);
+                    if($rider){
+                        if (strpos($body, '[rider_name]') !== FALSE) {
+                            $body = str_replace('[rider_name]', $rider->name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $rider->reset_pin_otp, $body);
+                        }
+                        $to = $rider->phone;
+                        self::sms($body, $to, 1);
+                    }
+                }
             }
         }
     }
@@ -8402,7 +8416,7 @@ class NotificationsController extends Controller
         }
 
         $to = $phone_number;
-        self::sms($body, $to);
+        self::sms($body, $to, 1);
     }
 
     static public function trax_otp_verification($phone_number, $pin)

@@ -97,11 +97,13 @@ Route::name('api.')->group(function () {
 
 	Route::prefix('rider')->name('rider.')->group(function() {
 		Route::post('login', 'Rider\RiderAPIController@login')->name('login');
-		Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
-		Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
-		Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
+        Route::post('login_v2', 'Rider\RiderAPIController@login_v2')->name('login_v2');
+        Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::any('signup', 'Rider\RiderAPIController@rider_signup')->name('signup');
         Route::get('cities', 'Rider\RiderAPIController@cities')->name('cities');
         Route::get('shipment_settings', 'Rider\RiderAPIController@shipment_attempt_settings')->name('shipment_settings');
+        Route::post('forget_pin', 'Rider\RiderAPIController@forget_pin')->name('forget_pin');
+        Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
 
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');

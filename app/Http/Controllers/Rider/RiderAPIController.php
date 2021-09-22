@@ -9602,6 +9602,65 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function forget_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                $pin = rand(1000, 9999);
+                $rider->reset_pin_otp = $pin;
+                $rider->save();
+                NotificationsController::send(158, $rider->id);
+                return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
+    public function reset_pin(Request $request)
+    {
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:4'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+            if ($rider->exists()) {
+                $rider = $rider->first();
+                if($request->input('otp') == $rider->reset_pin_otp){
+                    $rider->pin = bcrypt($request->pin);
+                    $rider->reset_pin_otp = NULL;
+                    $rider->save();
+                    return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                }else {
+                    return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+            }
+        }
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){
