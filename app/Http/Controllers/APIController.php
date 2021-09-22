@@ -4031,12 +4031,13 @@ class APIController extends Controller
                                                 'status' => 0,
                                             ]);
 
-                                            $shipment->consignee_status_id = 54;
-                                            $shipment->shipper_status_id = 54;
+                                            $shipment->consignee_status_id = 55;
+                                            $shipment->shipper_status_id = 55;
                                             $shipment->intercepted = 1;
                                             $shipment->save();
+                                            // ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
-                                            ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, $user_id);
+                                            ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
                                             
                                             if($self_collection == TRUE){
                                                 $shipment_self_collection = new SelfCollectionShipment();
