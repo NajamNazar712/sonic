@@ -4978,37 +4978,39 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
-                        //checking trax center 
-                        if (strtolower($row['self_collection']) == 'yes') {
-                            $consignee_city = City::where('name', $row['consignee_city_name'])->first();
-                            if($row['trax_center_franchise_type'] == 1){
-
-                                $trax_center = RetailTraxCenter::find($row['trax_center_franchise_id']);
-                                if(!$trax_center){
-                                    $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
-                                }else{
-                                    if($trax_center->status == 0){
+                        if($row['service_type_id'] == 1){
+                            //checking trax center 
+                            if (strtolower($row['self_collection']) == 'yes') {
+                                $consignee_city = City::where('name', $row['consignee_city_name'])->first();
+                                if($row['trax_center_franchise_type'] == 1){
+    
+                                    $trax_center = RetailTraxCenter::find($row['trax_center_franchise_id']);
+                                    if(!$trax_center){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
-                                    }elseif($trax_center->default_hub != $consignee_city->id){
-                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                    }else{
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
                                     }
-                                }
-                            }elseif($row['trax_center_franchise_type'] == 2){
-                                $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
-                                if(!$trax_franchise){
-                                    $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
-                                }else{
-                                    if($trax_franchise->status == 0){
+                                }elseif($row['trax_center_franchise_type'] == 2){
+                                    $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
+                                    if(!$trax_franchise){
                                         $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
-                                    }elseif($trax_franchise->default_hub != $consignee_city->id){
-                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                    }else{
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
                                     }
+                                }else{
+                                    $errors[$row_id]['trax_center_franchise_type'] = 'Express Centers/Franchise Type not found';
                                 }
-                            }else{
-                                $errors[$row_id]['trax_center_franchise_type'] = 'Express Centers/Franchise Type not found';
                             }
+                            //checking trax center end
                         }
-                        //checking trax center end
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
