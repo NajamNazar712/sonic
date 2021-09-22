@@ -68,7 +68,7 @@ class ShipperFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.id as id', 'u.id as user_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+            ->select('done_payments.id as id', 'u.id as user_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'),DB::raw('SUM(dps.wht) as total_wht'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
 //        ->where('done_payments.user_id', session('user_id'))
 //        ->orwhereIn('done_payments.user_id', session('sister_users'))
             ->groupBy('done_payments.id');
@@ -113,6 +113,9 @@ class ShipperFinanceController extends Controller
             })
             ->editColumn('total_gst', function ($done_payment) {
                 return number_format($done_payment->total_gst, 2);
+            })
+            ->editColumn('total_wht', function ($done_payment) {
+                return number_format($done_payment->total_wht, 2);
             })
             ->editColumn('total_payable', function ($done_payment) {
                 return number_format(ROUND($done_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
@@ -425,6 +428,7 @@ class ShipperFinanceController extends Controller
         $total_intercept_charges = 0;
         $total_nsa_osa_charges = 0;
         $total_gst = 0;
+        $total_wht = 0;
         $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
@@ -471,16 +475,21 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment_weight . '</td>
                               <td>' . $item->description . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
-                              <td>' . (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($weight_charges, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
             ';
 
             $serial_number++;
 
-            if ($account_type_id == 1) {
+            if (1 == 1) {
                 if ($done_payment_shipment->type != 2) {
                     if ($done_payment_shipment->type == 0) {
                         $total_collection_amount += $done_payment_shipment->amount;
@@ -506,6 +515,7 @@ class ShipperFinanceController extends Controller
                 }
 
                 $total_gst += $done_payment_shipment->gst;
+                $total_wht += $done_payment_shipment->wht;
                 $total_charges += $done_payment_shipment->charges;
                 $total_payable += $done_payment_shipment->payable;
             } else {
@@ -528,6 +538,11 @@ class ShipperFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_wht, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_collection_amount - $total_payable, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_payable, 2) . '</strong></td>
                             </tr>
       ';
 
@@ -535,6 +550,10 @@ class ShipperFinanceController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Total Collection Amount (PKR)</strong></td>
                               <td>' . number_format($total_collection_amount) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total WHT Amount (PKR)</strong></td>
+                              <td>' . number_format($total_wht,2) . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
@@ -562,6 +581,11 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                               <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
+                              <td class="color primary"><strong>Total Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>GST</strong></td>
+                              <td class="color primary"><strong>WHT</strong></td>
+                              <td class="color primary"><strong>Net Retained Amount (PKR)</strong></td>
+                              <td class="color primary"><strong>Net Disbursement Amount (PKR)</strong></td>
                             </tr>
       ';
 
@@ -623,6 +647,10 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($total_gst, 2) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>Total WHT (Deductable)</strong></td>
+                                        <td>' . number_format($total_wht, 2) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
                                         <td>' . number_format($total_packaging_material_charges, 2) . '</td>
                                     </tr>
@@ -632,7 +660,7 @@ class ShipperFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments - $total_wht), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -662,7 +690,8 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)'];
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Vendor', 'Origin', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'OSA Charges (PKR)', 'Adjustments (PKR)','Total Charges (PKR)','GST','WHT','Net Retained Amount (PKR)','Net Disbursement Amount (PKR)
+'];
 
         if ($done_payment && $done_payment->user_id == session('user_id')) {
             $account_type_id = $done_payment->shipper->account_type_id;
@@ -681,6 +710,7 @@ class ShipperFinanceController extends Controller
             $total_intercept_charges = 0;
             $total_nsa_osa_charges = 0;
             $total_gst = 0;
+            $total_wht = 0;
             $total_charges = 0;
             $total_adjustments = 0;
             $total_payable = 0;
@@ -725,16 +755,22 @@ class ShipperFinanceController extends Controller
                 $row[] = $shipment->booking_type->booking_type;
                 $row[] = $shipment_weight;
                 $row[] = $done_payment_shipment->amount;
-                $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
-                $row[] = (($account_type_id == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
-                $row[] = (($account_type_id == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
+                $row[] = ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $weight_charges : 0);
+                $row[] = ((1 == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? $shipment->cash_handling_charges : 0);
+                $row[] = ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? $shipment->nsa_osa_charges : 0);
                 $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
+
+                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0');
+                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0');
+                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0');
+                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->amount - $done_payment_shipment->payable, 2) : '0');
+                $row[] = ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->payable, 2) : '0');
 
                 $details[] = $row;
 
                 $serial_number++;
 
-                if ($account_type_id == 1) {
+                if (1 == 1) {
                     if ($done_payment_shipment->type != 2) {
                         if ($done_payment_shipment->charges != 0) {
                             if ($done_payment_shipment->type == 0) {
@@ -764,6 +800,7 @@ class ShipperFinanceController extends Controller
                     }
 
                     $total_gst += $done_payment_shipment->gst;
+                    $total_wht += $done_payment_shipment->wht;
                     $total_charges += $done_payment_shipment->charges;
                     $total_payable += $done_payment_shipment->payable;
                 } else {
@@ -779,7 +816,7 @@ class ShipperFinanceController extends Controller
 
             $total_columns = count($details[0]);
 
-            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments)];
+            $summary = ['Total Weight Charges' => $total_weight_charges, 'Total Cash Handling Charges' => $total_cash_handling_charges, 'Total Insurance Charges' => $total_insurance_charges, 'Total Replacement Charges' => $total_replacement_charges, 'Total Try & Buy Charges' => $total_try_and_buy_charges, 'Total Return Charges' => $total_return_charges, 'Total Fuel Surcharge' => $total_fuel_surcharge, 'Total Intercept Charges' => $total_intercept_charges, 'Total OSA Charges' => $total_nsa_osa_charges, 'Total Charges (w/o GST)' => ($total_charges - $total_packaging_material_charges), 'Total GST' => $total_gst,'Total WHT (Deductable)' => $total_wht, 'Total Packaging Material Charges' => $total_packaging_material_charges, 'Total Adjustments' => $total_adjustments, 'Overall Charges' => ($total_charges + $total_gst - $total_adjustments - $total_wht)];
 
             $details[] = [];
 

@@ -185,6 +185,9 @@
                         <th class="border-primary border-darken-1">Phone No</th>
                         <th class="border-primary border-darken-1">Email Address</th>
                         <th class="border-primary border-darken-1">Message</th>
+                        <th class="border-primary border-darken-1">Service</th>
+                        <th class="border-primary border-darken-1">Brand</th>
+                        <th class="border-primary border-darken-1">Company</th>
                         <th class="border-primary border-darken-1">Lead Reference</th>
                         <th class="border-primary border-darken-1">Requested Date/Time</th>
                         <th class="border-primary border-darken-1">Sale Person Tagged</th>
@@ -570,6 +573,9 @@
                             head.push('Phone No');
                             head.push('Email Address');
                             head.push('Message');
+                            head.push('Service');
+                            head.push('Brand');
+                            head.push('Company');
                             head.push('Lead Reference');
                             head.push('Requested Date/Time');
                             head.push('Sale Person Tagged');
@@ -593,6 +599,9 @@
                                 row.push(values.phone_number);
                                 row.push(values.email_address);
                                 row.push(values.message);
+                                row.push(values.service);
+                                row.push(values.brand);
+                                row.push(values.company);
                                 row.push(values.lead_reference);
                                 row.push(values.requested_date);
                                 row.push(values.sale_person);
@@ -717,7 +726,7 @@
                     }
                 },
                 rowId: 'lead_id',
-                order: [[11, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -729,6 +738,9 @@
                     {data: 'phone_number', name: 'leads.phone_number', class: 'align-middle phone_number'},
                     {data: 'email_address', name: 'leads.email_address', class: 'align-middle email_address'},
                     {data: 'message', name: 'leads.message', class: 'align-middle message'},
+                    {data: 'service', name: 'leads.service_id', class: 'align-middle service'},
+                    {data: 'brand', name: 'leads.brand', class: 'align-middle brand'},
+                    {data: 'company', name: 'leads.company', class: 'align-middle company'},
                     {data: 'lead_reference', name: 'lr.name', class: 'align-middle lead_reference'},
                     {data: 'requested_date', name: 'leads.requested_date', class: 'align-middle requested_date'},
                     {data: 'sale_person', name:'sp.name', class: 'align-middle sale_person'},
@@ -755,7 +767,7 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-
+                    var service_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -765,6 +777,12 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.service')){
+                            $(service_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -786,8 +804,21 @@
                         return obj;
                     });
 
+                    var data2 = $.map({!! $services !!}, function (obj) {
+                        obj.id = obj.id;
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
                         placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',

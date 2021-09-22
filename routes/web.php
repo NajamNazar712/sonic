@@ -677,6 +677,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{id}/add/rates/submit','Admins\AdminCorporateAccountsController@change_corporate_rate_type')->name('change_rate_type');
             Route::get('{id}/view/rates','Admins\AdminCorporateAccountsController@default_view_rates_index')->name('rates.view');
         });
+        Route::prefix('reimbursement_setting')->name('reimbursement_setting.')->group(function (){
+           Route::get('{id}','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting')->name('index');
+           Route::post('{id}','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting_store')->name('store');
+           Route::post('{id}/approve','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting_approve')->name('approve');
+           Route::post('{id}/reject','Admins\AdminCorporateAccountsController@corporate_reimbursement_setting_reject')->name('reject');
+        });
     });
     //ajax request
 
@@ -3225,11 +3231,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('download_docs', 'Admins\AdminHumanResourseController@download_docs')->name('download_docs');
 
         Route::prefix('employee_directory')->name('employee_directory.')->group(function () {
+            Route::post('pin', 'Admins\AdminHumanResourseController@employee_directory_pin')->name('pin');
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
             Route::post('reject', 'Admins\AdminHumanResourseController@employee_directory_reject')->name('reject');
             Route::get('{employee}/edit', 'Admins\AdminHumanResourseController@employee_directory_edit')->name('edit');
+            Route::post('get_designation', 'Admins\AdminHumanResourseController@employee_get_designation')->name('get.designation');
             Route::post('{employee}/profile', 'Admins\AdminHumanResourseController@employee_directory_profile_update')->name('profile.update');
             Route::post('{employee}/medical', 'Admins\AdminHumanResourseController@employee_directory_medical_update')->name('medical.update');
             Route::post('{employee}/bank', 'Admins\AdminHumanResourseController@employee_directory_bank_update')->name('bank.update');
@@ -3237,7 +3245,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/education', 'Admins\AdminHumanResourseController@employee_directory_education_update')->name('education.update');
             Route::post('{employee}/employment', 'Admins\AdminHumanResourseController@employee_directory_employment_update')->name('employment.update');
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
-
+            Route::prefix('staff')->name('staff.')->group(function () {
+                Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
+                Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
+            });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');
                 Route::post('permanent', 'Admins\AdminHumanResourseController@employee_directory_make_rider_permanent')->name('permanent');
@@ -3269,6 +3280,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminHumanResourseController@designation_index')->name('index');
             Route::get('list', 'Admins\AdminHumanResourseController@designation_list')->name('list');
             Route::post('status', 'Admins\AdminHumanResourseController@designation_status')->name('status');
+            Route::post('roles', 'Admins\AdminHumanResourseController@designation_roles')->name('roles');
             Route::post('add', 'Admins\AdminHumanResourseController@designation_add')->name('add');
             Route::post('edit', 'Admins\AdminHumanResourseController@designation_edit')->name('edit');
         });
