@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\RiderType;
@@ -229,7 +230,7 @@ class AdminHumanResourseController extends Controller
             ->join('employee_types as et','et.id','=','employees.employee_type_id')
             ->join('employee_request_statuses as ers','ers.id','=','employees.request_status_id')
             ->join('employee_statuses as es','es.id','=','employees.status_id')
-            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','ads.name as department_name'])
+            ->select(['r.name as check_if_rider_present_bit','r.rider_category_id as category_id','r.route_id as route_id','r.operation_rider_id as operation_id','r.blacklist as blacklist_rider','rr_rt.id as inactive_rider_type_id','rr_rt.name as inactive_rider_type','r_rt.id as active_rider_type_id','r_rt.name as active_rider_type','employees.id as employee_id', 'employees.name as employee_name','employees.city_id as city_id', 'cities.name as city' ,'employees.trax_id' ,'employees.request_status_id','employees.status_id as status_id' ,'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type','employees.status_id','ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at','employees.pin as pin','employees.address as address','employees.guardian_name as father_name','ads.name as department_name'])
             ->where(function ($q){
                 $q ->where('r.blacklist','=',0)
                     ->orWhere('r.blacklist','=',null);
@@ -295,6 +296,9 @@ class AdminHumanResourseController extends Controller
 
                 }
             })
+->editColumn('employee_name',function ($user){
+                return $user->employee_name.' '.$user->father_name;
+            })
             ->filterColumn('ads.name',function ($query,$keyword){
 
                 if ($keyword != '') {
@@ -313,7 +317,7 @@ class AdminHumanResourseController extends Controller
             ';
                     if (session('role_id') == 1 || in_array(468, session('permissions'))) {
                         $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                        $dropdown .= '<a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
+                        $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
                     }
                     if($result->request_status_id == 1 || $result->request_status_id == 2){
                         if (session('role_id') == 1 || in_array(469, session('permissions'))) {
@@ -322,6 +326,16 @@ class AdminHumanResourseController extends Controller
 
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
+                        }
+                    }
+                    if($result->request_status_id == 3 && $result->employee_type_id == 1)
+                    {
+                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
+                        }
+
+                        if ($result->status_id == 2 && (session('role_id') == 1 || in_array(591, session('permissions')))) {
+                            $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
                         }
                     }
 
@@ -376,6 +390,19 @@ class AdminHumanResourseController extends Controller
                 }
             })
             ->make(true);
+    }
+
+    public function employee_directory_pin(Request $request)
+    {
+        $employee = Employee::find($request->employee_id);
+        if($employee)
+        {
+            $employee->pin = $request->pin;
+            $employee->update();
+
+            return back()->with(['success'=>'Employee Pin Updated Successfully']);
+        }
+        return back()->with(['error'=>'Employee Not Found']);
     }
 
     public function employee_directory_make_rider_incentive(Request $request)
@@ -504,6 +531,58 @@ class AdminHumanResourseController extends Controller
         $employee->status_id = 2;
         $employee->save();
         return response()->json(['status' => 0, 'success' => 'Rider is Inactive!']);
+    }
+
+    public function employee_directory_make_staff_activate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = Admin::where('trax_id',$employee->trax_id);
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 1;
+        $staff->updated_by = Auth::id();
+        $staff->save();
+
+        $employee->status_id = self::GetStatusOfEmployee($employee->id);
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Staff is Activated!']);
+
+    }
+    public function employee_directory_make_staff_deactivate(Request $request)
+    {
+        $employee_id = $request->employee_id;
+        if(!$employee_id){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $employee = Employee::find($employee_id);
+        if(!$employee)
+        {
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = Admin::where('trax_id',$employee->trax_id);
+        if($staff->doesntExist()){
+            return response()->json(['status' => 1, 'error' => 'Staff not found!']);
+        }
+        $staff = $staff->first();
+
+        $staff->status = 0;
+        $staff->updated_by = Auth::id();
+        $staff->save();
+
+        $employee->status_id = 2;
+        $employee->save();
+        return response()->json(['status' => 0, 'success' => 'Staff is Inactive!']);
     }
 
     public function employee_directory_make_rider_update(Request $request)
@@ -645,6 +724,42 @@ class AdminHumanResourseController extends Controller
                     }
                     $employee->request_status_id = 3;
                     $employee->save();
+
+                    if($employee->employee_type_id == 1)
+                    {
+
+                        $admin = Admin::where('trax_id',$employee->trax_id);
+
+                        if($admin->doesntExist())
+                        {
+                            $admin = new Admin();
+
+                            $admin->name = $employee->name;
+                            $admin->email = $employee->official_email;
+                            $admin->phone_number = $employee->phone_number;
+                            $admin->cnic = $employee->cnic;
+                            $admin->role_id = $employee->designation->role_id ?? 79;
+                            $admin->default_hub_id = $employee->city_id;
+                            $admin->password = bcrypt($employee->pin);
+                            $admin->designation = $employee->designation->name ?? '';
+                            $admin->designation_id = $employee->designation_id;
+
+                            if($employee->status_id == 2)
+                            {
+                                $admin->status = 0;
+                            }
+                            else{
+                                $admin->status = 1;
+                            }
+
+                            $admin->updated_by = Auth::id();
+                            $admin->trax_id = $employee->trax_id;
+                            $admin->employee_id = $employee->id;
+
+                            $admin->save();
+                        }
+
+                    }
                 }
             }
 
@@ -703,6 +818,7 @@ class AdminHumanResourseController extends Controller
     {
         $request->validate([
             'personal_number'=> [Rule::unique('employees', 'phone_number')->ignore($employee->id)],
+            'cnic'=> [Rule::unique('employees', 'cnic')->ignore($employee->id)],
         ]);
 
         $employee->request_status_id = 2;
@@ -718,6 +834,7 @@ class AdminHumanResourseController extends Controller
         $employee->personal_email = $request->personal_email;
         $employee->address = $request->address;
         $employee->emergency_contact = $request->emergency_contact;
+        $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
         $employee->designation_id = $request->designation;
@@ -726,13 +843,25 @@ class AdminHumanResourseController extends Controller
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
-        $employee->sonic_id = $request->sonic_id;
+//        $employee->sonic_id = $request->sonic_id;
         $employee->pin = $request->bolt_pin;
         $employee->place_of_birth = $request->place_of_birth;
         $employee->date_of_birth = $request->date_of_birth_formatted;
         $employee->reporting_location_id = $request->reporting_location;
         $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
         $employee->update();
+
+        if($employee->employee_type_id == 1)
+        {
+            $admin = Admin::where('trax_id',$employee->trax_id);
+            if($admin->exists())
+            {
+                $admin = $admin->first();
+
+                $admin->role_id = $employee->designation->role_id ?? 79;
+                $admin->update();
+            }
+        }
 
         return back()->with(['success'=>'Employee Profile Updated Successfully']);
     }
@@ -2096,7 +2225,8 @@ class AdminHumanResourseController extends Controller
     }
     public function designation_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),390);
-        return view('admin.human_resource.designation');
+        $departments = AdminDepartment::all();
+        return view('admin.human_resource.designation',compact('departments'));
     }
 
     public function designation_list(Request $request){
@@ -2104,7 +2234,9 @@ class AdminHumanResourseController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),391);
         }
-        $designations = EmployeeDesignation::select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description']);
+        $designations = EmployeeDesignation::leftjoin('admin_departments as ad','ad.id','employee_designations.department_id')
+            ->leftjoin('admin_roles as r','r.id','employee_designations.role_id')
+            ->select(['employee_designations.id as id', 'employee_designations.name as name', 'employee_designations.code', 'employee_designations.status', 'employee_designations.description','employee_designations.department_id','ad.name as department','r.name as role','r.id as role_id']);
 
         return Datatables::of($designations)
             ->editColumn('status', function ($data) {
@@ -2160,9 +2292,18 @@ class AdminHumanResourseController extends Controller
         return response()->json(['status' => 1, 'success' => 'Designation '. $status .' successfully!']);
     }
 
+    public function designation_roles(Request $request)
+    {
+        $roles = AdminRole::where('department_id',$request->department_id)->get();
+
+        return response()->json(['status'=>1,'roles'=>$roles]);
+    }
+
     public function designation_add(Request $request){
         $designation = new EmployeeDesignation();
         $designation->name = $request->name;
+        $designation->department_id = $request->department_id;
+        $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
 
@@ -2174,9 +2315,29 @@ class AdminHumanResourseController extends Controller
     public function designation_edit(Request $request){
         $designation = EmployeeDesignation::find($request->designation_id);
         $designation->name = $request->name;
+        $designation->department_id = $request->department_id;
+        $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
+    }
+
+    public function employee_get_designation(Request $request)
+    {
+        if($request->has('department_id'))
+        {
+            $designations = EmployeeDesignation::where('department_id',$request->department_id);
+            if($designations->exists())
+            {
+                return response()->json(['status'=>1,'designations'=>$designations->get()]);
+            }
+            else{
+                return response()->json(['status'=>0,'error'=>'Designation Not Found']);
+            }
+        }
+        else{
+            return response()->json(['status'=>0,'error'=>'Department is Required']);
+        }
     }
     public function department_index(){
 
@@ -2189,8 +2350,7 @@ class AdminHumanResourseController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),393);
         }
-        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description'])
-        ->where('id', '!=', 1);
+        $departments = AdminDepartment::select(['admin_departments.id as id', 'admin_departments.name as name', 'admin_departments.code as code', 'admin_departments.description as description']);
 
         return Datatables::of($departments)
             ->addColumn("action", function ($data) {
