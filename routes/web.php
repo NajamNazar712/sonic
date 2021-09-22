@@ -1316,6 +1316,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
             Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
             Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
 
         });
     });

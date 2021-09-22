@@ -429,40 +429,50 @@
                     table.draw(true);
                 }
             });
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+           
 
-                var id = parseInt($(this).parent('tr').attr('id'));
+            function get_rcp_cards_data() {
+                var from_date = $('input[name="search_date_from_formatted"]').val();
+                var to_date = $('input[name="search_date_to_formatted"]').val();
+                var origin = $('#search_origin').val();
+                var user = $('#search_user').val();
+                var destination = $('#search_destination').val();
+                $.ajax({
+                    url: '{!! route('admin.return.rcp_agent.data') !!}',
+                    method: 'post',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'from_date': from_date,
+                        'to_date': to_date,
+                        'user': user,
+                        'origin': origin,
+                        'destination': destination,
 
-                var index = $.inArray(id, selected_rows);
-
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button('.close_action').enable();
-                    table.button('.re-attempt').enable();
-
-                }
-                else {
-                    table.button('.close_action').disable();
-                    table.button('.re-attempt').disable();
-                }
-
-            });
-
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-                var shipment_id = parseInt($(this).parents('tr').attr('id'));
-                if(shipment_id){
-                    if ($(this).hasClass('assign_responsible')) {
-                        $('#add_responsible_modal').modal('show');
-                        $('#responsible_person_shipment_id').val(shipment_id);
                     }
-                }
-            });
+                }).done(function (data) {
+                    if(data.status){
+                        $('#total').text(data.stats.total);
+                        $('#booked').text(data.stats.booked);
+                        $('#received').text(data.stats.received);
+                        $('#delivered').text(data.stats.delivered);
+                        $('#in_process').text(data.stats.in_process);
+                        $('#return').text(data.stats.return);
+                        $('#canceled').text(data.stats.canceled);
+
+                    }else{
+                        $('#total').text(0);
+                        $('#booked').text(0);
+                        $('#received').text(0);
+                        $('#delivered').text(0);
+                        $('#in_process').text(0);
+                        $('#return').text(0);
+                        $('#canceled').text(0);
+
+                    }
+                });
+            }
+
+           
 
 
 
