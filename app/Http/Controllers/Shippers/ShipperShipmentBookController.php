@@ -4486,7 +4486,7 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_1' => ['required', 'phone_number'],
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
-        'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
             'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,2', 'between:1,2'],
 
@@ -4811,6 +4811,7 @@ class ShipperShipmentBookController extends Controller
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
                                 }
                             }
+                        if($row['service_type_id'] == 1){
                             //checking trax center 
                             if (strtolower($row['self_collection']) == 'yes') {
                                 $consignee_city = City::where('name', $row['consignee_city_name'])->first();
@@ -4842,6 +4843,7 @@ class ShipperShipmentBookController extends Controller
                                 }
                             }
                             //checking trax center end
+                        }
                         }
 
                         if (!$user_shipping_info->city->status) {
