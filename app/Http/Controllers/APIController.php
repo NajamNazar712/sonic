@@ -4056,7 +4056,12 @@ class APIController extends Controller
                                                     $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
                                                     $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
                                                     $shipment_detail->save();
-                                                }    
+                                                }
+                                                $shipment = Shipment::find($shipment->id);
+                                                $shipment->shipper_status_id = 15;
+                                                $shipment->consignee_status_id = 15;
+                                                $shipment->save();
+                                                ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, $user_id, NULL);    
                                             }
 
                                             // $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id)->get()->first();
@@ -4188,7 +4193,12 @@ class APIController extends Controller
                                                     $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
                                                     $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
                                                     $shipment_detail->save();
-                                                }    
+                                                }
+                                                $shipment = Shipment::find($shipment->id);
+                                                $shipment->shipper_status_id = 15;
+                                                $shipment->consignee_status_id = 15;
+                                                $shipment->save();
+                                                ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, $user_id, NULL);    
                                             }
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
