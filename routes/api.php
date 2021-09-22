@@ -220,6 +220,7 @@ Route::name('api.')->group(function () {
         Route::post('login', 'AdminAPIController@login')->name('login');
         Route::post('login_v2', 'AdminAPIController@login')->name('login_v2');
         Route::get('slider', 'Rider\RiderAPIController@rider_ticker_images')->name('slider');
+        Route::post('forget_password','AdminAPIController@forget_password')->name('forget_password');
         Route::prefix('register_request')->name('register_request.')->group(function () {
             Route::get('signup_data', 'Rider\RiderAPIController@signup_data')->name('signup_data');
             Route::post('validate_data', 'AdminAPIController@validate_cnic_phone_number')->name('validate_data');
