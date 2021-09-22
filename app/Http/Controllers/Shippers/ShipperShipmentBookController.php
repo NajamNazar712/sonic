@@ -4811,6 +4811,8 @@ class ShipperShipmentBookController extends Controller
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
                                 }
                             }
+                        
+                        }
                         if($row['service_type_id'] == 1){
                             //checking trax center 
                             if (strtolower($row['self_collection']) == 'yes') {
@@ -4844,8 +4846,6 @@ class ShipperShipmentBookController extends Controller
                             }
                             //checking trax center end
                         }
-                        }
-
                         if (!$user_shipping_info->city->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
                         }
