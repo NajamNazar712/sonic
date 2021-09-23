@@ -894,6 +894,7 @@ class DeliveryController extends Controller
                     $rider_attendance_action->employee_id = $rider->id;
                     $rider_attendance_action->employee_type = 2;
                     $rider_attendance_action->action_id = 1;
+                    $rider_attendance_action->attendance_date = $attendance_date;
                     $rider_attendance_action->action_date = $attendance_datetime;
                     $rider_attendance_action->latitude = $city_id_location->hub_location_latitude;
                     $rider_attendance_action->longitude = $city_id_location->hub_location_longitude;
@@ -6601,6 +6602,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                                 $rider_attendance_action->employee_id = $rider_id;
                                 $rider_attendance_action->employee_type = 2;
                                 $rider_attendance_action->action_id = 1;
+                                $rider_attendance_action->attendance_date = $attendance_date;
                                 $rider_attendance_action->action_date = $attendance_datetime;
                                 $rider_attendance_action->latitude = $city_id_location->hub_location_latitude;
                                 $rider_attendance_action->longitude = $city_id_location->hub_location_longitude;
