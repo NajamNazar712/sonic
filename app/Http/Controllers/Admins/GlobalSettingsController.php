@@ -13,7 +13,7 @@ use App\Http\Models\Admin\BusinessProjectionShipment;
 use App\Http\Models\Admin\CompletedAgingReport;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\Fleet;
-use App\Http\Models\Admin\FuelFactorHistory;
+use App\Http\Models\Admin\Fuel\FuelFactorHistory;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\MonthClosingStatus;
 use App\Http\Models\Admin\MonthClosingType;
