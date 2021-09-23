@@ -120,6 +120,10 @@
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Reason</th>
+                        <th class="border-primary border-darken-1">Remark</th>
+                        <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -299,6 +303,10 @@
                             head.push('Account No.');
                             head.push('Shipper');
                             head.push('Consignee Name');
+                            head.push('Status');
+                            head.push('Reason');
+                            head.push('Remark');
+                            head.push('Total Attempt');
                             head.push('History Status');
                             head.push('Service Type');
                             head.push('Arrival');
@@ -323,6 +331,10 @@
                                 row.push(values.shipper);
                                 row.push(values.account_no);
                                 row.push(values.name);
+                                row.push(values.status);
+                                row.push(values.reason);
+                                row.push(values.remark);
+                                row.push(values.total_attempt);
                                 row.push(values.history_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival);
@@ -387,7 +399,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[8, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -395,6 +407,10 @@
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
+                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
+                    {data: 'remark', name: 'sjr.remark', class: 'align-middle remark'},
+                    {data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},

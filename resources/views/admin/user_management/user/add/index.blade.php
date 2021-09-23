@@ -68,6 +68,7 @@
 											</select>
 										</div>
 									</div>
+
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="text" name="designation" class="form-control" placeholder="Designation" >
@@ -77,6 +78,25 @@
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id">
+										</div>
+									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="designation_id" class="select2" id="designation_id">
+												@foreach($designations as $designation)
+													<option value="{{ $designation->id }}">{{ $designation->name }}</option>
+												@endforeach
+											</select>
+										</div>
+									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="shift_id" class="select2" id="shift_list" data-rule-required="true" data-msg-required="Employee Shift is required">
+												@foreach($shifts as $shift)
+													<option value="{{$shift->id}}"> {{$shift->name}}</option>
+												@endforeach
+											</select>
 										</div>
 									</div>
 
@@ -140,9 +160,19 @@
 				placeholder: 'Default Hub*'
 			});
 
+			$('#user_form #designation_id').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Select Designation'
+			});
+
 			$('#user_form #phone_number').inputmask({
 				'mask': '9999-9999999',
 				'clearIncomplete': true
+			});
+
+			$('#user_form #shift_list').prepend('<option value="" selected="selected"></option>').select2({
+				width: '100%',
+				placeholder: 'Working Shift*'
 			});
 
 			$('#user_form #cnic').inputmask({

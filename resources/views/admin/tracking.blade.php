@@ -588,6 +588,7 @@
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
 
@@ -608,15 +609,21 @@
                                         shipment += '<button class="d-none d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
 
                                     }
+                                    if((session('role_id') == 1 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)|| (session('department_id') == 6 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
+                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
+                                    }
                                 }
                                 else {
                                     if(details.pod_file){
-                              
+
                                         shipment += '<button class="btn btn-secondary mr-sm-1 d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                         shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.pod_file + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> POD File</a>';
 
                                     }else{
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
+                                    }
+                                    if((session('role_id') == 1 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)|| (session('department_id') == 6 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
+                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
                                     }
                                 }
 
@@ -1104,7 +1111,7 @@
                                         shipment += '<tr>';
                                         shipment += '<td>' + $count + '</td>';
                                         if (crm_request.status_id === 1 || crm_request.status_id === 5) {
-                                            shipment += '<td>' + crm_request.status + ' (' + crm_request.id + ')</td>';
+                                            shipment += '<td>' + crm_request.status + '(<a class="btn btn-sm btn-outline-info align-middle" href="' + complain_route + crm_request.id + '" target="_blank">(' + crm_request.id + ')</a>)</td>';
                                         }
                                         else {
                                             shipment += '<td>' + crm_request.status + '</td>';
@@ -1279,6 +1286,43 @@
 
                 print(id, booking_type_id,shipment_type);
             });
+
+            $('#tracking').on('click', '.print_pieces', function () {
+                id = $(this).attr('id');
+                if(id){
+                    pieces_print(id);
+                }
+            });
+            function pieces_print(id) {
+
+                $.ajax({
+                    url: '{!! route('admin.tracking.pieces_print') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        var tab = window.open('', '_blank');
+
+                        if (!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
 
             $('#tracking').on('click', '.add_request', function () {
                 id = $(this).attr('id');

@@ -1547,7 +1547,7 @@ class AdminReportsEmailController extends Controller
                         $shippers[$retail_done_payment->retail_done_payment->shipper->id] = $retail_done_payment->retail_done_payment->shipper->id;
                     }
                     if ($retail_done_payment->retail_done_payment->user_bank_info_id != null) {
-                        $iban = $retail_done_payment->retail_done_payment->shipper_bank->iban;
+                        $iban = $retail_done_payment->retail_done_payment->shipper->iban;
                     } else {
                         $iban = '-';
                     }

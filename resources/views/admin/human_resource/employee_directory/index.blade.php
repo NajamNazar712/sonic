@@ -29,6 +29,7 @@
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
+                                    <th class="border-primary border-darken-1">Staff Department</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -212,6 +213,32 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="UpdatePinModal" data-backdrop="static" tabindex="-1" role="dialog"
+         aria-labelledby="UpdatePinModal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Edit Bolt & Sonic Pin</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form action="{{route('admin.human_resource.employee_directory.pin')}}" class="form-horizontal mb-1 justify-content-center" method="POST" id="UpdatePinForm" novalidate="novalidate">
+                        {{csrf_field()}}
+                        <input type="hidden" name="employee_id" id="employee_id" value="">
+                        <div class="form-group">
+                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -316,6 +343,16 @@
                 }
             });
 
+            $("#UpdatePinForm").validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -339,6 +376,7 @@
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
+                            head.push('Department Name');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -353,6 +391,7 @@
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
+                                row.push(values.department_name);
                                 body.push(row);
                             });
                         },
@@ -596,6 +635,7 @@
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
+                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -611,6 +651,8 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
+                        '</select>';
+                    var department_type = '<select name="department_type_search" id="department_type_search" class="select2 form-control">' +
                         '</select>';
                     var employee_status = '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
@@ -631,6 +673,13 @@
                         else if($(header).is('.status'))
                         {
                             $(employee_status).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else if($(header).is('.department_name'))
+                        {
+                            $(department_type).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -657,7 +706,6 @@
                     });
 
                     var status_data = $.map({!! $employee_statuses !!}, function (obj) {
-                        obj.id = obj.id;
                         obj.text = obj.name;
                         return obj;
                     });
@@ -665,6 +713,17 @@
                     $("#employee_status_search").prepend('<option value="" selected></option>').select2({
                         data: status_data,
                         placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var department_name_data = $.map({!! $employee_department !!}, function (obj) {
+                        obj.text = obj.name;
+                        return obj;
+                    });
+                    $("#department_type_search").prepend('<option value="" selected></option>').select2({
+                        data: department_name_data,
+                        placeholder: "Select Department Type",
                         width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -842,7 +901,7 @@
                     var rider_type = table.row($(this).parents('tr')).data().inactive_rider_type_id;
                     route_id = null;
                 }
-                $('#employee_id').val(id);
+                $('#editRiderModal #employee_id').val(id);
                 $('#rider_name').val(rider_name);
                 $('#rider_cnic').val(cnic);
                 $('#rider_phone').val(phone_no);
@@ -853,8 +912,21 @@
 
             });
 
+            $('#UpdatePinModal #pin').inputmask({
+                'mask': '9999',
+                'clearIncomplete': true,
+            });
+
+            $('body').on('click', '.update_pin_btn', function (e) {
+                var employee_id = table.row($(this).parents('tr')).data().employee_id;
+                var pin = table.row($(this).parents('tr')).data().pin;
+                $('#UpdatePinModal #employee_id').val(employee_id);
+                $('#UpdatePinModal #pin').val(pin);
+                $('#UpdatePinModal').modal('show');
+            });
+
             $('body').on('hidden.bs.modal', '#editRiderModal', function () {
-                $('#employee_id').val('');
+                $('#editRiderModal #employee_id').val('');
                 $('#rider_name').val('');
                 $('#rider_cnic').val('');
                 $('#rider_phone').val('');
@@ -867,6 +939,11 @@
                 $('#category').val(null).trigger('change');
 
 
+            });
+
+            $('body').on('hidden.bs.modal', '#UpdatePinModal', function () {
+                $('#UpdatePinModal #employee_id').val('');
+                $('#pin').val('');
             });
 
             $('body').on('click', '.incentive', function (e) {
@@ -1113,6 +1190,67 @@
                 });
             });
 
+            $('body').on('click', '.deactivate_staff', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Staff Inactive!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Staff Inactive',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.deactivate') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
             $('body').on('click', '.activate', function (e) {
                 var id = $(this).data('target-id');
                 swal({
@@ -1149,6 +1287,67 @@
 
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.rider.activate') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+
+            $('body').on('click', '.activate_staff', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Make Staff Active!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Making Staff Active',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.activate') !!}',
                             method: 'POST',
                             data: {
                                 'employee_id': id,

@@ -154,6 +154,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
@@ -487,6 +488,7 @@
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
+                            head.push('Total WHT');
                             head.push('Packing Charges');
                             head.push('Total Deductable');
 							head.push('Adjustment Charges');
@@ -514,6 +516,7 @@
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
+                                row.push(values.total_wht);
                                 row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
 								row.push(values.adjustment_charges);
@@ -537,9 +540,35 @@
 			var table = $('#datatable').DataTable({
 				scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
+				@if (session('role_id') == 1 || count(array_intersect([62, 63, 597], session('permissions'))) !== 0)
 
 					buttons: [
+						@if (session('role_id') == 1 || in_array(597, session('permissions')))
+					{
+						text: 'Generate Report',
+						className: 'btn btn-primary paid',
+						enabled: true,
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.finance.done_payments.generate_report_to_email') !!}',
+								method: 'GET',
+							})
+									.done(function(data) {
+										if (data.status) {
+											toastr.success(data.success, 'Success!', {
+												positionClass: 'toast-bottom-center',
+												containerId: 'toast-bottom-center'
+											});
+										}
+										else {
+											toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+										}
+
+									});
+
+						}
+					},
+						@endif
 						@if (session('role_id') == 1 || in_array(62, session('permissions')))
 							{
 							text: 'Paid',
@@ -725,6 +754,7 @@
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_wht', name: 'dpc.wht', class: 'align-middle text-center total_wht', orderable: false},
 					{data:'packaging_charges', name: 'dpc.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
@@ -766,7 +796,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action') || $(header).is('.packaging_charges') || $(header).is('.adjustment_charges') || $(header).is('.total_wht')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.bank')){
                             $(bank_select).appendTo($(search))
@@ -1241,29 +1271,29 @@
 							'payment_request' : 1
 						}
 					})
-						.done(function(data) {
-							if (data.status) {
-								toastr.success(data.success, 'Success!', {
-									positionClass: 'toast-bottom-center',
-									containerId: 'toast-bottom-center'
-								});
-							}
-							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							}
+							.done(function(data) {
+								if (data.status) {
+									toastr.success(data.success, 'Success!', {
+										positionClass: 'toast-bottom-center',
+										containerId: 'toast-bottom-center'
+									});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+								}
 
-							table.button('.paid').disable();
-							table.button('.reverted').disable();
+								table.button('.paid').disable();
+								table.button('.reverted').disable();
 
-							selected_rows = [];
+								selected_rows = [];
 
-							table.rows().deselect();
+								table.rows().deselect();
 
-							table.draw('false');
+								table.draw('false');
 
-							$('#AddRequestModal').modal('hide');
-							$('#AddNewRequest').attr('disabled',false);
-						});
+								$('#AddRequestModal').modal('hide');
+								$('#AddNewRequest').attr('disabled',false);
+							});
 
                 }
             });

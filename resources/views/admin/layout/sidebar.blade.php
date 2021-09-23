@@ -658,7 +658,7 @@
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Dispute</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || count(array_intersect([399, 400, 402, 421, 422,525], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([399, 400, 402, 421, 422,525,595], session('permissions'))) !== 0)
                         <li class=" nav-item"><a href="#"><span class="menu-title">Telenor</span></a>
 
                             <ul class="menu-content">
@@ -687,7 +687,13 @@
                                            href="{{ route('admin.telenor.return.bulk_return') }}">Bulk Return</a>
                                     </li>
                                 @endif
-{{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
+                                @if (session('role_id') == 1 || in_array(595, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.revert.bulk_revert') }}">Bulk Revert</a>
+                                    </li>
+                                @endif
+
+                                    {{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
 {{--                                    <li><a class="menu-item"--}}
 {{--                                           href="{{ route('admin.telenor.call.index') }}">Call(s)</a>--}}
 {{--                                    </li>--}}
@@ -863,6 +869,8 @@
                     @if (session('role_id') == 1 || in_array(567, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.airway_journey.index') }}">Airway Bill Print History</a></li>
                     @endif
+
+                  {{--  <li><a class="menu-item" href="{{route('admin.attendance.mark')}}">Attendance</a></li>--}}
                 </ul>
             </li>
 
@@ -1606,7 +1614,7 @@
                     </ul>
                 </li>
             @endif
-            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492,506,568], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human Resource</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs')}}">Download Docs</a></li>
@@ -1625,6 +1633,10 @@
                             <li><a class="menu-item" href="{{ route('admin.human_resource.reporting_location.index')}}">Reporting Location</a></li>
                         @endif
 
+                        @if (session('role_id') == 1 || in_array(592, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_shifts.index')}}">Employee Shifts</a></li>
+                        @endif
+
                         @if (session('role_id') == 1 || in_array(481, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.designation.index')}}">Designation</a></li>
                         @endif
@@ -1641,6 +1653,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(568, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.fnf.index')}}">FNF</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(596, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                         @endif
                    
 

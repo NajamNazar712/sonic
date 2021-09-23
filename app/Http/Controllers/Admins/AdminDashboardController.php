@@ -7952,6 +7952,9 @@ class AdminDashboardController extends Controller
                         if(session('role_id') == 1 || in_array(440, session('permissions'))){
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.view.index', ['id'=> $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Intl View Rates</div></button>';
                         }
+                        if((session('role_id') == 1 || in_array(590, session('permissions'))) && $result->account_type_id == 2) {
+                            $dropdown .= '<button type="button" class="dropdown-item credit_limit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl Credit Limit</div></button>';
+                        }
                     }
 
                     if (InternationalEconomyRateStatus::where('user_id', $result->id)->doesntExist()) {
@@ -7969,6 +7972,10 @@ class AdminDashboardController extends Controller
                         if(session('role_id') == 1 || in_array(530, session('permissions'))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
                         }
+                    }
+
+                    if($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.reimbursement_setting.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Corporate Reimbursement Setting</div></button>';
                     }
 
                     $dropdown .= '
@@ -8309,6 +8316,10 @@ class AdminDashboardController extends Controller
                     if(session('role_id') == 1 || in_array(530, session('permissions'))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.international.rates.economy.create', ['id' => $result->id,'view'=>'view']) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Intl View Economy Rates</div></button>';
                     }
+                }
+
+                if($result->account_type_id == 2 && (session('role_id') == 1 || count(array_intersect([598, 599], session('permissions'))) !== 0)) {
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.reimbursement_setting.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-bar-chart"></i></div><div class="col-9 offset-1">Corporate Reimbursement Setting</div></button>';
                 }
 
                 $dropdown .= '
@@ -10653,6 +10664,8 @@ class AdminDashboardController extends Controller
             })
             ->make(true);
     }
+
+
 
 }
 

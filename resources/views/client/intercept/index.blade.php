@@ -24,6 +24,7 @@
                     </div>
                     <input type="hidden" name="shipment_id" value="{{$shipment['id']}}">
                     <div class="row justify-content-center">
+
                         <div class="col col_custom mr-5">
                             <h4 class="form-section mb-2 text-center">Consignee Information</h4>
                             <div class="form-group">
@@ -217,7 +218,6 @@
             }).bind('change', function () {
                 if(this.value == 2){
 
-                    console.log(city,name,email,amount);
                     var hiddenInput = $('<input/>' , {type : 'hidden' , name: 'consignee_city' , value : $('#consignee_city').val(), id : 'new_city' });
                     $('#intercept_form').append( hiddenInput );  //append the hidden field with same name and value from the dropdown field
                     $('#consignee_city').val(city).trigger('change');
