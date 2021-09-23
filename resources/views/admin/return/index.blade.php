@@ -117,6 +117,68 @@
         </div>
     </div>
 
+    <div class="modal fade" id="agent_assign_modal" data-backdrop="static" role="dialog" aria-labelledby="agent_assign_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="agent_assign_modal_title">Upload Excel for Agent Assigning</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="form-group text-left">
+                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                </div>
+                            </div>
+
+                            <div class="col ml-auto">
+                                <div class="form-group text-right">
+                                    <a href="{{ asset('file/Trax Return Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row align-items-center justify-content-center">
+                    <div class="col">
+                        <table class="table table-bordered datatable" id="agenttable" style="box-sizing: content-box; width: 760px; padding-right: 25px;">
+                            <thead>
+                            <tr role="row" class="bg-primary white text-center">
+                                <th colspan="2" class="border-primary border-darken-1">Agents</th>
+                            </tr>
+                            <tr role="row" class="bg-primary bg-lighten-1 white">
+                                <th class="text-center border-primary border-lighten-2">ID</th>
+                                <th class="border-primary border-lighten-2">Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($agents as $agent)
+                                    <tr role="row">
+                                        <td class="text-center">{{$agent->id}}</td>
+                                        <td>{{$agent->name}}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="EditEstimateChargesModal" role="dialog" aria-labelledby="EditEstimateChargesModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -361,6 +423,9 @@
 
         var selected_rows = [];
         var restricted_rows = [];
+        $('#agenttable').DataTable({
+            scrollY: '200px'
+            });
         @php $permission = (in_array(490, session('permissions'))); if($permission){ $permission = 1; }else{ $permission = 0; } @endphp
         $(document).ready(function () {
             $('#label_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -765,6 +830,14 @@
                         text: '<i class="la la-file-excel-o"></i> Upload',
                         action : function(e) {
                             $('#excel_upload_modal').modal('show');
+                        }
+                    },
+                    {
+                        title: 'Upload Agent',
+                        className: 'btn btn-primary excel-upload',
+                        text: '<i class="la la-file-excel-o"></i> Upload Agent',
+                        action : function(e) {
+                            $('#agent_assign_modal').modal('show');
                         }
                     },
                     'reset'
