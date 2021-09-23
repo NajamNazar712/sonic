@@ -7517,6 +7517,10 @@ class AdminReportsController extends Controller
 
         $time_slots = array(1 => '9 AM - 12 PM', 2 => '12 PM - 3 PM', 3 => '3 PM - 6 PM', 4 => '6 PM - 9 PM', 5 => '9 PM - 12 AM', 6 => '12 AM - 9 AM');
         $sum_total_status_updated = 0;
+        $sum_total_shipment_deliverd_bolt = 0;
+        $sum_total_shipment_undeliverd_bolt = 0;
+        $sum_total_shipment_deliverd_sonic = 0;
+        $sum_total_shipment_undeliverd_sonic = 0;
         $sum_out_for_delivery_count=0;
         $sum_bolt_status_updated = 0;
         $sum_bolt_status_percentage = 0;
@@ -7553,7 +7557,10 @@ class AdminReportsController extends Controller
             $end_time = Carbon::parse($end_time)->toTimeString();
 
             $time_array = array();
-
+            $total_shipment_deliverd_bolt = DeliveryNoteShipment::where([ 'update_type' => 1])->whereIn('status',[14, 30, 36, 37])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_bolt = DeliveryNoteShipment::where([ 'update_type' => 1])->whereIn('status',[7,8,9,12,15,18,56,29,10,11,29,35])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_deliverd_sonic = DeliveryNoteShipment::where([ 'update_type' => 0])->whereIn('status',[14, 30, 36, 37])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_sonic = DeliveryNoteShipment::where([ 'update_type' => 0])->whereIn('status',[7,8,9,12,15,18,56,29,10,11,29,35])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
             $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0);
             $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
@@ -7571,7 +7578,7 @@ class AdminReportsController extends Controller
             }
 
             $total_status_updated_count = $total_status_updated->count();
-            
+
             $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipper_status_id',5);
             $out_for_delivery = $out_for_delivery->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $out_for_delivery = $out_for_delivery->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
@@ -7589,7 +7596,7 @@ class AdminReportsController extends Controller
             }
 
             $out_for_delivery_count = $out_for_delivery->count();
-            
+
             $bolt_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNotNull('rider_id');
             $bolt_status_updated = $bolt_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $bolt_status_updated = $bolt_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
@@ -7612,7 +7619,7 @@ class AdminReportsController extends Controller
                 $bolt_status_percentage = ($bolt_status_updated_count / $total_status_updated_count) * 100;
             }
             $out_for_delivery_percentage = 0;
-            if($total_status_updated_count > 0){
+            if($total_status_updated_count > 0 && $out_for_delivery_percentage > 0){
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
             $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNull('rider_id');
@@ -7645,12 +7652,20 @@ class AdminReportsController extends Controller
             $time_array['bolt_status_percentage'] = round($bolt_status_percentage, 2) .'%';
             $time_array['sonic_status_updated'] = $sonic_status_updated_count;
             $time_array['sonic_status_percentage'] = round($sonic_status_percentage, 2) .'%';
+            $time_array['total_shipment_deliverd_bolt'] =$total_shipment_deliverd_bolt;
+            $time_array['total_shipment_undeliverd_bolt'] =$total_shipment_undeliverd_bolt;
+            $time_array['total_shipment_deliverd_sonic'] =$total_shipment_deliverd_sonic;
+            $time_array['total_shipment_undeliverd_sonic'] =$total_shipment_undeliverd_sonic;
             $sum_total_status_updated = $sum_total_status_updated + $total_status_updated_count;
             $sum_out_for_delivery_count = $sum_out_for_delivery_count + $out_for_delivery_count;
             $sum_bolt_status_updated = $sum_bolt_status_updated + $bolt_status_updated_count;
 //                $sum_bolt_status_percentage = $sum_bolt_status_percentage + $bolt_status_percentage;
             $sum_sonic_status_updated = $sum_sonic_status_updated + $sonic_status_updated_count;
 //                $sum_sonic_status_percentage = $sum_sonic_status_percentage + $sonic_status_percentage;
+            $sum_total_shipment_deliverd_bolt = $sum_total_shipment_deliverd_bolt + $total_shipment_deliverd_bolt;
+            $sum_total_shipment_undeliverd_bolt = $sum_total_shipment_undeliverd_bolt + $total_shipment_undeliverd_bolt;
+            $sum_total_shipment_deliverd_sonic = $sum_total_shipment_deliverd_sonic + $total_shipment_deliverd_sonic;
+            $sum_total_shipment_undeliverd_sonic = $sum_total_shipment_undeliverd_sonic + $total_shipment_undeliverd_sonic;
 
             $data[] = $time_array;
         }
@@ -7662,7 +7677,7 @@ class AdminReportsController extends Controller
 
         }
 
-        $data[] = array('time' => 'Total','out_for_delivery_count' => $sum_out_for_delivery_count, 'total_status_updated' => $sum_total_status_updated,'out_for_delivery_percentage' => round($sum_out_for_delivery_percentage, 2). '%', 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2) . '%', 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2). '%');
+        $data[] = array('time' => 'Total','out_for_delivery_count' => $sum_out_for_delivery_count, 'total_status_updated' => $sum_total_status_updated,'out_for_delivery_percentage' => round($sum_out_for_delivery_percentage, 2). '%', 'bolt_status_updated' => $sum_bolt_status_updated, 'bolt_status_percentage' => round($sum_bolt_status_percentage, 2) . '%', 'sonic_status_updated' => $sum_sonic_status_updated, 'sonic_status_percentage' => round($sum_sonic_status_percentage, 2). '%','total_shipment_deliverd_bolt' =>  $sum_total_shipment_deliverd_bolt,'total_shipment_undeliverd_bolt'=>$sum_total_shipment_undeliverd_bolt,'total_shipment_deliverd_sonic'=>$sum_total_shipment_deliverd_sonic,'total_shipment_undeliverd_sonic'=>$sum_total_shipment_undeliverd_sonic);
 
         return $data;
     }
