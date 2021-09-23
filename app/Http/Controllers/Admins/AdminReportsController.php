@@ -9098,7 +9098,8 @@ class AdminReportsController extends Controller
     }
 
     public function operation_service_level_index(){
-        
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),442);
         $shippers = DB::connection('reports')->table('users')->whereIn('status',[3, 4])->select('id','name')->get();
         $cities = DB::connection('reports')->table('cities')->select('id','name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub',1)->select('id','name')->get();
@@ -9111,7 +9112,12 @@ class AdminReportsController extends Controller
     }
 
     public function operation_service_level_list(Request $request){
-        
+
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),443);
+        }
+
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
