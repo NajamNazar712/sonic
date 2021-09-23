@@ -395,7 +395,7 @@ class AdminAPIController extends Controller
             }
             if ($request->action == 1) {
                 $admin_attendance->clock_in = $attendance_time;
-                $admin_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance->clock_in_datetime = $attendance_datetime;
                 $admin_attendance->clock_in_latitude = $request->latitude;
                 $admin_attendance->clock_in_longitude = $request->longitude;
                 $admin_attendance->clock_in_location = $location_status;
@@ -405,6 +405,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
                 $admin_attendance_action->action_date = $attendance_datetime;
+                $admin_attendance_action->attendance_date = $attendance_date;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->location_status = $location_status;
@@ -413,7 +414,7 @@ class AdminAPIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
             } elseif ($request->action == 2) {
                 $admin_attendance->clock_out = $attendance_time;
-                $admin_attendance->clock_out_datetime = Carbon::now()->format("Y-m-d H:i:s");
+                $admin_attendance->clock_out_datetime = $attendance_datetime;
                 $admin_attendance->clock_out_latitude = $request->latitude;
                 $admin_attendance->clock_out_longitude = $request->longitude;
                 $admin_attendance->clock_out_location = $location_status;
@@ -423,6 +424,7 @@ class AdminAPIController extends Controller
                 $admin_attendance_action->employee_type = 1;
                 $admin_attendance_action->action_id = $request->action;
                 $admin_attendance_action->action_date = $attendance_datetime;
+                $admin_attendance_action->attendance_date = $attendance_date;
                 $admin_attendance_action->latitude = $request->latitude;
                 $admin_attendance_action->longitude = $request->longitude;
                 $admin_attendance_action->location_status = $location_status;
@@ -3310,6 +3312,99 @@ class AdminAPIController extends Controller
             }
             return response()->json(['status' => 0, 'attendance_details' => []]);
         }
+    }
+
+    public function mark_attendance_api(Request $request)
+    {
+
+        $rules = [
+            'attendance_date' => ['required'],
+            'action_date' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'action' => ['required', 'integer', 'digits_between:1,10', 'exists:attendance_actions,id'],
+        ];
+
+        $admin_id = $request->admin_id;
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $location_status = 0;
+            $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                ->join('admins as a', 'e.id', 'a.employee_id')
+                ->where('a.id', $admin_id);
+            if($reporting_location->exists()){
+                $reporting_location = $reporting_location->first();
+                $reporting_location->radius;
+                $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                $origin = $request->latitude . ',' . $request->longitude;
+                $distance = $this->distance($origin, $destination);
+                if ($distance > $reporting_location->radius / 1000) {
+                    $location_status = 1;
+                } else {
+                    $location_status = 2;
+                }
+            }
+            $attendance_date = Carbon::parse($request->attendance_date)->format('Y-m-d');
+            $action_date = Carbon::createFromFormat('Y-m-d H:i:s', $request->action_date);
+
+            $admin_attendance = EmployeeAttendance::where('employee_id', $admin_id)
+                ->whereDate('attendance_date', $attendance_date)
+                ->where('employee_type', 1);
+            $admin_attendance_action = new EmployeeAttendanceActionLog();
+            if ($admin_attendance->exists()) {
+                $admin_attendance = $admin_attendance->first();
+            } else {
+                $admin_attendance = new EmployeeAttendance();
+                $admin_attendance->employee_id = $admin_id;
+                $admin_attendance->employee_type = 1;
+                $admin_attendance->attendance_date = $attendance_date;
+            }
+            if ($request->action == 1) {
+                $admin_attendance->clock_in_datetime = $action_date;
+                $admin_attendance->clock_in_latitude = $request->latitude;
+                $admin_attendance->clock_in_longitude = $request->longitude;
+                $admin_attendance->clock_in_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = $action_date;
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+
+                return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $admin_attendance_action]);
+            } elseif ($request->action == 2) {
+                $admin_attendance->clock_out_datetime = $action_date;
+                $admin_attendance->clock_out_latitude = $request->latitude;
+                $admin_attendance->clock_out_longitude = $request->longitude;
+                $admin_attendance->clock_out_location = $location_status;
+                $admin_attendance->save();
+
+                $admin_attendance_action->employee_id = $admin_id;
+                $admin_attendance_action->employee_type = 1;
+                $admin_attendance_action->action_id = $request->action;
+                $admin_attendance_action->action_date = $action_date;
+                $admin_attendance_action->attendance_date = $attendance_date;
+                $admin_attendance_action->latitude = $request->latitude;
+                $admin_attendance_action->longitude = $request->longitude;
+                $admin_attendance_action->location_status = $location_status;
+                $admin_attendance_action->save();
+                return response()->json(['status' => 0, 'message' => 'Clocked-Out Successfully', 'response' => $admin_attendance_action]);
+            }
+
+            return response()->json(['status' => 1, 'message' => 'Failed']);
+        }
+
     }
 
 

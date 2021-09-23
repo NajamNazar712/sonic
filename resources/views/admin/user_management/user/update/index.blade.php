@@ -88,6 +88,19 @@
 											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id" value="{{ $user->trax_id }}">
 										</div>
 									</div>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<select name="designation_id" class="select2" id="designation_id">
+												@foreach($designations as $designation)
+													@if ($designation->id == $user->designation_id)
+														<option value="{{ $designation->id }}" selected="selected">{{ $designation->name }}</option>
+													@else
+														<option value="{{ $designation->id }}">{{ $designation->name }}</option>
+													@endif
+												@endforeach
+											</select>
+										</div>
+									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
@@ -177,6 +190,18 @@
 				width: '100%',
 				placeholder: 'Working Shift*'
 			});
+			@endif
+
+@if ($user->designation_id === null)
+				$('#user_form #designation_id').prepend('<option value="" selected="selected"></option>').select2({
+					width: '100%',
+					placeholder: 'Select Designation'
+				});
+			@else
+				$('#user_form #designation_id').select2({
+					width: '100%',
+					placeholder: 'Select Designation'
+				});
 			@endif
 
 			$('#user_form #phone_number').inputmask({

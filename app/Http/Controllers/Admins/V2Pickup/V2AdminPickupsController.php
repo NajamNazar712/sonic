@@ -279,41 +279,34 @@ class V2AdminPickupsController extends Controller
             if($legend_filter = $request->get('legend_filter')){
                 if($legend_filter==8){
                     $datatables->where('v2_pickup_requests.reverse_pickup',1);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==2){
                     $datatables->where('v2_pickup_requests.vendor','<>',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==3){
                     $datatables->where('v2_pickup_requests.try_and_buy',1)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==4){
                     $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts',1)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==5){
                     $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts',2)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==6){
                     $datatables->where('v2_pickup_requests.status_id',3)->where('v2_pickup_requests.attempts','>',2)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==7){
                     $datatables->where('v2_pickup_requests.after_cut_off_time','<>',null)
                     ->where('v2_pickup_requests.status_id','<>',3)
                     ->where('v2_pickup_requests.try_and_buy',null)
                     ->where('v2_pickup_requests.vendor',null);
-                    return $datatables->make(true);
                 }
                 elseif($legend_filter==1){
                     $datatables->where('v2_pickup_requests.created_at','<=',Carbon::now()->startOfDay()->addDays(6))
@@ -322,13 +315,24 @@ class V2AdminPickupsController extends Controller
                         ->where('v2_pickup_requests.try_and_buy',null)
                         ->where('v2_pickup_requests.vendor',null)
                         ->where('v2_pickup_requests.reverse_pickup',null);
-
-                    return $datatables->make(true);
                 }
 
-            }else{
-                    return $datatables->make(true);
             }
+            
+            if($legend_filter = $request->get('before_cut_off_time')){
+                //to be made as before cut off time
+                
+                $cut_off_time = '17:30:00';
+                $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+                if ($setting->exists()) {
+                    $setting = $setting->first();
+                    $cut_off_time = $setting->setting_value . ':00:00';
+                    $cut_off_time = Carbon::parse($cut_off_time)->format('H:i:s');
+                    $datatables->whereTime('v2_pickup_requests.created_at','<=',$cut_off_time);
+                }
+
+            }
+                    return $datatables->make(true);
 
         
     }
