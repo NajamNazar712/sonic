@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -1055,6 +1056,7 @@ class AdminNsaAccountShipmentController extends Controller
 
     public function carrefour_arrival_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),439);
         return view('admin.carrefour.arrival');
     }
 

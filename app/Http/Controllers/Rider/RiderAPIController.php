@@ -4309,6 +4309,7 @@ class RiderAPIController extends Controller
             }
             if ($request->action == 1) {
                 $rider_attendance->clock_in = $attendance_time;
+                $rider_attendance->clock_in_datetime = $attendance_datetime;
                 $rider_attendance->clock_in_latitude = $request->latitude;
                 $rider_attendance->clock_in_longitude = $request->longitude;
                 $rider_attendance->clock_in_location = $location_status;
@@ -4317,6 +4318,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
@@ -4326,6 +4328,7 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action]);
             } elseif ($request->action == 2) {
                 $rider_attendance->clock_out = $attendance_time;
+                $rider_attendance->clock_out_datetime = $attendance_datetime;
                 $rider_attendance->clock_out_latitude = $request->latitude;
                 $rider_attendance->clock_out_longitude = $request->longitude;
                 $rider_attendance->clock_out_location = $location_status;
@@ -4334,6 +4337,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->employee_id = $rider_id;
                 $rider_attendance_action->employee_type = 2;
                 $rider_attendance_action->action_id = $request->action;
+                $rider_attendance_action->attendance_date = $attendance_date;
                 $rider_attendance_action->action_date = $attendance_datetime;
                 $rider_attendance_action->latitude = $request->latitude;
                 $rider_attendance_action->longitude = $request->longitude;
