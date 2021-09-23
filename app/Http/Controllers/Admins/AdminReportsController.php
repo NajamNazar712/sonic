@@ -7232,6 +7232,14 @@ class AdminReportsController extends Controller
         $count = DB::connection('reports')->table('delivery_notes')
             ->groupBy('r.id');
 
+        if(!empty($request->get('search_rider')) || !empty($request->get('search_rider_cat'))){
+            $count = $count->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id');
+        }
+
+        iif(!empty($request->get('search_hub')) || !empty($request->get('search_zone')) || !empty($request->get('search_destination'))){
+            $count = $count->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id');
+        }
+
         if($rider = $request->get('search_rider')){
             $count = $count->where('r.id', '=', $rider);
         }
