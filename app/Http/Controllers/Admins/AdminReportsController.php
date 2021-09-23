@@ -7236,7 +7236,7 @@ class AdminReportsController extends Controller
             $count = $count->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id');
         }
 
-        iif(!empty($request->get('search_hub')) || !empty($request->get('search_zone')) || !empty($request->get('search_destination'))){
+        if(!empty($request->get('search_hub')) || !empty($request->get('search_zone')) || !empty($request->get('search_destination'))){
             $count = $count->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id');
         }
 
