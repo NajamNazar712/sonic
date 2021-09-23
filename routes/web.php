@@ -1984,6 +1984,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('send_custom_notification', 'Admins\AdminNotificationsController@send_custom_notification')->name('send_custom_notification');
     });
 
+    Route::prefix('app_notifications')->name('app_notifications.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@app_notification_index')->name('index');
+        Route::get('list', 'Admins\AdminNotificationsController@app_notification_list')->name('list');
+        Route::post('status', 'Admins\AdminNotificationsController@app_notification_status')->name('status');
+        Route::post('details', 'Admins\AdminNotificationsController@app_notification_details')->name('details');
+        Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+    });
+
     //Reports start
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function (){
