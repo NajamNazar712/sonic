@@ -27,7 +27,6 @@ class Sprint77QuickSearchAndActivityTrailSeeder extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Telenor > Telenor Bulk Revert', 'url'=>'admin.telenor.revert.bulk_revert', 'permission_id' => 595),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Carrefour > Carrefour Bulk Arrival', 'url'=>'admin.carrefour.arrival.index', 'permission_id' => 579),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Support > Telenor > Bulk Return', 'url'=>'admin.telenor.return.bulk_return', 'permission_id' =>525 ),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'First Mile > Rider Tracking', 'url'=>'admin.v2_pickups.rider_tracking.index', 'permission_id' =>446 ),
