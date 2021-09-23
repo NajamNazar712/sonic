@@ -15,7 +15,7 @@ class CreateAgentReturnConfirmationsTable extends Migration
     {
         Schema::create('agent_return_confirmations', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamp('login_time');
+            $table->timestamp('login_time')->nullable();
             $table->timestamp('logout_time')->nullable();
             $table->date('current_date');
             $table->integer('admin_id')->index();

@@ -3735,6 +3735,22 @@ class ReturnController extends Controller
                 $assign_shipments->status = 1;
                 $assign_shipments->assigned_by = Auth::id();
                 $assign_shipments->save();
+
+                //set record in login/logut table
+                $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
+                
+                if(!$check_agent_return_confrimation->exists()){
+                    $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id);
+                     if($agent_role->exists()){
+                         $agent_return_confrimation = new AgentReturnConfirmation;
+                         $agent_return_confrimation->admin_id = $request->admin_id;
+                         $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
+                         $agent_return_confrimation->save();
+                     }
+                 }
+                //set record in login/logut table end
+                
             }
             return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
         }
@@ -4076,13 +4092,14 @@ class ReturnController extends Controller
 
     public function rcp_agent_list(Request $request){
         
-        // $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-        //             ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date');
+        $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+                    ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id');
 
-            $agent_productivity = ReturnAssignedShipments::join('admins as a','a.id','=','return_assigned_shipments.admin_id')
-                ->join('agent_return_confirmations as agrcp','agrcp.admin_id','=','return_assigned_shipments.admin_id')
-                ->select('a.name as agent_name','a.id as agent_id','agrcp.login_time as start_time','agrcp.logout_time as end_time','agrcp.current_date');
-        
+            // $agent_productivity = ReturnAssignedShipments::join('admins as a','a.id','=','return_assigned_shipments.admin_id')
+            //     // ->leftjoin('agent_return_confirmations as agrcp','agrcp.admin_id','=','return_assigned_shipments.admin_id')
+            //     ->select(DB::raw('DATE(return_assigned_shipments.created_at) as date'),'a.name as agent_name','a.id as agent_id');
+            //     // ->groupBy('date');
+
         $datatable = Datatables::of($agent_productivity)
             ->addColumn('total_assigning', function ($agent_productivity){
                return ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)->count();
@@ -4144,11 +4161,15 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->count();
                 return ($achive/$total)*100;
              });
-            //  if ($request->get('from_date') && $request->get('to_date')) {
-            //     $from = $request->get('from_date');
-            //     $to = $request->get('from_date');
-            //     $outbound_list = $outbound_list->whereBetween('created_at',[$fromDays,$toDays]);
-            // }
+             if ($request->get('from_date') && $request->get('to_date')) {
+                $from = $request->get('from_date');
+                $to = $request->get('from_date');
+                $agent_productivity = $agent_productivity->whereBetween('current_date',[$from,$to]);
+            }
+            if ($request->get('agent')) {
+                $agent_ids = $request->get('agent');
+                $agent_productivity = $agent_productivity->whereIn('admin_id',$agent_ids);
+            }
              return $datatable->make(true);
     }
 
@@ -4167,26 +4188,28 @@ class ReturnController extends Controller
         // }
         
         if($from != null || $to != null){
-            $stats['total'] = ReturnAssignedShipments::whereBetween('created_at',[$from,$to]);
-            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereBetween('created_at',[$from,$to]);
+            $stats['total'] = ReturnAssignedShipments::whereBetween('created_at',[$from,$to])->whereIn('admin_id', $agent);
+            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereBetween('created_at',[$from,$to])->whereIn('admin_id', $agent);
             $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->where('sh.shipper_status_id',13)
-            ->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            ->whereBetween('return_assigned_shipments.created_at',[$from,$to])
+            ->whereIn('return_assigned_shipments.admin_id', $agent);
         }else{
-            $stats['total'] = ReturnAssignedShipments::all();
-            $stats['completed'] = ReturnAssignedShipments::where('status',0);
+            $stats['total'] = ReturnAssignedShipments::whereIn('admin_id', $agent);
+            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereIn('admin_id', $agent);
             $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
-            ->where('sh.shipper_status_id',13);
+            ->where('sh.shipper_status_id',13)
+            ->whereIn('return_assigned_shipments.admin_id', $agent);
         }
 
         
         // $stats['productivity'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         
-        if($agent){
-            $stats['total'] = $stats['total']->where('admin_id',$agent);
-            $stats['completed'] = $stats['completed']->where('admin_id',$agent);
-            $stats['rcp_reattempt'] = $stats['completed']->where('return_assigned_shipments.admin_id',$agent);
-        }
+        // if($agent){
+        //     $stats['total'] = $stats['total']->where('admin_id',$agent);
+        //     $stats['completed'] = $stats['completed']->where('admin_id',$agent);
+        //     $stats['rcp_reattempt'] = $stats['completed']->where('return_assigned_shipments.admin_id',$agent);
+        // }
         // if ($hub) {
         //     $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
         //         $query->from('user_shipping_infos')

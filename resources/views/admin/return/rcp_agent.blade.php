@@ -16,7 +16,7 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4">
                                 <fieldset class="form-group pb-1">
-                                    <select name="search_agent" id="search_agent" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
+                                    <select name="search_agent[]" id="search_agent" class="form-control select2"   multiple="multiple" requireddata-rule-required="true" data-msg-required="This field is required">
                                         @foreach($agents as $agent)
                                             <option value="{{$agent->id}}">{{$agent->name}}</option>
                                         @endforeach
@@ -219,7 +219,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_agent').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_agent').select2({
                 width:'100%',
                 placeholder:"Select Agent",
                 allowClear:true,
@@ -341,6 +341,7 @@
                         // var to_date = ;
                         // var hub = $('#search_origin').val();
                         // var agent = $('#search_agent').val();
+                        d.agent = $('#search_agent').val();
 
                         d.from_date = $('input[name="from_date"]').val();
                         d.to_date = $('input[name="to_date"]').val();
