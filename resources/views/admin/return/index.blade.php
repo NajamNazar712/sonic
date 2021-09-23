@@ -149,31 +149,30 @@
                             </div>
                         </div>
                     </form>
-                    <div class="row align-items-center justify-content-center">
-                        <div class="col">
-                            <table class="table table-bordered datatable" id="agenttable" style="box-sizing: content-box; width: 760px; padding-right: 25px;">
-                                <thead>
-                                <tr role="row" class="bg-primary white text-center">
-                                    <th colspan="2" class="border-primary border-darken-1">Agents</th>
-                                </tr>
-                                <tr role="row" class="bg-primary bg-lighten-1 white">
-                                    <th class="text-center border-primary border-lighten-2">ID</th>
-                                    <th class="border-primary border-lighten-2">Name</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($agents as $agent)
-                                        <tr role="row">
-                                            <td class="text-center">{{$agent->id}}</td>
-                                            <td>{{$agent->name}}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                </div>
+                <div class="row align-items-center justify-content-center">
+                    <div class="col">
+                        <table class="table table-bordered datatable" id="agenttable" style="box-sizing: content-box; width: 760px; padding-right: 25px;">
+                            <thead>
+                            <tr role="row" class="bg-primary white text-center">
+                                <th colspan="2" class="border-primary border-darken-1">Agents</th>
+                            </tr>
+                            <tr role="row" class="bg-primary bg-lighten-1 white">
+                                <th class="text-center border-primary border-lighten-2">ID</th>
+                                <th class="border-primary border-lighten-2">Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($agents as $agent)
+                                    <tr role="row">
+                                        <td class="text-center">{{$agent->id}}</td>
+                                        <td>{{$agent->name}}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-               
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>

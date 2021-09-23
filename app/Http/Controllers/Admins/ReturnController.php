@@ -3828,11 +3828,12 @@ class ReturnController extends Controller
                         }
                     }
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
-                        $errors['Row #' . $row_id][] = 'Shipment is not ready for confirmation pending #' . $row['tracking_number'];
+                        $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
+                    }
+                    if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id',3)->where('a.id', $row['agent_id'])->exists()) {
+                        $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
                     }
                 }
-
-
             }
             if(empty($errors)){
                 $tracking_numbers = array();
@@ -3840,19 +3841,18 @@ class ReturnController extends Controller
                     $row_id = $key + 2;
                     $shipment_id = trim($row['tracking_number']);
                     $agent_id = trim($row['agent_id']);
-
                     $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $shipment_id)->where('status', 1)->first();
                     if($check_already_assigned){
                         $check_already_assigned->status = 0;
                         $check_already_assigned->save();
                     }
+                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
                     $assign_shipments = new ReturnAssignedShipments();
                     $assign_shipments->admin_id = $agent_id;
-                    $assign_shipments->shipment_id = $shipment_id;
+                    $assign_shipments->shipment_id = $id_shipment->id;
                     $assign_shipments->status = 1;
                     $assign_shipments->assigned_by = Auth::id();
                     $assign_shipments->save();
-
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
                 }
