@@ -112,7 +112,7 @@
                                             <tr>
                                                 <th scope="row">Case Nature History</th>
                                                 <td class="name">
-                                                    <h5 class="mb-0"><u><a  href="#" id="ceditRequestModal" data-toggle="modal" data-target="#myModal">{{str_pad($crm_historiescount, 4, '0', STR_PAD_LEFT)}}</a></u></h5>
+                                                    <h5 class="mb-0"><u><a  href="#" id="ceditRequestModal" data-toggle="modal" data-target="#myModal">{{str_pad($crm_historiescount+1, 4, '0', STR_PAD_LEFT)}}</a></u></h5>
                                                 </td>
                                             </tr>
                                             @endif
