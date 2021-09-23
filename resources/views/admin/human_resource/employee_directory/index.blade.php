@@ -20,16 +20,16 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S No.</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
-                                    <th class="border-primary border-darken-1">Employee Name</th>
+                                    <th class="border-primary border-darken-1">Employee FullName</th>
                                     <th class="border-primary border-darken-1">Gender</th>
                                     <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
+                                    <th class="border-primary border-darken-1">Staff Department</th>
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
-                                    <th class="border-primary border-darken-1">Staff Department</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -367,16 +367,16 @@
                             head = [];
                             head.push('S.No');
                             head.push('Employee ID');
-                            head.push('Employee Name');
+                            head.push('Employee FullName');
                             head.push('Gender');
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
                             head.push('Employee Type');
+                            head.push('Department Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
-                            head.push('Department Name');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
@@ -388,10 +388,10 @@
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
                                 row.push(values.employee_type);
+                                row.push(values.department_name);
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
-                                row.push(values.department_name);
                                 body.push(row);
                             });
                         },
@@ -619,7 +619,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.human_resource.employee_directory.list') }}',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -632,10 +632,10 @@
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
+                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
-                    {data: 'department_name', name: 'ads.id', class: 'align-middle department_name'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
