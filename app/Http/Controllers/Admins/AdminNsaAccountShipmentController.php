@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Auth;
-use App\Http\Controllers\Admins\ActivityTrailController;
 
 class AdminNsaAccountShipmentController extends Controller
 {
