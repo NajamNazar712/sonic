@@ -4085,9 +4085,10 @@ class ReturnController extends Controller
     }
 
     public function rcp_agent_index(){
+        $today = Carbon::now()->endOfDay();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.return.rcp_agent', compact('agents'));
+        return view('admin.return.rcp_agent', compact('agents','today'));
     }
 
     public function rcp_agent_list(Request $request){
@@ -4163,11 +4164,16 @@ class ReturnController extends Controller
              });
              if ($request->get('from_date') && $request->get('to_date')) {
                 $from = $request->get('from_date');
-                $to = $request->get('from_date');
-                $agent_productivity = $agent_productivity->whereBetween('current_date',[$from,$to]);
+                $to = $request->get('to_date');
+                // Carbon::now()->format("Y-m-d");
+                // Carbon::createFromFormat('Y-m-d', $request->get('from_date'));
+                // Carbon::createFromFormat('Y-m-d', $request->get('from_date'));
+                $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
             }
             if ($request->get('agent')) {
+                
                 $agent_ids = $request->get('agent');
+                // dd($agent_ids);
                 $agent_productivity = $agent_productivity->whereIn('admin_id',$agent_ids);
             }
              return $datatable->make(true);
@@ -4186,22 +4192,26 @@ class ReturnController extends Controller
         //     $fromDays = $from;
         //     $toDays = $to;
         // }
-        
         if($from != null || $to != null){
-            $stats['total'] = ReturnAssignedShipments::whereBetween('created_at',[$from,$to])->whereIn('admin_id', $agent);
-            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereBetween('created_at',[$from,$to])->whereIn('admin_id', $agent);
+            $stats['total'] = ReturnAssignedShipments::whereBetween('created_at',[$from,$to]);
+            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereBetween('created_at',[$from,$to]);
             $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->where('sh.shipper_status_id',13)
-            ->whereBetween('return_assigned_shipments.created_at',[$from,$to])
-            ->whereIn('return_assigned_shipments.admin_id', $agent);
+            ->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            
         }else{
-            $stats['total'] = ReturnAssignedShipments::whereIn('admin_id', $agent);
-            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereIn('admin_id', $agent);
+            $stats['total'] = ReturnAssignedShipments::all();
+            $stats['completed'] = ReturnAssignedShipments::where('status',0);
             $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->where('sh.shipper_status_id',13)
-            ->whereIn('return_assigned_shipments.admin_id', $agent);
+            ;
         }
-
+        if($agent){
+            $stats['total'] = $stats['total']->whereIn('return_assigned_shipments.admin_id', $agent);
+            $stats['completed'] = $stats['completed']->whereIn('return_assigned_shipments.admin_id', $agent);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereIn('return_assigned_shipments.admin_id', $agent);
+        }
+        
         
         // $stats['productivity'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
         
@@ -4254,7 +4264,7 @@ class ReturnController extends Controller
         $stats['total'] = number_format($stats['total']->count());
         $stats['completed'] = number_format($stats['completed']->count());
         $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
-        $stats['productivity'] = number_format((intval($stats['completed'])/intval($stats['total']))*100);
+        $stats['productivity'] = number_format(10);
         return response()->json(['status' => 1, 'stats' => $stats]);
 
     }

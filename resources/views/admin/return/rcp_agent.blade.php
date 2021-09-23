@@ -30,7 +30,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$today}}">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -40,7 +40,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{$today}}">
                                 </div>
                             </div>
 
@@ -224,12 +224,12 @@
                 placeholder:"Select Agent",
                 allowClear:true,
             });
-
-
-            get_rcp_cards_data();
+            var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
+                // min: new Date(thirtydays),
+                max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -239,14 +239,18 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
-                    }
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
+                max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -256,11 +260,46 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
-                    }
+                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+
+            get_rcp_cards_data();
+            // var from_date = $('#from_date').pickadate({
+            //     firstDay: 1,
+            //     clear: 'Clear',
+            //     format:'dd mmmm, yyyy',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onOpen: function() {
+            //         $('#from_date_root').css('top','40px');
+            //     },
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
+            // var to_date = $('#to_date').pickadate({
+            //     firstDay: 1,
+            //     clear: 'Clear',
+            //     format:'dd mmmm, yyyy',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
+            //     hiddenSuffix: '_formatted',
+            //     onOpen: function() {
+            //         $('#to_date_root').css('top', '40px');
+            //     },
+            //     onSet: function(context) {
+            //         if (context.select) {
+            //             $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+            //         }
+            //     }
+            // });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -343,8 +382,8 @@
                         // var agent = $('#search_agent').val();
                         d.agent = $('#search_agent').val();
 
-                        d.from_date = $('input[name="from_date"]').val();
-                        d.to_date = $('input[name="to_date"]').val();
+                        d.from_date = $('#search_form input[name="from_date_formatted"]').val();
+                        d.to_date = $('#search_form input[name="to_date_formatted"]').val();
                     }
                 },
                 order: [[1, 'asc']],
@@ -456,8 +495,8 @@
            
 
             function get_rcp_cards_data() {
-                var from_date = $('input[name="search_date_from_formatted"]').val();
-                var to_date = $('input[name="search_date_to_formatted"]').val();
+                var from_date = $('#search_form input[name="from_date_formatted"]').val();
+                var to_date = $('#search_form input[name="to_date_formatted"]').val();
                 var hub = $('#search_origin').val();
                 var agent = $('#search_agent').val();
 
