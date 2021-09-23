@@ -658,7 +658,7 @@
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Dispute</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || count(array_intersect([399, 400, 402, 421, 422,525], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([399, 400, 402, 421, 422,525,595], session('permissions'))) !== 0)
                         <li class=" nav-item"><a href="#"><span class="menu-title">Telenor</span></a>
 
                             <ul class="menu-content">
@@ -687,7 +687,13 @@
                                            href="{{ route('admin.telenor.return.bulk_return') }}">Bulk Return</a>
                                     </li>
                                 @endif
-{{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
+                                @if (session('role_id') == 1 || in_array(595, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.telenor.revert.bulk_revert') }}">Bulk Revert</a>
+                                    </li>
+                                @endif
+
+                                    {{--                                @if (session('role_id') == 1 || in_array(402, session('permissions')))--}}
 {{--                                    <li><a class="menu-item"--}}
 {{--                                           href="{{ route('admin.telenor.call.index') }}">Call(s)</a>--}}
 {{--                                    </li>--}}

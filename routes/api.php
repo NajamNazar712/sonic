@@ -242,6 +242,7 @@ Route::name('api.')->group(function () {
                 Route::post('history', 'AdminAPIController@attendance_history')->name('history');
                 Route::post('mark_v2', 'AdminAPIController@mark_attendance_v2')->name('mark_v2');
                 Route::post('detail_v2', 'AdminAPIController@attendance_details_v2')->name('detail_v2');
+                Route::post('mark_api', 'AdminAPIController@mark_attendance_api')->name('mark_api');
             });
 
             Route::prefix('retail')->name('retail.')->group(function () {

@@ -16,7 +16,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Yajra\Datatables\Datatables;
-
+use DB;
 class LeadManagementController extends Controller
 {
     public function __construct()
@@ -31,7 +31,7 @@ class LeadManagementController extends Controller
         $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('status', 1)->where('ar.department_id',7)->get();
         $statuses = LeadStatus::all();
         $lead_statuses = LeadStatus::where('id', '!=', 1)->get();
-
+        $services = DB::table('service_list')->get();
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
 
@@ -126,7 +126,7 @@ class LeadManagementController extends Controller
 
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(29);
-        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
+        return view('admin.leads.index')->with(['sale_name'=>$salesperson, 'services' => $services, 'statuses' => $statuses, 'lead_statuses' => $lead_statuses, 'leads' => $leads, 'cities' => $cities, 'dates' => $dates]);
     }
 
     public function list(Request $request){
@@ -142,7 +142,8 @@ class LeadManagementController extends Controller
             ->leftjoin('lead_statuses as ls', 'ls.id', '=', 'leads.status_id')
             ->leftjoin('lead_references as lr', 'lr.id', '=', 'leads.reference_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
-            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at');
+            ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
+            ->select('leads.id as lead_id', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city','t.name as territory','at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at','sl.name as service','leads.brand as brand','leads.company as company');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
