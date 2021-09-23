@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -300,6 +301,7 @@ class AdminInternationalShipmentsController extends Controller
     }
 
     public function shipment_status_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),441);
         $shipment_status = ShipmentStatus::where('status', 1)->whereIn('id', [3,4,5,8,14,17,18])->get();
         return view('admin.international.shipment_status')->with(['shipment_status' => $shipment_status]);
     }

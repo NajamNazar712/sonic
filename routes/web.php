@@ -87,6 +87,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
             Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
             Route::post('check_shipment_allowed_city', 'Shippers\ShipperShipmentBookController@check_shipment_allowed_city')->name('check_shipment_allowed_city');
+            Route::post('get_express_centers', 'Shippers\ShipperShipmentBookController@get_express_centers')->name('get_express_centers');
 
 
             Route::prefix('excel')->name('excel_')->group(function () {
@@ -393,6 +394,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Shippers\ShipperInterceptReBookController@intercept_re_book_index')->name('index');
         Route::post('update','Shippers\ShipperInterceptReBookController@intercept_re_book_update')->name('update');
+      
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
@@ -2933,7 +2935,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('intercept')->name('intercept.')->group(function (){
         Route::get('/{row_id}','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_index')->name('index');
         Route::post('update','Admins\AdminInterceptRebookRequestHistoryController@intercept_re_book_update')->name('update');
+        Route::post('get_express_centers', 'Admins\AdminInterceptRebookRequestHistoryController@get_express_centers')->name('get_express_centers');
+
     });
+
     Route::prefix('resources')->name('resources.')->group(function (){
         Route::get('','Admins\AdminResourcesController@index')->name('index');
         Route::get('city_list','Admins\AdminResourcesController@get_network_list')->name('city_list');
