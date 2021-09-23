@@ -7228,8 +7228,31 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),198);
         }
+
+        $count = DB::connection('reports')->table('delivery_notes')
+        ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+        ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id');
+
+        if($rider = $request->get('search_rider')){
+            $count = $count->where('r.id', '=', $rider);
+        }
+        if($hub = $request->get('search_hub')){
+            $count = $count->where('c.hub_id', '=', $hub);
+        }
+        if($zone = $request->get('search_zone')){
+            $count = $count->where('c.zone_id', '=', $zone);
+        }
+        if($destination = $request->get('search_destination')){
+            $count = $count->where('c.id', '=', $destination);
+        }
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $count = $count->where('r.operation_rider_id', $search_rider_cat);
+        }
+
+        $count = $count->groupBy('r.id')->count();
+
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
-            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
@@ -7247,8 +7270,8 @@ class AdminReportsController extends Controller
             ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
-
         $datatables = Datatables::of($route_distribution_summary)
+        ->setTotalRecords($count)
         ->addColumn('delivered_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
                 return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
@@ -7291,6 +7314,11 @@ class AdminReportsController extends Controller
         }
         if ($search_rider_cat = $request->get('search_rider_cat')) {
             $datatables->where('r.operation_rider_id', $search_rider_cat);
+        }
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $datatables = $datatables->whereBetween('delivery_notes.created_at', [$from,$to]);
         }
 
         return $datatables->make(true);
@@ -7631,7 +7659,7 @@ class AdminReportsController extends Controller
                 $bolt_status_percentage = ($bolt_status_updated_count / $total_status_updated_count) * 100;
             }
             $out_for_delivery_percentage = 0;
-            if($total_status_updated_count > 0){
+            if($out_for_delivery_count > 0){
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
             $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNull('rider_id');
