@@ -871,7 +871,7 @@ class GlobalSettingsController extends Controller
                             if ($user->account_type_id == 1) {
                                 $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                             } else {
-                                if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2){
+                                if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null){
                                     $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 }
                                 else{
@@ -885,7 +885,7 @@ class GlobalSettingsController extends Controller
                                 if ($user->account_type_id == 1) {
                                     $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 } else {
-                                    if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2) {
+                                    if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                         $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                     }
                                     else{
@@ -914,7 +914,7 @@ class GlobalSettingsController extends Controller
                                     if ($user->account_type_id == 1) {
                                         $fuel_surcharge_history = new HistoryFuelSurcharge();
                                     } else {
-                                        if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2) {
+                                        if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                             $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
                                         }
                                         else{
@@ -937,7 +937,7 @@ class GlobalSettingsController extends Controller
                                         $fuel_surcharge->fuel_surcharge = $fuel_factor;
                                         $fuel_surcharge->save();
                                     } else {
-                                        if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2) {
+                                        if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                             $fuel_surcharge = new CorporateFuelSurcharge();
                                             $fuel_surcharge->user_id = $user->id;
                                             $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
@@ -979,7 +979,7 @@ class GlobalSettingsController extends Controller
                                 if ($user->account_type_id == 1) {
                                     $rate_status = RateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                 } else {
-                                    if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2){
+                                    if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                         $rate_status = CorporateRateStatus::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                     }
                                     else{
@@ -993,7 +993,7 @@ class GlobalSettingsController extends Controller
                                     if ($user->account_type_id == 1) {
                                         $fuel_surcharge = FuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                     } else {
-                                        if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2) {
+                                        if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                             $fuel_surcharge = CorporateFuelSurcharge::where('user_id', $user->id)->where('shipping_mode_id', $shipping_mode->id);
                                         }
                                         else{
@@ -1022,7 +1022,7 @@ class GlobalSettingsController extends Controller
                                         if ($user->account_type_id == 1) {
                                             $fuel_surcharge_history = new HistoryFuelSurcharge();
                                         } else {
-                                            if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2) {
+                                            if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                                 $fuel_surcharge_history = new HistoryCorporateFuelSurcharge();
                                             }
                                             else{
@@ -1045,7 +1045,7 @@ class GlobalSettingsController extends Controller
                                             $fuel_surcharge->fuel_surcharge = $fuel_factor;
                                             $fuel_surcharge->save();
                                         } else {
-                                            if($user->corporate_rate_type_id == 1 || $user->corporate_rate_type_id == 2) {
+                                            if($user->corporate_rate_type_id != 3 && $user->new_rate_type_id == null) {
                                                 $fuel_surcharge = new CorporateFuelSurcharge();
                                                 $fuel_surcharge->user_id = $user->id;
                                                 $fuel_surcharge->shipping_mode_id = $shipping_mode->id;
