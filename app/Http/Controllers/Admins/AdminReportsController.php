@@ -7259,7 +7259,7 @@ class AdminReportsController extends Controller
         $count = $count->count();
 
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
-            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
             ->leftjoin('cities as c', 'c.id', '=', 'delivery_notes.hub_id')
             ->leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
