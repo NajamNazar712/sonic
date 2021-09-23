@@ -534,7 +534,7 @@
                 {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempts'},
-                {data: 'aging', name: 'aging', class: 'align-middle aging'},
+                {data: 'aging', name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
             ],
@@ -559,7 +559,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name')) {
+                    if ($(header).is('.action') || $(header).is('.aging') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.pickup_status')){
                         $(drop_select).appendTo($(search))
