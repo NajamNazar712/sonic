@@ -175,15 +175,15 @@
                                                 <div class="col text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]"/>
+                                                        <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]" @if($onweight->weight_addition == 1) checked @endif>
                                                     </div>
                                                 </div>
                                                 <div class="col-2 text-center">
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                            <input type="text" class="touchspin-color input-sm spkg" {{--value="0.5"--}} {{--disabled--}} data-bts-button-down-class="btn btn-success"
+                                                                   data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" value="@if($onweight->kg_range > 0.5){{$onweight->kg_range}} @else 0.5 @endif" @if($onweight->weight_addition == 0) disabled @endif>
                                                         </div>
                                                     </fieldset>
                                                 </div>
@@ -314,7 +314,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_insurance_charges_switch" class="switchery insuranceChargesOvernight" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="on_insurance_charges_switch" class="switchery insuranceChargesOvernight" data-color="success" data-size="sm"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -642,15 +642,15 @@
                                                 <div class="col text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]"/>
+                                                        <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]"  @if($olweight->weight_addition == 1) checked @endif>
                                                     </div>
                                                 </div>
                                                 <div class="col-2 text-center">
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
+                                                            <input type="text" class="touchspin-color input-sm spkg" {{--value="0.5"--}}  data-bts-button-down-class="btn btn-success"
+                                                                   data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" value="@if($olweight->kg_range > 0.5){{$olweight->kg_range}} @else 0.5 @endif" @if($olweight->weight_addition == 0) disabled @endif>
                                                         </div>
                                                     </fieldset>
                                                 </div>
@@ -778,7 +778,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_insurance_charges_switch" class="switchery insuranceChargesoverland" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="ol_insurance_charges_switch" class="switchery insuranceChargesoverland" data-color="success" data-size="sm"/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1104,15 +1104,15 @@
                                                 <div class="col text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="DetainSwitch{{$index}}" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[{{$index}}]"/>
+                                                        <input type="checkbox" id="DetainSwitch{{$index}}" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[{{$index}}]"  @if($detweight->weight_addition == 1) checked @endif>
                                                     </div>
                                                 </div>
                                                 <div class="col-2 text-center">
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" value="0.5" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[{{$index}}]">
+                                                            <input type="text" class="touchspin-color input-sm spkg"  data-bts-button-down-class="btn btn-success"
+                                                                   data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[{{$index}}]" value="@if($detweight->kg_range > 0.5){{$detweight->kg_range}} @else 0.5 @endif"  @if($detweight->weight_addition == 0) disabled @endif>
                                                         </div>
                                                     </fieldset>
                                                 </div>
