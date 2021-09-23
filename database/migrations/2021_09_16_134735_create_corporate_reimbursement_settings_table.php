@@ -21,8 +21,8 @@ class CreateCorporateReimbursementSettingsTable extends Migration
             $table->date('starting_date')->nullable();
             $table->date('ending_date')->nullable();
             $table->tinyInteger('status')->default('2'); // 1 Means Updated 2 Means Approved
-            $table->bigInteger('updated_by')->nullable();
-            $table->bigInteger('approved_by')->nullable();
+            $table->bigInteger('updated_by')->index()->nullable();
+            $table->bigInteger('approved_by')->index()->nullable();
             $table->timestamps();
         });
     }
