@@ -7631,7 +7631,7 @@ class AdminReportsController extends Controller
                 $bolt_status_percentage = ($bolt_status_updated_count / $total_status_updated_count) * 100;
             }
             $out_for_delivery_percentage = 0;
-            if($total_status_updated_count > 0){
+            if($out_for_delivery_count > 0){
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
             $sonic_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0)->whereNull('rider_id');
