@@ -7228,6 +7228,28 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),198);
         }
+
+        $count = DB::connection('reports')->table('delivery_notes')
+            ->groupBy('r.id');
+
+        if($rider = $request->get('search_rider')){
+            $count = $count->where('r.id', '=', $rider);
+        }
+        if($hub = $request->get('search_hub')){
+            $count = $count->where('c.hub_id', '=', $hub);
+        }
+        if($zone = $request->get('search_zone')){
+            $count = $count->where('c.zone_id', '=', $zone);
+        }
+        if($destination = $request->get('search_destination')){
+            $count = $count->where('c.id', '=', $destination);
+        }
+        if ($search_rider_cat = $request->get('search_rider_cat')) {
+            $count = $count->where('r.operation_rider_id', $search_rider_cat);
+        }
+
+        $count = $count->count();
+
         $route_distribution_summary = DB::connection('reports')->table('delivery_notes')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
@@ -7247,8 +7269,8 @@ class AdminReportsController extends Controller
             ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), 'c.name as hub')
             ->groupBy('r.id');
 
-
         $datatables = Datatables::of($route_distribution_summary)
+        ->setTotalRecords($count)
         ->addColumn('delivered_shipments_per', function ($entry) {
             if ($entry->shipments_count) {
                 return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
