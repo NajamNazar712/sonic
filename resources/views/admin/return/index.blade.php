@@ -127,7 +127,7 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    <form id="assign_agent_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.assign_agent_excel') }}" novalidate="novalidate" enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row align-items-center justify-content-center">
                             <div class="col">
@@ -144,35 +144,36 @@
 
                             <div class="col ml-auto">
                                 <div class="form-group text-right">
-                                    <a href="{{ asset('file/Trax Return Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                    <a href="{{ asset('file/Trax Agent Assign Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                 </div>
                             </div>
                         </div>
                     </form>
-                </div>
-                <div class="row align-items-center justify-content-center">
-                    <div class="col">
-                        <table class="table table-bordered datatable" id="agenttable" style="box-sizing: content-box; width: 760px; padding-right: 25px;">
-                            <thead>
-                            <tr role="row" class="bg-primary white text-center">
-                                <th colspan="2" class="border-primary border-darken-1">Agents</th>
-                            </tr>
-                            <tr role="row" class="bg-primary bg-lighten-1 white">
-                                <th class="text-center border-primary border-lighten-2">ID</th>
-                                <th class="border-primary border-lighten-2">Name</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($agents as $agent)
-                                    <tr role="row">
-                                        <td class="text-center">{{$agent->id}}</td>
-                                        <td>{{$agent->name}}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col">
+                            <table class="table table-bordered datatable" id="agenttable" style="box-sizing: content-box; width: 760px; padding-right: 25px;">
+                                <thead>
+                                <tr role="row" class="bg-primary white text-center">
+                                    <th colspan="2" class="border-primary border-darken-1">Agents</th>
+                                </tr>
+                                <tr role="row" class="bg-primary bg-lighten-1 white">
+                                    <th class="text-center border-primary border-lighten-2">ID</th>
+                                    <th class="border-primary border-lighten-2">Name</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($agents as $agent)
+                                        <tr role="row">
+                                            <td class="text-center">{{$agent->id}}</td>
+                                            <td>{{$agent->name}}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
+               
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
@@ -1243,6 +1244,30 @@
             }, $.validator.format("File Size must not exceed {0} bytes."));
 
             $('#return_status_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your shipment(s) are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+            $('#assign_agent_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 normalizer: function(value) {
