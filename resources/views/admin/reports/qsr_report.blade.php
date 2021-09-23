@@ -122,7 +122,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remark</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
                         <th class="border-primary border-darken-1">Service</th>
@@ -305,7 +305,7 @@
                             head.push('Consignee Name');
                             head.push('Status');
                             head.push('Reason');
-                            head.push('Remark');
+                            head.push('Remarks');
                             head.push('Total Attempt');
                             head.push('History Status');
                             head.push('Service Type');
@@ -333,7 +333,7 @@
                                 row.push(values.name);
                                 row.push(values.status);
                                 row.push(values.reason);
-                                row.push(values.remark);
+                                row.push(values.remarks);
                                 row.push(values.total_attempt);
                                 row.push(values.history_status);
                                 row.push(values.service_type);
@@ -409,7 +409,7 @@
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'remark', name: 'sjr.remark', class: 'align-middle remark'},
+                    {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},
                     {data:'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
