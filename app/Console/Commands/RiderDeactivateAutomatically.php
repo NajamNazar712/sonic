@@ -51,7 +51,7 @@ class RiderDeactivateAutomatically extends Command
         $v2_pickups  = V2PickupNote::whereBetween('created_at', [$date_week_age, $today])->pluck('rider_id')->toArray();
         $rider_active = array_unique(array_merge($deliveries,$v2_pickups));
         $data = array_diff($rider_ids, $rider_active);
-        if ($data != null){
+        if ($data !t= null){
         NotificationsController::send(155, $data);
         }
     }
