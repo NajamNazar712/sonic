@@ -1475,16 +1475,16 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>';
                                 }
 
-                                $shipment_details = ShipmentDetail::where('shipment_id',$shipment->id);
-                                if ($shipment_details->exists()) {
+                                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                                if ($express_details->exists()) {
                                     if($shipment->shipper_status_id != 54){
 
-                                        $shipment_details = $shipment_details->first();
-                                        if($shipment_details->center_frachise_type==1){
-                                            $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
+                                        $express_details = $express_details->first();
+                                        if($express_details->center_frachise_type==1){
+                                            $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
                                             $express_center =  '('. $trax_center->name. ')';
-                                        }elseif ($shipment_details->center_frachise_type==2) {
-                                            $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
+                                        }elseif ($express_details->center_frachise_type==2) {
+                                            $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
                                             $express_center = '('. $trax_franchise->name . ')';
                                         }else{
                                             $express_center = '';
