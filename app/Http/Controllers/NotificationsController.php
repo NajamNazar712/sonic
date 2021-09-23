@@ -8346,7 +8346,7 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
-else if ($id == 152)
+                else if ($id == 152)
                 {                    
                     $shipment = Shipment::find($reference_1_id);
 
