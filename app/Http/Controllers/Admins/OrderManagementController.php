@@ -620,26 +620,8 @@ class OrderManagementController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->addColumn('express_center',function ($shipments){
-
-                $shipment_details = ShipmentDetail::where('shipment_id',$shipments->id);
-                if ($shipment_details->exists()) {
-                    $shipment_details = $shipment_details->first();
-                    if($shipment_details->center_frachise_type==1){
-                        $trax_center =  RetailTraxCenter::find($shipment_details->center_frachise_id);
-                        return $trax_center->name;
-                    }elseif ($shipment_details->center_frachise_type==2) {
-                        $trax_franchise = RetailFranchise::find($shipment_details->center_frachise_id);    
-                        return $trax_franchise->name;
-                    }else{
-                        return '-';
-                    }
-                }else{
-                    return '-';
-                }
-                
             });
+            
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
