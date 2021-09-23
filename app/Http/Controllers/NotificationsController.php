@@ -200,7 +200,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 2) {
+                }
+                else if ($id == 2) {
                     $fields = ['order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
                     $shipment = Shipment::find($reference_1_id);
@@ -8345,6 +8346,35 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
+                else if ($id == 152)
+                {                    
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+                    
+                    $to = $shipper->phone;
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    
+                    self::sms($body, $to);
+                } 
+                else if ($id == 153)
+                {                    
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+                    
+                    $to = $shipper->email;
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+
+                    self::email($subject, $body, $to);
+
+                } 
             }
         }
     }
