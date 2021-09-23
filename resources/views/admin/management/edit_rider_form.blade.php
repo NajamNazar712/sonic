@@ -45,6 +45,16 @@
                 </select>
             </fieldset>
         </div>
+
+        <div class="col">
+            <fieldset class="form-group">
+                <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    @foreach($shifts as $shift)
+                        <option value="{{$shift->id}}"> {{$shift->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
     </div>
     <div id="riderInfoDiv">
         <div class="row mb-2">
@@ -109,18 +119,6 @@
                     <select name="operation_rider_id" id="operation_rider_id" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         @foreach($operation_rider_ids as $operation)
                             <option value="{{$operation->id}}">{{$operation->name}}</option>
-                        @endforeach
-                    </select>
-                </fieldset>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col">
-                <fieldset class="form-group">
-                    <select name="rider_shift" id="shift_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        @foreach($shifts as $shift)
-                            <option value="{{$shift->id}}"> {{$shift->name}}</option>
                         @endforeach
                     </select>
                 </fieldset>
@@ -212,7 +210,7 @@
         $('#shift_list').val({!! $rider->shift_id !!}).trigger('change');
         @else
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a Shift',
+            placeholder:'Select Shift',
             dropdownParent: $("#editRiderForm")
         });
         @endif
