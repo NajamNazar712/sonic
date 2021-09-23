@@ -48,7 +48,7 @@
                     <div class="row">
                         <div class="col-3">
                             <div class="card pull-up">
-                                <div class="card-content border rounded" id="total_shipments">
+                                <div class="card-content border rounded" id="total_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
@@ -56,7 +56,7 @@
                                             </div>
                                             <div class="media-body text-right">
                                                 <h3 id="total"></h3>
-                                                <span>Total Shipment(s)</span>
+                                                <span>Total Assigned</span>
                                             </div>
                                         </div>
                                     </div>
@@ -65,15 +65,15 @@
                         </div>
                         <div class="col-3">
                             <div class="card bg-gradient-directional-primary pull-up">
-                                <div class="card-content" id="total_pending">
+                                <div class="card-content" id="completed_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
                                                 <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="booked"></h3>
-                                                <span>Booked Shipment(s)</span>
+                                                <h3 class="text-white" id="completed"></h3>
+                                                <span>Total Completed</span>
                                             </div>
                                         </div>
                                     </div>
@@ -82,15 +82,15 @@
                         </div>
                         <div class="col-3">
                             <div class="card bg-gradient-directional-info pull-up">
-                                <div class="card-content" id="total_received">
+                                <div class="card-content" id="rcp_reattempt_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
                                                 <i class="icon-layers text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="received"></h3>
-                                                <span class="font-13">Received / In-Transit Shipment(s)</span>
+                                                <h3 class="text-white" id="rcp_reattempt"></h3>
+                                                <span class="font-13">Re-Attempt RCP</span>
                                             </div>
                                         </div>
                                     </div>
@@ -99,15 +99,15 @@
                         </div>
                         <div class="col-3">
                             <div class="card bg-gradient-directional-success pull-up">
-                                <div class="card-content" id="total_delivered">
+                                <div class="card-content" id="productivity_main">
                                     <div class="card-body">
                                         <div class="media d-flex">
                                             <div class="align-self-center">
                                                 <i class="icon-check text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="delivered"></h3>
-                                                <span>Delivered Shipment(s)</span>
+                                                <h3 class="text-white" id="productivity"></h3>
+                                                <span>Productivity %</span>
                                             </div>
                                         </div>
                                     </div>
@@ -210,6 +210,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            get_rcp_cards_data();
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -434,8 +435,8 @@
             function get_rcp_cards_data() {
                 var from_date = $('input[name="search_date_from_formatted"]').val();
                 var to_date = $('input[name="search_date_to_formatted"]').val();
-                var origin = $('#search_origin').val();
-                var user = $('#search_user').val();
+                var hub = $('#search_origin').val();
+                var agent = $('#search_user').val();
                 var destination = $('#search_destination').val();
                 $.ajax({
                     url: '{!! route('admin.return.rcp_agent.data') !!}',
@@ -444,30 +445,23 @@
                         '_token': '{{ csrf_token() }}',
                         'from_date': from_date,
                         'to_date': to_date,
-                        'user': user,
-                        'origin': origin,
-                        'destination': destination,
+                        'agent': agent,
+                        'hub': hub,
 
                     }
                 }).done(function (data) {
                     if(data.status){
+                        console.log(data.stats);
                         $('#total').text(data.stats.total);
-                        $('#booked').text(data.stats.booked);
-                        $('#received').text(data.stats.received);
-                        $('#delivered').text(data.stats.delivered);
-                        $('#in_process').text(data.stats.in_process);
-                        $('#return').text(data.stats.return);
-                        $('#canceled').text(data.stats.canceled);
+                        $('#completed').text(data.stats.completed);
+                        $('#rcp_reattempt').text(data.stats.rcp_reattempt);
+                        $('#productivity').text(data.stats.productivity);
 
-                    }else{
+                    }else{  
                         $('#total').text(0);
-                        $('#booked').text(0);
-                        $('#received').text(0);
-                        $('#delivered').text(0);
-                        $('#in_process').text(0);
-                        $('#return').text(0);
-                        $('#canceled').text(0);
-
+                        $('#completed').text(0);
+                        $('#rcp_reattempt').text(0);
+                        $('#productivity').text(0);
                     }
                 });
             }
