@@ -3745,9 +3745,12 @@ class ReturnController extends Controller
                      if($agent_role->exists()){
                          $agent_return_confrimation = new AgentReturnConfirmation;
                          $agent_return_confrimation->admin_id = $request->admin_id;
+                         $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
                          $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
                          $agent_return_confrimation->save();
                      }
+                 }else{
+                    $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
                  }
                 //set record in login/logut table end
                 
@@ -4088,12 +4091,14 @@ class ReturnController extends Controller
         $today = Carbon::now()->endOfDay();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
-        return view('admin.return.rcp_agent', compact('agents','today'));
+        $hubs = City::where([['status',1],['hub',1]])->get();
+        return view('admin.return.rcp_agent', compact('agents','today','hubs'));
     }
 
     public function rcp_agent_list(Request $request){
         
         $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+                    ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
                     ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time','agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id');
 
             // $agent_productivity = ReturnAssignedShipments::join('admins as a','a.id','=','return_assigned_shipments.admin_id')
@@ -4116,9 +4121,10 @@ class ReturnController extends Controller
                 ->where('status',0)
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
-                    $shipment = Shipment::find($return_assign_shipment->shipment_id);
-                    if($shipment->shipper_status_id == 13){
-                        $counter++;
+                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
+                    ->where('shipper_status_id',13);
+                    if($shipment->count() > 0){
+                        $counter = $shipment->count()+$counter;
                     }
                 }
                 return $counter;
@@ -4129,9 +4135,10 @@ class ReturnController extends Controller
                 ->where('status',0)
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
-                    $shipment = Shipment::find($return_assign_shipment->shipment_id);
-                    if($shipment->shipper_status_id == 20){
-                        $counter++;
+                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
+                    ->where('shipper_status_id',20);
+                    if($shipment->count() > 0){
+                        $counter = $shipment->count()+$counter;
                     }
                 }
                 return $counter;
@@ -4142,9 +4149,10 @@ class ReturnController extends Controller
                 ->where('status',0)
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
-                    $shipment = Shipment::find($return_assign_shipment->shipment_id);
-                    if($shipment->shipper_status_id == 55){
-                        $counter++;
+                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
+                    ->where('shipper_status_id',55);
+                    if($shipment->count() > 0){
+                        $counter = $shipment->count()+$counter;
                     }
                 }
                 return $counter;
@@ -4165,16 +4173,20 @@ class ReturnController extends Controller
              if ($request->get('from_date') && $request->get('to_date')) {
                 $from = $request->get('from_date');
                 $to = $request->get('to_date');
-                // Carbon::now()->format("Y-m-d");
-                // Carbon::createFromFormat('Y-m-d', $request->get('from_date'));
-                // Carbon::createFromFormat('Y-m-d', $request->get('from_date'));
                 $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
             }
             if ($request->get('agent')) {
-                
                 $agent_ids = $request->get('agent');
-                // dd($agent_ids);
                 $agent_productivity = $agent_productivity->whereIn('admin_id',$agent_ids);
+            }
+            if($request->get('hub')){
+                $hub_id = $request->get('hub');
+               
+                $agent_productivity->join('shipments as sh','sh.id','=','ras.shipment_id')
+                ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+                ->where('h.id',$hub_id);
+
             }
              return $datatable->make(true);
     }
@@ -4185,86 +4197,65 @@ class ReturnController extends Controller
         $from = $request->from_date;
         $to = $request->to_date;
         $hub = $request->hub;
-        // if($from == null || $to == null){
-        //     $toDays = Carbon::now()->endOfDay();
-        //     $fromDays = Carbon::now()->subDays(30)->startOfDay();
-        // }else{
-        //     $fromDays = $from;
-        //     $toDays = $to;
-        // }
-        if($from != null || $to != null){
-            $stats['total'] = ReturnAssignedShipments::whereBetween('created_at',[$from,$to]);
-            $stats['completed'] = ReturnAssignedShipments::where('status',0)->whereBetween('created_at',[$from,$to]);
-            $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
-            ->where('sh.shipper_status_id',13)
-            ->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+
+        
+      
+        if ($hub) {
+            $stats['total'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('h.id',$hub);
+            $stats['completed'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('ras.status',0)
+            ->where('h.id',$hub);
+
+            $stats['rcp_reattempt'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('ras.status',0)
+            ->where('h.id',$hub)
+            ->where('sh.shipper_status_id',13);
             
         }else{
-            $stats['total'] = ReturnAssignedShipments::all();
-            $stats['completed'] = ReturnAssignedShipments::where('status',0);
-            $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
-            ->where('sh.shipper_status_id',13)
-            ;
+            $stats['total'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id');
+            $stats['completed'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+            ->where('ras.status',0);
+            $stats['rcp_reattempt'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
+            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            ->where('sh.shipper_status_id',13);
         }
+        if($from != null || $to != null){
+            $stats['total'] = $stats['total']->whereBetween('ras.created_at',[$from,$to]);
+            $stats['completed'] =  $stats['completed']->whereBetween('ras.created_at',[$from,$to]);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereBetween('ras.created_at',[$from,$to]);
+            
+        }
+      
         if($agent){
-            $stats['total'] = $stats['total']->whereIn('return_assigned_shipments.admin_id', $agent);
-            $stats['completed'] = $stats['completed']->whereIn('return_assigned_shipments.admin_id', $agent);
-            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereIn('return_assigned_shipments.admin_id', $agent);
+            $stats['total'] = $stats['total']->whereIn('ras.admin_id', $agent);
+            $stats['completed'] = $stats['completed']->whereIn('ras.admin_id', $agent);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereIn('ras.admin_id', $agent);
         }
-        
-        
-        // $stats['productivity'] = DB::connection('reports')->table('shipments')->where('shipper_status_id',17)->whereBetween('created_at',[$fromDays,$toDays])->whereIn('user_id', $shipper);
-        
-        // if($agent){
-        //     $stats['total'] = $stats['total']->where('admin_id',$agent);
-        //     $stats['completed'] = $stats['completed']->where('admin_id',$agent);
-        //     $stats['rcp_reattempt'] = $stats['completed']->where('return_assigned_shipments.admin_id',$agent);
-        // }
-        // if ($hub) {
-        //     $stats['total'] = $stats['total']->whereExists(function($query) use ($origin) {
-        //         $query->from('user_shipping_infos')
-        //             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
-        //             ->whereExists(function ($sub_query) use ($origin) {
-        //                 $sub_query->from('cities')
-        //                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
-        //                     ->where('cities.id', $origin);
-        //             });
-        //     });
-        //     $stats['booked'] = $stats['booked']->whereExists(function($query) use ($origin) {
-        //         $query->from('user_shipping_infos')
-        //             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
-        //             ->whereExists(function ($sub_query) use ($origin) {
-        //                 $sub_query->from('cities')
-        //                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
-        //                     ->where('cities.id', $origin);
-        //             });
-        //     });
-        //     $stats['canceled'] = $stats['canceled']->whereExists(function($query) use ($origin) {
-        //         $query->from('user_shipping_infos')
-        //             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
-        //             ->whereExists(function ($sub_query) use ($origin) {
-        //                 $sub_query->from('cities')
-        //                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
-        //                     ->where('cities.id', $origin);
-        //             });
-        //     });
-        //     $stats['received'] = $stats['received']->whereExists(function($query) use ($origin) {
-        //         $query->from('user_shipping_infos')
-        //             ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
-        //             ->whereExists(function ($sub_query) use ($origin) {
-        //                 $sub_query->from('cities')
-        //                     ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
-        //                     ->where('cities.id', $origin);
-        //             });
-        //     });
-         
-        // }
-        
-        
+     
         $stats['total'] = number_format($stats['total']->count());
         $stats['completed'] = number_format($stats['completed']->count());
         $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
-        $stats['productivity'] = number_format(10);
+        if($stats['total'] == 0){
+            $stats['productivity'] = '0';
+        }else{
+            $stats['productivity'] = (intval($stats['completed'])/intval($stats['total']))*100;
+        }
         return response()->json(['status' => 1, 'stats' => $stats]);
 
     }

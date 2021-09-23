@@ -14,7 +14,7 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                            <div class="col-4">
+                            <div class="col-3">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_agent[]" id="search_agent" class="form-control select2"   multiple="multiple" requireddata-rule-required="true" data-msg-required="This field is required">
                                         @foreach($agents as $agent)
@@ -23,7 +23,16 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
+                                <fieldset class="form-group pb-1">
+                                    <select name="search_hub" id="search_hub" class="form-control select2" requireddata-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($hubs as $hub)
+                                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+                            <div class="col-3">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -33,7 +42,7 @@
                                     <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$today}}">
                                 </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-3">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -43,7 +52,7 @@
                                     <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{$today}}">
                                 </div>
                             </div>
-
+                            
                             <div class="col-2">
                                 <div class="form-group">
                                     <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
@@ -224,6 +233,12 @@
                 placeholder:"Select Agent",
                 allowClear:true,
             });
+            $('#search_hub').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Hub",
+                allowClear:true,
+            });
+            
             var today = '{{ $today }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -381,6 +396,7 @@
                         // var hub = $('#search_origin').val();
                         // var agent = $('#search_agent').val();
                         d.agent = $('#search_agent').val();
+                        d.hub = $('#search_hub').val();
 
                         d.from_date = $('#search_form input[name="from_date_formatted"]').val();
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
@@ -499,6 +515,7 @@
                 var to_date = $('#search_form input[name="to_date_formatted"]').val();
                 var hub = $('#search_origin').val();
                 var agent = $('#search_agent').val();
+                var hub = $('#search_hub').val();
 
                 var destination = $('#search_destination').val();
                 $.ajax({

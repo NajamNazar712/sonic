@@ -19,6 +19,7 @@ class CreateAgentReturnConfirmationsTable extends Migration
             $table->timestamp('logout_time')->nullable();
             $table->date('current_date');
             $table->integer('admin_id')->index();
+            $table->integer('return_assigned_shipment_id')->nullable()->index();
             $table->timestamps();
         });
     }
