@@ -2744,6 +2744,15 @@ class UpdateManifestJunctionMapping extends Seeder
                     $route->ending_hub_id = $mapping['junction_1'];
                     $route->save();
                 }
+                else{
+                    if($mapping['origin'] != null && $mapping['destination']) {
+                        $route = new V2JunctionRoutes();
+                        $route->junction_mapping_id = $junction->id;
+                        $route->starting_hub_id = $mapping['origin'];
+                        $route->ending_hub_id = $mapping['destination'];
+                        $route->save();
+                    }
+                }
             }
             if(array_key_exists('junction_2', $mapping)){
                 if($mapping['junction_2'] != null && $mapping['junction_1']){
@@ -2757,6 +2766,15 @@ class UpdateManifestJunctionMapping extends Seeder
                     $route->starting_hub_id = $mapping['junction_1'];
                     $route->ending_hub_id = $mapping['junction_2'];
                     $route->save();
+                }
+                else{
+                    if($mapping['junction_1'] != null && $mapping['destination']) {
+                        $route = new V2JunctionRoutes();
+                        $route->junction_mapping_id = $junction->id;
+                        $route->starting_hub_id = $mapping['junction_1'];
+                        $route->ending_hub_id = $mapping['destination'];
+                        $route->save();
+                    }
                 }
             }
             if(array_key_exists('junction_3', $mapping)){
@@ -2772,6 +2790,15 @@ class UpdateManifestJunctionMapping extends Seeder
                     $route->ending_hub_id = $mapping['junction_3'];
                     $route->save();
                 }
+                else{
+                    if($mapping['junction_2'] != null && $mapping['destination']) {
+                        $route = new V2JunctionRoutes();
+                        $route->junction_mapping_id = $junction->id;
+                        $route->starting_hub_id = $mapping['junction_2'];
+                        $route->ending_hub_id = $mapping['destination'];
+                        $route->save();
+                    }
+                }
             }
             if(array_key_exists('junction_4', $mapping)){
                 if($mapping['junction_4'] != null && $mapping['junction_3']){
@@ -2785,6 +2812,15 @@ class UpdateManifestJunctionMapping extends Seeder
                     $route->starting_hub_id = $mapping['junction_3'];
                     $route->ending_hub_id = $mapping['junction_4'];
                     $route->save();
+                }
+                else{
+                    if($mapping['junction_4'] != null && $mapping['destination']) {
+                        $route = new V2JunctionRoutes();
+                        $route->junction_mapping_id = $junction->id;
+                        $route->starting_hub_id = $mapping['junction_4'];
+                        $route->ending_hub_id = $mapping['destination'];
+                        $route->save();
+                    }
                 }
             }
         }
