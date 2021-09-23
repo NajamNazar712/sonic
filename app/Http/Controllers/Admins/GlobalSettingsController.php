@@ -3051,6 +3051,7 @@ class GlobalSettingsController extends Controller
 
     public function carrefour_account_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),444);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $riders = Rider::where('status', 1)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'carrefour_accounts');
@@ -4452,6 +4453,8 @@ class GlobalSettingsController extends Controller
     }
 
     public function debriefing_time_setting_index(){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),445);
         $settings = GlobalSettings::where('type', 'debriefing_time_setting');
 
         if ($settings->exists()) {
@@ -4486,6 +4489,7 @@ class GlobalSettingsController extends Controller
 
     public function shipment_status_eta_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),449);
         $shipment_status = ShipmentStatus::whereNotIn('id', [1, 17])->where('status', 1)->select(['id', 'name'])->get();
 
         return view('admin.settings.telenor.shipment_status_eta')->with(['shipment_status' => $shipment_status]);
@@ -4575,7 +4579,7 @@ class GlobalSettingsController extends Controller
     }
 
 	public function last_mile_cron_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),416);
+        ActivityTrailController::createActivityTrailLog(Auth::id(),446);
         $settings = GlobalSettings::where('type', 'last_mile_cron_time')->first();
 
         $default_time = NULL;
@@ -4604,7 +4608,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function dhl_sync_time_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),447);
         $settings = GlobalSettings::where('type', 'dhl_sync_time_1')->first();
 
         $default_time_1 = NULL;
@@ -4654,7 +4658,7 @@ class GlobalSettingsController extends Controller
     }
 
     public function international_automation_user_index(){
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(),448);
         $settings = GlobalSettings::where('type', 'dhl_user_id')->first();
 
         $dhl_user_id = NULL;
