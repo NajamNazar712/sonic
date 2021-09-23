@@ -14,7 +14,15 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12 ">
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-
+                            <div class="col-4">
+                                <fieldset class="form-group pb-1">
+                                    <select name="search_agent" id="search_agent" class="form-control select2" required data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($agents as $agent)
+                                            <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
                             <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
@@ -210,6 +218,14 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $('#search_agent').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select Agent",
+                allowClear:true,
+            });
+
+
             get_rcp_cards_data();
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
@@ -321,8 +337,13 @@
                 ajax:{
                     url: '{{ route('admin.return.rcp_agent.list') }}',
                     data: function (d) {
-                        d.search_date_from = $('input[name="from_date_formatted"]').val();
-                        d.search_date_to = $('input[name="to_date_formatted"]').val();
+                        // var from_date = ;
+                        // var to_date = ;
+                        // var hub = $('#search_origin').val();
+                        // var agent = $('#search_agent').val();
+
+                        d.from_date = $('input[name="from_date"]').val();
+                        d.to_date = $('input[name="to_date"]').val();
                     }
                 },
                 order: [[1, 'asc']],
@@ -428,6 +449,7 @@
                 submitHandler: function(form) {
 
                     table.draw(true);
+                    get_rcp_cards_data();
                 }
             });
            
@@ -436,7 +458,8 @@
                 var from_date = $('input[name="search_date_from_formatted"]').val();
                 var to_date = $('input[name="search_date_to_formatted"]').val();
                 var hub = $('#search_origin').val();
-                var agent = $('#search_user').val();
+                var agent = $('#search_agent').val();
+
                 var destination = $('#search_destination').val();
                 $.ajax({
                     url: '{!! route('admin.return.rcp_agent.data') !!}',
