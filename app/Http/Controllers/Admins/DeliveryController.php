@@ -83,7 +83,10 @@ use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
 use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
+use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
@@ -864,6 +867,43 @@ class DeliveryController extends Controller
                 }
                 NotificationsController::send(40, $note->id);
             }
+
+            //rider attendance
+            if($request->operation_rider_type_for_attendance == 1){
+                
+                $attendance_datetime = Carbon::now()->format('Y-m-d H:i:s');
+                $attendance_date = Carbon::now()->format('Y-m-d');
+                $attendance_time = Carbon::now()->format('H:i:s');
+    
+                $city_id_location = City::find($request->hub_id);
+    
+                $rider_attendance = EmployeeAttendance::where('employee_id', $rider->id)
+                    ->whereDate('attendance_date', $attendance_date)
+                    ->where('employee_type', 2);
+                if (!$rider_attendance->exists()) {
+                    $rider_attendance = new EmployeeAttendance();
+                    $rider_attendance->employee_id = $rider->id;
+                    $rider_attendance->employee_type = 2;
+                    $rider_attendance->attendance_date = $attendance_date;
+                    $rider_attendance->clock_in_datetime = $attendance_datetime;
+                    $rider_attendance->clock_in_latitude = $city_id_location->hub_location_latitude;
+                    $rider_attendance->clock_in_longitude = $city_id_location->hub_location_longitude;
+                    $rider_attendance->save();
+                    
+                    $rider_attendance_action = new EmployeeAttendanceActionLog();
+                    $rider_attendance_action->employee_id = $rider->id;
+                    $rider_attendance_action->employee_type = 2;
+                    $rider_attendance_action->action_id = 1;
+                    $rider_attendance_action->attendance_date = $attendance_date;
+                    $rider_attendance_action->action_date = $attendance_datetime;
+                    $rider_attendance_action->latitude = $city_id_location->hub_location_latitude;
+                    $rider_attendance_action->longitude = $city_id_location->hub_location_longitude;
+                    $rider_attendance_action->save();
+                }
+            }
+            //rider attendance end
+            
+
 
             return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
         }
@@ -5919,6 +5959,20 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
+                    $self_collection = false;
+
+                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
+                        if ($shipment_self_collection->exists()) {
+                            if($previous_consignee_city_id == $new_consignee_city_id){
+                                $self_collection = true;
+                            }
+                        }
+
+
+                    // if($shipment->self_collection == 1){
+                        
+                    // }
+
                     InterceptReBookRequestHistory::create([
                         'shipment_id' => $shipment->id,
                         'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -5962,6 +6016,13 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
+                    if($self_collection){
+                        $shipment = Shipment::find($shipment_id);
+                        $shipment->shipper_status_id = 15;
+                        $shipment->consignee_status_id = 15;
+                        $shipment->save();
+                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
+                    }
 
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
                     if($return_assign_shipment){
@@ -5973,7 +6034,14 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             }
 
             if ($valid) {
-                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Intercept Approved', 'print' => $print];
+                $text = '';
+                if($self_collection){
+                    $text = 'Shipment(s) has been marked as Intercept Approved, Please note that is also marked as self collection.';
+                }
+                else{
+                    $text = 'Shipment(s) has been marked as Intercept Approved';
+                }
+                return ['status' => 0, 'success' => $text, 'print' => $print];
             }
             else {
                 return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
@@ -6509,6 +6577,39 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     if($ccd_flag == false || ($ccd_flag == true && $rider->ccd == 1)){
                         $delivery_note->rider_id = $rider_id;
                         $delivery_note->save();
+
+                        //rider attendance
+                        if($request->oper_id == 1){
+                            $attendance_datetime = Carbon::now()->format('Y-m-d H:i:s');
+                            $attendance_date = Carbon::now()->format('Y-m-d');
+                            $attendance_time = Carbon::now()->format('H:i:s');
+                            $city_id_location = City::find($delivery_note->hub_id);
+    
+                            $rider_attendance = EmployeeAttendance::where('employee_id', $rider_id)
+                                ->whereDate('attendance_date', $attendance_date)
+                                ->where('employee_type', 2);
+                            if (!$rider_attendance->exists()) {
+                                $rider_attendance = new EmployeeAttendance();
+                                $rider_attendance->employee_id = $rider_id;
+                                $rider_attendance->employee_type = 2;
+                                $rider_attendance->attendance_date = $attendance_date;
+                                $rider_attendance->clock_in_datetime = $attendance_datetime;
+                                $rider_attendance->clock_in_latitude = $city_id_location->hub_location_latitude;
+                                $rider_attendance->clock_in_longitude = $city_id_location->hub_location_longitude;
+                                $rider_attendance->save();
+                                
+                                $rider_attendance_action = new EmployeeAttendanceActionLog();
+                                $rider_attendance_action->employee_id = $rider_id;
+                                $rider_attendance_action->employee_type = 2;
+                                $rider_attendance_action->action_id = 1;
+                                $rider_attendance_action->attendance_date = $attendance_date;
+                                $rider_attendance_action->action_date = $attendance_datetime;
+                                $rider_attendance_action->latitude = $city_id_location->hub_location_latitude;
+                                $rider_attendance_action->longitude = $city_id_location->hub_location_longitude;
+                                $rider_attendance_action->save();
+                            }
+                        }
+                        //rider attendance end
                         return response()->json(['status' => 0, 'success' => 'Rider updated successfully']);
                     }
                     else{

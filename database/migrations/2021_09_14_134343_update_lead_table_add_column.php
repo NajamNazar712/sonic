@@ -14,7 +14,7 @@ class UpdateLeadTableAddColumn extends Migration
     public function up()
     {
         Schema::table('leads', function (Blueprint $table) {
-            $table->integer('service_id')->nullable();
+            $table->integer('service_id')->index()->nullable();
             $table->string('brand')->nullable();
             $table->string('company')->nullable();
         });

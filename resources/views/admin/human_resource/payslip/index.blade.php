@@ -52,6 +52,26 @@
                                 </div>
                             </form>
 
+                            <form id="search_form" class="form-inline mb-1 row" novalidate="novalidate">
+
+                                <div class="col-3">
+                                    <div class="form-group input-group ml-1">
+
+                                        <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                                </span>
+                                        </div>
+                                        <input type="text" name="search_payslip_month" class="form-control bg-primary border-primary white rounded-right" id="search_payslip_month" placeholder="Search Payslip Month" data-rule-required="true" data-msg-required="Payslip Month is required">
+
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-2 mt-2">
+                                    <button id="datatable_filter_btn" type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
@@ -66,8 +86,9 @@
                                         <th class="border-primary border-darken-1">Date of Joining</th>
                                         <th class="border-primary border-darken-1">CNIC</th>
                                         <th class="border-primary border-darken-1">Total Deduction</th>
+                                        <th class="border-primary border-darken-1">Total Salary</th>
                                         <th class="border-primary border-darken-1">Net Salary</th>
-                                        <th class="border-primary border-darken-1">IBAN</th>
+                                        <th class="border-primary border-darken-1">IBAN / Account No.</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -133,7 +154,7 @@
             width: auto !important;
             text-align: left;
         }
-        #payslip_month_table{
+        #payslip_month_table , #search_payslip_month_table {
             display:none;
         }
 
@@ -153,7 +174,7 @@
         $(document).ready(function() {
             var max = '{{ Carbon\Carbon::now() }}';
 
-            var payslip_month = $('#payslip_month').pickadate({
+            var payslip_month = $('#payslip_upload_form #payslip_month').pickadate({
                 firstDay: 1,
                 disable:[true,1],
                 clear: '',
@@ -180,6 +201,32 @@
 
             });
 
+            var search_payslip_month = $('#search_form #search_payslip_month').pickadate({
+                firstDay: 1,
+                disable:[true,1],
+                clear: '',
+                today:'Select Current Month',
+                max: max,
+                format:'mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#search_payslip_month_root').css('top','40px');
+                    $('#search_payslip_month_root button.picker__button--today').removeAttr('disabled');
+                },
+                onSet: function(context) {
+
+                    var from_month = $('#search_payslip_month_root .picker__select--month').val();
+                    var from_year = $('#search_payslip_month_root .picker__select--year').val();
+                    var payslip_month_selected = new Date(from_year,from_month, 1);
+
+                    search_payslip_month.pickadate('picker').set('select', payslip_month_selected,{muted:true});
+
+                }
+
+            });
 
             $('#payslip_upload_form').validate({
                 errorClass: 'danger',
@@ -231,6 +278,7 @@
                             head.push('Date of Joining');
                             head.push('CNIC');
                             head.push('Total Deduction');
+                            head.push('Total Salary');
                             head.push('Net Salary');
                             head.push('IBAN');
                             $.each(result.data, function(index, values) {
@@ -248,6 +296,7 @@
                                 row.push(values.joining_date);
                                 row.push(values.cnic);
                                 row.push(values.total_deduction);
+                                row.push(values.total_salary);
                                 row.push(values.net_salary);
                                 row.push(values.iban);
 
@@ -267,7 +316,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'International Standard DHL Rates',
+                        title: 'Employee Payslips',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -284,7 +333,12 @@
                 serverSide: true,
                 rowId: 'id',
                 order: [[1, 'asc']],
-                ajax: '{{ route('admin.human_resource.payslip.list') }}',
+                ajax: {
+                    url: '{{ route('admin.human_resource.payslip.list') }}',
+                    data: function (d) {
+                        d.search_payslip_month = $('input[name="search_payslip_month_formatted"]').val();
+                    }
+                },
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'payroll_month', name: 'employee_payslips.payroll_month', class: 'align-middle payroll_month'},
@@ -297,6 +351,7 @@
                     {data: 'joining_date', name: 'employee_payslips.joining_date', class: 'align-middle joining_date'},
                     {data: 'cnic', name: 'employee_payslips.cnic', class: 'align-middle cnic'},
                     {data: 'total_deduction', name: 'employee_payslips.total_deduction', class: 'align-middle total_deduction'},
+                    {data: 'total_salary', name: 'employee_payslips.total_salary', class: 'align-middle total_salary'},
                     {data: 'net_salary', name: 'employee_payslips.net_salary', class: 'align-middle net_salary'},
                     {data: 'iban', name: 'employee_payslips.iban', class: 'align-middle iban'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false},
@@ -368,6 +423,13 @@
                 }
             });
 
+            $('#search_form').bind('submit',function (e) {
+                e.preventDefault();
+
+                table.draw();
+
+
+            });
 
         });
     </script>

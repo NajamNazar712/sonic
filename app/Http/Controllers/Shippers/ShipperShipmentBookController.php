@@ -62,6 +62,8 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\Admin;
+use App\http\Models\Admin\Retail\RetailFranchise;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipmentPiece;
@@ -552,11 +554,17 @@ class ShipperShipmentBookController extends Controller
                     if ($service_type_id == 1) {
                         if ($request->filled('self_collection')) {
                             $self_collection = TRUE;
+                            $express_center_id = $request->express_center;
+                            $express_center_type = $request->center_franchise;
                         } else {
+                            $express_center_id = 0;
+                            $express_center_type = 0;
                             $self_collection = FALSE;
                         }
                     }
                     else{
+                        $express_center_id = 0;
+                        $express_center_type = 0;
                         $self_collection = FALSE;
                     }
 
@@ -678,7 +686,10 @@ class ShipperShipmentBookController extends Controller
                     $business_category_id = 1;
 
                     $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id , $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id);
-
+                    $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id)->get()->first();
+                    $shipment_detail->center_frachise_id = $express_center_id;
+                    $shipment_detail->center_frachise_type = $express_center_type;
+                    $shipment_detail->save();
                     if(session('user_type') == 2){
                         $substitute_user_shipment = new SubstituteUserShipment();
                         $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -1420,7 +1431,25 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>
                                 ';
                                 }
-
+                                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                                if ($express_details->exists()) {
+                                    if($shipment->shipper_status_id != 54){
+                                        $express_details = $express_details->first();
+                                        if($express_details->center_frachise_type==1){
+                                            $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                            $express_center =  '('. $trax_center->name. ')';
+                                        }elseif ($express_details->center_frachise_type==2) {
+                                            $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                            $express_center = '('. $trax_franchise->name . ')';
+                                        }else{
+                                            $express_center = '';
+                                        }
+                                    }else{
+                                        $express_center = '';
+                                    }
+                                }else{
+                                    $express_center = '';
+                                }
                         $origin = $return_address_id == NULL ? 'Origin':'Return';
                         $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> '.$origin.'</strong></td>':'<td style="background-color:  #6e6e6e !important; color: white;" class="color border twice-bottom twice-left" ><strong> '.$origin.'</strong></td>';
 
@@ -1433,7 +1462,7 @@ class ShipperShipmentBookController extends Controller
                                 '.$originstyle.'
                                 <td class="border twice-bottom"><strong>' . $origin_data . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name.' '.$express_center .'</strong></td>
                               </tr>';
 
                                     $table_start .='
@@ -1462,7 +1491,26 @@ class ShipperShipmentBookController extends Controller
                                     <td><strong>International</strong></td>';
                                 }
 
+                                $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                                if ($express_details->exists()) {
+                                    if($shipment->shipper_status_id != 54){
 
+                                        $express_details = $express_details->first();
+                                        if($express_details->center_frachise_type==1){
+                                            $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                            $express_center =  '('. $trax_center->name. ')';
+                                        }elseif ($express_details->center_frachise_type==2) {
+                                            $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                            $express_center = '('. $trax_franchise->name . ')';
+                                        }else{
+                                            $express_center = '';
+                                        }
+                                    }else{
+                                        $express_center = '';
+                                    }
+                                }else{
+                                    $express_center = '';
+                                }
                         $table_start .= '
                                 <td class="color primary"><strong>Date</strong></td>
                                 <td>' . $shipment->created_at->format('Y-m-d') . '</td>
@@ -1471,7 +1519,7 @@ class ShipperShipmentBookController extends Controller
                                 <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
                                 <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                                 <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
+                                <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name .' '.$express_center . '</strong></td>
                               </tr>';
 
                             $table_start .='
@@ -1857,7 +1905,25 @@ class ShipperShipmentBookController extends Controller
 
                     if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
                         $shipment_pieces = '';
-
+                        $express_details = ShipmentDetail::where('shipment_id',$shipment->id);
+                        if ($express_details->exists()) {
+                            if($shipment->shipper_status_id != 54){
+                                $express_details = $express_details->first();
+                                if($express_details->center_frachise_type==1){
+                                    $trax_center =  RetailTraxCenter::find($express_details->center_frachise_id);
+                                    $express_center =  '('. $trax_center->name. ')';
+                                }elseif ($express_details->center_frachise_type==2) {
+                                    $trax_franchise = RetailFranchise::find($express_details->center_frachise_id);    
+                                    $express_center = '('. $trax_franchise->name . ')';
+                                }else{
+                                    $express_center = '';
+                                }
+                            }else{
+                                $express_center = '';
+                            }
+                        }else{
+                            $express_center = '';
+                        }
                         foreach ($shipment->shipment_pieces as $piece){
                             $shipment_pieces .= '<table class="table table-sm table-bordered border twice">
                         <tbody><tr>';
@@ -1872,7 +1938,7 @@ class ShipperShipmentBookController extends Controller
                                 <td rowspan="1" class="color primary border twice-left"><strong>Origin</strong></td>
                                 <td rowspan="1" class="border">' . $shipment->pickup_address->city->name . '</td>
                                 <td rowspan="1" class="color primary border "><strong>Destination</strong></td>
-                                <td rowspan="1" class="border">' . $shipment->consignee_city->name . '</td>
+                                <td rowspan="1" class="border">' . $shipment->consignee_city->name .' ('.$express_center. '</td>
                                 
                                 <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
@@ -2291,7 +2357,10 @@ class ShipperShipmentBookController extends Controller
             }
         $charges_modes = ChargesModes::whereIn('id', [4])->get();
 
-        return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
+        $trax_centers = RetailTraxCenter::where('status', 1)->get();
+        $trax_franchises = RetailFranchise::where('status',1)->get();
+     
+        return view('client.shipment.book.excel')->with(['trax_centers' => $trax_centers, 'trax_franchises' => $trax_franchises, 'booking_types' => $booking_types, 'user' => $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'charges_modes' => $charges_modes]);
     }
 
     public function excel_store(Request $request) {
@@ -2406,7 +2475,10 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => 'Shipper Reference Number 3',
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
-            'open_shipment' => 'Open Shipment'
+            'open_shipment' => 'Open Shipment',
+            'trax_center_franchise_id' => 'Express Centers/Franchise ID',
+            'trax_center_franchise_type' => 'Express Centers/Franchise Type',
+
         ];
 
         $messages = [
@@ -2446,6 +2518,9 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,2', 'between:1,2'],
+
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
 
@@ -2541,9 +2616,9 @@ class ShipperShipmentBookController extends Controller
             $column_count = null;
             
             if($excel_type == 1){
-                $column_count = 60;
+                $column_count = 62;
                 
-                $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'replacement_item_product_type_id', 18 => 'replacement_item_description', 19 => 'replacement_item_quantity', 20 => 'item_product_type_id_1', 21 => 'item_description_1', 22 => 'item_quantity_1', 23 => 'item_insurance_1', 24 => 'item_price_1', 25 => 'item_product_type_id_2', 26 => 'item_description_2', 27 => 'item_quantity_2', 28 => 'item_insurance_2', 29 => 'item_price_2', 30 => 'item_product_type_id_3', 31 => 'item_description_3', 32 => 'item_quantity_3', 33 => 'item_insurance_3', 34 => 'item_price_3', 35 => 'item_product_type_id_4', 36 => 'item_description_4', 37 => 'item_quantity_4', 38 => 'item_insurance_4', 39 => 'item_price_4', 40 => 'item_product_type_id_5', 41 => 'item_description_5', 42 => 'item_quantity_5', 43 => 'item_insurance_5', 44 => 'item_price_5', 45 => 'special_instructions', 46 => 'estimated_weight', 47 => 'shipping_mode_id', 48 => 'same_day_timing_id', 49 => 'try_and_buy_charges', 50 => 'amount', 51 => 'payment_mode_id', 52 => 'charges_mode_id', 53 => 'pieces_quantity', 54 => 'shipper_reference_number_1', 55 => 'shipper_reference_number_2', 56 => 'shipper_reference_number_3', 57 => 'shipper_reference_number_4', 58 => 'shipper_reference_number_5', 59 => 'open_shipment'];
+                $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'replacement_item_product_type_id', 18 => 'replacement_item_description', 19 => 'replacement_item_quantity', 20 => 'item_product_type_id_1', 21 => 'item_description_1', 22 => 'item_quantity_1', 23 => 'item_insurance_1', 24 => 'item_price_1', 25 => 'item_product_type_id_2', 26 => 'item_description_2', 27 => 'item_quantity_2', 28 => 'item_insurance_2', 29 => 'item_price_2', 30 => 'item_product_type_id_3', 31 => 'item_description_3', 32 => 'item_quantity_3', 33 => 'item_insurance_3', 34 => 'item_price_3', 35 => 'item_product_type_id_4', 36 => 'item_description_4', 37 => 'item_quantity_4', 38 => 'item_insurance_4', 39 => 'item_price_4', 40 => 'item_product_type_id_5', 41 => 'item_description_5', 42 => 'item_quantity_5', 43 => 'item_insurance_5', 44 => 'item_price_5', 45 => 'special_instructions', 46 => 'estimated_weight', 47 => 'shipping_mode_id', 48 => 'same_day_timing_id', 49 => 'try_and_buy_charges', 50 => 'amount', 51 => 'payment_mode_id', 52 => 'charges_mode_id', 53 => 'pieces_quantity', 54 => 'shipper_reference_number_1', 55 => 'shipper_reference_number_2', 56 => 'shipper_reference_number_3', 57 => 'shipper_reference_number_4', 58 => 'shipper_reference_number_5', 59 => 'open_shipment', 60 => 'trax_center_franchise_type', 61 => 'trax_center_franchise_id'];
 
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
                     $query->whereNotIn('id', [4]);
@@ -2551,9 +2626,9 @@ class ShipperShipmentBookController extends Controller
                 $service_type_check_id = null;
             }
             elseif ($excel_type == 2){
-                $column_count = 30;
+                $column_count = 32;
                 
-                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'self_collection', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'shipping_mode_id', 19 => 'same_day_timing_id', 20 => 'amount', 21 => 'payment_mode_id', 22 => 'charges_mode_id', 23 => 'pieces_quantity', 24 => 'shipper_reference_number_1', 25 => 'shipper_reference_number_2', 26 => 'shipper_reference_number_3', 27 => 'shipper_reference_number_4', 28 => 'shipper_reference_number_5', 29 => 'open_shipment'];
+                $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'self_collection', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'shipping_mode_id', 19 => 'same_day_timing_id', 20 => 'amount', 21 => 'payment_mode_id', 22 => 'charges_mode_id', 23 => 'pieces_quantity', 24 => 'shipper_reference_number_1', 25 => 'shipper_reference_number_2', 26 => 'shipper_reference_number_3', 27 => 'shipper_reference_number_4', 28 => 'shipper_reference_number_5', 29 => 'open_shipment', 30 => 'trax_center_franchise_type', 31 => 'trax_center_franchise_id'];
                 $service_type_check_id = 1;
             }
             elseif ($excel_type == 3){
@@ -2729,6 +2804,39 @@ class ShipperShipmentBookController extends Controller
                                 }
                             }
                         }*/
+                        if($row['service_type_id'] == 1){
+                             //checking trax center 
+                            if (strtolower($row['self_collection']) == 'yes') {
+                                $consignee_city = City::where('name', $row['consignee_city_name'])->first();
+                                if($row['trax_center_franchise_type'] == 1){
+
+                                    $trax_center = RetailTraxCenter::find($row['trax_center_franchise_id']);
+                                    if(!$trax_center){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }elseif($row['trax_center_franchise_type'] == 2){
+                                    $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
+                                    if(!$trax_franchise){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }else{
+                                    $errors[$row_id]['trax_center_franchise_type'] = 'Express Centers/Franchise Type not found';
+                                }
+                            }
+                        //checking trax center end
+                        }
 
                         if (!$user_shipping_info->city->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
@@ -2860,7 +2968,39 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
-
+                        if($row['service_type_id'] == 1){
+                            //checking trax center 
+                            if (strtolower($row['self_collection']) == 'yes') {
+                                $consignee_city = City::where('name', $row['consignee_city_name'])->first();
+                                if($row['trax_center_franchise_type'] == 1){
+    
+                                    $trax_center = RetailTraxCenter::find($row['trax_center_franchise_id']);
+                                    if(!$trax_center){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }elseif($row['trax_center_franchise_type'] == 2){
+                                    $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
+                                    if(!$trax_franchise){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }else{
+                                    $errors[$row_id]['trax_center_franchise_type'] = 'Express Centers/Franchise Type not found';
+                                }
+                            }
+                            //checking trax center end
+                        }
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
@@ -3226,12 +3366,24 @@ class ShipperShipmentBookController extends Controller
                 if ($service_type_id == 1) {
                     if ($request->filled('self_collection')) {
                         $self_collection = TRUE;
+
+                        $express_center_id = $request->express_center;
+                        
+                        $express_center_type = $request->center_franchise;
                     } else {
                         $self_collection = FALSE;
+                        
+
+                        $express_center_id = 0;
+                        $express_center_type = 0;
                     }
                 }
                 else{
                     $self_collection = FALSE;
+                    
+
+                    $express_center_id = 0;
+                    $express_center_type = 0;
                 }
 
                 if ($service_type_id != 5) {
@@ -3347,6 +3499,11 @@ class ShipperShipmentBookController extends Controller
                 }
                 $business_category_id = 1;
                 $shipment_id = $this->corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+                $shipment_detail = ShipmentDetail::where('shipment_id',$shipment_id)->get()->first();
+                $shipment_detail->center_frachise_id = $express_center_id;
+                $shipment_detail->center_frachise_type = $express_center_type;
+                $shipment_detail->save();
+                
                 if(session('user_type') == 2){
                     $substitute_user_shipment = new SubstituteUserShipment();
                     $substitute_user_shipment->substitute_user_id = Auth::id();
@@ -4091,7 +4248,10 @@ class ShipperShipmentBookController extends Controller
                 $payment_modes = PaymentMode::whereNotIn('id', [2])->get();
             }
         }
-        return view('client.shipment.book.corporate.excel')->with(['booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products]);
+
+        $trax_centers = RetailTraxCenter::where('status', 1)->get();
+        $trax_franchises = RetailFranchise::where('status',1)->get();
+        return view('client.shipment.book.corporate.excel')->with(['trax_centers' => $trax_centers, 'trax_franchises' => $trax_franchises, 'booking_types' => $booking_types,'user'=> $user, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'delivery_types' => $delivery_types, 'charges_modes' => $charges_modes, 'min_chargeable_weights' => $min_chargeable_weights,'distribution_products'=>$distribution_products]);
     }
 
     public function corporate_excel_distribution_index() {
@@ -4314,7 +4474,9 @@ class ShipperShipmentBookController extends Controller
             'shipper_reference_number_3' => 'Shipper Reference Number 3',
             'shipper_reference_number_4' => 'Shipper Reference Number 4',
             'shipper_reference_number_5' => 'Shipper Reference Number 5',
-            'open_shipment' => 'Open Shipment'
+            'open_shipment' => 'Open Shipment',
+            'trax_center_franchise_id' => 'Express Centers/Franchise ID',
+            'trax_center_franchise_type' => 'Express Centers/Franchise Type',
 
         ];
 
@@ -4359,6 +4521,9 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2' => ['nullable', 'phone_number'],
             'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
             'self_collection' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+            'trax_center_franchise_id' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+            'trax_center_franchise_type' => ['required_if:self_collection,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,2', 'between:1,2'],
+
             'order_date' => ['nullable', 'date_format:Y-m-d'],
             'open_shipment' => ['nullable', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
 
@@ -4464,9 +4629,9 @@ class ShipperShipmentBookController extends Controller
 
             if($excel_type == 0){}
             else if($excel_type == 1){
-                $column_count = 35;
+                $column_count = 37;
 
-                $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'replacement_item_product_type_id', 19 => 'replacement_item_description', 20 => 'replacement_item_quantity', 21 => 'special_instructions', 22 => 'estimated_weight', 23 => 'shipping_mode_id', 24 => 'same_day_timing_id', 25 => 'amount', 26 => 'payment_mode_id', 27 => 'charges_mode_id', 28 => 'pieces_quantity', 29 => 'shipper_reference_number_1', 30 => 'shipper_reference_number_2', 31 => 'shipper_reference_number_3', 32 => 'shipper_reference_number_4', 33 => 'shipper_reference_number_5', 34 => 'open_shipment'];
+                $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'delivery_type_id', 3 => 'information_display', 4 => 'consignee_city_name', 5 => 'consignee_name', 6 => 'consignee_address', 7 => 'consignee_phone_number_1', 8 => 'consignee_phone_number_2', 9 => 'consignee_email_address', 10 => 'self_collection', 11 => 'order_id', 12 => 'order_date', 13 => 'item_product_type_id', 14 => 'item_description', 15 => 'item_quantity', 16 => 'item_insurance', 17 => 'item_price', 18 => 'replacement_item_product_type_id', 19 => 'replacement_item_description', 20 => 'replacement_item_quantity', 21 => 'special_instructions', 22 => 'estimated_weight', 23 => 'shipping_mode_id', 24 => 'same_day_timing_id', 25 => 'amount', 26 => 'payment_mode_id', 27 => 'charges_mode_id', 28 => 'pieces_quantity', 29 => 'shipper_reference_number_1', 30 => 'shipper_reference_number_2', 31 => 'shipper_reference_number_3', 32 => 'shipper_reference_number_4', 33 => 'shipper_reference_number_5', 34 => 'open_shipment', 35 => 'trax_center_franchise_type', 36 => 'trax_center_franchise_id'];
 
                 $rules['service_type_id'] = ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function($query) {
                     $query->whereNotIn('id', [4]);
@@ -4474,8 +4639,8 @@ class ShipperShipmentBookController extends Controller
                 $service_type_check_id = null;
             }
             elseif($excel_type == 2){
-                $column_count = 31;
-                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'amount', 22 => 'payment_mode_id', 23 => 'charges_mode_id', 24 => 'pieces_quantity', 25 => 'shipper_reference_number_1', 26 => 'shipper_reference_number_2', 27 => 'shipper_reference_number_3', 28 => 'shipper_reference_number_4', 29 => 'shipper_reference_number_5', 30 => 'open_shipment'];
+                $column_count = 33;
+                $fields = [0 => 'pickup_address_id', 1 => 'delivery_type_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'self_collection', 10 => 'order_id', 11 => 'order_date', 12 => 'item_product_type_id', 13 => 'item_description', 14 => 'item_quantity', 15 => 'item_insurance', 16 => 'item_price', 17 => 'special_instructions', 18 => 'estimated_weight', 19 => 'shipping_mode_id', 20 => 'same_day_timing_id', 21 => 'amount', 22 => 'payment_mode_id', 23 => 'charges_mode_id', 24 => 'pieces_quantity', 25 => 'shipper_reference_number_1', 26 => 'shipper_reference_number_2', 27 => 'shipper_reference_number_3', 28 => 'shipper_reference_number_4', 29 => 'shipper_reference_number_5', 30 => 'open_shipment', 31 => 'trax_center_franchise_type', 32 => 'trax_center_franchise_id'];
                 $service_type_check_id = 1;
             }
             elseif($excel_type == 3){
@@ -4680,8 +4845,41 @@ class ShipperShipmentBookController extends Controller
                                     $errors[$row_id]['return_address_id'] = 'Return Address ID #' . $row['return_address_id'] . ' is disabled';
                                 }
                             }
+                        
                         }
-
+                        if($row['service_type_id'] == 1){
+                            //checking trax center 
+                            if (strtolower($row['self_collection']) == 'yes') {
+                                $consignee_city = City::where('name', $row['consignee_city_name'])->first();
+                                if($row['trax_center_franchise_type'] == 1){
+    
+                                    $trax_center = RetailTraxCenter::find($row['trax_center_franchise_id']);
+                                    if(!$trax_center){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }elseif($row['trax_center_franchise_type'] == 2){
+                                    $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
+                                    if(!$trax_franchise){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }else{
+                                    $errors[$row_id]['trax_center_franchise_type'] = 'Express Centers/Franchise Type not found';
+                                }
+                            }
+                            //checking trax center end
+                        }
                         if (!$user_shipping_info->city->status) {
                             $errors[$row_id]['pickup_address_id'] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
                         }
@@ -4710,6 +4908,7 @@ class ShipperShipmentBookController extends Controller
                         if (!$consignee_city->zone_id) {
                             $errors[$row_id]['consignee_city_name'] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
                         }
+                        
 
                         $pickup_city_id = $user_shipping_info->city_id;
 
@@ -4813,7 +5012,39 @@ class ShipperShipmentBookController extends Controller
                     }
                     else{
                         $pickup_consignee_city = City::where('name', $row['consignee_city_name'])->first();
-
+                        if($row['service_type_id'] == 1){
+                            //checking trax center 
+                            if (strtolower($row['self_collection']) == 'yes') {
+                                $consignee_city = City::where('name', $row['consignee_city_name'])->first();
+                                if($row['trax_center_franchise_type'] == 1){
+    
+                                    $trax_center = RetailTraxCenter::find($row['trax_center_franchise_id']);
+                                    if(!$trax_center){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_center->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_center->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }elseif($row['trax_center_franchise_type'] == 2){
+                                    $trax_franchise = RetailFranchise::find($row['trax_center_franchise_id']);
+                                    if(!$trax_franchise){
+                                        $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                    }else{
+                                        if($trax_franchise->status == 0){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise ID not found';
+                                        }elseif($trax_franchise->default_hub != $consignee_city->id){
+                                            $errors[$row_id]['trax_center_franchise_id'] = 'Express Centers/Franchise does not belongs to '.$consignee_city->name.'';
+                                        }
+                                    }
+                                }else{
+                                    $errors[$row_id]['trax_center_franchise_type'] = 'Express Centers/Franchise Type not found';
+                                }
+                            }
+                            //checking trax center end
+                        }
                         if (!$pickup_consignee_city->status) {
                             $errors[$row_id]['consignee_city_name'] = 'Pickup Address\'s City: ' . $pickup_consignee_city->name . ' is deactivated';
                         }
@@ -6856,5 +7087,12 @@ class ShipperShipmentBookController extends Controller
 
         }
 
+    }
+
+    public function get_express_centers(Request $request){
+        $trax_centers = RetailTraxCenter::where('default_hub', $request->hub_id)->where('status', 1)->get();
+        $trax_franchise = RetailFranchise::where('default_hub', $request->hub_id)->where('status',1)->get();
+           
+        return response()->json(['status' => 1, 'trax_centers' => $trax_centers, 'trax_franchise' => $trax_franchise]);
     }
 }
