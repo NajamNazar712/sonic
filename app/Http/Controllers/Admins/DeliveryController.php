@@ -4527,6 +4527,7 @@ class DeliveryController extends Controller
         if ($request->get('search_date_from_deposited') && $request->get('search_date_to_deposited')) {
             $from = $request->get('search_date_from_deposited');
             $to = $request->get('search_date_to_deposited');
+            $datatable->where('station_deposit_notes.status', 1);
             $datatable->whereBetween('station_deposit_notes.created_at', [$from,$to]);
         }
         return $datatable->make(true);
