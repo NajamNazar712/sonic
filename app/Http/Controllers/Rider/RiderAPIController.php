@@ -9622,11 +9622,15 @@ class RiderAPIController extends Controller
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($rider->exists()) {
                 $rider = $rider->first();
-                $pin = rand(1000, 9999);
-                $rider->reset_pin_otp = $pin;
-                $rider->save();
-                NotificationsController::send(158, $rider->id);
-                return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                if($rider->status){
+                    $pin = rand(1000, 9999);
+                    $rider->reset_pin_otp = $pin;
+                    $rider->save();
+                    NotificationsController::send(158, $rider->id);
+                    return response()->json(['status' => 0, 'message' => 'Pin has been sent to your registered number', 'otp' => $pin]);
+                }else{
+                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                }
             } else {
                 return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
             }

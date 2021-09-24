@@ -3429,6 +3429,9 @@ class AdminAPIController extends Controller
         } else {
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
+                if($admin->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
                 $this->sendResetLinkEmail($request);
                 return response()->json(['status' => 0, 'message' => 'Password reset link has been sent to your email']);
             } else {
