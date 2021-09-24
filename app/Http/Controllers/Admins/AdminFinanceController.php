@@ -8,6 +8,7 @@ use App\Http\Models\Admin\AdjustmentLog;
 use App\Http\Models\Admin\AdjustmentType;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\ChangeShipmentWeightLog;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\RevertStatusRequest;
@@ -1079,7 +1080,9 @@ class AdminFinanceController extends Controller
             ->leftjoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_items as sis', 'sis.shipment_id', '=', 'shipments.id')
             ->leftjoin('products as prod', 'prod.id', '=', 'sis.product_type_id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin', 'shipments.actual_weight as actual_weight', 'shipments.chargeable_weight as chargeable_weight', 'sm.mode as shipping_mode', 'sis.quantity as item_quantity', 'prod.product_name as product_name')
+            ->leftjoin('resolved_outstanding_shipments as ros', 'ros.shipment_id', '=', 'shipments.id')
+            ->leftjoin('admins as rosa', 'rosa.id', '=', 'ros.resolved_by')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin', 'shipments.actual_weight as actual_weight', 'shipments.chargeable_weight as chargeable_weight', 'sm.mode as shipping_mode', 'sis.quantity as item_quantity', 'prod.product_name as product_name', 'rosa.name as resolved_by', 'ros.created_at as resolved_at')
             ->where('shipments.booking_type_id',4)->where('shipments.shipper_status_id', '!=', 17);
 
 
@@ -1157,6 +1160,9 @@ class AdminFinanceController extends Controller
                 }
             });
 
+        if($tracking = $request->get('tracking_numbers')){
+            $datatables->where('shipments.tracking_number', '=', $tracking);
+        }
         return $datatables->make(true);
     }
 
@@ -1170,11 +1176,39 @@ class AdminFinanceController extends Controller
 
             $shipment->save();
 
+            $resolved_shipment = new ResolvedOutstandingShipment();
+            $resolved_shipment->shipment_id = $shipment->id;
+            $resolved_shipment->resolved_by = Auth::id();
+            $resolved_shipment->save();
+
             return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
         }
         else {
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
         }
+    }
+
+    public function outstanding_walk_in_shipments_bulk_resolved(Request $request){
+        $shipment_ids = $request->shipments;
+        foreach ($shipment_ids as $shipment_id){
+            $shipment = Shipment::where('id', $shipment_id)->where('walk_in_status', '!=', 1);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+                if ((($shipment->charges_mode_id == 1) || ($shipment->charges_mode_id == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25)))){
+
+                    $shipment->walk_in_status = 1;
+
+                    $shipment->save();
+
+                    $resolved_shipment = new ResolvedOutstandingShipment();
+                    $resolved_shipment->shipment_id = $shipment->id;
+                    $resolved_shipment->resolved_by = Auth::id();
+                    $resolved_shipment->save();
+                }
+            }
+
+        }
+        return ['status' => 0, 'success' => 'Selected Shipments has been marked as Resolved'];
     }
 
     public function outstanding_sdn_edit_deposit_slip(Request $request){

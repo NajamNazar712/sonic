@@ -15,9 +15,26 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <input type="text" name="tracking_numbers" class="tracking_numbers ml-4" placeholder="Tracking Number(s)" id="tracking_numbers" style="width: 100%" >
+                                    </div>
+                                </div>
+
+                                <div class="col-3">
+                                    <div class="form-group">
+                                        <button id="datatable_filter_btn" type="submit" class=" btn btn-outline-primary btn-min-width"><i
+                                                    class="la la-search"></i> Search
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </form>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Booked By</th>
@@ -43,6 +60,8 @@
                                     <th class="border-primary border-darken-1">Arrival DateTime</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
+                                    <th class="border-primary border-darken-1">Resolved At</th>
+                                    <th class="border-primary border-darken-1">Resolved By</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -60,6 +79,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 @endsection
 
 @section('js')
@@ -69,10 +89,42 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
+            var selected_rows = [];
+
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -111,6 +163,8 @@
                             head.push('Arrival Date/Time');
                             head.push('Status');
                             head.push('Aging');
+                            head.push('Resolved At');
+                            head.push('Resolved By');
 
 
 
@@ -142,6 +196,8 @@
                                 row.push(values.arrival_date);
                                 row.push(values.walk_in_status);
                                 row.push(values.aging);
+                                row.push(values.resolved_at);
+                                row.push(values.resolved_by);
                                 body.push(row);
                             });
                         },
@@ -155,6 +211,119 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    @if(session('role_id') == 1 || in_array(168, session('permissions')))
+                    {
+                        text: 'Resolve',
+                        className: 'btn btn-primary bulk_resolved',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                swal({
+                                    title: 'Are you sure?',
+                                    text: 'You want to mark selected Tracking Numbers Resolved?',
+                                    icon: 'success',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.finance.outstanding_shipments.walk_in_bulk_resolved') !!}',
+                                            method: 'post',
+                                            data: {
+                                                'shipments': selected_rows,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        })
+                                            .done(function(data) {
+                                                if (data.status == 0) {
+                                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                                }
+                                                else {
+                                                    toastr.error('Something went wrong!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                                }
+                                                table.rows().deselect();
+
+                                                selected_rows = [];
+
+                                                table.button('.bulk_resolved').disable();
+
+                                                table.draw('false');
+                                            });
+                                    }
+                                });
+                            }
+
+                        }
+                    },
+                    @endif
+                    {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.bulk_resolved').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.bulk_resolved').disable();
+                                    }
+                                }
+                            });
+                        }
+                    },
                     {
                         extend: 'excel',
                         title: 'Outstanding Walk-in Shipments',
@@ -166,16 +335,26 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
+                },
                 language: {
                     processing: data_table_loader
                 },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.finance.outstanding_shipments.walk_in_list') }}',
+                    data:function (d) {
+                        d.tracking_numbers = $('#tracking_numbers').val();
+                    }
                 },
                 rowId: 'id',
-                order: [[20, 'desc']],
+                order: [[21, 'desc']],
                 columns: [
+                    {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     {data:'booked_by', name: 'adn.name', class: 'align-middle text-center booked_by'},
@@ -201,12 +380,17 @@
                     {data:'created_at', name: 'shipments.created_at', class: 'align-middle text-center created_at'},
                     {data:'walk_in_status', name: 'shipments.walk_in_status', class: 'align-middle text-center walk_in_status'},
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
+                    {data:'resolved_at', name: 'ros.created_at', class: 'align-middle text-center resolved_at'},
+                    {data:'resolved_by', name: 'rosa.name', class: 'align-middle text-center resolved_by'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
+                    if(((data.charges_mode_id === 1) || (data.charges_mode_id === 2 && (data.shipper_status_id === 14 || data.shipper_status_id === 25))) && (data.walk_in_status !== 1)){
+                        $('td:eq(0)', row).addClass('select-checkbox');
+                    }
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -223,7 +407,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.charges') || $(header).is('.aging') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.charges') || $(header).is('.aging') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.service_type')){
                             $(service_drop_select).appendTo($(search))
@@ -375,6 +559,33 @@
                                 });
                         }
                     });
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button('.bulk_resolved').enable();
+                }
+                else {
+                    table.button('.bulk_resolved').disable();
+                }
+            });
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                var tracking_numbers = $('#track_form .tracking_numbers').val();
+                if (tracking_numbers != '') {
+                    table.draw();
                 }
             });
         });
