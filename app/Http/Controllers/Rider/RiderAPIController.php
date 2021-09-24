@@ -1432,10 +1432,10 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
 
-        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
+        $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
 
         if ($pickup_note->exists()) {
-            $pickup_note = $pickup_note->latest('id')->first();
+            $pickup_note = $pickup_note->first();
 
             $information = array();
 

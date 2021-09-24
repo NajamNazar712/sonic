@@ -8029,7 +8029,7 @@ class AdminFinanceController extends Controller
         }
     }
 
-    static public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable,$wht, $retail = NULL){
+    static public function add_pending_payment_charges($pending_payment_id, $amount, $charges, $gst, $payable,$wht = 0, $retail = NULL){
         if($retail != null){
             $pending_payment_charges = RetailPendingPaymentCalculation::where('retail_pending_payment_id', $pending_payment_id);
             if($pending_payment_charges->exists()){

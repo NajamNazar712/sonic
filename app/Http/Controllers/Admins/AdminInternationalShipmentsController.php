@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Admins;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
