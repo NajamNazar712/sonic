@@ -9669,6 +9669,35 @@ class RiderAPIController extends Controller
         }
     }
 
+    public function fake_status_count(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $fake_status_count = NULL;
+        $month = NULL;
+        if ($request->has('date')) {
+            $r_current_date = Carbon::createFromFormat("Y-m-d H:i:s", $request->date . '-26 23:59:59')->toDateTimeString();
+            $r_previous_month = Carbon::parse($r_current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+            $fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+                ->whereBetween('dn.created_at', [$r_previous_month, $r_current_date])
+                ->where('rider_id', $rider_id)
+                ->where('update_type', 1)
+                ->where('fake_status', 1)->count('fake_status');
+            $month = Carbon::parse($request->date)->format("F-Y");
+        }
+        $current_month = Carbon::now()->format("Y-m");
+        $current_date = Carbon::createFromFormat("Y-m-d H:i:s", $current_month . '-26 23:59:59')->toDateTimeString();
+        $previous_month = Carbon::parse($current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
+
+        $current_fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+            ->whereBetween('dn.created_at', [$previous_month, $current_month])
+            ->where('rider_id', $rider_id)
+            ->where('update_type', 1)
+            ->where('fake_status', 1)->count('fake_status');
+        $c_month = Carbon::now()->format("F-Y");
+        return response()->json(['status' => 0, 'current_count' => $current_fake_status_count, 'current_month' => $c_month, 'count' => $fake_status_count, 'month' => $month]);
+    }
+
     /*public function delivery_packaging_material_update($tracking_number){
         $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $tracking_number)->where('status_id', 3)->first();
         if($packaging_material_shipment != null){

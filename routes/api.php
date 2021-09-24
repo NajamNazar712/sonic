@@ -211,7 +211,7 @@ Route::name('api.')->group(function () {
             });
 
             Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
-
+            Route::post('fake_status', 'Rider\RiderAPIController@fake_status_count')->name('fake_status');
 		});
 
 	});
