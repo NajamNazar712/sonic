@@ -34,7 +34,7 @@ class AdminAttendanceController extends Controller
     public function admin_attendance_index(Request $request){
         ActivityTrailController::createActivityTrailLog(Auth::id(),56);
 
-        if(session('role_id') == 1 && session('role_id') == 17){
+        if(in_array(session('role_id'), [1, 63, 70])){
             $cities = City::select('id','name')->get();
             $departments = AdminDepartment::select('id','name')->get();
             $users = Admin::where('status', 1)->select('id','name')->get();
