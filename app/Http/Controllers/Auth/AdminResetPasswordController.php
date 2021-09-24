@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+use App\Http\Controllers\NotificationsController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
@@ -62,6 +63,8 @@ class AdminResetPasswordController extends Controller
         $user->save();
 
         event(new PasswordReset($user));
+
+        NotificationsController::send(159, $user->id);
         //return redirect(route('cod.login'))->with('success','Your password has reset!');
         //$this->guard()->login($user);
     }

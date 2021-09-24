@@ -8388,6 +8388,13 @@ class NotificationsController extends Controller
                         self::sms($body, $to, 1);
                     }
                 }
+                else if ($id == 159){
+                    $admin = Admin::find($reference_1_id);
+                    if($admin){
+                        $to = $admin->email;
+                        self::email($subject,$body, $to);
+                    }
+                }
             }
         }
     }
