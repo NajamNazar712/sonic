@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Shipment;
 use App\http\Models\ShipmentOrderDate;
@@ -19,6 +20,7 @@ use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\City;
+use Carbon\Carbon;
 use App\Http\Models\ShipmentDetail;
 
 class ProcessShipmentBookingDBPriority implements ShouldQueue
@@ -476,5 +478,13 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
         }
 
         NotificationsController::send(2, $shipment_id);
+        $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+        $now = Carbon::now()->format('H:i:s');
+        $cutofftime = $settingsfortime->setting_value.":00:00";
+        if($now>$cutofftime)
+        {
+            NotificationsController::send(152, $shipment_id);
+            NotificationsController::send(153, $shipment_id);
+        }
     }
 }

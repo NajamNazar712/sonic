@@ -242,7 +242,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['poc','receiving_of_pickup','company_name','tracking_number','order_id','destination','service_type','amount','quantity','product_type','description','estimated_weight'];
         }
 		else if($id == 31){
-            $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','destination','channel','case_nature','case_nature_type','details'];
+            $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','destination','channel','case_nature','case_nature_type','details','status'];
         }
         else if ($id == 32) {
              $details['fields'] = ['nsa', 'tracking_number'];
@@ -605,9 +605,22 @@ class AdminNotificationsController extends Controller
         else if ($id == 150){
             $details['fields'] = ['preview'];
         }
+        else if($id == 152 || $id == 153){
+            $details['fields'] = ['shipper_name'];
+        }
+        else if ($id == 154){
+            $details['fields'] = ['shipment_no','Sales_Person','shipper_name'];
+        }
+        else if ($id == 155){
+            $details['fields'] = ['preview'];
+        }
         else if ($id == 156)
         {
             $details['fields'] = ['month','year','link'];
+        }
+        else if ($id == 158)
+        {
+            $details['fields'] = ['rider_name', 'otp'];
         }
 		return $details;
     }

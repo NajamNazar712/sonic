@@ -200,7 +200,8 @@ class NotificationsController extends Controller
                     }
 
                     self::email($subject, $body, $to, $cc);
-                } else if ($id == 2) {
+                }
+                else if ($id == 2) {
                     $fields = ['order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
                     $shipment = Shipment::find($reference_1_id);
@@ -8345,6 +8346,48 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to);
                 }
+                else if ($id == 152)
+                {                    
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+                    
+                    $to = $shipper->phone;
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    
+                    self::sms($body, $to);
+                } 
+                else if ($id == 153)
+                {                    
+                    $shipment = Shipment::find($reference_1_id);
+
+                    $shipper = $shipment->user;
+                    
+                    $to = $shipper->email;
+
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+
+                    self::email($subject, $body, $to);
+
+                } 
+                else if ($id == 158){
+                    $rider = Rider::find($reference_1_id);
+                    if($rider){
+                        if (strpos($body, '[rider_name]') !== FALSE) {
+                            $body = str_replace('[rider_name]', $rider->name, $body);
+                        }
+                        if (strpos($body, '[otp]') !== FALSE) {
+                            $body = str_replace('[otp]', $rider->reset_pin_otp, $body);
+                        }
+                        $to = $rider->phone;
+                        self::sms($body, $to, 1);
+                    }
+                }
             }
         }
     }
@@ -8402,7 +8445,7 @@ class NotificationsController extends Controller
         }
 
         $to = $phone_number;
-        self::sms($body, $to);
+        self::sms($body, $to, 1);
     }
 
     static public function trax_otp_verification($phone_number, $pin)

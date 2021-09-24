@@ -1145,6 +1145,14 @@ class APIController extends Controller
             }
 
             NotificationsController::send(2, $shipment_id);
+            $settingsfortime = GlobalSettings::where('type', 'pickup_request_cut_off_time')->first();
+            $now = Carbon::now()->format('H:i:s');
+            $cutofftime = $settingsfortime->setting_value.":00:00";
+            if($now>$cutofftime)
+            {
+                NotificationsController::send(152, $shipment_id);
+                NotificationsController::send(153, $shipment_id);
+            }
             if ($request->has('pieces_quantity')) {
                 if ($request->input('pieces_quantity') > 1) {
                     $video = array("https://www.youtube.com/watch?v=Uy0KAIx3xHQ", "Please view this video so that you can follow required process. In case process is not followed completely we will not be able to process this shipment ملٹیپل پیسز شپمینٹ بک یا پیک کرنے کا طریقہ اس وڈیو میں ضرور دیکھیں اگر شپمینٹ بتاۓ ہؤۓ طریقہ  کے تہت  ہینڈاؤرنہیں ہوئ تو ہم اس شپمینٹ کو پروسیس نہیں کریں گے  ");

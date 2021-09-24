@@ -1407,8 +1407,8 @@ class AdminTrackingController extends Controller
                 $barcodes .= '
             <div class="pwrapper p-1">
                 <div class="row justify-content-center">
-                    <div class="col-5">
-                        <div class="row mb-2">
+                    <div class="col">
+                        <div class="row mt-2 mb-2">
                             <div class="col-5 logo text-left">
                                 <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline" style="filter: brightness(1) !important;">
                             </div>

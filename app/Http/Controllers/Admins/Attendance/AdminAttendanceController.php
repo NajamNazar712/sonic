@@ -84,6 +84,9 @@ class AdminAttendanceController extends Controller
 
         if(session('role_id') != 1 && session('role_id') != 17){
             $attendances->where('ad.id', session('department_id'));
+            if(session('department_id') != 6){
+                $attendances->where('employee_attendances.employee_type', 1);
+            }
             $attendances = $attendances->whereIn('c.hub_id', session('hubs'));
         }
 
