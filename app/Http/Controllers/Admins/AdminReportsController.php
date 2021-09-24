@@ -4108,9 +4108,12 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
             ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->leftjoin('admin_hubs as ah', 'ah.hub_id', '=', 'c.hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
             ->select('z.name as zone_name','r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::connection('reports')->raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
-            ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
+            ->where('dns.fake_status', 1)
+            ->where('ah.admin_id', Auth::id())
+            ->groupBy('delivery_notes.id');
 
 
         $datatables = Datatables::of($delivery_note)
