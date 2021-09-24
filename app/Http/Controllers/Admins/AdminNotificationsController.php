@@ -616,6 +616,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['month','year','link'];
         }
+        else if ($id == 158)
+        {
+            $details['fields'] = ['rider_name', 'otp'];
+        }
 		return $details;
     }
 
