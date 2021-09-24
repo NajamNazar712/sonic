@@ -386,7 +386,7 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(((data.charges_mode_id === 1) || (data.charges_mode_id === 2 && (data.shipper_status_id === 14 || data.shipper_status_id === 25))) && (data.walk_in_status !== 1)){
+                    if(((data.charges_mode_id == 1) || (data.charges_mode_id == 2 && (data.shipper_status_id == 14 || data.shipper_status_id == 25))) && (data.walk_in_status != 1)){
                         $('td:eq(0)', row).addClass('select-checkbox');
                     }
 
