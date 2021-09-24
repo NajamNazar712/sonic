@@ -349,7 +349,7 @@
                 //     '<i class="ft-plus-circle"></i>' +
                 //     '</div>' +
                 //     '<div class="col-9 offset-1">Upload Image</div></button></div></div></div>';
-                var upload_image = '<input class="form-control form-control-sm" multiple type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" multiple type="file" name="upload_2_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                var upload_image = '<input class="form-control form-control-sm" multiple type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" multiple type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
@@ -458,6 +458,29 @@
 
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
+
+            var result;
+            $.validator.addMethod("reference_no",
+                function(value, element) {
+                    if(value > 3) {
+
+                        $.ajax({
+                            type: "POST",
+                            url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
+                            data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
+                            success: function (data) {
+                                if(data === 'true'){
+                                    result = false;
+                                }else{
+                                    result = true;
+                                }
+                            }
+                        });
+                        return result;
+                    }
+                },
+                "Statement Reference Number already exists."
+            );
 
             $('body').on('select2:select','.account_head .head_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));

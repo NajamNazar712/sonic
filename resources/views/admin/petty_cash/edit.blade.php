@@ -18,34 +18,12 @@
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" disabled data-rule-required="true" data-msg-required="Hub is required">
-                                    @foreach($hubs as $city)
-                                        <option value="{{$city->id}}">{{$city->name}}</option>
+                                <select name="select_statement_sdn" id="select_statement_sdn" disabled class="form-control select2" data-rule-required="true" data-msg-required="SDN is required">
+                                    @foreach($sdns as $sdn)
+                                        <option value="{{$sdn->id}}">{{str_pad($sdn->id, 6, '0', STR_PAD_LEFT)}}</option>
                                     @endforeach
                                 </select>
                             </fieldset>
-                        </div>
-                        <div class="col ">
-                            <div class="form-group input-group ml-1">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-
-                                <input type="text" name="select_date_from" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required" data-value="{{$petty_statement->from}}">
-                            </div>
-                        </div>
-                        <div class="col ">
-                            <div class="form-group input-group ml-1">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-
-                                <input type="text" name="select_date_to" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" data-value="{{$petty_statement->to}}">
-                            </div>
                         </div>
                         <div class="col">
                             <fieldset class="form-group">
@@ -65,13 +43,18 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
+                            <th class="border-primary border-darken-1">Zone</th>
+                            <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">City / Location</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1"> Employee Id </th>
+                            <th class="border-primary border-darken-1"> Name </th>
+                            <th class="border-primary border-darken-1"> Designation </th>
                             <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
-                            <th class="border-primary border-darken-1">Reference Document</th>
+                            <th class="border-primary border-darken-1">Reference Documents</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1"></th>
 
@@ -149,6 +132,25 @@
             font-size: 24px;
             color: #64a0d2;
         }
+        .date-col-width{
+            min-width: 150px;
+        }
+        .custom-col-width{
+            min-width: 150px;
+        }
+        div.picker .picker__holder{
+            width: 250px;
+        }
+        .doe-col-width{
+            min-width: 250px;
+        }
+        .date-col-width{
+            min-width: 200px;
+        }
+
+        textarea {
+            resize: horizontal;
+        }
     </style>
 @endsection
 
@@ -164,75 +166,21 @@
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
-        let main_hub = '';
-        let main_hub_id = '';
         $(document).ready(function () {
-            $('#select_statement_hub').on('change',function () {
-                var value = $(this).val();
-                $.ajax({
-                    type: "POST",
-                    url: '{!! route('admin.petty_cash.make.destination') !!}', // script to validate in server side
-                    data: {hub_id: value,'_token': '{!! csrf_token() !!}'},
-                    success: function (response) {
-                        if(response.status == 1)
-                        {
-                            main_hub = response.data.name;
-                            main_hub_id = response.data.id;
-                        }
-                        else{
-                            main_hub = '';
-                            main_hub_id = '';
-                        }
-                        $('.hub_select').val(main_hub);
-                        $('.hub_select_id').val(main_hub_id);
-                    }
-                });
-            });
+
             $('.reference_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
             });
-            $('#select_statement_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
+            $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select SDN No.',
                 width:'100%',
                 allowClear:true
             });
 
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
-            var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
-
-            $('#edit_statement_form #select_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                min: new Date(old_date_limit),
-                max: new Date(future_date_limit),
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    // if (context.select) {
-                    //     $('#edit_statement_form #select_date_to').pickadate('picker').set('min', $('#edit_statement_form #select_date_from').pickadate('picker').get('select'));
-                    // }
-                }
-            });
-            $('#edit_statement_form #select_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                min: new Date(old_date_limit),
-                max: new Date(future_date_limit),
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    // if (context.select) {
-                    //     $('#edit_statement_form #select_date_from').pickadate('picker').set('max', $('#edit_statement_form #select_date_to').pickadate('picker').get('select'));
-                    // }
-                }
-            });
+            $('#select_statement_sdn').val('{!! $petty_statement->sdn_id!!}').trigger('change');
 
             var selected_rows = [];
             var rows_count = 0;
@@ -285,17 +233,23 @@
                 rowId: 'statement_detail_id',
                 paging:false,
                 ordering: false,
+                autoWidth: true,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
+                    {data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name custom-col-width form-group'},
                     {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name custom-col-width form-group'},
-                    {data:'date' ,name: 'date', class: 'align-middle date form-group'},
-                    {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group'},
-                    {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
-                    {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
-                    {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
-                    {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document form-group'},
+                    {data:'city_name' ,name: 'c.name', class: 'align-middle city_name custom-col-width form-group'},
+                    {data:'date' ,name: 'date', class: 'align-middle date date-col-width form-group'},
+                    {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group doe-col-width'},
+                    {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width form-group'},
+                    {data:'employee_name' ,name: 'petty_cash_statement_details.employee_name', class: 'align-middle custom-col-width employee_name form-group'},
+                    {data:'employee_designation' ,name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation custom-col-width form-group'},
+                    {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width form-group'},
+                    {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle custom-col-width reference_no form-group'},
+                    {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle custom-col-width remarks'},
+                    {data:'reference_document' ,name: 'reference_document', class: 'align-middle reference_document custom-col-width form-group'},
                     {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                     {data:'action' ,name: 'action', class: 'align-middle action'}
                 ],
@@ -318,6 +272,27 @@
 
                     $(".title_select").select2({
                         placeholder: "Select Account Title",
+                        width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
+                    });
+
+                    $(".zone_select").select2({
+                        placeholder: "Select Zone",
+                        width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
+                    });
+
+                    $(".hub_select").select2({
+                        placeholder: "Select Hub",
+                        width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
+                    });
+
+                    $(".city_select").select2({
+                        placeholder: "Select City",
                         width:'100%'
                     }).bind('change', function() {
                         this_table.api().table().columns.adjust();
@@ -597,9 +572,7 @@
                     if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
                         $(row.node()).find('td.account_head select').attr('disabled',false);
                         $(row.node()).find('td.account_title select').attr('disabled',false);
-                        $(row.node()).find('td.hub_name').attr('disabled',false);
-                        // if($(row.node()).find('td.account_head select').val() == 1){
-                        // }
+                        $(row.node()).find('td.zone select').attr('disabled',false);
                         $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);

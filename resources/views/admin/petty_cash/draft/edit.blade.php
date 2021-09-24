@@ -221,6 +221,29 @@
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
 
+            var result;
+            $.validator.addMethod("reference_no",
+                function(value, element) {
+                    if(value > 3) {
+
+                        $.ajax({
+                            type: "POST",
+                            url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
+                            data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
+                            success: function (data) {
+                                if(data === 'true'){
+                                    result = false;
+                                }else{
+                                    result = true;
+                                }
+                            }
+                        });
+                        return result;
+                    }
+                },
+                "Statement Reference Number already exists."
+            );
+
             var max_date = '{{ Carbon\Carbon::now()->toDateString() }}';
             rows_count = 0;
             var min_date_limit = '{{ Carbon\Carbon::now()->subDays(3)->toDateString() }}';

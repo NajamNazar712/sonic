@@ -176,9 +176,9 @@ class AdminPettyCashController extends Controller
                     $petty_detail->save();
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
-                        $filename = 'statement_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.png';
 
                         $file = $request->file('upload_image' . $selected_id);
+                        $filename = 'statement_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.'.$file->getClientOriginalExtension();
 
                         Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
 
@@ -187,9 +187,9 @@ class AdminPettyCashController extends Controller
                     }
 
                     if ($request->hasFile('upload_2_image' . $selected_id)) {
-                        $filename = 'statement_2_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.png';
-
                         $file = $request->file('upload_2_image' . $selected_id);
+                        $filename = 'statement_2_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.'.$file->getClientOriginalExtension();
+
 
                         Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
 
@@ -236,9 +236,9 @@ class AdminPettyCashController extends Controller
                     $petty_detail_draft->save();
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
-                        $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_detail_draft->id . '.png';
-
                         $file = $request->file('upload_image' . $selected_id);
+                        $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_detail_draft->id . '.'.$file->getClientOriginalExtension();
+
                         Storage::disk('public')->putFileAs('petty_cash_statement_details_draft', $file, $filename);
 //                        $file->move(public_path('uploads/petty_cash'), $filename);
 
@@ -247,9 +247,9 @@ class AdminPettyCashController extends Controller
                     }
 
                     if ($request->hasFile('upload_2_image' . $selected_id)) {
-                        $filename = 'statement_2_' . $petty_cash_draft->id . '_detail_' . $petty_detail_draft->id . '.png';
-
                         $file = $request->file('upload_2_image' . $selected_id);
+                        $filename = 'statement_2_' . $petty_cash_draft->id . '_detail_' . $petty_detail_draft->id . '.'.$file->getClientOriginalExtension();
+
 
                         Storage::disk('public')->putFileAs('petty_cash_statement_details_draft', $file, $filename);
 
@@ -272,16 +272,24 @@ class AdminPettyCashController extends Controller
     {
         $petty = PettyCashStatement::find($id);
         $head = PettyCashAccountHead::select('id', 'name')->get();
-        $hubs = City::where('hub', 1)->select('id', 'name')->get();
-        $cities = City::select('id', 'name')->get();
-        return view('admin.petty_cash.edit')->with(['heads' => $head, 'hubs' => $hubs, 'cities' => $cities, 'petty_statement' => $petty]);
+        $zones = Zone::where('business_category_id',1)->select('id','name')->get();
+        $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
+        if (session('role_id') == 1) {
+            $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
+        } else {
+            $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
+        }
+        return view('admin.petty_cash.edit')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees]);
     }
 
     public function edit_petty_cash_statement_list(Request $request, $id)
     {
         $petty_details = PettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'petty_cash_statement_details.hub_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'petty_cash_statement_details.city_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'petty_cash_statement_details.zone_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'petty_cash_statement_details.employee_id')
             ->join('petty_cash_statements as pcs', 'pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at')
+            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city','z.name as zone','a.trax_id as employee_id', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at','petty_cash_statement_details.employee_name as employee_name_data','petty_cash_statement_details.employee_designation as employee_designation_data')
             ->where('petty_cash_statement_details.petty_cash_statement_id', $id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -324,8 +332,78 @@ class AdminPettyCashController extends Controller
                 return $select;
 
             })
+            ->addColumn('zone_name', function ($petty_details) {
+                $zone_id = $petty_details->zone_id;
+                $zones = Zone::where('business_category_id',1)->select('id','name')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($zones as $zone) {
+                    if ($zone->id == $zone_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $zone->id . '" ' . $selected . '>' . $zone->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 zone_select" disabled name="zone[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Zone is required">' . $drops . '</select>';
+                return $select;
+            })
             ->addColumn('hub_name', function ($petty_details) {
-                $input = '<input type="hidden" value="" class="hub_select_id"  name="hub[' . $petty_details->statement_detail_id . ']"></input><input type="text" readonly value="" class="form-control form-control-sm hub_select" data-rule-required="true" data-msg-required="City is required"></input>';
+                $zone_id = $petty_details->zone_id;
+                $hub_id = $petty_details->hub_id;
+                $hubs = City::where('hub',1)->where('zone_id',$zone_id)->select('id','name')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($hubs as $hub) {
+                    if ($hub->id == $hub_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $hub->id . '" ' . $selected . '>' . $hub->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
+                return $select;
+            })
+            ->addColumn('city_name', function ($petty_details) {
+                $hub_id = $petty_details->hub_id;
+                $city_id = $petty_details->city_id;
+                $cities = City::where('hub',0)->where('hub_id',$hub_id)->select('id','name')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($cities as $city) {
+                    if ($city->id == $city_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $city->id . '" ' . $selected . '>' . $city->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 city_select" disabled name="city[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="City is required">' . $drops . '</select>';
+                return $select;
+            })
+            ->addColumn('employee_trax_id', function ($petty_details) {
+                $employee_id = $petty_details->employee_id;
+                $employees = Admin::where('status',1)->where('trax_id','!=',null)->select('id','trax_id')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($employees as $employee) {
+                    if ($employee->id == $employee_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $employee->id . '" ' . $selected . '>' . $employee->trax_id . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Employee is required">' . $drops . '</select>';
+                return $select;
+            })
+            ->addColumn('employee_name',function ($petty_details){
+                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_name_data . '" name="employee_name[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Name is required">';
+                return $input;
+            })
+            ->addColumn('employee_designation',function ($petty_details){
+                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_designation_data . '" name="employee_designations[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Designation is required">';
                 return $input;
             })
             ->editColumn('date', function ($petty_details) {
@@ -1411,11 +1489,10 @@ class AdminPettyCashController extends Controller
                 $hub_array[$zone->id] = $zone->zone_cities->where('hub',1);
                 foreach ($zone->zone_cities->where('hub',1) as $hub)
                 {
-                    $city_array[$hub->id] = $hub->hub_city;
+                    $city_array[$hub->id] = $hub->hub_cities;
                 }
             }
 
-            return $zones;
             $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
             if (session('role_id') == 1) {
                 $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
@@ -1563,7 +1640,12 @@ class AdminPettyCashController extends Controller
                         $petty_cash_draft_detail->petty_cash_statement_draft_id = $draft_id;
                         $petty_cash_draft_detail->account_head_id = $request->head[$selected_id];
                         $petty_cash_draft_detail->account_title_id = $request->title[$selected_id];
+                        $petty_cash_draft_detail->zone_id = $request->zone[$selected_id];
                         $petty_cash_draft_detail->hub_id = $request->hub[$selected_id];
+                        $petty_cash_draft_detail->city_id = $request->city[$selected_id];
+                        $petty_cash_draft_detail->employee_id = $request->employee[$selected_id];
+                        $petty_cash_draft_detail->employee_name = $request->employee_name[$selected_id];
+                        $petty_cash_draft_detail->employee_designation = $request->employee_designation[$selected_id];
                         $petty_cash_draft_detail->date = $request->date[$selected_id];
 
                         $petty_cash_draft_detail->expense_details = $request->expense[$selected_id];
@@ -1574,9 +1656,9 @@ class AdminPettyCashController extends Controller
                         $image_key = "image_$selected_id";
                         if ($request->hasFile('upload_image' . $selected_id)) {
 
-                            $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.png';
-
                             $file = $request->file('upload_image' . $selected_id);
+                            $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.$file->getClientOriginalExtension();
+
 
                             if ($request->has($image_key)) {
 
@@ -1588,7 +1670,8 @@ class AdminPettyCashController extends Controller
 
                         } else {
                             if ($request->has($image_key)) {
-                                $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.png';
+                                $extension = explode($image_key,'.');
+                                $filename = 'statement_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.end($extension);
                                 //                            return $request->input($image_key);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details_draft/' . $filename);
 
@@ -1596,18 +1679,46 @@ class AdminPettyCashController extends Controller
                             }
                         }
 
+                        $image_2_key = "image_2_$selected_id";
+                        if ($request->hasFile('upload_2_image' . $selected_id)) {
+
+                            $file = $request->file('upload_2_image' . $selected_id);
+                            $filename = 'statement_2_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.$file->getClientOriginalExtension();
+
+
+                            if ($request->has($image_2_key)) {
+
+                                Storage::disk('public')->delete('petty_cash_statement_details_draft/' . $request->input($image_2_key));
+                            }
+                            Storage::disk('public')->putFileAs('petty_cash_statement_details_draft/', $file, $filename);
+
+                            $petty_cash_draft_detail->reference_document_2 = $filename;
+
+                        } else {
+                            if ($request->has($image_2_key)) {
+                                $extension = explode($image_2_key,'.');
+                                $filename = 'statement_2_' . $petty_cash_draft->id . '_detail_' . $petty_cash_draft_detail->id . '.'.end($extension);
+                                //                            return $request->input($image_key);
+                                Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details_draft/' . $filename);
+
+                                $petty_cash_draft_detail->reference_document_2 = $filename;
+                            }
+                        }
+
                         $petty_cash_draft_detail->save();
 
                     }
                     $petty_cash_draft->total_amount = $total_amount;
+                    $petty_cash_draft->sdn_id = $request->select_statement_sdn;
                     $petty_cash_draft->save();
                     return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Draft Successfully Updated!']);
                 } else {
                     $petty_cash = new PettyCashStatement();
-                    $petty_cash->hub_id = $petty_cash_draft->hub_id;
+//                    $petty_cash->hub_id = $petty_cash_draft->hub_id;
                     $petty_cash->reference_no = $petty_cash_draft->reference_no;
-                    $petty_cash->from = $petty_cash_draft->from;
-                    $petty_cash->to = $petty_cash_draft->to;
+                    $petty_cash->sdn_id = $request->select_statement_sdn;
+//                    $petty_cash->from = $petty_cash_draft->from;
+//                    $petty_cash->to = $petty_cash_draft->to;
                     $petty_cash->created_by = Auth::id();
                     $petty_cash->save();
                     foreach ($selected_ids as $selected_id) {
@@ -1617,7 +1728,12 @@ class AdminPettyCashController extends Controller
                         $petty_detail->petty_cash_statement_id = $petty_cash->id;
                         $petty_detail->account_head_id = $request->head[$selected_id];
                         $petty_detail->account_title_id = $request->title[$selected_id];
+                        $petty_detail->zone_id = $request->zone[$selected_id];
                         $petty_detail->hub_id = $request->hub[$selected_id];
+                        $petty_detail->city_id = $request->city[$selected_id];
+                        $petty_detail->employee_id = $request->employee[$selected_id];
+                        $petty_detail->employee_name = $request->employee_name[$selected_id];
+                        $petty_detail->employee_designation = $request->employee_designation[$selected_id];
                         $petty_detail->date = $request->date[$selected_id];
                         $petty_detail->expense_details = $request->expense[$selected_id];
                         $petty_detail->amount = $request->amount[$selected_id];
@@ -1627,9 +1743,9 @@ class AdminPettyCashController extends Controller
                         $image_key = "image_$selected_id";
 
                         if ($request->hasFile('upload_image' . $selected_id)) {
-                            $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
-
                             $file = $request->file('upload_image' . $selected_id);
+                            $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.$file->getClientOriginalExtension();
+
                             if ($request->has($image_key)) {
                                 Storage::disk('public')->delete('petty_cash_statement_details_draft' . $request->input($image_key));
                             }
@@ -1640,13 +1756,39 @@ class AdminPettyCashController extends Controller
                         } else {
                             if ($request->has($image_key)) {
 
-                                $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.png';
+                                $extension = explode($image_key,'.');
+                                $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_key), 'petty_cash_statement_details/' . $filename);
 
                                 $petty_detail->reference_document = $filename;
                                 $petty_detail->save();
 
 
+                            }
+                        }
+
+                        $image_2_key = "image_2_$selected_id";
+
+                        if ($request->hasFile('upload_2_image' . $selected_id)) {
+                            $file = $request->file('upload_2_image' . $selected_id);
+                            $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.$file->getClientOriginalExtension();
+
+                            if ($request->has($image_2_key)) {
+                                Storage::disk('public')->delete('petty_cash_statement_details_draft' . $request->input($image_2_key));
+                            }
+                            Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                            $petty_detail->reference_document_2 = $filename;
+                            $petty_detail->save();
+                        } else {
+                            if ($request->has($image_2_key)) {
+
+                                $extension = explode($image_2_key,'.');
+                                $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
+                                Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details/' . $filename);
+
+                                $petty_detail->reference_document_2 = $filename;
+                                $petty_detail->save();
                             }
                         }
 
