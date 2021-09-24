@@ -267,6 +267,24 @@ class V2AdminPickupsController extends Controller
                         return '';
                     }
             })
+            ->addColumn('aging',function ($pickup_requests){
+                $requested_date=$pickup_requests->requested_date;
+                $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $days =Carbon::createFromTime($settings->setting_value, '0', '0', 'Asia/Karachi');
+                   
+                    $startTime = Carbon::parse($requested_date);
+                    $endTime = Carbon::parse($days);
+
+                    $totalDuration =  $startTime->diffInHours($endTime).' Hrs';
+                   
+                    //$difference =  $requested_date->diff($days)->format('%H:%I:%S')." Minutes";
+                    //$difference=$requested_date-$days;
+                    return $totalDuration;
+                }
+                //$days = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            })
             ->editColumn('brand_name', function ($pickup_requests) {
                 if($pickup_requests->brand_name==null){
                     $shipper = User::find($pickup_requests->user_id);
