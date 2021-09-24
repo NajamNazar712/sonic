@@ -928,8 +928,13 @@ class GlobalSettingsController extends Controller
                                     $fuel_surcharge_history->save();
 
                                 } else {
-                                    $rate_status->fuel_charges = 1;
-                                    $rate_status->save();
+                                    if($fuel_factor > 0) {
+                                        $rate_status->fuel_charges = 1;
+                                        $rate_status->save();
+                                    }
+                                    else{
+                                        $fuel_factor = 0;
+                                    }
                                     if ($user->account_type_id == 1) {
                                         $fuel_surcharge = new FuelSurcharge();
                                         $fuel_surcharge->user_id = $user->id;
@@ -1036,8 +1041,13 @@ class GlobalSettingsController extends Controller
                                         $fuel_surcharge_history->save();
 
                                     } else {
-                                        $rate_status->fuel_charges = 1;
-                                        $rate_status->save();
+                                        if($fuel_factor > 0) {
+                                            $rate_status->fuel_charges = 1;
+                                            $rate_status->save();
+                                        }
+                                        else{
+                                            $fuel_factor = 0;
+                                        }
                                         if ($user->account_type_id == 1) {
                                             $fuel_surcharge = new FuelSurcharge();
                                             $fuel_surcharge->user_id = $user->id;
