@@ -837,16 +837,7 @@ class DeliveryController extends Controller
                 }
 
                 if($normal_rider){
-                    $rider_device_token = EmployeeDeviceToken::where('employee_id',$request->selected_rider_id)
-                        ->where('employee_type_id', 2)
-                        ->select('device_token');
-                    if ($rider_device_token->exists()) {
-                        $rider_device_token = $rider_device_token->first();
-                        $device_token = $rider_device_token->device_token;
-                        $title = "Delivery Note Assigned";
-                        $message = "Dear Rider Delivery Note # " . $note->id . " Has Been Assigned To You";
-                        NotificationsController::bolt_app_notification($request->selected_rider_id, 2,$device_token, $title, $message);
-                    }
+                    NotificationsController::app_notification(5, $request->selected_rider_id, 2, $note->id);
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
@@ -7129,6 +7120,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                 $rider->otp_date = Carbon::now();
                 $rider->save();
                 NotificationsController::send(144, $rider, $otp);
+                NotificationsController::app_notification(9, $rider->id, 2, $otp);
                 return response()->json(['status' => 1]);
             }
             else{

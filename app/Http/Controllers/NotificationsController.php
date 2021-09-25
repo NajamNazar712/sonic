@@ -15,8 +15,10 @@ use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\http\Models\Admin\Retail\RetailUser;
 use App\Http\Models\Admin\SalePersonTag;
+use App\http\Models\AppNotification;
 use App\Http\Models\Commission\SalesCommission;
 use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\ConsigneeUser;
 use App\Http\Models\CRFTermsConditions;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmRequest;
@@ -24,6 +26,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
 use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
@@ -43,6 +46,7 @@ use App\Http\Models\SaleTierTag;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentPiecesRequest;
 use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -8464,6 +8468,124 @@ class NotificationsController extends Controller
 
         $to = $phone_number;
         self::sms($body, $to);
+    }
+
+    static public function app_notification($id, $employee_id, $employee_type, $reference1_id, $reference2_id = NULL)
+    {
+        $push_notification = AppNotification::find($id);
+        if ($push_notification) {
+            if ($push_notification->status) {
+                $title = $push_notification->title;
+                $body = $push_notification->body;
+                if ($id == 1) {
+                    $rider = Rider::find($reference1_id);
+                    $shipper = User::find($reference2_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    if (strpos($body, '[rider]') !== FALSE) {
+                        $body = str_replace('[rider]', $rider->name, $body);
+                    }
+                } else if ($id == 2) {
+                    $rider = Rider::find($reference1_id);
+                    $shipper = User::find($reference2_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    if (strpos($body, '[rider]') !== FALSE) {
+                        $body = str_replace('[rider]', $rider->name, $body);
+                    }
+                } else if ($id == 3) {
+                    $shipper = User::find($reference1_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                } else if ($id == 4) {
+                    $shipper = User::find($reference1_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                } else if ($id == 5) {
+                    if (strpos($body, '[note_id]') !== FALSE) {
+                        $body = str_replace('[note_id]', $reference1_id, $body);
+                    }
+                } else if ($id == 6) {
+                    if (strpos($body, '[note_id]') !== FALSE) {
+                        $body = str_replace('[note_id]', $reference1_id, $body);
+                    }
+                } else if ($id == 7) {
+                    $shipment = Shipment::find($reference1_id);
+                    $status = ShipmentStatus::find($reference2_id);
+                    $shipper = User::find($employee_id);
+                    if (strpos($body, '[shipper_name]') !== FALSE) {
+                        $body = str_replace('[shipper_name]', $shipper->name, $body);
+                    }
+                    if (strpos($body, '[tracking_no]') !== FALSE) {
+                        $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                    }
+                    if (strpos($body, '[status_name]') !== FALSE) {
+                        $body = str_replace('[status_name]', $status->name, $body);
+                    }
+                } else if ($id == 8) {
+                    $shipment = Shipment::find($reference1_id);
+                    $status = ShipmentStatus::find($reference2_id);
+                    $consignee_user = ConsigneeUser::find($employee_id);
+                    if (strpos($body, '[consignee_name]') !== FALSE) {
+                        $body = str_replace('[consignee_name]', $consignee_user->name, $body);
+                    }
+                    if (strpos($body, '[tracking_no]') !== FALSE) {
+                        $body = str_replace('[tracking_no]', $shipment->tracking_number, $body);
+                    }
+                    if (strpos($body, '[status_name]') !== FALSE) {
+                        $body = str_replace('[status_name]', $status->name, $body);
+                    }
+                } else if ($id == 9) {
+                    $rider = Rider::find($employee_id);
+                    if (strpos($body, '[rider]') !== FALSE) {
+                        $body = str_replace('[rider]', $rider->name, $body);
+                    }
+                    if (strpos($body, '[otp]') !== FALSE) {
+                        $body = str_replace('[otp]', $reference1_id, $body);
+                    }
+                }
+                $employee_device_token = EmployeeDeviceToken::where('employee_id', $employee_id)
+                    ->where('employee_type_id', $employee_type)
+                    ->select('device_token');
+                if ($employee_device_token->exists()) {
+                    $employee_device_token = $employee_device_token->first();
+                    $device_token = $employee_device_token->device_token;
+                    $server_key = 'AAAAPew_cdc:APA91bEJb7w_3-rOI5Pkr1wVVG9Qtl_WBQh_fEEk1N0yY-CHeUwOWKmSUODGhFbGuJv-BaqY-NS6KAYIo3Cw_UyKm2PvlM4reEae1SPj-y75z0Eu722IYUUqm_M2W9UOYnu40QyCIFGL';
+                    $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
+
+                    $message = [
+                        'data' => [
+                            'title' => $title,
+                            'body' => $body
+                        ],
+                        'to' => $device_token
+                    ];
+
+                    $client = new Client(['base_uri' => $fcmUrl, 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+
+                    $response = $client->post('', [
+                        'headers' => [
+                            'Content-Type' => 'application/json',
+                            'Authorization' => 'key=' . $server_key,
+                        ],
+                        'body' => json_encode($message)
+                    ]);
+                    $response = json_decode($response->getBody()->getContents(), true);
+                    if ($response['success'] != 0) {
+                        $notification_history = new EmployeeNotificationHistory();
+                        $notification_history->employee_id = $employee_id;
+                        $notification_history->employee_type_id = $employee_type;
+                        $notification_history->title = $title;
+                        $notification_history->message = $body;
+                        $notification_history->save();
+                    }
+                }
+            }
+        }
     }
 
 }

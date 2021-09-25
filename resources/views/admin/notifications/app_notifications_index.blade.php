@@ -140,9 +140,6 @@
 			autosize($('#send_custom_email .body')[0]);
 			@endif
 
-				var reciever = $('#send_custom_email .receiver').val();
-				console.log(reciever);
-
 			@if (session('role_id') == 1 || in_array(101, session('permissions')))
 				autosize($('#edit .body')[0]);
 			@endif
