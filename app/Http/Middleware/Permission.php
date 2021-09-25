@@ -629,9 +629,16 @@ class Permission
             'notifications.index' => 100,
             'notifications.list' => 100,
             'notifications.send_custom_email' => 103,
+            'notifications.send_custom_notification' => 103,
             'notifications.details' => 101,
             'notifications.status' => 102,
             'notifications.edit' => 101,
+
+            'app_notifications.index' => 601,
+            'app_notifications.list' => 601,
+            'app_notifications.details' => 602,
+            'app_notifications.edit' => 602,
+            'app_notifications.status' => 603,
 
             'crm.permissions' => 188,
             'crm.list' => 188,

@@ -16,5 +16,13 @@ class UpdateModulePermissionForAppNotificationSeeder extends Seeder
             array('id' => 602, 'name' => 'App Notifications - Update', 'module_id' => 13),
             array('id' => 603, 'name' => 'App Notifications - Enable/Disable', 'module_id' => 13)
         ));
+
+        DB::table('activity_trail_actions')->insert(array(
+            array('id' => 450, 'screen_name' => 'App-Notification', 'action'=> 'View')
+        ));
+
+        $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Support > App-Notification', 'url'=>'admin.app_notifications.index', 'permission_id' => 601)
+        );
     }
 }

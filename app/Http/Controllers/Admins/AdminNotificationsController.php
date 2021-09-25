@@ -668,6 +668,7 @@ class AdminNotificationsController extends Controller
 
     public function app_notification_index(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),450);
         $app_type = AppType::all();
         return view('admin.notifications.app_notifications_index')->with(['app_type'=>$app_type]);
     }
