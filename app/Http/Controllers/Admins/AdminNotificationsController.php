@@ -697,11 +697,11 @@ class AdminNotificationsController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                if (session('role_id') == 1 || in_array(101, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(602, session('permissions'))) {
                     $dropdown .= $edit_button;
                 }
 
-                if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(603, session('permissions'))) {
                     if ($notification->status) {
                         $dropdown .= $disable_button;
                     } else {
@@ -774,17 +774,12 @@ class AdminNotificationsController extends Controller
     }
 
     public function app_notification_edit(Request $request) {
-        $notification = Notification::find($request->id);
+        $notification = AppNotification::find($request->id);
         if ($notification) {
-            if ($notification->type_id == 1) {
-                $notification->subject = $request->get('subject');
-            }
-
+            $notification->title = $request->get('title');
             $notification->body = $request->get('body');
             $notification->updated_by = Auth::id();
-
             $notification->save();
-
             return ['status' => 0, 'success' => 'Notification has been edited'];
         }
         else {

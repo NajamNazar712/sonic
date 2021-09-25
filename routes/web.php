@@ -1989,7 +1989,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminNotificationsController@app_notification_list')->name('list');
         Route::post('status', 'Admins\AdminNotificationsController@app_notification_status')->name('status');
         Route::post('details', 'Admins\AdminNotificationsController@app_notification_details')->name('details');
-        Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+        Route::post('edit', 'Admins\AdminNotificationsController@app_notification_edit')->name('edit');
     });
 
     //Reports start

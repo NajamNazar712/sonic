@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Notifications')
+@section('title', 'App - Notifications')
 
 @section('content')
 	<div class="app-content content">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Notifications
+					App - Notifications
 				</h1>
 
 				<div class="card">
@@ -30,7 +30,7 @@
 									</tr>
 								</thead>
 							</table>
-							@if (session('role_id') == 1 || in_array(101, session('permissions')))
+							@if (session('role_id') == 1 || in_array(602, session('permissions')))
 								<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
@@ -46,8 +46,8 @@
 												</div>
 												<div class="modal-body">
 													<div class="form-group email">
-														<label>Subject</label>
-														<input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required" data-rule-field="true">
+														<label>Title</label>
+														<input type="text" name="subject" class="form-control subject" placeholder="Title*" data-rule-required="true" data-msg-required="Title is required" data-rule-field="true">
 													</div>
 
 													<div class="form-group">
@@ -92,55 +92,7 @@
 
 	<script>
 		$(document).ready(function() {
-			@if (session('role_id') == 1 || in_array(103, session('permissions')))
-				$('#send_custom_email .shipper_status').select2({
-					width: '100%',
-					placeholder: 'Status*'
-				});
-
-				$('#send_custom_email .receiver').select2({
-					width: '100%',
-					placeholder: 'Receiver*'
-				}).bind('change', function() {
-					if ($(this).hasClass('danger')) {
-						$(this).valid();
-					}
-					if(this.value == 2){
-						$('#shipper_div').removeClass('d-none');
-					}
-					else{
-						$('#shipper_div').addClass('d-none');
-					}
-				});
-
-			$('#send_custom_notification .notification_receiver').select2({
-				width: '100%',
-				placeholder: 'Receiver*'
-			}).bind('change', function() {
-				if ($(this).hasClass('danger')) {
-					$(this).valid();
-				}
-				if(this.value == 2){
-					$('#riders_div').removeClass('d-none');
-					$('#employees_div').addClass('d-none');
-				}
-				else{
-					$('#employees_div').removeClass('d-none');
-					$('#riders_div').addClass('d-none');
-				}
-			});
-			$('#send_custom_notification .riders').select2({
-				width: '100%',
-				placeholder: 'Select Rider*'
-			});
-			$('#send_custom_notification .employees').select2({
-				width: '100%',
-				placeholder: 'Select Employee*'
-			});
-			autosize($('#send_custom_email .body')[0]);
-			@endif
-
-			@if (session('role_id') == 1 || in_array(101, session('permissions')))
+			@if (session('role_id') == 1 || in_array(602, session('permissions')))
 				autosize($('#edit .body')[0]);
 			@endif
 
@@ -243,24 +195,10 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(103, session('permissions')))
-				$('#send_custom_email form').validate({
-					errorClass: 'danger',
-					successClass: 'success',
-					normalizer: function(value) {
-						return $.trim(value);
-					},
-					errorPlacement: function(error, element) {
-						error.addClass('w-100').appendTo(element.parent('.form-group'));
-					}
-				});
-			@endif
-
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var notification_id = parseInt($(this).parents('tr').attr('id'));
-				var notification_type = parseInt($(this).parents('tr').attr('data-type'));
 
-				@if (session('role_id') == 1 || in_array(101, session('permissions')))
+				@if (session('role_id') == 1 || in_array(602, session('permissions')))
 					if ($(this).hasClass('edit')) {
 						$.ajax({
 							url: '{!! route('admin.app_notifications.details') !!}',
@@ -294,7 +232,7 @@
 					}
 				@endif
 
-				@if (session('role_id') == 1 || in_array(102, session('permissions')))
+				@if (session('role_id') == 1 || in_array(603, session('permissions')))
 					if ($(this).hasClass('enable')) {
 						$.ajax({
 							url: '{!! route('admin.app_notifications.status') !!}',
@@ -340,7 +278,7 @@
 				@endif
 			});
 
-			@if (session('role_id') == 1 || in_array(101, session('permissions')))
+			@if (session('role_id') == 1 || in_array(602, session('permissions')))
 				$('#edit').on('shown.bs.modal', function (e) {
 					autosize.update($('#edit .body')[0]);
 				})
@@ -372,16 +310,16 @@
 					},
 					submitHandler: function(form) {
 						var id = $(form).find('.id').val();
-						var subject = $(form).find('.subject').val();
+						var title = $(form).find('.subject').val();
 						var body = $(form).find('.body').val();
 
 						$.ajax({
-							url: '{!! route('admin.notifications.edit') !!}',
+							url: '{!! route('admin.app_notifications.edit') !!}',
 							method: 'POST',
 							data: {
 								'_token': '{{ csrf_token() }}',
 								'id': id,
-								'subject': subject,
+								'title': title,
 								'body': body
 							}
 						})
@@ -397,35 +335,7 @@
 						});
 					}
 				});
-
-			$('#send_custom_notification_form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				},
-			});
 			@endif
-
-			$('#send_custom_email').on('hide.bs.modal', function (e) {
-
-				$('.shipper_status').val('').trigger('change');
-				$('#shipper_div').addClass('d-none');
-				$('.receiver').val('').trigger('change');
-				$('.subject').val('').trigger('change');
-				$('.body').val('').trigger('change');
-
-			});
-
-			$('#send_custom_notification').on('hide.bs.modal', function (e) {
-				$('.notification_receiver').val('').trigger('change');
-				$('.riders').val('').trigger('change');
-				$('.employees').val('').trigger('change');
-				$('#riders_div').addClass('d-none');
-				$('#employees_div').addClass('d-none');
-				$('.notification_title').val('');
-				$('.notification_body').val('');
-			});
 
 		});
 	</script>
