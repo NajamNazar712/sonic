@@ -168,12 +168,12 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('.reference_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-            });
+            // $('.reference_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            // });
             $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select SDN No.',
                 width:'100%',

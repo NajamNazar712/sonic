@@ -11,30 +11,44 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                     <div class="row">
+                        @if($petty_statement->hub_id != null)
                         <div class="col-6">
                             <fieldset class="form-group">
                                 <label class="font-medium-3">Statement Hub :</label>
                                 <span class="font-medium-4 font-weight-light">{!! $petty_statement->hub_name!!}</span>
                             </fieldset>
                         </div>
+                        @endif
+                            @if($petty_statement->sdn_id != null)
+                                <div class="col-6">
+                                    <fieldset class="form-group">
+                                        <label class="font-medium-3">Statement SDN :</label>
+                                        <span class="font-medium-4 font-weight-light">{!! str_pad($petty_statement->sdn_id, 6, '0', STR_PAD_LEFT)!!}</span>
+                                    </fieldset>
+                                </div>
+                            @endif
                         <div class="col">
                             <fieldset class="form-group">
                                 <label class="font-medium-3">Statement Reference Number :</label>
                                 <span class="font-medium-4 font-weight-light">{!! $petty_statement->reference_no!!}</span>
                             </fieldset>
                         </div>
+                            @if($petty_statement->from != null)
                         <div class="col-6">
                             <fieldset class="form-group">
                             <label class="font-medium-3">Statement From :</label>
                             <span class="font-medium-4 font-weight-light">{!! $petty_statement->from!!}</span>
                             </fieldset>
                         </div>
+                            @endif
+                            @if($petty_statement->from != null)
                         <div class="col-6 ">
                             <fieldset class="form-group">
                             <label class="font-medium-3">Statement To :</label>
                             <span class="font-medium-4 font-weight-light">{!! $petty_statement->to!!}</span>
                             </fieldset>
                         </div>
+                            @endif
 
                         <div class="col-12">
                             <fieldset class="form-group">
@@ -50,9 +64,14 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Account Head</th>
                             <th class="border-primary border-darken-1">Account Title</th>
+                            <th class="border-primary border-darken-1">Zone</th>
+                            <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">City / Location</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1"> Employee Id </th>
+                            <th class="border-primary border-darken-1"> Name </th>
+                            <th class="border-primary border-darken-1"> Designation </th>
                             <th class="border-primary border-darken-1"> Amount </th>
                             <th class="border-primary border-darken-1">Reference No.</th>
                             <th class="border-primary border-darken-1">Remarks</th>
@@ -135,9 +154,14 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title'},
+                    {data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name'},
                     {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name'},
+                    {data:'city_name' ,name: 'c.name', class: 'align-middle city_name'},
                     {data:'date' ,name: 'date', class: 'align-middle date'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense'},
+                    {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width'},
+                    {data:'employee_name' ,name: 'petty_cash_statement_details.employee_name', class: 'align-middle employee_name custom-col-width'},
+                    {data:'employee_designation' ,name: 'petty_cash_statement_details.employee_designation', class: 'align-middle employee_designation custom-col-width'},
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount custom-col-width'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},

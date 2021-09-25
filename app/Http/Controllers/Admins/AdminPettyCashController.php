@@ -441,7 +441,11 @@ class AdminPettyCashController extends Controller
                 if ($petty_details->reference_document != null) {
                     $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]) . ' target="_blank">View</a></button>';
                 }
-                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div>';
+                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div>';
+                if ($petty_details->reference_document_2 != null) {
+                    $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document_2]) . ' target="_blank">View</a></button>';
+                }
+                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_2_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div>';
                 return $reference_document;
             })
             ->editColumn('status', function ($petty_details) {
@@ -496,6 +500,7 @@ class AdminPettyCashController extends Controller
             $url = Storage::disk('s3')->temporaryUrl('petty_cash_statement_images/' . $reference_document, now()->addMinutes(5));
         }
 
+        return redirect($url);
         return view('admin.petty_cash.reference_document')->with(['url' => $url]);
     }
 
@@ -513,7 +518,7 @@ class AdminPettyCashController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),99);
         }
 
-        $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
+        $petty = PettyCashStatement::leftjoin('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
@@ -799,7 +804,6 @@ class AdminPettyCashController extends Controller
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = PettyCashStatement::find($statement_id);
-//        dd($petty_cash);
         $total_amount = 0;
         if ($petty_cash) {
             foreach ($selected_ids as $selected_id) {
@@ -810,7 +814,7 @@ class AdminPettyCashController extends Controller
                 if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) {
                     $petty_detail->account_head_id = $request->head[$selected_id];
                     $petty_detail->account_title_id = $request->title[$selected_id];
-                    $petty_detail->hub_id = $request->hub[$selected_id];
+//                    $petty_detail->hub_id = $request->hub[$selected_id];
 //                    $petty_detail->hub_id = ($request->has($hubId) ? $request->hub[$selected_id] : null);
 
                 }
@@ -834,14 +838,26 @@ class AdminPettyCashController extends Controller
                 }
                 $petty_detail->save();
                 if ($request->hasFile('upload_image' . $petty_detail->id)) {
-                    $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id;
-                    Storage::disk('public')->delete('petty_cash_statement_details/' . $filename) . '.png';
-
                     $file = $request->file('upload_image' . $petty_detail->id);
+                    $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
+                    Storage::disk('public')->delete('petty_cash_statement_details/' . $filename);
+
 
                     Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
 
                     $petty_detail->reference_document = $filename;
+                    $petty_detail->save();
+                }
+
+                if ($request->hasFile('upload_2_image' . $petty_detail->id)) {
+                    $file = $request->file('upload_2_image' . $petty_detail->id);
+                    $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
+                    Storage::disk('public')->delete('petty_cash_statement_details/' . $filename);
+
+
+                    Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                    $petty_detail->reference_document_2 = $filename;
                     $petty_detail->save();
                 }
             }
@@ -867,7 +883,7 @@ class AdminPettyCashController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),100);
         }
 
-        $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
+        $petty = PettyCashStatement::leftjoin('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
@@ -972,8 +988,11 @@ class AdminPettyCashController extends Controller
     public function approved_petty_cash_statements_view_list(Request $request,$id)
     {
         $petty_details = PettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'petty_cash_statement_details.hub_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'petty_cash_statement_details.city_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'petty_cash_statement_details.zone_id')
+            ->leftjoin('admins as a','a.id','petty_cash_statement_details.employee_id')
             ->join('petty_cash_statements as pcs', 'pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at')
+            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at','a.trax_id as employee_trax_id','z.name as zone_name','c.name as city_name','petty_cash_statement_details.employee_name','petty_cash_statement_details.employee_designation','petty_cash_statement_details.reference_document_2')
             ->where('petty_cash_statement_details.petty_cash_statement_id', $id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -1031,6 +1050,9 @@ class AdminPettyCashController extends Controller
                 if ($petty_details->reference_document != null) {
                     $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]) . ' target="_blank">View</a></button>';
                 }
+                if ($petty_details->reference_document_2 != null) {
+                    $reference_document .= '<br><button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document_2]) . ' target="_blank">View</a></button>';
+                }
                 $reference_document .= '</div>';
                 return $reference_document;
             })
@@ -1060,7 +1082,7 @@ class AdminPettyCashController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),101);
         }
 
-        $petty = PettyCashStatement::join('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
+        $petty = PettyCashStatement::leftjoin('cities as h', 'h.id', '=', 'petty_cash_statements.hub_id')
             ->join('admins as cb', 'cb.id', '=', 'petty_cash_statements.created_by')
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
@@ -1317,6 +1339,11 @@ class AdminPettyCashController extends Controller
                       </table>
         ';
             $petty_cash_statement = $petty_cash_statement->first();
+            $hub_name = "";
+            if($petty_cash_statement->hub_id != null)
+            {
+                $hub_name = $petty_cash_statement->hub->name;
+            }
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -1335,7 +1362,7 @@ class AdminPettyCashController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Hub</strong></td>
-                            <td>' . $petty_cash_statement->hub->name . '</td>
+                            <td>' . $hub_name . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Reference No.</strong></td>
@@ -1771,7 +1798,7 @@ class AdminPettyCashController extends Controller
 
                         if ($request->hasFile('upload_2_image' . $selected_id)) {
                             $file = $request->file('upload_2_image' . $selected_id);
-                            $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.$file->getClientOriginalExtension();
+                            $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.$file->getClientOriginalExtension();
 
                             if ($request->has($image_2_key)) {
                                 Storage::disk('public')->delete('petty_cash_statement_details_draft' . $request->input($image_2_key));
@@ -1784,7 +1811,7 @@ class AdminPettyCashController extends Controller
                             if ($request->has($image_2_key)) {
 
                                 $extension = explode($image_2_key,'.');
-                                $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
+                                $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id . '.'.end($extension);
                                 Storage::disk('public')->move('petty_cash_statement_details_draft/' . $request->input($image_2_key), 'petty_cash_statement_details/' . $filename);
 
                                 $petty_detail->reference_document_2 = $filename;

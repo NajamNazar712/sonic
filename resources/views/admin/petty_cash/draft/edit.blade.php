@@ -130,12 +130,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('.reference_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-            });
+            // $('.reference_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false,
+            //     'rightAlign': false,
+            // });
 
             $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select SDN No.',
@@ -266,7 +266,7 @@
                 var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Amount is required">';
                 var remarks_input = '<input class="form-control form-control-sm" name="remarks['+rows_count+']" placeholder="Remarks">';
 
-                var upload_image = '<input class="form-control form-control-sm" multiple type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" multiple type="file" name="upload_2_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{

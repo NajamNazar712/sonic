@@ -293,32 +293,6 @@
 
                 }
             });
-            var result;
-            $.validator.addMethod("reference_no",
-                function(value, element) {
-                    result = false;
-                    // if(value.length > 3) {
-                        $.ajax({
-                            type: "POST",
-                            async: false,
-                            url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
-                            data: {reference: value,'_token': '{!! csrf_token() !!}'},
-                            success: function (data) {
-
-                                if(data === "false"){
-                                    result = true;
-                                }else{
-                                    result = false;
-                                }
-
-                            }
-                        });
-
-                       return result;
-                    // }
-                },
-                "Statement Reference Number already exists."
-            );
 
             $('body').on('change','#datatable tr td.details_of_expense textarea,#datatable tr td.remarks textarea',function() {
                 $(this).val($(this).val().trim());
@@ -349,7 +323,7 @@
                 //     '<i class="ft-plus-circle"></i>' +
                 //     '</div>' +
                 //     '<div class="col-9 offset-1">Upload Image</div></button></div></div></div>';
-                var upload_image = '<input class="form-control form-control-sm" multiple type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" multiple type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
@@ -459,15 +433,14 @@
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
 
-            var result;
+            var result = true;
             $.validator.addMethod("reference_no",
                 function(value, element) {
-                    if(value > 3) {
-
                         $.ajax({
                             type: "POST",
+                            async: true,
                             url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
-                            data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
+                            data: {reference: value,'_token': '{!! csrf_token() !!}'},
                             success: function (data) {
                                 if(data === 'true'){
                                     result = false;
@@ -477,7 +450,6 @@
                             }
                         });
                         return result;
-                    }
                 },
                 "Statement Reference Number already exists."
             );
