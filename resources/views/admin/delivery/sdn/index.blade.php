@@ -51,6 +51,26 @@
                         </div>
                     </div>
                     <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+                            </div>
+                            <input type="text" name="search_date_from_deposited"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from_deposited" placeholder="Deposited Date From">
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+                            </div>
+                            <input type="text" name="search_date_to_deposited" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to_deposited" placeholder="Deposited Date To">
+                        </div>
+                    </div>
+                    <div class="col-3">
                         <div class="form-group">
                             <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
                         </div>
@@ -396,6 +416,36 @@
                     }
                 }
             });
+
+            var search_date_from_deposited = $('#search_date_from_deposited').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to_deposited').pickadate('picker').set('min', $('#search_date_from_deposited').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_to_deposited = $('#search_date_to_deposited').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from_deposited').pickadate('picker').set('max', $('#search_date_to_deposited').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -479,6 +529,8 @@
                         d.search_tracking = $('#search_tracking').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_date_from_deposited = $('input[name="search_date_from_deposited_formatted"]').val();
+                        d.search_date_to_deposited = $('input[name="search_date_to_deposited_formatted"]').val();
                     }
                 },
                 rowId: 'sdn_id',

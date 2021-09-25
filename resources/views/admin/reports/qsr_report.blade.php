@@ -129,6 +129,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Product Type</th>
                         <th class="border-primary border-darken-1">Product Description</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
@@ -308,6 +309,7 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Zone');
                             head.push('Product Type');
                             head.push('Product Description');
                             head.push('Amount');
@@ -332,6 +334,7 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.zone);
                                 row.push(values.product_type);
                                 row.push(values.description);
                                 row.push(values.amount);
@@ -404,6 +407,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
                     {data: 'description', name: 'si.description', class: 'align-middle description'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
