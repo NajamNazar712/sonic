@@ -928,6 +928,10 @@ class GlobalSettingsController extends Controller
                                     $fuel_surcharge_history->save();
 
                                 } else {
+                                    if($fuel_factor < 0) {
+                                        $fuel_factor = 0;
+                                    }
+
                                     $rate_status->fuel_charges = 1;
                                     $rate_status->save();
                                     if ($user->account_type_id == 1) {
@@ -1036,6 +1040,10 @@ class GlobalSettingsController extends Controller
                                         $fuel_surcharge_history->save();
 
                                     } else {
+                                        if($fuel_factor < 0) {
+                                            $fuel_factor = 0;
+                                        }
+
                                         $rate_status->fuel_charges = 1;
                                         $rate_status->save();
                                         if ($user->account_type_id == 1) {
