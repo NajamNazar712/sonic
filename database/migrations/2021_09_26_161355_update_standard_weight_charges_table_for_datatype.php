@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateStandardWeightChargesTableForWeightAddition extends Migration
+class UpdateStandardWeightChargesTableForDatatype extends Migration
 {
     /**
      * Run the migrations.
@@ -14,9 +14,8 @@ class UpdateStandardWeightChargesTableForWeightAddition extends Migration
     public function up()
     {
         Schema::table('standard_weight_charges', function (Blueprint $table) {
-            $table->tinyInteger('weight_addition')->after('range_down')->default(0);
-            $table->decimal('kg_range',8,2)->after('weight_addition');
-
+            $table->decimal('local_or_6hr')->change();
+            $table->decimal('national_charges_class_0')->change();
         });
     }
 
@@ -28,9 +27,8 @@ class UpdateStandardWeightChargesTableForWeightAddition extends Migration
     public function down()
     {
         Schema::table('standard_weight_charges', function (Blueprint $table) {
-            $table->dropColumn('weight_addition');
-            $table->dropColumn('kg_range');
-
+            $table->integer('local_or_6hr')->change();
+            $table->integer('national_charges_class_0')->change();
         });
     }
 }
