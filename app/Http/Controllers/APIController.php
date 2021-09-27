@@ -3914,14 +3914,12 @@ class APIController extends Controller
                     if ($validate->fails()) {
                         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
                     } else {
-                        $self_collection = False;
                         if ($request->consignee_type == 1) {
 
                             $rules = [
                                 'consignee_address' => ['required', 'between:1,255'],
                                 'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
                                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
-                                'self_collection' => ['nullable', 'boolean'],
                             ];
 
                             $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3945,13 +3943,7 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
-                                            if ($request->has('self_collection')) {
-                                                if ($request->input('self_collection') != null) {
-                                                    if ($request->input('self_collection') == 1) {
-                                                        $self_collection = true;
-                                                    }
-                                                }
-                                            }
+                                            
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $shipment->consignee_city_id,
@@ -3973,11 +3965,7 @@ class APIController extends Controller
 
                                             ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
                                             
-                                            if($self_collection == TRUE){
-                                                $shipment_self_collection = new SelfCollectionShipment();
-                                                $shipment_self_collection->shipment_id = $shipment->id;
-                                                $shipment_self_collection->save();
-                                            }
+                                            
 
                                             // $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id)->get()->first();
                                             // $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
@@ -4007,7 +3995,6 @@ class APIController extends Controller
                                 'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
                                 'consignee_email_address' => ['nullable', 'filled', 'email'],
                                 'amount' => ['required', 'nullable', 'numeric', 'between:0,1000000'],
-                                'self_collection' => ['nullable', 'boolean'],
                             ];
 
                             $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4031,13 +4018,7 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
-                                            if ($request->has('self_collection')) {
-                                                if ($request->input('self_collection') != null) {
-                                                    if ($request->input('self_collection') == 1) {
-                                                        $self_collection = true;
-                                                    }
-                                                }
-                                            }
+                                            
                                             $s_amount = str_replace(",", "", "$request->amount");
                                             $amount = (int) $s_amount;
                                             InterceptReBookRequest::create([
@@ -4060,11 +4041,7 @@ class APIController extends Controller
 
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
                                             
-                                            if($self_collection == TRUE){
-                                                $shipment_self_collection = new SelfCollectionShipment();
-                                                $shipment_self_collection->shipment_id = $shipment->id;
-                                                $shipment_self_collection->save();
-                                             }
+                                            
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
                                     } else {
