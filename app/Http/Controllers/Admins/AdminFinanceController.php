@@ -1082,7 +1082,7 @@ class AdminFinanceController extends Controller
             ->leftjoin('products as prod', 'prod.id', '=', 'sis.product_type_id')
             ->leftjoin('resolved_outstanding_shipments as ros', 'ros.shipment_id', '=', 'shipments.id')
             ->leftjoin('admins as rosa', 'rosa.id', '=', 'ros.resolved_by')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status','adn.name as booked_by','oc.name as origin', 'shipments.actual_weight as actual_weight', 'shipments.chargeable_weight as chargeable_weight', 'sm.mode as shipping_mode', 'sis.quantity as item_quantity', 'prod.product_name as product_name', 'rosa.name as resolved_by', 'ros.created_at as resolved_at')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount', 'shipments.received_amount', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status', 'shipments.walk_in_status as walk_in_status_id','adn.name as booked_by','oc.name as origin', 'shipments.actual_weight as actual_weight', 'shipments.chargeable_weight as chargeable_weight', 'sm.mode as shipping_mode', 'sis.quantity as item_quantity', 'prod.product_name as product_name', 'rosa.name as resolved_by', 'ros.created_at as resolved_at')
             ->where('shipments.booking_type_id',4)->where('shipments.shipper_status_id', '!=', 17);
 
 
@@ -1160,8 +1160,8 @@ class AdminFinanceController extends Controller
                 }
             });
 
-        if($tracking = $request->get('tracking_numbers')){
-            $datatables->where('shipments.tracking_number', '=', $tracking);
+        if($tracking_numbers = $request->get('tracking_numbers')){
+            $datatables->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
         return $datatables->make(true);
     }
