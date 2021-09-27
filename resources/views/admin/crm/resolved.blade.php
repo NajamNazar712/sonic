@@ -51,6 +51,9 @@
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
+                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
+                                    <th class="border-primary border-darken-1">Tagged To</th>
+                                    <th class="border-primary border-darken-1">Tagged At</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
@@ -613,6 +616,9 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
+                    {data: 'crm_request_tagging_type_id', name: 'crth.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
@@ -654,7 +660,10 @@
                         '<option value="2">Shipper Substitute User</option>' +
                         '<option value="3">Consignee</option>' +
                         '</select>';
-
+                        var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
+                        '<option value="1">Department</option>' +
+                        '<option value="2">Admin</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -688,6 +697,12 @@
                         }
                         else if ($(header).is('.added_by')) {
                             $(added_by).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.tagged')) {
+                            $(tagging_type).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -789,7 +804,12 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-
+                    $('#tagging_type').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Admin/Department",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     this.api().table().columns.adjust();
                 }
