@@ -133,15 +133,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
         $intercept_type = $request->consignee;
-        if ($request->filled('self_collection')) {
-            $self_collection = TRUE;
-
-           
-        } else {
-            $self_collection = FALSE;
-            
-
-        }
+        
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
         $crm_request = CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_type_id', 11);
@@ -212,23 +204,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
 
                    }
-                    if($self_collection == TRUE){
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if (!$shipment_self_collection->exists()) {
-                            $shipment_self_collection = new SelfCollectionShipment();
-                            $shipment_self_collection->shipment_id = $shipment->id;
-                            $shipment_self_collection->save();
-                        }
-
-                        
-                        if ($intercept_type == 2){
-                            ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, NULL, Auth::id());
-                            $shipment = Shipment::find($request->shipment_id);
-                            $shipment->shipper_status_id = 15;
-                            $shipment->consignee_status_id = 15;
-                            $shipment->save();
-                        }    
-                    }
+                    
 
                     
                     return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
