@@ -5964,14 +5964,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     $previous_consignee_city_id = $shipment->consignee_city_id;
                     $new_consignee_city_id = $intercept->consignee_city_id;
 
-                    $self_collection = false;
-
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if ($shipment_self_collection->exists()) {
-                            if($previous_consignee_city_id == $new_consignee_city_id){
-                                $self_collection = true;
-                            }
-                        }
+                    
 
 
                     // if($shipment->self_collection == 1){
@@ -6021,13 +6014,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     ShipmentChargesController::intercept($shipment_id, $previous_consignee_city_id, $new_consignee_city_id);
 
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
-                    if($self_collection){
-                        $shipment = Shipment::find($shipment_id);
-                        $shipment->shipper_status_id = 15;
-                        $shipment->consignee_status_id = 15;
-                        $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
-                    }
+                    
 
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
                     if($return_assign_shipment){
@@ -6039,13 +6026,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             }
 
             if ($valid) {
-                $text = '';
-                if($self_collection){
-                    $text = 'Shipment(s) has been marked as Intercept Approved, Please note that is also marked as self collection.';
-                }
-                else{
                     $text = 'Shipment(s) has been marked as Intercept Approved';
-                }
                 return ['status' => 0, 'success' => $text, 'print' => $print];
             }
             else {
