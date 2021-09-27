@@ -94,6 +94,126 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="BulkExternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BulkExternalCommentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add External Comment </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="bulk_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                        <input type="text" value="0" name="bulk_comment_type" id="bulk_comment_type" hidden>
+                        <div class="col">
+                            <div class="form-group">
+                                <textarea class="form-control" rows="5" id="bulk_comment" placeholder="Add External Comment"></textarea>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-success" id="bulkcommentSubmit">Add External Comment</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="InternalCommentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="InternalCommentModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Internal Comment </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="internal_comment_form" class="form-horizontal" method="POST" novalidate="novalidate">
+                        <div class="col">
+                            <div class="form-group">
+                                <input type="text" value="1" name="internal_comment_type" id="internal_comment_type" hidden>
+                                <textarea class="form-control" rows="5" id="internal_comment" placeholder="Add Internal Comment"></textarea>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-success" id="internalcommentSubmit">Add Internal Comment</button>
+                                <button type="button" class="btn btn-info closebutton" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade text-left" id="tagModal" data-backdrop="static" tabindex="-1" role="dialog"
+             aria-labelledby="tagModal"
+             aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content ">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Tag</h4>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form id="tag_submit_form" method="post">
+                            @method('POST')
+                            @csrf
+                            <div class="row justify-content-center">
+                                <div class="col-11">
+                                    <fieldset class="form-group">
+                                        <input type="hidden" id="crm_request_ids" value="">
+                                        <input type="hidden" id="prev_status" name="prev_status"
+                                               value="">
+                                        <select name="tag_type" id="tag_type" class="form-control select2">
+                                            @foreach($types as $type)
+                                                <option value="{{$type->id}}"> {{$type->name}} </option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-8">
+                                    <fieldset class="form-group">
+                                        <div class="d-none" id="admin_tag_div">
+                                            <select name="tag_admin" id="tag_admin" class="form-control select2">
+                                                @foreach($admins as $admin)
+                                                    <option value="{{$admin->id}}"> {{$admin->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="d-none" id="department_tag_div">
+                                            <div class="">
+                                                <select name="tag_department" id="tag_department"
+                                                        class="form-control  select2">
+                                                    @foreach($departments as $department)
+                                                        <option value="{{$department->id}}"> {{$department->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="mt-1">
+                                                <select name="tag_hub" id="tag_hub"
+                                                        class="form-control select2">
+                                                    @foreach($hubs as $hub)
+                                                        <option value="{{$hub->id}}"> {{$hub->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success width-25-per" id="tag_adminSubmit">Tag</button>
+                        <button type="button" class="btn btn-info width-25-per" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 @endsection
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
@@ -208,6 +328,35 @@
                 scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    @if(session('role_id') == 1 || in_array(201, session('permissions')))
+
+                    {
+                        text: 'Bulk Internal Comment',
+                        className: 'btn btn-primary bulk_internal_comment',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $('#InternalCommentModal').modal('show');
+                        }
+                    },
+                    {
+                        text: 'Bulk External Comment',
+                        className: 'btn btn-primary bulk_external_comment',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            $('#BulkExternalCommentModal').modal('show');
+                        }
+                    },
+                    @endif
+                    {
+                        text: 'Tag',
+                        className: 'btn btn-primary tag',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows.length > 0){
+                                $('#tagModal').modal('show');
+                            }
+                        }
+                    },
                         @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
                     {
                         text: 'Assign Agent',
@@ -379,6 +528,9 @@
 
                                     table.button('.assign').enable();
                                     table.button('.close_requests').enable();
+                                    table.button('.bulk_internal_comment').enable();
+                                    table.button('.bulk_external_comment').enable();
+                                    table.button('.tag').enable();
                                 }
                             });
                         }
@@ -406,6 +558,9 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.assign').disable();
                                         table.button('.close_requests').disable();
+                                        table.button('.bulk_internal_comment').disable();
+                                        table.button('.bulk_external_comment').disable();
+                                        table.button('.tag').disable();
                                     }
                                 }
                             });
@@ -649,6 +804,116 @@
                 var lblcount= document.getElementById('count');
                 lblcount.textContent =count +' Row(s) selected';
             } );
+
+            $('.closebutton').on('click',function(){
+                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                });
+                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                    $("#InternalCommentModal #internal_comment").val("");
+                });
+
+            });
+
+            $('#bulkcommentSubmit').on('click',function () {
+                var comment = $('#BulkExternalCommentModal #bulk_comment').val();
+                var comment_type = $('#BulkExternalCommentModal #bulk_comment_type').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment_type':comment_type,
+                            'comment': comment,
+                            'crm_request_ids': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#BulkExternalCommentModal').modal('hide');
+                                $("#BulkExternalCommentModal").on("hidden.bs.modal", function() {
+                                    $("#BulkExternalCommentModal #bulk_comment").val("");
+                                });
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#bulk_comment').val('').trigger('change');
+                            $('#BulkExternalCommentModal').modal('hide');
+                            table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.bulk_external_comment').disable();
+                            table.button('.bulk_internal_comment').disable();
+                            table.button('.tag').disable();
+                        });
+                }
+                else {
+                    var error = "Add Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+
+            $('#internalcommentSubmit').on('click',function () {
+                var comment = $('#InternalCommentModal #internal_comment').val();
+                var comment_type = $('#InternalCommentModal #internal_comment_type').val();
+                if (comment) {
+                    $.ajax({
+                        url: '{!! route('admin.crm.comment.bulk') !!}',
+                        method: 'POST',
+                        data: {
+                            'comment_type':comment_type,
+                            'comment': comment,
+                            'crm_request_ids': selected_rows,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                $('#InternalCommentModal').modal('hide');
+                                $("#InternalCommentModal").on("hidden.bs.modal", function() {
+                                    $("#InternalCommentModal #internal_comment").val("");
+                                });
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            selected_rows = [];
+                            table.rows().deselect();
+                            $('#internal_comment').val('').trigger('change');
+                            $('#InternalCommentModal').modal('hide');
+                            table.draw('false');
+                            table.button('.assign').disable();
+                            table.button('.bulk_external_comment').disable();
+                            table.button('.bulk_internal_comment').disable();
+                            table.button('.tag').disable();
+                        });
+                } else {
+                    var error = "Add Internal Comment First!";
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
                 width:'100%',
@@ -670,10 +935,16 @@
                 if (selected_rows.length > 0) {
                     table.button('.assign').enable();
                     table.button('.close_requests').enable();
+                    table.button('.bulk_internal_comment').enable();
+                    table.button('.bulk_external_comment').enable();
+                    table.button('.tag').enable();
                 }
                 else {
                     table.button('.assign').disable();
                     table.button('.close_requests').disable();
+                    table.button('.bulk_internal_comment').disable();
+                    table.button('.bulk_external_comment').disable();
+                    table.button('.tag').disable();
                 }
             });
 
@@ -713,7 +984,121 @@
                 e.preventDefault();
                 table.draw();
             });
+            $("#tag_admin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select User",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
 
+            $("#tag_department").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Department",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
+            $("#tag_hub").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Hub",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            });
+
+            $("#tag_type").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Type",
+                width: '100%',
+                dropdownParent: $('#tagModal')
+            }).bind('change', function () {
+                var id = parseInt($(this).val());
+                if (id === 1) {
+                    $('#admin_tag_div').addClass('d-none');
+                    $('#department_tag_div').removeClass('d-none');
+                } else if (id === 2) {
+                    $('#department_tag_div').addClass('d-none');
+                    $('#admin_tag_div').removeClass('d-none');
+                } else {
+                    $('#admin_tag_div').addClass('d-none');
+                    $('#department_tag_div').addClass('d-none');
+                }
+            });
+            // $('#tag').on('click', function (e) {
+            //     e.preventDefault();
+            //     $('#tagModal').modal('show');
+            // });
+            $('#tagModal').on('hide.bs.modal', function (e) {
+                $('#tag_type').val('').trigger('change');
+                $('#admin_tag_div').addClass('d-none');
+                $('#department_tag_div').addClass('d-none');
+            });
+            $('#tag_adminSubmit').on('click', function () {
+                var type = parseInt($('#tag_type').val());
+                var tag_hub = null;
+                if (type === 1) {
+                    var tag = parseInt($('#tag_department').val());
+                    tag_hub = parseInt($('#tag_hub').val());
+                    if(!tag_hub){
+                        tag_hub = null;
+                    }
+                }
+                else if (type === 2) {
+                    var tag = parseInt($('#tag_admin').val());
+                }
+                if (tag) {
+                    $('#tag_adminSubmit').attr('disabled', true);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Request(s) are being tagged.',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    $.ajax({
+                        url: '{!! route('admin.crm.in_process.tag') !!}',
+                        method: 'POST',
+                        data: {
+                            'tagged_id': tag,
+                            'tagged_hub': tag_hub,
+                            'crm_request_ids[]': selected_rows,
+                            'crm_request_tagging_type_id': type,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 0) {
+                                $('#tagModal').modal('hide');
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                            swal.close();
+                            $('#tag_adminSubmit').attr('disabled', false);
+                            selected_rows = [];
+
+                            table.rows().deselect();
+
+                            table.draw('false');
+                        });
+                }
+                else {
+                    if (type === 1) {
+                        var error = "Department Not Selected!";
+                    }
+                    else if (type === 2) {
+                        var error = "User Not Selected!";
+                    }
+                    else {
+                        error = "Type Not Selected!";
+                    }
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+
+            });
             {{--$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign', function() {--}}
                 {{--$('#AssignAgentModal').modal('show');--}}
                 {{--var crm_request_id = parseInt($(this).parents('tr').attr('id'));--}}

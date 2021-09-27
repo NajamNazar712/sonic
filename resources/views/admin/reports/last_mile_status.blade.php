@@ -94,6 +94,10 @@
                             <th class="border-primary border-darken-1">Percentage</th>
                             <th class="border-primary border-darken-1">Statuses Updated from Sonic</th>
                             <th class="border-primary border-darken-1">Percentage</th>
+                            <th class="border-primary border-darken-1">Number Of Delivered From Bolt</th>
+                            <th class="border-primary border-darken-1">Number Of Undelivered From Bolt</th>
+                            <th class="border-primary border-darken-1">Number Of Delivered From Sonic</th>
+                            <th class="border-primary border-darken-1">Number Of Undelivered From Sonic</th>
 
                         </tr>
                         </thead>
@@ -238,7 +242,7 @@
                 ordering: false,
             });
 
-            var types = ['time','out_for_delivery_count', 'total_status_updated','out_for_delivery_percentage', 'bolt_status_updated', 'bolt_status_percentage', 'sonic_status_updated', 'sonic_status_percentage'];
+                var types = ['time','out_for_delivery_count', 'total_status_updated','out_for_delivery_percentage', 'bolt_status_updated', 'bolt_status_percentage', 'sonic_status_updated', 'sonic_status_percentage','total_shipment_deliverd_bolt','total_shipment_undeliverd_bolt','total_shipment_deliverd_sonic','total_shipment_undeliverd_sonic'];
             function list() {
                 blockPagePermanently();
                 $('#search_filter_btn').prop('disabled', true);
