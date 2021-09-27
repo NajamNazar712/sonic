@@ -255,8 +255,14 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('image', function ($return_note) {
+                if ($return_note->delivered_to_shipper_count != 0) {
                 return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
-            })
+                }
+                else {
+
+                    return '-';
+                }
+                })
             ->editColumn('shipments_count_link', function($return_note) {
                 if ($return_note->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_note->shipments_count . '</button>';
