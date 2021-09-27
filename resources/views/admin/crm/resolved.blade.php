@@ -272,6 +272,9 @@
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
+                            head.push('Tagged (Admin/Department)');
+                            head.push('Tagged To');
+                            head.push('Tagged At');
                             head.push('Launched Date');
                             head.push('Complaint Re-Open Date');
                             head.push('Resolved By');
@@ -303,6 +306,9 @@
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
+                                row.push(values.crm_request_tagging_type_id);
+                                row.push(values.tagged_to);
+                                row.push(values.tagged_date);
                                 row.push(values.created_at);
                                 row.push(values.reopen_date);
                                 row.push(values.resolved_by);
@@ -597,7 +603,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[21, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
