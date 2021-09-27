@@ -515,7 +515,7 @@
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
                                 row.push(values.last_comment_date);
-                                row.push(values.last_comment_external.replace(/<br>/gi, '\n'));
+                                row.push(values.last_comment_external);
                                 row.push(values.last_comment_date_external);
                                 row.push(values.tagged_to);
                                 row.push(values.tagged_hub);
