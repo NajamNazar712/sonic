@@ -29,6 +29,7 @@ use App\Http\Models\EmployeeRequisition;
 use App\Http\Models\Excel_reports\Debriefing;
 use App\http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\Excel_reports\HubWiseSplit;
+use App\Http\Models\Excel_reports\KaeNumber;
 use App\Http\Models\Excel_reports\MonthAverage;
 use App\http\Models\Excel_reports\QaReportPettyCash;
 use App\Http\Models\Excel_reports\SalePersonNumbers;
@@ -3635,7 +3636,8 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.yousuf@trax.pk'];
 
                     self::email($subject, $body, $to, $cc, $bcc);
-                } else if ($id == 47) {
+                }
+                else if ($id == 47) {
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
                     }
@@ -3777,7 +3779,8 @@ class NotificationsController extends Controller
                     $bcc = ['muhammad.waqas@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
 
-                } else if ($id == 48) {
+                }
+                else if ($id == 48) {
 
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
@@ -3871,7 +3874,8 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $email);
                     }
 
-                } else if ($id == 49) {
+                }
+                else if ($id == 49) {
                     $reference_1_id = Carbon::parse($reference_1_id)->subDay()->toDateString();
                     if (strpos($subject, '[date]') !== FALSE) {
                         $subject = str_replace('[date]', $reference_1_id, $subject);
@@ -3981,7 +3985,8 @@ class NotificationsController extends Controller
 //                 }
 //
 //                 self::email($subject, $body, $to);
-                } else if ($id == 50) {
+                }
+                else if ($id == 50) {
                     $done = "Done";
                     $not_done = "Not Done";
                     // $pickup_note = PickupNote::find($reference_1_id);
@@ -8369,6 +8374,117 @@ class NotificationsController extends Controller
                     if ($sale_person_email) {
                         self::email($subject, $body, $sale_person_email);
                     }
+
+                }
+
+                else if ($id == 160) {
+                    if (strpos($subject, '[date]') !== FALSE) {
+                        $subject = str_replace('[date]', $reference_1_id, $subject);
+                    }
+
+                    $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+                    $date = Carbon::today()->startOfDay()->toDateTimeString();
+                    $date_end = Carbon::today()->endOfDay()->toDateTimeString();
+                    $sale_person_number_data = KaeNumber::whereBetween('created_at', [$date, $date_end])->orderBy('shipments', 'desc')->get();
+                    $html = '<table><thead><tr><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>S No.</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Admin</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Achieved Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Shipments</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Achieved %</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Achieved Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Revenue</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Target Achieved %</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Avg Revenue/Parcel</strong></th><th style="padding:5px; border: 1px solid black; border-collapse: collapse;"><strong>Contribution</strong></th></tr></thead><tbody>';
+                    $serial = 1;
+                    $shipments_count = 0;
+                    $revenue_count = 0;
+                    $avg_revenue_count = 0;
+                    $contribution_count = 0;
+                    $total_target_shipments = 0;
+                    $total_target_shipments_achieved = 0;
+                    $total_target_revenue = 0;
+                    $total_target_revenue_achieved = 0;
+                    $sum_total_target_revenue_achieved = 0;
+                    $total_target_revenue_avg = 0;
+                    foreach ($sale_person_number_data as $sale_person_number) {
+                        $all_shipments_target_revenue = 0;
+                        $target_shipments_achieved = 0;
+                        $target_revenue_achieved = 0;
+                        $target_shipments = $sale_person_number->target_shipments;
+                        if ($target_shipments > 0) {
+                            $target_shipments_achieved = ($sale_person_number->shipments / $target_shipments) * 100;
+                        }
+                        $target_revenue = $sale_person_number->target_revenue;
+                        if ($target_revenue > 0) {
+                            $all_shipments_target_revenue = $target_revenue * $target_shipments;
+                            $total_target_revenue_avg += $all_shipments_target_revenue;
+                            if ($all_shipments_target_revenue > 0) {
+                                $target_revenue_achieved = ($sale_person_number->revenue / $all_shipments_target_revenue) * 100;
+                            } else {
+                                $target_revenue_achieved = 0;
+                            }
+                        }
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial . '</td>';
+                        if ($sale_person_number->admin_id == 0) {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Walk-In</td>';
+                        } else {
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $sale_person_number->sales_person->name . '</td>';
+                        }
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($sale_person_number->target_shipments) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_shipments_achieved) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->revenue)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($all_shipments_target_revenue) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($target_revenue_achieved) . '%</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($sale_person_number->avg_revenue)) . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($sale_person_number->contribution, 2, '.', '') . '%</td>';
+                        $html .= '</tr>';
+                        $shipments_count = $shipments_count + $sale_person_number->shipments;
+                        $revenue_count = $revenue_count + $sale_person_number->revenue;
+                        $contribution_count = $contribution_count + $sale_person_number->contribution;
+                        $total_target_shipments += $sale_person_number->target_shipments;
+                        $total_target_revenue += $sale_person_number->target_revenue;
+                        $sum_total_target_revenue_achieved += $target_revenue_achieved;
+                        $serial++;
+                    }
+                    if ($total_target_shipments > 0) {
+                        $total_target_shipments_achieved = ($shipments_count / $total_target_shipments) * 100;
+                    }
+                    $total_all_shipments_target_revenue = 0;
+                    if ($total_target_revenue_avg > 0) {
+                        $total_target_revenue_achieved = ($revenue_count / $total_target_revenue_avg) * 100;
+                    }
+                    if ($shipments_count != 0) {
+                        $avg_revenue_count = $revenue_count / $shipments_count;
+                    } else {
+                        $avg_revenue_count = 0;
+                    }
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Total</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format($total_target_shipments) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_shipments_achieved) . '%</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($revenue_count)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#FFE699;">' . number_format(round($total_target_revenue_avg)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; background-color:#C7E0B4;">' . number_format($total_target_revenue_achieved) . '%</td>';
+
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format(round($avg_revenue_count)) . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($contribution_count) . '%</td>';
+                    $html .= '</tr>';
+
+                    $html .= '</tr>';
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+
+                    $to = array();
+
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
+
+                    $cc = array();
+                    $bcc = array();
+                    $bcc = ['muhammad.waqas@trax.pk'];
+                    self::email($subject, $body, $to, $cc, $bcc);
 
                 }
             }

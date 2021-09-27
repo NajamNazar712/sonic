@@ -1095,6 +1095,11 @@ class DailyPickupSalesReportController extends Controller
 
         $tagged_shippers = DB::connection('reports')->table('sale_tier_tags')->where('kam', $sale_person_id)->select('user_id')->distinct()->pluck('user_id')->toArray();
 
+        if(count($tagged_shippers) < 1)
+        {
+            return null;
+        }
+
         foreach ($hubs as $hub) {
 
             $booked = DB::connection('reports')->table('shipments')->whereExists(function($query) use ($hub) {

@@ -50,7 +50,9 @@ class DailyPickupSalesKAEIndividualEmail extends Command
         if(count($sales_persons) > 0){
             foreach ($sales_persons as $sales_person){
                 $response = DailyPickupSalesReportController::daily_pickup_sales_report_individual_kae( $date . ' 00:00:00', $sales_person->id);
-                NotificationsController::send(157, $sales_person->id, $response);
+                if($response != null) {
+                    NotificationsController::send(157, $sales_person->id, $response);
+                }
             }
         }
     }

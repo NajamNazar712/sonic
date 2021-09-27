@@ -15,7 +15,11 @@ class Seeder4049ForNotifications extends Seeder
 
         DB::table('notifications')->insert(array(
             array('id' => 157, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily Pickup & Sales Report for KAEs', 'type_id' => 1, 'subject' => ' Daily Pickup & Sales Report [date]', 'body' => 'Dear Concern,
-Please download the report from the following link: [link].', 'updated_by' => 3, 'status' => 0)
+Please download the report from the following link: [link].', 'updated_by' => 3, 'status' => 0),
+
+            array('id' => 160, 'created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Daily KAE Numbers Report', 'type_id' => 1, 'subject' => ' Daily KAE Numbers [date]', 'body' => '[preview]
+
+Please download the report from the following link: [link].', 'updated_by' => 3, 'status' => 0),
         ));
     }
 }
