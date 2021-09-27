@@ -65,15 +65,7 @@ class ShipperInterceptReBookController extends Controller
         $shipment = Shipment::find($request->shipment_id);
         $user_id = session('user_id');
         $intercept_type = $request->consignee;
-        if ($request->filled('self_collection')) {
-            $self_collection = TRUE;
-
-            
-        } else {
-            $self_collection = FALSE;
-            
-
-        }
+        
         $shipment_status = $shipment->status_shipper->name;
 
         if ($shipment['shipper_status_id'] == 12) {
@@ -132,25 +124,6 @@ class ShipperInterceptReBookController extends Controller
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
                         
-                    }
-
-                    if($self_collection == TRUE){
-                        $shipment_self_collection = SelfCollectionShipment::where('shipment_id',$shipment->id);
-                        if (!$shipment_self_collection->exists()) {
-                            $shipment_self_collection = new SelfCollectionShipment();
-                            $shipment_self_collection->shipment_id = $shipment->id;
-                            $shipment_self_collection->save();
-                        }
-                        
-  
-                        
-                        if($intercept_type == 2){
-                            ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, NULL,$user_id,NULL);
-                            $shipment = Shipment::find($request->shipment_id);
-                            $shipment->shipper_status_id = 15;
-                            $shipment->consignee_status_id = 15;
-                            $shipment->save();
-                        }
                     }
 
 
