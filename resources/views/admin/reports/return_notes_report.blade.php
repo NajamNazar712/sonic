@@ -415,7 +415,7 @@
                     {data: 'created_by', name: 'cr.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
                     {orderable: false, searchable: false,data: 'aging', name: 'aging', class: 'align-middle aging'},
-                    {orderable: false, searchable: false,data: 'image', name: 'image', class: 'align-middle image'},
+                    {orderable: false, searchable: false,data: 'image', name: 'image', class: 'align-middle text-center image'},
                     { data:'delivered_to_shipper_count' ,name: 'delivered_to_shipper_count', class: 'align-middle text-center delivered_to_shipper_count', orderable: false, searchable: false},
 
                 ],
