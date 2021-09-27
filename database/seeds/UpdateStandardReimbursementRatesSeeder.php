@@ -32,9 +32,9 @@ class UpdateStandardReimbursementRatesSeeder extends Seeder
 
             //sameday
 
-            array('id' => 9, 'shipping_mode_id' => 4, 'range_up' => 0.01,'range_down' => 0.50,'weight_addition' => 0,'kg_range' => 0.5,'local_or_6hr' => 250,'national_charges_class_0' => 250,'national_charges_class_1' => 250,'national_charges_class_2' => 250 , 'national_charges_class_3' => 250),
-            array('id' => 10, 'shipping_mode_id' => 4, 'range_up' => 0.51,'range_down' => 1,'weight_addition' => 0,'kg_range' => 0.5,'local_or_6hr' => 275,'national_charges_class_0' => 275,'national_charges_class_1' => 275,'national_charges_class_2' => 275 , 'national_charges_class_3' => 275),
-            array('id' => 11, 'shipping_mode_id' => 4, 'range_up' => 1.01,'range_down' => 100,'weight_addition' => 0,'kg_range' => 0.5,'local_or_6hr' => 300,'national_charges_class_0' => 300,'national_charges_class_1' => 300,'national_charges_class_2' => 300 , 'national_charges_class_3' => 300),
+            array('id' => 9, 'shipping_mode_id' => 4, 'range_up' => 0.01,'range_down' => 0.50,'weight_addition' => 0,'kg_range' => 0.5,'local_or_6hr' => 250,'national_charges_class_0' => 250,'national_charges_class_1' => '10%','national_charges_class_2' => '20%' , 'national_charges_class_3' => 250),
+            array('id' => 10, 'shipping_mode_id' => 4, 'range_up' => 0.51,'range_down' => 1,'weight_addition' => 0,'kg_range' => 0.5,'local_or_6hr' => 275,'national_charges_class_0' => 275,'national_charges_class_1' => '10%','national_charges_class_2' => '20%' , 'national_charges_class_3' => 250),
+            array('id' => 11, 'shipping_mode_id' => 4, 'range_up' => 1.01,'range_down' => 100,'weight_addition' => 0,'kg_range' => 0.5,'local_or_6hr' => 300,'national_charges_class_0' => 300,'national_charges_class_1' => '10%','national_charges_class_2' => '20%' , 'national_charges_class_3' => 250),
 
         ));
 
