@@ -149,7 +149,7 @@
         }
 
         textarea {
-            resize: horizontal;
+            resize: both;
         }
     </style>
 @endsection

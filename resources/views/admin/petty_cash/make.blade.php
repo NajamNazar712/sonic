@@ -141,7 +141,7 @@
         }
 
         textarea {
-            resize: horizontal;
+            resize: both;
         }
     </style>
 @endsection
@@ -309,10 +309,10 @@
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
                 var expense_detail_input = '<textarea class="form-control form-control-sm" rows="5" name="expense['+rows_count+']" maxlength="300" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required"></textarea>';
-                var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']" data-rule-required="true" data-msg-required="Employee is required"></select>';
+                var employee_select = '<select class="form-control form-control-sm select2 employee_select" name="employee['+rows_count+']" data-rule-required="true" data-msg-required="Employee Id is required"></select>';
                 var employee_name_input = '<input class="form-control form-control-sm employee_name" readonly name="employee_name['+rows_count+']" placeholder="Employee Name"  data-rule-required="true" data-msg-required="Employee Name is required">';
                 var employee_designation_input = '<input class="form-control form-control-sm employee_designation" readonly name="employee_designation['+rows_count+']" placeholder="Employee Designation"  data-rule-required="true" data-msg-required="Employee Designation is required">';
-                var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Employee is required">';
+                var amount_input = '<input class="form-control form-control-sm amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control form-control-sm reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
                 var remarks_input = '<textarea class="form-control form-control-sm" rows="5" name="remarks['+rows_count+']" placeholder="Remarks"></textarea>';
                 // var $dropdown = '<div class="btn-group">' +

@@ -289,7 +289,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('zones as z', 'z.id', '=', 'petty_cash_statement_details.zone_id')
             ->leftjoin('admins as a', 'a.id', '=', 'petty_cash_statement_details.employee_id')
             ->join('petty_cash_statements as pcs', 'pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city','z.name as zone','a.trax_id as employee_id', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at','petty_cash_statement_details.employee_name as employee_name_data','petty_cash_statement_details.employee_designation as employee_designation_data')
+            ->select('petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city','z.name as zone','a.trax_id as employee_id', 'petty_cash_statement_details.hub_id', 'petty_cash_statement_details.account_head_id', 'petty_cash_statement_details.account_title_id', 'petty_cash_statement_details.date', 'petty_cash_statement_details.expense_details', 'petty_cash_statement_details.amount', 'petty_cash_statement_details.reference_no', 'petty_cash_statement_details.remarks', 'petty_cash_statement_details.status', 'pcs.status as petty_status', 'petty_cash_statement_details.station_amount', 'petty_cash_statement_details.operation_amount', 'petty_cash_statement_details.finance_amount', 'petty_cash_statement_details.reference_document as reference_document', 'petty_cash_statement_details.created_at','petty_cash_statement_details.employee_name as employee_name_data','petty_cash_statement_details.employee_designation as employee_designation_data','petty_cash_statement_details.hub_id','petty_cash_statement_details.zone_id','petty_cash_statement_details.city_id')
             ->where('petty_cash_statement_details.petty_cash_statement_id', $id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -351,16 +351,16 @@ class AdminPettyCashController extends Controller
             ->addColumn('hub_name', function ($petty_details) {
                 $zone_id = $petty_details->zone_id;
                 $hub_id = $petty_details->hub_id;
-                $hubs = City::where('hub',1)->where('zone_id',$zone_id)->select('id','name')->get();
+                $petty_hubs = City::where('hub',1)->where('zone_id',$zone_id)->select('id','name')->get();
                 $drops = '';
                 $selected = '';
-                foreach ($hubs as $hub) {
-                    if ($hub->id == $hub_id) {
+                foreach ($petty_hubs as $petty_hub) {
+                    if ($petty_hub->id == $hub_id) {
                         $selected = 'selected';
                     } else {
                         $selected = '';
                     }
-                    $drops .= '<option value="' . $hub->id . '" ' . $selected . '>' . $hub->name . '</option>';
+                    $drops .= '<option value="' . $petty_hub->id . '" ' . $selected . '>' . $petty_hub->name . '</option>';
                 }
                 $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
                 return $select;
@@ -395,7 +395,7 @@ class AdminPettyCashController extends Controller
                     }
                     $drops .= '<option value="' . $employee->id . '" ' . $selected . '>' . $employee->trax_id . '</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Employee is required">' . $drops . '</select>';
+                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Employee Id is required">' . $drops . '</select>';
                 return $select;
             })
             ->addColumn('employee_name',function ($petty_details){
@@ -1295,8 +1295,13 @@ class AdminPettyCashController extends Controller
                             <td class="color primary"><strong>Chart of Account</strong></td>
                             <td class="color primary"><strong>Account Title</strong></td>
                             <td class="color primary"><strong>Details</strong></td>
+                            <td class="color primary"><strong>Zone</strong></td>
+                            <td class="color primary"><strong>Hub</strong></td>
                             <td class="color primary"><strong>Location</strong></td>
                             <td class="color primary"><strong>Reference No.</strong></td>
+                            <td class="color primary"><strong>Employee Id</strong></td>
+                            <td class="color primary"><strong>Employee Name</strong></td>
+                            <td class="color primary"><strong>Employee Designation</strong></td>
                             <td class="color primary"><strong>Amount</strong></td>
                             <td class="color primary"><strong>Remarks</strong></td>
                           </tr>
@@ -1316,6 +1321,29 @@ class AdminPettyCashController extends Controller
                     $detain_amount = $detail->amount;
                 }
 
+                $zone_name = "";
+                $hub_name = "";
+                $city_name = "";
+                $employee_id = "";
+                if($detail->zone_id != null)
+                {
+                    $zone_name = $detail->zone->name;
+                }
+
+                if($detail->hub_id != null)
+                {
+                    $hub_name = $detail->location->name;
+                }
+
+                if($detail->city_id != null)
+                {
+                    $city_name = $detail->city->name;
+                }
+
+                if($detail->employee_id != null)
+                {
+                    $employee_id = $detail->employee->trax_id;
+                }
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_statements . '</td>
@@ -1323,8 +1351,13 @@ class AdminPettyCashController extends Controller
                             <td>' . $detail->heads->name . '</td>
                             <td>' . $detail->titles->name . '</td>
                             <td>' . $detail->expense_details . '</td>
-                            <td>' . $detail->location->name . '</td>
+                            <td>' . $zone_name . '</td>
+                            <td>' . $hub_name . '</td>
+                            <td>' . $city_name . '</td>
                             <td>' . $detail->reference_no . '</td>
+                            <td>' . $employee_id . '</td>
+                            <td>' . $detail->employee_name . '</td>
+                            <td>' . $detail->employee_designation . '</td>
                             <td>Rs ' . number_format($detain_amount) . '</td>
                             <td>' . $detail->remarks . '</td>
                 ';
@@ -1340,10 +1373,7 @@ class AdminPettyCashController extends Controller
         ';
             $petty_cash_statement = $petty_cash_statement->first();
             $hub_name = "";
-            if($petty_cash_statement->hub_id != null)
-            {
-                $hub_name = $petty_cash_statement->hub->name;
-            }
+
             $main_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -1359,12 +1389,25 @@ class AdminPettyCashController extends Controller
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
-                          </tr>
-                          <tr>
+                          </tr>';
+            if($petty_cash_statement->hub_id != null)
+            {
+                $hub_name = $petty_cash_statement->hub->name;
+                $main_details .= '<tr>
                             <td class="color secondary"><strong>Hub</strong></td>
                             <td>' . $hub_name . '</td>
-                          </tr>
-                          <tr>
+                          </tr>';
+            }
+            if($petty_cash_statement->sdn_id != null)
+            {
+                $main_details .= '<tr>
+                            <td class="color secondary"><strong>SDN No.</strong></td>
+                            <td>' . str_pad($petty_cash_statement->sdn_id, 6, '0', STR_PAD_LEFT) . '</td>
+                          </tr>';
+            }
+
+
+            $main_details .= '<tr>
                             <td class="color secondary"><strong>Reference No.</strong></td>
                             <td>' . $petty_cash_statement->reference_no . '</td>
                           </tr>
