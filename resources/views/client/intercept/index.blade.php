@@ -68,14 +68,7 @@
 
                                 <input type="text" name="amount"  id="amount" class="form-control rounded-right amount" value="{{$shipment['amount']}}" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
                             </div>
-                            @if ($shipment->booking_type_id == 1)
-                                <div id="self_collection_div" class="form-group text-center p-1 border border-light rounded">
-                                    <label class="d-block">Self Collection</label>
-                                    <input type="checkbox" name="self_collection" class="switch hidden" id="self_collection">
-                                </div>
-                                
-                               
-                            @endif
+                           
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -123,7 +116,6 @@
 
 
            
-            $('#self_collection').checkboxpicker();
 
             var city = @json($shipment['consignee_city_id']);
             var name = @json($shipment['consignee_name']);
