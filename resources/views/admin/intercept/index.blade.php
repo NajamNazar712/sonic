@@ -116,13 +116,10 @@
 
             
             var city = @json($shipment['consignee_city_id']);
-            // $('#consignee_city').select2({
-            //     width: '100%',
-            //     placeholder: 'City*'
-            // }).bind('change', function() {
-			// 	$(this).valid();
-				
-            //     });
+            $('#consignee_city').select2({
+                width: '100%',
+                placeholder: 'City*'
+            });
             $('#consignee').select2({
                 width: '100%',
                 placeholder: 'Consignee*'

@@ -122,13 +122,10 @@
             var email = @json($shipment['consignee_email']);
             var amount = @json($shipment['amount']);
 
-            // $('#consignee_city').select2({
-            //     width: '100%',
-            //     placeholder: 'City*'
-            // }).bind('change', function() {
-			// 	$(this).valid();
-				
-            //     });
+            $('#consignee_city').select2({
+                width: '100%',
+                placeholder: 'City*'
+            });
             $('#consignee').select2({
                 width: '100%',
                 placeholder: 'Consignee*'
