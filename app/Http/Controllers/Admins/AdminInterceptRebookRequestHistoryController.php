@@ -136,15 +136,11 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         if ($request->filled('self_collection')) {
             $self_collection = TRUE;
 
-            $express_center_id = $request->express_center;
-            
-            $express_center_type = $request->center_franchise;
+           
         } else {
             $self_collection = FALSE;
             
 
-            $express_center_id = 0;
-            $express_center_type = 0;
         }
         $shipment_status = $shipment->status_shipper->name;
         $crm = false;
@@ -224,19 +220,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                             $shipment_self_collection->save();
                         }
 
-                        $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id);
-                        if ($shipment_detail->exists()) {
-                            $shipment_detail = $shipment_detail->first();
-                            $shipment_detail->center_frachise_id = $express_center_id;
-                            $shipment_detail->center_frachise_type = $express_center_type;
-                            $shipment_detail->save();
-                        }else{
-                            $shipment_detail = new ShipmentDetail();
-                            $shipment_detail->shipment_id = $shipment->id;
-                            $shipment_detail->center_frachise_id = $express_center_id;
-                            $shipment_detail->center_frachise_type = $express_center_type;
-                            $shipment_detail->save();
-                        }
+                        
                         if ($intercept_type == 2){
                             ShipmentsJourneyController::add($shipment->id, 15, 15, NULL, NULL, NULL, Auth::id());
                             $shipment = Shipment::find($request->shipment_id);
@@ -257,10 +241,5 @@ class AdminInterceptRebookRequestHistoryController extends Controller
         }
     }
 
-    public function get_express_centers(Request $request){
-        $trax_centers = RetailTraxCenter::where('default_hub', $request->hub_id)->where('status', 1)->get();
-        $trax_franchise = RetailFranchise::where('default_hub', $request->hub_id)->where('status',1)->get();
-           
-        return response()->json(['status' => 1, 'trax_centers' => $trax_centers, 'trax_franchise' => $trax_franchise]);
-    }
+    
 }
