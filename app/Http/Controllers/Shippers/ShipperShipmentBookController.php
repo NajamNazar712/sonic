@@ -166,8 +166,15 @@ class ShipperShipmentBookController extends Controller
 
         $shipment->amount = $amount;
 
-        if ($payment_mode_id == 2 && $user_id != 4758) {
-            $payment_mode_id = 1;
+        $settings = GlobalSettings::where('type','ccd_booking')->first();
+        $ccd_accounts = array();
+        $ccd_accounts = array_map('intval', explode(',', $settings->text));
+
+        if (in_array($user_id, $ccd_accounts)) {
+            $payment_mode_id = 2;
+        }
+        else{
+            $payment_mode_id == 1;
         }
 
         $shipment->payment_mode_id = $payment_mode_id;
