@@ -25,7 +25,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipment;
 use App\Http\Models\Rider;
@@ -54,8 +54,9 @@ class AdminTrackingController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_channels = CrmRequestChannel::where('id', '!=', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
-
-        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims]);
+        $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
+        $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
+        return view('admin.tracking')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_channels' => $case_nature_channels, 'case_nature_type_claims' => $case_nature_type_claims,'return_confirm_reasons' => $return_confirm_reasons]);
     }
 
     public function track(Request $request) {

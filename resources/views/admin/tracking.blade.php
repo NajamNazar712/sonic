@@ -285,6 +285,90 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="ReattemptModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReattemptModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Re Attempt</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="reattempt_request_form" method="post">
+                        @csrf
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
+
+                            <input type="hidden" id="reattempt_shipment_id">
+                            <div class="row old_scroll" id="reattempt_shipments">
+                            </div>
+                            <hr>
+                            <div class="feedback" id="request_feedback">
+                                <div class="row justify-content-center">
+                                    <div class="col-12">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="return_remark" id="reattempt_remarks" rows="5" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="btnReattempt" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Return Confirm Reason</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="container">
+                            <div class="row">
+                                <h2 class="heading">Tracking Number(s)</h2>
+                            </div>
+
+                            <input type="hidden" id="return_shipment_id">
+                            <div class="row old_scroll" id="return_shipments">
+                            </div>
+                            <hr>
+                            <div class="form-group">
+                                @if($return_confirm_reasons)
+                                    <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
+                                        @foreach($return_confirm_reasons as $reason)
+                                            <option value="{{$reason->id}}">{{$reason->name}}</option>
+                                        @endforeach
+                                    </select>
+                                @endif
+                            </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="btnReturn" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -336,6 +420,10 @@
                 'digits': 2,
                 'min': 0.00,
                 'max': 1000000.00
+            });
+            $('#return_reason_select').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Reason'
             });
             $('#case_nature_select').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
@@ -587,9 +675,9 @@
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
 
-                                shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
-                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Re-Attempt</button>';
-                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Intercept</button>';
+                                shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 return" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 returnMarkStatus" id=' + id + ' data-tracking=' + details.tracking_number + '>Re-Attempt</button>';
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_number + '>Intercept</button>';
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
@@ -1335,7 +1423,33 @@
                 $('#AddRequestModal').modal('show');
 
             });
+            $('#tracking').on('click','.returnMarkStatus', function () {
+                id = $(this).attr('id');
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                $('#reattempt_shipment_id').val(id);
+                $('#reattempt_shipments').html(tracking_rows);
+                $('#ReattemptModal').modal('show');
 
+            });
+            $('#tracking').on('click','.intercept', function () {
+                id = $(this).attr('id');
+                if(id != ''){
+                    var redirect = '{!! route('admin.intercept.index', ':id') !!}';
+                    var url = redirect.replace(':id', id);
+                    window.open(url);
+                }
+
+            });
+            $('#tracking').on('click','.return', function () {
+                id = $(this).attr('id');
+                var tracking = $(this).attr('data-tracking');
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                $('#return_shipment_id').val(id);
+                $('#return_shipments').html(tracking_rows);
+                $('#ReturnConfirmReasonModal').modal('show');
+
+            });
             $('#tracking').on('click', '.rider_information', function () {
                 id = $(this).attr('data-id');
 
@@ -1949,6 +2063,85 @@
                     }
 
                 }
+            }
+        });
+        $( "#update_return_reason_form" ).validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                    var return_reason_select = $('#return_reason_select').val();
+                    alert(return_reason_select);
+                    swal({
+                            title: 'Please Wait!',
+                            text: 'Launching Request.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    $.ajax({
+                        url: '{!! route('admin.return.marked.status.single') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': $('#return_shipment_id').val(),
+                            'single_return_reason_select': return_reason_select,
+                            'action': 'confirm'
+                        }
+                    })
+                    .done(function (data) {
+                            swal.close();
+                        if(data.status == 1){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+
+                        $('#ReattemptModal').modal('hide');
+                    });
+                    
+            }
+        });
+        $( "#reattempt_request_form" ).validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                    var reattempt_remarks = $('#reattempt_remarks').val();
+                    swal({
+                            title: 'Please Wait!',
+                            text: 'Launching Request.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    $.ajax({
+                        url: '{!! route('admin.return.marked.status.single') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': $('#reattempt_shipment_id').val(),
+                            'remark': reattempt_remarks,
+                            'action': 'reattempt'
+                        }
+                    })
+                    .done(function (data) {
+                            swal.close();
+                        if(data.status == 1){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+
+                        $('#ReattemptModal').modal('hide');
+                    });
+                    
             }
         });
         $('#AddRequestModal').on('hide.bs.modal', function (e) {
