@@ -90,8 +90,8 @@
                         <th class="border-primary border-darken-1">Deposited Amount</th>
 
                         <th class="border-primary border-darken-1">Deposited By</th>
-
                         <th class="border-primary border-darken-1">Deposited Date</th>
+                        <th class="border-primary border-darken-1">Resolved By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Adjustment Date</th>
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
@@ -466,8 +466,8 @@
                             head.push('DNCC Amount');
                             head.push('Deposited Amount');
                             head.push('Deposited By');
-                            // head.push('Company Bank');
                             head.push('Deposited Date');
+                            head.push('Resolved By');
                             head.push('Status');
                             head.push('Adjustment Date');
                             head.push('Adjustment Amount');
@@ -486,8 +486,8 @@
                                 row.push(values.sdn_amount);
                                 row.push(values.sdn_deposit_amount);
                                 row.push(values.deposited_by);
-                                // row.push(values.bank);
                                 row.push(values.created_at);
+                                row.push(values.resolved_by);
                                 row.push(values.status);
                                 row.push(values.adjustment_date);
                                 row.push(values.adjustment_amount);
@@ -546,8 +546,8 @@
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
-                    // { data:'bank' ,name: 'banks_lists.id', class: 'align-middle bank'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
+                    { data:'resolved_by' ,name: 'resolved_by', class: 'align-middle resolved_by'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},

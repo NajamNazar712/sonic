@@ -255,8 +255,14 @@ class AdminReportsController extends Controller
                 }
             })
             ->addColumn('image', function ($return_note) {
+                if ($return_note->delivered_to_shipper_count != 0) {
                 return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
-            })
+                }
+                else {
+
+                    return '-';
+                }
+                })
             ->editColumn('shipments_count_link', function($return_note) {
                 if ($return_note->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $return_note->shipments_count . '</button>';
@@ -6751,7 +6757,8 @@ class AdminReportsController extends Controller
         $sdn = StationDepositNote::
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref','station_deposit_notes.created_at']);
+            ->leftjoin('admins as a', 'a.id', '=', 'station_deposit_notes.status_updated_by')
+            ->select(['a.name as resolved_by','station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref','station_deposit_notes.created_at']);
 
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
@@ -7560,10 +7567,10 @@ class AdminReportsController extends Controller
             $end_time = Carbon::parse($end_time)->toTimeString();
 
             $time_array = array();
-            $total_shipment_deliverd_bolt = DeliveryNoteShipment::where([ 'update_type' => 1])->whereIn('status',[14, 30, 36, 37])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
-            $total_shipment_undeliverd_bolt = DeliveryNoteShipment::where([ 'update_type' => 1])->whereIn('status',[7,8,9,12,15,18,56,29,10,11,29,35])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
-            $total_shipment_deliverd_sonic = DeliveryNoteShipment::where([ 'update_type' => 0])->whereIn('status',[14, 30, 36, 37])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
-            $total_shipment_undeliverd_sonic = DeliveryNoteShipment::where([ 'update_type' => 0])->whereIn('status',[7,8,9,12,15,18,56,29,10,11,29,35])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_deliverd_bolt = DeliveryNoteShipment::where([ 'update_type' => 1])->whereIn('status',[4,5,6,7])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_bolt = DeliveryNoteShipment::where([ 'update_type' => 1])->whereNotIn('status',[4,5,6,7])->where('status','!=',0)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_deliverd_sonic = DeliveryNoteShipment::where([ 'update_type' => 0])->whereIn('status',[4,5,6,7])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_sonic = DeliveryNoteShipment::where([ 'update_type' => 0])->whereNotIn('status',[4,5,6,7])->where('status','!=',0)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
             $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0);
             $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
