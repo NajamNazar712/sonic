@@ -474,7 +474,11 @@ class ReturnController extends Controller
 
         if($request->action == 'un-assign'){
             foreach ($shipment_ids as $shipment){
-                ReturnAssignedShipments::where('shipment_id', $shipment)->delete();
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                if($return_assign_shipment->exists()){
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
+                }
             }
             return ['status'=>1,'success'=>"Agent Unassigned successfully"];
 
