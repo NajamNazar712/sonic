@@ -469,9 +469,20 @@ class ReturnController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
         }
     }
+    public function unassign_agent(Request $request){
+        $shipment_ids = $request->shipment_ids;
 
+        if($request->action == 'un-assign'){
+            foreach ($shipment_ids as $shipment){
+                ReturnAssignedShipments::where('shipment_id', $shipment)->delete();
+            }
+            return ['status'=>1,'success'=>"Agent Unassigned successfully"];
+
+        }
+    }
+    
     public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-
+        dd($request);
         $shipment_ids = $request->shipment_ids;
 
         if($request->action == 'reattempt'){
