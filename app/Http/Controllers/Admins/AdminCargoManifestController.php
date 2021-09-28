@@ -66,6 +66,7 @@ class AdminCargoManifestController extends Controller
         $mapping =  V2JunctionMapping::join('cities as oc','oc.id', '=', 'v2_junction_mappings.origin_id')
             ->join('cities as dc','dc.id', '=', 'v2_junction_mappings.destination_id')
             ->join('admins as a','a.id', '=', 'v2_junction_mappings.updated_by')
+            
             ->select('v2_junction_mappings.id as id','v2_junction_mappings.status as status', 'v2_junction_mappings.updated_at as updated_at','oc.name as origin','oc.hub_location_latitude as ohllat','oc.hub_location_longitude as ohllng','dc.name as destination','dc.hub_location_latitude as dhllat','dc.hub_location_longitude as dhllng', 'a.name as updated_by');
 
         return Datatables::of($mapping)
