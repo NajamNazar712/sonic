@@ -380,7 +380,7 @@ class APIController extends Controller
             if ($value) {
                 $value = $this->phone_number($value);
 
-                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{10}$/', $value)) {
+                if (preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{3}-{0,1}\d{7}$|^\d{3}-{1}\d{7}$|^\d{11}$|^\d{4}-\d{7}$|^\d{3}-\d{7}$|^\d{11}$/', $value)) {
                     return true;
                 } else {
                     return false;
@@ -2238,8 +2238,8 @@ class APIController extends Controller
             'consignee_city_name' => ['required', 'between:1,100', Rule::exists('gul_ahmed_cities', 'city_name')],
             'consignee_name' => ['required', 'between:1,100'],
             'consignee_address' => ['required', 'between:1,255'],
-            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{11}$/'],
-            'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{11}$/'],
+            'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
             'consignee_email_address' => ['nullable', 'filled', 'email'],
             'order_date' => ['nullable', 'date_format:Y-m-d'],
             'special_instructions' => ['nullable', 'filled', 'between:0,190'],
