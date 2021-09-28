@@ -152,7 +152,7 @@
                 </div>
                 <div class="row align-items-center justify-content-center">
                     <div class="col">
-                        <table class="table table-bordered datatable" id="agenttable" style="box-sizing: content-box; width: 760px; padding-right: 25px;">
+                        <table class="table table-bordered" id="agenttable">
                             <thead>
                             <tr role="row" class="bg-primary white text-center">
                                 <th colspan="2" class="border-primary border-darken-1">Agents</th>
@@ -423,8 +423,11 @@
 
         var selected_rows = [];
         var restricted_rows = [];
-        $('#agenttable').DataTable({
-            scrollY: '200px'
+        var tableagent = $('#agenttable').DataTable({
+                scrollY: '200px',
+                });
+            $('#agent_assign_modal').on('shown.bs.modal', function () {
+                tableagent.columns.adjust();
             });
         @php $permission = (in_array(490, session('permissions'))); if($permission){ $permission = 1; }else{ $permission = 0; } @endphp
         $(document).ready(function () {
