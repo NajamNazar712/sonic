@@ -170,8 +170,11 @@ class ShipperShipmentBookController extends Controller
         $ccd_accounts = array();
         $ccd_accounts = array_map('intval', explode(',', $settings->text));
 
-        if ($payment_mode_id == 2 && in_array($user_id, $ccd_accounts)) {
-            $payment_mode_id = 1;
+        if (in_array($user_id, $ccd_accounts)) {
+            $payment_mode_id = 2;
+        }
+        else{
+            $payment_mode_id == 1;
         }
 
         $shipment->payment_mode_id = $payment_mode_id;
