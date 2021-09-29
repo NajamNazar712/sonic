@@ -2072,7 +2072,6 @@
             },
             submitHandler: function(form) {
                     var return_reason_select = $('#return_reason_select').val();
-                    alert(return_reason_select);
                     swal({
                             title: 'Please Wait!',
                             text: 'Launching Request.',
