@@ -311,7 +311,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-12">
                                         <fieldset class="form-group">
-                                            <textarea class="form-control" name="return_remark" id="reattempt_remarks" rows="5" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                            <textarea class="form-control" name="reattempt_remarks" id="reattempt_remarks" rows="5" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
                                         </fieldset>
                                     </div>
                                 </div>
@@ -1435,6 +1435,7 @@
                 var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
+                $('#reattempt_remarks').val('');
                 $('#ReattemptModal').modal('show');
 
             });
@@ -1453,6 +1454,9 @@
                 var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
                 $('#return_shipment_id').val(id);
                 $('#return_shipments').html(tracking_rows);
+                //$('#return_reason_select').val(0);
+                //$("#return_reason_select").empty();
+
                 $('#ReturnConfirmReasonModal').modal('show');
 
             });
@@ -2080,7 +2084,7 @@
                     var return_reason_select = $('#return_reason_select').val();
                     swal({
                             title: 'Please Wait!',
-                            text: 'Launching Request.',
+                            text: ' ',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,
@@ -2110,6 +2114,9 @@
                     
             }
         });
+        $('#ReturnConfirmReasonModal').on('hide.bs.modal', function (e) {
+                $('#return_reason_select').val('').trigger('change');
+            });
         $( "#reattempt_request_form" ).validate({
             errorClass:"danger",
             errorPlacement: function(error, element) {
@@ -2119,7 +2126,7 @@
                     var reattempt_remarks = $('#reattempt_remarks').val();
                     swal({
                             title: 'Please Wait!',
-                            text: 'Launching Request.',
+                            text: ' ',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,
