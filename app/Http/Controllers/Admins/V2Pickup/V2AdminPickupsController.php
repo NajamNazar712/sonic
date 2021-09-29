@@ -403,7 +403,6 @@ class V2AdminPickupsController extends Controller
             $existing_pickup_request_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->where('attempt_date', '>', $today);
 
             if (!$existing_pickup_request_attempt->exists()) {
-                dd(1);
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
 
                 $previous_rider_id = $pickup_request->current_rider_id;
