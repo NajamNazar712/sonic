@@ -51,6 +51,9 @@
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
+                                    <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
+                                    <th class="border-primary border-darken-1">Tagged To</th>
+                                    <th class="border-primary border-darken-1">Tagged At</th>
                                     <th class="border-primary border-darken-1">Launched Date</th>
                                     <th class="border-primary border-darken-1">Complaint Re-Open Date</th>
                                     <th class="border-primary border-darken-1">Resolved By</th>
@@ -269,6 +272,9 @@
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
+                            head.push('Tagged (Admin/Department)');
+                            head.push('Tagged To');
+                            head.push('Tagged At');
                             head.push('Launched Date');
                             head.push('Complaint Re-Open Date');
                             head.push('Resolved By');
@@ -300,6 +306,9 @@
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
+                                row.push(values.crm_request_tagging_type_id);
+                                row.push(values.tagged_to);
+                                row.push(values.tagged_date);
                                 row.push(values.created_at);
                                 row.push(values.reopen_date);
                                 row.push(values.resolved_by);
@@ -594,7 +603,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[18, 'desc']],
+                order: [[23, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -613,6 +622,9 @@
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
+                    {data: 'crm_request_tagging_type_id', name: 'crth.crm_request_tagging_type_id', class: 'align-middle tagged'},
+                    {data: 'tagged_to', name: 'tagged_to', class: 'align-middle tagged_to'},
+                    {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
                     {data: 'reopen_date', name: 'crsh.created_at', class: 'align-middle reopen_date'},
                     {data: 'resolved_by', name: 'ra.name', class: 'align-middle resolved_by'},
@@ -654,7 +666,10 @@
                         '<option value="2">Shipper Substitute User</option>' +
                         '<option value="3">Consignee</option>' +
                         '</select>';
-
+                        var tagging_type = '<select name="tagging_type" id="tagging_type" class="select2 form-control">' +
+                        '<option value="1">Department</option>' +
+                        '<option value="2">Admin</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -688,6 +703,12 @@
                         }
                         else if ($(header).is('.added_by')) {
                             $(added_by).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
+                        else if ($(header).is('.tagged')) {
+                            $(tagging_type).appendTo($(search))
                                 .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -789,7 +810,12 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-
+                    $('#tagging_type').prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Admin/Department",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     this.api().table().columns.adjust();
                 }
