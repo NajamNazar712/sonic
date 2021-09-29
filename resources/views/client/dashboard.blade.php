@@ -484,7 +484,7 @@
             background-repeat: repeat-x;
         }
         .selectize-control {
-            width: 300px !important;
+            width: 305px !important;
         }
         .align-bottom{
             vertical-align: bottom;
