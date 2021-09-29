@@ -688,34 +688,38 @@ class AdminNotificationsController extends Controller
                 return (($notification->status) ? 'Enabled' : 'Disabled');
             })
             ->addColumn('action', function ($notification) {
-                $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                if (session('role_id') == 1 || in_array(602, session('permissions')) || session('role_id') == 1 || in_array(603, session('permissions'))) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
-                $dropdown = '
+                    $dropdown = '
                 <div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                if (session('role_id') == 1 || in_array(602, session('permissions'))) {
-                    $dropdown .= $edit_button;
-                }
-
-                if (session('role_id') == 1 || in_array(603, session('permissions'))) {
-                    if ($notification->status) {
-                        $dropdown .= $disable_button;
-                    } else {
-                        $dropdown .= $enable_button;
+                    if (session('role_id') == 1 || in_array(602, session('permissions'))) {
+                        $dropdown .= $edit_button;
                     }
-                }
 
-                $dropdown .= '
+                    if (session('role_id') == 1 || in_array(603, session('permissions'))) {
+                        if ($notification->status) {
+                            $dropdown .= $disable_button;
+                        } else {
+                            $dropdown .= $enable_button;
+                        }
+                    }
+
+                    $dropdown .= '
                   </div>
                 </div>
             ';
 
-                return $dropdown;
+                    return $dropdown;
+                } else {
+                    return "";
+                }
             });
 
         return $datatables->make(true);
