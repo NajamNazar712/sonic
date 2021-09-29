@@ -7564,10 +7564,10 @@ class AdminDashboardController extends Controller
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
             $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
 
-//            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
-//            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-//            $weight_addition_diff = $this->compare_data($weight_addition,$standard_weight_addition);
-//            dd($weight_addition,$standard_weight_addition,$weight_addition_diff);
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
+            //dd($weight_addition,$standard_weight_addition,$weight_addition_diff);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
@@ -7660,7 +7660,7 @@ class AdminDashboardController extends Controller
             
 //            dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff);
 
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1)
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1)
             {
                 $overnight_changes = 1;
             }
@@ -7683,9 +7683,9 @@ class AdminDashboardController extends Controller
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
             $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
 
-//            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
-//            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-//            $weight_addition_diff = $this->compare_data($weight_addition,$standard_weight_addition);
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
@@ -7774,7 +7774,7 @@ class AdminDashboardController extends Controller
                 $fuel_surcharge_diff = 1;
             }
 
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1)
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1)
             {
                 $overland_changes = 1;
             }
@@ -7797,9 +7797,9 @@ class AdminDashboardController extends Controller
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
             $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
 
-//            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
-//            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-//            $weight_addition_diff = $this->compare_data($weight_addition,$standard_weight_addition);
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
@@ -7888,7 +7888,7 @@ class AdminDashboardController extends Controller
                 $fuel_surcharge_diff = 1;
             }
 
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1)
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1)
             {
                 $detain_changes = 1;
             }
@@ -7911,9 +7911,9 @@ class AdminDashboardController extends Controller
             $weight_kg_range = $weight_charges->pluck('spkg')->toArray();
             $kg_range_diff = $this->compare_data($weight_kg_range,$standard_kg_range);
 
-//            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
-//            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
-//            $weight_addition_diff = $this->compare_data($weight_addition,$standard_weight_addition);
+            $standard_weight_addition = $standard_charges->pluck('weight_addition')->toArray();
+            $weight_addition = $weight_charges->pluck('weight_addition')->toArray();
+            $weight_addition_diff = $this->compare_data($standard_weight_addition,$weight_addition);
 
             $standard_local = $standard_charges->pluck('local_or_6hr')->toArray();
             $weight_local = $weight_charges->pluck('local_or_6hr')->toArray();
@@ -8003,7 +8003,7 @@ class AdminDashboardController extends Controller
                 $fuel_surcharge_diff = 1;
             }
 
-            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1)
+            if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1)
             {
                 $sameday_changes = 1;
             }

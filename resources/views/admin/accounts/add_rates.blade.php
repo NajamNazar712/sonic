@@ -2568,6 +2568,15 @@
         var fuelChargesSwitch = document.querySelector('.switchery.fuelSurchargeOvernight');
         var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesSwitch');
 
+
+        if(insuranceChargesSwitch.checked === false){
+
+            $('.insurance-charges-div-overnight').find('input').prop('disabled',true);
+            $('.insurance-charges-btn-overnight').find('button').prop('disabled',true);
+
+        }
+
+
         $('.weightAdditionOvernight').on('change',function(){
                 var wid = $(this).attr('id');
             var wswitch = document.querySelector('#'+wid);
@@ -2746,13 +2755,13 @@
 
         // InsuranceOvernight
         insuranceChargesSwitch.onchange = function () {
-            console.log(1);
+
             if(insuranceChargesSwitch.checked === true){
-                console.log(2);
+
                 $('.insurance-charges-div-overnight').find('input').prop('disabled',false);
                 $('.insurance-charges-btn-overnight').find('button').prop('disabled',false);
             }else if(insuranceChargesSwitch.checked === false){
-                console.log(3);
+
                 $('.insurance-charges-div-overnight').find('input').prop('disabled',true);
                 $('.insurance-charges-btn-overnight').find('button').prop('disabled',true);
 
@@ -2958,6 +2967,13 @@
             }
         };
 
+        if(insuranceChargesSwitchOverland.checked === false){
+            $('.insurance-charges-div-overland').find('input').prop('disabled',true);
+            $('.insurance-charges-btn-overland').find('button').prop('disabled',true);
+
+        }
+
+
         // InsuranceOvernight
         insuranceChargesSwitchOverland.onchange = function () {
             if(insuranceChargesSwitchOverland.checked === true){
@@ -3134,6 +3150,11 @@
 
             }
         };
+        if(insuranceChargesSwitchDetain.checked === false){
+            $('.insurance-charges-div-detain').find('input').prop('disabled',true);
+            $('.insurance-charges-btn-detain').find('button').prop('disabled',true);
+
+        }
 
         // InsuranceOvernight
         insuranceChargesSwitchDetain.onchange = function () {
@@ -3321,6 +3342,11 @@
 
             }
         };
+        if(insuranceChargesSwitchSameday.checked === false){
+            $('.insurance-charges-div-sameday').find('input').prop('disabled',true);
+            $('.insurance-charges-btn-sameday').find('button').prop('disabled',true);
+
+        }
 
         // InsuranceOvernight
         insuranceChargesSwitchSameday.onchange = function () {
