@@ -7573,14 +7573,25 @@ class AdminReportsController extends Controller
             $end_time = Carbon::parse($end_time)->toTimeString();
 
             $time_array = array();
-            $shipment_deliverd = ShipmentsJourney::whereIn('shipper_status_id',[14,30,36,37])->latest()->distinct()->pluck('shipment_id')->toArray();
-            $shipment_undeliverd = ShipmentsJourney::whereIn('shipper_status_id',[7,8,9,12,15,18,56,29,10,11,35])->latest()->distinct()->pluck('shipment_id')->toArray();
+            /*$shipment_deliverd = ShipmentsJourney::whereIn('shipper_status_id',[14,30,36,37])->latest()->pluck('shipment_id')->toArray();
+            $shipment_undeliverd = ShipmentsJourney::whereIn('shipper_status_id',[7,8,9,12,15,18,56,29,10,11,35])->latest()->distinct()->pluck('shipment_id')->toArray();*/
 
-            $total_shipment_deliverd_bolt = DeliveryNoteShipment::whereIn('shipment_id',$shipment_deliverd)->where([ 'update_type' => 1])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
-            $total_shipment_undeliverd_bolt = DeliveryNoteShipment::whereIn('shipment_id',$shipment_undeliverd)->where([ 'update_type' => 1])->where('status','!=',0)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_deliverd_bolt = ShipmentsJourney::whereIn('shipper_status_id',[14,30,36,37])->where('verification', 1)->whereNotNull('rider_id')->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->distinct('shipment_id')->count();
 
-            $total_shipment_deliverd_sonic = DeliveryNoteShipment::whereIn('shipment_id',$shipment_deliverd)->where([ 'update_type' => 0])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
-            $total_shipment_undeliverd_sonic = DeliveryNoteShipment::whereIn('shipment_id',$shipment_undeliverd)->where([ 'update_type' => 0])->where('status','!=',0)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_bolt = ShipmentsJourney::whereIn('shipper_status_id',[7,8,9,12,15,18,56,29,10,11,35])->whereNotNull('rider_id')->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->distinct('shipment_id')->count();
+
+
+            /*$total_shipment_deliverd_bolt = DeliveryNoteShipment::whereIn('shipment_id',$shipment_deliverd)->where([ 'update_type' => 1])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_bolt = DeliveryNoteShipment::whereIn('shipment_id',$shipment_undeliverd)->where([ 'update_type' => 1])->where('status','!=',0)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();*/
+
+
+            $total_shipment_deliverd_sonic = ShipmentsJourney::whereIn('shipper_status_id',[14,30,36,37])->where('verification', 1)->whereNull('rider_id')->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->distinct('shipment_id')->count();
+
+            $total_shipment_undeliverd_sonic = ShipmentsJourney::whereIn('shipper_status_id',[7,8,9,12,15,18,56,29,10,11,35])->whereNull('rider_id')->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->distinct('shipment_id')->count();
+
+
+            /*$total_shipment_deliverd_sonic = DeliveryNoteShipment::whereIn('shipment_id',$shipment_deliverd)->where([ 'update_type' => 0])->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();
+            $total_shipment_undeliverd_sonic = DeliveryNoteShipment::whereIn('shipment_id',$shipment_undeliverd)->where([ 'update_type' => 0])->where('status','!=',0)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time)->count();*/
             $total_status_updated = ShipmentsJourney::whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 0);
             $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
             $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
