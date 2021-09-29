@@ -574,7 +574,7 @@ class ReturnController extends Controller
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
             }
-            return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
+            return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Return - Confirm!"];
 
 
         }elseif($request->action == 'reattempt'){
@@ -622,7 +622,7 @@ class ReturnController extends Controller
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
             }
-            return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
+            return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Reattempted!"];
         }else{
             return ['status'=>0,'error'=>"Invalid action, Please refresh your page!"];
         }

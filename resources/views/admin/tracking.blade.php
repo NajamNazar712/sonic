@@ -674,8 +674,10 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
+                                
+                                shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(45, session('permissions')))
-                                shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 return" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 return" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
                                 @endif
                                 @if (session('role_id') == 1 || in_array(46, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 returnMarkStatus" id=' + id + ' data-tracking=' + details.tracking_number + '>Re-Attempt</button>';
@@ -683,7 +685,6 @@
                                 @if (session('role_id') == 1 || in_array(245, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_number + '>Intercept</button>';
                                 @endif
-                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
 
@@ -1431,7 +1432,7 @@
             $('#tracking').on('click','.returnMarkStatus', function () {
                 id = $(this).attr('id');
                 var tracking = $(this).attr('data-tracking');
-                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
                 $('#reattempt_shipment_id').val(id);
                 $('#reattempt_shipments').html(tracking_rows);
                 $('#ReattemptModal').modal('show');
@@ -1449,7 +1450,7 @@
             $('#tracking').on('click','.return', function () {
                 id = $(this).attr('id');
                 var tracking = $(this).attr('data-tracking');
-                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+                var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
                 $('#return_shipment_id').val(id);
                 $('#return_shipments').html(tracking_rows);
                 $('#ReturnConfirmReasonModal').modal('show');
@@ -2104,7 +2105,7 @@
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
 
-                        $('#ReattemptModal').modal('hide');
+                        $('#ReturnConfirmReasonModal').modal('hide');
                     });
                     
             }
