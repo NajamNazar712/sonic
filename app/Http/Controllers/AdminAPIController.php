@@ -3429,6 +3429,7 @@ class AdminAPIController extends Controller
         } else {
             $admin = Admin::where('email', $request->email);
             if ($admin->exists()) {
+                $admin = $admin->first();
                 if($admin->status == 0){
                     return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                 }
