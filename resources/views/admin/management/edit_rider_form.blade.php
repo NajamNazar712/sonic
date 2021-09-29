@@ -86,6 +86,15 @@
         <div class="row">
             <div class="col">
                 <fieldset class="form-group">
+                    <select name="rider_main_category" id="main_category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+
+                        @foreach($main_category as $category)
+                            <option value="{{$category->id}}">{{$category->name}}</option>
+                        @endforeach
+                    </select>
+                </fieldset>
+            </div> <div class="col">
+                <fieldset class="form-group">
                     <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
 
                         @foreach($categories as $category)
@@ -94,7 +103,9 @@
                     </select>
                 </fieldset>
             </div>
-            <div class="col">
+            </div>
+        <div class="row">
+        <div class="col">
                 <fieldset class="form-group">
                     <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
                         @foreach($routes as $route)
@@ -188,6 +199,7 @@
         });
         var category_id = {{$rider->rider_category_id}};
         $('#category_list').val(category_id).trigger('change');
+        $('#main_category_list').val(category_id).trigger('change');
         $("input[name='pin']").inputmask({
             'alias': 'integer',
             'allowMinus': false,

@@ -28,6 +28,11 @@
                                             </div>
 
                                             <div class="form-group col-auto">
+                                                <label>Order Id (Full)</label>
+                                                <input type="text" name="order_id" class="form-control order_id" placeholder="Order ID">
+                                            </div>
+
+                                            <div class="form-group col-auto">
                                                 <label class="d-block hidden">Search</label>
                                                 <button type="submit" class="btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                             </div>
@@ -99,6 +104,7 @@
                     url: '{{ route('cod.quick_search.list') }}',
                     data: function (d) {
                         d.tracking_number = $('#track_form .tracking_number').val();
+                        d.order_id = $('#track_form .order_id').val();
                         d.phone_number = $('#track_form .phone_number').val();
                     }
                 },
@@ -127,6 +133,7 @@
                 submitHandler: function (form) {
                     var tracking_number = $('#track_form .tracking_number').val();
                     var phone_number = $('#track_form .phone_number').val();
+                    var order_id = $('#track_form .order_id').val();
 
                     if (!(tracking_number.length >= 6 && Math.floor(tracking_number) == tracking_number && $.isNumeric(tracking_number))) {
                         tracking_number = '';
@@ -136,7 +143,7 @@
                         phone_number = '';
                     }
 
-                    if (tracking_number != '' || phone_number != '') {
+                    if (tracking_number != '' || phone_number != '' || order_id != '') {
                         table.draw();
                     }
                 }

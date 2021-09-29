@@ -117,6 +117,68 @@
         </div>
     </div>
 
+    <div class="modal fade" id="agent_assign_modal" data-backdrop="static" role="dialog" aria-labelledby="agent_assign_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="agent_assign_modal_title">Upload Excel for Agent Assigning</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="assign_agent_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.assign_agent_excel') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="form-group text-left">
+                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                </div>
+                            </div>
+
+                            <div class="col ml-auto">
+                                <div class="form-group text-right">
+                                    <a href="{{ asset('file/Trax Agent Assign Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row align-items-center justify-content-center">
+                    <div class="col">
+                        <table class="table table-bordered" id="agenttable">
+                            <thead>
+                            <tr role="row" class="bg-primary white text-center">
+                                <th colspan="2" class="border-primary border-darken-1">Agents</th>
+                            </tr>
+                            <tr role="row" class="bg-primary bg-lighten-1 white">
+                                <th class="text-center border-primary border-lighten-2">ID</th>
+                                <th class="border-primary border-lighten-2">Name</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($agents as $agent)
+                                    <tr role="row">
+                                        <td class="text-center">{{$agent->id}}</td>
+                                        <td>{{$agent->name}}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="EditEstimateChargesModal" role="dialog" aria-labelledby="EditEstimateChargesModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
@@ -361,6 +423,12 @@
 
         var selected_rows = [];
         var restricted_rows = [];
+        var tableagent = $('#agenttable').DataTable({
+                scrollY: '200px',
+                });
+            $('#agent_assign_modal').on('shown.bs.modal', function () {
+                tableagent.columns.adjust();
+            });
         @php $permission = (in_array(490, session('permissions'))); if($permission){ $permission = 1; }else{ $permission = 0; } @endphp
         $(document).ready(function () {
             $('#label_select').prepend('<option value="" selected="selected"></option>').select2({
@@ -549,6 +617,7 @@
                                                         table.button('.assign').disable();
                                                         table.button('.confirm').disable();
                                                         table.button('.re-attempt').disable();
+                                                        table.button('.un-assign').disable();
 
                                                     });
                                             } else {
@@ -569,7 +638,76 @@
                         }
                     },
                         @endif
+                        @if (session('role_id') == 1 || in_array(316, session('permissions')))
+                        {
+                        text: 'Un Assign Agent',
+                        className: 'btn btn-primary un-assign',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != '' && restricted_rows.length == 0){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Un Assign Agent!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
 
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                // shipment_remarks[id] = remark;
+                                            }
+                                        });
+
+                                        $.ajax({
+                                            url: '{!! route('admin.return.unassign.agent') !!}',
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids':selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                                'action': 'un-assign',
+                                            }
+                                        }).done(function (data) {
+                                            UnblockPagePermanently();
+                                            selected_rows = [];
+                                            restricted_rows = [];
+                                            table.rows().deselect();
+                                            table.draw('false');
+                                            table.button('.confirm').disable();
+                                            table.button('.re-attempt').disable();
+                                            table.button('.assign').disable();
+                                            table.button('.un-assign').disable();
+
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        });
+                                    }
+                                });
+
+                            }
+                        }
+                    },
+                        @endif
                         @if (session('role_id') == 1 || in_array(45, session('permissions')))
                     {
                         text: 'Confirm',
@@ -645,8 +783,9 @@
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
                                             table.button('.assign').disable();
-                                            table.draw('false');
+                                            table.button('.un-assign').disable();
                                             table.rows().deselect();
+                                            table.draw('false');
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                         });
@@ -716,6 +855,7 @@
                                             table.button('.re-attempt').enable();
                                         }
                                         table.button('.assign').enable();
+                                        table.button('.un-assign').enable();
                                     }
                                 }
                             });
@@ -752,7 +892,7 @@
                                         table.button('.confirm').disable();
                                         table.button('.assign').disable();
                                         table.button('.re-attempt').disable();
-
+                                        table.button('.un-assign').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -765,6 +905,14 @@
                         text: '<i class="la la-file-excel-o"></i> Upload',
                         action : function(e) {
                             $('#excel_upload_modal').modal('show');
+                        }
+                    },
+                    {
+                        title: 'Upload Agent',
+                        className: 'btn btn-primary excel-upload',
+                        text: '<i class="la la-file-excel-o"></i> Upload Agent',
+                        action : function(e) {
+                            $('#agent_assign_modal').modal('show');
                         }
                     },
                     'reset'
@@ -980,11 +1128,13 @@
                                 table.button('.confirm').enable();
                                 table.button('.assign').enable();
                                 table.button('.re-attempt').enable();
+                                table.button('.un-assign').enable();
                             }
                             else {
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
                             }
                         }
                     });
@@ -1022,11 +1172,13 @@
                                 table.button('.confirm').disable();
                             }
                             table.button('.assign').enable();
+                            table.button('.un-assign').enable();
                         }
                         else {
                             table.button('.confirm').disable();
                             table.button('.assign').disable();
                             table.button('.re-attempt').disable();
+                            table.button('.un-assign').disable();
                         }
                     }else{
                         if(hub_ids[0] == hub_id){
@@ -1062,11 +1214,13 @@
                                     table.button('.confirm').disable();
                                 }
                                 table.button('.assign').enable();
+                                table.button('.un-assign').enable();
                             }
                             else {
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
                             }
                         }else{
                             var error = "Selected hubs should be the same!";
@@ -1193,6 +1347,30 @@
                     form.submit();
                 }
             });
+            $('#assign_agent_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your shipment(s) are being updated!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
             $('#update_return_reason_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -1254,6 +1432,7 @@
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
                                 table.draw('false');
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 $('#ReturnConfirmReasonModal').modal('hide');
