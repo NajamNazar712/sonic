@@ -2746,10 +2746,13 @@
 
         // InsuranceOvernight
         insuranceChargesSwitch.onchange = function () {
+            console.log(1);
             if(insuranceChargesSwitch.checked === true){
+                console.log(2);
                 $('.insurance-charges-div-overnight').find('input').prop('disabled',false);
                 $('.insurance-charges-btn-overnight').find('button').prop('disabled',false);
             }else if(insuranceChargesSwitch.checked === false){
+                console.log(3);
                 $('.insurance-charges-div-overnight').find('input').prop('disabled',true);
                 $('.insurance-charges-btn-overnight').find('button').prop('disabled',true);
 
