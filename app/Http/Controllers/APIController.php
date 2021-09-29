@@ -940,7 +940,7 @@ class APIController extends Controller
             }
 
             if ($service_type_id == 3 && $payment_mode_id == 4) {
-                $payment_mode_id == 1;
+                $payment_mode_id = 1;
             }
 
             if ($payment_mode_id == 4) {
