@@ -674,10 +674,15 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + '  '+ open_box_iocn +'  '+ ccd_icon +'</div>';
-
+                                @if (session('role_id') == 1 || in_array(45, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 return" id=' + id + ' data-tracking=' + details.tracking_number + '>Return</button>';
+                                @endif
+                                @if (session('role_id') == 1 || in_array(46, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 returnMarkStatus" id=' + id + ' data-tracking=' + details.tracking_number + '>Re-Attempt</button>';
+                                @endif
+                                @if (session('role_id') == 1 || in_array(245, session('permissions')))
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 intercept" id=' + id + ' data-tracking=' + details.tracking_number + '>Intercept</button>';
+                                @endif
                                 shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if ('complain' in details) {
                                     shipment += '<a class="mr-1 d-sm-inline-block" href="' + complain_route + details.complain.id + '" target="_blank"><button class="btn btn-sm w-100 ';
