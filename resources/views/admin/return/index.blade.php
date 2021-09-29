@@ -549,6 +549,7 @@
                                                         table.button('.assign').disable();
                                                         table.button('.confirm').disable();
                                                         table.button('.re-attempt').disable();
+                                                        table.button('.un-assign').disable();
 
                                                     });
                                             } else {
@@ -569,7 +570,76 @@
                         }
                     },
                         @endif
+                        @if (session('role_id') == 1 || in_array(316, session('permissions')))
+                        {
+                        text: 'Un Assign Agent',
+                        className: 'btn btn-primary un-assign',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != '' && restricted_rows.length == 0){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Un Assign Agent!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        blockPagePermanently();
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
 
+                                            if ($(row.node()).hasClass('selected')) {
+                                                var id = parseInt(row.id());
+                                                // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                // shipment_remarks[id] = remark;
+                                            }
+                                        });
+
+                                        $.ajax({
+                                            url: '{!! route('admin.return.unassign.agent') !!}',
+                                            method:'POST',
+                                            data:{
+                                                'shipment_ids':selected_rows,
+                                                '_token':'{{ csrf_token() }}',
+                                                'action': 'un-assign',
+                                            }
+                                        }).done(function (data) {
+                                            UnblockPagePermanently();
+                                            selected_rows = [];
+                                            restricted_rows = [];
+                                            table.rows().deselect();
+                                            table.draw('false');
+                                            table.button('.confirm').disable();
+                                            table.button('.re-attempt').disable();
+                                            table.button('.assign').disable();
+                                            table.button('.un-assign').disable();
+
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        });
+                                    }
+                                });
+
+                            }
+                        }
+                    },
+                        @endif
                         @if (session('role_id') == 1 || in_array(45, session('permissions')))
                     {
                         text: 'Confirm',
@@ -645,8 +715,9 @@
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
                                             table.button('.assign').disable();
-                                            table.draw('false');
+                                            table.button('.un-assign').disable();
                                             table.rows().deselect();
+                                            table.draw('false');
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                         });
@@ -716,6 +787,7 @@
                                             table.button('.re-attempt').enable();
                                         }
                                         table.button('.assign').enable();
+                                        table.button('.un-assign').enable();
                                     }
                                 }
                             });
@@ -752,7 +824,7 @@
                                         table.button('.confirm').disable();
                                         table.button('.assign').disable();
                                         table.button('.re-attempt').disable();
-
+                                        table.button('.un-assign').disable();
                                         hub_ids.splice(index, 1);
                                     }
                                 }
@@ -980,11 +1052,13 @@
                                 table.button('.confirm').enable();
                                 table.button('.assign').enable();
                                 table.button('.re-attempt').enable();
+                                table.button('.un-assign').enable();
                             }
                             else {
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
                             }
                         }
                     });
@@ -1022,11 +1096,13 @@
                                 table.button('.confirm').disable();
                             }
                             table.button('.assign').enable();
+                            table.button('.un-assign').enable();
                         }
                         else {
                             table.button('.confirm').disable();
                             table.button('.assign').disable();
                             table.button('.re-attempt').disable();
+                            table.button('.un-assign').disable();
                         }
                     }else{
                         if(hub_ids[0] == hub_id){
@@ -1062,11 +1138,13 @@
                                     table.button('.confirm').disable();
                                 }
                                 table.button('.assign').enable();
+                                table.button('.un-assign').enable();
                             }
                             else {
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
                             }
                         }else{
                             var error = "Selected hubs should be the same!";
@@ -1151,7 +1229,7 @@
                 if(row_id != ''){
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     var url = redirect.replace(':id', row_id);
-                    window.location = url;
+                    window.open(url);
                 }
             });
 
@@ -1254,6 +1332,7 @@
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
+                                table.button('.un-assign').disable();
                                 table.draw('false');
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 $('#ReturnConfirmReasonModal').modal('hide');
