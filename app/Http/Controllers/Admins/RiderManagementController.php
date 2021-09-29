@@ -25,6 +25,7 @@ use App\Http\Models\SmsHistoryRider;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\RiderMainCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -144,11 +145,12 @@ class RiderManagementController extends Controller
     public function addRiderView($type){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
         $operation_riders = OperationRidersCategory::all();
         $shifts = EmployeeShift::where('status', 1)->get();
 
-        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts]);
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category,'route_types' => $route_types, 'cities'=>$city,'operation_riders' =>$operation_riders, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category]);
     }
     public function addRiderDetails(Request $request){
         $type = $request->rider_type;
@@ -161,6 +163,7 @@ class RiderManagementController extends Controller
             'route_id'=>'required',
             'operation_rider_id'=>'required',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'pin' => 'required|numeric',
             'rider_shift' => 'required|numeric'
         ];
@@ -207,6 +210,7 @@ class RiderManagementController extends Controller
             'cnic'=>$request->cnic,
             'address'=>$request->address,
             'route_id'=>$route_id,
+            'rider_main_category_id'=>$request->rider_main_category,
             'rider_category_id'=>$request->rider_category,
             'operation_rider_id'=>$request->operation_rider_id,
             'status'=>1,
@@ -240,12 +244,13 @@ class RiderManagementController extends Controller
     public function editRiderView($id, $type){
         $city = City::where('business_category_id', 1)->select(['id','name'])->get();
         $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
         $route_types = RouteType::all();
         $rider = Rider::find($id);
         $route = Route::where('city_id',$rider->city_id)->get();
         $operation_rider_ids =  OperationRidersCategory::all();
         $shifts =  EmployeeShift::where('status', 1)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts]);
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route,'route_types' => $route_types,'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts,'main_category' => $main_category]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -256,6 +261,7 @@ class RiderManagementController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'rider_shift'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -279,6 +285,7 @@ class RiderManagementController extends Controller
 
 
         $rider->rider_category_id = $request->rider_category;
+        $rider->rider_main_category_id = $request->rider_main_category;
 
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
@@ -675,10 +682,11 @@ class RiderManagementController extends Controller
         $rider_type = RiderType::all();
         $city = City::where('business_category_id', 1)->get();
         $category = RiderCategory::all();
+        $main_category = RiderMainCategory::all();
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
         $shifts = EmployeeShift::where('status', 1)->get();
-        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category, 'shifts' => $shifts]);
+        return view('admin.management.riders.rider_request')->with(['rider_types'=>$rider_type, 'categories'=>$category, 'routes' => $route, 'cities' => $city,'operation_rider_category' => $operation_rider_category, 'shifts' => $shifts,'main_category' =>$main_category]);
     }
 
     public function rider_request_list(Request $request)
@@ -735,6 +743,7 @@ class RiderManagementController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_request_id' => 'required',
             'rider_type' => "required|numeric",
@@ -779,6 +788,7 @@ class RiderManagementController extends Controller
             'address'=>$request->address,
             'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category,
+            'rider_main_category_id'=>$request->rider_main_category,
             'status'=>1,
             'pin'=> bcrypt($request->pin),
             'created_by' => Auth::id(),

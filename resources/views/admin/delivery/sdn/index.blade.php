@@ -51,6 +51,26 @@
                         </div>
                     </div>
                     <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+                            </div>
+                            <input type="text" name="search_date_from_deposited"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from_deposited" placeholder="Deposited Date From">
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+                            </div>
+                            <input type="text" name="search_date_to_deposited" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to_deposited" placeholder="Deposited Date To">
+                        </div>
+                    </div>
+                    <div class="col-3">
                         <div class="form-group">
                             <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
                         </div>
@@ -70,8 +90,8 @@
                         <th class="border-primary border-darken-1">Deposited Amount</th>
 
                         <th class="border-primary border-darken-1">Deposited By</th>
-
                         <th class="border-primary border-darken-1">Deposited Date</th>
+                        <th class="border-primary border-darken-1">Resolved By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Adjustment Date</th>
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
@@ -396,6 +416,36 @@
                     }
                 }
             });
+
+            var search_date_from_deposited = $('#search_date_from_deposited').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to_deposited').pickadate('picker').set('min', $('#search_date_from_deposited').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_to_deposited = $('#search_date_to_deposited').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from_deposited').pickadate('picker').set('max', $('#search_date_to_deposited').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -416,8 +466,8 @@
                             head.push('DNCC Amount');
                             head.push('Deposited Amount');
                             head.push('Deposited By');
-                            // head.push('Company Bank');
                             head.push('Deposited Date');
+                            head.push('Resolved By');
                             head.push('Status');
                             head.push('Adjustment Date');
                             head.push('Adjustment Amount');
@@ -436,8 +486,8 @@
                                 row.push(values.sdn_amount);
                                 row.push(values.sdn_deposit_amount);
                                 row.push(values.deposited_by);
-                                // row.push(values.bank);
                                 row.push(values.created_at);
+                                row.push(values.resolved_by);
                                 row.push(values.status);
                                 row.push(values.adjustment_date);
                                 row.push(values.adjustment_amount);
@@ -479,6 +529,8 @@
                         d.search_tracking = $('#search_tracking').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_date_from_deposited = $('input[name="search_date_from_deposited_formatted"]').val();
+                        d.search_date_to_deposited = $('input[name="search_date_to_deposited_formatted"]').val();
                     }
                 },
                 rowId: 'sdn_id',
@@ -494,8 +546,8 @@
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
-                    // { data:'bank' ,name: 'banks_lists.id', class: 'align-middle bank'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
+                    { data:'resolved_by' ,name: 'resolved_by', class: 'align-middle resolved_by'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},

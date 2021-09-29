@@ -1255,6 +1255,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
         Route::post('excel/assign_agent_excel','Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
         Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
+        Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');   
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');

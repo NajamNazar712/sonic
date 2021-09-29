@@ -74,14 +74,26 @@
     <div class="row">
         <div class="col">
             <fieldset class="form-group">
+                <select name="rider_main_category" id="category_main_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <option value="" selected>Select a Rider Main Category</option>
+                    @foreach($main_category as $category)
+                        <option value="{{$category->id}}">{{$category->name}}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+        <div class="col">
+            <fieldset class="form-group">
                 <select name="rider_category" id="category_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="" selected>Select a Rider Category</option>
+                    <option value="" selected>Select a Rider Sub Category</option>
                     @foreach($categories as $category)
                         <option value="{{$category->id}}">{{$category->name}}</option>
                     @endforeach
                 </select>
             </fieldset>
         </div>
+    </div>
+    <div class="row">
         <div class="col">
             <fieldset class="form-group">
                 <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
@@ -182,9 +194,13 @@
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#addRiderForm")
-        });                          
+        });
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select a rider category',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#category_main_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a rider main category',
             dropdownParent: $("#addRiderForm")
         });
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
