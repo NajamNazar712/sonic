@@ -3831,7 +3831,7 @@ class ReturnController extends Controller
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
-                    if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id',3)->where('a.id', $row['agent_id'])->exists()) {
+                    if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id',3)->where('a.status',1)->where('a.id', $row['agent_id'])->exists()) {
                         $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
                     }
                 }
