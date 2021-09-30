@@ -4095,7 +4095,7 @@ class ReturnController extends Controller
         return view('admin.return.rcp_agent', compact('agents','today','hubs'));
     }
 
-    public function rcp_agent_list(Request $request){
+    public function rcp_agent_list(Request $request){   
         
         $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
                     ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
@@ -4177,7 +4177,7 @@ class ReturnController extends Controller
             }
             if ($request->get('agent')) {
                 $agent_ids = $request->get('agent');
-                $agent_productivity = $agent_productivity->whereIn('admin_id',$agent_ids);
+                $agent_productivity = $agent_productivity->whereIn('agent_return_confirmations.admin_id',$agent_ids);
             }
             if($request->get('hub')){
                 $hub_id = $request->get('hub');

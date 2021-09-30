@@ -98,6 +98,12 @@ class AdminLoginController extends Controller
                     $agent_login->current_date = Carbon::now()->format("Y-m-d");
                     $agent_login->save();
                 }
+            }else{
+                $check_login = $check_login->get()->first();
+                if($check_login->login_time == NULL){
+                    $check_login->login_time = Carbon::now();
+                    $check_login->save();
+                }
             }
 //mark login end
             session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers,'sales_coordinator' => $sales_coordinator,'first_login' => $first_login]);

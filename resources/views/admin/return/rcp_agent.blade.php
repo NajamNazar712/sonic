@@ -281,40 +281,7 @@
             });
 
             get_rcp_cards_data();
-            // var from_date = $('#from_date').pickadate({
-            //     firstDay: 1,
-            //     clear: 'Clear',
-            //     format:'dd mmmm, yyyy',
-            //     selectYears: true,
-            //     selectMonths: true,
-            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
-            //     hiddenSuffix: '_formatted',
-            //     onOpen: function() {
-            //         $('#from_date_root').css('top','40px');
-            //     },
-            //     onSet: function(context) {
-            //         if (context.select) {
-            //             $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
-            //         }
-            //     }
-            // });
-            // var to_date = $('#to_date').pickadate({
-            //     firstDay: 1,
-            //     clear: 'Clear',
-            //     format:'dd mmmm, yyyy',
-            //     selectYears: true,
-            //     selectMonths: true,
-            //     formatSubmit: 'yyyy-mm-dd 23:59:59',
-            //     hiddenSuffix: '_formatted',
-            //     onOpen: function() {
-            //         $('#to_date_root').css('top', '40px');
-            //     },
-            //     onSet: function(context) {
-            //         if (context.select) {
-            //             $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
-            //         }
-            //     }
-            // });
+            
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -391,10 +358,6 @@
                 ajax:{
                     url: '{{ route('admin.return.rcp_agent.list') }}',
                     data: function (d) {
-                        // var from_date = ;
-                        // var to_date = ;
-                        // var hub = $('#search_origin').val();
-                        // var agent = $('#search_agent').val();
                         d.agent = $('#search_agent').val();
                         d.hub = $('#search_hub').val();
 
@@ -408,13 +371,13 @@
                     {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
                     {data: 'start_time', name: 'start_time', class: 'align-middle start_time'},
                     {data: 'end_time', name: 'end_time', class: 'align-middle end_time'},
-                    {data: 'total_assigning', name: 'total_assigning', class: 'align-middle total_assigning'},
-                    {data: 'actual_productivity', name: 'actual_productivity', class: 'align-middle actual_productivity'},
-                    {data: 'reattempt', name: 'reattempt', class: 'align-middle reattempt'},
-                    {data: 'return', name: 'return', class: 'align-middle return'},
-                    {data: 'intercept', name: 'shipments.intercept', class: 'align-middle intercept'},
-                    {data: 'pending', name: 'pending', class: 'align-middle pending'},
-                    {data: 'productivity', name: 'productivity', class: 'align-middle productivity'},
+                    {data: 'total_assigning', orderable: false, searchable: false, name: 'total_assigning', class: 'align-middle total_assigning'},
+                    {data: 'actual_productivity', orderable: false, searchable: false, name: 'actual_productivity', class: 'align-middle actual_productivity'},
+                    {data: 'reattempt', orderable: false, searchable: false, name: 'reattempt', class: 'align-middle reattempt'},
+                    {data: 'return', orderable: false, searchable: false, name: 'return', class: 'align-middle return'},
+                    {data: 'intercept', orderable: false, searchable: false, name: 'shipments.intercept', class: 'align-middle intercept'},
+                    {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
+                    {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -437,7 +400,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') ) {
+                        if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') || $(header).is('.productivity')) {
                             $(td).appendTo($(search));
                         }
                         // else if($(header).is('.status')){
