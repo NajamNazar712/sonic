@@ -48,7 +48,8 @@ class RiderManagementController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),58);
         $category = RiderCategory::all();
-        return view('admin.management.riders.permanent_index')->with(['categories'=>$category]);
+        $main_category = RiderMAinCategory::all();
+        return view('admin.management.riders.permanent_index')->with(['categories'=>$category,'main_categories'=>$main_category]);
     }
 
     public function permanent_list(Request $request){
@@ -468,7 +469,8 @@ class RiderManagementController extends Controller
     public function incentive_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),59);
         $category = RiderCategory::all();
-        return view('admin.management.riders.incentive_index')->with(['categories'=>$category]);
+        $main_category = RiderMainCategory::all();
+        return view('admin.management.riders.incentive_index')->with(['categories'=>$category,'main_categories'=>$main_category]);
     }
 
     public function incentive_list(Request $request){
@@ -563,7 +565,8 @@ class RiderManagementController extends Controller
     public function blacklist_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),350);
         $category = RiderCategory::all();
-        return view('admin.management.riders.blacklisted')->with(['categories'=>$category]);
+        $main_category = RiderMainCategory::all();
+        return view('admin.management.riders.blacklisted')->with(['categories'=>$category,'main_categories'=>$main_category]);
     }
     public function blacklist_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -575,10 +578,11 @@ class RiderManagementController extends Controller
             ->leftjoin('zones as z','cities.zone_id','=','z.id')
             ->leftjoin('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->join('rider_main_categories','rider_main_categories.id','=','riders.rider_main_category_id')
             ->leftjoin('admins as cb', 'cb.id', '=', 'riders.created_by')
             ->leftjoin('admins as ub', 'ub.id', '=', 'riders.updated_by')
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
-            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
+            ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
             ->where('riders.blacklist', 1);
 
         if (session('role_id') != 1) {

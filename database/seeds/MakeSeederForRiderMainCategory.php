@@ -13,8 +13,8 @@ class MakeSeederForRiderMainCategory extends Seeder
     {
         DB::table('rider_main_categories')->truncate();
         DB::table('rider_main_categories')->insert(array(
-            array('name'=>'Pickup Rider'),
-            array('name'=>'Delivery Rider'),
+            array('name'=>'Pickup Courier'),
+            array('name'=>'Delivery Courier'),
         ));
     }
 }

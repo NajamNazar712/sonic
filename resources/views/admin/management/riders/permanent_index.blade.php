@@ -28,7 +28,8 @@
                                 <th class="border-primary border-darken-1">CNIC</th>
                                 <th class="border-primary border-darken-1">Address</th>
                                 <th class="border-primary border-darken-1">Route</th>
-                                <th class="border-primary border-darken-1">Category</th>
+                                <th class="border-primary border-darken-1">Main Category</th>
+                                <th class="border-primary border-darken-1">Sub-Category</th>
                                 <th class="border-primary border-darken-1">Status</th>
                                 <th class="border-primary border-darken-1">Created By</th>
                                 <th class="border-primary border-darken-1">Created At</th>
@@ -302,6 +303,7 @@
                     {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
                     {data: 'address', name: 'riders.address', class: 'align-middle address'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
+                    {data: 'main_category', name: 'rider_main_categories.id', class: 'align-middle main_category'},
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
@@ -329,6 +331,7 @@
                         '<option value="1">Active</option>' +
                         '</select>';
                     var category_select = '<select name="category_select" id="category_select" class="select2 form-control"></select>';
+                    var main_category_select = '<select name="main_category_select" id="main_category_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -336,17 +339,22 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.select')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.status')){
+                        } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.category')){
+                                }).wrap(td);
+                        } else if ($(header).is('.category')) {
                             $(category_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
+                                }).wrap(td);
+                        } else if ($(header).is('.main_category')) {
+                        $(main_category_select).appendTo($(search))
+                            .on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
+                    }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -363,24 +371,32 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    var data = $.map({!! $categories !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data = $.map({!! $categories !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
+                    var data1 = $.map({!! $categories !!}, function (obj) {
+                        obj.text = obj.name; // replace pk with your identifier
 
                         return obj;
                     });
 
-                    $("#category_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Category",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+            $("#category_select").prepend('<option value="" selected></option>').select2({
+                data:data1,
+                placeholder: "Select Sub-Category",
+                width:'100%',
+                containerCssClass: 'select-xs',
+                dropdownCssClass: 'form-control-sm p-0'
+            });
+
+            var data = $.map({!! $main_categories !!}, function (obj) {
+                obj.text = obj.name; // replace name with the property used for the text
+
+                return obj;
+            });
+            $("#main_category_select").prepend('<option value="" selected></option>').select2({
+                data:data,
+                placeholder: "Select Main Category",
+                width:'100%',
+                containerCssClass: 'select-xs',
+                dropdownCssClass: 'form-control-sm p-0'
+            });
                     this.api().table().columns.adjust();
                 }
             });
