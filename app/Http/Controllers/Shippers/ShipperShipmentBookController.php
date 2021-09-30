@@ -174,7 +174,7 @@ class ShipperShipmentBookController extends Controller
             $payment_mode_id = 2;
         }
         else{
-            $payment_mode_id == 1;
+            $payment_mode_id = 1;
         }
 
         $shipment->payment_mode_id = $payment_mode_id;
