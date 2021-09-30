@@ -1399,7 +1399,7 @@ class DailyPickupSalesReportController extends Controller
 
         $shipping_mode_wise_header['header'] = ['S. No.','Shipping Mode', 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Avg/Parcel Revenue','Actual Weight','Avg Actual Weight/Parcel','Avg Revenue on Actual Weight','Chargeable Weight','Avg. Chargeable Weight/Parcel','Avg. Revenue On Chargeable Weight','Collection Amount','Avg. Amount Collection','% Rev. on Amount Collection'];
 
-        $shipping_mode_wise_details = self::daily_pickup_sales_shipping_mode_wise($date_from,$date_to,TRUE, $sale_person_id);
+        $shipping_mode_wise_details = self::daily_pickup_sales_shipping_mode_wise_kae($date_from,$date_to,TRUE, $sale_person_id);
 
         $total_shipping_booked = 0;
         $total_shipping_received = 0;
@@ -2343,6 +2343,241 @@ class DailyPickupSalesReportController extends Controller
             }
 
         }
+        return $data;
+    }
+
+    static public function daily_pickup_sales_shipping_mode_wise_kae($date_from,$date_to, $sales_tagging = FALSE, $sale_person_id = NULL){
+
+        $data = array();
+        $shipping_modes = ShippingMode::all();
+
+
+        if($sales_tagging == true){
+
+            $tagged_shippers = DB::connection('reports')->table('sale_tier_tags')->where('admin_id', $sale_person_id)->select('user_id')->pluck('user_id')->toArray();
+
+//            $assigned_admins = DB::connection('reports')->table('multiple_sale_leads')->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
+//                ->leftjoin('sale_person_tags as spt', 'spt.admin_id', '=', 'mst.admin_id')
+//                ->where('multiple_sale_leads.admin_id', $sale_person_id)
+//                ->where('spt.status', 0)
+//                ->whereNotNull('spt.user_id')->select('spt.user_id')->pluck('spt.user_id')->toArray();
+//            if($assigned_admins) {
+//                $tagged_shippers = array_merge($tagged_shippers, $assigned_admins);
+//            }
+
+            $serial = 1;
+            foreach($shipping_modes as $mode){
+
+                $booked = 0;
+                $received = 0;
+                $cod_collection = 0;
+                $actual_weight = 0;
+                $chargeable_weight = 0;
+                $revenue_wo_gst = 0;
+
+                $booked= DB::connection('reports')->table('shipments')
+                    ->whereBetween('shipments.created_at',[$date_from,$date_to])
+                    ->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id','!=',1690)
+                    ->where('shipments.shipping_mode_id', $mode->id)->whereIn('user_id', $tagged_shippers)->count();
+
+
+                $received = DB::connection('reports')->table('shipments')
+                    ->whereExists(function ($query) use ($date_from, $date_to) {
+                        $query->from('shipments_journey')
+                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                            ->whereBetween('created_at', [$date_from, $date_to])
+                            ->where('shipper_status_id', 2);
+                    })->whereIn('user_id', $tagged_shippers)->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipments.shipping_mode_id', $mode->id)->count();
+
+                $shipments_data = array();
+                $shipments_data = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
+                    $query->from('shipments_journey')
+                        ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+                        ->whereBetween('created_at', [$date_from, $date_to])
+                        ->where('shipper_status_id', 2);
+                })->whereIn('user_id', $tagged_shippers)->where('shipments.packaging_material_request', '=', 0)->where('shipments.shipping_mode_id', $mode->id)->where('shipments.user_id', '!=', 1690)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
+
+
+                $revenue_wo_gst = $shipments_data->revenue_wo_gst;
+                $actual_weight = $shipments_data->actual_weight;
+                $chargeable_weight = $shipments_data->chargeable_weight;
+                $cod_collection = $shipments_data->cod_collection;
+
+                $data[$mode->id]['serial'] = $serial;
+                $data[$mode->id]['mode'] = $mode->mode;
+                $data[$mode->id]['booked'] = $booked;
+                $data[$mode->id]['received'] = $received;
+                $data[$mode->id]['revenue_wo_gst'] = $revenue_wo_gst;
+                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $revenue_wo_gst/$received:0;
+                $data[$mode->id]['actual_weight'] = $actual_weight;
+                $data[$mode->id]['avg_actual_weight'] = ($received != 0) ? $actual_weight / $received : 0;
+                $data[$mode->id]['avg_rev_actual_weight'] = ($actual_weight != 0) ? $revenue_wo_gst / $actual_weight:0;
+                $data[$mode->id]['chargeable_weight'] = $chargeable_weight;
+                $data[$mode->id]['avg_chargeable_weight'] = ($received != 0) ? $chargeable_weight / $received:0;
+                $data[$mode->id]['avg_rev_chargeable_weight'] = ($chargeable_weight != 0) ? $revenue_wo_gst / $chargeable_weight:0;
+                $data[$mode->id]['collection_amount'] = $cod_collection;
+                $data[$mode->id]['avg_amount_collection'] = ($received != 0) ? $cod_collection / $received : 0;
+                $data[$mode->id]['revenue_amount_collection'] = ($cod_collection != 0) ? $revenue_wo_gst / $cod_collection : 0;
+                $data[$mode->id]['revenue_amount_collection'] = $data[$mode->id]['revenue_amount_collection'] * 100;
+                $serial++;
+            }
+        }
+//        else if($rm_id != null){
+//
+//            $assigned_hubs = AdminHub::where('admin_id', $rm_id)->pluck('hub_id')->toArray();
+//            $hubs = DB::connection('reports')->table('cities')->whereIn('hub_id', $assigned_hubs)->where('pickup', 1)->pluck('id')->toArray();
+//
+//            $serial = 1;
+//            foreach($shipping_modes as $mode){
+//
+//                $booked = 0;
+//                $received = 0;
+//                $cod_collection = 0;
+//                $actual_weight = 0;
+//                $chargeable_weight = 0;
+//                $revenue_wo_gst = 0;
+//
+//                $booked= DB::connection('reports')->table('shipments')
+//                    ->whereExists(function ($query) use ($hubs) {
+//                        $query->from('user_shipping_infos')
+//                            ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+//                            ->whereExists(function ($sub_query) use ($hubs) {
+//                                $sub_query->from('cities')
+//                                    ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+//                                    ->whereIn('cities.id', $hubs);
+//                            });
+//                    })
+//                    ->whereBetween('shipments.created_at',[$date_from,$date_to])
+//                    ->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id','!=',1690)
+//                    ->where('shipments.shipping_mode_id', $mode->id)->select('shipments.id')->get()->count();
+//
+//
+//                $received = DB::connection('reports')->table('shipments')
+//                    ->whereExists(function ($query) use ($hubs) {
+//                        $query->from('user_shipping_infos')
+//                            ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+//                            ->whereExists(function ($sub_query) use ($hubs) {
+//                                $sub_query->from('cities')
+//                                    ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+//                                    ->whereIn('cities.id', $hubs);
+//                            });
+//                    })
+//                    ->whereExists(function ($query) use ($date_from, $date_to) {
+//                        $query->from('shipments_journey')
+//                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+//                            ->whereBetween('created_at', [$date_from, $date_to])
+//                            ->where('shipper_status_id', 2);
+//                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipments.shipping_mode_id', $mode->id)->select('shipments.id')->get()->count();
+//
+//                if($booked > 0 || $received > 0){
+//
+//                    $shipments_data = array();
+//
+//                    $shipments_data = DB::connection('reports')->table('shipments')
+//                        ->whereExists(function ($query) use ($hubs) {
+//                            $query->from('user_shipping_infos')
+//                                ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+//                                ->whereExists(function ($sub_query) use ($hubs) {
+//                                    $sub_query->from('cities')
+//                                        ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+//                                        ->whereIn('cities.id', $hubs);
+//                                });
+//                        })
+//                        ->whereExists(function ($query) use ($date_from, $date_to) {
+//                            $query->from('shipments_journey')
+//                                ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+//                                ->whereBetween('created_at', [$date_from, $date_to])
+//                                ->where('shipper_status_id', 2);
+//                        })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipments.shipping_mode_id', $mode->id)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
+//
+//                    $revenue_wo_gst = $shipments_data->revenue_wo_gst;
+//                    $actual_weight = $shipments_data->actual_weight;
+//                    $chargeable_weight = $shipments_data->chargeable_weight;
+//                    $cod_collection = $shipments_data->cod_collection;
+//                }
+//
+//                $data[$mode->id]['serial'] = $serial;
+//                $data[$mode->id]['mode'] = $mode->mode;
+//                $data[$mode->id]['booked'] = $booked;
+//                $data[$mode->id]['received'] = $received;
+//                $data[$mode->id]['revenue_wo_gst'] = $revenue_wo_gst;
+//                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $revenue_wo_gst/$received:0;
+//                $data[$mode->id]['actual_weight'] = $actual_weight;
+//                $data[$mode->id]['avg_actual_weight'] = ($received != 0) ? $actual_weight / $received : 0;
+//                $data[$mode->id]['avg_rev_actual_weight'] = ($actual_weight != 0) ? $revenue_wo_gst / $actual_weight:0;
+//                $data[$mode->id]['chargeable_weight'] = $chargeable_weight;
+//                $data[$mode->id]['avg_chargeable_weight'] = ($received != 0) ? $chargeable_weight / $received:0;
+//                $data[$mode->id]['avg_rev_chargeable_weight'] = ($chargeable_weight != 0) ? $revenue_wo_gst / $chargeable_weight:0;
+//                $data[$mode->id]['collection_amount'] = $cod_collection;
+//                $data[$mode->id]['avg_amount_collection'] = ($received != 0) ? $cod_collection / $received : 0;
+//                $data[$mode->id]['revenue_amount_collection'] = ($received != 0) ? $revenue_wo_gst / $cod_collection : 0;
+//                $data[$mode->id]['revenue_amount_collection'] = $data[$mode->id]['revenue_amount_collection'] * 100;
+//                $serial++;
+//            }
+//        }
+//        else{
+//
+//            $serial = 1;
+//            foreach($shipping_modes as $mode){
+//
+//                $booked = 0;
+//                $received = 0;
+//                $cod_collection = 0;
+//                $actual_weight = 0;
+//                $chargeable_weight = 0;
+//                $revenue_wo_gst = 0;
+//
+//                $booked= DB::connection('reports')->table('shipments')
+//                    ->whereBetween('shipments.created_at',[$date_from,$date_to])
+//                    ->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id','!=',1690)
+//                    ->where('shipments.shipping_mode_id', $mode->id)->select('shipments.id')->get()->count();
+//
+//
+//                $received = DB::connection('reports')->table('shipments')
+//                    ->whereExists(function ($query) use ($date_from, $date_to) {
+//                        $query->from('shipments_journey')
+//                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+//                            ->whereBetween('created_at', [$date_from, $date_to])
+//                            ->where('shipper_status_id', 2);
+//                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipments.shipping_mode_id', $mode->id)->select('shipments.id')->get()->count();
+//
+//                if($booked > 0 || $received > 0){
+//
+//                    $shipments_data = array();
+//
+//                    $shipments_data = DB::connection('reports')->table('shipments')->whereExists(function ($query) use ($date_from, $date_to) {
+//                        $query->from('shipments_journey')
+//                            ->where('shipments.id', DB::raw('`shipments_journey`.`shipment_id`'))
+//                            ->whereBetween('created_at', [$date_from, $date_to])
+//                            ->where('shipper_status_id', 2);
+//                    })->where('shipments.packaging_material_request', '=', 0)->where('shipments.user_id', '!=', 1690)->where('shipments.shipping_mode_id', $mode->id)->select(DB::connection('reports')->raw('SUM(IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)) as revenue_wo_gst'), DB::connection('reports')->raw('SUM(amount) as cod_collection'), DB::connection('reports')->raw('SUM(actual_weight) as actual_weight'), DB::connection('reports')->raw('SUM(chargeable_weight) as chargeable_weight'))->first();
+//
+//                    $revenue_wo_gst = $shipments_data->revenue_wo_gst;
+//                    $actual_weight = $shipments_data->actual_weight;
+//                    $chargeable_weight = $shipments_data->chargeable_weight;
+//                    $cod_collection = $shipments_data->cod_collection;
+//                }
+//
+//                $data[$mode->id]['serial'] = $serial;
+//                $data[$mode->id]['mode'] = $mode->mode;
+//                $data[$mode->id]['booked'] = $booked;
+//                $data[$mode->id]['received'] = $received;
+//                $data[$mode->id]['revenue_wo_gst'] = $revenue_wo_gst;
+//                $data[$mode->id]['avg_parcel_rev'] = ($received != 0) ? $revenue_wo_gst/$received:0;
+//                $data[$mode->id]['actual_weight'] = $actual_weight;
+//                $data[$mode->id]['avg_actual_weight'] = ($received != 0) ? $actual_weight / $received : 0;
+//                $data[$mode->id]['avg_rev_actual_weight'] = ($actual_weight != 0) ? $revenue_wo_gst / $actual_weight:0;
+//                $data[$mode->id]['chargeable_weight'] = $chargeable_weight;
+//                $data[$mode->id]['avg_chargeable_weight'] = ($received != 0) ? $chargeable_weight / $received:0;
+//                $data[$mode->id]['avg_rev_chargeable_weight'] = ($chargeable_weight != 0) ? $revenue_wo_gst / $chargeable_weight:0;
+//                $data[$mode->id]['collection_amount'] = $cod_collection;
+//                $data[$mode->id]['avg_amount_collection'] = ($received != 0) ? $cod_collection / $received : 0;
+//                $data[$mode->id]['revenue_amount_collection'] = ($cod_collection != 0) ? $revenue_wo_gst / $cod_collection : 0;
+//                $data[$mode->id]['revenue_amount_collection'] = $data[$mode->id]['revenue_amount_collection'] * 100;
+//                $serial++;
+//            }
+//
+//        }
         return $data;
     }
 
