@@ -142,7 +142,8 @@
                             head.push('CNIC');
                             head.push('Address');
                             head.push('Route');
-                            head.push('Category');
+                            head.push('Main Category');
+                            head.push('Sub-Category');
                             head.push('Status');
                             head.push('Created By');
                             head.push('Created At');
@@ -163,6 +164,7 @@
                                 row.push(values.cnic);
                                 row.push(values.address);
                                 row.push(values.route);
+                                row.push(values.main_category);
                                 row.push(values.category);
                                 row.push(values.status);
                                 row.push(values.created_by);

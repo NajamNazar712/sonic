@@ -1253,6 +1253,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
+        Route::post('excel/assign_agent_excel','Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
         Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
         Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');   
 
