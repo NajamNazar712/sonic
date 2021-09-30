@@ -772,6 +772,7 @@ class ShipperReportsController extends Controller
         $datatable = Datatables::of($shipment)
         ->addColumn('rider_remarks', function($shipment) {
             $rider_status = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('rider_id')->get()->last();
+<<<<<<< .mine
             if($rider_status){
                 if($rider_status){
                     return $rider_status->remarks;
@@ -779,6 +780,15 @@ class ShipperReportsController extends Controller
                     return '-';
                 }
             }
+=======
+            if ($rider_status) {
+                return $rider_status->remarks;
+            } else {
+                return '-';
+            }
+
+
+>>>>>>> .theirs
         })
         ->addColumn('last_reason', function($shipment) {
             $last_reason = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('status_reason_id')->get()->last();
