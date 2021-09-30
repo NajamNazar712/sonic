@@ -8479,7 +8479,7 @@ class NotificationsController extends Controller
 
                     $to = array();
 
-                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'fawwad.haider@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
+                    $to = ['mohsin.qamar@trax.pk', 'mohsin.ali@trax.pk', 'waqas@trax.pk', 'muhammad.yousuf@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'fawad.ahmed@trax.pk'];
 
                     $cc = array();
                     $bcc = array();
