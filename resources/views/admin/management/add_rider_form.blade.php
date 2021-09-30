@@ -196,11 +196,11 @@
             dropdownParent: $("#addRiderForm")
         });
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a rider category',
+            placeholder:'Select Rider Sub-Category',
             dropdownParent: $("#addRiderForm")
         });
         $('#category_main_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a rider main category',
+            placeholder:'Select Rider Main Category',
             dropdownParent: $("#addRiderForm")
         });
         $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({
