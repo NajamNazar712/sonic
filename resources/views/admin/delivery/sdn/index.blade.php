@@ -261,43 +261,25 @@
                     <form id="sdn_adjustment_add" class="form" action="{{route('admin.delivery.sdn.adjustment.add')}}" method="post">
                         @csrf
                         <input type="hidden" name="sdn_id" id="sdn_id_for_adjustment">
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <select name="petty_cash_select" class="select2" id="petty_cash_select">
-                                        @foreach($petty_cash_list as $petty_cash)
-                                            <option value="{{$petty_cash->id}}">{{$petty_cash->id}}</option>
-                                        @endforeach 
-                                    </select>
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <table class="table table-bordered" style="z-index: 3;">
+                        <input type="hidden" name="sdn_rows" id="sdn_rows_for_adjustment">
+                        <table class="table table-bordered datatable" id="sdn_adjustment_table" style="z-index: 3;width: 100%;">
                             <thead>
-                            <tr role="row" class="bg-primary white">
-                                <th class="border-primary border-darken-1">Date</th>
-                                <th class="border-primary border-darken-1">Adjustment Amount</th>
-                                <th class="border-primary border-darken-1">Adjustment Reference</th>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">Statement #</th>
+                                    <th class="border-primary border-darken-1">Statement Creation Date</th>
+                                    <th class="border-primary border-darken-1">Amount</th>
+                                    <th class="border-primary border-darken-1">Action</th>
 
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <td class="">
-                                        <div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="adjustment_date" id="adjustment_date" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date*" data-rule-required="true" data-msg-required="Date is required"></div>
-                                    </td>
-                                    <td>
-                                        <div class="form-group">
-                                            <input class="form-control form-control-sm adjustment_amount" id="adjustment_amount" name="adjustment_amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required"></div>
-                                    </td>
-                                    <td>
-                                        <div class="form-group">
-                                            <input class="form-control form-control-sm adjustment_ref" id="adjustment_ref" name="adjustment_ref" placeholder="Adjustment Ref*" data-rule-required="true" data-msg-required="Adjustment reference is required"></div>
-                                    </td>
                                 </tr>
-                            </tbody>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3">Total</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
                         </table>
 
                         <hr>
@@ -1050,44 +1032,6 @@
                    });
                }
             });
-            var adjustment_date = $('#adjustment_date').pickadate({
-                firstDay: 1,
-                today: '',
-                clear: '',
-                close: '',
-                weekdaysShort: ['S', 'M', 'Tu', 'W', 'Th', 'F', 'S'],
-                showMonthsShort: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-            });
-
-            $('#petty_cash_select').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Petty Cash Statement ID',
-                dropdownParent:$('#AddAdjustmentModal')
-            }).bind('select2:select',function(){
-                var id = $(this).val();
-                if(id){
-                    $.ajax({
-                        url: '{!! route('admin.delivery.sdn.petty_cash_detail') !!}',
-                        method: 'GET',
-                        data: {
-                            'petty_cash_id': id
-                        }
-                    }).done(function(data){
-                        if(data.status == 0){
-                                var d = new Date(data.details.date.date);
-                            
-                               adjustment_date.pickadate('picker').set({'select': d},{muted: true});
-                               $('#adjustment_amount').val(data.details.amount);
-                               $('#adjustment_ref').val(data.details.reference);
-                               
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        }
-                    });
-                }
-            });
 
             $('#ViewDepositSlip').on('hidden.bs.modal', function () {
                 deposit_slip_table.clear();
@@ -1099,31 +1043,149 @@
                 selected_rows = [];
             });
 
-            
-            $('input.adjustment_amount').inputmask({
-                'alias': 'decimal',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'digits': 2,
-                'min': 0.00,
-                'max': 10000000.00
-            });
-
-            $('body').on('change','#sdn_adjustment_add .adjustment_ref',function() {
-                $(this).val($(this).val().trim());
-            });
+            var sdn_adjustment_table;
+            var selected_adjustment_rows = [];
             $('#datatable tbody').on('click', 'button.adjustment_add', function () {
                var sdn_id = $(this).parents('tr').attr('id');
+               var options_html = "";
                if(sdn_id){
-                   $('#adjustment_date').val('');
-                   $('#adjustment_amount').val('');
-                   $('#adjustment_ref').val('');
+                   var adjustment_rows_count = 0;
+                   $.ajax({
+                       url: '{!! route('admin.delivery.sdn.get.petty_cash_statements') !!}',
+                       method: 'POST',
+                       data: {
+                           'id': sdn_id,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   })
+                       .done(function(data) {
+                            if(data.status == 1)
+                            {
+                                $.each(data.data,function (key,value) {
+                                    options_html += "<option value='"+value.id+"' data-date='"+value.date+"' data-amount='"+value.amount+"' >"+value.id+"</option>";
+                                });
+                                sdn_adjustment_table = $('#sdn_adjustment_table').DataTable({
+                                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                                    buttons:[{
+                                        title: 'Add Row',
+                                        className: 'btn btn-primary mb-1',
+                                        text: '<i class="la la-plus"></i> Add Row',
+                                        action:function (e) {
+                                            add_adjustment_row();
+                                        }
+                                    }],
+                                    ordering:false,
+                                    paging:false,
+                                    columns: [
+                                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                        {name: 'statement', class: 'align-middle statement form-group', width: '20%'},
+                                        {name: 'date', class: 'align-middle date form-group'},
+                                        {name: 'amount', class: 'align-middle amount form-group'},
+                                        {name: 'action', class: 'align-middle action'},
+                                    ],
 
-                   $('#AddAdjustmentModal').modal('show');
-                   $('#sdn_id_for_adjustment').val(sdn_id);
+                                    rowCallback: function(row, data, index) {
+                                        var info = sdn_adjustment_table.page.info();
+
+                                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                                    },
+                                    footerCallback: function(row, data, start, end, display) {
+                                        var api = this.api();
+                                        api.columns('.statement', {
+                                            page: 'current'
+                                        }).every(function() {
+                                            $(this.footer()).html('Total Amount');
+                                        });
+                                        api.columns('.amount', {
+                                            page: 'current'
+                                        }).every(function() {
+                                            amount = this
+                                                .data()
+                                                .reduce(function(a, b) {
+                                                    var x = parseFloat(a) || 0;
+                                                    var y = parseFloat(b) || 0;
+                                                    return x + y;
+                                                }, 0);
+                                            $(this.footer()).html(amount);
+                                        });
+                                    }
+                                });
+
+
+                                $('#sdn_id_for_adjustment').val(sdn_id);
+                                $('#AddAdjustmentModal').modal('show');
+
+                                function add_adjustment_row() {
+                                    adjustment_rows_count++;
+                                    var statement_select = '<select class="form-control statement_select select2 unique_statement" name="statement['+adjustment_rows_count+']" data-rule-required="true" data-msg-required="Statement is required"></select>';
+                                    var amount_input = "<div class='amount_input'><div>";
+                                    if(adjustment_rows_count == 1){
+                                        var remove = '';
+                                    }else{
+                                        var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger adjustment_remove_row"><i class="la la-close"></i></a>';
+
+                                    }
+                                    sdn_adjustment_table.row.add([0, statement_select,'','',remove]).node().id = adjustment_rows_count;
+                                    sdn_adjustment_table.draw(true);
+                                    selected_adjustment_rows.push(adjustment_rows_count);
+                                    $('select[name="statement['+adjustment_rows_count+']"]').prepend('<option value="" selected="selected" data-date="" data-amount=""></option>'+options_html).select2({
+                                        placeholder:'Select Statement',
+                                        width:'100%',
+                                        dropdownCssClass: 'form-control-sm p-0'
+                                    }).bind('change',function (){
+                                        var date = $(this).find("option:selected").attr("data-date");
+                                        var amount = $(this).find("option:selected").attr("data-amount");
+                                        sdn_adjustment_table.row($(this).closest("tr")).data()[2] = date;
+                                        sdn_adjustment_table.row($(this).closest("tr")).data()[3] = amount;
+                                        $(this).closest("td").next("td").html(date);
+                                        $(this).closest("td").next("td").next("td").html(amount);
+                                        sdn_adjustment_table.draw();
+                                    });
+                                }
+
+
+                                add_adjustment_row();
+                            }
+                            else{
+                                toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                       });
+
+
                }
             });
+
+            $('body').on('click', 'a.adjustment_remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_adjustment_rows);
+
+                if (index !== -1) {
+                    selected_adjustment_rows.splice(index, 1);
+                }
+                sdn_adjustment_table.row( $(this).parents('tr') ).remove().draw();
+            });
+
+            $('#AddAdjustmentModal').on('hidden.bs.modal', function () {
+                sdn_adjustment_table.clear();
+                sdn_adjustment_table.destroy();
+                selected_adjustment_rows = [];
+            });
+
+            $.validator.addMethod("unique_statement", function(value, element) {
+                var parentForm = $(element).closest('form');
+                var timeRepeated = 0;
+                if (value != '') {
+                    $(parentForm.find('.unique_statement')).each(function () {
+                        if ($(this).val() === value && value != 0) {
+                            timeRepeated++;
+                        }
+                    });
+                }
+                return timeRepeated === 1 || timeRepeated === 0;
+
+            }, "Statement Can Not Be Duplicate");
+
             var sdn_form;
             sdn_form = $('#sdn_adjustment_add').validate({
                 errorClass: 'danger',
@@ -1132,13 +1194,37 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to Adjust SDN!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $('#sdn_rows_for_adjustment').val(selected_adjustment_rows);
+                            form.submit();
+                        }
+                    });
+
                 }
             });
-            $('#AddAdjustmentModal').on('hidden.bs.modal', function () {
-                $('#petty_cash_select').val('').trigger('change');
-                sdn_form.resetForm()
-            });
+
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
                 table.draw();

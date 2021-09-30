@@ -1135,6 +1135,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('sdn')->name('sdn.')->group(function (){
             Route::get('','Admins\DeliveryController@sdn_view')->name('index');
             Route::get('list','Admins\DeliveryController@sdn_list')->name('list');
+            Route::post('get/petty_cash_statements','Admins\DeliveryController@get_petty_cash_statements')->name('get.petty_cash_statements');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');

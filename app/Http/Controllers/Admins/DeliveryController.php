@@ -21,6 +21,7 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\DeliveryNoteRequests;
@@ -4532,6 +4533,19 @@ class DeliveryController extends Controller
         return $datatable->make(true);
     }
 
+    public function get_petty_cash_statements(Request $request)
+    {
+        $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->where('sdn_id',$request->id)->select(['id','created_at as date','total_amount as amount']);
+
+        if($petty_cash_list->exists()) {
+            $petty_cash_list = $petty_cash_list->get();
+            return response()->json(['status' => 1, 'data' => $petty_cash_list]);
+        }
+        else{
+            return response()->json(['status' => 0,'message'=>"No Petty Cash Statements Find for Current SDN"]);
+        }
+    }
+
     public function sdn_details(Request $request, $id)
     {
         return view('admin.delivery.sdn.details')->with('sdn_id', $id);
@@ -4590,7 +4604,7 @@ class DeliveryController extends Controller
         foreach($deposit_rows as $row){
             $total_amount += $request->amount[$row];
         }
-        if( $sdn->sdn_amount>= $total_amount)
+        if( $sdn->sdn_amount >= $total_amount)
         {
             $sdn->sdn_deposit_amount = $total_amount;
         }
@@ -6456,25 +6470,41 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             $sdn = StationDepositNote::find($sdn_id);
             $dncc_amount= $sdn->sdn_amount;
             $deposit_amount= $sdn->sdn_deposit_amount;
-            $adjustment_amount =  $request->adjustment_amount;
+            $adjustment_amount =  0;
 
+            $rows = explode(',',$request->sdn_rows);
+            foreach ($rows as $row)
+            {
+                $statement = PettyCashStatement::find($request->statement[$row]);
+                if($statement)
+                {
+                    $adjustment_amount += $statement->total_amount;
+                }
+            }
             $total = $deposit_amount + $adjustment_amount;
             if($dncc_amount == $total){
-                $sdn->adjustment_amount = $request->adjustment_amount;
-                $sdn->adjustment_date = $request->adjustment_date_formatted;
-                $sdn->adjustment_ref = $request->adjustment_ref;
+                $sdn->adjustment_amount = $adjustment_amount;
                 $sdn->adjusted = 1;
                 $sdn->sdn_net_amount = $dncc_amount - $deposit_amount - $adjustment_amount;
-                // if($request->petty_cash_select != ''){
-                $sdn->petty_cash_statement_id = $request->petty_cash_select;
-                // }
                 $sdn->save();
 
-                $petty_details = PettyCashStatement::find($request->petty_cash_select);
-                if($petty_details) {
-                    $petty_details->status = 5;
-                    $petty_details->save();
+                foreach ($rows as $row)
+                {
+                    $statement = PettyCashStatement::find($request->statement[$row]);
+                    if($statement)
+                    {
+                        $statement->status = 5;
+                        $statement->save();
+
+                        $sdn_adjustment = new StationDepositNoteAdjustment();
+                        $sdn_adjustment->sdn_id = $sdn->id;
+                        $sdn_adjustment->petty_cash_statement_id = $statement->id;
+                        $sdn_adjustment->date = $statement->created_at;
+                        $sdn_adjustment->amount = $statement->total_amount;
+                        $sdn_adjustment->save();
+                    }
                 }
+
 
                 return redirect()->back()->with(['success' => 'Adjustment added successfully!']);
 
