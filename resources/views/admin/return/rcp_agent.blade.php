@@ -275,8 +275,6 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
 
@@ -393,9 +391,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    // var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    // var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                    // var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -403,22 +398,7 @@
                         if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') || $(header).is('.productivity')) {
                             $(td).appendTo($(search));
                         }
-                        // else if($(header).is('.status')){
-                        //     $(drop_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }else if($(header).is('.mode')){
-                        //     $(mode_drop_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }else if($(header).is('.service_type')){
-                        //     $(service_drop_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }
+                      
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -430,31 +410,6 @@
                         }
                     });
 
-
-                    // $("#status_select").prepend('<option value="" selected></option>').select2({
-                    //       data:data,
-                    //       placeholder: "Select Status",
-                    //       width:'100%',
-                    //       containerCssClass: 'select-xs',
-                    //       dropdownCssClass: 'form-control-sm p-0'
-                    //   });
-                    //
-                    //
-                    //   $("#mode_select").prepend('<option value="" selected></option>').select2({
-                    //       data:data1,
-                    //       placeholder: "Select Mode",
-                    //       width:'100%',
-                    //       containerCssClass: 'select-xs',
-                    //       dropdownCssClass: 'form-control-sm p-0'
-                    //   });
-                    //
-                    //   $("#service_select").prepend('<option value="" selected></option>').select2({
-                    //       data:data2,
-                    //       placeholder: "Select Service",
-                    //       width:'100%',
-                    //       containerCssClass: 'select-xs',
-                    //       dropdownCssClass: 'form-control-sm p-0'
-                    //   });
                     this.api().table().columns.adjust();
                 }
             });

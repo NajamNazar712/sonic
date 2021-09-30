@@ -4140,9 +4140,15 @@ class ReturnController extends Controller
                 return $return_assign_shipments;
              })
              ->addColumn('pending', function ($agent_productivity){
-                return ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                 $total = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)->count();
+                $actual = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
                 ->where('status',0)
                 ->whereDate('created_at',$agent_productivity->current_date)->count();
+                if($actual == 0){
+                    return $total;
+                }else{
+                    return $total - $actual;
+                }
              })
              ->addColumn('productivity', function ($agent_productivity){
                 $total =  ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)->count();
@@ -4178,57 +4184,44 @@ class ReturnController extends Controller
         $from = $request->from_date;
         $to = $request->to_date;
         $hub = $request->hub;
-
-        
-      
         if ($hub) {
-            $stats['total'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
-            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            $stats['total'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->where('h.id',$hub);
-            $stats['completed'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
-            ->join('shipments as sh','sh.id','=','ras.shipment_id')
-            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->where('ras.status',0)
             ->where('h.id',$hub);
 
-            $stats['rcp_reattempt'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
-            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            $stats['completed'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->where('ras.status',0)
+            ->where('return_assigned_shipments.status',0)
+            ->where('h.id',$hub);
+
+            $stats['rcp_reattempt'] = ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
+            ->join('cities AS dc', 'sh.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->where('return_assigned_shipments.status',0)
             ->where('h.id',$hub)
             ->where('sh.shipper_status_id',13);
             
         }else{
-            $stats['total'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id');
-            $stats['completed'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
-            ->where('ras.status',0);
-            $stats['rcp_reattempt'] = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-            ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
-            ->join('shipments as sh','sh.id','=','ras.shipment_id')
+            $stats['total'] = ReturnAssignedShipments::where('created_at','<>',null);
+            $stats['completed'] = ReturnAssignedShipments::where('status',0);
+            $stats['rcp_reattempt'] =ReturnAssignedShipments::join('shipments as sh','sh.id','=','return_assigned_shipments.shipment_id')
             ->where('sh.shipper_status_id',13);
         }
         if($from != null || $to != null){
-            $stats['total'] = $stats['total']->whereBetween('ras.created_at',[$from,$to]);
-            $stats['completed'] =  $stats['completed']->whereBetween('ras.created_at',[$from,$to]);
-            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereBetween('ras.created_at',[$from,$to]);
+            $stats['total'] = $stats['total']->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            $stats['completed'] =  $stats['completed']->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereBetween('return_assigned_shipments.created_at',[$from,$to]);
             
         }
       
         if($agent){
-            $stats['total'] = $stats['total']->whereIn('ras.admin_id', $agent);
-            $stats['completed'] = $stats['completed']->whereIn('ras.admin_id', $agent);
-            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereIn('ras.admin_id', $agent);
+            $stats['total'] = $stats['total']->whereIn('return_assigned_shipments.admin_id', $agent);
+            $stats['completed'] = $stats['completed']->whereIn('return_assigned_shipments.admin_id', $agent);
+            $stats['rcp_reattempt'] = $stats['rcp_reattempt']->whereIn('return_assigned_shipments.admin_id', $agent);
         }
-     
+        
         $stats['total'] = number_format($stats['total']->count());
         $stats['completed'] = number_format($stats['completed']->count());
         $stats['rcp_reattempt'] = number_format($stats['rcp_reattempt']->count());
