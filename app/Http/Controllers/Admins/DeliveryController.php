@@ -100,7 +100,7 @@ class DeliveryController extends Controller
 
     public function pending_delivery_index(Request $request)
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),19);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 19);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
@@ -109,9 +109,8 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),79);
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
         $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -132,7 +131,7 @@ class DeliveryController extends Controller
                     ->where('ras.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
-            ->leftjoin('admins as agent','agent.id','=','ras.admin_id')
+            ->leftjoin('admins as agent', 'agent.id', '=', 'ras.admin_id')
             ->join('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=',
@@ -150,8 +149,8 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_address',
-                'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_address',
+                'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint')
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
@@ -165,7 +164,7 @@ class DeliveryController extends Controller
                 'class' => function ($shipments) {
                     if ($shipments->complaint != null) {
                         return 'complaint_row';
-                    }else if($shipments->booking_type_id == 3){
+                    } else if ($shipments->booking_type_id == 3) {
                         return "tnb_row";
                     } else {
                         return '';
@@ -176,14 +175,13 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('amount', function($shipment){
+            ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper .' (' . $shipment->poc . ')';
-                }
-                else {
+                    return $shipment->shipper . ' (' . $shipment->poc . ')';
+                } else {
                     return $shipment->shipper;
                 }
             })
@@ -264,11 +262,11 @@ class DeliveryController extends Controller
                     return '';
                 }
             });
-            if($mode = $request->get('search_shipping_mode')){
+        if ($mode = $request->get('search_shipping_mode')) {
 
-                $datatables->where('sm.id', '=', $mode);
-            }
-           return $datatables->make(true);
+            $datatables->where('sm.id', '=', $mode);
+        }
+        return $datatables->make(true);
 
 
     }
@@ -296,7 +294,19 @@ class DeliveryController extends Controller
         $routes = $routes->get();
         $operation_rider_category = OperationRidersCategory::all();
 
-        return view('admin.delivery.note.index')->with(['routes' => $routes,'operation_rider_category' => $operation_rider_category]);
+        return view('admin.delivery.note.index')->with(['routes' => $routes, 'operation_rider_category' => $operation_rider_category]);
+    }
+
+    public function get_adjustment_reference(Request $request)
+    {
+        $adjustments = StationDepositNoteAdjustment::where('sdn_id',$request->sdn_id)->get();
+        $html = "";
+        foreach ($adjustments as $adjustment)
+        {
+            $html .= '<u><a href="javascript:void(0);" onclick="printStatement('.$adjustment->petty_cash_statement_id.')">'. $adjustment->petty_cash_statement_id .'</a></u><br>';
+        }
+
+        return response()->json(['status'=>1,'html'=>$html]);
     }
 
     public function check_rider_dncc_status(Request $request)
@@ -4392,6 +4402,31 @@ class DeliveryController extends Controller
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
+            ->addColumn('adjusted_reference_link', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn)->count();
+                    if($adjustment_count > 0) {
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $adjustment_count . '</button>';
+                    }
+                    else{
+                        return 0;
+                    }
+                }
+            })
+            ->addColumn('adjusted_reference_count', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn)->count();
+                    return $adjustment_count;
+                }
+            })
             ->editColumn('adjustment_date', function ($deliveries) {
                 $date = str_replace('00:00:00', '', $deliveries->adjustment_date);
                 return $date;
@@ -4449,6 +4484,10 @@ class DeliveryController extends Controller
                 $adjustment_add_button = '<button type="button" class="dropdown-item adjustment_add" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add SDN Adjustment</div></button>';
                 $upload_deposit_slip_button = '<button type="button" class="dropdown-item" data-target-id="' . $result->sdn_id . '" data-target="#uploadDepositSlip" data-toggle="modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Upload Deposit Slip</div></button>';
 
+                $reconcile_to_deposit = '<button type="button" class="dropdown-item update_status_deposit"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Deposit</div></button>';
+
+                $add_remove_dncc = '<button type="button" class="dropdown-item add_remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add/Remove DNCC</div></button>';
+
 
 
                 $dropdown = '
@@ -4475,6 +4514,16 @@ class DeliveryController extends Controller
 
                 if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
                     $dropdown .= $upload_deposit_slip_button;
+                }
+
+                if($result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions'))))
+                {
+                    $dropdown .= $reconcile_to_deposit;
+                }
+
+                if($result->status != 2 && (session('role_id') == 1 || in_array(605, session('permissions'))))
+                {
+                    $dropdown .= $add_remove_dncc;
                 }
 
                 $dropdown .= '
@@ -4533,6 +4582,60 @@ class DeliveryController extends Controller
         return $datatable->make(true);
     }
 
+    public function back_to_deposit(Request $request)
+    {
+        $station_deposit_note = StationDepositNote::find($request->sdn_id);
+
+        if($station_deposit_note) {
+            if($station_deposit_note->status == 2) {
+                if($station_deposit_note->sdn_type == 1) {
+                    $station_deposit_note->status = 1;
+                    $station_deposit_note->status_updated_at = Carbon::now();
+                    $station_deposit_note->status_updated_by = Auth::id();
+
+                    $station_deposit_note->save();
+
+                    $delivery_note_ids = DeliveryNoteStationDepositNote::where('station_deposit_node_id', $station_deposit_note->id)->get();
+
+                    foreach ($delivery_note_ids as $value) {
+                        foreach (DeliveryNoteShipment::where('delivery_note_id', $value->delivery_note_id)->get() as $delivery_note_shipment) {
+                            if ($delivery_note_shipment->status == 7) {
+
+                                $shipment = Shipment::where('id', $delivery_note_shipment->shipment_id);
+                                if ($shipment->exists()) {
+                                    $shipment = $shipment->first();
+                                    if ($shipment->booking_type_id == 2) {
+                                        $delivery_note_shipment->status = 4;
+                                    } else if ($shipment->booking_type_id == 3) {
+                                        $delivery_note_shipment->status = 5;
+                                    } else if ($shipment->booking_type_id == 4) {
+                                        $delivery_note_shipment->status = 6;
+                                        $shipment->walk_in_status = 0;
+                                        $shipment->save();
+                                    } else {
+                                        $delivery_note_shipment->status = 6;
+                                    }
+                                }
+
+                                $delivery_note_shipment->save();
+                            }
+                        }
+                    }
+
+                    return response()->json(['status' => 0, 'message' => 'Station Deposit Note Status Updated To Deposited']);
+                }
+                else{
+                    
+                }
+            }
+            else{
+                return response()->json(['status'=>0,'message'=>'Station Deposit Note Not Resolved']);
+        }
+        }
+        else{
+            return response()->json(['status'=>0,'message'=>'Station Deposit Note Not Found']);
+        }
+    }
     public function get_petty_cash_statements(Request $request)
     {
         $petty_cash_list = PettyCashStatement::whereIn('status',[0,1,2,7])->where('sdn_id',$request->id)->select(['id','created_at as date','total_amount as amount']);

@@ -1132,10 +1132,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             });
         });
+        Route::prefix('completed')->name('completed.')->group(function(){
+            Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
+            Route::get('list','Admins\DeliveryController@completed_receive_deliveries_list')->name('list');
+            Route::post('deposit/dncc','Admins\DeliveryController@completed_deliveries_selected_dncc')->name('deposit.dncc');
+            Route::get('sdn/create','Admins\DeliveryController@create_sdn_view')->name('sdn.create');
+            Route::post('sdn/create','Admins\DeliveryController@create_sdn_submit')->name('sdn.create.submit');
+            Route::get('dncc/list','Admins\DeliveryController@get_sdn_list')->name('dncc.list');
+            Route::post('shipments','Admins\DeliveryController@completed_shipments')->name('shipments');
+            Route::post('shipments/delivered','Admins\DeliveryController@completed_shipments_delivered')->name('shipments.delivered');
+
+
+            Route::prefix('retail')->name('retail.')->group(function() {
+                Route::get('', 'Admins\Retail\RetailCompletedDeliveries@index')->name('index');
+                Route::get('list', 'Admins\Retail\RetailCompletedDeliveries@list')->name('list');
+                Route::post('shipments/delivered','Admins\Retail\RetailCompletedDeliveries@shipments_delivered')->name('shipments.delivered');
+
+                Route::post('deposit/pncc','Admins\Retail\RetailCompletedDeliveries@completed_deliveries_selected_pncc')->name('deposit.pncc');
+                Route::get('pncc/list','Admins\Retail\RetailCompletedDeliveries@get_sdn_list')->name('pncc.list');
+
+                Route::get('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_view')->name('sdn.create');
+                Route::post('sdn/create','Admins\Retail\RetailCompletedDeliveries@create_sdn_submit')->name('sdn.create.submit');
+
+            });
+        });
         Route::prefix('sdn')->name('sdn.')->group(function (){
             Route::get('','Admins\DeliveryController@sdn_view')->name('index');
             Route::get('list','Admins\DeliveryController@sdn_list')->name('list');
             Route::post('get/petty_cash_statements','Admins\DeliveryController@get_petty_cash_statements')->name('get.petty_cash_statements');
+            Route::post('get/adjustment_reference','Admins\DeliveryController@get_adjustment_reference')->name('get.adjustment_reference');
+            Route::post('back_to_deposit','Admins\DeliveryController@back_to_deposit')->name('back_to_deposit');
             Route::post('dn','Admins\DeliveryController@sdn_dncc_list')->name('dn');
             Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
             Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');

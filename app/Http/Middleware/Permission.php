@@ -229,6 +229,7 @@ class Permission
             'delivery.completed.dncc.list' => 41,
             'delivery.sdn.index' => 42,
             'delivery.sdn.list' => 42,
+            'delivery.sdn.back_to_deposit' => 604,
             'delivery.sdn.dn' => 42,
             'delivery.sdn.shipments' => 42,
             'delivery.sdn.details' => 42,

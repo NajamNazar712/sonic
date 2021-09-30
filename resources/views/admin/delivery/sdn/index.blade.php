@@ -137,6 +137,13 @@
 
                             </tr>
                             </thead>
+                            <tfoot>
+                            <tr>
+                                <td colspan="3">Total</td>
+                                <td id="upload_deposit_total"></td>
+                                <td></td>
+                            </tr>
+                            </tfoot>
                         </table>
                     <hr>
                     <div class="row justify-content-center">
@@ -196,6 +203,25 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="delivered_shipments_modal_title">Delivered Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="adjustment_reference_modal" data-backdrop="static" role="dialog" aria-labelledby="adjustment_reference_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="adjustment_reference_modal_title">Adjustment Reference(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -368,6 +394,35 @@
     {{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
+        function printStatement(id) {
+            $.ajax({
+                url: '{!! route('admin.petty_cash.statements.print') !!}',
+                method: 'POST',
+                data: {
+                    'id': id,
+                    '_token': '{{ csrf_token() }}'
+                }
+            })
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
+
+                    if(!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        }
+
         $(document).ready(function () {
             var search_date_from = $('#search_date_from').pickadate({
                 firstDay: 1,
@@ -472,7 +527,7 @@
                                 row.push(values.resolved_by);
                                 row.push(values.status);
                                 row.push(values.adjustment_date);
-                                row.push(values.adjustment_amount);
+                                row.push(values.adjusted_reference_count);
                                 row.push(values.adjustment_ref);
                                 row.push(values.difference_amount);
 
@@ -533,7 +588,7 @@
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'adjustment_date' ,name: 'station_deposit_notes.adjustment_date', class: 'align-middle adjustment_date'},
                     { data:'sdn_adjustment_amount' ,name: 'station_deposit_notes.adjustment_amount', class: 'align-middle adjustment_amount'},
-                    { data:'adjustment_ref' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle adjustment_ref',orderable: false, searchable: false},
+                    { data:'adjusted_reference_link' ,name: 'station_deposit_notes.adjustment_ref', class: 'align-middle text-center adjustment_ref',orderable: false, searchable: false},
                     { data:'difference_amount' ,name: 'difference_amount', class: 'align-middle difference_amount',orderable: false, searchable: false},
                     { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
@@ -803,6 +858,38 @@
                     });
 
             });
+            $('#datatable tbody').on('click','tr td.adjustment_ref button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.delivery.sdn.get.adjustment_reference') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'sdn_id': id,
+                        }
+                    })
+                        .done(function (data) {
+                            if (data.status == 1) {
+                                var notes = '';
+
+                                notes += data.html
+                                $('#adjustment_reference_modal .modal-body').html('');
+                                $('#adjustment_reference_modal').modal('show');
+                                $('#adjustment_reference_modal .modal-body').html(notes);
+                            } else {
+                                toastr.error('Something went wrong!', 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+                        });
+                }
+
+            });
+
+
+
             $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $('#delivered_shipments_modal .modal-body').html('');
@@ -971,6 +1058,14 @@
                         'digits': 2,
                         'min': 0.00,
                         'max': 10000000.00
+                    }).bind('keyup',function (){
+                        let upload_total = 0
+                        $('#sdn_upload_table .amount').each(function(v){
+                            if($(this).val() != "") {
+                                upload_total += parseFloat($(this).val());
+                            }
+                        });
+                        $("#upload_deposit_total").html(upload_total);
                     });
                 }
             });
@@ -1029,6 +1124,46 @@
                                 deposit_slip_table.draw(true);
                             });
                         }
+                   });
+               }
+            });
+            $('body').on('click','.update_status_deposit', function () {
+               var id = $(this).parents('tr').attr('id');
+               if(id){
+                   swal({
+                       title: 'Are You Sure?',
+                       text: 'Select Yes to Mark SDN Deposited!',
+                       icon: 'warning',
+                       buttons: {
+                           cancel: {
+                               text: 'No',
+                               value: null,
+                               visible: true,
+                               closeModal: true,
+                           },
+                           confirm: {
+                               text: 'Yes',
+                               value: true,
+                               visible: true,
+                               closeModal: true
+                           }
+                       },
+                       closeOnClickOutside: false,
+                       closeOnEsc: false,
+                       dangerMode: true
+                   }).then(function (confirm) {
+                       if (confirm) {
+                           $.ajax({
+                               url:'{!! route('admin.delivery.sdn.back_to_deposit') !!}',
+                               type:'POST',
+                               data: {
+                                   'sdn_id':id,
+                                   '_token': '{{ csrf_token() }}'
+                               }
+                           }).done(function (data) {
+                               table.draw();
+                           });
+                       }
                    });
                }
             });
