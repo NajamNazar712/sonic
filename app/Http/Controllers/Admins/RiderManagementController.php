@@ -85,6 +85,14 @@ class RiderManagementController extends Controller
                     return '-';
                 }
 
+            })->editColumn('main_category', function ($rider) {
+                if($rider->main_category != null){
+                    return $rider->main_category;
+                }
+                else{
+                    return '-';
+                }
+
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
@@ -510,6 +518,15 @@ class RiderManagementController extends Controller
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
+            ->editColumn('main_category', function ($rider) {
+                if($rider->main_category != null){
+                    return $rider->main_category;
+                }
+                else{
+                    return '-';
+                }
+
+            })
             ->filterColumn('route',function($query, $keyword){
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
@@ -584,7 +601,6 @@ class RiderManagementController extends Controller
             ->leftjoin('rider_types as rt', 'rt.id', '=', 'riders.rider_type_id')
             ->select('cities.name as city','c.name as hub','z.name as zone','riders.id as rider_id','riders.id','riders.name as rider', 'riders.trax_id' ,'riders.phone','riders.cnic', 'riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','rider_main_categories.name as main_category','riders.status as status','riders.created_at','cb.name as created_by', 'ub.name as updated_by', 'riders.rider_type_id','riders.blacklist', 'rt.name as rider_type')
             ->where('riders.blacklist', 1);
-
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
         }
@@ -596,6 +612,15 @@ class RiderManagementController extends Controller
             ->editColumn('trax_id', function ($rider) {
                 if($rider->trax_id != null){
                     return $rider->trax_id;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->editColumn('main_category', function ($rider) {
+                if($rider->main_category != null){
+                    return $rider->main_category;
                 }
                 else{
                     return '-';

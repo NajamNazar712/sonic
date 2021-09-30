@@ -286,7 +286,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.riders.incentive.list') }}',
-                order: [[14, 'desc']],
+                order: [[15, 'desc']],
                 rowId : 'rider_id',
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},

@@ -157,7 +157,7 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.management.riders.blacklist.list') }}',
-                order: [[13, 'desc']],
+                order: [[14, 'desc']],
                 rowId : 'rider_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
