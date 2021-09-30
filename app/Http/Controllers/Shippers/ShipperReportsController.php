@@ -778,7 +778,7 @@ class ShipperReportsController extends Controller
                 }else{
                     return '-';
                 }
-
+            }
         })
         ->addColumn('last_reason', function($shipment) {
             $last_reason = ShipmentsJourney::where('shipment_id',$shipment->shipment_id)->whereNotNull('status_reason_id')->get()->last();
