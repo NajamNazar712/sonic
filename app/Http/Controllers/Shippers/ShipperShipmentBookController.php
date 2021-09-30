@@ -3175,14 +3175,26 @@ class ShipperShipmentBookController extends Controller
         $shipment->order_id = $order_id;
         $shipment->package_type = $package_type;
         $shipment->special_instructions = $special_instructions;
-        
 
         $shipment->estimated_weight = $estimated_weight;
         $shipment->shipping_mode_id = $shipping_mode_id;
         $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->amount = $amount;
+
+        $settings = GlobalSettings::where('type','ccd_booking')->first();
+        $ccd_accounts = array();
+        $ccd_accounts = array_map('intval', explode(',', $settings->text));
+
+        if (in_array($user_id, $ccd_accounts)) {
+            $payment_mode_id = 2;
+        }
+        else{
+            $payment_mode_id = 1;
+        }
+
         $shipment->payment_mode_id = $payment_mode_id;
+
         $shipment->shipper_status_id = 1;
         $shipment->consignee_status_id = 1;
         $shipment->walk_in_delivery_type_id = $delivery_type_id;
