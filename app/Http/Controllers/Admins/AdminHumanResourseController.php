@@ -394,6 +394,15 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_pin(Request $request)
     {
+        $validations = [
+            'pin' => 'required|integer|digits:4'
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
         $employee = Employee::find($request->employee_id);
         if($employee)
         {

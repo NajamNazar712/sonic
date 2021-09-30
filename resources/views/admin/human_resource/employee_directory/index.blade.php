@@ -229,7 +229,7 @@
                         {{csrf_field()}}
                         <input type="hidden" name="employee_id" id="employee_id" value="">
                         <div class="form-group">
-                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
+                            <input type="text" name="pin" id="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required" data-rule-minlength="4" data-rule-maxlength="4">
                         </div>
                         <div class="form-group ml-1">
                             <button type="submit" name="edit" class="btn btn-primary" value="edit">Update</button>
@@ -912,8 +912,12 @@
 
             });
 
-            $('#UpdatePinModal #pin').inputmask({
-                'mask': '9999',
+            $("#UpdatePinModal #pin").inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'mask':"9999",
                 'clearIncomplete': true,
             });
 
