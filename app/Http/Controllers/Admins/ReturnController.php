@@ -4116,46 +4116,28 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->count();
              })
              ->addColumn('reattempt', function ($agent_productivity){
-                 $counter = 0;
-                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
-                ->where('status',0)
-                ->whereDate('created_at',$agent_productivity->current_date)->get();
-                foreach ($return_assign_shipments as $return_assign_shipment) {
-                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->where('shipper_status_id',13);
-                    if($shipment->count() > 0){
-                        $counter = $shipment->count()+$counter;
-                    }
-                }
-                return $counter;
+                $return_assign_shipments = ReturnAssignedShipments::join('shipments_journey as sj','sj.shipment_id','=','return_assigned_shipments.shipment_id')
+                ->where('sj.shipper_status_id',13) 
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id) 
+                ->where('return_assigned_shipments.status',0)
+                ->whereDate('return_assigned_shipments.created_at',$agent_productivity->current_date)->count();
+                return $return_assign_shipments;
              })
              ->addColumn('return', function ($agent_productivity){
-                $counter = 0;
-                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
-                ->where('status',0)
-                ->whereDate('created_at',$agent_productivity->current_date)->get();
-                foreach ($return_assign_shipments as $return_assign_shipment) {
-                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->where('shipper_status_id',20);
-                    if($shipment->count() > 0){
-                        $counter = $shipment->count()+$counter;
-                    }
-                }
-                return $counter;
+                $return_assign_shipments = ReturnAssignedShipments::join('shipments_journey as sj','sj.shipment_id','=','return_assigned_shipments.shipment_id')
+                ->where('sj.shipper_status_id',20) 
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id) 
+                ->where('return_assigned_shipments.status',0)
+                ->whereDate('return_assigned_shipments.created_at',$agent_productivity->current_date)->count();
+                return $return_assign_shipments;
             })
              ->addColumn('intercept', function ($agent_productivity){
-                $counter = 0;
-                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
-                ->where('status',0)
-                ->whereDate('created_at',$agent_productivity->current_date)->get();
-                foreach ($return_assign_shipments as $return_assign_shipment) {
-                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->where('shipper_status_id',55);
-                    if($shipment->count() > 0){
-                        $counter = $shipment->count()+$counter;
-                    }
-                }
-                return $counter;
+                $return_assign_shipments = ReturnAssignedShipments::join('shipments_journey as sj','sj.shipment_id','=','return_assigned_shipments.shipment_id')
+                ->where('sj.shipper_status_id',55) 
+                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id) 
+                ->where('return_assigned_shipments.status',0)
+                ->whereDate('return_assigned_shipments.created_at',$agent_productivity->current_date)->count();
+                return $return_assign_shipments;
              })
              ->addColumn('pending', function ($agent_productivity){
                 return ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
@@ -4163,7 +4145,6 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->count();
              })
              ->addColumn('productivity', function ($agent_productivity){
-
                 $total =  ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)->count();
                 $achive =  ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
                 ->where('status',0)
