@@ -2354,7 +2354,7 @@ class DailyPickupSalesReportController extends Controller
 
         if($sales_tagging == true){
 
-            $tagged_shippers = DB::connection('reports')->table('sale_tier_tags')->where('admin_id', $sale_person_id)->select('user_id')->pluck('user_id')->toArray();
+            $tagged_shippers = DB::connection('reports')->table('sale_tier_tags')->where('kam', $sale_person_id)->select('user_id')->pluck('user_id')->toArray();
 
 //            $assigned_admins = DB::connection('reports')->table('multiple_sale_leads')->leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
 //                ->leftjoin('sale_person_tags as spt', 'spt.admin_id', '=', 'mst.admin_id')
