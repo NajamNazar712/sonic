@@ -39,7 +39,7 @@ class AdminPettyCashController extends Controller
         $this->middleware('Permission');
     }
 
-    //Petty Cash Statement Status 0 -> Pending,  1 -> Station Approved,  2 -> Operation Approved,  3 -> Finance Approved,  4 -> Paid, 5 -> Adjusted, 6 -> Rejected
+    //Petty Cash Statement Status 0 -> Pending,  1 -> Station Approved,  2 -> Operation Approved,  3 -> Finance Approved,  4 -> Paid, 5 -> Adjusted, 6 -> Rejected  7 ->
     public function make_petty_cash_statement_index()
     {
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();

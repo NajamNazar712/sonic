@@ -81,7 +81,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use SebastianBergmann\Environment\Console;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\SalePersonTag;
-use function foo\func;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
