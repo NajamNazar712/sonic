@@ -37,6 +37,7 @@ use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\RouteType;
 use App\Http\Models\Zone;
+use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -205,12 +206,13 @@ class AdminHumanResourseController extends Controller
         $route = Route::all();
         $operation_rider_category = OperationRidersCategory::all();
         $rider_categories = RiderCategory::all();
+        $rider_main_categories = RiderMainCategory::all();
         $route_types = RouteType::all();
         $employee_types = EmployeeType::all();
         $employee_statuses = EmployeeStatus::all();
         $employee_department = AdminDepartment::all();
         $city = City::where('business_category_id', 1)->get();
-        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department]);
+        return view('admin.human_resource.employee_directory.index')->with(['cities' => $city,'employee_types'=>$employee_types,'rider_categories' => $rider_categories, 'rider_types'=>$rider_type, 'routes' => $route,'operation_rider_category' => $operation_rider_category,'route_types'=>$route_types,'employee_statuses'=>$employee_statuses,'employee_department'=>$employee_department,'rider_main_categories'=>$rider_main_categories]);
     }
 
     public function employee_directory_list(Request $request){
@@ -516,6 +518,7 @@ class AdminHumanResourseController extends Controller
             'address'=>'required|max:255',
             'route_id'=>'required',
             'rider_category'=>'required|numeric',
+            'rider_main_category'=>'required|numeric',
             'pin' => 'required|integer|digits:4',
             'rider_type' => "required|numeric",
             'category' => "required|numeric"
@@ -574,6 +577,7 @@ class AdminHumanResourseController extends Controller
         $rider->route_id = $route_id;
         $rider->operation_rider_id = $request->category;
         $rider->rider_category_id = $request->rider_category;
+        $rider->rider_main_category_id = $request->rider_main_category;
         $rider->update();
 
         if($rider){
