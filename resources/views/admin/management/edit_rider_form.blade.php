@@ -198,9 +198,12 @@
             dropdownParent: $("#editRiderForm")
         });
         var category_id = {{$rider->rider_category_id}};
-        var main_category_id = {{$rider->rider_main_category_id}};
         $('#category_list').val(category_id).trigger('change');
+        @if($rider->rider_main_category_id != null)
+        var main_category_id = {{$rider->rider_main_category_id}};
         $('#main_category_list').val(main_category_id).trigger('change');
+        @endif
+
         $("input[name='pin']").inputmask({
             'alias': 'integer',
             'allowMinus': false,
