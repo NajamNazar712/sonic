@@ -4155,7 +4155,7 @@ class ReturnController extends Controller
                 $achive =  ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
                 ->where('status',0)
                 ->whereDate('created_at',$agent_productivity->current_date)->count();
-                return ($achive/$total)*100;
+                return number_format(($achive/$total)*100,2);
              });
              if ($request->get('from_date') && $request->get('to_date')) {
                 $from = $request->get('from_date');
@@ -4228,7 +4228,7 @@ class ReturnController extends Controller
         if($stats['total'] == 0){
             $stats['productivity'] = '0';
         }else{
-            $stats['productivity'] = (intval($stats['completed'])/intval($stats['total']))*100;
+            $stats['productivity'] = number_format((intval($stats['completed'])/intval($stats['total']))*100,2);
         }
         return response()->json(['status' => 1, 'stats' => $stats]);
 
