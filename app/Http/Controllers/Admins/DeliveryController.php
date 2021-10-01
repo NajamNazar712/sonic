@@ -4486,9 +4486,6 @@ class DeliveryController extends Controller
 
                 $reconcile_to_deposit = '<button type="button" class="dropdown-item update_status_deposit"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Update Status To Deposit</div></button>';
 
-                $add_remove_dncc = '<button type="button" class="dropdown-item add_remove_dncc"  data-target-id="' . $result->sdn_id . '" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Add/Remove DNCC</div></button>';
-
-
 
                 $dropdown = '
                   <div class="btn-group">
@@ -4519,11 +4516,6 @@ class DeliveryController extends Controller
                 if($result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions'))))
                 {
                     $dropdown .= $reconcile_to_deposit;
-                }
-
-                if($result->status != 2 && (session('role_id') == 1 || in_array(605, session('permissions'))))
-                {
-                    $dropdown .= $add_remove_dncc;
                 }
 
                 $dropdown .= '
