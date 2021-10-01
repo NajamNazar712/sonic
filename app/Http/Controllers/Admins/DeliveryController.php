@@ -4513,7 +4513,7 @@ class DeliveryController extends Controller
                     $dropdown .= $upload_deposit_slip_button;
                 }
 
-                if($result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions'))))
+                if($result->sdn_type == 1 && $result->status == 2 && (session('role_id') == 1 || in_array(604, session('permissions'))))
                 {
                     $dropdown .= $reconcile_to_deposit;
                 }
@@ -6565,7 +6565,7 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
             $sdn = StationDepositNote::find($sdn_id);
             $dncc_amount= $sdn->sdn_amount;
             $deposit_amount= $sdn->sdn_deposit_amount;
-            $adjustment_amount =  0;
+            $adjustment_amount =  $sdn->adjustment_amount;
 
             $rows = explode(',',$request->sdn_rows);
             foreach ($rows as $row)

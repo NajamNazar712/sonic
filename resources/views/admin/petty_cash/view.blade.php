@@ -67,6 +67,7 @@
                             <th class="border-primary border-darken-1">Zone</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">City / Location</th>
+                            <th class="border-primary border-darken-1">Operation Manager</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
                             <th class="border-primary border-darken-1"> Employee Id </th>
@@ -157,6 +158,7 @@
                     {data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name'},
                     {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name'},
                     {data:'city_name' ,name: 'c.name', class: 'align-middle city_name'},
+                    {data:'operation_manager_name' ,name: 'op.name', class: 'align-middle operation_manager_name'},
                     {data:'date' ,name: 'date', class: 'align-middle date'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width'},

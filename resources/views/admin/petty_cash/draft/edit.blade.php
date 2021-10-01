@@ -46,6 +46,7 @@
                             <th class="border-primary border-darken-1">Zone</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">City / Location</th>
+                            <th class="border-primary border-darken-1">Operation Manager</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
                             <th class="border-primary border-darken-1"> Employee Id </th>
@@ -137,6 +138,14 @@
             //     'rightAlign': false,
             // });
 
+            let default_zone_id = '';
+            let default_hub_id = '';
+            let default_operation_manager_id = '';
+            let default_zone_value = '';
+            let default_hub_value = '';
+            let default_operation_manager_value = '';
+            let cities_data = ""
+
             $('#select_statement_sdn').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select SDN No.',
                 width:'100%',
@@ -169,6 +178,7 @@
                     {name: 'zone', class: 'align-middle zone custom-col-width form-group'},
                     {name: 'hub', class: 'align-middle hub custom-col-width form-group'},
                     {name: 'city', class: 'align-middle city custom-col-width form-group'},
+                    {name: 'operation_manager_id', class: 'align-middle operation_manager_id custom-col-width form-group'},
                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                     {name: 'details_of_expense', class: 'align-middle details_of_expense doe-col-width form-group'},
                     {name: 'employee_id', class: 'align-middle employee_id custom-col-width form-group'},
@@ -253,8 +263,9 @@
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var zone_select = '<select class="form-control form-control-sm select2 zone_select" name="zone['+rows_count+']" data-rule-required="true" data-msg-required="Zone is required"></select>';
-                var hub_select = '<select class="form-control form-control-sm select2 hub_select" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                var zone_select = '<input type="hidden" class="zone_input_id" name="zone['+rows_count+']" value="'+default_zone_id+'"><input type="text" readonly placeholder="Select Zone" class="form-control zone_input_value" value="'+default_zone_value+'">';
+                var hub_select = '<input type="hidden" class="hub_input_id" name="hub['+rows_count+']" value="'+default_hub_id+'"><input type="text" readonly placeholder="Select Hub" class="form-control hub_input_value" value="'+default_hub_value+'">';
+                var operation_manager_select = '<input type="hidden" class="operation_manager_input_id" name="operation_manager['+rows_count+']" value="'+default_operation_manager_id+'"><input type="text" readonly class="form-control operation_manager_input_value" placeholder="Select Operation Manager" value="'+default_operation_manager_value+'">';
                 var city_select = '<select class="form-control form-control-sm select2 city_select" name="city['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
@@ -293,7 +304,7 @@
                 });
                 // var trow = '<tr><td>'+rows_count+'</td><td>'+heads_select+'</td><td>'+titles_select+'</td><td>'+hub_select+'</td><td>'+date_input+'</td><td>'+expense_detail_input+'</td><td>'+amount_input+'</td><td>'+reference_input+'</td><td>'+remarks_input+'</td><td>'+upload_image+'</td><td>'+remove+'</td></tr>';
                 // $('#datatable tbody').append(trow);
-                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,operation_manager_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -306,23 +317,15 @@
                     allowClear:true,
                     dropdownCssClass: 'form-control-sm p-0'
                 });
-                $('select[name="zone['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    data: zones,
-                    placeholder:'Select Zone',
-                    dropdownCssClass: 'form-control-sm p-0'
 
-                });
                 $('select[name="employee['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: employees,
                     placeholder:'Select Employee Id',
                     dropdownCssClass: 'form-control-sm p-0'
 
                 });
-                $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    placeholder:'Select Hub',
-                    dropdownCssClass: 'form-control-sm p-0'
-                });
                 $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data: cities_data,
                     placeholder:'Select a City',
                     dropdownCssClass: 'form-control-sm p-0'
                 });
@@ -397,6 +400,10 @@
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_zone = $(this).find(':selected');
                 var zone = parseInt(selected_zone.val());
+                default_zone_id = zone;
+                default_zone_value = selected_zone.text();
+                $(".zone_input_id").val(default_zone_id);
+                $(".zone_input_value").val(default_zone_value);
                 var hub = selected_zone.closest('td').next('td').find('.hub_select');
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.hubs') !!}',
@@ -421,6 +428,10 @@
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_hub = $(this).find(':selected');
                 var hub = parseInt(selected_hub.val());
+                default_hub_id = hub;
+                default_hub_value = selected_hub.text();
+                $(".hub_input_id").val(default_hub_id);
+                $(".hub_input_value").val(default_hub_value);
                 var city = selected_hub.closest('td').next('td').find('.city_select');
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.cities') !!}',
@@ -431,14 +442,27 @@
                     }
                 }).done(function (data) {
                     if(data.status){
-                        city.empty().trigger('change');
-                        $.each(data.data,function (key,value) {
-                            var newOption = new Option(value.name, value.id, false, false);
-                            city.append(newOption).trigger('change');
+                        cities_data = $.map(data.data, function (obj) {
+                            obj.id = obj.id;
+                            obj.text = obj.name;
+                            return obj;
                         });
-                        city.val('').trigger('change');
+                        $('.city_select').each(function(elm){
+                            $(this).empty().trigger('change');
+                            $(this).prepend('<option value="" selected="selected"></option>').select2({data:cities_data,placeholder:"Select a City"});
+                            $(this).val('').trigger('change');
+                        });
                     }
                 });
+            });
+
+            $('body').on('select2:select','.operation_manager_id .operation_manager_select',function () {
+                var selected_manager = $(this).find(':selected');
+                var manager = parseInt(selected_manager.val());
+                default_operation_manager_id = manager;
+                default_operation_manager_value = selected_manager.text();
+                $(".operation_manager_input_id").val(default_operation_manager_id);
+                $(".operation_manager_input_value").val(default_operation_manager_value);
             });
 
             $('body').on('select2:select','.employee_id .employee_select',function () {
@@ -750,6 +774,7 @@
                         var zone = '{{$data->zone_id}}';
                         var hub = '{{$data->hub_id}}';
                         var city = '{{$data->city_id}}';
+                        var operation_manager = '{{$data->operation_manager_id}}';
                         var date = '{{$data->date}}';
                         var employee_id = '{{$data->employee_id}}';
                         var employee_name = '{{$data->employee_name}}';
@@ -761,19 +786,17 @@
                         var reference_document = $.trim('{{$data->reference_document}}');
                         var reference_document_2 = $.trim('{{$data->reference_document_2}}');
 
-                    load_row(head, title, zone,hub,city, date, expense,employee_id,employee_name,employee_designation, amount, reference_no, remarks, reference_document,reference_document_2);
+                    load_row(head, title, zone,hub,city,operation_manager, date, expense,employee_id,employee_name,employee_designation, amount, reference_no, remarks, reference_document,reference_document_2);
                 @endforeach
             }
             load_data();
 
-            function load_row(head, title,zone, hub,city, date, expense,employee_id,employee_name,employee_designation, amount, reference, remarks, reference_document,reference_document_2) {
+            function load_row(head, title,zone, hub,city,operation_manager, date, expense,employee_id,employee_name,employee_designation, amount, reference, remarks, reference_document,reference_document_2) {
                 var image_url = '{{asset('/storage/petty_cash_statement_details_draft')}}';
                 rows_count++;
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var zone_select = '<select class="form-control form-control-sm select2 zone_select" name="zone['+rows_count+']" data-rule-required="true" data-msg-required="Zone is required"></select>';
-                var hub_select = '<select class="form-control form-control-sm select2 hub_select" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
                 var city_select = '<select class="form-control form-control-sm select2 city_select" name="city['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required" data-value="'+ date +'"></div>';
 
@@ -797,7 +820,6 @@
 
                 upload_image += '<br><div class="text-center">';
 
-                console.log(reference_document_2);
                 if(reference_document_2 != ''){
                     upload_image += '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="'+ image_url +'/'+ reference_document_2 +'" target="_blank">View</a></button><input type="hidden" name="image_2_'+ rows_count +'" value="'+reference_document_2+'">';
                 }
@@ -807,9 +829,14 @@
 
                 if(rows_count == 1){
                     var remove = '';
+                    var zone_select = '<select class="form-control form-control-sm select2 zone_select" name="zone['+rows_count+']" data-rule-required="true" data-msg-required="Zone is required"></select>';
+                    var hub_select = '<select class="form-control form-control-sm select2 hub_select"  name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                    var operation_manager_select = '<select class="form-control form-control-sm select2 operation_manager_select" name="operation_manager['+rows_count+']" data-rule-required="true" data-msg-required="Operation Manager is required"></select>';
                 }else{
                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-
+                    var zone_select = '<input type="hidden" class="zone_input_id" name="zone['+rows_count+']" value="'+default_zone_id+'"><input type="text" readonly placeholder="Select Zone" class="form-control zone_input_value" value="'+default_zone_value+'">';
+                    var hub_select = '<input type="hidden" class="hub_input_id" name="hub['+rows_count+']" value="'+default_hub_id+'"><input type="text" readonly placeholder="Select Hub" class="form-control hub_input_value" value="'+default_hub_value+'">';
+                    var operation_manager_select = '<input type="hidden" class="operation_manager_input_id" name="operation_manager['+rows_count+']" value="'+default_operation_manager_id+'"><input type="text" readonly class="form-control operation_manager_input_value" placeholder="Select Operation Manager" value="'+default_operation_manager_value+'">';
                 }
 
                 var heads = $.map({!! $heads !!}, function (obj) {
@@ -839,14 +866,17 @@
                 });
 
                 var city_array = @json($city_array);
-                console.log(city_array);
                 var hub_city = $.map(city_array[hub], function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
                     return obj;
                 });
 
-                console.log(hub_city);
+                var operation_managers = $.map({!! $operation_managers !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name+" ("+obj.trax_id+") ";
+                    return obj;
+                });
 
                 var employees = $.map({!! $employees !!}, function (obj) {
                     obj.id = obj.id;
@@ -855,7 +885,7 @@
                 });
                 // var trow = '<tr><td>'+rows_count+'</td><td>'+heads_select+'</td><td>'+titles_select+'</td><td>'+hub_select+'</td><td>'+date_input+'</td><td>'+expense_detail_input+'</td><td>'+amount_input+'</td><td>'+reference_input+'</td><td>'+remarks_input+'</td><td>'+upload_image+'</td><td>'+remove+'</td></tr>';
                 // $('#datatable tbody').append(trow);
-                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,operation_manager_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -871,32 +901,70 @@
                     dropdownCssClass: 'form-control-sm p-0'
                 });
                 $('select[name="title['+rows_count+']"]').val(title).trigger('change');
-                $('select[name="zone['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    data: zones,
-                    placeholder:'Select Zone',
-                    dropdownCssClass: 'form-control-sm p-0'
+                if(rows_count == 1) {
+                    $('select[name="zone[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: zones,
+                        placeholder: 'Select Zone',
+                        dropdownCssClass: 'form-control-sm p-0'
 
-                });
-                $('select[name="zone['+rows_count+']"]').val(zone).trigger('change');
-                $('select[name="employee['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    data: employees,
-                    placeholder:'Select Employee Id',
-                    dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('select[name="zone[' + rows_count + ']"]').val(zone).trigger('change');
 
-                });
-                $('select[name="employee['+rows_count+']"]').val(employee_id).trigger('change');
-                $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    data:zone_hub,
-                    placeholder:'Select Hub',
-                    dropdownCssClass: 'form-control-sm p-0'
-                });
-                $('select[name="hub['+rows_count+']"]').val(hub).trigger('change');
-                $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    data:hub_city,
-                    placeholder:'Select a City',
-                    dropdownCssClass: 'form-control-sm p-0'
-                });
-                $('select[name="city['+rows_count+']"]').val(city).trigger('change');
+                    default_zone_id = zone;
+                    $.each(zones,function (i,v){
+                       if(v.id == zone)
+                       {
+                           default_zone_value = v.text;
+                       }
+                    });
+
+                    $('select[name="hub[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: zone_hub,
+                        placeholder: 'Select Hub',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('select[name="hub[' + rows_count + ']"]').val(hub).trigger('change');
+
+
+                    default_hub_id = hub;
+                    $.each(zone_hub,function (i,v){
+                        if(v.id == hub)
+                        {
+                            default_hub_value = v.text;
+                        }
+                    });
+
+                    $('select[name="operation_manager['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: operation_managers,
+                        placeholder:'Select Operation Manager',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $('select[name="operation_manager[' + rows_count + ']"]').val(operation_manager).trigger('change');
+
+                    default_operation_manager_id = operation_manager;
+                    $.each(operation_managers,function (i,v){
+                        if(v.id == operation_manager)
+                        {
+                            default_operation_manager_value = v.text;
+                        }
+                    });
+
+                    cities_data = hub_city;
+                }
+                    $('select[name="employee[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: employees,
+                        placeholder: 'Select Employee Id',
+                        dropdownCssClass: 'form-control-sm p-0'
+
+                    });
+                    $('select[name="employee[' + rows_count + ']"]').val(employee_id).trigger('change');
+                    $('select[name="city[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: hub_city,
+                        placeholder: 'Select a City',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('select[name="city[' + rows_count + ']"]').val(city).trigger('change');
 
                 $('.reference_row').inputmask({
                     'alias': 'integer',

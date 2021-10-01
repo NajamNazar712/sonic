@@ -46,6 +46,7 @@
                                 <th class="border-primary border-darken-1">Zone</th>
                                 <th class="border-primary border-darken-1">Hub</th>
                                 <th class="border-primary border-darken-1">City / Location</th>
+                                <th class="border-primary border-darken-1">Operation Manager</th>
                                 <th class="border-primary border-darken-1">Date</th>
                                 <th class="border-primary border-darken-1">Details of Expense</th>
                                 <th class="border-primary border-darken-1"> Employee Id </th>
@@ -143,6 +144,10 @@
         textarea {
             resize: both;
         }
+
+        select:read-only{
+            pointer-events: none;
+        }
     </style>
 @endsection
 
@@ -160,6 +165,14 @@
         $(document).ready(function () {
             let main_hub = '';
             let main_hub_id = '';
+            let default_zone_id = '';
+            let default_hub_id = '';
+            let default_operation_manager_id = '';
+            let default_zone_value = '';
+            let default_hub_value = '';
+            let default_operation_manager_value = '';
+            let cities_data = ""
+
             @if (session('print'))
             $.ajax({
                 url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -227,6 +240,7 @@
                     {name: 'zone', class: 'align-middle zone custom-col-width form-group'},
                     {name: 'hub', class: 'align-middle hub custom-col-width form-group'},
                     {name: 'city', class: 'align-middle city custom-col-width form-group'},
+                    {name: 'operation_manager_id', class: 'align-middle operation_manager_id custom-col-width form-group'},
                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                     {name: 'details_of_expense', class: 'align-middle details_of_expense doe-col-width form-group'},
                     {name: 'employee_id', class: 'align-middle employee_id custom-col-width form-group'},
@@ -303,8 +317,7 @@
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control form-control-sm select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control form-control-sm select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var zone_select = '<select class="form-control form-control-sm select2 zone_select" name="zone['+rows_count+']" data-rule-required="true" data-msg-required="Zone is required"></select>';
-                var hub_select = '<select class="form-control form-control-sm select2 hub_select" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+
                 var city_select = '<select class="form-control form-control-sm select2 city_select" name="city['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
                 var date_input = '<div class="form-group input-group input-group-sm mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" id="expense_date_' + rows_count + '" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date is required"></div>';
 
@@ -326,10 +339,17 @@
                 var upload_image = '<input class="form-control form-control-sm" type="file" name="upload_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-required="true" data-msg-required="Reference Document is required" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."><br><input class="form-control form-control-sm" type="file" name="upload_2_image'+rows_count+'" data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
                 if(rows_count == 1){
                     var remove = '';
+                    var zone_select = '<select class="form-control form-control-sm select2 zone_select" name="zone['+rows_count+']" data-rule-required="true" data-msg-required="Zone is required"></select>';
+                    var hub_select = '<select class="form-control form-control-sm select2 hub_select"  name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                    var operation_manager_select = '<select class="form-control form-control-sm select2 operation_manager_select" name="operation_manager['+rows_count+']" data-rule-required="true" data-msg-required="Operation Manager is required"></select>';
                 }else{
                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-sm btn-danger remove_row"><i class="la la-close"></i></a>';
-
+                    var zone_select = '<input type="hidden" class="zone_input_id" name="zone['+rows_count+']" value="'+default_zone_id+'"><input type="text" readonly placeholder="Select Zone" class="form-control zone_input_value" value="'+default_zone_value+'">';
+                    var hub_select = '<input type="hidden" class="hub_input_id" name="hub['+rows_count+']" value="'+default_hub_id+'"><input type="text" readonly placeholder="Select Hub" class="form-control hub_input_value" value="'+default_hub_value+'">';
+                    var operation_manager_select = '<input type="hidden" class="operation_manager_input_id" name="operation_manager['+rows_count+']" value="'+default_operation_manager_id+'"><input type="text" readonly class="form-control operation_manager_input_value" placeholder="Select Operation Manager" value="'+default_operation_manager_value+'">';
                 }
+
+
 
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
@@ -349,7 +369,13 @@
                     return obj;
                 });
 
-                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
+                var operation_managers = $.map({!! $operation_managers !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name+" ("+obj.trax_id+") ";
+                    return obj;
+                });
+
+                table.row.add([0, heads_select,titles_select,zone_select,hub_select,city_select,operation_manager_select,date_input,expense_detail_input,employee_select,employee_name_input,employee_designation_input,amount_input,reference_input,remarks_input,upload_image,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -363,26 +389,43 @@
                     dropdownCssClass: 'form-control-sm p-0'
 
                 });
-                $('select[name="zone['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    data: zones,
-                    placeholder:'Select Zone',
-                    dropdownCssClass: 'form-control-sm p-0'
+                if(rows_count == 1) {
+                    $('select[name="zone[' + rows_count + ']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: zones,
+                        placeholder: 'Select Zone',
+                        dropdownCssClass: 'form-control-sm p-0'
 
-                });
+                    });
+                    $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        placeholder:'Select Hub',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    $('select[name="operation_manager['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: operation_managers,
+                        placeholder:'Select Operation Manager',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        placeholder:'Select a City',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                }
+                else{
+                    $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                        data: cities_data,
+                        placeholder:'Select a City',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                }
                 $('select[name="employee['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: employees,
                     placeholder:'Select Employee Id',
                     dropdownCssClass: 'form-control-sm p-0'
 
                 });
-                $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    placeholder:'Select Hub',
-                    dropdownCssClass: 'form-control-sm p-0'
-                });
-                $('select[name="city['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
-                    placeholder:'Select a City',
-                    dropdownCssClass: 'form-control-sm p-0'
-                });
+
+
 
                 $('.reference_row').inputmask({
                     'alias': 'integer',
@@ -487,6 +530,10 @@
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_zone = $(this).find(':selected');
                 var zone = parseInt(selected_zone.val());
+                default_zone_id = zone;
+                default_zone_value = selected_zone.text();
+                $(".zone_input_id").val(default_zone_id);
+                $(".zone_input_value").val(default_zone_value);
                 var hub = selected_zone.closest('td').next('td').find('.hub_select');
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.hubs') !!}',
@@ -511,7 +558,10 @@
                 var rowid = parseInt($(this).parents('tr').attr('id'));
                 var selected_hub = $(this).find(':selected');
                 var hub = parseInt(selected_hub.val());
-                var city = selected_hub.closest('td').next('td').find('.city_select');
+                default_hub_id = hub;
+                default_hub_value = selected_hub.text();
+                $(".hub_input_id").val(default_hub_id);
+                $(".hub_input_value").val(default_hub_value);
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.cities') !!}',
                     type:'POST',
@@ -521,14 +571,27 @@
                     }
                 }).done(function (data) {
                     if(data.status){
-                        city.empty().trigger('change');
-                        $.each(data.data,function (key,value) {
-                            var newOption = new Option(value.name, value.id, false, false);
-                            city.append(newOption).trigger('change');
+                        cities_data = $.map(data.data, function (obj) {
+                            obj.id = obj.id;
+                            obj.text = obj.name;
+                            return obj;
                         });
-                        city.val('').trigger('change');
+                        $('.city_select').each(function(elm){
+                            $(this).empty().trigger('change');
+                            $(this).prepend('<option value="" selected="selected"></option>').select2({data:cities_data,placeholder:"Select a City"});
+                            $(this).val('').trigger('change');
+                        });
                     }
                 });
+            });
+
+            $('body').on('select2:select','.operation_manager_id .operation_manager_select',function () {
+                var selected_manager = $(this).find(':selected');
+                var manager = parseInt(selected_manager.val());
+                default_operation_manager_id = manager;
+                default_operation_manager_value = selected_manager.text();
+                $(".operation_manager_input_id").val(default_operation_manager_id);
+                $(".operation_manager_input_value").val(default_operation_manager_value);
             });
 
             $('body').on('select2:select','.employee_id .employee_select',function () {

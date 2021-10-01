@@ -46,6 +46,7 @@
                             <th class="border-primary border-darken-1">Zone</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">City / Location</th>
+                            <th class="border-primary border-darken-1">Operation Manager</th>
                             <th class="border-primary border-darken-1">Date</th>
                             <th class="border-primary border-darken-1">Details of Expense</th>
                             <th class="border-primary border-darken-1"> Employee Id </th>
@@ -132,9 +133,7 @@
             font-size: 24px;
             color: #64a0d2;
         }
-        .date-col-width{
-            min-width: 150px;
-        }
+
         .custom-col-width{
             min-width: 150px;
         }
@@ -145,7 +144,7 @@
             min-width: 250px;
         }
         .date-col-width{
-            min-width: 200px;
+            min-width: 100px;
         }
 
         textarea {
@@ -246,6 +245,7 @@
                     {data:'zone_name' ,name: 'z.name', class: 'align-middle zone_name custom-col-width form-group'},
                     {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name custom-col-width form-group'},
                     {data:'city_name' ,name: 'c.name', class: 'align-middle city_name custom-col-width form-group'},
+                    {data:'operation_manager_name' ,name: 'om.name', class: 'align-middle operation_manager_name custom-col-width form-group'},
                     {data:'date' ,name: 'date', class: 'align-middle date date-col-width form-group'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group doe-col-width'},
                     {data:'employee_trax_id' ,name: 'a.trax_id', class: 'align-middle employee_trax_id custom-col-width form-group'},
@@ -298,6 +298,13 @@
 
                     $(".city_select").select2({
                         placeholder: "Select City",
+                        width:'100%'
+                    }).bind('change', function() {
+                        this_table.api().table().columns.adjust();
+                    });
+
+                    $(".operation_manager__select").select2({
+                        placeholder: "Select Operation Manager",
                         width:'100%'
                     }).bind('change', function() {
                         this_table.api().table().columns.adjust();

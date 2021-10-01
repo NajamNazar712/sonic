@@ -1059,17 +1059,21 @@
                         'min': 0.00,
                         'max': 10000000.00
                     }).bind('keyup',function (){
-                        let upload_total = 0
-                        $('#sdn_upload_table .amount').each(function(v){
-                            if($(this).val() != "") {
-                                upload_total += parseFloat($(this).val());
-                            }
-                        });
-                        $("#upload_deposit_total").html(upload_total);
+                        update_upload_slip_total();
                     });
                 }
             });
 
+            function update_upload_slip_total()
+            {
+                let upload_total = 0
+                $('#sdn_upload_table .amount').each(function(v){
+                    if($(this).val() != "") {
+                        upload_total += parseFloat($(this).val());
+                    }
+                });
+                $("#upload_deposit_total").html(upload_total);
+            }
 
             $('body').on('click', 'a.remove_row',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
@@ -1079,6 +1083,7 @@
                     selected_rows.splice(index, 1);
                 }
                 deposit_table.row( $(this).parents('tr') ).remove().draw();
+                update_upload_slip_total();
             });
             var deposit_slip_table;
             $('body').on('click','.deposit_slip_view', function () {
