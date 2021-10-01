@@ -4117,7 +4117,7 @@ class ReturnController extends Controller
              })
              ->addColumn('reattempt', function ($agent_productivity){
                 $return_assign_shipments = ReturnAssignedShipments::join('shipments_journey as sj','sj.shipment_id','=','return_assigned_shipments.shipment_id')
-                ->where('sj.shipper_status_id',13) 
+                ->where('sj.shipper_status_id',52) 
                 ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id) 
                 ->where('return_assigned_shipments.status',0)
                 ->whereDate('return_assigned_shipments.created_at',$agent_productivity->current_date)->count();
@@ -4125,7 +4125,7 @@ class ReturnController extends Controller
              })
              ->addColumn('return', function ($agent_productivity){
                 $return_assign_shipments = ReturnAssignedShipments::join('shipments_journey as sj','sj.shipment_id','=','return_assigned_shipments.shipment_id')
-                ->where('sj.shipper_status_id',20) 
+                ->where('sj.shipper_status_id',12) 
                 ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id) 
                 ->where('return_assigned_shipments.status',0)
                 ->whereDate('return_assigned_shipments.created_at',$agent_productivity->current_date)->count();
