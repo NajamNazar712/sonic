@@ -7662,15 +7662,16 @@ class AdminDashboardController extends Controller
             $insurance_charge = InsuranceCharge::where('shipping_mode_id',1)->where('user_id',$id);
             $insurance_charges_diff = 0;
             if($insurance_charge->exists()){
-                $insurance_charges_diff == 1;
+                $insurance_charges_diff = 1;
             }
             
-          /*  dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff,$insurance_charges_diff);*/
+
 
             if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
             {
                 $overnight_changes = 1;
             }
+//            dd($weight_range_up_diff,$weight_range_down_diff,$kg_range_diff,$local_diff,$national_charges_0_diff,$national_charges_1_diff, $national_charges_2_diff,$national_charges_3_diff,$booking_type_charges_diff,$cash_handling_charges_change,$return_charges_diff,$fuel_surcharge_diff,$weight_addition_diff,$insurance_charges_diff,$overnight_changes);
         }
 
         //overland
@@ -7785,7 +7786,7 @@ class AdminDashboardController extends Controller
             $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
             $insurance_charges_diff = 0;
             if($insurance_charge->exists()){
-                $insurance_charges_diff == 1;
+                $insurance_charges_diff = 1;
             }
 
             if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
@@ -7905,7 +7906,7 @@ class AdminDashboardController extends Controller
             $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
             $insurance_charges_diff = 0;
             if($insurance_charge->exists()){
-                $insurance_charges_diff == 1;
+                $insurance_charges_diff = 1;
             }
 
             if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
@@ -8026,7 +8027,7 @@ class AdminDashboardController extends Controller
             $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
             $insurance_charges_diff = 0;
             if($insurance_charge->exists()){
-                $insurance_charges_diff == 1;
+                $insurance_charges_diff = 1;
             }
 
             if($weight_range_up_diff == 1 || $weight_range_down_diff == 1 || $kg_range_diff == 1 || $local_diff == 1 || $national_charges_0_diff == 1 || $national_charges_1_diff == 1 || $national_charges_2_diff == 1 || $national_charges_3_diff == 1 || $booking_type_charges_diff == 1 || $cash_handling_charges_change == 1 || $return_charges_diff == 1 || $fuel_surcharge_diff == 1 || $weight_addition_diff == 1 || $insurance_charges_diff == 1)
