@@ -300,7 +300,7 @@
                     {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
                     {data: 'address', name: 'riders.address', class: 'align-middle address'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
-                    {data: 'main_category', name: 'rider_main_categories.id', class: 'align-middle main_category'},
+                    {data: 'main_category', name: 'rider_main_categories.id', class: 'align-middle text-center main_category'},
                     {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},

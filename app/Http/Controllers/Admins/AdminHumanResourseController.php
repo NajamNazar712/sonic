@@ -2347,40 +2347,6 @@ class AdminHumanResourseController extends Controller
             })
             ->make(true);
     }
-    public function payslip_index(Request $request){
-        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
-        return view('admin.human_resource.payslip.index');
-    }
-
-    public function payslip_list(Request $request){
-        if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
-        }
-        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
-        $datatable = Datatables::of($payslips)
-            ->addColumn('action', function () {
-                $dropdown = '
-                <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
-            ';
-            $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
-
-                return $dropdown;
-            });
-
-        if ($request->get('search_payslip_month')) {
-            $month = $request->get('search_payslip_month');
-            $from = Carbon::parse($month)->startOfMonth()->toDateString();
-            $to = Carbon::parse($month)->endOfMonth()->toDateString();
-            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
-        }
-        return $datatable->make(true);
-
-    }
-              
-                   
-      
 
     public function employee_shift_status(Request $request)
     {
@@ -2416,6 +2382,38 @@ class AdminHumanResourseController extends Controller
         $shift->extension_minutes = $request->extension_minutes;
         $shift->save();
         return redirect()->back()->with('success', 'Shift Updated Successfully!');
+    }
+
+    public function payslip_index(Request $request){
+        ActivityTrailController::createActivityTrailLog(Auth::id(),436);
+        return view('admin.human_resource.payslip.index');
+    }
+
+    public function payslip_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
+        }
+        $payslips = EmployeePayslip::select('id', 'payroll_month','trax_id', 'name', 'designation', 'department', 'hub', 'zone', 'joining_date', 'cnic', 'total_deduction', 'net_salary', 'iban');
+        $datatable = Datatables::of($payslips)
+            ->addColumn('action', function () {
+                $dropdown = '
+                <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                $dropdown .= '<button type="button" class="dropdown-item print" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Print</div></button>';
+
+                return $dropdown;
+            });
+
+        if ($request->get('search_payslip_month')) {
+            $month = $request->get('search_payslip_month');
+            $from = Carbon::parse($month)->startOfMonth()->toDateString();
+            $to = Carbon::parse($month)->endOfMonth()->toDateString();
+            $datatable->whereBetween('employee_payslips.payroll_month', [$from,$to]);
+        }
+        return $datatable->make(true);
+
     }
     public function payslip_excel_upload(Request $request){
 
@@ -2493,7 +2491,7 @@ class AdminHumanResourseController extends Controller
             'recovery' => 'Recovery',
             'auction_sale' => 'Auction Sale',
             'penalty' => 'Penalty',
-            'other_deductions' => 'Others Deduction',
+            'others_deduction' => 'Others Deduction',
             'van_deduction' => 'Van Deduction',
             'medical_insurance' => 'Medical Insurance',
             'total_deduction' => 'Total Deduction',
@@ -2562,7 +2560,7 @@ class AdminHumanResourseController extends Controller
             'recovery' => ['nullable', 'integer'],
             'auction_sale' => ['nullable', 'integer'],
             'penalty' => ['nullable', 'integer'],
-            'other_deductions' => ['nullable', 'integer'],
+            'others_deduction' => ['nullable', 'integer'],
             'van_deduction' => ['nullable', 'integer'],
             'medical_insurance' => ['nullable', 'integer'],
             'total_deduction' => ['nullable', 'integer'],
@@ -2572,7 +2570,7 @@ class AdminHumanResourseController extends Controller
         ];
 
 
-        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'other_deductions', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
+        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'others_deduction', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
         if ($file = $request->file('payslip')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -2685,7 +2683,7 @@ class AdminHumanResourseController extends Controller
                         $payslip->recovery = trim($row['recovery']);
                         $payslip->auction_sale = trim($row['auction_sale']);
                         $payslip->penalty = trim($row['penalty']);
-                        $payslip->other_deductions = trim($row['other_deductions']);
+                        $payslip->others_deduction = trim($row['others_deduction']);
                         $payslip->van_deduction = trim($row['van_deduction']);
                         $payslip->medical_insurance = trim($row['medical_insurance']);
                         $payslip->total_deduction = trim($row['total_deduction']);
@@ -2728,8 +2726,9 @@ class AdminHumanResourseController extends Controller
         $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
         $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
         $personal_contact = '';
-        if($user = Admin::where('trax_id', $payslip->trax_id)->exists()){
-            $user = $user->first();
+
+        if(Admin::where('trax_id', $payslip->trax_id)->exists()){
+            $user = Admin::where('trax_id', $payslip->trax_id)->first();
             $personal_contact = $user->phone_number;
         }else{
             $rider = Rider::where('trax_id', $payslip->trax_id);
@@ -2751,25 +2750,71 @@ class AdminHumanResourseController extends Controller
         $fuel_days = ($payslip->fuel_days != NULL) ? $payslip->fuel_days:'-';
 
 
-        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance:'-';
-        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:'-';
-        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:'-';
-        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:'-';
-        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:'-';
-        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:'-';
-        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:'-';
-        $overtime = ($payslip->overtime != NULL) ? $payslip->overtime:'-';
-        $bonus = ($payslip->bonus != NULL) ? $payslip->bonus:'-';
-        $arrears = ($payslip->arrears != NULL) ? $payslip->arrears:'-';
-        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:'-';
-        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:'-';
-        $operations_incentive = ($payslip->operations_incentive != NULL) ? $payslip->operations_incentive:'-';
-        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:'-';
-        $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition:'-';
+        $mobile_allowance = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance:0;
+        $vehicle_allowance = ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:0;
+        $fuel_allowance = ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:0;
+        $conveyance_allowance = ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:0;
+        $vehicle_maintenance = ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:0;
+        $fixed_incentive = ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:0;
+        $holiday_allowance = ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:0;
+        $overtime = ($payslip->overtime != NULL) ? $payslip->overtime:0;
+        $bonus = ($payslip->bonus != NULL) ? $payslip->bonus:0;
+        $arrears = ($payslip->arrears != NULL) ? $payslip->arrears:0;
+        $pickup_incentive = ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:0;
+        $delivery_incentive = ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:0;
+        $operations_incentive = ($payslip->operation_incentive != NULL) ? $payslip->operation_incentive:0;
+        $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:0;
+        $others_addition = ($payslip->others_addition != NULL) ? $payslip->others_addition:0;
 
         $total_addition = 0;
 
-        $total_addition = ($payslip->mobile_allowance != NULL) ? $payslip->mobile_allowance: 0 + ($payslip->vehicle_allowance != NULL) ? $payslip->vehicle_allowance:0 + ($payslip->fuel_allowance != NULL) ? $payslip->fuel_allowance:0 + ($payslip->conveyance_allowance != NULL) ? $payslip->conveyance_allowance:0 + ($payslip->vehicle_maintenance != NULL) ? $payslip->vehicle_maintenance:0 + ($payslip->fixed_incentive != NULL) ? $payslip->fixed_incentive:0 + ($payslip->holiday_allowance != NULL) ? $payslip->holiday_allowance:0 + ($payslip->overtime != NULL) ? $payslip->overtime:0 + ($payslip->bonus != NULL) ? $payslip->bonus:0 + ($payslip->arrears != NULL) ? $payslip->arrears:0 + ($payslip->pickup_incentive != NULL) ? $payslip->pickup_incentive:0 + ($payslip->delivery_incentive != NULL) ? $payslip->delivery_incentive:0 + ($payslip->operations_incentive != NULL) ? $payslip->operations_incentive:0 + ($payslip->extra_duty_allowance != NULL) ? $payslip->extra_duty_allowance:0 + ($payslip->others_addition != NULL) ? $payslip->others_addition:0;
+        $total_addition = $mobile_allowance + $vehicle_allowance + $fuel_allowance + $conveyance_allowance + $vehicle_maintenance + $fixed_incentive + $holiday_allowance + $overtime + $bonus + $arrears + $pickup_incentive + $delivery_incentive + $operations_incentive + $extra_duty_allowance + $others_addition;
+
+        if($mobile_allowance == 0){
+            $mobile_allowance = '-';
+        }
+        if($vehicle_allowance == 0){
+            $vehicle_allowance = '-';
+        }
+        if($fuel_allowance == 0){
+            $fuel_allowance = '-';
+        }
+        if($conveyance_allowance == 0){
+            $conveyance_allowance = '-';
+        }
+        if($vehicle_maintenance == 0){
+            $vehicle_maintenance = '-';
+        }
+        if($fixed_incentive == 0){
+            $fixed_incentive = '-';
+        }
+        if($holiday_allowance == 0){
+            $holiday_allowance = '-';
+        }
+        if($overtime == 0){
+            $overtime = '-';
+        }
+        if($bonus == 0){
+            $bonus = '-';
+        }
+        if($arrears == 0){
+            $arrears = '-';
+        }
+        if($pickup_incentive == 0){
+            $pickup_incentive = '-';
+        }
+        if($delivery_incentive == 0){
+            $delivery_incentive = '-';
+        }
+        if($operations_incentive == 0){
+            $operations_incentive = '-';
+        }
+        if($extra_duty_allowance == 0){
+            $extra_duty_allowance = '-';
+        }
+        if($others_addition == 0){
+            $others_addition = '-';
+        }
 
 
         $paycut = ($payslip->paycut != NULL) ? $payslip->paycut : '-';
@@ -3050,13 +3095,13 @@ class AdminHumanResourseController extends Controller
                         
                         <tr class="text-center">
                             <td class="color primary border twice" colspan="2">Total Addition</td>
-                            <td class="color primary border twice" colspan="2">'. $total_addition .'</td>
+                            <td class="color primary border twice" colspan="2">'. number_format($total_addition) .'</td>
                             <td class="color primary border twice" colspan="2">Total Deduction</td>
-                            <td class="color primary border twice" colspan="2">'. $total_deduction .'</td>
+                            <td class="color primary border twice" colspan="2">'. number_format($total_deduction) .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="color primary border twice" colspan="6">Net Salary</td>
-                            <td class="color primary border twice" colspan="2">'. $net_salary .'</td>
+                            <td class="color primary border twice" colspan="2">'. number_format($net_salary) .'</td>
                         </tr>
                         <tr class="text-left">
                             <td class="border twice" colspan="8" rowspan="5"><i>Note: This is a system generated document and does not require any signature.</i></td>

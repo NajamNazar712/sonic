@@ -12,7 +12,7 @@ class GenerateMenuallReprotForDonePayment extends Seeder
         public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 597, 'name' => 'Generate Manual Report For Done Payent', 'module_id' => 8),
+            array('id' => 597, 'name' => 'Generate Manual Report - Done Payment', 'module_id' => 8),
         ));
     }
 }

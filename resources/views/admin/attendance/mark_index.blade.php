@@ -14,15 +14,19 @@
                             <div class="row mb-2 height-400" style=" position: relative;">
                                 <div class="col text-center">
                                      <div id="punch">
-                                         <h2 class="centered text-white"></h2>
+                                         <h2 class="centered text-white punch_msg"></h2>
                                      </div>
+                                    <div id="msg_div" class="d-none">
+                                        <h2 class="center text-danger msg">Attendance Already Marked</h2>
+                                    </div>
                                 </div>
                             </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white text-center">
                                     <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">Date</th>
+                                    <th class="border-primary border-darken-1">Attendance Date</th>
+                                    <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                     <th class="border-primary border-darken-1">Location</th>
                                 </tr>
@@ -54,12 +58,11 @@
             left: 50%;
             margin: -70px 0 0 -170px;
         }
-        .centered{
+        .centered ,.center{
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-
         }
     </style>
 
@@ -74,14 +77,22 @@
 
          var clock_in = @json($clock_in);
          var clock_out = @json($clock_out);
-        
-         if((clock_in == 0 && clock_out == 0 ) || (clock_in == 1 && clock_out == 1 ) ){
+         var date = @json($date);
+
+
+         if(clock_in == 0 && clock_out == 0){
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK IN</strong>');
+             $('#msg_div').addClass('d-none');
+         }
+         else if(clock_in == 1 && clock_out == 1 ){
+             $('#punch').addClass('d-none');
+             $('#msg_div').removeClass('d-none');
          }
          else{
              $('.centered').html('');
              $('.centered').append('<strong>CLOCK OUT</strong>');
+             $('#msg_div').addClass('d-none');
          }
 
          var flag = true;
@@ -94,7 +105,8 @@
                      data: {
                          '_token': '{{ csrf_token() }}',
                          'clock_in': clock_in,
-                         'clock_out': clock_out
+                         'clock_out': clock_out,
+                         'attendance_date' : date
                      }
                  })
                      .done(function (data) {
@@ -106,15 +118,26 @@
                              });
                          } else {
                              table.draw();
+                             if(data.error == 0){
+                                 swal({
+                                     title: data.success,
+                                     text: data.date,
+                                     icon: 'success',
+                                     buttons: false,
+                                     closeOnClickOutside: true,
+                                     closeOnEsc: true
+                                 });
+                             }else{
+                                 swal({
+                                     title: "Already Marked",
+                                     text: data.message,
+                                     icon: 'error',
+                                     buttons: false,
+                                     closeOnClickOutside: true,
+                                     closeOnEsc: true
+                                 });
+                             }
 
-                             swal({
-                                 title: data.success,
-                                 text: data.date + '  ' + data.time,
-                                 icon: 'success',
-                                 buttons: false,
-                                 closeOnClickOutside: true,
-                                 closeOnEsc: true
-                             });
                              if (data.status == 1) {
                                  $('.centered').html('');
                                  $('.centered').append('<strong>CLOCK OUT</strong>');
@@ -122,10 +145,12 @@
                                  clock_out = 0;
 
                              } else if (data.status == 2) {
-                                 $('.centered').html('');
-                                 $('.centered').append('<strong>CLOCK IN</strong>');
-                                 clock_in = 0;
-                                 clock_out = 0;
+                                 console.log(232);
+                                $('.centered').text('');
+                                 clock_in = 1;
+                                 clock_out = 1;
+                                 $('#punch').addClass('d-none');
+                                 $('#msg_div').removeClass('d-none');
                              }
                          }
                      });
@@ -153,12 +178,16 @@
 
                 ajax: {
                     url: '{{ route('admin.attendance.mark.list') }}',
+                    data: function (d) {
+                        d.attendance_date = date;
+                    }
                 },
-                order:['1','desc'],
+                order:['2','desc'],
                 rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at text-center'},
+                    {data: 'attendance_date', name: 'attendance_date', class: 'align-middle attendance_date text-center'},
+                    {data: 'action_date', name: 'action_date', class: 'align-middle action_date text-center'},
                     {data: 'action_id', name: 'action_id', class: 'align-middle action_id text-center'},
                     {data: 'latitude', name: 'latitude', class: 'align-middle latitude text-center'},
                 ],
