@@ -17,7 +17,7 @@ class UpdateActivityTrailSeederForRCPAgentProductivity extends Seeder
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile > Return > RCP Agent Productivity', 'url'=>'return.rcp_agent.index', 'permission_id' => 600)
+        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Last Mile > Return > RCP Agent Productivity', 'url'=>'admin.return.rcp_agent.index', 'permission_id' => 600)
         );
     }
 }
