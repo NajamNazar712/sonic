@@ -7603,15 +7603,31 @@ class AdminReportsController extends Controller
             $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
             if($destination != null){
                 $total_status_updated = $total_status_updated->where('city_id', $destination);
+                $total_shipment_deliverd_bolt = $total_shipment_deliverd_bolt->where('city_id', $destination);
+                $total_shipment_undeliverd_bolt = $total_shipment_undeliverd_bolt->where('city_id', $destination);
+                $total_shipment_deliverd_sonic = $total_shipment_deliverd_sonic->where('city_id', $destination);
+                $total_shipment_undeliverd_sonic = $total_shipment_undeliverd_sonic->where('city_id', $destination);
             }
             if($hub != null){
                 $total_status_updated = $total_status_updated->whereIn('city_id', $hub_cities);
+                $total_shipment_deliverd_bolt = $total_shipment_deliverd_bolt->whereIn('city_id', $hub_cities);
+                $total_shipment_undeliverd_bolt = $total_shipment_undeliverd_bolt->whereIn('city_id', $hub_cities);
+                $total_shipment_deliverd_sonic = $total_shipment_deliverd_sonic->whereIn('city_id', $hub_cities);
+                $total_shipment_undeliverd_sonic = $total_shipment_undeliverd_sonic->whereIn('city_id', $hub_cities);
             }
             if($zone != null){
                 $total_status_updated = $total_status_updated->whereIn('city_id', $zone_cities);
+                $total_shipment_deliverd_bolt = $total_shipment_deliverd_bolt->whereIn('city_id', $zone_cities);
+                $total_shipment_undeliverd_bolt = $total_shipment_undeliverd_bolt->whereIn('city_id', $zone_cities);
+                $total_shipment_deliverd_sonic = $total_shipment_deliverd_sonic->whereIn('city_id', $zone_cities);
+                $total_shipment_undeliverd_sonic = $total_shipment_undeliverd_sonic->whereIn('city_id', $zone_cities);
             }
             if($rider != null){
                 $total_status_updated = $total_status_updated->where('rider_id', $rider);
+                $total_shipment_deliverd_bolt = $total_shipment_deliverd_bolt->where('rider_id', $rider);
+                $total_shipment_undeliverd_bolt = $total_shipment_undeliverd_bolt->where('rider_id', $rider);
+                $total_shipment_deliverd_sonic = $total_shipment_deliverd_sonic->where('rider_id', $rider);
+                $total_shipment_undeliverd_sonic = $total_shipment_undeliverd_sonic->where('rider_id', $rider);
             }
 
             $total_status_updated_count = $total_status_updated->count();
