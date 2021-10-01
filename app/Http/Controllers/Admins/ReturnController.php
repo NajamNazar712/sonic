@@ -4287,16 +4287,13 @@ class ReturnController extends Controller
                     }
                 }
            
-            $total_assign = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)
-                            ->where('status',1)->count();
+           
             $total_unassign = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)
                             ->where('status',0)->count();
-
-                $total = $total_assign + $counter;
-                if($total == 0){
+                if($total_unassign == 0){
                     return '0';
                 }else{
-                    return $total - $total_unassign;
+                    return $total_unassign - $counter;
                 }
 
              });
