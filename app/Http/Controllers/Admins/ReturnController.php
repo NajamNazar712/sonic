@@ -3176,18 +3176,18 @@ class ReturnController extends Controller
         return view('admin.return.history');
     }
 
-    public function history_list(Request $request){
-        if($request->get('excel') && $request->get('excel') == true)
-        {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),88);
+    public function history_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 88);
         }
 
         $deliveries = ReturnNote::
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
-            ->join('admins','admins.id','=','return_notes.admin_id')
-            ->join('admins as sb','sb.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at','return_notes.updated_at as submitted_at','return_notes.image',DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'),DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count_link')]);
+            ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
+            ->leftjoin('admins as sb', 'sb.id', '=', 'return_notes.updated_by')
+            ->select(['return_notes.id as return_note', 'return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'admins.name as assigned_by', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.status', 'sb.name as submitted_by', 'return_notes.updated_at', 'return_notes.updated_at as submitted_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count_link')]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -3201,27 +3201,23 @@ class ReturnController extends Controller
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('image', function ($deliveries) {
-                 if ($deliveries->delivered_to_shipper_count != 0) {
-                     return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
-                 }
-                 else
-                 {
-                     return '-';
-                 }
-                 })
-            ->editColumn('shipments_count_link', function($deliveries) {
+                if ($deliveries->delivered_to_shipper_count != 0) {
+                    return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('shipments_count_link', function ($deliveries) {
                 if ($deliveries->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
-                }
-                else {
+                } else {
                     return 0;
                 }
             })
-            ->editColumn('delivered_to_shipper_count', function($deliveries) {
+            ->editColumn('delivered_to_shipper_count', function ($deliveries) {
                 if ($deliveries->delivered_to_shipper_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->delivered_to_shipper_count . '</button>';
-                }
-                else {
+                } else {
 
                     return '-';
                 }
@@ -3229,33 +3225,32 @@ class ReturnController extends Controller
             ->filterColumn('return_notes.id', function ($query, $keyword) {
                 return $query->where('return_notes.id', '=', $keyword);
             })
-
-            ->addColumn('main_status', function($deliveries) {
-                if($deliveries->status == 0){
+            ->addColumn('main_status', function ($deliveries) {
+                if ($deliveries->status == 0) {
                     return 'Pending for Update';
-                }else if($deliveries->status == 1){
+                } else if ($deliveries->status == 1) {
                     return 'Verified';
-                }else if($deliveries->status == 2){
+                } else if ($deliveries->status == 2) {
                     return 'Canceled';
-                }else if($deliveries->status == 3){
+                } else if ($deliveries->status == 3) {
                     return 'Updated';
                 }
             })
-            ->filterColumn('main_status',function ($query,$keyword){
-                if($keyword == 0){
-                    $query->where('return_notes.status',0);
-                }else if($keyword == 1){
-                    $query->where('return_notes.status',1);
-                }else if($keyword == 2){
-                    $query->where('return_notes.status',2);
-                }else if($keyword == 3){
-                    $query->where('return_notes.status',3);
+            ->filterColumn('main_status', function ($query, $keyword) {
+                if ($keyword == 0) {
+                    $query->where('return_notes.status', 0);
+                } else if ($keyword == 1) {
+                    $query->where('return_notes.status', 1);
+                } else if ($keyword == 2) {
+                    $query->where('return_notes.status', 2);
+                } else if ($keyword == 3) {
+                    $query->where('return_notes.status', 3);
                 }
             });
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('return_notes.created_at', [$from,$to]);
+            $datatables->whereBetween('return_notes.created_at', [$from, $to]);
         }
 
         return $datatables->make(true);
