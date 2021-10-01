@@ -7903,7 +7903,7 @@ class AdminDashboardController extends Controller
                 $fuel_surcharge_diff = 1;
             }
 
-            $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id',3)->where('user_id',$id);
             $insurance_charges_diff = 0;
             if($insurance_charge->exists()){
                 $insurance_charges_diff = 1;
@@ -8024,7 +8024,7 @@ class AdminDashboardController extends Controller
                 $fuel_surcharge_diff = 1;
             }
 
-            $insurance_charge = InsuranceCharge::where('shipping_mode_id',2)->where('user_id',$id);
+            $insurance_charge = InsuranceCharge::where('shipping_mode_id',4)->where('user_id',$id);
             $insurance_charges_diff = 0;
             if($insurance_charge->exists()){
                 $insurance_charges_diff = 1;
