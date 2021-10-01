@@ -4595,7 +4595,7 @@ class DeliveryController extends Controller
 
                     $station_deposit_note->save();
 
-                    $delivery_note_ids = DeliveryNoteStationDepositNote::where('station_deposit_node_id', $station_deposit_note->id)->get();
+                    $delivery_note_ids = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $station_deposit_note->id)->get();
 
                     foreach ($delivery_note_ids as $value) {
                         foreach (DeliveryNoteShipment::where('delivery_note_id', $value->delivery_note_id)->get() as $delivery_note_shipment) {
@@ -4622,10 +4622,10 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    return response()->json(['status' => 0, 'message' => 'Station Deposit Note Status Updated To Deposited']);
+                    return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Deposited']);
                 }
                 else{
-                    
+
                 }
             }
             else{

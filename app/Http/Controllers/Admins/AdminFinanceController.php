@@ -11,6 +11,7 @@ use App\Http\Models\Admin\ChangeShipmentWeightLog;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\RevertStatusRequest;
+use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteSlip;
 use App\Http\Models\Admin\VisionSoft\VisionSoftCodPaymentClear;
 use App\Http\Models\ChargesModes;
@@ -185,6 +186,31 @@ class AdminFinanceController extends Controller
                 }
                 else {
                     return 0;
+                }
+            })
+            ->addColumn('adjusted_reference_link', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn_number)->count();
+                    if($adjustment_count > 0) {
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $adjustment_count . '</button>';
+                    }
+                    else{
+                        return 0;
+                    }
+                }
+            })
+            ->addColumn('adjusted_reference_count', function ($sdn) {
+                if($sdn->adjustment_ref != null)
+                {
+                    return $sdn->adjustment_ref;
+                }
+                else{
+                    $adjustment_count = StationDepositNoteAdjustment::where('sdn_id',$sdn->sdn_number)->count();
+                    return $adjustment_count;
                 }
             })
             ->editColumn('sdn_amount', function($shipment){

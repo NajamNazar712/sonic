@@ -1161,7 +1161,14 @@
                                    '_token': '{{ csrf_token() }}'
                                }
                            }).done(function (data) {
-                               table.draw();
+                               if(data.status == 1)
+                               {
+                                   table.draw(false);
+                                   toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                               }
+                               else{
+                                   toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                               }
                            });
                        }
                    });
@@ -1175,6 +1182,7 @@
             $('#uploadDepositSlip').on('hidden.bs.modal', function () {
                 deposit_table.clear();
                 deposit_table.destroy();
+                $("#upload_deposit_total").html(0);
                 selected_rows = [];
             });
 
