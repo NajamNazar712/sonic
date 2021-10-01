@@ -86,6 +86,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
@@ -2055,6 +2056,12 @@ class DeliveryController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 6;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                             }
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
@@ -2214,6 +2221,12 @@ class DeliveryController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 6;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                             }
                         }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
@@ -6005,6 +6018,12 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     if($return_assign_shipment){
                         $return_assign_shipment->status = 0;
                         $return_assign_shipment->save();
+                        
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 3;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                     }
                     $print[] = $shipment_id;
                 }

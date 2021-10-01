@@ -25,6 +25,7 @@ use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -325,6 +326,12 @@ class ShipperReturnController extends Controller
                     $return_assign_shipment = $return_assign_shipment->latest()->first();
                     $return_assign_shipment->status = 0;
                     $return_assign_shipment->save();
+
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
                 }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
@@ -370,6 +377,12 @@ class ShipperReturnController extends Controller
                    if($return_assign_shipment){
                        $return_assign_shipment->status = 0;
                        $return_assign_shipment->save();
+                       
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 2;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                    }
 
                 }
@@ -415,6 +428,12 @@ class ShipperReturnController extends Controller
                    if($return_assign_shipment){
                        $return_assign_shipment->status = 0;
                        $return_assign_shipment->save();
+                       
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 5;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                    }
                     if($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)){
                         NotificationsController::send(33, $shipment);
@@ -458,6 +477,12 @@ class ShipperReturnController extends Controller
                    if($return_assign_shipment){
                        $return_assign_shipment->status = 0;
                        $return_assign_shipment->save();
+
+                       $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 5;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                    }
                    
                     if($journey){
