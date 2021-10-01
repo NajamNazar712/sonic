@@ -4239,7 +4239,7 @@ class ReturnController extends Controller
            
 
                 $total_assign = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)
-                                ->count();
+                                ->where('status',1)->count();
                  if($actual == 0){
                     return $total_assign;
                 }else{
