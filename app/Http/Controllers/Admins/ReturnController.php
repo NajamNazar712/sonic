@@ -74,7 +74,8 @@ class ReturnController extends Controller
 
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-            ->where('admin_roles.department_id',3)->get();
+            ->where('admin_roles.department_id',3)
+            ->where('a.status',1)->get();
         return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists]);
     }
 
@@ -469,9 +470,24 @@ class ReturnController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
         }
     }
+    public function unassign_agent(Request $request){
+        $shipment_ids = $request->shipment_ids;
 
+        if($request->action == 'un-assign'){
+            foreach ($shipment_ids as $shipment){
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                if($return_assign_shipment->exists()){
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
+                }
+            }
+            return ['status'=>1,'success'=>"Agent Unassigned successfully"];
+
+        }
+    }
+    
     public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-
+        dd($request);
         $shipment_ids = $request->shipment_ids;
 
         if($request->action == 'reattempt'){
@@ -537,7 +553,7 @@ class ReturnController extends Controller
             if($parcel->booking_type_id == 5){
                 return ['status' => 0,'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
             }
-            if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55])){
+            if(!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55]) && ($parcel->shipper_status_id == 12)){
 
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
 
@@ -574,12 +590,12 @@ class ReturnController extends Controller
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
             }
-            return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
+            return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Return - Confirm!"];
 
 
         }elseif($request->action == 'reattempt'){
             $parcel = Shipment::find($request->shipment_id);
-            if(!in_array($parcel->shipper_status_id, [13, 20])){
+            if(!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12)){
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
 
                 if ($journey) {
@@ -622,7 +638,7 @@ class ReturnController extends Controller
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
             }
-            return ['status'=>0,'error'=>"Shipment is already updated, Please refresh your page!"];
+            return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Reattempted!"];
         }else{
             return ['status'=>0,'error'=>"Invalid action, Please refresh your page!"];
         }
@@ -1853,7 +1869,8 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS rns ON r.id = rns.return_note_id WHERE rns.return_note_id = return_notes.id AND rns.status = 0) AS shipments_unverified_count')])
+            ->leftjoin('return_note_shipments as rns','rns.return_note_id', '=', 'return_notes.id')
+            ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS rns ON r.id = rns.return_note_id WHERE rns.return_note_id = return_notes.id AND rns.status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
             ->whereIn('return_notes.status',[0,3]);
 
         if (session('role_id') != 1) {
@@ -1916,7 +1933,7 @@ class ReturnController extends Controller
                         $dropdown .= $shift_shipment_button;
                     }
 
-                    if($result->status == 3){
+                    if($result->status == 3 && $result->delivered_to_shipper_count != 0){
                         $dropdown .= $return_image_upload;
                     }
 
@@ -3184,8 +3201,14 @@ class ReturnController extends Controller
                 return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('image', function ($deliveries) {
-                return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
-            })
+                 if ($deliveries->delivered_to_shipper_count != 0) {
+                     return "<a href='#' class='btn btn-block btn-outline-info mr-1 image-popup'><i class='la la-image'></i></a>";
+                 }
+                 else
+                 {
+                     return '-';
+                 }
+                 })
             ->editColumn('shipments_count_link', function($deliveries) {
                 if ($deliveries->shipments_count != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
@@ -3739,6 +3762,140 @@ class ReturnController extends Controller
         }
         else{
             return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
+        }
+    }
+
+    public function assign_agent_excel(Request $request){
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'agent_id' => 'Agent ID'
+        ];
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'unique' => ':attribute is already Present.'
+        ];
+        $rules = [
+            'tracking_number' => ['required', 'integer'],
+            'agent_id' => ['required', 'integer']
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'agent_id'];
+
+        if($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Agent ID'];
+        }
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if($index == 1){
+                }
+                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            }
+            else {
+                unset($spreadsheet[0]);
+            }
+        }
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
+                }
+
+                $rows[] = $row;
+            }
+
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_ids = array();
+            $tracking_id_row = array();
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+
+                $validate = Validator::make($row, $rules, $messages);
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+                if (empty($errors['Row #' . $row_id])) {
+                    if (!empty(trim($row['tracking_number']))) {
+                        if (empty($tracking_ids)) {
+                            $tracking_ids[] = $row['tracking_number'];
+                            $tracking_id_row[$row['tracking_number']] = $row_id;
+                        }
+                        else {
+                            if (in_array($row['tracking_number'], $tracking_ids)) {
+                                $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                            }
+                            else {
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            }
+                        }
+                    }
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
+                        $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
+                    }
+                    if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id',3)->where('a.status',1)->where('a.id', $row['agent_id'])->exists()) {
+                        $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
+                    }
+                }
+            }
+            if(empty($errors)){
+                $tracking_numbers = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $shipment_id = trim($row['tracking_number']);
+                    $agent_id = trim($row['agent_id']);
+                    $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $shipment_id)->where('status', 1)->first();
+                    if($check_already_assigned){
+                        $check_already_assigned->status = 0;
+                        $check_already_assigned->save();
+                    }
+                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
+                    $assign_shipments = new ReturnAssignedShipments();
+                    $assign_shipments->admin_id = $agent_id;
+                    $assign_shipments->shipment_id = $id_shipment->id;
+                    $assign_shipments->status = 1;
+                    $assign_shipments->assigned_by = Auth::id();
+                    $assign_shipments->save();
+                    $tracking_numbers['Row #' . $row_id] = $shipment_id;
+
+                }
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $row . ': ' . $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
+
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Assigned with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            }
+            else{
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+
+                return redirect()->back()->withErrors($errors);
+            }
+
+        }
+        else {
+            return redirect()->back()->with('error', 'No Shipments in File');
         }
     }
 
