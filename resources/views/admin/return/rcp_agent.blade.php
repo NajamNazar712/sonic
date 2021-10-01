@@ -147,6 +147,7 @@
                         <th class="border-primary border-darken-1">Return</th>
                         <th class="border-primary border-darken-1">Intercept</th>
                         <th class="border-primary border-darken-1">Pending</th>
+                        <th class="border-primary border-darken-1">Un-Assigned</th>
                         <th class="border-primary border-darken-1">Productivity(%)</th>
                     </tr>
                     </thead>
@@ -303,6 +304,8 @@
                             head.push('Return');
                             head.push('Intercept');
                             head.push('Pending');
+                            head.push('Un-Assigned');
+                            
                             head.push('Productivity(%)');
 
 
@@ -320,6 +323,8 @@
                                 row.push(values.return);
                                 row.push(values.intercept);
                                 row.push(values.pending);
+                                row.push(values.un_assigned);
+                                
                                 row.push(values.productivity);
 
 
@@ -375,6 +380,7 @@
                     {data: 'return', orderable: false, searchable: false, name: 'return', class: 'align-middle return'},
                     {data: 'intercept', orderable: false, searchable: false, name: 'shipments.intercept', class: 'align-middle intercept'},
                     {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
+                    {data: 'un_assigned', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
                 ],
@@ -395,7 +401,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') || $(header).is('.productivity')) {
+                        if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') || $(header).is('.productivity')  || $(header).is('.un_assigned')) {
                             $(td).appendTo($(search));
                         }
                       

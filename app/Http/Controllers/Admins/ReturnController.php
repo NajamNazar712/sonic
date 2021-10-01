@@ -4120,7 +4120,7 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
                     $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->whereIn('shipper_status_id',[52,12,55]);
+                    ->whereIn('shipper_status_id',[13,20,55]);
                     if($shipment->count() > 0){
                         $counter++;
                     }
@@ -4149,7 +4149,7 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
                     $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->whereIn('shipper_status_id',[52,12,55]);
+                    ->whereIn('shipper_status_id',[13,20,55]);
                     if($shipment->count() > 0){
                         $counter++;
                     }
@@ -4169,7 +4169,7 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
                     $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->where('shipper_status_id',52);
+                    ->where('shipper_status_id',13);
                     if($shipment->count() > 0){
                         $counter++;
                     }
@@ -4189,7 +4189,7 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
                     $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->where('shipper_status_id',12);
+                    ->where('shipper_status_id',20);
                     if($shipment->count() > 0){
                         $counter++;
                     }
@@ -4231,7 +4231,7 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
                     $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->whereIn('shipper_status_id',[52,12,55]);
+                    ->whereIn('shipper_status_id',[13,20,55]);
                     if($shipment->count() > 0){
                         $actual++;
                     }
@@ -4258,7 +4258,7 @@ class ReturnController extends Controller
                 ->whereDate('created_at',$agent_productivity->current_date)->get();
                 foreach ($return_assign_shipments as $return_assign_shipment) {
                     $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
-                    ->whereIn('shipper_status_id',[52,12,55]);
+                    ->whereIn('shipper_status_id',[13,20,55]);
                     if($shipment->count() > 0){
                         $actual++;
                     }
@@ -4272,6 +4272,32 @@ class ReturnController extends Controller
                             }else{
                                 return number_format(($actual/($total_assign+$actual))*100,2);
                             }
+
+             })
+             ->addColumn('un_assigned', function ($agent_productivity){
+                $counter = 0;
+                $return_assign_shipments = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)
+                ->where('status',0)
+                ->whereDate('created_at',$agent_productivity->current_date)->get();
+                foreach ($return_assign_shipments as $return_assign_shipment) {
+                    $shipment = ShipmentsJourney::where('shipment_id',$return_assign_shipment->shipment_id)
+                    ->whereIn('shipper_status_id',[13,20,55]);
+                    if($shipment->count() > 0){
+                        $counter++;
+                    }
+                }
+           
+            $total_assign = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)
+                            ->where('status',1)->count();
+            $total_unassign = ReturnAssignedShipments::where('admin_id',$agent_productivity->agent_id)->whereDate('created_at',$agent_productivity->current_date)
+                            ->where('status',0)->count();
+
+                $total = $total_assign + $counter;
+                if($total == 0){
+                    return '0';
+                }else{
+                    return $total - $total_unassign;
+                }
 
              });
              if ($request->get('from_date') && $request->get('to_date')) {
@@ -4436,7 +4462,7 @@ class ReturnController extends Controller
         
         foreach ($actual->get() as $item) {
             $shipment = ShipmentsJourney::where('shipment_id',$item->shipment_id)
-            ->whereIn('shipper_status_id',[52,12,55]);
+            ->whereIn('shipper_status_id',[13,20,55]);
             if($shipment->count() > 0){
                 $actual_counter++;
             }
@@ -4445,7 +4471,7 @@ class ReturnController extends Controller
 
         foreach ($stats['rcp_reattempt']->get() as $item) {
             $shipment = ShipmentsJourney::where('shipment_id',$item->shipment_id)
-            ->where('shipper_status_id',52);
+            ->where('shipper_status_id',13);
             if($shipment->count() > 0){
                 $reattempt_counter++;
             }
