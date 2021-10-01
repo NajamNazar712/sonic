@@ -202,6 +202,11 @@
         @if($rider->rider_main_category_id != null)
         var main_category_id = {{$rider->rider_main_category_id}};
         $('#main_category_list').val(main_category_id).trigger('change');
+        @else
+        $('#main_category_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Rider Main Category',
+            dropdownParent: $("#editRiderForm")
+        });
         @endif
 
         $("input[name='pin']").inputmask({
