@@ -34,8 +34,6 @@
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Consignee Name</th>
                                     <th class="border-primary border-darken-1">Reattempt By</th>
-                                    <th class="border-primary border-darken-1">Phone</th>
-                                    <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Collection Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
@@ -159,8 +157,6 @@
                         head.push('Hub');
                         head.push('Consignee Name');
                         head.push('Reattempted By');
-                        head.push('Phone');
-                        head.push('Address');
                         head.push('Collection Amount');
                         head.push('Shipping Mode');
                         head.push('Service Type');
@@ -181,8 +177,6 @@
                             row.push(values.hub);
                             row.push(values.consignee_name);
                             row.push(values.agent);
-                            row.push(values.phone);
-                            row.push(values.consignee_address);
                             row.push(values.amount);
                             row.push(values.shipping_mode);
                             row.push(values.service_type);
@@ -230,7 +224,7 @@
                 }
             },
             rowId: 'shId',
-            order: [[16, 'desc']],
+            order: [[14, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -240,8 +234,6 @@
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
-                {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
-                {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
