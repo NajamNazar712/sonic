@@ -198,6 +198,8 @@
                         <th class="border-primary border-darken-1">Last Internal Comment By</th>
                         <th class="border-primary border-darken-1">Last Internal Comment</th>
                         <th class="border-primary border-darken-1">Last Internal Comment Date</th>
+                        <th class="border-primary border-darken-1">Last External Comment</th>
+                        <th class="border-primary border-darken-1">Last External Comment Date</th>
                         <th class="border-primary border-darken-1">Tagged To</th>
                         <th class="border-primary border-darken-1">Tagged Hub</th>
                         <th class="border-primary border-darken-1">Tagged At</th>
@@ -471,6 +473,8 @@
                             head.push('Last Internal Comment By');
                             head.push('Last Internal Comment');
                             head.push('Last Internal Comment Date');
+                            head.push('Last External Comment');
+                            head.push('Last External Comment Date');
                             head.push('Tagged To');
                             head.push('Tagged Hub');
                             head.push('Tagged At');
@@ -511,6 +515,8 @@
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
                                 row.push(values.last_comment_date);
+                                row.push(values.last_comment_external);
+                                row.push(values.last_comment_date_external);
                                 row.push(values.tagged_to);
                                 row.push(values.tagged_hub);
                                 row.push(values.tagged_at);
@@ -607,6 +613,8 @@
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
+                    {data: 'last_comment_external', name: 'ccse.comment', class: 'align-middle last_comment'},
+                    {data: 'last_comment_date_external', name: 'ccse.created_at', class: 'align-middle last_comment_date'},
                     {data: 'tagged_to', name: 'crt.tagged_id', class: 'align-middle tagged_to', orderable: false, searchable: false},
                     {data: 'tagged_hub', name: 'crtadh.name', class: 'align-middle tagged_hub'},
                     {data: 'tagged_at', name: 'crt.created_at', class: 'align-middle tagged_at'},

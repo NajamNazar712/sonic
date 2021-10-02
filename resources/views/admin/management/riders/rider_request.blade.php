@@ -140,6 +140,17 @@
                             </div>
                         </div>
                         <div class="row">
+
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="rider_main_category" id="main_category_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($main_category as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
                             <div class="col">
                                 <fieldset class="form-group">
                                     <select name="rider_category" id="category_list" class="form-control select2"
@@ -150,7 +161,9 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            <div class="col">
+                            </div>
+                        <div class="row">
+                        <div class="col">
                                 <fieldset class="form-group">
                                     <select name="route_id" id="route_list" class="form-control select2"
                                             data-rule-required="true" data-msg-required="This field is required">
@@ -233,6 +246,11 @@
             $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Select Rider Category',
+                dropdownParent: $('#approveRiderModal')
+            });
+            $('#main_category_list').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'Select Rider Main Category',
                 dropdownParent: $('#approveRiderModal')
             });
             $('#shift_list').prepend('<option value="" selected="selected"></option>').select2({

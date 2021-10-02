@@ -208,6 +208,8 @@ Route::name('api.')->group(function () {
                 Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
             });
 
+            Route::post('payslip', 'Rider\RiderAPIController@rider_payslip')->name('payslip');
+
 		});
 
 	});
