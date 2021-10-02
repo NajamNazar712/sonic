@@ -444,7 +444,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([44, 47, 48, 49, 126, 566], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([44, 47, 48, 49, 126, 566, 600], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(44, session('permissions')))

@@ -368,7 +368,7 @@
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[2, 'asc']],
+                order: [[2, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
