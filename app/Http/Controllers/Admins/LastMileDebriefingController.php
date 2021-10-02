@@ -86,23 +86,33 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_assign_agents(Request $request){
         $delivery_note_details = DeliveryNote::find($request->delivery_note_id);
-        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
-        if(count($delivery_note_shipments) > 0){
-            foreach ($delivery_note_shipments as $delivery_note_shipment){
-                $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
-                if($agent_call_monitor->exists()){
-                    $agent_call_monitor = $agent_call_monitor->first();
-                    $agent_call_monitor->agent_id = $request->agent_id;
+        if($delivery_note_details->status == 0){
+            $delivery_note_shipments = $delivery_note_details->delivery_note_undelivered_shipments;
+            if(count($delivery_note_shipments) > 0){
+                foreach ($delivery_note_shipments as $delivery_note_shipment){
+                    $agent_call_monitor = AgentCallMonitoring::where('shipment_id', $delivery_note_shipment->shipment_id)->where('delivery_note_id', $delivery_note_shipment->delivery_note_id);
+                    if($agent_call_monitor->exists()){
+                        $agent_call_monitor = $agent_call_monitor->first();
+                        if($agent_call_monitor->completed == 0){
+                            $agent_call_monitor->agent_id = $request->agent_id;
+                        }
+                    }
+                    else{
+                        $agent_call_monitor = new AgentCallMonitoring;
+                        $agent_call_monitor->agent_id = $request->agent_id;
+                        $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
+                        $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
+                    }
+                    $agent_call_monitor->save();
                 }
-                else{
-                    $agent_call_monitor = new AgentCallMonitoring;
-                    $agent_call_monitor->agent_id = $request->agent_id;
-                    $agent_call_monitor->shipment_id = $delivery_note_shipment->shipment_id;
-                    $agent_call_monitor->delivery_note_id = $delivery_note_shipment->delivery_note_id;
-                }
-                $agent_call_monitor->save();
+                return redirect()->back()->with('success', 'Agent Assign successfully.');
             }
-            return redirect()->back()->with('success', 'Agent Assign successfully.');
+            else{
+                return redirect()->back()->with('error', 'Undelivered shipments not found!');
+            }
+        }
+        else{
+            return redirect()->back()->with('error', 'Delivery note already verified!');
         }
     }
 
