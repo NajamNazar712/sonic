@@ -489,6 +489,11 @@ class ReturnController extends Controller
                     $return_assign_shipment->status = 0;
                     $return_assign_shipment->save();
                 }
+                $return_assign_log = new ReturnAssignedShipmentLogs();
+                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                $return_assign_log->status = 4;
+                $return_assign_log->assigned_by = Auth::id();
+                $return_assign_log->save();
             }
             return ['status'=>1,'success'=>"Agent Unassigned successfully"];
 
