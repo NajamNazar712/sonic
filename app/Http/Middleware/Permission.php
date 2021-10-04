@@ -1036,7 +1036,9 @@ class Permission
             'settings.ccd_booking.index' => 558,
 
             'human_resource.payslip.index' => 596,
-
+            
+            'return.rcp_agent.index' => 600,
+            'return.rcp_agent.list' => 600,
 
         ],
 
@@ -1128,7 +1130,7 @@ class Permission
             'reports.weight_reconciliation.index' => 8,
             'reports.weight_reconciliation.list' => 8,
 
-
+            
 
             
 

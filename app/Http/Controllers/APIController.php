@@ -35,6 +35,7 @@ use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceShipment;
 use App\http\Models\ReportingLocation;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -3855,6 +3856,13 @@ class APIController extends Controller
                             $return_assign_shipment = $return_assign_shipment->latest()->first();
                             $return_assign_shipment->status = 0;
                             $return_assign_shipment->save();
+                            
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->assigned_by = $user_id;
+                            $return_assign_log->save();
+
                         }
                         return response()->json(['status' => 0, 'message' => 'Shipment successfully marked as Shipment - Return Confirm']);
                     }
@@ -3886,6 +3894,12 @@ class APIController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 5;
+                                $return_assign_log->assigned_by = $user_id;
+                                $return_assign_log->save();
                             }
                             if ($journey) {
                                 NotificationsController::send(33, $shipment->id);

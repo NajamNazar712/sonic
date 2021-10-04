@@ -87,7 +87,7 @@
                                         <th class="border-primary border-darken-1">CNIC</th>
                                         <th class="border-primary border-darken-1">Total Deduction</th>
                                         <th class="border-primary border-darken-1">Net Salary</th>
-                                        <th class="border-primary border-darken-1">IBAN</th>
+                                        <th class="border-primary border-darken-1">IBAN / Account No.</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -313,7 +313,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'International Standard DHL Rates',
+                        title: 'Employee Payslips',
                         className:'btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },

@@ -86,6 +86,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
@@ -2055,6 +2056,12 @@ class DeliveryController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 6;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                             }
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
@@ -2214,6 +2221,12 @@ class DeliveryController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 6;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                             }
                         }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
@@ -4354,8 +4367,8 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
-
+            ->select(['admins.name as resolved_by','station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
+        //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
@@ -6011,6 +6024,12 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     if($return_assign_shipment){
                         $return_assign_shipment->status = 0;
                         $return_assign_shipment->save();
+                        
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 3;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                     }
                     $print[] = $shipment_id;
                 }

@@ -2,17 +2,17 @@
 
 use Illuminate\Database\Seeder;
 
-class GenerateMenuallReprotForDonePayment extends Seeder
+class UpdateModulePermissionForReturnConfirmAgentProductivity extends Seeder
 {
     /**
      * Run the database seeds.
      *
      * @return void
      */
-        public function run()
+    public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 597, 'name' => 'Generate Manual Report - Done Payment', 'module_id' => 8),
+            array('id' => 600, 'name' => 'RCP Agent Productivity', 'module_id' => 7),
         ));
     }
 }
