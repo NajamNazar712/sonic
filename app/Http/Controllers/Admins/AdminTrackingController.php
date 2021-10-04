@@ -7,6 +7,7 @@ use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
 use App\http\Models\Admin\Retail\RetailFranchise;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
@@ -229,10 +230,9 @@ class AdminTrackingController extends Controller
                     }
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;
-
                     if ($shipment_payment_journey) {
+                        $journey_details = array();
                         foreach ($shipment_payment_journey as $journey) {
-                            $journey_details = array();
                             $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             if($journey->payment_id == null){
@@ -1156,6 +1156,17 @@ class AdminTrackingController extends Controller
                                 $journey_details['user'] = $journey->admin->name;
 
                                 $details['weight_history'][] = $journey_details;
+                            }
+                        }
+
+                        $resolved_outstanding_shipments = ResolvedOutstandingShipment::where('shipment_id', $shipment->id);
+                        if($resolved_outstanding_shipments->exists()){
+                            $resolved_outstanding_shipments = $resolved_outstanding_shipments->get();
+                            $outstanding_details = array();
+                            foreach ($resolved_outstanding_shipments as $resolved_outstanding_shipment) {
+                                $outstanding_details['date_time'] = Carbon::parse($resolved_outstanding_shipment->created_at)->toDateTimeString();
+                                $outstanding_details['resolved_by'] = $resolved_outstanding_shipment->admin->name;
+                                $details['outstanding_history'][] = $outstanding_details;
                             }
                         }
 

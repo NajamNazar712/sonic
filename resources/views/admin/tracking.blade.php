@@ -1285,6 +1285,33 @@
                                     shipment += '</div>';
                                     shipment += '</div>';
                                 }
+                                if ('outstanding_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Resolved Outstanding Shipment History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable resolved_outstanding_shipment">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Resolved By</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.outstanding_history, function (index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.resolved_by + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
 
                                 shipment += '</div>';
                                 shipment += '</div>';
