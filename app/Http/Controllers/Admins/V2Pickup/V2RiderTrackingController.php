@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\V2Pickup;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\V2Pickup\V2PickupNote;
@@ -20,6 +21,7 @@ class V2RiderTrackingController extends Controller
 
     public function rider_tracking_index ()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),440);
         if(Auth::user()->role_id == 1)
         {
             $cities = City::all();

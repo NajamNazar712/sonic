@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\http\Models\AppNotification;
+use App\http\Models\AppType;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\NotificationType;
 use App\Http\Models\Rider;
@@ -240,7 +242,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['poc','receiving_of_pickup','company_name','tracking_number','order_id','destination','service_type','amount','quantity','product_type','description','estimated_weight'];
         }
 		else if($id == 31){
-            $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','destination','channel','case_nature','case_nature_type','details'];
+            $details['fields'] = ['request_id','tracking_number','shipper_name','email','phone','destination','channel','case_nature','case_nature_type','details','status'];
         }
         else if ($id == 32) {
              $details['fields'] = ['nsa', 'tracking_number'];
@@ -603,6 +605,15 @@ class AdminNotificationsController extends Controller
         else if ($id == 150){
             $details['fields'] = ['preview'];
         }
+        else if($id == 152 || $id == 153){
+            $details['fields'] = ['shipper_name'];
+        }
+        else if ($id == 154){
+            $details['fields'] = ['shipment_no','Sales_Person','shipper_name'];
+        }
+        else if ($id == 155){
+            $details['fields'] = ['preview'];
+        }
         else if ($id == 156)
         {
             $details['fields'] = ['month','year','link'];
@@ -610,6 +621,10 @@ class AdminNotificationsController extends Controller
         else if ($id == 157)
         {
             $details['fields'] = ['date', 'link'];
+        }
+		else if ($id == 158)
+        {
+            $details['fields'] = ['rider_name', 'otp'];
         }
         else if ($id == 160)
         {
@@ -657,5 +672,131 @@ class AdminNotificationsController extends Controller
             return redirect()->back()->with('success', 'Custom Notification Sent');
         }
         return back()->withErrors('No Receiver to send notification to!');
+    }
+
+    public function app_notification_index(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),450);
+        $app_type = AppType::all();
+        return view('admin.notifications.app_notifications_index')->with(['app_type'=>$app_type]);
+    }
+
+    public function app_notification_list(Request $request)
+    {
+        $notifications = AppNotification::join('admins as a', 'app_notifications.updated_by', '=', 'a.id')
+            ->join('app_types as at', 'app_notifications.app_id', '=', 'at.id')
+            ->select('app_notifications.id as id', 'app_notifications.name as name', 'app_notifications.app_id as app_id', 'app_notifications.updated_at as updated_at', 'a.name as updated_by', 'app_notifications.status as status', 'at.name as app_name');
+        $datatables = Datatables::of($notifications)
+            ->setRowAttr([
+                'data-type' => function($notification) {
+                    return $notification->app_id;
+                },
+            ])
+            ->editColumn('status', function ($notification) {
+                return (($notification->status) ? 'Enabled' : 'Disabled');
+            })
+            ->addColumn('action', function ($notification) {
+                if (session('role_id') == 1 || in_array(602, session('permissions')) || session('role_id') == 1 || in_array(603, session('permissions'))) {
+                    $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                    $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+                    $dropdown = '
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                    if (session('role_id') == 1 || in_array(602, session('permissions'))) {
+                        $dropdown .= $edit_button;
+                    }
+
+                    if (session('role_id') == 1 || in_array(603, session('permissions'))) {
+                        if ($notification->status) {
+                            $dropdown .= $disable_button;
+                        } else {
+                            $dropdown .= $enable_button;
+                        }
+                    }
+
+                    $dropdown .= '
+                  </div>
+                </div>
+            ';
+
+                    return $dropdown;
+                } else {
+                    return "";
+                }
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function app_notification_status(Request $request) {
+        $notification = AppNotification::find($request->id);
+        if ($notification) {
+            $notification->status = $request->status;
+            $notification->updated_by = Auth::id();
+
+            $notification->save();
+
+            if ($request->status) {
+                return ['status' => 0, 'success' => 'Notification has been enabled'];
+            }
+            else {
+                return ['status' => 0, 'success' => 'Notification has been disabled'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Notification with given ID is present'];
+        }
+    }
+
+    public function app_notification_details(Request $request) {
+        $id = $request->id;
+        $notification = AppNotification::find($id);
+        if($notification){
+            $details = array();
+            $details['title'] = $notification->title;
+            $details['body'] = $notification->body;
+            if($id == 1){
+                $details['fields'] = ["shipper_name", "rider"];
+            }else if($id == 2){
+                $details['fields'] = ["shipper_name", "rider"];
+            }else if($id == 3){
+                $details['fields'] = ["shipper_name"];
+            }else if($id == 4){
+                $details['fields'] = ["shipper_name"];
+            }else if($id == 5){
+                $details['fields'] = ["note_id"];
+            }else if($id == 6){
+                $details['fields'] = ["note_id"];
+            }else if($id == 7){
+                $details['fields'] = ["shipper_name", "tracking_no", "status_name"];
+            }else if($id == 8){
+                $details['fields'] = ["consignee_name", "tracking_no", "status_name"];
+            }else if($id == 9){
+                $details['fields'] = ["rider", "otp"];
+            }
+            return $details;
+        }else{
+            return ['status' => 1, 'error' => 'No Notification with given ID is present'];
+        }
+
+    }
+
+    public function app_notification_edit(Request $request) {
+        $notification = AppNotification::find($request->id);
+        if ($notification) {
+            $notification->title = $request->get('title');
+            $notification->body = $request->get('body');
+            $notification->updated_by = Auth::id();
+            $notification->save();
+            return ['status' => 0, 'success' => 'Notification has been edited'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Notication with given ID is present'];
+        }
     }
 }

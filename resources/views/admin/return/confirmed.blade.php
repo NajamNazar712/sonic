@@ -38,6 +38,7 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Attempt Count</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -50,7 +51,6 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Return Pending for</th>
-                        <th class="border-primary border-darken-1">Attempt Count</th>
                         <th class="border-primary border-darken-1">Return Confirmed By</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -199,6 +199,7 @@
                             head.push('Tracking No.');
                             head.push('Order ID');
                             head.push('Shipper Name');
+                            head.push('Attempt Count');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -211,7 +212,6 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Return Pending For');
-                            head.push('Attempt Count');
                             head.push('Return Confirmed By');
                             head.push('Reason');
                             head.push('Remarks');
@@ -226,6 +226,7 @@
                                 row.push(values.tracking);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.total_attempt);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -238,7 +239,6 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.return_pending_for);
-                                row.push(values.total_attempt);
                                 row.push(values.return_confirmed_by);
                                 row.push(values.reason);
                                 row.push(values.remarks);
@@ -457,13 +457,14 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[19, 'desc']],
+                order: [[22, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', orderable: false},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
@@ -476,7 +477,6 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
-                    {data: 'total_attempt', name: 'total_attempt', class: 'align-middle total_attempt', orderable: false},
                     {data: 'return_confirmed_by', name: 'cb.name', class: 'align-middle return_confirmed_by', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks', orderable: false, searchable: false},

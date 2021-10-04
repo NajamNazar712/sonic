@@ -1407,38 +1407,41 @@ class AdminTrackingController extends Controller
             foreach ($shipment->shipment_pieces as $piece){
                 $barcodes .= '
             <div class="pwrapper p-1">
-                <div class="row mb-2">
-                    <div class="col-5 logo text-left">
-                        <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline">
-                    </div>
-                    <div class="col-7 text-left">
-                        <span class="d-block"><strong>' . $shipment->tracking_number . '</strong></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-6">
-                    
-                        <div class="col mb-1">
-                            <span class="label text-left">Origin: </span><span class="label text-right"><u>'. $shipment->pickup_address->city->name .'</u></span>
-                        </div>
-                        <div class="col">
-                            <span class="label text-left">Destination: </span> <span class="label text-right"><u>'. $shipment->consignee_city->name . '</u></span>
-                        </div>
-                      
-                    </div>
-                    <div class="col-6">
-                        <div class="barcode text-center">
-                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
-                        <span class="d-block "><strong>' . $piece->tracking_number . '</strong></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row text-left">
+                <div class="row justify-content-center">
                     <div class="col">
-                        <label class="label"><strong>'. $count . '/' . $total_pieces .'</strong></label>
+                        <div class="row mt-2 mb-2">
+                            <div class="col-5 logo text-left">
+                                <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline" style="filter: brightness(1) !important;">
+                            </div>
+                            <div class="col-7 text-left">
+                                <span class="d-block"><strong>' . $shipment->tracking_number . '</strong></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                            
+                                <div class="col mb-1">
+                                    <span class="label text-left">Origin: </span><span class="label text-right"><u>'. $shipment->pickup_address->city->name .'</u></span>
+                                </div>
+                                <div class="col">
+                                    <span class="label text-left">Destination: </span> <span class="label text-right"><u>'. $shipment->consignee_city->name . '</u></span>
+                                </div>
+                              
+                            </div>
+                            <div class="col-6">
+                                <div class="barcode text-center">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
+                                <span class="d-block "><strong>' . $piece->tracking_number . '</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-left">
+                            <div class="col">
+                                <label class="label"><strong>'. $count . '/' . $total_pieces .'</strong></label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-             
             </div>
         ';
                 $count++;

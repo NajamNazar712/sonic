@@ -1788,16 +1788,7 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
 
-                $rider_device_token = EmployeeDeviceToken::where('employee_id',$rider)
-                    ->where('employee_type_id', 2)
-                    ->select('device_token');
-                if ($rider_device_token->exists()) {
-                    $rider_device_token = $rider_device_token->first();
-                    $device_token = $rider_device_token->device_token;
-                    $title = "Return Note Assigned";
-                    $message = "Dear Rider Return Note # " . $note->id . " Has Been Assigned To You";
-                    NotificationsController::bolt_app_notification($rider, 2,$device_token, $title, $message);
-                }
+                NotificationsController::app_notification(6, $rider, 2, $note->id);
 
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
