@@ -444,7 +444,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([44, 47, 48, 49, 126, 566], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([44, 47, 48, 49, 126, 566, 600], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(44, session('permissions')))
@@ -472,6 +472,9 @@
                                     @endif
                                     @if (session('role_id') == 1 || in_array(566, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.return.return_deliveries.index') }}">Return Deliveries</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(600, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.return.rcp_agent.index') }}">RCP Agent Productivity</a></li>
                                     @endif
                                 </ul>
                             </li>

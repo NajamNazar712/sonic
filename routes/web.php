@@ -1261,7 +1261,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
+        Route::post('excel/assign_agent_excel','Admins\ReturnController@assign_agent_excel')->name('excel.assign_agent_excel');
         Route::post('assign/agent','Admins\ReturnController@assign_agent')->name('assign.agent');   
+        Route::post('unassign/agent','Admins\ReturnController@unassign_agent')->name('unassign.agent');   
 
         Route::post('marked/self_collection','Admins\ReturnController@change_status_to_self_collection')->name('marked.self_collection');
         Route::post('edit/estimated_charges','Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
@@ -1318,6 +1320,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\ReturnController@return_deliveries_list')->name('list');
             Route::get('app_shipment_list', 'Admins\ReturnController@return_deliveries_app_shipments_list')->name('app_shipment_list');
             Route::get('dbf_shipment_list', 'Admins\ReturnController@return_deliveries_dbf_shipments_list')->name('dbf_shipment_list');
+
+        });
+
+        Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
+            Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
 
         });
     });
@@ -1688,6 +1697,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('walk_in_index', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_index')->name('walk_in_index');
             Route::get('walk_in_list', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_list')->name('walk_in_list');
             Route::put('walk_in_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_resolved')->name('walk_in_resolved');
+            Route::post('walk_in_bulk_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_bulk_resolved')->name('walk_in_bulk_resolved');
             Route::put('revert_request_shipments_check', 'Admins\AdminFinanceController@revert_request_shipments_check')->name('revert_request_shipments_check');
             Route::post('revert_request_submit', 'Admins\AdminFinanceController@revert_request_submit')->name('revert_request_submit');
             Route::get('revert_requested/{image_id}', 'Admins\AdminFinanceController@revert_requested_image')->name('revert_requested_image');

@@ -9679,7 +9679,7 @@ class RiderAPIController extends Controller
             $r_previous_month = Carbon::parse($r_current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
 
             $fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
-                ->whereBetween('dn.created_at', [$r_previous_month, $r_current_date])
+                ->whereBetween('dn.status_verified_at', [$r_previous_month, $r_current_date])
                 ->where('rider_id', $rider_id)
                 ->where('update_type', 1)
                 ->where('fake_status', 1)->count('fake_status');
@@ -9690,7 +9690,7 @@ class RiderAPIController extends Controller
         $previous_month = Carbon::parse($current_date)->subMonth()->addDay()->format("Y-m-d 00:00:00");
 
         $current_fake_status_count = DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
-            ->whereBetween('dn.created_at', [$previous_month, $current_month])
+            ->whereBetween('dn.status_verified_at', [$previous_month, $current_date])
             ->where('rider_id', $rider_id)
             ->where('update_type', 1)
             ->where('fake_status', 1)->count('fake_status');

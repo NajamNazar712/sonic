@@ -87,6 +87,7 @@ use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
 use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller
@@ -151,8 +152,7 @@ class DeliveryController extends Controller
                     ->whereIn('crm.status_id', [DB::raw(2), DB::raw(3), DB::raw(5)])
                     ->where('crm.case_nature_id', DB::raw(1));
             })
-            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',
-                'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
+            ->select('agent.name as agent','shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address',                'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date','sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint')
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
@@ -2054,6 +2054,12 @@ class DeliveryController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 6;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                             }
                         }
                         if ($shipment_details->shipper_status_id != $selected_status) {
@@ -2212,6 +2218,12 @@ class DeliveryController extends Controller
                             if ($return_assign_shipment) {
                                 $return_assign_shipment->status = 0;
                                 $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 6;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                             }
                         }
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
@@ -4352,8 +4364,8 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins', 'admins.id', '=', 'station_deposit_notes.deposited_by')
             ->leftjoin('banks_lists', 'banks_lists.id', '=', 'station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
-
+            ->select(['admins.name as resolved_by','station_deposit_notes.id as sdn', 'station_deposit_notes.id as sdn_id', 'oc.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.dncc_count as dncc_link', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_delivered_shipments as delivered_shipments_link', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_net_amount', 'admins.name as deposited_by', 'station_deposit_notes.created_at', 'station_deposit_notes.deposit_slip', 'station_deposit_notes.status', 'banks_lists.name as bank','station_deposit_notes.deposit_slip_status','station_deposit_notes.sdn_deposit_amount','station_deposit_notes.adjustment_amount', 'station_deposit_notes.adjustment_date', 'station_deposit_notes.adjustment_ref', 'station_deposit_notes.adjusted as adjusted', 'station_deposit_notes.sdn_type']);
+        //admins.name as resolved_by to be changed before merging on sprint_78
         if (session('role_id') != 1) {
             $sdn = $sdn->whereIn('oc.hub_id', session('hubs'));
         }
@@ -4521,6 +4533,12 @@ class DeliveryController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatable->whereBetween('station_deposit_notes.status_updated_at', [$from,$to]);
+        }
+        if ($request->get('search_date_from_deposited') && $request->get('search_date_to_deposited')) {
+            $from = $request->get('search_date_from_deposited');
+            $to = $request->get('search_date_to_deposited');
+            $datatable->where('station_deposit_notes.status', 1);
+            $datatable->whereBetween('station_deposit_notes.created_at', [$from,$to]);
         }
         return $datatable->make(true);
     }
@@ -6024,6 +6042,12 @@ ActivityTrailController::createActivityTrailLog(Auth::id(),303);
                     if($return_assign_shipment){
                         $return_assign_shipment->status = 0;
                         $return_assign_shipment->save();
+                        
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 3;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                     }
                     $print[] = $shipment_id;
                 }

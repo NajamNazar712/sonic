@@ -267,6 +267,24 @@ class V2AdminPickupsController extends Controller
                         return '';
                     }
             })
+            ->addColumn('aging',function ($pickup_requests){
+                $requested_date=$pickup_requests->requested_date;
+                $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $days =Carbon::createFromTime($settings->setting_value, '0', '0', 'Asia/Karachi');
+                   
+                    $startTime = Carbon::parse($requested_date);
+                    $endTime = Carbon::parse($days);
+
+                    $totalDuration =  $startTime->diffInHours($endTime).' Hrs';
+                   
+                    //$difference =  $requested_date->diff($days)->format('%H:%I:%S')." Minutes";
+                    //$difference=$requested_date-$days;
+                    return $totalDuration;
+                }
+                //$days = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
+            })
             ->editColumn('brand_name', function ($pickup_requests) {
                 if($pickup_requests->brand_name==null){
                     $shipper = User::find($pickup_requests->user_id);
@@ -426,7 +444,8 @@ class V2AdminPickupsController extends Controller
 
                 $pickups++;
                 self::retail_pickup_assign($pickup_request_id, $rider_id);
-            } else {
+            }
+            else {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
                 if ($pickup_request->current_rider_id == $rider_id) {
                     continue;
@@ -467,15 +486,14 @@ class V2AdminPickupsController extends Controller
                     }
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
-                if ($previous_rider_id != null) {
-                    NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->rider_id, $pickup_request->shipper_id);
-                }
-                if ($rider_id != null && $previous_rider_id == null) {
-                    NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
-                } elseif ($rider_id != null && $previous_rider_id != null) {
-                    NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
-                }
-
+            }
+            if ($previous_rider_id != NULL) {
+                NotificationsController::app_notification(2, $previous_rider_id, 2, $pickup_request->current_rider_id, $pickup_request->shipper_id);
+            }
+            if ($rider_id != NULL && $previous_rider_id == NULL) {
+                NotificationsController::app_notification(3, $rider_id, 2, $pickup_request->shipper_id);
+            } elseif ($rider_id != NULL && $previous_rider_id != NULL) {
+                NotificationsController::app_notification(1, $rider_id, 2, $previous_rider_id, $pickup_request->shipper_id);
             }
         }
         if (count($allowed_pickup_requests) > 0) {
