@@ -37,9 +37,7 @@ use App\Http\Models\InvoiceShipment;
 use App\http\Models\ReportingLocation;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
-use App\http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentDetail;
 use App\http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPrebook;
 use App\http\Models\ShipmentShipperReference;
@@ -843,6 +841,13 @@ class APIController extends Controller
 
                 $payment_mode_id = $request->input('payment_mode_id');
                 $self_collection = false;
+                if ($service_type_id == 1 && $request->has('self_collection')) {
+                    if ($request->input('self_collection') != null) {
+                        if ($request->input('self_collection') == 1) {
+                            $self_collection = true;
+                        }
+                    }
+                }
 
             }
 
@@ -3957,20 +3962,16 @@ class APIController extends Controller
                                                 'status' => 0,
                                             ]);
 
-                                            $shipment->consignee_status_id = 55;
-                                            $shipment->shipper_status_id = 55;
+                                            $shipment->consignee_status_id = 54;
+                                            $shipment->shipper_status_id = 54;
                                             $shipment->intercepted = 1;
                                             $shipment->save();
-                                            // ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
+                                            ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
-                                            ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
+                                            // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
                                             
                                             
 
-                                            // $shipment_detail = ShipmentDetail::where('shipment_id',$shipment->id)->get()->first();
-                                            // $shipment_detail->center_frachise_id = $request->trax_center_franchise_id;
-                                            // $shipment_detail->center_frachise_type = $request->trax_center_franchise_type;
-                                            // $shipment_detail->save();
                                             
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
 
