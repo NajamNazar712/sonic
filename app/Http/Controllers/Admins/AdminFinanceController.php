@@ -729,6 +729,7 @@ class AdminFinanceController extends Controller
         $count = $count->count();
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+            ->join('retail_shipments as rs','rs.shipment_id','=','s.id')
             ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
