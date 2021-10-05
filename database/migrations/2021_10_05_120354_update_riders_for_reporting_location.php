@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateEmployeeOnSitesTable extends Migration
+class UpdateRidersForReportingLocation extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class CreateEmployeeOnSitesTable extends Migration
      */
     public function up()
     {
-        Schema::create('employee_on_sites', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('employee_id');
-            $table->integer('employee_type_id');
-            $table->timestamps();
+        Schema::table('riders', function (Blueprint $table) {
+            $table->integer('reporting_location_id')->nullable()->index();
         });
     }
 
@@ -28,6 +25,8 @@ class CreateEmployeeOnSitesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('employee_on_sites');
+        Schema::table('riders', function (Blueprint $table) {
+            $table->dropColumn('reporting_location_id');
+        });
     }
 }

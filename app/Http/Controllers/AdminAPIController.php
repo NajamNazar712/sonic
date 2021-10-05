@@ -3442,11 +3442,11 @@ class AdminAPIController extends Controller
         }
     }
 
-    public function employee_on_site(Request $request)
+    public function attendance_notification(Request $request)
     {
         $rules = [
-            'employee_id' => ['required'],
-            'employee_type_id' => ['required'],
+            'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -3455,18 +3455,55 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $admin = Admin::where('email', $request->email);
-            if ($admin->exists()) {
-                $admin = $admin->first();
-                if($admin->status == 0){
-                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+            $admin_id = $request->admin_id;
+            $admin = Admin::find($admin_id);
+            if ($admin) {
+                if ($admin->reporting_location_id) {
+                    $reporting_location = ReportingLocation::join('admins as a', 'reporting_locations.id', 'a.reporting_location_id')
+                        ->where('a.id', $admin_id);
+                } else {
+                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                        ->join('admins as a', 'e.id', 'a.employee_id')
+                        ->where('a.id', $admin_id);
                 }
-                $this->sendResetLinkEmail($request);
-                return response()->json(['status' => 0, 'message' => 'Password reset link has been sent to your email']);
-            } else {
-                return response()->json(['status' => 1, 'message' => 'Email is not registered']);
-            }
+                if ($reporting_location->exists()) {
+                    $reporting_location = $reporting_location->first();
+                    $reporting_location->radius;
+                    $destination = $reporting_location->lat . ',' . $reporting_location->long;
+                    $origin = $request->latitude . ',' . $request->longitude;
+                    $distance = $this->distance($origin, $destination);
+                    if ($distance <= $reporting_location->radius / 1000) {
+                        if($admin->shift_id){
+                            $shift = EmployeeShift::where('id', $admin->shift_id);
+                        }else{
+                            $shift = EmployeeShift::join('employees as e', 'employee_shifts.id', '=', 'e.shift_id')
+                                ->where('e.id', $admin->employee_id);
+                        }
+                        if($shift->exists()){
+                            $shift = $shift->first();
+                            $now_time = Carbon::now();
+                            $grace_time = $shift->extension_minutes;
+                            if($now_time->toTimeString() == Carbon::parse($shift->start_time)->toTimeString()){
 
+                            }elseif ($now_time->toTimeString() == $now_time->addMinutes(($grace_time/2))->toTimeString()){
+
+                            }elseif ($now_time->toTimeString() == $now_time->addMinutes(($grace_time - 1))->toTimeString()){
+
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Time']);
+                            }
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Shift not found!']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'User is off-site']);
+                    }
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Reporting location not found']);
+                }
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User Not Found!']);
+            }
         }
     }
 
