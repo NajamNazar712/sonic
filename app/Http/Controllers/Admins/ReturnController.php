@@ -1788,16 +1788,7 @@ class ReturnController extends Controller
 
                 $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
 
-                $rider_device_token = EmployeeDeviceToken::where('employee_id',$rider)
-                    ->where('employee_type_id', 2)
-                    ->select('device_token');
-                if ($rider_device_token->exists()) {
-                    $rider_device_token = $rider_device_token->first();
-                    $device_token = $rider_device_token->device_token;
-                    $title = "Return Note Assigned";
-                    $message = "Dear Rider Return Note # " . $note->id . " Has Been Assigned To You";
-                    NotificationsController::bolt_app_notification($rider, 2,$device_token, $title, $message);
-                }
+                NotificationsController::app_notification(6, $rider, 2, $note->id);
 
                 if ($note) {
                     foreach ($valid_shipments as $index  => $shipment_id) {
@@ -1909,7 +1900,8 @@ class ReturnController extends Controller
             ->join('admins','admins.id','=','return_notes.admin_id')
             ->leftjoin('return_note_shipments as rns','rns.return_note_id', '=', 'return_notes.id')
             ->select(['return_notes.id as return_note', 'return_notes.id','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status',DB::raw('(SELECT COUNT(r.id) FROM return_notes AS r INNER JOIN return_note_shipments AS rns ON r.id = rns.return_note_id WHERE rns.return_note_id = return_notes.id AND rns.status = 0) AS shipments_unverified_count'), DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id = 25 and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count')])
-            ->whereIn('return_notes.status',[0,3]);
+            ->whereIn('return_notes.status',[0,3])
+        ->groupBy('return_note_id');
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
@@ -3005,10 +2997,6 @@ class ReturnController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Trax ID</strong></td>
                             <td>' . $rider_id . '</td>
-                            <td colspan="2" rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Category</strong></td>
@@ -3924,22 +3912,38 @@ class ReturnController extends Controller
             }
             if(empty($errors)){
                 $tracking_numbers = array();
-                foreach ($rows as $key => $row) {
+                foreach ($rows as $key => $row) foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
                     $shipment_id = trim($row['tracking_number']);
                     $agent_id = trim($row['agent_id']);
-                    $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $shipment_id)->where('status', 1)->first();
+                    
+                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
+                    $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $id_shipment->id)->where('status', 1)->first();
                     if($check_already_assigned){
                         $check_already_assigned->status = 0;
                         $check_already_assigned->save();
+    
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                                $return_assign_log->status = 4;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                     }
-                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
                     $assign_shipments = new ReturnAssignedShipments();
                     $assign_shipments->admin_id = $agent_id;
-                    $assign_shipments->shipment_id = $id_shipment->id;
+                    $assign_shipments->shipment_id =  $id_shipment->id;
                     $assign_shipments->status = 1;
                     $assign_shipments->assigned_by = Auth::id();
                     $assign_shipments->save();
+    
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                                $return_assign_log->status = 0;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
+    
+
+
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
                 }

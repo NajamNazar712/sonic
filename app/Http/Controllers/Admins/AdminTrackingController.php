@@ -7,6 +7,7 @@ use App\http\Models\Admin\KeyAccountDailyShipment;
 use App\http\Models\Admin\KeyAccountDailySummary;
 use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\MasterCargo\MasterCargoBag;
+use App\Http\Models\Admin\ResolvedOutstandingShipment;
 use App\http\Models\Admin\Retail\RetailFranchise;
 use App\http\Models\Admin\Retail\RetailShipment;
 use App\http\Models\Admin\Retail\RetailShipperInfo;
@@ -229,10 +230,9 @@ class AdminTrackingController extends Controller
                     }
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;
-
                     if ($shipment_payment_journey) {
+                        $journey_details = array();
                         foreach ($shipment_payment_journey as $journey) {
-                            $journey_details = array();
                             $payment = DonePaymentShipment::where('shipment_id', $shipment->id)->first();
                             $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
                             if($journey->payment_id == null){
@@ -1159,6 +1159,17 @@ class AdminTrackingController extends Controller
                             }
                         }
 
+                        $resolved_outstanding_shipments = ResolvedOutstandingShipment::where('shipment_id', $shipment->id);
+                        if($resolved_outstanding_shipments->exists()){
+                            $resolved_outstanding_shipments = $resolved_outstanding_shipments->get();
+                            $outstanding_details = array();
+                            foreach ($resolved_outstanding_shipments as $resolved_outstanding_shipment) {
+                                $outstanding_details['date_time'] = Carbon::parse($resolved_outstanding_shipment->created_at)->toDateTimeString();
+                                $outstanding_details['resolved_by'] = $resolved_outstanding_shipment->admin->name;
+                                $details['outstanding_history'][] = $outstanding_details;
+                            }
+                        }
+
                         $complain = CrmRequest::where('shipment_id', $shipment->id)->whereIn('status_id', [2, 3, 5]);
 
                         if ($complain->exists()) {
@@ -1407,38 +1418,41 @@ class AdminTrackingController extends Controller
             foreach ($shipment->shipment_pieces as $piece){
                 $barcodes .= '
             <div class="pwrapper p-1">
-                <div class="row mb-2">
-                    <div class="col-5 logo text-left">
-                        <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline">
-                    </div>
-                    <div class="col-7 text-left">
-                        <span class="d-block"><strong>' . $shipment->tracking_number . '</strong></span>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-6">
-                    
-                        <div class="col mb-1">
-                            <span class="label text-left">Origin: </span><span class="label text-right"><u>'. $shipment->pickup_address->city->name .'</u></span>
-                        </div>
-                        <div class="col">
-                            <span class="label text-left">Destination: </span> <span class="label text-right"><u>'. $shipment->consignee_city->name . '</u></span>
-                        </div>
-                      
-                    </div>
-                    <div class="col-6">
-                        <div class="barcode text-center">
-                        <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
-                        <span class="d-block "><strong>' . $piece->tracking_number . '</strong></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row text-left">
+                <div class="row justify-content-center">
                     <div class="col">
-                        <label class="label"><strong>'. $count . '/' . $total_pieces .'</strong></label>
+                        <div class="row mt-2 mb-2">
+                            <div class="col-5 logo text-left">
+                                <img src="' . asset('img/trax_logo_new.png') . '" width="75" class="d-inline" style="filter: brightness(1) !important;">
+                            </div>
+                            <div class="col-7 text-left">
+                                <span class="d-block"><strong>' . $shipment->tracking_number . '</strong></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                            
+                                <div class="col mb-1">
+                                    <span class="label text-left">Origin: </span><span class="label text-right"><u>'. $shipment->pickup_address->city->name .'</u></span>
+                                </div>
+                                <div class="col">
+                                    <span class="label text-left">Destination: </span> <span class="label text-right"><u>'. $shipment->consignee_city->name . '</u></span>
+                                </div>
+                              
+                            </div>
+                            <div class="col-6">
+                                <div class="barcode text-center">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($piece->tracking_number, $generator::TYPE_CODE_128, 2, 70)) . '" class="img-fluid mx-auto d-block h-auto">
+                                <span class="d-block "><strong>' . $piece->tracking_number . '</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-left">
+                            <div class="col">
+                                <label class="label"><strong>'. $count . '/' . $total_pieces .'</strong></label>
+                            </div>
+                        </div>
                     </div>
                 </div>
-             
             </div>
         ';
                 $count++;

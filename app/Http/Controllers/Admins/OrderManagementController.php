@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
+use App\http\Models\Admin\Retail\RetailFranchise;
+use App\http\Models\Admin\Retail\RetailTraxCenter;
 use App\Http\Models\BookingType;
 use App\Http\Models\BusinessCategory;
 use App\Http\Models\Consolidation;
@@ -29,6 +31,7 @@ use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
 use App\Http\Models\WarehouseStock;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\PaymentMode;
+use App\Http\Models\ShipmentDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -618,6 +621,7 @@ class OrderManagementController extends Controller
                     $query->whereRaw('false');
                 }
             });
+            
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
         }
