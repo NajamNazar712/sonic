@@ -104,6 +104,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Retail\OtherParcelReceiving;
 use App\Http\Models\Admin\Retail\OtherParcelReceivingShipment;
 use App\Http\Models\Admin\Retail\OtherRetailShipment;
+use App\Http\Models\SubCategorySegment;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -1628,5 +1629,16 @@ class ShipperDashboardController extends Controller
     {
         $html = ShipperAgreementController::view_crf_agreement($request->id,null,TRUE);
         return $html;
+    }
+
+    public function get_sub_segment(Request $request){
+        $sub_segments = SubCategorySegment::where('segment_id',$request->segment_id);
+        if($sub_segments->exists()){
+            $sub_segments = $sub_segments->get();
+            return response()->json(['status' => 0, 'sub_segments' => $sub_segments]);
+        }else{
+            return response()->json(['status' => 1]);
+        }
+
     }
 }

@@ -311,6 +311,20 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="sub_segments">Sub Segments:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="sub_segments" id="sub_segments" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($sub_segments as $sub_segment)
+                                                                    <option value="{{$sub_segment->id}}"> {{$sub_segment->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -992,7 +1006,24 @@
         });
         $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Segment',
+        }).bind('change', function() {
+                console.log($(this).val());
+
+                $.ajax({
+                        url:'{!! route('cod.get_sub_segment') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'segment_id': $(this).val(),
+                        }
+                    }).done(function (data) {
+                      
+                    });
+            });
+        $('select[name="sub_segments"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Sub Segments',
         });
+        
         $('select[name="territory_id"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Territory',
 
