@@ -484,8 +484,9 @@ class ReturnController extends Controller
 
         if($request->action == 'un-assign'){
             foreach ($shipment_ids as $shipment){
-                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
                 if($return_assign_shipment->exists()){
+                    $return_assign_shipment = $return_assign_shipment->latest()->first();
                     $return_assign_shipment->status = 0;
                     $return_assign_shipment->save();
 
