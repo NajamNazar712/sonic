@@ -488,12 +488,14 @@ class ReturnController extends Controller
                 if($return_assign_shipment->exists()){
                     $return_assign_shipment->status = 0;
                     $return_assign_shipment->save();
+
+                    
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                    $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                    $return_assign_log->status = 4;
+                    $return_assign_log->assigned_by = Auth::id();
+                    $return_assign_log->save();
                 }
-                $return_assign_log = new ReturnAssignedShipmentLogs();
-                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                $return_assign_log->status = 4;
-                $return_assign_log->assigned_by = Auth::id();
-                $return_assign_log->save();
             }
             return ['status'=>1,'success'=>"Agent Unassigned successfully"];
 
@@ -3912,7 +3914,7 @@ class ReturnController extends Controller
             }
             if(empty($errors)){
                 $tracking_numbers = array();
-                foreach ($rows as $key => $row) {
+                foreach ($rows as $key => $row) foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
                     $shipment_id = trim($row['tracking_number']);
                     $agent_id = trim($row['agent_id']);
@@ -3942,23 +3944,7 @@ class ReturnController extends Controller
                                 $return_assign_log->assigned_by = Auth::id();
                                 $return_assign_log->save();
     
-                    //set record in login/logut table
-                    $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->where('current_date',Carbon::now()->format("Y-m-d"));
-                                    
-                    if(!$check_agent_return_confrimation->exists()){
-                        $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        ->where('admin_roles.department_id',3)->where('a.id',$agent_id);
-                        if($agent_role->exists()){
-                            $agent_return_confrimation = new AgentReturnConfirmation;
-                            $agent_return_confrimation->admin_id = $agent_id;
-                            $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                            $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
-                            $agent_return_confrimation->save();
-                        }
-                    }else{
-                        $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                    }
-                    //set record in login/logut table end
+
 
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
