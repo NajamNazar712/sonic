@@ -10,7 +10,7 @@ use App\Http\Controllers\ShipmentsPaymentJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\NsaAccountShipment;
+use App\Http\Models\Admin\NsaAccountShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\DonePaymentShipment;

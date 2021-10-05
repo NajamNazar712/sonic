@@ -22,7 +22,7 @@ use App\Http\Models\Admin\ReplacementToRegularLog;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteSlip;
-use App\http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\Admin\ShipmentOnHold;
 use App\Http\Models\DeliveryNoteRequests;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\Handover\Handover;
@@ -47,8 +47,8 @@ use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingMaterialRequestDetail;
 use App\Http\Models\PackagingMaterialRequestHistory;
-use App\http\Models\RestrictedCityIntercept;
-use App\http\Models\RestrictParcelsAttempt;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderDelivery;
@@ -86,7 +86,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\PODImage;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\ShipmentDetail;
 
 class DeliveryController extends Controller

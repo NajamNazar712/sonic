@@ -1,6 +1,6 @@
 <?php
 
-namespace App\http\Models\Excel_reports;
+namespace App\Http\Models\Excel_reports;
 
 use Illuminate\Database\Eloquent\Model;
 

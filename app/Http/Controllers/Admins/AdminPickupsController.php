@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\City;
 use App\Http\Models\ConsolidationShipments;
-use App\http\Models\DefaultWeight;
+use App\Http\Models\DefaultWeight;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;

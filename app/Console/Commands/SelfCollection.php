@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\OrderManagementController;
 use App\Http\Controllers\NotificationsController;
-use App\http\Models\SelfCollectionShipment;
+use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
 use Illuminate\Console\Command;
 

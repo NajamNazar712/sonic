@@ -6,7 +6,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\GlobalSettings;
-use App\http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\Admin\Retail\RetailShipment;
 use App\Http\Models\Admin\RiderType;
 use App\Http\Models\City;
 use App\Http\Models\EmployeeShift;

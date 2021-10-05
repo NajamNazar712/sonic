@@ -31,7 +31,7 @@ use App\Http\Models\HR\EmployeeRelationship;
 use App\Http\Models\HR\EmployeeReligion;
 use App\Http\Models\HR\EmployeeStatus;
 use App\Http\Models\HR\EmployeeType;
-use App\http\Models\ReportingLocation;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Rider\RiderRequest;
 use App\Http\Models\Rider\RidersIncentive;
 use App\Http\Models\RiderCategory;

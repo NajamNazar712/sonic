@@ -1,6 +1,6 @@
 <?php
 
-namespace App\http\Models\WMS;
+namespace App\Http\Models\WMS;
 
 use Illuminate\Database\Eloquent\Model;
 
