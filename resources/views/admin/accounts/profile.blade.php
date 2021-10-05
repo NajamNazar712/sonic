@@ -870,7 +870,35 @@
             $('#segment_id').prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Segment",
                 width:'100%',
+            }).bind('change', function() {
+                var id = $(this).val();
+                $(this).valid();
+                console.log(id);
+                // $.ajax({
+                //     url: '{!! route('cod.get_sub_segment') !!}',
+                //     method: 'POST',
+                //     data: {
+                //         'segment_id': id,
+                //         '_token': '{{ csrf_token() }}'
+                //     }
+                // }).done(function (data) {
+                //     console.log(data);
+                //    if (data.status == 0) {
+                //        $('#sub_segment_id').children().remove();
+                //                     $('#sub_segment_id').prepend('<option value="" selected="selected"></option>')
+                //                 $.each(data.sub_segments, function (index, sub_segments) {
+                //                     $('#sub_segment_id').append('<option value="'+sub_segments.id+'" id="trax_center">'+sub_segments.name+'</option>')
+                //                 });
+                //    }
+                // });
             });
+
+
+            // $('#segment_id').prepend('<option value="" selected></option>').select2({
+            //     placeholder: "Select Segment",
+            //     width:'100%',
+            // });
+            
             @if($user->segment_id != null)
             var segment_id = {!! $user->segment_id !!};
             $('#segment_id').val(segment_id).trigger('change');

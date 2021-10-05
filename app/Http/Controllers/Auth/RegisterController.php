@@ -667,4 +667,14 @@ class RegisterController extends Controller
         }
     }
 
+    public function get_sub_segment(Request $request){
+        $sub_segments = SubCategorySegment::where('segment_id',$request->segment_id);
+        if($sub_segments->exists()){
+            $sub_segments = $sub_segments->get();
+            return response()->json(['status' => 0, 'sub_segments' => $sub_segments]);
+        }else{
+            return response()->json(['status' => 1]);
+        }
+    }
+
 }

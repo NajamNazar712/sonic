@@ -318,9 +318,6 @@
                                                         </label>
                                                         <div>
                                                             <select name="sub_segments" id="sub_segments" class="select2 form-control required" style="width: 100%">
-                                                                @foreach($sub_segments as $sub_segment)
-                                                                    <option value="{{$sub_segment->id}}"> {{$sub_segment->name}}</option>
-                                                                @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
@@ -1004,25 +1001,32 @@
             placeholder:'Select Sale Person',
             // dropdownParent:$('#registership')
         });
-        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select Segment',
-        }).bind('change', function() {
-                console.log($(this).val());
-
-                $.ajax({
-                        url:'{!! route('cod.get_sub_segment') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'segment_id': $(this).val(),
-                        }
-                    }).done(function (data) {
-                      
-                    });
-            });
         $('select[name="sub_segments"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Sub Segments',
         });
+        $('select[name="segments"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select Segment',
+        }).bind('change', function() {
+                var id = $(this).val();
+                $(this).valid();
+                $.ajax({
+                    url: '{!! route('cod.get_sub_segment') !!}',
+                    method: 'POST',
+                    data: {
+                        'segment_id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                   if (data.status == 0) {
+                       $('#sub_segments').children().remove();
+                                    $('#sub_segments').prepend('<option value="" selected="selected"></option>')
+                                $.each(data.sub_segments, function (index, sub_segments) {
+                                    $('#sub_segments').append('<option value="'+sub_segments.id+'" id="trax_center">'+sub_segments.name+'</option>')
+                                });
+                   }
+                });
+            });
+        
         
         $('select[name="territory_id"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Territory',
