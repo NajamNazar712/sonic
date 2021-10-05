@@ -216,10 +216,9 @@ $designations = EmployeeDesignation::where('status',1)->get();
         $admin->cnic = $request->input('cnic');
         $admin->role_id = $request->input('role_id');
         $admin->default_hub_id = $request->input('default_hub');
-        $admin->password = bcrypt($request->input('password'));
-        $admin->designation = $request->input('designation');
+        $admin->pin = $request->input('pin');
         $admin->shift_id = $request->input('shift_id');
-$admin->designation_id = $request->input('designation_id');
+        $admin->designation_id = $request->input('designation_id');
 
         if($request->trax_id != null){
             $trax_id = $request->trax_id;
@@ -324,13 +323,15 @@ $designations = EmployeeDesignation::where('status',1)->get();
             $admin->default_hub_id = $request->input('default_hub');
             $admin->updated_by = Auth::id();
             $admin->trax_id = $request->trax_id;
-            $admin->designation = $request->input('designation');
             $admin->shift_id = $request->input('shift_id');
-$admin->designation_id = $request->input('designation_id');
+            $admin->pin = $request->input('pin');
+            $admin->designation_id = $request->input('designation_id');
 
-            if ($request->filled('password')) {
-                $admin->password = bcrypt($request->input('password'));
-            }
+//            if ($request->filled('password')) {
+//                $admin->password = bcrypt($request->input('password'));
+//            }
+
+
 
             $admin->save();
 
@@ -355,6 +356,21 @@ $admin->designation_id = $request->input('designation_id');
                 AdminHub::where('admin_id', $id)->delete();
             }
 
+            $employee = Employee::where('trax_id',$admin->trax_id);
+            if($employee->exists())
+            {
+                $employee = $employee->first();
+                $employee->designation_id = $admin->designation_id;
+                $employee->official_phone_number = $admin->phone_number;
+                $employee->official_email = $admin->email;
+                $employee->cnic = $admin->cnic;
+                $employee->name = $admin->name;
+                $employee->pin = $admin->pin;
+                $employee->shift_id = $admin->shift_id;
+                $employee->reporting_location_id = $admin->reporting_location_id;
+
+                $employee->update();
+            }
             return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
     }
 

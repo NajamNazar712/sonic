@@ -311,6 +311,7 @@ class RiderManagementController extends Controller
 
         $rider->updated_by = Auth::id();
 
+
         if($request->route_id == 'other'){
             $route = new Route();
             $route->city_id = $request->city_id;
@@ -338,6 +339,22 @@ class RiderManagementController extends Controller
 
 
         $rider->save();
+
+
+        $employee = Employee::where('trax_id',$rider->trax_id);
+        if($employee->exists())
+        {
+            $employee = $employee->first();
+            $employee->city_id = $rider->city_id;
+            $employee->name = $rider->name;
+            $employee->official_phone_number = $rider->phone;
+            $employee->cnic = $rider->cnic;
+            $employee->address = $rider->address;
+            $employee->pin = $rider->dummy_pin;
+            $employee->shift_id = $rider->shift_id;
+            $employee->reporting_location_id = $rider->reporting_location_id;
+            $employee->save();
+        }
 
         if($rider){
             return redirect()->back()->with('success','Rider updated successfully');

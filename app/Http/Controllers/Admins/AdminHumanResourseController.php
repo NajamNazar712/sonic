@@ -6,6 +6,7 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OperationRidersCategory;
@@ -19,6 +20,7 @@ use App\Http\Models\HR\EmployeeAttachment;
 use App\Http\Models\HR\EmployeeBankInformation;
 use App\Http\Models\HR\EmployeeBloodGroup;
 use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\HR\EmployeeDesignationHub;
 use App\Http\Models\HR\EmployeeDomicile;
 use App\Http\Models\HR\EmployeeEducationalBackground;
 use App\Http\Models\HR\EmployeeEmployementHistory;
@@ -357,9 +359,9 @@ class AdminHumanResourseController extends Controller
 
                             }
 
-                            if (session('role_id') == 1 || in_array(382, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
-                            }
+//                            if (session('role_id') == 1 || in_array(382, session('permissions'))) {
+//                                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist</div></button>';
+//                            }
 
                             if (session('role_id') == 1 || in_array(99, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
@@ -721,19 +723,21 @@ class AdminHumanResourseController extends Controller
                 $employee = Employee::find($employee_id);
                 if(in_array($employee->request_status_id, [1, 2])) {
                     if($employee->trax_id == null) {
-                        $global_setting = GlobalSettings::where('type', 'latest_employee_id');
+                        if($employee->employee_type_id == 1 || ($employee->employee_type_id == 2 && $employee->rider_request->rider_type_id == 1)) {
+                            $global_setting = GlobalSettings::where('type', 'latest_employee_id');
 
-                        if ($global_setting->exists()) {
-                            $global_setting = $global_setting->first();
-                            $trax_id = $global_setting->setting_value + 1;
-                            $global_setting->setting_value = $trax_id;
-                            $global_setting->save();
-                            $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
-                        } else {
-                            $trax_id = null;
+                            if ($global_setting->exists()) {
+                                $global_setting = $global_setting->first();
+                                $trax_id = $global_setting->setting_value + 1;
+                                $global_setting->setting_value = $trax_id;
+                                $global_setting->save();
+                                $trax_id = 'Trax' . str_pad($trax_id, 5, '0', STR_PAD_LEFT);
+                            } else {
+                                $trax_id = null;
+                            }
+
+                            $employee->trax_id = $trax_id;
                         }
-
-                        $employee->trax_id = $trax_id;
                     }
                     $employee->request_status_id = 3;
                     $employee->save();
@@ -749,13 +753,14 @@ class AdminHumanResourseController extends Controller
 
                             $admin->name = $employee->name;
                             $admin->email = $employee->official_email;
-                            $admin->phone_number = $employee->phone_number;
+                            $admin->phone_number = $employee->official_phone_number;
                             $admin->cnic = $employee->cnic;
                             $admin->role_id = $employee->designation->role_id ?? 79;
-                            $admin->default_hub_id = $employee->city_id;
-                            $admin->password = bcrypt($employee->pin);
-                            $admin->designation = $employee->designation->name ?? '';
+                            $admin->default_hub_id = $employee->city->hub_city->id;
+                            $admin->pin = $employee->pin;
                             $admin->designation_id = $employee->designation_id;
+                            $admin->shift_id = $employee->shift_id;
+                            $admin->reporting_location_id = $employee->reporting_location_id;
 
                             if($employee->status_id == 2)
                             {
@@ -871,8 +876,45 @@ class AdminHumanResourseController extends Controller
             {
                 $admin = $admin->first();
 
+                $admin->designation_id = $employee->designation_id;
                 $admin->role_id = $employee->designation->role_id ?? 79;
+                $admin->phone_number = $employee->official_phone_number;
+                $admin->email = $employee->official_email;
+                $admin->cnic = $employee->cnic;
+                $admin->name = $employee->name;
+                $admin->default_hub_id = $employee->city->hub_city->id;
+                $admin->pin = $employee->pin;
+                $admin->shift_id = $employee->shift_id;
+                $admin->reporting_location_id = $employee->reporting_location_id;
                 $admin->update();
+
+                AdminHub::where('admin_id',$admin->id)->delete();
+
+                $hubs = EmployeeDesignationHub::where('designation_id',$employee->designation_id)->get(['hub_id']);
+                foreach ($hubs as $hub)
+                {
+                    $admin_hub = new AdminHub();
+                    $admin_hub->admin_id = $admin->id;
+                    $admin_hub->hub_id = $hub->hub_id;
+                    $admin_hub->save();
+                }
+            }
+        }
+        else{
+            $rider = Rider::where('trax_id',$employee->trax_id);
+            if($rider->exists())
+            {
+                $rider = $rider->first();
+                $rider->city_id = $employee->city_id;
+                $rider->name = $employee->name;
+                $rider->phone = $employee->official_phone_number;
+                $rider->cnic = $employee->cnic;
+                $rider->address = $employee->address;
+                $rider->dummy_pin = $employee->pin;
+                $rider->shift_id = $employee->shift_id;
+                $rider->reporting_location_id = $employee->reporting_location_id;
+                $rider->pin = bcrypt($employee->pin);
+                $rider->save();
             }
         }
 
@@ -2239,7 +2281,8 @@ class AdminHumanResourseController extends Controller
     public function designation_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),390);
         $departments = AdminDepartment::all();
-        return view('admin.human_resource.designation',compact('departments'));
+        $hubs = City::select('id','name')->where('hub',1)->get();
+        return view('admin.human_resource.designation',compact('departments','hubs'));
     }
 
     public function designation_list(Request $request){
@@ -2259,6 +2302,9 @@ class AdminHumanResourseController extends Controller
                 else{
                     return 'Active';
                 }
+            })
+            ->addColumn('hubs',function($data){
+                return EmployeeDesignationHub::where('designation_id',$data->id)->get(['hub_id'])->toArray();
             })
             ->addColumn("action", function ($data) {
                 if(session('role_id') == 1 || in_array(482, session('permissions')) || in_array(483, session('permissions'))){
@@ -2320,6 +2366,14 @@ class AdminHumanResourseController extends Controller
         $designation->description = $request->description;
         $designation->save();
 
+        foreach ($request->hub_id as $hub)
+        {
+            $designation_hub = new EmployeeDesignationHub();
+            $designation_hub->designation_id = $designation->id;
+            $designation_hub->hub_id = $hub;
+            $designation_hub->save();
+        }
+
         $designation->code = 'Des'. str_pad($designation->id, 3, '0', STR_PAD_LEFT);
         $designation->save();
         return redirect()->back()->with('success', 'Designation Added Successfully!');
@@ -2332,6 +2386,30 @@ class AdminHumanResourseController extends Controller
         $designation->role_id = $request->role_id;
         $designation->description = $request->description;
         $designation->save();
+
+        EmployeeDesignationHub::where('designation_id',$designation->id)->delete();
+
+        foreach ($request->hub_id as $hub)
+        {
+            $designation_hub = new EmployeeDesignationHub();
+            $designation_hub->designation_id = $designation->id;
+            $designation_hub->hub_id = $hub;
+            $designation_hub->save();
+        }
+
+        $admins = Admin::where('designation_id',$designation->id)->get(['id']);
+        foreach ($admins as $admin)
+        {
+            AdminHub::where('admin_id',$admin->id)->delete();
+            foreach ($request->hub_id as $hub)
+            {
+                $admin_hub = new AdminHub();
+                $admin_hub->admin_id = $admin->id;
+                $admin_hub->hub_id = $hub;
+                $admin_hub->save();
+            }
+        }
+
         return redirect()->back()->with('success', 'Designation Updated Successfully!');
     }
 

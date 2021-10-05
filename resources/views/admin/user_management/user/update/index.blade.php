@@ -41,13 +41,13 @@
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Email must be unique" value="{{ $user->email }}">
+											<input type="email" name="email" class="form-control" placeholder="Outlook Id*" data-rule-required="true" data-msg-required="Outlook Id is required" data-rule-remote="{{ route('admin.user_management.users.email', ['id' => $user->id]) }}" data-msg-remote="Outlook Id must be unique" value="{{ $user->email }}">
 										</div>
 									</div>
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="password" name="password" class="form-control" placeholder="Password" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 characters">
+											<input type="text" name="pin" class="form-control" placeholder="Bolt & Sonic Pin*" data-rule-minlength="4" data-msg-minlength="Bolt & Sonic Pin needs to be at-least 4 characters" data-rule-required="true" data-msg-required="Bolt & Sonic Pin is required">
 										</div>
 									</div>
 
@@ -79,17 +79,6 @@
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
-											<input type="text" name="designation" class="form-control" placeholder="Designation" value="{{ $user->designation }}">
-										</div>
-									</div>
-
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-										<div class="form-group">
-											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id" value="{{ $user->trax_id }}">
-										</div>
-									</div>
-									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
-										<div class="form-group">
 											<select name="designation_id" class="select2" id="designation_id">
 												@foreach($designations as $designation)
 													@if ($designation->id == $user->designation_id)
@@ -101,6 +90,13 @@
 											</select>
 										</div>
 									</div>
+
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
+										<div class="form-group">
+											<input type="text" name="trax_id" class="form-control" placeholder="Trax Id" value="{{ $user->trax_id }}">
+										</div>
+									</div>
+
 
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
