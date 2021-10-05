@@ -3442,6 +3442,34 @@ class AdminAPIController extends Controller
         }
     }
 
+    public function employee_on_site(Request $request)
+    {
+        $rules = [
+            'employee_id' => ['required'],
+            'employee_type_id' => ['required'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $admin = Admin::where('email', $request->email);
+            if ($admin->exists()) {
+                $admin = $admin->first();
+                if($admin->status == 0){
+                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                }
+                $this->sendResetLinkEmail($request);
+                return response()->json(['status' => 0, 'message' => 'Password reset link has been sent to your email']);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'Email is not registered']);
+            }
+
+        }
+    }
+
 
 
 }
