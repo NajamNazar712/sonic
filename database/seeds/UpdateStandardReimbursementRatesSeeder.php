@@ -39,29 +39,31 @@ class UpdateStandardReimbursementRatesSeeder extends Seeder
 
         ));
 
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 1,'range_up' => 0,'range_down' => 3000,'charges' => 0]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 1,'range_up' => 3001,'range_down' => 5000,'charges' => 100]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 1,'range_up' => 5001,'range_down' => 10000,'charges' => 200]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 1,'range_up' => 10001,'range_down' => 30000,'charges' => 300]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 1,'range_up' => 30001,'range_down' => 1000000,'charges' => '1%']);
+        DB::table('standard_cash_handling_charges')->insert(array(
+        array('id' => 1,'shipping_mode_id' => 1,'range_up' => 0,'range_down' => 3000,'charges' => 0),
+        array('id' => 2,'shipping_mode_id' => 1,'range_up' => 3001,'range_down' => 5000,'charges' => 100),
+        array('id' => 3,'shipping_mode_id' => 1,'range_up' => 5001,'range_down' => 10000,'charges' => 200),
+        array('id' => 4,'shipping_mode_id' => 1,'range_up' => 10001,'range_down' => 30000,'charges' => 300),
+        array('id' => 5,'shipping_mode_id' => 1,'range_up' => 30001,'range_down' => 1000000,'charges' => '1%'),
 
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 2,'range_up' => 0,'range_down' => 3000,'charges' => 0]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 2,'range_up' => 3001,'range_down' => 5000,'charges' => 100]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 2,'range_up' => 5001,'range_down' => 10000,'charges' => 200]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 2,'range_up' => 10001,'range_down' => 30000,'charges' => 300]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 2,'range_up' => 30001,'range_down' => 1000000,'charges' => '1%']);
+        array('id' => 6,'shipping_mode_id' => 2,'range_up' => 0,'range_down' => 3000,'charges' => 0),
+        array('id' => 7,'shipping_mode_id' => 2,'range_up' => 3001,'range_down' => 5000,'charges' => 100),
+        array('id' => 8,'shipping_mode_id' => 2,'range_up' => 5001,'range_down' => 10000,'charges' => 200),
+        array('id' => 9,'shipping_mode_id' => 2,'range_up' => 10001,'range_down' => 30000,'charges' => 300),
+        array('id' => 10,'shipping_mode_id' => 2,'range_up' => 30001,'range_down' => 1000000,'charges' => '1%'),
 
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 3,'range_up' => 0,'range_down' => 3000,'charges' => 0]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 3,'range_up' => 3001,'range_down' => 5000,'charges' => 100]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 3,'range_up' => 5001,'range_down' => 10000,'charges' => 200]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 3,'range_up' => 10001,'range_down' => 30000,'charges' => 300]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 3,'range_up' => 30001,'range_down' => 1000000,'charges' => '1%']);
+        array('id' => 11,'shipping_mode_id' => 3,'range_up' => 0,'range_down' => 3000,'charges' => 0),
+        array('id' => 12,'shipping_mode_id' => 3,'range_up' => 3001,'range_down' => 5000,'charges' => 100),
+        array('id' => 13,'shipping_mode_id' => 3,'range_up' => 5001,'range_down' => 10000,'charges' => 200),
+        array('id' => 14,'shipping_mode_id' => 3,'range_up' => 10001,'range_down' => 30000,'charges' => 300),
+        array('id' => 15,'shipping_mode_id' => 3,'range_up' => 30001,'range_down' => 1000000,'charges' => '1%'),
 
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 4,'range_up' => 0,'range_down' => 3000,'charges' => 0]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 4,'range_up' => 3001,'range_down' => 5000,'charges' => 100]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 4,'range_up' => 5001,'range_down' => 10000,'charges' => 200]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 4,'range_up' => 10001,'range_down' => 30000,'charges' => 300]);
-        StandardCashHandlingCharge::create(['shipping_mode_id' => 4,'range_up' => 30001,'range_down' => 500000,'charges' => '1%']);
+        array('id' => 16,'shipping_mode_id' => 4,'range_up' => 0,'range_down' => 3000,'charges' => 0),
+        array('id' => 17,'shipping_mode_id' => 4,'range_up' => 3001,'range_down' => 5000,'charges' => 100),
+        array('id' => 18,'shipping_mode_id' => 4,'range_up' => 5001,'range_down' => 10000,'charges' => 200),
+        array('id' => 19,'shipping_mode_id' => 4,'range_up' => 10001,'range_down' => 30000,'charges' => 300),
+        array('id' => 20,'shipping_mode_id' => 4,'range_up' => 30001,'range_down' => 500000,'charges' => '1%'),
+        ));
 
         StandardReturnCharge::whereIn('shipping_mode_id',[1,2,3])->update(['local' => 50,'national_charges_class_0' => 100,'national_charges_class_1' => 100,'national_charges_class_2' => 100,'national_charges_class_3' => 100]);
 
