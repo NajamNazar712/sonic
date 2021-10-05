@@ -3943,14 +3943,14 @@ class ReturnController extends Controller
                                 $return_assign_log->save();
     
                     //set record in login/logut table
-                    $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',Auth::id())->where('current_date',Carbon::now()->format("Y-m-d"));
+                    $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->where('current_date',Carbon::now()->format("Y-m-d"));
                                     
                     if(!$check_agent_return_confrimation->exists()){
                         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                        ->where('admin_roles.department_id',3)->where('a.id',Auth::id());
+                        ->where('admin_roles.department_id',3)->where('a.id',$agent_id);
                         if($agent_role->exists()){
                             $agent_return_confrimation = new AgentReturnConfirmation;
-                            $agent_return_confrimation->admin_id = Auth::id();
+                            $agent_return_confrimation->admin_id = $agent_id;
                             $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
                             $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
                             $agent_return_confrimation->save();
