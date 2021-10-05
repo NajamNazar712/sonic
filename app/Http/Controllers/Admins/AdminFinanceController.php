@@ -7025,7 +7025,9 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
             ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->whereIn('is.id',[1,2])->where('ubi.default_bank',1);
-
+            if(session('department_id') == 7){
+                $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
+            }
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
@@ -7215,7 +7217,9 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('invoicing_cycles as ic','ic.id','=','ubi.invoicing_cycle_id')
             ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'c.name as city', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.created_at', 'invoices.due_date', 'invoices.received_date', 'b.name as company_bank', 'invoices.received_amount', 'invoices.tax_amount', 'invoices.deposit_date', 'is.name as status', 'invoices.status_id', 'invoices.invoicing_date','ic.name as invoicing_cycle')->where('is.id',3)->where('ubi.default_bank',1);
-
+            if(session('department_id') == 7){
+                $invoices->whereIn('invoices.user_id', session('tagged_shippers'));
+            }
         $datatables = Datatables::of($invoices)
             ->addColumn('invoice_number_button', function($invoice) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->invoice_number . '</button>';
