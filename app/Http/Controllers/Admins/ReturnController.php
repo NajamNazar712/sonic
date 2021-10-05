@@ -3940,13 +3940,13 @@ class ReturnController extends Controller
                     $assign_shipments->save();
     
                     $return_assign_log = new ReturnAssignedShipmentLogs();
-                                $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
-                                $return_assign_log->status = 0;
-                                $return_assign_log->assigned_by = Auth::id();
-                                $return_assign_log->save();
+                    $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                    $return_assign_log->status = 0;
+                    $return_assign_log->assigned_by = Auth::id();
+                    $return_assign_log->save();
     
                     //set record in login/logut table
-                    $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->where('current_date',Carbon::now()->format("Y-m-d"));
+                    $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
                                     
                     if(!$check_agent_return_confrimation->exists()){
                         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
