@@ -3915,22 +3915,38 @@ class ReturnController extends Controller
             }
             if(empty($errors)){
                 $tracking_numbers = array();
-                foreach ($rows as $key => $row) {
+                foreach ($rows as $key => $row) foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
                     $shipment_id = trim($row['tracking_number']);
                     $agent_id = trim($row['agent_id']);
-                    $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $shipment_id)->where('status', 1)->first();
+                    
+                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
+                    $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $id_shipment->id)->where('status', 1)->first();
                     if($check_already_assigned){
                         $check_already_assigned->status = 0;
                         $check_already_assigned->save();
+    
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                                $return_assign_log->status = 4;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
                     }
-                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
                     $assign_shipments = new ReturnAssignedShipments();
                     $assign_shipments->admin_id = $agent_id;
-                    $assign_shipments->shipment_id = $id_shipment->id;
+                    $assign_shipments->shipment_id =  $id_shipment->id;
                     $assign_shipments->status = 1;
                     $assign_shipments->assigned_by = Auth::id();
                     $assign_shipments->save();
+    
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                                $return_assign_log->status = 0;
+                                $return_assign_log->assigned_by = Auth::id();
+                                $return_assign_log->save();
+    
+
+
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
                 }
