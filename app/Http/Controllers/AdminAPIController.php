@@ -3483,12 +3483,13 @@ class AdminAPIController extends Controller
                             $shift = $shift->first();
                             $now_time = Carbon::now();
                             $grace_time = $shift->extension_minutes;
+                            return response()->json(['status' => $now_time->toTimeString(), 'message' => Carbon::parse($shift->start_time)->toTimeString()]);
                             if($now_time->toTimeString() == Carbon::parse($shift->start_time)->toTimeString()){
-
+                                return response()->json(['status' => $now_time->toTimeString(), 'message' => Carbon::parse($shift->start_time)->toTimeString()]);
                             }elseif ($now_time->toTimeString() == $now_time->addMinutes(($grace_time/2))->toTimeString()){
-
+                                return response()->json(['status' => $now_time->toTimeString(), 'message' => Carbon::parse($shift->start_time)->toTimeString()]);
                             }elseif ($now_time->toTimeString() == $now_time->addMinutes(($grace_time - 1))->toTimeString()){
-
+                                return response()->json(['status' => $now_time->toTimeString(), 'message' => Carbon::parse($shift->start_time)->toTimeString()]);
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'Time']);
                             }
